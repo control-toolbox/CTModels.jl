@@ -1,6 +1,6 @@
-# CTApp
+# CTModels
 
-Documentation for [CTApp](https://github.com/control-toolbox/CTApp.jl).
+Documentation for [CTModels](https://github.com/control-toolbox/CTModels.jl).
 
 ## Dependencies
 

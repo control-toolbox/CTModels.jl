@@ -1,23 +1,19 @@
-# CTApp.jl
+# CTModels.jl
 
-This repository is a template to create an application or a package for the [control-toolbox ecosystem](https://github.com/control-toolbox). The instructions to set up a new application / package are given in discussion https://github.com/control-toolbox/CTApp.jl/discussions/9.
+[ci-img]: https://github.com/control-toolbox/CTModels.jl/actions/workflows/CI.yml/badge.svg?branch=main
+[ci-url]: https://github.com/control-toolbox/CTModels.jl/actions/workflows/CI.yml?query=branch%3Amain
 
-----
-
-[ci-img]: https://github.com/control-toolbox/CTApp.jl/actions/workflows/CI.yml/badge.svg?branch=main
-[ci-url]: https://github.com/control-toolbox/CTApp.jl/actions/workflows/CI.yml?query=branch%3Amain
-
-[co-img]: https://codecov.io/gh/control-toolbox/CTApp.jl/branch/main/graph/badge.svg?token=YM5YQQUSO3
-[co-url]: https://codecov.io/gh/control-toolbox/CTApp.jl
+[co-img]: https://codecov.io/gh/control-toolbox/CTModels.jl/branch/main/graph/badge.svg?token=YM5YQQUSO3
+[co-url]: https://codecov.io/gh/control-toolbox/CTModels.jl
 
 [doc-dev-img]: https://img.shields.io/badge/docs-dev-8A2BE2.svg
-[doc-dev-url]: https://control-toolbox.org/CTApp.jl/dev/
+[doc-dev-url]: https://control-toolbox.org/CTModels.jl/dev/
 
 [doc-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[doc-stable-url]: https://control-toolbox.org/CTApp.jl/stable/
+[doc-stable-url]: https://control-toolbox.org/CTModels.jl/stable/
 
 [licence-img]: https://img.shields.io/badge/License-MIT-yellow.svg
-[licence-url]: https://github.com/control-toolbox/CTApp.jl/blob/master/LICENSE
+[licence-url]: https://github.com/control-toolbox/CTModels.jl/blob/master/LICENSE
 
 [aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
 [aqua-url]: https://github.com/JuliaTesting/Aqua.jl
@@ -38,8 +34,8 @@ The control-toolbox ecosystem gathers Julia packages for mathematical control an
 
 ## Contributing
 
-[issue-url]: https://github.com/control-toolbox/CTApp.jl/issues
-[first-good-issue-url]: https://github.com/control-toolbox/CTApp.jl/contribute
+[issue-url]: https://github.com/control-toolbox/CTModels.jl/issues
+[first-good-issue-url]: https://github.com/control-toolbox/CTModels.jl/contribute
 
 If you think you found a bug or if you have a feature request / suggestion, feel free to open an [issue][issue-url].
 Before opening a pull request, please start an issue or a discussion on the topic. 
@@ -51,4 +47,4 @@ You can find first good issues (if any 🙂) [here][first-good-issue-url]. You m
 If you want to ask a question, feel free to start a discussion [here](https://github.com/orgs/control-toolbox/discussions). This forum is for general discussion about this repository and the [control-toolbox organization](https://github.com/control-toolbox).
 
 >[!NOTE]
-> If you want to add an application or a package to the control-toolbox ecosystem, please follow this [set up tutorial](https://github.com/control-toolbox/CTApp.jl/discussions/9).
+> If you want to add an application or a package to the control-toolbox ecosystem, please follow this [set up tutorial](https://github.com/control-toolbox/CTModels.jl/discussions/9).

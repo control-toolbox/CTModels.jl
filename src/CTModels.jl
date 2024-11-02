@@ -1,4 +1,4 @@
-module CTApp
+module CTModels
 
 greet() = print("Hello World!")
 
