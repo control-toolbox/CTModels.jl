@@ -1,4 +1,5 @@
 using Documenter
+using CTModels
 
 repo_url = "github.com/control-toolbox/CTModels.jl"
 
@@ -15,7 +16,10 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=["Introduction" => "index.md"],
+    pages=[
+        "Introduction" => "index.md",
+        "API" => "api.md",
+        ],
 )
 
 deploydocs(; repo=repo_url * ".git", devbranch="main")
