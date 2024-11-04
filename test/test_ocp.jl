@@ -1,5 +1,4 @@
 function test_ocp()
-    
     @test isconcretetype(CTModels.OptimalControlModelMutable)
     @test all_concrete(CTModels.OptimalControlModel)
 
@@ -15,5 +14,4 @@ function test_ocp()
     # tests
     #@test CTModels.control(ocp) == control
     @test CTModels.state(ocp) == state
-
 end

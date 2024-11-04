@@ -50,8 +50,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct OptimalControlModel{
-    ControlModelType <: AbstractControlModel,
-    StateModelType <: AbstractStateModel,
+    ControlModelType<:AbstractControlModel,StateModelType<:AbstractStateModel
 } <: AbstractOptimalControlModel
     control::ControlModelType
     state::StateModelType
@@ -65,6 +64,6 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModelMutable <: AbstractOptimalControlModel
-    control::Union{AbstractControlModel, Nothing} = nothing
-    state::Union{AbstractStateModel, Nothing} = nothing
+    control::Union{AbstractControlModel,Nothing} = nothing
+    state::Union{AbstractStateModel,Nothing} = nothing
 end

@@ -13,7 +13,7 @@ Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
 __state_components(n::Dimension, name::String) =
-    n > 1 ? [name * CTBase.ctindices(i) for i ∈ range(1, n)] : [name]
+    n > 1 ? [name * CTBase.ctindices(i) for i in range(1, n)] : [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -79,15 +79,19 @@ julia> state_components(ocp)
 function state!(
     ocp::OptimalControlModelMutable,
     n::Dimension,
-    name::T1 = __state_name(),
-    components_names::Vector{T2} = __state_components(n, string(name)),
-) where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
+    name::T1=__state_name(),
+    components_names::Vector{T2}=__state_components(n, string(name)),
+) where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings
     __is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state has already been set."))
     (n > 1) &&
         (size(components_names, 1) ≠ n) &&
-        throw(CTBase.IncorrectArgument("the number of state names must be equal to the state dimension"))
+        throw(
+            CTBase.IncorrectArgument(
+                "the number of state names must be equal to the state dimension"
+            ),
+        )
 
     # set the state
     ocp.state = StateModel(n, string(name), string.(components_names))

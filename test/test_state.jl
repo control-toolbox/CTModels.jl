@@ -54,5 +54,4 @@ function test_state()
     # wrong number of components
     ocp = CTModels.OptimalControlModelMutable()
     @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "y", ["u"])
-
 end

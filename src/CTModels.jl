@@ -1,10 +1,9 @@
 module CTModels
 
 # imports
-import CTBase
+using CTBase: CTBase
 using DocStringExtensions
 using Parameters # @with_kw: to have default values in struct
-
 
 # aliases
 const Dimension = Int
