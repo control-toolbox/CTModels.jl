@@ -1,49 +1,56 @@
 function test_control()
 
     #
-    @test isconcretetype(CTModels.ControlModel)
+    @test isconcretetype(CTModels.ControlModel{2})
 
     # ControlModel
-    control = CTModels.ControlModel(2, "u", ["u₁", "u₂"])
+    control = CTModels.ControlModel("u", SA["u₁", "u₂"])
     @test CTModels.dimension(control) == 2
     @test CTModels.name(control) == "u"
     @test CTModels.components(control) == ["u₁", "u₂"]
 
+    # some checkings
+    ocp = CTModels.OptimalControlModelMutable()
+    @test ismissing(ocp.control)
+    @test !CTModels.__is_control_set(ocp)
+    CTModels.control!(ocp, 1)
+    @test CTModels.__is_control_set(ocp)
+
     # control!
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 1)
-    @test CTModels.control_dimension(ocp) == 1
-    @test CTModels.control_name(ocp) == "u"
-    @test CTModels.control_components(ocp) == ["u"]
+    @test CTModels.dimension(ocp.control) == 1
+    @test CTModels.name(ocp.control) == "u"
+    @test CTModels.components(ocp.control) == ["u"]
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 1, "v")
-    @test CTModels.control_dimension(ocp) == 1
-    @test CTModels.control_name(ocp) == "v"
+    @test CTModels.dimension(ocp.control) == 1
+    @test CTModels.name(ocp.control) == "v"
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 2)
-    @test CTModels.control_dimension(ocp) == 2
-    @test CTModels.control_name(ocp) == "u"
-    @test CTModels.control_components(ocp) == ["u₁", "u₂"]
+    @test CTModels.dimension(ocp.control) == 2
+    @test CTModels.name(ocp.control) == "u"
+    @test CTModels.components(ocp.control) == ["u₁", "u₂"]
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 2, :v)
-    @test CTModels.control_dimension(ocp) == 2
-    @test CTModels.control_name(ocp) == "v"
-    @test CTModels.control_components(ocp) == ["v₁", "v₂"]
+    @test CTModels.dimension(ocp.control) == 2
+    @test CTModels.name(ocp.control) == "v"
+    @test CTModels.components(ocp.control) == ["v₁", "v₂"]
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 2, "v", ["a", "b"])
-    @test CTModels.control_dimension(ocp) == 2
-    @test CTModels.control_name(ocp) == "v"
-    @test CTModels.control_components(ocp) == ["a", "b"]
+    @test CTModels.dimension(ocp.control) == 2
+    @test CTModels.name(ocp.control) == "v"
+    @test CTModels.components(ocp.control) == ["a", "b"]
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.control!(ocp, 2, "v", [:a, :b])
-    @test CTModels.control_dimension(ocp) == 2
-    @test CTModels.control_name(ocp) == "v"
-    @test CTModels.control_components(ocp) == ["a", "b"]
+    @test CTModels.dimension(ocp.control) == 2
+    @test CTModels.name(ocp.control) == "v"
+    @test CTModels.components(ocp.control) == ["a", "b"]
 
     # set twice
     ocp = CTModels.OptimalControlModelMutable()

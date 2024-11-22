@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the control.
 The default value is `"u"`.
 """
-__control_name() = "u"
+__control_name()::String = "u"
 
 """
 $(TYPEDSIGNATURES)
@@ -12,14 +12,14 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the controls.
 The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
 """
-__control_components(m::Dimension, name::String) =
+__control_components(m::Dimension, name::String)::Vector{String} =
     m > 1 ? [name * CTBase.ctindices(i) for i ∈ range(1, m)] : [name]
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_control_set(ocp::OptimalControlModelMutable) = !isnothing(ocp.control)
+__is_control_set(ocp::OptimalControlModelMutable)::Bool = !ismissing(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
@@ -81,7 +81,7 @@ function control!(
     m::Dimension,
     name::T1 = __control_name(),
     components_names::Vector{T2} = __control_components(m, string(name)),
-) where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
+)::Nothing where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
 
     # checkings
     __is_control_set(ocp) && throw(CTBase.UnauthorizedCall("the control has already been set."))
@@ -92,7 +92,8 @@ function control!(
         )
 
     # set the control
-    ocp.control = ControlModel(m, string(name), string.(components_names))
+    ocp.control = ControlModel{m}(string(name), 
+        SVector{m}(string.(components_names)))
     return nothing
 end
 
@@ -101,18 +102,16 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from ControlModel
-dimension(model::ControlModel) = model.dimension
-name(model::ControlModel) = model.name
-components(model::ControlModel) = model.components
+(dimension(::ControlModel{M})::Dimension) where M = M
+name(model::ControlModel)::String = model.name
+components(model::ControlModel)::Vector{String} = Vector(model.components)
 
 # from OptimalControlModel
-control(model::OptimalControlModel) = model.control
-control_dimension(model::OptimalControlModel) = dimension(control(model))
-control_name(model::OptimalControlModel) = name(control(model))
-control_components(model::OptimalControlModel) = components(control(model))
-
-# from OptimalControlModelMutable
-control(model::OptimalControlModelMutable) = model.control
-control_dimension(model::OptimalControlModelMutable) = dimension(control(model))
-control_name(model::OptimalControlModelMutable) = name(control(model))
-control_components(model::OptimalControlModelMutable) = components(control(model))
+(control(model::OptimalControlModel{T, S, C, V})::C) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel, 
+    C<:AbstractControlModel, 
+    V<:AbstractVariableModel} = model.control
+control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))
+control_name(model::OptimalControlModel)::String = name(control(model))
+control_components(model::OptimalControlModel)::Vector{String} = components(control(model))

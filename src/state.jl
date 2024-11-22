@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the name of the state.
 The default value is `"x"`.
 """
-__state_name() = "x"
+__state_name()::String = "x"
 
 """
 $(TYPEDSIGNATURES)
@@ -12,14 +12,14 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
-__state_components(n::Dimension, name::String) =
+__state_components(n::Dimension, name::String)::Vector{String} =
     n > 1 ? [name * CTBase.ctindices(i) for i ∈ range(1, n)] : [name]
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_state_set(ocp::OptimalControlModelMutable) = !isnothing(ocp.state)
+__is_state_set(ocp::OptimalControlModelMutable)::Bool = !ismissing(ocp.state)
 
 """
 $(TYPEDSIGNATURES)
@@ -81,7 +81,7 @@ function state!(
     n::Dimension,
     name::T1 = __state_name(),
     components_names::Vector{T2} = __state_components(n, string(name)),
-) where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
+)::Nothing where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
 
     # checkings
     __is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state has already been set."))
@@ -90,7 +90,8 @@ function state!(
         throw(CTBase.IncorrectArgument("the number of state names must be equal to the state dimension"))
 
     # set the state
-    ocp.state = StateModel(n, string(name), string.(components_names))
+    ocp.state = StateModel{n}(string(name), 
+        SVector{n}(string.(components_names)))
     return nothing
 end
 
@@ -99,18 +100,16 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from StateModel
-dimension(model::StateModel) = model.dimension
-name(model::StateModel) = model.name
-components(model::StateModel) = model.components
+(dimension(::StateModel{N})::Dimension) where N = N
+name(model::StateModel)::String = model.name
+components(model::StateModel)::Vector{String} = Vector(model.components)
 
 # from OptimalControlModel
-state(model::OptimalControlModel) = model.state
-state_dimension(model::OptimalControlModel) = dimension(state(model))
-state_name(model::OptimalControlModel) = name(state(model))
-state_components(model::OptimalControlModel) = components(state(model))
-
-# from OptimalControlModelMutable
-state(model::OptimalControlModelMutable) = model.state
-state_dimension(model::OptimalControlModelMutable) = dimension(state(model))
-state_name(model::OptimalControlModelMutable) = name(state(model))
-state_components(model::OptimalControlModelMutable) = components(state(model))
+(state(model::OptimalControlModel{T, S, C, V})::S) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel, 
+    C<:AbstractControlModel, 
+    V<:AbstractVariableModel} = model.state
+state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))
+state_name(model::OptimalControlModel)::String = name(state(model))
+state_components(model::OptimalControlModel)::Vector{String} = components(state(model))

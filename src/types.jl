@@ -11,10 +11,9 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct StateModel <: AbstractStateModel
-    dimension::Dimension
+struct StateModel{N} <: AbstractStateModel
     name::String
-    components::Vector{String}
+    components::SVector{N, String}
 end
 
 # ------------------------------------------------------------------------------ #
@@ -30,10 +29,84 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct ControlModel <: AbstractControlModel
-    dimension::Dimension
+struct ControlModel{M} <: AbstractControlModel
     name::String
-    components::Vector{String}
+    components::SVector{M, String}
+end
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractVariableModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct VariableModel{Q} <: AbstractVariableModel
+    name::String
+    components::SVector{Q, String}
+end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct EmptyVariableModel <: AbstractVariableModel end
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractTimeModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct FixedTimeModel <: AbstractTimeModel
+    time::Time
+    name::String
+end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct FreeTimeModel <: AbstractTimeModel
+    index::Int
+    name::String
+end
+
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractTimesModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct TimesModel{TI <: AbstractTimeModel, TF <: AbstractTimeModel} <: AbstractTimesModel
+    initial::TI
+    final::TF
+    time_name::String
 end
 
 # ------------------------------------------------------------------------------ #
@@ -50,11 +123,15 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct OptimalControlModel{
-    ControlModelType <: AbstractControlModel,
+    TimesModelType <: AbstractTimesModel,
     StateModelType <: AbstractStateModel,
+    ControlModelType <: AbstractControlModel,
+    VariableModelType <: AbstractVariableModel,
 } <: AbstractOptimalControlModel
-    control::ControlModelType
+    times::TimesModelType
     state::StateModelType
+    control::ControlModelType
+    variable::VariableModelType
 end
 
 """
@@ -65,6 +142,8 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModelMutable <: AbstractOptimalControlModel
-    control::Union{AbstractControlModel, Nothing} = nothing
-    state::Union{AbstractStateModel, Nothing} = nothing
+    times::Union{AbstractTimesModel, Missing} = missing
+    state::Union{AbstractStateModel, Missing} = missing
+    control::Union{AbstractControlModel, Missing} = missing
+    variable::Union{AbstractVariableModel, Nothing} = nothing
 end
