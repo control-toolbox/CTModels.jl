@@ -54,7 +54,8 @@ function variable!(
     __is_dynamics_set(ocp) && throw(CTBase.UnauthorizedCall("the dynamics must be set after the variable."))
 
     # set the variable
-    ocp.variable = VariableModel{q}(string(name), SVector{q}(string.(components_names)))
+    ocp.variable = VariableModel(string(name), string.(components_names))
+
     return nothing
 end
 
@@ -63,18 +64,19 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from AbstractVariableModel
-dimension(::EmptyVariableModel)::Dimension = 0
-(dimension(::VariableModel{Q})::Dimension) where Q = Q
 name(model::VariableModel)::String = model.name
-components(model::VariableModel)::Vector{String} = Vector(model.components)
+components(model::VariableModel)::Vector{String} = model.components
+dimension(::EmptyVariableModel)::Dimension = 0
+(dimension(model::VariableModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(variable(model::OptimalControlModel{T, S, C, V, O})::V) where {
+(variable(model::OptimalControlModel{T, S, C, V, D, O})::V) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
+    D<:Function,
     O<:AbstractObjectiveModel} = model.variable
-variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))
 variable_name(model::OptimalControlModel)::String = name(variable(model))
 variable_components(model::OptimalControlModel)::Vector{String} = components(variable(model))
+variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))

@@ -86,7 +86,8 @@ function control!(
         )
 
     # set the control
-    ocp.control = ControlModel{m}(string(name), SVector{m}(string.(components_names)))
+    ocp.control = ControlModel(string(name), string.(components_names))
+
     return nothing
 end
 
@@ -95,17 +96,18 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from ControlModel
-(dimension(::ControlModel{M})::Dimension) where M = M
 name(model::ControlModel)::String = model.name
-components(model::ControlModel)::Vector{String} = Vector(model.components)
+components(model::ControlModel)::Vector{String} = model.components
+(dimension(model::ControlModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(control(model::OptimalControlModel{T, S, C, V, O})::C) where {
+(control(model::OptimalControlModel{T, S, C, V, D, O})::C) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
+    D<:Function,
     O<:AbstractObjectiveModel} = model.control
-control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))
 control_name(model::OptimalControlModel)::String = name(control(model))
 control_components(model::OptimalControlModel)::Vector{String} = components(control(model))
+control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))

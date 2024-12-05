@@ -84,7 +84,8 @@ function state!(
         throw(CTBase.IncorrectArgument("the number of state names must be equal to the state dimension"))
 
     # set the state
-    ocp.state = StateModel{n}(string(name), SVector{n}(string.(components_names)))
+    ocp.state = StateModel(string(name), string.(components_names))
+
     return nothing
 end
 
@@ -93,17 +94,18 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from StateModel
-(dimension(::StateModel{N})::Dimension) where N = N
 name(model::StateModel)::String = model.name
-components(model::StateModel)::Vector{String} = Vector(model.components)
+components(model::StateModel)::Vector{String} = model.components
+(dimension(model::StateModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(state(model::OptimalControlModel{T, S, C, V, O})::S) where {
+(state(model::OptimalControlModel{T, S, C, V, D, O})::S) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
+    D<:Function,
     O<:AbstractObjectiveModel} = model.state
-state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))
 state_name(model::OptimalControlModel)::String = name(state(model))
 state_components(model::OptimalControlModel)::Vector{String} = components(state(model))
+state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))

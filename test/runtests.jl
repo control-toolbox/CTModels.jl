@@ -3,11 +3,10 @@ using Aqua
 using CheckConcreteStructs
 using CTBase
 using CTModels
-using StaticArrays
 
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
-    for name in (:times, :ocp, :control, :state, :variable, :objective)
+    for name in (:times, :ocp, :control, :state, :variable, :dynamics, :objective)
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
             include("$(test_name).jl")

@@ -59,11 +59,11 @@ function objective!(
 
     # set the objective
     if !isnothing(mayer) && isnothing(lagrange)
-        ocp.objective = MayerObjectiveModel(Mayer(mayer), criterion)
+        ocp.objective = MayerObjectiveModel(mayer, criterion)
     elseif isnothing(mayer) && !isnothing(lagrange)
-        ocp.objective = LagrangeObjectiveModel(Lagrange(lagrange), criterion)
+        ocp.objective = LagrangeObjectiveModel(lagrange, criterion)
     else
-        ocp.objective = BolzaObjectiveModel(Mayer(mayer), Lagrange(lagrange), criterion)
+        ocp.objective = BolzaObjectiveModel(mayer, lagrange, criterion)
     end
 
     return nothing
@@ -76,7 +76,7 @@ end
 
 # From MayerObjectiveModel
 criterion(model::MayerObjectiveModel)::Symbol = model.criterion
-(mayer(model::MayerObjectiveModel{M})::M) where {M <: AbstractMayerFunctionModel} = model.mayer!
+(mayer(model::MayerObjectiveModel{M})::M) where {M <: Function} = model.mayer
 lagrange(model::MayerObjectiveModel) = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
 has_mayer_cost(model::MayerObjectiveModel)::Bool = true
 has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
@@ -84,63 +84,70 @@ has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
 # From LagrangeObjectiveModel
 criterion(model::LagrangeObjectiveModel)::Symbol = model.criterion
 mayer(model::LagrangeObjectiveModel) = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
-(lagrange(model::LagrangeObjectiveModel{L})::L) where {L <: AbstractLagrangeFunctionModel} = model.lagrange!
+(lagrange(model::LagrangeObjectiveModel{L})::L) where {L <: Function} = model.lagrange
 has_mayer_cost(model::LagrangeObjectiveModel)::Bool = false
 has_lagrange_cost(model::LagrangeObjectiveModel)::Bool = true
 
 # From BolzaObjectiveModel
 criterion(model::BolzaObjectiveModel)::Symbol = model.criterion
-(mayer(model::BolzaObjectiveModel{M, L})::M) where {M <: AbstractMayerFunctionModel, L <: AbstractLagrangeFunctionModel} = model.mayer!
-(lagrange(model::BolzaObjectiveModel{M, L})::L) where {M <: AbstractMayerFunctionModel, L <: AbstractLagrangeFunctionModel} = model.lagrange!
+(mayer(model::BolzaObjectiveModel{M, L})::M) where {M <: Function, L <: Function} = model.mayer
+(lagrange(model::BolzaObjectiveModel{M, L})::L) where {M <: Function, L <: Function} = model.lagrange
 has_mayer_cost(model::BolzaObjectiveModel)::Bool = true
 has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
 
 # From OptimalControlModel
-(objective(model::OptimalControlModel{T, S, C, V, O})::O) where {
+(objective(model::OptimalControlModel{T, S, C, V, D, O})::O) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
+    D<:Function,
     O<:AbstractObjectiveModel} = model.objective
 
 criterion(model::OptimalControlModel)::Symbol = criterion(objective(model))
 
-(mayer(model::OptimalControlModel{T, S, C, V, MayerObjectiveModel{M}})::M) where {
+(mayer(model::OptimalControlModel{T, S, C, V, D, MayerObjectiveModel{M}})::M) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerFunctionModel} = mayer(objective(model))
-(mayer(model::OptimalControlModel{T, S, C, V, BolzaObjectiveModel{M, L}})::M) where {
+    D<:Function,
+    M<:Function} = mayer(objective(model))
+(mayer(model::OptimalControlModel{T, S, C, V, D, BolzaObjectiveModel{M, L}})::M) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerFunctionModel,
-    L<:AbstractLagrangeFunctionModel} = mayer(objective(model))
-mayer(model::OptimalControlModel{T, S, C, V, <:LagrangeObjectiveModel}) where {
+    D<:Function,
+    M<:Function,
+    L<:Function} = mayer(objective(model))
+mayer(model::OptimalControlModel{T, S, C, V, D, <:LagrangeObjectiveModel}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
+    D<:Function,
     V<:AbstractVariableModel} = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
 
-(lagrange(model::OptimalControlModel{T, S, C, V, LagrangeObjectiveModel{L}})::L) where {
+(lagrange(model::OptimalControlModel{T, S, C, V, D, LagrangeObjectiveModel{L}})::L) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    L<:AbstractLagrangeFunctionModel} = lagrange(objective(model))
-(lagrange(model::OptimalControlModel{T, S, C, V, BolzaObjectiveModel{M, L}})::L) where {
+    D<:Function,
+    L<:Function} = lagrange(objective(model))
+(lagrange(model::OptimalControlModel{T, S, C, V, D, BolzaObjectiveModel{M, L}})::L) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerFunctionModel,
-    L<:AbstractLagrangeFunctionModel} = lagrange(objective(model))
-lagrange(model::OptimalControlModel{T, S, C, V, <:MayerObjectiveModel}) where {
+    D<:Function,
+    M<:Function,
+    L<:Function} = lagrange(objective(model))
+lagrange(model::OptimalControlModel{T, S, C, V, D, <:MayerObjectiveModel}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
+    D<:Function,
     V<:AbstractVariableModel} = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
 
 # has_mayer_cost and has_lagrange_cost

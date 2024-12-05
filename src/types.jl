@@ -11,9 +11,9 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct StateModel{N} <: AbstractStateModel
+struct StateModel <: AbstractStateModel
     name::String
-    components::SVector{N, String}
+    components::Vector{String}
 end
 
 # ------------------------------------------------------------------------------ #
@@ -29,9 +29,9 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct ControlModel{M} <: AbstractControlModel
+struct ControlModel <: AbstractControlModel
     name::String
-    components::SVector{M, String}
+    components::Vector{String}
 end
 
 # ------------------------------------------------------------------------------ #
@@ -47,9 +47,9 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct VariableModel{Q} <: AbstractVariableModel
+struct VariableModel <: AbstractVariableModel
     name::String
-    components::SVector{Q, String}
+    components::Vector{String}
 end
 
 """
@@ -113,37 +113,6 @@ end
 """
 $(TYPEDEF)
 """
-abstract type AbstractMayerFunctionModel end
-
-"""
-$(TYPEDEF)
-"""
-struct Mayer{TF<:Function} <: AbstractMayerFunctionModel
-    f::TF
-end
-
-function (F::Mayer{<:Function})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0, xf, v)
-    return nothing
-end
-
-"""
-$(TYPEDEF)
-"""
-abstract type AbstractLagrangeFunctionModel end
-
-struct Lagrange{TF<:Function} <: AbstractLagrangeFunctionModel
-    f::TF
-end
-
-function (F::Lagrange{<:Function})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing 
-    F.f(r, t, x, u, v)
-    return nothing
-end
-
-"""
-$(TYPEDEF)
-"""
 abstract type AbstractObjectiveModel end
 
 """
@@ -153,8 +122,8 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct MayerObjectiveModel{TM <: AbstractMayerFunctionModel} <: AbstractObjectiveModel
-    mayer!::TM
+struct MayerObjectiveModel{TM <: Function} <: AbstractObjectiveModel
+    mayer::TM
     criterion::Symbol
 end
 
@@ -165,8 +134,8 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct LagrangeObjectiveModel{TL <: AbstractLagrangeFunctionModel} <: AbstractObjectiveModel
-    lagrange!::TL
+struct LagrangeObjectiveModel{TL <: Function} <: AbstractObjectiveModel
+    lagrange::TL
     criterion::Symbol
 end
 
@@ -177,34 +146,10 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct BolzaObjectiveModel{
-        TM <: AbstractMayerFunctionModel, 
-        TL <: AbstractLagrangeFunctionModel} <: AbstractObjectiveModel
-    mayer!::TM
-    lagrange!::TL
+struct BolzaObjectiveModel{TM <: Function, TL <: Function} <: AbstractObjectiveModel
+    mayer::TM
+    lagrange::TL
     criterion::Symbol
-end
-
-# ------------------------------------------------------------------------------ #
-"""
-$(TYPEDEF)
-"""
-abstract type AbstractDynamics end
-
-"""
-$(TYPEDEF)
-
-**Fields**
-
-$(TYPEDFIELDS)
-"""
-struct Dynamics{TF<:Function} <: AbstractDynamics
-    f::TF
-end
-
-function (F::Dynamics{<:Function})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u, v)
-    return nothing
 end
 
 # ------------------------------------------------------------------------------ #
@@ -225,7 +170,7 @@ struct OptimalControlModel{
     StateModelType <: AbstractStateModel,
     ControlModelType <: AbstractControlModel,
     VariableModelType <: AbstractVariableModel,
-    DynamicsModelType <: AbstractDynamics,
+    DynamicsModelType <: Function,
     ObjectiveModelType <: AbstractObjectiveModel,
 } <: AbstractOptimalControlModel
     times::TimesModelType
@@ -248,7 +193,7 @@ $(TYPEDFIELDS)
     state::Union{AbstractStateModel, Nothing} = nothing
     control::Union{AbstractControlModel, Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{AbstractDynamics, Nothing} = nothing
+    dynamics::Union{Function, Nothing} = nothing
     objective::Union{AbstractObjectiveModel, Nothing} = nothing
 end
 

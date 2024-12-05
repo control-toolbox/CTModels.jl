@@ -1,10 +1,10 @@
 function test_control()
 
     #
-    @test isconcretetype(CTModels.ControlModel{2})
+    @test isconcretetype(CTModels.ControlModel)
 
     # ControlModel
-    control = CTModels.ControlModel("u", SA["u₁", "u₂"])
+    control = CTModels.ControlModel("u", ["u₁", "u₂"])
     @test CTModels.dimension(control) == 2
     @test CTModels.name(control) == "u"
     @test CTModels.components(control) == ["u₁", "u₂"]
