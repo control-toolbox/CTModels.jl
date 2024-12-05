@@ -11,7 +11,10 @@ using StaticArrays
 const Dimension = Int
 const ctNumber = Real
 const Time = ctNumber
-const Variable = Union{ctNumber, AbstractVector{<:ctNumber}}
+const ctVector = AbstractVector{<:ctNumber}
+const State = ctVector
+const Control = ctVector
+const Variable = ctVector
 
 #
 include("types.jl")
@@ -21,6 +24,7 @@ include("state.jl")
 include("control.jl")
 include("variable.jl")
 include("times.jl")
+include("objective.jl")
 
 #
 

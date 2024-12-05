@@ -18,12 +18,6 @@ __control_components(m::Dimension, name::String)::Vector{String} =
 """
 $(TYPEDSIGNATURES)
 
-"""
-__is_control_set(ocp::OptimalControlModelMutable)::Bool = !ismissing(ocp.control)
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the control dimension and possibly the names of each coordinate.
 
 !!! note
@@ -92,8 +86,7 @@ function control!(
         )
 
     # set the control
-    ocp.control = ControlModel{m}(string(name), 
-        SVector{m}(string.(components_names)))
+    ocp.control = ControlModel{m}(string(name), SVector{m}(string.(components_names)))
     return nothing
 end
 
@@ -107,11 +100,12 @@ name(model::ControlModel)::String = model.name
 components(model::ControlModel)::Vector{String} = Vector(model.components)
 
 # from OptimalControlModel
-(control(model::OptimalControlModel{T, S, C, V})::C) where {
+(control(model::OptimalControlModel{T, S, C, V, O})::C) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
-    V<:AbstractVariableModel} = model.control
+    V<:AbstractVariableModel,
+    O<:AbstractObjectiveModel} = model.control
 control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))
 control_name(model::OptimalControlModel)::String = name(control(model))
 control_components(model::OptimalControlModel)::Vector{String} = components(control(model))

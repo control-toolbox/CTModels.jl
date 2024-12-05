@@ -11,7 +11,7 @@ function test_variable()
 
     # some checkings
     ocp = CTModels.OptimalControlModelMutable()
-    @test isnothing(ocp.variable)
+    @test ocp.variable isa CTModels.EmptyVariableModel
     @test !CTModels.__is_variable_set(ocp)
     CTModels.variable!(ocp, 1)
     @test CTModels.__is_variable_set(ocp)

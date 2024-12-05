@@ -17,7 +17,7 @@ function test_times()
 
     # some checkings
     ocp = CTModels.OptimalControlModelMutable()
-    @test ismissing(ocp.times)
+    @test isnothing(ocp.times)
     @test !CTModels.__is_times_set(ocp)
     CTModels.time!(ocp, t0=0.0, tf=10.0, time_name="s")
     @test CTModels.__is_times_set(ocp)
@@ -36,7 +36,7 @@ function test_times()
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.variable!(ocp, 1)
     CTModels.time!(ocp, ind0=1, tf=10.0) # t0 free, tf fixed, scalar variable
-    @test CTModels.initial_time(ocp.times, 0.0) == 0.0
+    @test CTModels.initial_time(ocp.times, [0.0]) == 0.0
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.variable!(ocp, 2)
@@ -46,7 +46,7 @@ function test_times()
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.variable!(ocp, 1)
     CTModels.time!(ocp, t0=0.0, indf=1) # t0 fixed, tf free, scalar variable
-    @test CTModels.final_time(ocp.times, 10.0) == 10.0
+    @test CTModels.final_time(ocp.times, [10.0]) == 10.0
 
     ocp = CTModels.OptimalControlModelMutable()
     CTModels.variable!(ocp, 2)

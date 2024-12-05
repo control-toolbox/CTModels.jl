@@ -18,12 +18,6 @@ __variable_components(q::Dimension, name::String)::Vector{String} =
 """
 $(TYPEDSIGNATURES)
 
-"""
-__is_variable_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.variable)
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the variable dimension and possibly the names of each component.
 
 !!! note
@@ -53,9 +47,11 @@ function variable!(
             ),
         )
 
+    # the objective must not be set before the variable
+    __is_objective_set(ocp) && throw(CTBase.UnauthorizedCall("the objective must be set after the variable."))
+
     # set the variable
-    ocp.variable = VariableModel{q}(string(name), 
-        SVector{q}(string.(components_names)))
+    ocp.variable = VariableModel{q}(string(name), SVector{q}(string.(components_names)))
     return nothing
 end
 
@@ -70,11 +66,12 @@ name(model::VariableModel)::String = model.name
 components(model::VariableModel)::Vector{String} = Vector(model.components)
 
 # from OptimalControlModel
-(variable(model::OptimalControlModel{T, S, C, V})::V) where {
+(variable(model::OptimalControlModel{T, S, C, V, O})::V) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
-    V<:AbstractVariableModel} = model.variable
+    V<:AbstractVariableModel,
+    O<:AbstractObjectiveModel} = model.variable
 variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))
 variable_name(model::OptimalControlModel)::String = name(variable(model))
 variable_components(model::OptimalControlModel)::Vector{String} = components(variable(model))

@@ -18,12 +18,6 @@ __state_components(n::Dimension, name::String)::Vector{String} =
 """
 $(TYPEDSIGNATURES)
 
-"""
-__is_state_set(ocp::OptimalControlModelMutable)::Bool = !ismissing(ocp.state)
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the state dimension and possibly the names of each component.
 
 !!! note
@@ -90,8 +84,7 @@ function state!(
         throw(CTBase.IncorrectArgument("the number of state names must be equal to the state dimension"))
 
     # set the state
-    ocp.state = StateModel{n}(string(name), 
-        SVector{n}(string.(components_names)))
+    ocp.state = StateModel{n}(string(name), SVector{n}(string.(components_names)))
     return nothing
 end
 
@@ -105,11 +98,12 @@ name(model::StateModel)::String = model.name
 components(model::StateModel)::Vector{String} = Vector(model.components)
 
 # from OptimalControlModel
-(state(model::OptimalControlModel{T, S, C, V})::S) where {
+(state(model::OptimalControlModel{T, S, C, V, O})::S) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
-    V<:AbstractVariableModel} = model.state
+    V<:AbstractVariableModel,
+    O<:AbstractObjectiveModel} = model.state
 state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))
 state_name(model::OptimalControlModel)::String = name(state(model))
 state_components(model::OptimalControlModel)::Vector{String} = components(state(model))

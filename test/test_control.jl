@@ -11,7 +11,7 @@ function test_control()
 
     # some checkings
     ocp = CTModels.OptimalControlModelMutable()
-    @test ismissing(ocp.control)
+    @test isnothing(ocp.control)
     @test !CTModels.__is_control_set(ocp)
     CTModels.control!(ocp, 1)
     @test CTModels.__is_control_set(ocp)
