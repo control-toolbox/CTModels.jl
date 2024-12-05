@@ -1,95 +1,3 @@
-# Calls to Mayer function
-function (F::Mayer{<:Function, <:Val, <:Val})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0, xf, v)
-    return nothing
-end
-
-function (F::Mayer{<:Function, Val{1}, <:Val})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0[1], xf[1], v)
-    return nothing
-end
-
-function (F::Mayer{<:Function, <:Val, Val{1}})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing 
-    F.f(r, x0, xf, v[1])
-    return nothing
-end
-
-function (F::Mayer{<:Function, Val{1}, Val{1}})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0[1], xf[1], v[1])
-    return nothing
-end
-
-function (F::Mayer{<:Function, <:Val, Val{0}})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0, xf)
-    return nothing
-end
-
-function (F::Mayer{<:Function, Val{1}, Val{0}})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
-    F.f(r, x0[1], xf[1])
-    return nothing
-end
-
-# Calls to Lagrange function
-function (F::Lagrange{<:Function, <:Val, <:Val, <:Val})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing 
-    F.f(r, t, x, u, v)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, <:Val, <:Val})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u, v)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, <:Val, Val{1}, <:Val})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u[1], v)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, Val{1}, <:Val})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u[1], v)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, <:Val, <:Val, Val{1}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u, v[1])
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, <:Val, Val{1}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u, v[1])
-    return nothing
-end
-
-function (F::Lagrange{<:Function, <:Val, Val{1}, Val{1}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u[1], v[1])
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, Val{1}, Val{1}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u[1], v[1])
-    return nothing
-end
-
-function (F::Lagrange{<:Function, <:Val, <:Val, Val{0}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, <:Val, Val{0}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u)
-    return nothing
-end
-
-function (F::Lagrange{<:Function, <:Val, Val{1}, Val{0}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x, u[1])
-    return nothing
-end
-
-function (F::Lagrange{<:Function, Val{1}, Val{1}, Val{0}})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
-    F.f(r, t, x[1], u[1])
-    return nothing
-end
-
 """
 $(TYPEDSIGNATURES)
 
@@ -140,27 +48,22 @@ function objective!(
     !__is_control_set(ocp) && throw(CTBase.UnauthorizedCall("the control must be set before the objective."))
     #!__is_variable_set(ocp) && throw(CTBase.UnauthorizedCall("the variable must be set before the objective."))
 
+    # checkings: times must be set before the objective
+    !__is_times_set(ocp) && throw(CTBase.UnauthorizedCall("the times must be set before the objective."))
+
     # checkings: the objective must not be set before
     __is_objective_set(ocp) && throw(CTBase.UnauthorizedCall("the objective has already been set."))
 
     # checkings: at least one of the two functions must be given
     isnothing(mayer) && isnothing(lagrange) && throw(CTBase.IncorrectArgument("at least one of the two functions must be given. Please provide a Mayer or a Lagrange function."))
 
-    # get dimensions
-    n = dimension(ocp.state)
-    m = dimension(ocp.control)
-    q = dimension(ocp.variable)
-
     # set the objective
-    # Mayer and not Lagrange => MayerObjectiveModel
-    # Lagrange and not Mayer => LagrangeObjectiveModel
-    # Mayer and Lagrange => BolzaObjectiveModel
     if !isnothing(mayer) && isnothing(lagrange)
-        ocp.objective = MayerObjectiveModel(Mayer(mayer, n, q), criterion)
+        ocp.objective = MayerObjectiveModel(Mayer(mayer), criterion)
     elseif isnothing(mayer) && !isnothing(lagrange)
-        ocp.objective = LagrangeObjectiveModel(Lagrange(lagrange, n, m, q), criterion)
+        ocp.objective = LagrangeObjectiveModel(Lagrange(lagrange), criterion)
     else
-        ocp.objective = BolzaObjectiveModel(Mayer(mayer, n, q), Lagrange(lagrange, n, m, q), criterion)
+        ocp.objective = BolzaObjectiveModel(Mayer(mayer), Lagrange(lagrange), criterion)
     end
 
     return nothing
@@ -173,7 +76,7 @@ end
 
 # From MayerObjectiveModel
 criterion(model::MayerObjectiveModel)::Symbol = model.criterion
-(mayer(model::MayerObjectiveModel{M})::M) where {M <: AbstractMayerModel} = model.mayer!
+(mayer(model::MayerObjectiveModel{M})::M) where {M <: AbstractMayerFunctionModel} = model.mayer!
 lagrange(model::MayerObjectiveModel) = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
 has_mayer_cost(model::MayerObjectiveModel)::Bool = true
 has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
@@ -181,14 +84,14 @@ has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
 # From LagrangeObjectiveModel
 criterion(model::LagrangeObjectiveModel)::Symbol = model.criterion
 mayer(model::LagrangeObjectiveModel) = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
-(lagrange(model::LagrangeObjectiveModel{L})::L) where {L <: AbstractLagrangeModel} = model.lagrange!
+(lagrange(model::LagrangeObjectiveModel{L})::L) where {L <: AbstractLagrangeFunctionModel} = model.lagrange!
 has_mayer_cost(model::LagrangeObjectiveModel)::Bool = false
 has_lagrange_cost(model::LagrangeObjectiveModel)::Bool = true
 
 # From BolzaObjectiveModel
 criterion(model::BolzaObjectiveModel)::Symbol = model.criterion
-(mayer(model::BolzaObjectiveModel{M, L})::M) where {M <: AbstractMayerModel, L <: AbstractLagrangeModel} = model.mayer!
-(lagrange(model::BolzaObjectiveModel{M, L})::L) where {M <: AbstractMayerModel, L <: AbstractLagrangeModel} = model.lagrange!
+(mayer(model::BolzaObjectiveModel{M, L})::M) where {M <: AbstractMayerFunctionModel, L <: AbstractLagrangeFunctionModel} = model.mayer!
+(lagrange(model::BolzaObjectiveModel{M, L})::L) where {M <: AbstractMayerFunctionModel, L <: AbstractLagrangeFunctionModel} = model.lagrange!
 has_mayer_cost(model::BolzaObjectiveModel)::Bool = true
 has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
 
@@ -207,14 +110,14 @@ criterion(model::OptimalControlModel)::Symbol = criterion(objective(model))
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerModel} = mayer(objective(model))
+    M<:AbstractMayerFunctionModel} = mayer(objective(model))
 (mayer(model::OptimalControlModel{T, S, C, V, BolzaObjectiveModel{M, L}})::M) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerModel,
-    L<:AbstractLagrangeModel} = mayer(objective(model))
+    M<:AbstractMayerFunctionModel,
+    L<:AbstractLagrangeFunctionModel} = mayer(objective(model))
 mayer(model::OptimalControlModel{T, S, C, V, <:LagrangeObjectiveModel}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
@@ -226,14 +129,14 @@ mayer(model::OptimalControlModel{T, S, C, V, <:LagrangeObjectiveModel}) where {
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    L<:AbstractLagrangeModel} = lagrange(objective(model))
+    L<:AbstractLagrangeFunctionModel} = lagrange(objective(model))
 (lagrange(model::OptimalControlModel{T, S, C, V, BolzaObjectiveModel{M, L}})::L) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
-    M<:AbstractMayerModel,
-    L<:AbstractLagrangeModel} = lagrange(objective(model))
+    M<:AbstractMayerFunctionModel,
+    L<:AbstractLagrangeFunctionModel} = lagrange(objective(model))
 lagrange(model::OptimalControlModel{T, S, C, V, <:MayerObjectiveModel}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 

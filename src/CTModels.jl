@@ -24,6 +24,7 @@ include("state.jl")
 include("control.jl")
 include("variable.jl")
 include("times.jl")
+include("dynamics.jl")
 include("objective.jl")
 
 #

@@ -50,6 +50,9 @@ function variable!(
     # the objective must not be set before the variable
     __is_objective_set(ocp) && throw(CTBase.UnauthorizedCall("the objective must be set after the variable."))
 
+    # the dynamics must not be set before the variable
+    __is_dynamics_set(ocp) && throw(CTBase.UnauthorizedCall("the dynamics must be set after the variable."))
+
     # set the variable
     ocp.variable = VariableModel{q}(string(name), SVector{q}(string.(components_names)))
     return nothing

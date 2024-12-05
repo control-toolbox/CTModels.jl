@@ -113,35 +113,33 @@ end
 """
 $(TYPEDEF)
 """
-abstract type AbstractMayerModel end
+abstract type AbstractMayerFunctionModel end
 
 """
 $(TYPEDEF)
 """
-struct Mayer{TF<:Function, VN<:Val, VQ<:Val} <: AbstractMayerModel
+struct Mayer{TF<:Function} <: AbstractMayerFunctionModel
     f::TF
-    n_val::VN     # just to specialize the type
-    q_val::VQ  # just to specialize the type
 end
 
-# constructor
-Mayer(f::Function, n::Int, q::Int) = Mayer{typeof(f), Val{n}, Val{q}}(f, Val{n}(), Val{q}())
+function (F::Mayer{<:Function})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+    F.f(r, x0, xf, v)
+    return nothing
+end
 
 """
 $(TYPEDEF)
 """
-abstract type AbstractLagrangeModel end
+abstract type AbstractLagrangeFunctionModel end
 
-struct Lagrange{TF<:Function, VN<:Val, VM<:Val, VQ<:Val} <: AbstractLagrangeModel
+struct Lagrange{TF<:Function} <: AbstractLagrangeFunctionModel
     f::TF
-    n_val::VN     # just to specialize the type
-    m_val::VM   # just to specialize the type
-    q_val::VQ  # just to specialize the type
 end
 
-# constructor
-Lagrange(f::Function, n::Int, m::Int, q::Int) = 
-    Lagrange{typeof(f), Val{n}, Val{m}, Val{q}}(f, Val{n}(), Val{m}(), Val{q}())
+function (F::Lagrange{<:Function})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing 
+    F.f(r, t, x, u, v)
+    return nothing
+end
 
 """
 $(TYPEDEF)
@@ -155,7 +153,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct MayerObjectiveModel{TM <: AbstractMayerModel} <: AbstractObjectiveModel
+struct MayerObjectiveModel{TM <: AbstractMayerFunctionModel} <: AbstractObjectiveModel
     mayer!::TM
     criterion::Symbol
 end
@@ -167,7 +165,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct LagrangeObjectiveModel{TL <: AbstractLagrangeModel} <: AbstractObjectiveModel
+struct LagrangeObjectiveModel{TL <: AbstractLagrangeFunctionModel} <: AbstractObjectiveModel
     lagrange!::TL
     criterion::Symbol
 end
@@ -179,10 +177,34 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct BolzaObjectiveModel{TM <: AbstractMayerModel, TL <: AbstractLagrangeModel} <: AbstractObjectiveModel
+struct BolzaObjectiveModel{
+        TM <: AbstractMayerFunctionModel, 
+        TL <: AbstractLagrangeFunctionModel} <: AbstractObjectiveModel
     mayer!::TM
     lagrange!::TL
     criterion::Symbol
+end
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractDynamics end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct Dynamics{TF<:Function} <: AbstractDynamics
+    f::TF
+end
+
+function (F::Dynamics{<:Function})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    F.f(r, t, x, u, v)
+    return nothing
 end
 
 # ------------------------------------------------------------------------------ #
@@ -203,12 +225,14 @@ struct OptimalControlModel{
     StateModelType <: AbstractStateModel,
     ControlModelType <: AbstractControlModel,
     VariableModelType <: AbstractVariableModel,
-    ObjectiveModelType <: AbstractObjectiveModel
+    DynamicsModelType <: AbstractDynamics,
+    ObjectiveModelType <: AbstractObjectiveModel,
 } <: AbstractOptimalControlModel
     times::TimesModelType
     state::StateModelType
     control::ControlModelType
     variable::VariableModelType
+    dynamics::DynamicsModelType
     objective::ObjectiveModelType
 end
 
@@ -224,6 +248,7 @@ $(TYPEDFIELDS)
     state::Union{AbstractStateModel, Nothing} = nothing
     control::Union{AbstractControlModel, Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
+    dynamics::Union{AbstractDynamics, Nothing} = nothing
     objective::Union{AbstractObjectiveModel, Nothing} = nothing
 end
 
@@ -250,6 +275,12 @@ $(TYPEDSIGNATURES)
 
 """
 __is_variable_set(ocp::OptimalControlModelMutable)::Bool = !(ocp.variable isa EmptyVariableModel)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+__is_dynamics_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.dynamics)
 
 """
 $(TYPEDSIGNATURES)

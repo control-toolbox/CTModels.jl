@@ -14,6 +14,7 @@ function test_times()
     time = CTModels.FreeTimeModel(1, "s")
     @test CTModels.index(time) == 1
     @test CTModels.name(time) == "s"
+    @test_throws CTBase.IncorrectArgument CTModels.time(time, Float64[])
 
     # some checkings
     ocp = CTModels.OptimalControlModelMutable()

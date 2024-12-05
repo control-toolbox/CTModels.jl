@@ -11,6 +11,7 @@ function test_ocp()
     # functions
     mayer_user!(r, x0, xf, v) = r .= [0.0]
     lagrange_user!(r, t, x, u, v) = r .= [0.0]
+    dynamics_user!(r, t, x, u, v) = r .= [0.0; 0.0]
 
     # points
     x0 = [0.0, 0.0]
@@ -25,10 +26,11 @@ function test_ocp()
     state = CTModels.StateModel{n}("y", SA["y₁", "y₂"])
     control = CTModels.ControlModel{m}("u", SA["u₁", "u₂"])
     variable = CTModels.VariableModel{q}("v", SA["v₁", "v₂"])
-    objective = CTModels.MayerObjectiveModel(CTModels.Mayer(mayer_user!, n, q), :min)
+    dynamics = CTModels.DynamicsModel(dynamics_user!)
+    objective = CTModels.MayerObjectiveModel(CTModels.Mayer(mayer_user!), :min)
 
     # concrete ocp
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
 
     # tests on times
     @test CTModels.times(ocp) == times
@@ -59,6 +61,7 @@ function test_ocp()
     @test CTModels.variable_dimension(ocp) == 2
     @test CTModels.variable_name(ocp) == "v"
     @test CTModels.variable_components(ocp) == ["v₁", "v₂"]
+
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
@@ -128,7 +131,7 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with Lagrange objective
-    lagrange = CTModels.Lagrange(lagrange_user!, n, m, q)
+    lagrange = CTModels.Lagrange(lagrange_user!)
     objective = CTModels.LagrangeObjectiveModel(lagrange, :max)
     ocp = CTModels.OptimalControlModel(times, state, control, variable, objective)
 
@@ -149,7 +152,7 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective
-    mayer = CTModels.Mayer(mayer_user!, n, q)
+    mayer = CTModels.Mayer(mayer_user!)
     objective = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
     ocp = CTModels.OptimalControlModel(times, state, control, variable, objective)
 

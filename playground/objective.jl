@@ -16,7 +16,7 @@ times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTime
 state = CTModels.StateModel{n}("y", SA["y₁", "y₂"])
 control = CTModels.ControlModel{m}("u", SA["u₁", "u₂"])
 variable = CTModels.VariableModel{q}("v", SA["v₁", "v₂"])
-objective = CTModels.MayerObjectiveModel(CTModels.Mayer(mayer_user!, n, q), :min)
+objective = CTModels.MayerObjectiveModel(CTModels.Mayer(mayer_user!), :min)
 
 # concrete ocp
 ocp = CTModels.OptimalControlModel(times, state, control, variable, objective)

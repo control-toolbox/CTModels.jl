@@ -62,4 +62,15 @@ function test_variable()
     ocp = CTModels.OptimalControlModelMutable()
     @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
 
+    # objective must be set after the variable
+    ocp = CTModels.OptimalControlModelMutable()
+    mayer(r, x0, xf, v) = r[1] = x0[1] + xf[1] + v[1]
+    CTModels.objective!(ocp, :min, mayer=mayer)
+    @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
+
+    # dynamics must be set after the variable
+    ocp = CTModels.OptimalControlModelMutable()
+    CTModels.dynamics!(ocp, (r, t, x, u, v) -> nothing)
+    @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
+
 end
