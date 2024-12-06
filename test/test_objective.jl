@@ -3,7 +3,7 @@ function test_objective()
     # is concretetype    
     @test isconcretetype(CTModels.MayerObjectiveModel{Function}) # MayerObjectiveModel
     @test isconcretetype(CTModels.LagrangeObjectiveModel{Function}) # LagrangeObjectiveModel
-    @test isconcretetype(CTModels.BolzaObjectiveModel{Function, Function}) # BolzaObjectiveModel
+    @test isconcretetype(CTModels.BolzaObjectiveModel{Function,Function}) # BolzaObjectiveModel
 
     # Functions
     mayer!(r, x0, xf, v) = r .= x0 .+ xf .+ v
@@ -35,11 +35,11 @@ function test_objective()
 
     # from OptimalControlModelMutable with Mayer objective
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min, mayer=mayer!)
+    CTModels.objective!(ocp, :min; mayer=mayer!)
     @test ocp.objective == CTModels.MayerObjectiveModel(mayer!, :min)
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
@@ -48,11 +48,11 @@ function test_objective()
 
     # from OptimalControlModelMutable with Lagrange objective
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :max, lagrange=lagrange!)
+    CTModels.objective!(ocp, :max; lagrange=lagrange!)
     @test ocp.objective == CTModels.LagrangeObjectiveModel(lagrange!, :max)
     @test CTModels.criterion(ocp.objective) == :max
     @test CTModels.has_mayer_cost(ocp.objective) == false
@@ -61,11 +61,11 @@ function test_objective()
 
     # from OptimalControlModelMutable with Bolza objective
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min, mayer=mayer!, lagrange=lagrange!)
+    CTModels.objective!(ocp, :min; mayer=mayer!, lagrange=lagrange!)
     @test ocp.objective == CTModels.BolzaObjectiveModel(mayer!, lagrange!, :min)
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
@@ -74,14 +74,14 @@ function test_objective()
     # exceptions
     # state not set
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # control not set
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
@@ -95,27 +95,26 @@ function test_objective()
 
     # objective already set
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min, mayer=mayer!)
+    CTModels.objective!(ocp, :min; mayer=mayer!)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # variable set after the objective
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
-    CTModels.objective!(ocp, :min, mayer=mayer!)
+    CTModels.objective!(ocp, :min; mayer=mayer!)
     @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
 
     # no function given
     ocp = CTModels.OptimalControlModelMutable()
-    CTModels.time!(ocp, t0=0.0, tf=10.0)
+    CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :min)
-
 end

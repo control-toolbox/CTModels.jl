@@ -103,7 +103,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct TimesModel{TI <: AbstractTimeModel, TF <: AbstractTimeModel} <: AbstractTimesModel
+struct TimesModel{TI<:AbstractTimeModel,TF<:AbstractTimeModel} <: AbstractTimesModel
     initial::TI
     final::TF
     time_name::String
@@ -122,7 +122,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct MayerObjectiveModel{TM <: Function} <: AbstractObjectiveModel
+struct MayerObjectiveModel{TM<:Function} <: AbstractObjectiveModel
     mayer::TM
     criterion::Symbol
 end
@@ -134,7 +134,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct LagrangeObjectiveModel{TL <: Function} <: AbstractObjectiveModel
+struct LagrangeObjectiveModel{TL<:Function} <: AbstractObjectiveModel
     lagrange::TL
     criterion::Symbol
 end
@@ -146,7 +146,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct BolzaObjectiveModel{TM <: Function, TL <: Function} <: AbstractObjectiveModel
+struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
     mayer::TM
     lagrange::TL
     criterion::Symbol
@@ -166,12 +166,12 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct OptimalControlModel{
-    TimesModelType <: AbstractTimesModel,
-    StateModelType <: AbstractStateModel,
-    ControlModelType <: AbstractControlModel,
-    VariableModelType <: AbstractVariableModel,
-    DynamicsModelType <: Function,
-    ObjectiveModelType <: AbstractObjectiveModel,
+    TimesModelType<:AbstractTimesModel,
+    StateModelType<:AbstractStateModel,
+    ControlModelType<:AbstractControlModel,
+    VariableModelType<:AbstractVariableModel,
+    DynamicsModelType<:Function,
+    ObjectiveModelType<:AbstractObjectiveModel,
 } <: AbstractOptimalControlModel
     times::TimesModelType
     state::StateModelType
@@ -189,12 +189,12 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModelMutable <: AbstractOptimalControlModel
-    times::Union{AbstractTimesModel, Nothing} = nothing
-    state::Union{AbstractStateModel, Nothing} = nothing
-    control::Union{AbstractControlModel, Nothing} = nothing
+    times::Union{AbstractTimesModel,Nothing} = nothing
+    state::Union{AbstractStateModel,Nothing} = nothing
+    control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{Function, Nothing} = nothing
-    objective::Union{AbstractObjectiveModel, Nothing} = nothing
+    dynamics::Union{Function,Nothing} = nothing
+    objective::Union{AbstractObjectiveModel,Nothing} = nothing
 end
 
 """
@@ -219,7 +219,8 @@ __is_control_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.control
 $(TYPEDSIGNATURES)
 
 """
-__is_variable_set(ocp::OptimalControlModelMutable)::Bool = !(ocp.variable isa EmptyVariableModel)
+__is_variable_set(ocp::OptimalControlModelMutable)::Bool =
+    !(ocp.variable isa EmptyVariableModel)
 
 """
 $(TYPEDSIGNATURES)

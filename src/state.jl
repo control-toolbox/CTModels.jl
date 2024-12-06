@@ -13,7 +13,7 @@ Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
 __state_components(n::Dimension, name::String)::Vector{String} =
-    n > 1 ? [name * CTBase.ctindices(i) for i ∈ range(1, n)] : [name]
+    n > 1 ? [name * CTBase.ctindices(i) for i in range(1, n)] : [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -73,15 +73,19 @@ julia> state_components(ocp)
 function state!(
     ocp::OptimalControlModelMutable,
     n::Dimension,
-    name::T1 = __state_name(),
-    components_names::Vector{T2} = __state_components(n, string(name)),
-)::Nothing where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
+    name::T1=__state_name(),
+    components_names::Vector{T2}=__state_components(n, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings
     __is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state has already been set."))
     (n > 1) &&
         (size(components_names, 1) ≠ n) &&
-        throw(CTBase.IncorrectArgument("the number of state names must be equal to the state dimension"))
+        throw(
+            CTBase.IncorrectArgument(
+                "the number of state names must be equal to the state dimension"
+            ),
+        )
 
     # set the state
     ocp.state = StateModel(string(name), string.(components_names))
@@ -99,13 +103,16 @@ components(model::StateModel)::Vector{String} = model.components
 (dimension(model::StateModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(state(model::OptimalControlModel{T, S, C, V, D, O})::S) where {
+(
+    state(model::OptimalControlModel{T,S,C,V,D,O})::S
+) where {
     T<:AbstractTimesModel,
-    S<:AbstractStateModel, 
-    C<:AbstractControlModel, 
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = model.state
+    O<:AbstractObjectiveModel,
+} = model.state
 state_name(model::OptimalControlModel)::String = name(state(model))
 state_components(model::OptimalControlModel)::Vector{String} = components(state(model))
 state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))
