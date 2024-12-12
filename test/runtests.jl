@@ -6,7 +6,17 @@ using CTModels
 
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
-    for name in (:times, :ocp, :control, :state, :variable, :dynamics, :objective, :constraints)
+    for name in (
+        :aqua,
+        :times, 
+        :ocp, 
+        :control, 
+        :state, 
+        :variable, 
+        :dynamics, 
+        :objective, 
+        :constraints, 
+        :model)
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
             println("testing: ", string(name))

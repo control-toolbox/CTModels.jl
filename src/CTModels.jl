@@ -25,5 +25,6 @@ include("dynamics.jl")
 include("objective.jl")
 include("constraints.jl")
 include("definition.jl")
+include("model.jl")
 
 end
