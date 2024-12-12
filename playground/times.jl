@@ -1,6 +1,8 @@
 using StaticArrays
 
-times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t")
+times = CTModels.TimesModel(
+    CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t"
+)
 control = CTModels.ControlModel("u", SA["u₁", "u₂"])
 state = CTModels.StateModel("y", SA["y₁", "y₂"])
 variable = CTModels.VariableModel("v", SA["v₁", "v₂"])
@@ -18,7 +20,7 @@ f(x::Int, y::Float64) = convert(Float64, x) + y
 
 @code_warntype f(1, 1.0)
 
-struct Fun{TF <: Function}
+struct Fun{TF<:Function}
     f::TF
 end
 

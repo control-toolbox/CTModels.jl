@@ -61,5 +61,4 @@ function test_variable()
     # wrong number of components
     ocp = CTModels.OptimalControlModelMutable()
     @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
-
 end

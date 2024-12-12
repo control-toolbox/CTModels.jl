@@ -1,5 +1,4 @@
 function test_ocp()
-    
     @test isconcretetype(CTModels.OptimalControlModelMutable)
     @test all_concrete(CTModels.OptimalControlModel)
 
@@ -22,7 +21,9 @@ function test_ocp()
     u = [0.0, 0.0]
 
     # models
-    times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t")
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t"
+    )
     state = CTModels.StateModel("y", ["y₁", "y₂"])
     control = CTModels.ControlModel("u", ["u₁", "u₂"])
     variable = CTModels.VariableModel("v", ["v₁", "v₂"])
@@ -87,7 +88,9 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with fixed times
-    times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
+    times = CTModels.TimesModel(
+        CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
+    )
     ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
 
     # tests on times
@@ -104,7 +107,9 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with fixed initial time and free final time
-    times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t")
+    times = CTModels.TimesModel(
+        CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t"
+    )
     ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
 
     # tests on times
@@ -121,7 +126,9 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with free initial time and fixed final time
-    times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
+    )
     ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
 
     # tests on times
@@ -166,5 +173,4 @@ function test_ocp()
     @test CTModels.criterion(ocp) == :min
     @test CTModels.has_mayer_cost(ocp) == true
     @test CTModels.has_lagrange_cost(ocp) == true
-
 end
