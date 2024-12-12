@@ -99,13 +99,14 @@ components(model::StateModel)::Vector{String} = model.components
 (dimension(model::StateModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(state(model::OptimalControlModel{T, S, C, V, D, O})::S) where {
+(state(model::OptimalControlModel{T, S, C, V, D, O, B})::S) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = model.state
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = model.state
 state_name(model::OptimalControlModel)::String = name(state(model))
 state_components(model::OptimalControlModel)::Vector{String} = components(state(model))
 state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))

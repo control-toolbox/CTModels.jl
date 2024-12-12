@@ -70,13 +70,14 @@ dimension(::EmptyVariableModel)::Dimension = 0
 (dimension(model::VariableModel)::Dimension) = length(components(model))
 
 # from OptimalControlModel
-(variable(model::OptimalControlModel{T, S, C, V, D, O})::V) where {
+(variable(model::OptimalControlModel{T, S, C, V, D, O, B})::V) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = model.variable
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = model.variable
 variable_name(model::OptimalControlModel)::String = name(variable(model))
 variable_components(model::OptimalControlModel)::Vector{String} = components(variable(model))
 variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))

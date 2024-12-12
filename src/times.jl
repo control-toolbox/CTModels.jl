@@ -151,83 +151,92 @@ initial_time(model::TimesModel{FreeTimeModel, <:AbstractTimeModel}, variable::Va
 final_time(model::TimesModel{<:AbstractTimeModel, FreeTimeModel}, variable::Variable)::Time = time(final(model), variable)
 
 # From OptimalControlModel
-(times(model::OptimalControlModel{T, S, C, V, D, O})::T) where {
+(times(model::OptimalControlModel{T, S, C, V, D, O, B})::T) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel, 
     D<:Function,
-    O<:AbstractObjectiveModel} = model.times
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = model.times
 
 time_name(model::OptimalControlModel)::String = time_name(times(model))
 
-(initial_time(model::OptimalControlModel{T, S, C, V, D, O})::Time) where {
+(initial_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Time) where {
     T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel, 
     D<:Function,
-    O<:AbstractObjectiveModel} = initial_time(times(model))
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = initial_time(times(model))
 
-(final_time(model::OptimalControlModel{T, S, C, V, D, O})::Time) where {
+(final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = final_time(times(model))
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = final_time(times(model))
 
-(initial_time(model::OptimalControlModel{T, S, C, V, D, O}, variable::Variable)::Time) where {
+(initial_time(model::OptimalControlModel{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = initial_time(times(model), variable)
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = initial_time(times(model), variable)
 
-(final_time(model::OptimalControlModel{T, S, C, V, D, O}, variable::Variable)::Time) where {
+(final_time(model::OptimalControlModel{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = final_time(times(model), variable)
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = final_time(times(model), variable)
 
 initial_time_name(model::OptimalControlModel)::String = name(initial(times(model)))
 
 final_time_name(model::OptimalControlModel)::String = name(final(times(model)))
 
-(has_fixed_initial_time(model::OptimalControlModel{T, S, C, V, D, O})::Bool) where {
+(has_fixed_initial_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = true
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = true
 
-(has_fixed_initial_time(model::OptimalControlModel{T, S, C, V, D, O})::Bool) where {
+(has_fixed_initial_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = false
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = false
 
-(has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O})::Bool) where {
+(has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = true
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = true
 
-(has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O})::Bool) where {
+(has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
-    O<:AbstractObjectiveModel} = false
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsTypeAlias} = false
 
 has_free_initial_time(model::OptimalControlModel)::Bool = !has_fixed_initial_time(model)
 

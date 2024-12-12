@@ -28,9 +28,10 @@ function test_ocp()
     variable = CTModels.VariableModel("v", ["v₁", "v₂"])
     dynamics = dynamics_user!
     objective = CTModels.MayerObjectiveModel(mayer_user!, :min)
+    constraints = CTModels.ConstraintsTypeAlias()
 
     # concrete ocp
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on times
     @test CTModels.times(ocp) == times
@@ -88,7 +89,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with fixed times
     times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on times
     @test CTModels.times(ocp) == times
@@ -105,7 +106,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with fixed initial time and free final time
     times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t")
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on times
     @test CTModels.times(ocp) == times
@@ -122,7 +123,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with free initial time and fixed final time
     times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on times
     @test CTModels.times(ocp) == times
@@ -139,7 +140,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with Lagrange objective
     objective = CTModels.LagrangeObjectiveModel(lagrange_user!, :max)
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
@@ -159,7 +160,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective
     objective = CTModels.BolzaObjectiveModel(mayer_user!, lagrange, :min)
-    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective)
+    ocp = CTModels.OptimalControlModel(times, state, control, variable, dynamics, objective, constraints)
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
@@ -167,4 +168,6 @@ function test_ocp()
     @test CTModels.has_mayer_cost(ocp) == true
     @test CTModels.has_lagrange_cost(ocp) == true
 
+
+    
 end

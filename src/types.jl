@@ -172,6 +172,7 @@ struct OptimalControlModel{
     VariableModelType <: AbstractVariableModel,
     DynamicsModelType <: Function,
     ObjectiveModelType <: AbstractObjectiveModel,
+    ConstraintsModelType <: ConstraintsTypeAlias
 } <: AbstractOptimalControlModel
     times::TimesModelType
     state::StateModelType
@@ -179,6 +180,7 @@ struct OptimalControlModel{
     variable::VariableModelType
     dynamics::DynamicsModelType
     objective::ObjectiveModelType
+    constraints::ConstraintsModelType
 end
 
 """
@@ -195,6 +197,7 @@ $(TYPEDFIELDS)
     variable::AbstractVariableModel = EmptyVariableModel()
     dynamics::Union{Function, Nothing} = nothing
     objective::Union{AbstractObjectiveModel, Nothing} = nothing
+    constraints::ConstraintsTypeAlias = ConstraintsTypeAlias()
 end
 
 """
