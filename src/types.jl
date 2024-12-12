@@ -156,7 +156,7 @@ end
 """
 $(TYPEDEF)
 """
-abstract type AbstractOptimalControlModel end
+abstract type AbstractModel end
 
 """
 $(TYPEDEF)
@@ -165,7 +165,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct OptimalControlModel{
+struct Model{
     TimesModelType <: AbstractTimesModel,
     StateModelType <: AbstractStateModel,
     ControlModelType <: AbstractControlModel,
@@ -173,7 +173,7 @@ struct OptimalControlModel{
     DynamicsModelType <: Function,
     ObjectiveModelType <: AbstractObjectiveModel,
     ConstraintsModelType <: ConstraintsDictType
-} <: AbstractOptimalControlModel
+} <: AbstractModel
     times::TimesModelType
     state::StateModelType
     control::ControlModelType
@@ -191,7 +191,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-@with_kw mutable struct OptimalControlModelMutable <: AbstractOptimalControlModel
+@with_kw mutable struct PreModel <: AbstractModel
     times::Union{AbstractTimesModel, Nothing} = nothing
     state::Union{AbstractStateModel, Nothing} = nothing
     control::Union{AbstractControlModel, Nothing} = nothing
@@ -206,40 +206,40 @@ end
 $(TYPEDSIGNATURES)
 
 """
-__is_times_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.times)
+__is_times_set(ocp::PreModel)::Bool = !isnothing(ocp.times)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_state_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.state)
+__is_state_set(ocp::PreModel)::Bool = !isnothing(ocp.state)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_control_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.control)
+__is_control_set(ocp::PreModel)::Bool = !isnothing(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_variable_set(ocp::OptimalControlModelMutable)::Bool = !(ocp.variable isa EmptyVariableModel)
+__is_variable_set(ocp::PreModel)::Bool = !(ocp.variable isa EmptyVariableModel)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_dynamics_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.dynamics)
+__is_dynamics_set(ocp::PreModel)::Bool = !isnothing(ocp.dynamics)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_objective_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.objective)
+__is_objective_set(ocp::PreModel)::Bool = !isnothing(ocp.objective)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_definition_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.definition)
+__is_definition_set(ocp::PreModel)::Bool = !isnothing(ocp.definition)

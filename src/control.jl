@@ -71,7 +71,7 @@ julia> control_components(ocp)
 ```
 """
 function control!(
-    ocp::OptimalControlModelMutable,
+    ocp::PreModel,
     m::Dimension,
     name::T1 = __control_name(),
     components_names::Vector{T2} = __control_components(m, string(name)),
@@ -96,19 +96,19 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from ControlModel
-name(model::ControlModel)::String = model.name
-components(model::ControlModel)::Vector{String} = model.components
-(dimension(model::ControlModel)::Dimension) = length(components(model))
+name(ocp::ControlModel)::String = ocp.name
+components(ocp::ControlModel)::Vector{String} = ocp.components
+(dimension(ocp::ControlModel)::Dimension) = length(components(ocp))
 
-# from OptimalControlModel
-(control(model::OptimalControlModel{T, S, C, V, D, O, B})::C) where {
+# from Model
+(control(ocp::Model{T, S, C, V, D, O, B})::C) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = model.control
-control_name(model::OptimalControlModel)::String = name(control(model))
-control_components(model::OptimalControlModel)::Vector{String} = components(control(model))
-control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))
+    B<:ConstraintsDictType} = ocp.control
+control_name(ocp::Model)::String = name(control(ocp))
+control_components(ocp::Model)::Vector{String} = components(control(ocp))
+control_dimension(ocp::Model)::Dimension = dimension(control(ocp))

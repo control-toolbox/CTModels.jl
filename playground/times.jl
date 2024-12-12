@@ -6,7 +6,7 @@ state = CTModels.StateModel("y", SA["y₁", "y₂"])
 variable = CTModels.VariableModel("v", SA["v₁", "v₂"])
 
 # concrete ocp
-ocp = CTModels.OptimalControlModel(times, state, control, variable)
+ocp = CTModels.Model(times, state, control, variable)
 
 @code_warntype CTModels.initial_time(ocp, [0, 10])
 

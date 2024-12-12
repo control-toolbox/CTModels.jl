@@ -33,8 +33,8 @@ function test_objective()
     @test CTModels.has_mayer_cost(objective) == true
     @test CTModels.has_lagrange_cost(objective) == true
 
-    # from OptimalControlModelMutable with Mayer objective
-    ocp = CTModels.OptimalControlModelMutable()
+    # from PreModel with Mayer objective
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
@@ -46,8 +46,8 @@ function test_objective()
     @test CTModels.has_lagrange_cost(ocp.objective) == false
     @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp.objective)
 
-    # from OptimalControlModelMutable with Lagrange objective
-    ocp = CTModels.OptimalControlModelMutable()
+    # from PreModel with Lagrange objective
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
@@ -59,8 +59,8 @@ function test_objective()
     @test CTModels.has_lagrange_cost(ocp.objective) == true
     @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp.objective)
 
-    # from OptimalControlModelMutable with Bolza objective
-    ocp = CTModels.OptimalControlModelMutable()
+    # from PreModel with Bolza objective
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
@@ -73,28 +73,28 @@ function test_objective()
 
     # exceptions
     # state not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # control not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # times not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # objective already set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
@@ -103,7 +103,7 @@ function test_objective()
     @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
 
     # variable set after the objective
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
@@ -111,7 +111,7 @@ function test_objective()
     @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
 
     # no function given
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)

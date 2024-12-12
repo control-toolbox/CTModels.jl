@@ -1,5 +1,5 @@
 function dynamics!(
-    ocp::OptimalControlModelMutable,
+    ocp::PreModel,
     f::Function
 )::Nothing
 
@@ -22,8 +22,8 @@ end
 # GETTERS
 # ------------------------------------------------------------------------------ #
 
-# From OptimalControlModel
-(dynamics(model::OptimalControlModel{T, S, C, V, D, O, B})::D) where {
+# From Model
+(dynamics(ocp::Model{T, S, C, V, D, O, B})::D) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
@@ -31,4 +31,4 @@ end
     D<:Function,
     O<:AbstractObjectiveModel,
     B<:ConstraintsDictType,
-    } = model.dynamics
+    } = ocp.dynamics

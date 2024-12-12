@@ -31,7 +31,7 @@ julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
 ```
 """
 function variable!(
-    ocp::OptimalControlModelMutable,
+    ocp::PreModel,
     q::Dimension,
     name::T1 = __variable_name(),
     components_names::Vector{T2} = __variable_components(q, string(name)),
@@ -64,20 +64,20 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from AbstractVariableModel
-name(model::VariableModel)::String = model.name
-components(model::VariableModel)::Vector{String} = model.components
+name(ocp::VariableModel)::String = ocp.name
+components(ocp::VariableModel)::Vector{String} = ocp.components
 dimension(::EmptyVariableModel)::Dimension = 0
-(dimension(model::VariableModel)::Dimension) = length(components(model))
+(dimension(ocp::VariableModel)::Dimension) = length(components(ocp))
 
-# from OptimalControlModel
-(variable(model::OptimalControlModel{T, S, C, V, D, O, B})::V) where {
+# from Model
+(variable(ocp::Model{T, S, C, V, D, O, B})::V) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = model.variable
-variable_name(model::OptimalControlModel)::String = name(variable(model))
-variable_components(model::OptimalControlModel)::Vector{String} = components(variable(model))
-variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))
+    B<:ConstraintsDictType} = ocp.variable
+variable_name(ocp::Model)::String = name(variable(ocp))
+variable_components(ocp::Model)::Vector{String} = components(variable(ocp))
+variable_dimension(ocp::Model)::Dimension = dimension(variable(ocp))

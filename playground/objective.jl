@@ -19,7 +19,7 @@ variable = CTModels.VariableModel{q}("v", SA["v₁", "v₂"])
 objective = CTModels.MayerObjectiveModel(CTModels.Mayer(mayer_user!), :min)
 
 # concrete ocp
-ocp = CTModels.OptimalControlModel(times, state, control, variable, objective)
+ocp = CTModels.Model(times, state, control, variable, objective)
 
 r = zeros(Float64, 1)
 r_user = zeros(Float64, 1)

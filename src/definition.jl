@@ -8,7 +8,7 @@ $(TYPEDSIGNATURES)
 Set the model definition of the optimal control problem.
 
 """
-function definition!(ocp::OptimalControlModelMutable, definition::Expr)::Nothing
+function definition!(ocp::PreModel, definition::Expr)::Nothing
     ocp.definition = definition
     return nothing
 end
@@ -23,7 +23,7 @@ $(TYPEDSIGNATURES)
 Return the model definition of the optimal control problem or `nothing`.
 
 """
-definition(ocp::OptimalControlModel)::Expr = ocp.definition
+definition(ocp::Model)::Expr = ocp.definition
 
 # ------------------------------------------------------------------------------ #
 # PRINT
@@ -44,7 +44,7 @@ Print the optimal control problem.
 function Base.show(
     io::IO,
     ::MIME"text/plain",
-    ocp::OptimalControlModel,
+    ocp::Model,
 )
 
     # some checks
@@ -60,6 +60,6 @@ function Base.show(
 
 end
 
-function Base.show_default(io::IO, ocp::OptimalControlModel)
+function Base.show_default(io::IO, ocp::Model)
     print(io, typeof(ocp))
 end

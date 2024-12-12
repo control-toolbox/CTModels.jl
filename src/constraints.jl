@@ -7,7 +7,7 @@ A unique value is given to each constraint using the `gensym` function and prefi
 __constraint_label() = gensym(:unamed)
 
 function constraint!(
-    model_constraints::ConstraintsDictType,
+    ocp_constraints::ConstraintsDictType,
     type::Symbol,
     n::Dimension,
     m::Dimension,
@@ -20,7 +20,7 @@ function constraint!(
 )
 
     # checkings: the constraint must not be set before
-    label ∈ keys(model_constraints) &&
+    label ∈ keys(ocp_constraints) &&
         throw(CTBase.UnauthorizedCall("the constraint named " * String(label) * " already exists."))
 
     # checkings: lb and ub cannot be both nothing
@@ -58,7 +58,7 @@ function constraint!(
                 )
             end
             (length(rg) != length(lb)) && throw(CTBase.IncorrectArgument(txt))
-            constraint!(model_constraints, type, n, m, q; rg = rg, lb = lb, ub = ub, label = label)
+            constraint!(ocp_constraints, type, n, m, q; rg = rg, lb = lb, ub = ub, label = label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
@@ -93,13 +93,13 @@ function constraint!(
                 )
             end
             # set the constraint
-            model_constraints[label] = (type, rg, lb, ub)
+            ocp_constraints[label] = (type, rg, lb, ub)
         end
 
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
             # set the constraint
             if type ∈ [:boundary, :variable, :path]
-                model_constraints[label] = (type, f, lb, ub)
+                ocp_constraints[label] = (type, f, lb, ub)
             else
                 throw(
                     CTBase.IncorrectArgument(
@@ -118,7 +118,7 @@ function constraint!(
 end
 
 function constraint!(
-    ocp::OptimalControlModelMutable,
+    ocp::PreModel,
     type::Symbol;
     rg::Union{OrdinalRange{<:Int}, Nothing} = nothing,
     f::Union{Function, Nothing} = nothing,
@@ -156,9 +156,9 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From ContraintsModel
-constraint(ocp::OptimalControlModel, label::Symbol)::Tuple = ocp.constraints[label]
+constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints[label]
 
-function constraints(ocp::OptimalControlModel)
+function constraints(ocp::Model)
 
     path_cons_nl_f   = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
@@ -283,7 +283,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
 """
-function dim_path_cons_nl(ocp::OptimalControlModel)
+function dim_path_cons_nl(ocp::Model)
 
     dim = 0
     for (_, c) ∈ ocp.constraints
@@ -301,7 +301,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 """
-function dim_boundary_cons_nl(ocp::OptimalControlModel) 
+function dim_boundary_cons_nl(ocp::Model) 
 
     dim = 0
     for (_, c) ∈ ocp.constraints
@@ -319,7 +319,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear variable constraints.
 """
-function dim_variable_cons_nl(ocp::OptimalControlModel)
+function dim_variable_cons_nl(ocp::Model)
 
     dim = 0
     for (_, c) ∈ ocp.constraints
@@ -337,7 +337,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on state.
 """
-function dim_state_cons_box(ocp::OptimalControlModel)
+function dim_state_cons_box(ocp::Model)
 
     dim = 0
     for (_, c) ∈ ocp.constraints
@@ -355,7 +355,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on control.
 """
-function dim_control_cons_box(ocp::OptimalControlModel)
+function dim_control_cons_box(ocp::Model)
 
     dim = 0
     for (_, c) ∈ ocp.constraints
@@ -373,7 +373,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on variable.
 """
-function dim_variable_cons_box(ocp::OptimalControlModel)
+function dim_variable_cons_box(ocp::Model)
 
     dim = 0
     for (_, c) ∈ ocp.constraints

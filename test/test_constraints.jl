@@ -2,36 +2,36 @@ function test_constraints()
 
     ∅ = Vector{Real}()
 
-    # From OptimalControlModelMutable
-    ocp_set = CTModels.OptimalControlModelMutable()
+    # From PreModel
+    ocp_set = CTModels.PreModel()
     CTModels.time!(ocp_set, t0=0.0, tf=10.0)
     CTModels.state!(ocp_set, 2)
     CTModels.control!(ocp_set, 1)
     CTModels.variable!(ocp_set, 1)
 
     # state not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # control not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # times not set
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # variable not set and try to add a :variable constraint
-    ocp = CTModels.OptimalControlModelMutable()
+    ocp = CTModels.PreModel()
     CTModels.time!(ocp, t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)

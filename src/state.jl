@@ -71,7 +71,7 @@ julia> state_components(ocp)
 ```
 """
 function state!(
-    ocp::OptimalControlModelMutable,
+    ocp::PreModel,
     n::Dimension,
     name::T1 = __state_name(),
     components_names::Vector{T2} = __state_components(n, string(name)),
@@ -94,19 +94,19 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from StateModel
-name(model::StateModel)::String = model.name
-components(model::StateModel)::Vector{String} = model.components
-(dimension(model::StateModel)::Dimension) = length(components(model))
+name(ocp::StateModel)::String = ocp.name
+components(ocp::StateModel)::Vector{String} = ocp.components
+(dimension(ocp::StateModel)::Dimension) = length(components(ocp))
 
-# from OptimalControlModel
-(state(model::OptimalControlModel{T, S, C, V, D, O, B})::S) where {
+# from Model
+(state(ocp::Model{T, S, C, V, D, O, B})::S) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = model.state
-state_name(model::OptimalControlModel)::String = name(state(model))
-state_components(model::OptimalControlModel)::Vector{String} = components(state(model))
-state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))
+    B<:ConstraintsDictType} = ocp.state
+state_name(ocp::Model)::String = name(state(ocp))
+state_components(ocp::Model)::Vector{String} = components(state(ocp))
+state_dimension(ocp::Model)::Dimension = dimension(state(ocp))
