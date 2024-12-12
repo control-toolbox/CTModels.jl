@@ -172,7 +172,7 @@ struct OptimalControlModel{
     VariableModelType <: AbstractVariableModel,
     DynamicsModelType <: Function,
     ObjectiveModelType <: AbstractObjectiveModel,
-    ConstraintsModelType <: ConstraintsTypeAlias
+    ConstraintsModelType <: ConstraintsDictType
 } <: AbstractOptimalControlModel
     times::TimesModelType
     state::StateModelType
@@ -181,6 +181,7 @@ struct OptimalControlModel{
     dynamics::DynamicsModelType
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
+    definition::Expr
 end
 
 """
@@ -197,7 +198,8 @@ $(TYPEDFIELDS)
     variable::AbstractVariableModel = EmptyVariableModel()
     dynamics::Union{Function, Nothing} = nothing
     objective::Union{AbstractObjectiveModel, Nothing} = nothing
-    constraints::ConstraintsTypeAlias = ConstraintsTypeAlias()
+    constraints::ConstraintsDictType = ConstraintsDictType()
+    definition::Union{Expr, Nothing} = nothing
 end
 
 """
@@ -235,3 +237,9 @@ $(TYPEDSIGNATURES)
 
 """
 __is_objective_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.objective)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+__is_definition_set(ocp::OptimalControlModelMutable)::Bool = !isnothing(ocp.definition)

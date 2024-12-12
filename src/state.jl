@@ -106,7 +106,7 @@ components(model::StateModel)::Vector{String} = model.components
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = model.state
+    B<:ConstraintsDictType} = model.state
 state_name(model::OptimalControlModel)::String = name(state(model))
 state_components(model::OptimalControlModel)::Vector{String} = components(state(model))
 state_dimension(model::OptimalControlModel)::Dimension = dimension(state(model))

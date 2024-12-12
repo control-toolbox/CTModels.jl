@@ -108,7 +108,7 @@ components(model::ControlModel)::Vector{String} = model.components
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = model.control
+    B<:ConstraintsDictType} = model.control
 control_name(model::OptimalControlModel)::String = name(control(model))
 control_components(model::OptimalControlModel)::Vector{String} = components(control(model))
 control_dimension(model::OptimalControlModel)::Dimension = dimension(control(model))

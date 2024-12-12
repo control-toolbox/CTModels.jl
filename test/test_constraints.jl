@@ -71,36 +71,26 @@ function test_constraints()
     # if a range is provided, the only possible constraints are :state, :control, and :variable
     @test_throws CTBase.IncorrectArgument CTModels.constraint!(ocp_set, :dummy, rg=1:2, lb=[0, 1], ub=[1, 2])
 
-    # if a function is provided, the only possible constraints are :boundary, :control, :state, :variable and :mixed
+    # if a function is provided, the only possible constraints are :path, :boundary and :variable
     @test_throws CTBase.IncorrectArgument CTModels.constraint!(ocp_set, :dummy, f=(x, y) -> x + y, lb=[0, 1], ub=[1, 2])
 
     # we cannot provide a function and a range
-    @test_throws CTBase.IncorrectArgument CTModels.constraint!(ocp_set, :state, f=(x, y) -> x + y, rg=1:2, lb=[0, 1], ub=[1, 2])
+    @test_throws CTBase.IncorrectArgument CTModels.constraint!(ocp_set, :variable, f=(x, y) -> x + y, rg=1:2, lb=[0, 1], ub=[1, 2])
+    
+    # test with :path constraint
+    f_path(r, t, x, u, v) = r .= x .+ u .+ v .+ t
+    CTModels.constraint!(ocp_set, :path, f=f_path, lb=[0, 1], ub=[1, 2], label=:path)
+    @test ocp_set.constraints[:path] == (:path, f_path, [0, 1], [1, 2])
 
     # test with :boundary constraint
     f_boundary(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
     CTModels.constraint!(ocp_set, :boundary, f=f_boundary, lb=[0, 1], ub=[1, 2], label=:boundary)
     @test ocp_set.constraints[:boundary] == (:boundary, f_boundary, [0, 1], [1, 2])
 
-    # test with :state constraint
-    f_state(r, t, x) = r .= x .+ t
-    CTModels.constraint!(ocp_set, :state, f=f_state, lb=[0, 1], ub=[1, 2], label=:state)
-    @test ocp_set.constraints[:state] == (:state, f_state, [0, 1], [1, 2])
-
-    # test with :control constraint
-    f_control(r, t, u) = r .= u .+ t
-    CTModels.constraint!(ocp_set, :control, f=f_control, lb=[0, 1], ub=[1, 2], label=:control)
-    @test ocp_set.constraints[:control] == (:control, f_control, [0, 1], [1, 2])
-
     # test with :variable constraint
     f_variable(r, t, v) = r .= v .+ t
     CTModels.constraint!(ocp_set, :variable, f=f_variable, lb=[0, 1], ub=[1, 2], label=:variable)
     @test ocp_set.constraints[:variable] == (:variable, f_variable, [0, 1], [1, 2])
-
-    # test with :mixed constraint
-    f_mixed(r, t, x, u, v) = r .= x .+ u .+ v .+ t
-    CTModels.constraint!(ocp_set, :mixed, f=f_mixed, lb=[0, 1], ub=[1, 2], label=:mixed)
-    @test ocp_set.constraints[:mixed] == (:mixed, f_mixed, [0, 1], [1, 2])
 
     # test with :state constraint and range
     CTModels.constraint!(ocp_set, :state, rg=1:2, lb=[0, 1], ub=[1, 2], label=:state_rg)

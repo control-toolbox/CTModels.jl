@@ -158,7 +158,7 @@ final_time(model::TimesModel{<:AbstractTimeModel, FreeTimeModel}, variable::Vari
     V<:AbstractVariableModel, 
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = model.times
+    B<:ConstraintsDictType} = model.times
 
 time_name(model::OptimalControlModel)::String = time_name(times(model))
 
@@ -169,7 +169,7 @@ time_name(model::OptimalControlModel)::String = time_name(times(model))
     V<:AbstractVariableModel, 
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = initial_time(times(model))
+    B<:ConstraintsDictType} = initial_time(times(model))
 
 (final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
@@ -178,7 +178,7 @@ time_name(model::OptimalControlModel)::String = time_name(times(model))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = final_time(times(model))
+    B<:ConstraintsDictType} = final_time(times(model))
 
 (initial_time(model::OptimalControlModel{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
@@ -187,7 +187,7 @@ time_name(model::OptimalControlModel)::String = time_name(times(model))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = initial_time(times(model), variable)
+    B<:ConstraintsDictType} = initial_time(times(model), variable)
 
 (final_time(model::OptimalControlModel{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
@@ -196,7 +196,7 @@ time_name(model::OptimalControlModel)::String = time_name(times(model))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = final_time(times(model), variable)
+    B<:ConstraintsDictType} = final_time(times(model), variable)
 
 initial_time_name(model::OptimalControlModel)::String = name(initial(times(model)))
 
@@ -209,7 +209,7 @@ final_time_name(model::OptimalControlModel)::String = name(final(times(model)))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = true
+    B<:ConstraintsDictType} = true
 
 (has_fixed_initial_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
@@ -218,7 +218,7 @@ final_time_name(model::OptimalControlModel)::String = name(final(times(model)))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = false
+    B<:ConstraintsDictType} = false
 
 (has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
@@ -227,7 +227,7 @@ final_time_name(model::OptimalControlModel)::String = name(final(times(model)))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = true
+    B<:ConstraintsDictType} = true
 
 (has_fixed_final_time(model::OptimalControlModel{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
@@ -236,7 +236,7 @@ final_time_name(model::OptimalControlModel)::String = name(final(times(model)))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = false
+    B<:ConstraintsDictType} = false
 
 has_free_initial_time(model::OptimalControlModel)::Bool = !has_fixed_initial_time(model)
 

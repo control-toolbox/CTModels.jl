@@ -100,7 +100,7 @@ has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = model.objective
+    B<:ConstraintsDictType} = model.objective
 
 criterion(model::OptimalControlModel)::Symbol = criterion(objective(model))
 
@@ -111,7 +111,7 @@ criterion(model::OptimalControlModel)::Symbol = criterion(objective(model))
     V<:AbstractVariableModel,
     D<:Function,
     M<:Function,
-    B<:ConstraintsTypeAlias} = mayer(objective(model))
+    B<:ConstraintsDictType} = mayer(objective(model))
 (mayer(model::OptimalControlModel{T, S, C, V, D, BolzaObjectiveModel{M, L}, B})::M) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
@@ -120,14 +120,14 @@ criterion(model::OptimalControlModel)::Symbol = criterion(objective(model))
     D<:Function,
     M<:Function,
     L<:Function,
-    B<:ConstraintsTypeAlias} = mayer(objective(model))
+    B<:ConstraintsDictType} = mayer(objective(model))
 mayer(model::OptimalControlModel{T, S, C, V, D, <:LagrangeObjectiveModel, B}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     D<:Function,
     V<:AbstractVariableModel,
-    B<:ConstraintsTypeAlias} = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
+    B<:ConstraintsDictType} = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
 
 (lagrange(model::OptimalControlModel{T, S, C, V, D, LagrangeObjectiveModel{L}, B})::L) where {
     T<:AbstractTimesModel,
@@ -136,7 +136,7 @@ mayer(model::OptimalControlModel{T, S, C, V, D, <:LagrangeObjectiveModel, B}) wh
     V<:AbstractVariableModel,
     D<:Function,
     L<:Function,
-    B<:ConstraintsTypeAlias} = lagrange(objective(model))
+    B<:ConstraintsDictType} = lagrange(objective(model))
 (lagrange(model::OptimalControlModel{T, S, C, V, D, BolzaObjectiveModel{M, L}, B})::L) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
@@ -145,14 +145,14 @@ mayer(model::OptimalControlModel{T, S, C, V, D, <:LagrangeObjectiveModel, B}) wh
     D<:Function,
     M<:Function,
     L<:Function,
-    B<:ConstraintsTypeAlias} = lagrange(objective(model))
+    B<:ConstraintsDictType} = lagrange(objective(model))
 lagrange(model::OptimalControlModel{T, S, C, V, D, <:MayerObjectiveModel, B}) where {
     T<:AbstractTimesModel,
     S<:AbstractStateModel, 
     C<:AbstractControlModel, 
     D<:Function,
     V<:AbstractVariableModel,
-    B<:ConstraintsTypeAlias} = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
+    B<:ConstraintsDictType} = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
 
 # has_mayer_cost and has_lagrange_cost
 has_mayer_cost(model::OptimalControlModel)::Bool = has_mayer_cost(objective(model))

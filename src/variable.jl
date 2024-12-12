@@ -77,7 +77,7 @@ dimension(::EmptyVariableModel)::Dimension = 0
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias} = model.variable
+    B<:ConstraintsDictType} = model.variable
 variable_name(model::OptimalControlModel)::String = name(variable(model))
 variable_components(model::OptimalControlModel)::Vector{String} = components(variable(model))
 variable_dimension(model::OptimalControlModel)::Dimension = dimension(variable(model))

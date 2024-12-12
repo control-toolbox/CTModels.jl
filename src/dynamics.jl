@@ -30,5 +30,5 @@ end
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsTypeAlias,
+    B<:ConstraintsDictType,
     } = model.dynamics
