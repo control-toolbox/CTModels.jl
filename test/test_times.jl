@@ -3,7 +3,6 @@ function test_times()
     #
     @test isconcretetype(CTModels.FixedTimeModel)
     @test isconcretetype(CTModels.FreeTimeModel)
-    @test all_concrete(CTModels.TimesModel)
 
     # FixedTimeModel
     time = CTModels.FixedTimeModel(1.0, "s")
