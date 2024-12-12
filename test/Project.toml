@@ -1,12 +1,8 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-CheckConcreteStructs = "73c92db5-9da6-4938-911a-6443a7e94a58"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Aqua = "0.8"
-
-[where]
-CheckConcreteStructs = "https://github.com/gdalle/CheckConcreteStructs.jl#main"

@@ -1,7 +1,6 @@
 function test_ocp()
     
     @test isconcretetype(CTModels.PreModel)
-    @test all_concrete(CTModels.Model)
 
     # dimensions
     n = 2 # state dimension

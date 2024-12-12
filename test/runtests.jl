@@ -1,6 +1,5 @@
 using Test
 using Aqua
-using CheckConcreteStructs
 using CTBase
 using CTModels
 
