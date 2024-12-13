@@ -94,19 +94,11 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from StateModel
-name(ocp::StateModel)::String = ocp.name
-components(ocp::StateModel)::Vector{String} = ocp.components
-(dimension(ocp::StateModel)::Dimension) = length(components(ocp))
+name(model::StateModel)::String = model.name
+components(model::StateModel)::Vector{String} = model.components
+(dimension(model::StateModel)::Dimension) = length(components(model))
 
 # from Model
-(state(ocp::Model{T, S, C, V, D, O, B})::S) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel, 
-    C<:AbstractControlModel, 
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = ocp.state
-state_name(ocp::Model)::String = name(state(ocp))
-state_components(ocp::Model)::Vector{String} = components(state(ocp))
-state_dimension(ocp::Model)::Dimension = dimension(state(ocp))
+state_name(ocp::Model)::String = name(ocp.state)
+state_components(ocp::Model)::Vector{String} = components(ocp.state)
+state_dimension(ocp::Model)::Dimension = dimension(ocp.state)

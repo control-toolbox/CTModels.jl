@@ -129,38 +129,38 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From FixedTimeModel
-time(ocp::FixedTimeModel)::Time = ocp.time
-name(ocp::FixedTimeModel)::String = ocp.name
+time(model::FixedTimeModel)::Time = model.time
+name(model::FixedTimeModel)::String = model.name
 
 # From FreeTimeModel
-index(ocp::FreeTimeModel)::Int = ocp.index
-name(ocp::FreeTimeModel)::String = ocp.name
-function time(ocp::FreeTimeModel, variable::AbstractVector{T})::T where T<:ctNumber
-    # check if ocp.index in [1, length(variable)]
-    !(1 ≤ ocp.index ≤ length(variable)) && throw(CTBase.IncorrectArgument("the index of the time variable must be contained in 1:$(length(variable))"))
-    return variable[ocp.index]
+index(model::FreeTimeModel)::Int = model.index
+name(model::FreeTimeModel)::String = model.name
+function time(model::FreeTimeModel, variable::AbstractVector{T})::T where T<:ctNumber
+    # check if model.index in [1, length(variable)]
+    !(1 ≤ model.index ≤ length(variable)) && throw(CTBase.IncorrectArgument("the index of the time variable must be contained in 1:$(length(variable))"))
+    return variable[model.index]
 end
 
 # From TimesModel
-(initial(ocp::TimesModel{TI, TF})::TI) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = ocp.initial
-(final(ocp::TimesModel{TI, TF})::TF) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = ocp.final
-time_name(ocp::TimesModel)::String = ocp.time_name
-initial_time(ocp::TimesModel{FixedTimeModel, <:AbstractTimeModel})::Time = time(initial(ocp))
-final_time(ocp::TimesModel{<:AbstractTimeModel, FixedTimeModel})::Time = time(final(ocp))
-initial_time(ocp::TimesModel{FreeTimeModel, <:AbstractTimeModel}, variable::Variable)::Time = time(initial(ocp), variable)
-final_time(ocp::TimesModel{<:AbstractTimeModel, FreeTimeModel}, variable::Variable)::Time = time(final(ocp), variable)
+(initial(model::TimesModel{TI, TF})::TI) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = model.initial
+(final(model::TimesModel{TI, TF})::TF) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = model.final
+time_name(model::TimesModel)::String = model.time_name
+initial_time(model::TimesModel{FixedTimeModel, <:AbstractTimeModel})::Time = time(initial(model))
+final_time(model::TimesModel{<:AbstractTimeModel, FixedTimeModel})::Time = time(final(model))
+initial_time(model::TimesModel{FreeTimeModel, <:AbstractTimeModel}, variable::Variable)::Time = time(initial(model), variable)
+final_time(model::TimesModel{<:AbstractTimeModel, FreeTimeModel}, variable::Variable)::Time = time(final(model), variable)
 
 # From Model
 (times(ocp::Model{T, S, C, V, D, O, B})::T) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel, 
-    C<:AbstractControlModel, 
-    V<:AbstractVariableModel, 
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
     B<:ConstraintsDictType} = ocp.times
-
-time_name(ocp::Model)::String = time_name(times(ocp))
+    
+time_name(ocp::Model)::String = time_name(ocp.times)
 
 (initial_time(ocp::Model{T, S, C, V, D, O, B})::Time) where {
     T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},
@@ -169,7 +169,7 @@ time_name(ocp::Model)::String = time_name(times(ocp))
     V<:AbstractVariableModel, 
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = initial_time(times(ocp))
+    B<:ConstraintsDictType} = initial_time(ocp.times)
 
 (final_time(ocp::Model{T, S, C, V, D, O, B})::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
@@ -178,7 +178,7 @@ time_name(ocp::Model)::String = time_name(times(ocp))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = final_time(times(ocp))
+    B<:ConstraintsDictType} = final_time(ocp.times)
 
 (initial_time(ocp::Model{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
@@ -187,7 +187,7 @@ time_name(ocp::Model)::String = time_name(times(ocp))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = initial_time(times(ocp), variable)
+    B<:ConstraintsDictType} = initial_time(ocp.times, variable)
 
 (final_time(ocp::Model{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
     T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
@@ -196,11 +196,11 @@ time_name(ocp::Model)::String = time_name(times(ocp))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = final_time(times(ocp), variable)
+    B<:ConstraintsDictType} = final_time(ocp.times, variable)
 
-initial_time_name(ocp::Model)::String = name(initial(times(ocp)))
+initial_time_name(ocp::Model)::String = name(initial(ocp.times))
 
-final_time_name(ocp::Model)::String = name(final(times(ocp)))
+final_time_name(ocp::Model)::String = name(final(ocp.times))
 
 (has_fixed_initial_time(ocp::Model{T, S, C, V, D, O, B})::Bool) where {
     T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},

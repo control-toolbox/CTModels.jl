@@ -64,20 +64,12 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from AbstractVariableModel
-name(ocp::VariableModel)::String = ocp.name
-components(ocp::VariableModel)::Vector{String} = ocp.components
+name(model::VariableModel)::String = model.name
+components(model::VariableModel)::Vector{String} = model.components
 dimension(::EmptyVariableModel)::Dimension = 0
-(dimension(ocp::VariableModel)::Dimension) = length(components(ocp))
+(dimension(model::VariableModel)::Dimension) = length(components(model))
 
 # from Model
-(variable(ocp::Model{T, S, C, V, D, O, B})::V) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel, 
-    C<:AbstractControlModel, 
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = ocp.variable
-variable_name(ocp::Model)::String = name(variable(ocp))
-variable_components(ocp::Model)::Vector{String} = components(variable(ocp))
-variable_dimension(ocp::Model)::Dimension = dimension(variable(ocp))
+variable_name(ocp::Model)::String = name(ocp.variable)
+variable_components(ocp::Model)::Vector{String} = components(ocp.variable)
+variable_dimension(ocp::Model)::Dimension = dimension(ocp.variable)

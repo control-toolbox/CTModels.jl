@@ -14,6 +14,8 @@ const Time = ctNumber
 const ctVector = AbstractVector{<:ctNumber}
 const Variable = ctVector
 const ConstraintsDictType = Dict{Symbol, Tuple{Symbol, Union{Function, OrdinalRange{<:Int}}, ctVector, ctVector}}
+const Times = AbstractVector{<:Time}
+const TimesDisc = Union{Times, StepRangeLen}
 
 #
 include("types.jl")

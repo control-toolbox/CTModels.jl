@@ -16,6 +16,19 @@ struct StateModel <: AbstractStateModel
     components::Vector{String}
 end
 
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct StateModelSolution{TS<:Function} <: AbstractStateModel
+    name::String
+    components::Vector{String}
+    solution::TS
+end
+
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
@@ -32,6 +45,19 @@ $(TYPEDFIELDS)
 struct ControlModel <: AbstractControlModel
     name::String
     components::Vector{String}
+end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct ControlModelSolution{TS<:Function} <: AbstractControlModel
+    name::String
+    components::Vector{String}
+    solution::TS
 end
 
 # ------------------------------------------------------------------------------ #
@@ -60,6 +86,19 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct EmptyVariableModel <: AbstractVariableModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct VariableModelSolution{TS<:ctVector} <: AbstractVariableModel
+    name::String
+    components::Vector{String}
+    solution::TS
+end
 
 # ------------------------------------------------------------------------------ #
 """
@@ -153,6 +192,8 @@ struct BolzaObjectiveModel{TM <: Function, TL <: Function} <: AbstractObjectiveM
 end
 
 # ------------------------------------------------------------------------------ #
+# Model
+# ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
 """
@@ -243,3 +284,132 @@ $(TYPEDSIGNATURES)
 
 """
 __is_definition_set(ocp::PreModel)::Bool = !isnothing(ocp.definition)
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractTimeGridModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct TimeGridModel{T<:TimesDisc} <: AbstractTimeGridModel
+    grid::T
+end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct EmptyTimeGridModel <: AbstractTimeGridModel end
+
+# ------------------------------------------------------------------------------ #
+# Solver infos
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractSolverInfos end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct SolverInfos{TI<:Dict{Symbol, Any}} <: AbstractSolverInfos
+    iterations::Int # number of iterations
+    stopping::Symbol # the stopping criterion
+    message::String # the message corresponding to the stopping criterion
+    success::Bool # whether or not the method has finished successfully: CN1, stagnation vs iterations max
+    constraints_violation::Float64 # the constraints violation
+    infos::TI # additional informations
+end
+
+# ------------------------------------------------------------------------------ #
+# Constraints and dual variables for the solutions
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractDualModel end
+
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct DualModel{
+    SC_LB_Dual <: Function,
+    SC_UB_Dual <: Function,
+    CC_LB_Dual <: Function,
+    CC_UB_Dual <: Function,
+    VC_LB_Dual <: ctVector,
+    VC_UB_Dual <: ctVector,
+    BC <: ctVector,
+    BC_Dual <: ctVector,
+    PC <: Function,
+    PC_Dual <: Function,
+    VC <: ctVector,
+    VC_Dual <: ctVector
+} <: AbstractDualModel
+    state_constraints_lb_dual::SC_LB_Dual
+    state_constraints_ub_dual::SC_UB_Dual
+    control_constraints_lb_dual::CC_LB_Dual
+    control_constraints_ub_dual::CC_UB_Dual
+    variable_constraints_lb_dual::VC_LB_Dual
+    variable_constraints_ub_dual::VC_UB_Dual
+    boundary_constraints::BC
+    boundary_constraints_dual::BC_Dual
+    path_constraints::PC
+    path_constraints_dual::PC_Dual
+    variable_constraints::VC
+    variable_constraints_dual::VC_Dual
+end
+
+# ------------------------------------------------------------------------------ #
+# Solution
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractSolution end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct Solution{
+    TimeGridModelType <: AbstractTimeGridModel,
+    TimesModelType <: AbstractTimesModel,
+    StateModelType <: AbstractStateModel,
+    ControlModelType <: AbstractControlModel,
+    VariableModelType <: AbstractVariableModel,
+    CostateModelType <: Function,
+    ObjectiveValueType <: ctNumber,
+    DualModelType <: AbstractDualModel,
+    SolverInfosType <: AbstractSolverInfos
+} <: AbstractSolution
+    time_grid::TimeGridModelType
+    times::TimesModelType
+    state::StateModelType
+    control::ControlModelType
+    variable::VariableModelType
+    costate::CostateModelType
+    cost::ObjectiveValueType
+    dual::DualModelType
+    solver_infos::SolverInfosType
+end

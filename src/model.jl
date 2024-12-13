@@ -1,4 +1,4 @@
-function build(pre_ocp::PreModel)::Model
+function build_model(pre_ocp::PreModel)::Model
 
     # checkings: times must be set
     __is_times_set(pre_ocp) || throw(CTBase.UnauthorizedCall("the times must be set before building the model."))

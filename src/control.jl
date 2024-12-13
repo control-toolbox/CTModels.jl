@@ -96,19 +96,11 @@ end
 # ------------------------------------------------------------------------------ #
 
 # from ControlModel
-name(ocp::ControlModel)::String = ocp.name
-components(ocp::ControlModel)::Vector{String} = ocp.components
-(dimension(ocp::ControlModel)::Dimension) = length(components(ocp))
+name(model::ControlModel)::String = model.name
+components(model::ControlModel)::Vector{String} = model.components
+(dimension(model::ControlModel)::Dimension) = length(components(model))
 
 # from Model
-(control(ocp::Model{T, S, C, V, D, O, B})::C) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel, 
-    C<:AbstractControlModel, 
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = ocp.control
-control_name(ocp::Model)::String = name(control(ocp))
-control_components(ocp::Model)::Vector{String} = components(control(ocp))
-control_dimension(ocp::Model)::Dimension = dimension(control(ocp))
+control_name(ocp::Model)::String = name(ocp.control)
+control_components(ocp::Model)::Vector{String} = components(ocp.control)
+control_dimension(ocp::Model)::Dimension = dimension(ocp.control)

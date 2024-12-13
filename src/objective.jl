@@ -72,25 +72,25 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From MayerObjectiveModel
-criterion(ocp::MayerObjectiveModel)::Symbol = ocp.criterion
-(mayer(ocp::MayerObjectiveModel{M})::M) where {M <: Function} = ocp.mayer
-lagrange(ocp::MayerObjectiveModel) = throw(CTBase.UnauthorizedCall("a Mayer objective ocp does not have a Lagrange function."))
-has_mayer_cost(ocp::MayerObjectiveModel)::Bool = true
-has_lagrange_cost(ocp::MayerObjectiveModel)::Bool = false
+criterion(model::MayerObjectiveModel)::Symbol = model.criterion
+(mayer(model::MayerObjectiveModel{M})::M) where {M <: Function} = model.mayer
+lagrange(model::MayerObjectiveModel) = throw(CTBase.UnauthorizedCall("a Mayer objective model does not have a Lagrange function."))
+has_mayer_cost(model::MayerObjectiveModel)::Bool = true
+has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
 
 # From LagrangeObjectiveModel
-criterion(ocp::LagrangeObjectiveModel)::Symbol = ocp.criterion
-mayer(ocp::LagrangeObjectiveModel) = throw(CTBase.UnauthorizedCall("a Lagrange objective ocp does not have a Mayer function."))
-(lagrange(ocp::LagrangeObjectiveModel{L})::L) where {L <: Function} = ocp.lagrange
-has_mayer_cost(ocp::LagrangeObjectiveModel)::Bool = false
-has_lagrange_cost(ocp::LagrangeObjectiveModel)::Bool = true
+criterion(model::LagrangeObjectiveModel)::Symbol = model.criterion
+mayer(model::LagrangeObjectiveModel) = throw(CTBase.UnauthorizedCall("a Lagrange objective model does not have a Mayer function."))
+(lagrange(model::LagrangeObjectiveModel{L})::L) where {L <: Function} = model.lagrange
+has_mayer_cost(model::LagrangeObjectiveModel)::Bool = false
+has_lagrange_cost(model::LagrangeObjectiveModel)::Bool = true
 
 # From BolzaObjectiveModel
-criterion(ocp::BolzaObjectiveModel)::Symbol = ocp.criterion
-(mayer(ocp::BolzaObjectiveModel{M, L})::M) where {M <: Function, L <: Function} = ocp.mayer
-(lagrange(ocp::BolzaObjectiveModel{M, L})::L) where {M <: Function, L <: Function} = ocp.lagrange
-has_mayer_cost(ocp::BolzaObjectiveModel)::Bool = true
-has_lagrange_cost(ocp::BolzaObjectiveModel)::Bool = true
+criterion(model::BolzaObjectiveModel)::Symbol = model.criterion
+(mayer(model::BolzaObjectiveModel{M, L})::M) where {M <: Function, L <: Function} = model.mayer
+(lagrange(model::BolzaObjectiveModel{M, L})::L) where {M <: Function, L <: Function} = model.lagrange
+has_mayer_cost(model::BolzaObjectiveModel)::Bool = true
+has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
 
 # From Model
 (objective(ocp::Model{T, S, C, V, D, O, B})::O) where {
