@@ -4,7 +4,7 @@ function build_solution(
     X::Matrix{Float64},
     U::Matrix{Float64},
     v::Vector{Float64},
-    P::Vector{Float64};
+    P::Matrix{Float64};
     cost::Float64,
     iterations::Int,
     constraints_violation::Float64,
