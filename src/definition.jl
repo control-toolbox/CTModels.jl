@@ -41,11 +41,7 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(
-    io::IO,
-    ::MIME"text/plain",
-    ocp::Model,
-)
+function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
 
     # some checks
     @assert hasproperty(definition(ocp), :head)
@@ -54,12 +50,11 @@ function Base.show(
     tab = 4
     code = striplines(definition(ocp))
     @match code.head begin
-        :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
+        :block => [__print(code.args[i], io, tab) for i in eachindex(code.args)]
         _ => __print(code, io, tab)
     end
-
 end
 
 function Base.show_default(io::IO, ocp::Model)
-    print(io, typeof(ocp))
+    return print(io, typeof(ocp))
 end

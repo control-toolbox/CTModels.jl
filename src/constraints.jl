@@ -12,32 +12,40 @@ function constraint!(
     n::Dimension,
     m::Dimension,
     q::Dimension;
-    rg::Union{OrdinalRange{<:Int}, Nothing} = nothing,
-    f::Union{Function, Nothing} = nothing,
-    lb::Union{ctVector, Nothing} = nothing,
-    ub::Union{ctVector, Nothing} = nothing,
-    label::Symbol = __constraint_label(),
+    rg::Union{OrdinalRange{<:Int},Nothing}=nothing,
+    f::Union{Function,Nothing}=nothing,
+    lb::Union{ctVector,Nothing}=nothing,
+    ub::Union{ctVector,Nothing}=nothing,
+    label::Symbol=__constraint_label(),
 )
 
     # checkings: the constraint must not be set before
-    label ∈ keys(ocp_constraints) &&
-        throw(CTBase.UnauthorizedCall("the constraint named " * String(label) * " already exists."))
+    label ∈ keys(ocp_constraints) && throw(
+        CTBase.UnauthorizedCall(
+            "the constraint named " * String(label) * " already exists."
+        ),
+    )
 
     # checkings: lb and ub cannot be both nothing
-    (isnothing(lb) && isnothing(ub)) &&
-        throw(CTBase.UnauthorizedCall("The lower bound `lb` and the upper bound `ub` cannot be both nothing."))
+    (isnothing(lb) && isnothing(ub)) && throw(
+        CTBase.UnauthorizedCall(
+            "The lower bound `lb` and the upper bound `ub` cannot be both nothing."
+        ),
+    )
 
     # bounds
     isnothing(lb) && (lb = -Inf * ones(eltype(ub), length(ub)))
     isnothing(ub) && (ub = Inf * ones(eltype(lb), length(lb)))
 
     # lb and ub must have the same length
-    length(lb) != length(ub) &&
-        throw(CTBase.IncorrectArgument("the lower bound `lb` and the upper bound `ub` must have the same length."))
+    length(lb) != length(ub) && throw(
+        CTBase.IncorrectArgument(
+            "the lower bound `lb` and the upper bound `ub` must have the same length."
+        ),
+    )
 
     # add the constraint
     @match (rg, f, lb, ub) begin
-
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type == :state
                 rg = 1:n
@@ -58,7 +66,7 @@ function constraint!(
                 )
             end
             (length(rg) != length(lb)) && throw(CTBase.IncorrectArgument(txt))
-            constraint!(ocp_constraints, type, n, m, q; rg = rg, lb = lb, ub = ub, label = label)
+            constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
@@ -83,7 +91,7 @@ function constraint!(
                         "the range of the variable constraint must be contained in 1:$q",
                     ),
                 )
-            else 
+            else
                 throw(
                     CTBase.IncorrectArgument(
                         "the following type of constraint is not valid: " *
@@ -114,26 +122,29 @@ function constraint!(
         _ => throw(CTBase.IncorrectArgument("Provided arguments are inconsistent."))
     end
     return nothing
-
 end
 
 function constraint!(
     ocp::PreModel,
     type::Symbol;
-    rg::Union{OrdinalRange{<:Int}, Nothing} = nothing,
-    f::Union{Function, Nothing} = nothing,
-    lb::Union{ctVector, Nothing} = nothing,
-    ub::Union{ctVector, Nothing} = nothing,
-    label::Symbol = __constraint_label(),
+    rg::Union{OrdinalRange{<:Int},Nothing}=nothing,
+    f::Union{Function,Nothing}=nothing,
+    lb::Union{ctVector,Nothing}=nothing,
+    ub::Union{ctVector,Nothing}=nothing,
+    label::Symbol=__constraint_label(),
 )
 
     # checkings: times, state and control must be set before adding constraints
-    !__is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state must be set before adding constraints."))
-    !__is_control_set(ocp) && throw(CTBase.UnauthorizedCall("the control must be set before adding constraints."))
-    !__is_times_set(ocp) && throw(CTBase.UnauthorizedCall("the times must be set before adding constraints."))
+    !__is_state_set(ocp) &&
+        throw(CTBase.UnauthorizedCall("the state must be set before adding constraints."))
+    !__is_control_set(ocp) &&
+        throw(CTBase.UnauthorizedCall("the control must be set before adding constraints."))
+    !__is_times_set(ocp) &&
+        throw(CTBase.UnauthorizedCall("the times must be set before adding constraints."))
 
     # checkings: if the ocp has no variable, then the constraint! function cannot be used with type=:variable
-    !__is_variable_set(ocp) && type == :variable &&
+    !__is_variable_set(ocp) &&
+        type == :variable &&
         throw(
             CTBase.UnauthorizedCall(
                 "the ocp has no variable" *
@@ -147,8 +158,9 @@ function constraint!(
     q = dimension(ocp.variable)
 
     # add the constraint
-    constraint!(ocp.constraints, type, n, m, q; rg = rg, f = f, lb = lb, ub = ub, label = label)
-
+    return constraint!(
+        ocp.constraints, type, n, m, q; rg=rg, f=f, lb=lb, ub=ub, label=label
+    )
 end
 
 # ------------------------------------------------------------------------------ #
@@ -159,35 +171,34 @@ end
 constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints[label]
 
 function constraints(ocp::Model)
-
-    path_cons_nl_f   = Vector{Function}() # nonlinear path constraints
+    path_cons_nl_f = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
-    path_cons_nl_lb  = Vector{ctNumber}()
-    path_cons_nl_ub  = Vector{ctNumber}()
+    path_cons_nl_lb = Vector{ctNumber}()
+    path_cons_nl_ub = Vector{ctNumber}()
 
-    variable_cons_nl_f   = Vector{Function}() # nonlinear variable constraints
+    variable_cons_nl_f = Vector{Function}() # nonlinear variable constraints
     variable_cons_nl_dim = Vector{Int}()
-    variable_cons_nl_lb  = Vector{ctNumber}()
-    variable_cons_nl_ub  = Vector{ctNumber}()
+    variable_cons_nl_lb = Vector{ctNumber}()
+    variable_cons_nl_ub = Vector{ctNumber}()
 
-    boundary_cons_nl_f   = Vector{Function}() # nonlinear boundary constraints
+    boundary_cons_nl_f = Vector{Function}() # nonlinear boundary constraints
     boundary_cons_nl_dim = Vector{Int}()
-    boundary_cons_nl_lb  = Vector{ctNumber}()
-    boundary_cons_nl_ub  = Vector{ctNumber}()
+    boundary_cons_nl_lb = Vector{ctNumber}()
+    boundary_cons_nl_ub = Vector{ctNumber}()
 
     state_cons_box_ind = Vector{Int}() # state range
-    state_cons_box_lb  = Vector{ctNumber}()
-    state_cons_box_ub  = Vector{ctNumber}()
+    state_cons_box_lb = Vector{ctNumber}()
+    state_cons_box_ub = Vector{ctNumber}()
 
     control_cons_box_ind = Vector{Int}() # control range
-    control_cons_box_lb  = Vector{ctNumber}()
-    control_cons_box_ub  = Vector{ctNumber}()
+    control_cons_box_lb = Vector{ctNumber}()
+    control_cons_box_ub = Vector{ctNumber}()
 
     variable_cons_box_ind = Vector{Int}() # variable range
-    variable_cons_box_lb  = Vector{ctNumber}()
-    variable_cons_box_ub  = Vector{ctNumber}()
+    variable_cons_box_lb = Vector{ctNumber}()
+    variable_cons_box_ub = Vector{ctNumber}()
 
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         @match c begin
             (:path, f::Function, lb, ub) => begin
                 push!(path_cons_nl_f, f)
@@ -241,7 +252,7 @@ function constraints(ocp::Model)
 
     function path_cons_nl!(val, t, x, u, v) # nonlinear path constraints (in place)
         j = 1
-        for i ∈ 1:length(path_cons_nl_f)
+        for i in 1:length(path_cons_nl_f)
             li = path_cons_nl_dim[i]
             path_cons_nl_f[i](@view(val[j:(j + li - 1)]), t, x, u, v)
             j = j + li
@@ -251,7 +262,7 @@ function constraints(ocp::Model)
 
     function variable_cons_nl!(val, v) # nonlinear variable constraints
         j = 1
-        for i ∈ 1:length(variable_cons_nl_f)
+        for i in 1:length(variable_cons_nl_f)
             li = variable_cons_nl_dim[i]
             variable_cons_nl_f[i](@view(val[j:(j + li - 1)]), v)
             j = j + li
@@ -261,7 +272,7 @@ function constraints(ocp::Model)
 
     function boundary_cons_nl!(val, x0, xf, v) # nonlinear boundary constraints
         j = 1
-        for i ∈ 1:length(boundary_cons_nl_f)
+        for i in 1:length(boundary_cons_nl_f)
             li = boundary_cons_nl_dim[i]
             boundary_cons_nl_f[i](@view(val[j:(j + li - 1)]), x0, xf, v)
             j = j + li
@@ -272,10 +283,9 @@ function constraints(ocp::Model)
     return (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub),
     (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub),
     (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub),
-    (state_cons_box_lb,    state_cons_box_ind,    state_cons_box_ub),
-    (control_cons_box_lb,  control_cons_box_ind,  control_cons_box_ub),
+    (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub),
+    (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub),
     (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub)
-
 end
 
 """
@@ -284,16 +294,14 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear path constraints.
 """
 function dim_path_cons_nl(ocp::Model)
-
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:path, f::Function, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end
 
 """
@@ -301,17 +309,15 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 """
-function dim_boundary_cons_nl(ocp::Model) 
-
+function dim_boundary_cons_nl(ocp::Model)
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:boundary, f::Function, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end
 
 """
@@ -320,16 +326,14 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear variable constraints.
 """
 function dim_variable_cons_nl(ocp::Model)
-
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:variable, f::Function, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end
 
 """
@@ -338,16 +342,14 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on state.
 """
 function dim_state_cons_box(ocp::Model)
-
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:state, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end
 
 """
@@ -356,16 +358,14 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on control.
 """
 function dim_control_cons_box(ocp::Model)
-
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:control, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end
 
 """
@@ -374,14 +374,12 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on variable.
 """
 function dim_variable_cons_box(ocp::Model)
-
     dim = 0
-    for (_, c) ∈ ocp.constraints
+    for (_, c) in ocp.constraints
         dim += @match c begin
             (:variable, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
             _ => 0
         end
     end
     return dim
-
 end

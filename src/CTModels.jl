@@ -1,7 +1,7 @@
 module CTModels
 
 # imports
-import CTBase
+using CTBase: CTBase
 using DocStringExtensions
 using MLStyle
 using Parameters # @with_kw: to have default values in struct
@@ -13,7 +13,9 @@ const ctNumber = Real
 const Time = ctNumber
 const ctVector = AbstractVector{<:ctNumber}
 const Variable = ctVector
-const ConstraintsDictType = Dict{Symbol, Tuple{Symbol, Union{Function, OrdinalRange{<:Int}}, ctVector, ctVector}}
+const ConstraintsDictType = Dict{
+    Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
+}
 
 #
 include("types.jl")

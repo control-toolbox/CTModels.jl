@@ -103,7 +103,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct TimesModel{TI <: AbstractTimeModel, TF <: AbstractTimeModel} <: AbstractTimesModel
+struct TimesModel{TI<:AbstractTimeModel,TF<:AbstractTimeModel} <: AbstractTimesModel
     initial::TI
     final::TF
     time_name::String
@@ -122,7 +122,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct MayerObjectiveModel{TM <: Function} <: AbstractObjectiveModel
+struct MayerObjectiveModel{TM<:Function} <: AbstractObjectiveModel
     mayer::TM
     criterion::Symbol
 end
@@ -134,7 +134,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct LagrangeObjectiveModel{TL <: Function} <: AbstractObjectiveModel
+struct LagrangeObjectiveModel{TL<:Function} <: AbstractObjectiveModel
     lagrange::TL
     criterion::Symbol
 end
@@ -146,7 +146,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct BolzaObjectiveModel{TM <: Function, TL <: Function} <: AbstractObjectiveModel
+struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
     mayer::TM
     lagrange::TL
     criterion::Symbol
@@ -166,13 +166,13 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct Model{
-    TimesModelType <: AbstractTimesModel,
-    StateModelType <: AbstractStateModel,
-    ControlModelType <: AbstractControlModel,
-    VariableModelType <: AbstractVariableModel,
-    DynamicsModelType <: Function,
-    ObjectiveModelType <: AbstractObjectiveModel,
-    ConstraintsModelType <: ConstraintsDictType
+    TimesModelType<:AbstractTimesModel,
+    StateModelType<:AbstractStateModel,
+    ControlModelType<:AbstractControlModel,
+    VariableModelType<:AbstractVariableModel,
+    DynamicsModelType<:Function,
+    ObjectiveModelType<:AbstractObjectiveModel,
+    ConstraintsModelType<:ConstraintsDictType,
 } <: AbstractModel
     times::TimesModelType
     state::StateModelType
@@ -192,14 +192,14 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct PreModel <: AbstractModel
-    times::Union{AbstractTimesModel, Nothing} = nothing
-    state::Union{AbstractStateModel, Nothing} = nothing
-    control::Union{AbstractControlModel, Nothing} = nothing
+    times::Union{AbstractTimesModel,Nothing} = nothing
+    state::Union{AbstractStateModel,Nothing} = nothing
+    control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{Function, Nothing} = nothing
-    objective::Union{AbstractObjectiveModel, Nothing} = nothing
+    dynamics::Union{Function,Nothing} = nothing
+    objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
-    definition::Union{Expr, Nothing} = nothing
+    definition::Union{Expr,Nothing} = nothing
 end
 
 """
