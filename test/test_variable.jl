@@ -61,5 +61,4 @@ function test_variable()
     # wrong number of components
     ocp = CTModels.PreModel()
     @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
-
 end

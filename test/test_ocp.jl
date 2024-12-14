@@ -1,5 +1,4 @@
 function test_ocp()
-    
     @test isconcretetype(CTModels.PreModel)
 
     # dimensions
@@ -21,7 +20,9 @@ function test_ocp()
     u = [10.0, 11.0]
 
     # models
-    times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t")
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "t₀"), CTModels.FreeTimeModel(2, "t_f"), "t"
+    )
     state = CTModels.StateModel("y", ["y₁", "y₂"])
     control = CTModels.ControlModel("u", ["u₁", "u₂"])
     variable = CTModels.VariableModel("v", ["v₁", "v₂"])
@@ -39,47 +40,53 @@ function test_ocp()
 
     # path constraint
     f_path_a(r, t, x, u, v) = r .= x .+ u .+ v .+ t
-    CTModels.constraint!(constraints, :path, n, m, q, f=f_path_a, lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2])
     f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-    CTModels.constraint!(constraints, :path, n, m, q, f=f_path_b, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
 
     # boundary constraint
     f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
-    CTModels.constraint!(constraints, :boundary, n, m, q, f=f_boundary_a, lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(
+        constraints, :boundary, n, m, q; f=f_boundary_a, lb=[0, 1], ub=[1, 2]
+    )
     f_boundary_b(r, x0, xf, v) = r .= x0[1] - 1.0 + v[1] * (xf[1] - x0[1])
-    CTModels.constraint!(constraints, :boundary, n, m, q, f=f_boundary_b, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3])
 
     # variable constraint
     f_variable_a(r, v) = r .= 2v
-    CTModels.constraint!(constraints, :variable, n, m, q, f=f_variable_a, lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(
+        constraints, :variable, n, m, q; f=f_variable_a, lb=[0, 1], ub=[1, 2]
+    )
     f_variable_b(r, v) = r .= v[1] - 1.0
-    CTModels.constraint!(constraints, :variable, n, m, q, f=f_variable_b, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :variable, n, m, q; f=f_variable_b, lb=[3], ub=[3])
 
     # state box constraint
-    CTModels.constraint!(constraints, :state, n, m, q, lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :state, n, m, q, rg=1:1, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # control box constraint
-    CTModels.constraint!(constraints, :control, n, m, q, lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :control, n, m, q, rg=1:1, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # variable box constraint
-    CTModels.constraint!(constraints, :variable, n, m, q, lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :variable, n, m, q, rg=1:1, lb=[3], ub=[3])
+    CTModels.constraint!(constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.constraint!(constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # Model definition
     definition = quote
         t ∈ [0, 1], time
         x ∈ R², state
         u ∈ R, control
-        x(0) == [ -1, 0 ]
-        x(1) == [ 0, 0 ]
-        ẋ(t) == [ x₂(t), u(t) ]
-        ∫( 0.5u(t)^2 ) → min
+        x(0) == [-1, 0]
+        x(1) == [0, 0]
+        ẋ(t) == [x₂(t), u(t)]
+        ∫(0.5u(t)^2) → min
     end
 
     # concrete ocp
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # print
     display(ocp)
@@ -144,12 +151,9 @@ function test_ocp()
 
     # Get all constraints and test. Be careful, the order is not guaranteed. 
     # We will check up to permutations by sorting the results.
-    (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub),
-    (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub),
-    (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub),
-    (state_cons_box_lb,    state_cons_box_ind,    state_cons_box_ub),
-    (control_cons_box_lb,  control_cons_box_ind,  control_cons_box_ub),
-    (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub) = CTModels.constraints(ocp)
+    (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub), (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub), (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub), (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub), (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub), (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub) = CTModels.constraints(
+        ocp
+    )
 
     # path constraints
     @test sort(path_cons_nl_lb) == [0, 1, 3]
@@ -201,8 +205,12 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with fixed times
-    times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    times = CTModels.TimesModel(
+        CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
+    )
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
@@ -217,8 +225,12 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with fixed initial time and free final time
-    times = CTModels.TimesModel(CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t")
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    times = CTModels.TimesModel(
+        CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t"
+    )
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
@@ -233,8 +245,12 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with free initial time and fixed final time
-    times = CTModels.TimesModel(CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t")
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
+    )
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # tests on times
     @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
@@ -250,7 +266,9 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with Lagrange objective
     objective = CTModels.LagrangeObjectiveModel(lagrange_user!, :max)
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
@@ -270,12 +288,13 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective
     objective = CTModels.BolzaObjectiveModel(mayer_user!, lagrange, :min)
-    ocp = CTModels.Model(times, state, control, variable, dynamics, objective, constraints, definition)
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
     @test CTModels.criterion(ocp) == :min
     @test CTModels.has_mayer_cost(ocp) == true
     @test CTModels.has_lagrange_cost(ocp) == true
-
 end

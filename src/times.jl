@@ -38,11 +38,11 @@ julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol
 """
 function time!(
     ocp::PreModel;
-    t0::Union{Time, Nothing} = nothing,
-    tf::Union{Time, Nothing} = nothing,
-    ind0::Union{Int, Nothing} = nothing,
-    indf::Union{Int, Nothing} = nothing,
-    time_name::Union{String, Symbol} = __time_name(),
+    t0::Union{Time,Nothing}=nothing,
+    tf::Union{Time,Nothing}=nothing,
+    ind0::Union{Int,Nothing}=nothing,
+    indf::Union{Int,Nothing}=nothing,
+    time_name::Union{String,Symbol}=__time_name(),
 )::Nothing
 
     # check if the function has been already called
@@ -52,18 +52,33 @@ function time!(
     # and in this case check consistency, meaning that ind0 and indf must belong
     # to 1 <= ind0, indf <= q, where q is the variable dimension.
     # Otherwise, throw an error.
-    (!isnothing(ind0) || !isnothing(indf)) && !__is_variable_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the variable must be set before calling time! if t0 or tf is free."))
+    (!isnothing(ind0) || !isnothing(indf)) &&
+        !__is_variable_set(ocp) &&
+        throw(
+            CTBase.UnauthorizedCall(
+                "the variable must be set before calling time! if t0 or tf is free."
+            ),
+        )
 
     # check consistency with the variable
     if __is_variable_set(ocp)
         q = dimension(ocp.variable)
 
-        !isnothing(ind0) && !(1 ≤ ind0 ≤ q) && # t0 is free
-        throw(CTBase.IncorrectArgument("the index of the t0 variable must be contained in 1:$q"))
+        !isnothing(ind0) &&
+            !(1 ≤ ind0 ≤ q) && # t0 is free
+            throw(
+                CTBase.IncorrectArgument(
+                    "the index of the t0 variable must be contained in 1:$q"
+                ),
+            )
 
-        !isnothing(indf) && !(1 ≤ indf ≤ q) && # tf is free
-        throw(CTBase.IncorrectArgument("the index of the tf variable must be contained in 1:$q"))
+        !isnothing(indf) &&
+            !(1 ≤ indf ≤ q) && # tf is free
+            throw(
+                CTBase.IncorrectArgument(
+                    "the index of the tf variable must be contained in 1:$q"
+                ),
+            )
     end
 
     # check consistency
@@ -102,20 +117,28 @@ function time!(
     # core
     (initial_time, final_time) = @match (t0, ind0, tf, indf) begin
         (::Time, ::Nothing, ::Time, ::Nothing) => begin # (t0, tf)
-            (FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0, digits = 2))),
-             FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf, digits = 2))))
+            (
+                FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
+                FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
+            )
         end
         (::Nothing, ::Int, ::Time, ::Nothing) => begin # (ind0, tf)
-            (FreeTimeModel(ind0, components(ocp.variable)[ind0]),
-             FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf, digits = 2))))
+            (
+                FreeTimeModel(ind0, components(ocp.variable)[ind0]),
+                FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
+            )
         end
         (::Time, ::Nothing, ::Nothing, ::Int) => begin # (t0, indf)
-            (FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0, digits = 2))),
-             FreeTimeModel(indf, components(ocp.variable)[indf]))
+            (
+                FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
+                FreeTimeModel(indf, components(ocp.variable)[indf]),
+            )
         end
         (::Nothing, ::Int, ::Nothing, ::Int) => begin # (ind0, indf)
-            (FreeTimeModel(ind0, components(ocp.variable)[ind0]),
-             FreeTimeModel(indf, components(ocp.variable)[indf]))
+            (
+                FreeTimeModel(ind0, components(ocp.variable)[ind0]),
+                FreeTimeModel(indf, components(ocp.variable)[indf]),
+            )
         end
         _ => throw(CTBase.IncorrectArgument("Provided arguments are inconsistent."))
     end
@@ -135,108 +158,146 @@ name(model::FixedTimeModel)::String = model.name
 # From FreeTimeModel
 index(model::FreeTimeModel)::Int = model.index
 name(model::FreeTimeModel)::String = model.name
-function time(model::FreeTimeModel, variable::AbstractVector{T})::T where T<:ctNumber
+function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
     # check if model.index in [1, length(variable)]
-    !(1 ≤ model.index ≤ length(variable)) && throw(CTBase.IncorrectArgument("the index of the time variable must be contained in 1:$(length(variable))"))
+    !(1 ≤ model.index ≤ length(variable)) && throw(
+        CTBase.IncorrectArgument(
+            "the index of the time variable must be contained in 1:$(length(variable))"
+        ),
+    )
     return variable[model.index]
 end
 
 # From TimesModel
-(initial(model::TimesModel{TI, TF})::TI) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = model.initial
-(final(model::TimesModel{TI, TF})::TF) where {TI <: AbstractTimeModel, TF <: AbstractTimeModel} = model.final
+(
+    initial(model::TimesModel{TI,TF})::TI
+) where {TI<:AbstractTimeModel,TF<:AbstractTimeModel} = model.initial
+(final(model::TimesModel{TI,TF})::TF) where {TI<:AbstractTimeModel,TF<:AbstractTimeModel} =
+    model.final
 time_name(model::TimesModel)::String = model.time_name
-initial_time(model::TimesModel{FixedTimeModel, <:AbstractTimeModel})::Time = time(initial(model))
-final_time(model::TimesModel{<:AbstractTimeModel, FixedTimeModel})::Time = time(final(model))
-initial_time(model::TimesModel{FreeTimeModel, <:AbstractTimeModel}, variable::Variable)::Time = time(initial(model), variable)
-final_time(model::TimesModel{<:AbstractTimeModel, FreeTimeModel}, variable::Variable)::Time = time(final(model), variable)
+initial_time(model::TimesModel{FixedTimeModel,<:AbstractTimeModel})::Time =
+    time(initial(model))
+final_time(model::TimesModel{<:AbstractTimeModel,FixedTimeModel})::Time = time(final(model))
+initial_time(
+    model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, variable::Variable
+)::Time = time(initial(model), variable)
+final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::Variable)::Time =
+    time(final(model), variable)
 
 # From Model
-(times(ocp::Model{T, S, C, V, D, O, B})::T) where {
+(
+    times(ocp::Model{T,S,C,V,D,O,B})::T
+) where {
     T<:TimesModel,
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = ocp.times
-    
+    B<:ConstraintsDictType,
+} = ocp.times
+
 time_name(ocp::Model)::String = time_name(ocp.times)
 
-(initial_time(ocp::Model{T, S, C, V, D, O, B})::Time) where {
-    T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel, 
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = initial_time(ocp.times)
-
-(final_time(ocp::Model{T, S, C, V, D, O, B})::Time) where {
-    T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
+(
+    initial_time(ocp::Model{T,S,C,V,D,O,B})::Time
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = final_time(ocp.times)
+    B<:ConstraintsDictType,
+} = initial_time(ocp.times)
 
-(initial_time(ocp::Model{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
-    T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B})::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = initial_time(ocp.times, variable)
+    B<:ConstraintsDictType,
+} = final_time(ocp.times)
 
-(final_time(ocp::Model{T, S, C, V, D, O, B}, variable::Variable)::Time) where {
-    T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
+(
+    initial_time(ocp::Model{T,S,C,V,D,O,B}, variable::Variable)::Time
+) where {
+    T<:TimesModel{FreeTimeModel,<:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = final_time(ocp.times, variable)
+    B<:ConstraintsDictType,
+} = initial_time(ocp.times, variable)
+
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B}, variable::Variable)::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FreeTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:ConstraintsDictType,
+} = final_time(ocp.times, variable)
 
 initial_time_name(ocp::Model)::String = name(initial(ocp.times))
 
 final_time_name(ocp::Model)::String = name(final(ocp.times))
 
-(has_fixed_initial_time(ocp::Model{T, S, C, V, D, O, B})::Bool) where {
-    T<:TimesModel{FixedTimeModel, <:AbstractTimeModel},
+(
+    has_fixed_initial_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = true
+    B<:ConstraintsDictType,
+} = true
 
-(has_fixed_initial_time(ocp::Model{T, S, C, V, D, O, B})::Bool) where {
-    T<:TimesModel{FreeTimeModel, <:AbstractTimeModel},
+(
+    has_fixed_initial_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{FreeTimeModel,<:AbstractTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = false
+    B<:ConstraintsDictType,
+} = false
 
-(has_fixed_final_time(ocp::Model{T, S, C, V, D, O, B})::Bool) where {
-    T<:TimesModel{<:AbstractTimeModel, FixedTimeModel},
+(
+    has_fixed_final_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = true
+    B<:ConstraintsDictType,
+} = true
 
-(has_fixed_final_time(ocp::Model{T, S, C, V, D, O, B})::Bool) where {
-    T<:TimesModel{<:AbstractTimeModel, FreeTimeModel},
+(
+    has_fixed_final_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FreeTimeModel},
     S<:AbstractStateModel,
     C<:AbstractControlModel,
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType} = false
+    B<:ConstraintsDictType,
+} = false
 
 has_free_initial_time(ocp::Model)::Bool = !has_fixed_initial_time(ocp)
 
