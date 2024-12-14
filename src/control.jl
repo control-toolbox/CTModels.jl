@@ -13,7 +13,7 @@ Used to set the default value of the names of the controls.
 The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
 """
 __control_components(m::Dimension, name::String)::Vector{String} =
-    m > 1 ? [name * CTBase.ctindices(i) for i ∈ range(1, m)] : [name]
+    m > 1 ? [name * CTBase.ctindices(i) for i in range(1, m)] : [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -73,16 +73,19 @@ julia> control_components(ocp)
 function control!(
     ocp::PreModel,
     m::Dimension,
-    name::T1 = __control_name(),
-    components_names::Vector{T2} = __control_components(m, string(name)),
-)::Nothing where {T1<:Union{String, Symbol}, T2<:Union{String, Symbol}}
+    name::T1=__control_name(),
+    components_names::Vector{T2}=__control_components(m, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings
-    __is_control_set(ocp) && throw(CTBase.UnauthorizedCall("the control has already been set."))
+    __is_control_set(ocp) &&
+        throw(CTBase.UnauthorizedCall("the control has already been set."))
     (m > 1) &&
         (size(components_names, 1) ≠ m) &&
         throw(
-            CTBase.IncorrectArgument("the number of control names must be equal to the control dimension"),
+            CTBase.IncorrectArgument(
+                "the number of control names must be equal to the control dimension"
+            ),
         )
 
     # set the control

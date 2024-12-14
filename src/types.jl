@@ -142,7 +142,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct TimesModel{TI <: AbstractTimeModel, TF <: AbstractTimeModel} <: AbstractTimesModel
+struct TimesModel{TI<:AbstractTimeModel,TF<:AbstractTimeModel} <: AbstractTimesModel
     initial::TI
     final::TF
     time_name::String
@@ -161,7 +161,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct MayerObjectiveModel{TM <: Function} <: AbstractObjectiveModel
+struct MayerObjectiveModel{TM<:Function} <: AbstractObjectiveModel
     mayer::TM
     criterion::Symbol
 end
@@ -173,7 +173,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct LagrangeObjectiveModel{TL <: Function} <: AbstractObjectiveModel
+struct LagrangeObjectiveModel{TL<:Function} <: AbstractObjectiveModel
     lagrange::TL
     criterion::Symbol
 end
@@ -185,7 +185,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct BolzaObjectiveModel{TM <: Function, TL <: Function} <: AbstractObjectiveModel
+struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
     mayer::TM
     lagrange::TL
     criterion::Symbol
@@ -207,13 +207,13 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct Model{
-    TimesModelType <: AbstractTimesModel,
-    StateModelType <: AbstractStateModel,
-    ControlModelType <: AbstractControlModel,
-    VariableModelType <: AbstractVariableModel,
-    DynamicsModelType <: Function,
-    ObjectiveModelType <: AbstractObjectiveModel,
-    ConstraintsModelType <: ConstraintsDictType
+    TimesModelType<:AbstractTimesModel,
+    StateModelType<:AbstractStateModel,
+    ControlModelType<:AbstractControlModel,
+    VariableModelType<:AbstractVariableModel,
+    DynamicsModelType<:Function,
+    ObjectiveModelType<:AbstractObjectiveModel,
+    ConstraintsModelType<:ConstraintsDictType,
 } <: AbstractModel
     times::TimesModelType
     state::StateModelType
@@ -233,14 +233,14 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct PreModel <: AbstractModel
-    times::Union{AbstractTimesModel, Nothing} = nothing
-    state::Union{AbstractStateModel, Nothing} = nothing
-    control::Union{AbstractControlModel, Nothing} = nothing
+    times::Union{AbstractTimesModel,Nothing} = nothing
+    state::Union{AbstractStateModel,Nothing} = nothing
+    control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{Function, Nothing} = nothing
-    objective::Union{AbstractObjectiveModel, Nothing} = nothing
+    dynamics::Union{Function,Nothing} = nothing
+    objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
-    definition::Union{Expr, Nothing} = nothing
+    definition::Union{Expr,Nothing} = nothing
 end
 
 """
@@ -325,7 +325,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct SolverInfos{TI<:Dict{Symbol, Any}} <: AbstractSolverInfos
+struct SolverInfos{TI<:Dict{Symbol,Any}} <: AbstractSolverInfos
     iterations::Int # number of iterations
     stopping::Symbol # the stopping criterion
     message::String # the message corresponding to the stopping criterion
@@ -350,18 +350,18 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct DualModel{
-    SC_LB_Dual <: Function,
-    SC_UB_Dual <: Function,
-    CC_LB_Dual <: Function,
-    CC_UB_Dual <: Function,
-    VC_LB_Dual <: ctVector,
-    VC_UB_Dual <: ctVector,
-    BC <: ctVector,
-    BC_Dual <: ctVector,
-    PC <: Function,
-    PC_Dual <: Function,
-    VC <: ctVector,
-    VC_Dual <: ctVector
+    SC_LB_Dual<:Function,
+    SC_UB_Dual<:Function,
+    CC_LB_Dual<:Function,
+    CC_UB_Dual<:Function,
+    VC_LB_Dual<:ctVector,
+    VC_UB_Dual<:ctVector,
+    BC<:ctVector,
+    BC_Dual<:ctVector,
+    PC<:Function,
+    PC_Dual<:Function,
+    VC<:ctVector,
+    VC_Dual<:ctVector,
 } <: AbstractDualModel
     state_constraints_lb_dual::SC_LB_Dual
     state_constraints_ub_dual::SC_UB_Dual
@@ -393,15 +393,15 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct Solution{
-    TimeGridModelType <: AbstractTimeGridModel,
-    TimesModelType <: AbstractTimesModel,
-    StateModelType <: AbstractStateModel,
-    ControlModelType <: AbstractControlModel,
-    VariableModelType <: AbstractVariableModel,
-    CostateModelType <: Function,
-    ObjectiveValueType <: ctNumber,
-    DualModelType <: AbstractDualModel,
-    SolverInfosType <: AbstractSolverInfos
+    TimeGridModelType<:AbstractTimeGridModel,
+    TimesModelType<:AbstractTimesModel,
+    StateModelType<:AbstractStateModel,
+    ControlModelType<:AbstractControlModel,
+    VariableModelType<:AbstractVariableModel,
+    CostateModelType<:Function,
+    ObjectiveValueType<:ctNumber,
+    DualModelType<:AbstractDualModel,
+    SolverInfosType<:AbstractSolverInfos,
 } <: AbstractSolution
     time_grid::TimeGridModelType
     times::TimesModelType

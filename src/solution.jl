@@ -22,7 +22,7 @@ function build_solution(
     path_constraints::Matrix{Float64},
     path_constraints_dual::Matrix{Float64},
     variable_constraints::Vector{Float64},
-    variable_constraints_dual::Vector{Float64}
+    variable_constraints_dual::Vector{Float64},
 )
 
     # get dimensions
@@ -32,7 +32,7 @@ function build_solution(
 
     # check that time grid is strictly increasing
     # if not proceed with list of indexes as time grid
-    if !issorted(T, lt = <=)
+    if !issorted(T; lt=<=)
         println(
             "WARNING: time grid at solution is not strictly increasing, replacing with list of indices...",
         )
@@ -42,9 +42,9 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange cost
-    x = CTBase.ctinterpolate(T,              CTBase.matrix2vec(X[:, 1:dim_x], 1))
+    x = CTBase.ctinterpolate(T, CTBase.matrix2vec(X[:, 1:dim_x], 1))
     p = CTBase.ctinterpolate(T[1:(end - 1)], CTBase.matrix2vec(P[:, 1:dim_x], 1))
-    u = CTBase.ctinterpolate(T,              CTBase.matrix2vec(U[:, 1:dim_u], 1))
+    u = CTBase.ctinterpolate(T, CTBase.matrix2vec(U[:, 1:dim_u], 1))
 
     # force scalar output when dimension is 1
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
@@ -53,23 +53,45 @@ function build_solution(
     var = (dim_v == 1) ? v[1] : v
 
     # misc infos
-    infos = Dict{Symbol, Any}()
+    infos = Dict{Symbol,Any}()
 
     # nonlinear constraints and dual variables
-    path_constraints_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints, 1))(t)
-    path_constraints_dual_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints_dual, 1))(t)
+    path_constraints_fun =
+        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints, 1))(t)
+    path_constraints_dual_fun =
+        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints_dual, 1))(t)
 
     # box constraints multipliers
-    state_constraints_lb_dual_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1))(t)
-    state_constraints_ub_dual_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1))(t)
-    control_constraints_lb_dual_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1))(t)
-    control_constraints_ub_dual_fun = t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1))(t)
+    state_constraints_lb_dual_fun =
+        t -> CTBase.ctinterpolate(
+            T, CTBase.matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
+        )(
+            t
+        )
+    state_constraints_ub_dual_fun =
+        t -> CTBase.ctinterpolate(
+            T, CTBase.matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
+        )(
+            t
+        )
+    control_constraints_lb_dual_fun =
+        t -> CTBase.ctinterpolate(
+            T, CTBase.matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
+        )(
+            t
+        )
+    control_constraints_ub_dual_fun =
+        t -> CTBase.ctinterpolate(
+            T, CTBase.matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
+        )(
+            t
+        )
 
     # build Models
     time_grid = TimeGridModel(T)
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
-    variable = VariableModelSolution(variable_name(ocp),  variable_cpùomponents(ocp), var)
+    variable = VariableModelSolution(variable_name(ocp), variable_cpùomponents(ocp), var)
     dual = DualModel(
         state_constraints_lb_dual_fun,
         state_constraints_ub_dual_fun,
@@ -85,24 +107,10 @@ function build_solution(
         variable_constraints_dual,
     )
     solver_infos = SolverInfos(
-        iterations,
-        stopping,
-        message,
-        success,
-        constraints_violation,
-        infos,
+        iterations, stopping, message, success, constraints_violation, infos
     )
 
     return Solution(
-        time_grid,
-        times(ocp),
-        state,
-        control,
-        variable,
-        fp,
-        cost,
-        dual,
-        solver_infos
+        time_grid, times(ocp), state, control, variable, fp, cost, dual, solver_infos
     )
-
 end
