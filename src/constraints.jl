@@ -6,7 +6,7 @@ A unique value is given to each constraint using the `gensym` function and prefi
 """
 __constraint_label() = gensym(:unamed)
 
-function constraint!(
+function __constraint!(
     ocp_constraints::ConstraintsDictType,
     type::Symbol,
     n::Dimension,
@@ -66,7 +66,7 @@ function constraint!(
                 )
             end
             (length(rg) != length(lb)) && throw(CTBase.IncorrectArgument(txt))
-            constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
+            __constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
@@ -158,7 +158,7 @@ function constraint!(
     q = dimension(ocp.variable)
 
     # add the constraint
-    return constraint!(
+    return __constraint!(
         ocp.constraints, type, n, m, q; rg=rg, f=f, lb=lb, ub=ub, label=label
     )
 end
@@ -168,218 +168,148 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From ContraintsModel
-constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints[label]
+constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 
-function constraints(ocp::Model)
-    path_cons_nl_f = Vector{Function}() # nonlinear path constraints
-    path_cons_nl_dim = Vector{Int}()
-    path_cons_nl_lb = Vector{ctNumber}()
-    path_cons_nl_ub = Vector{ctNumber}()
+(
+    path_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TP
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.path_nl
 
-    variable_cons_nl_f = Vector{Function}() # nonlinear variable constraints
-    variable_cons_nl_dim = Vector{Int}()
-    variable_cons_nl_lb = Vector{ctNumber}()
-    variable_cons_nl_ub = Vector{ctNumber}()
+(
+    variable_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TV1
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.variable_nl
 
-    boundary_cons_nl_f = Vector{Function}() # nonlinear boundary constraints
-    boundary_cons_nl_dim = Vector{Int}()
-    boundary_cons_nl_lb = Vector{ctNumber}()
-    boundary_cons_nl_ub = Vector{ctNumber}()
+(
+    boundary_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TB
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.boundary_nl
 
-    state_cons_box_ind = Vector{Int}() # state range
-    state_cons_box_lb = Vector{ctNumber}()
-    state_cons_box_ub = Vector{ctNumber}()
+(
+    state_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TS
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.state_box
 
-    control_cons_box_ind = Vector{Int}() # control range
-    control_cons_box_lb = Vector{ctNumber}()
-    control_cons_box_ub = Vector{ctNumber}()
+(
+    control_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TC
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.control_box
 
-    variable_cons_box_ind = Vector{Int}() # variable range
-    variable_cons_box_lb = Vector{ctNumber}()
-    variable_cons_box_ub = Vector{ctNumber}()
-
-    for (_, c) in ocp.constraints
-        @match c begin
-            (:path, f::Function, lb, ub) => begin
-                push!(path_cons_nl_f, f)
-                push!(path_cons_nl_dim, length(lb))
-                append!(path_cons_nl_lb, lb)
-                append!(path_cons_nl_ub, ub)
-            end
-            (:variable, f::Function, lb, ub) => begin
-                push!(variable_cons_nl_f, f)
-                push!(variable_cons_nl_dim, length(lb))
-                append!(variable_cons_nl_lb, lb)
-                append!(variable_cons_nl_ub, ub)
-            end
-            (:boundary, f::Function, lb, ub) => begin
-                push!(boundary_cons_nl_f, f)
-                push!(boundary_cons_nl_dim, length(lb))
-                append!(boundary_cons_nl_lb, lb)
-                append!(boundary_cons_nl_ub, ub)
-            end
-            (:state, rg::OrdinalRange{<:Int}, lb, ub) => begin
-                append!(state_cons_box_ind, rg)
-                append!(state_cons_box_lb, lb)
-                append!(state_cons_box_ub, ub)
-            end
-            (:control, rg::OrdinalRange{<:Int}, lb, ub) => begin
-                append!(control_cons_box_ind, rg)
-                append!(control_cons_box_lb, lb)
-                append!(control_cons_box_ub, ub)
-            end
-            (:variable, rg::OrdinalRange{<:Int}, lb, ub) => begin
-                append!(variable_cons_box_ind, rg)
-                append!(variable_cons_box_lb, lb)
-                append!(variable_cons_box_ub, ub)
-            end
-            _ => error("Internal error")
-        end
-    end
-
-    @assert length(path_cons_nl_f) == length(path_cons_nl_dim)
-    @assert length(path_cons_nl_lb) == length(path_cons_nl_ub)
-    @assert length(variable_cons_nl_f) == length(variable_cons_nl_dim)
-    @assert length(variable_cons_nl_lb) == length(variable_cons_nl_ub)
-    @assert length(boundary_cons_nl_f) == length(boundary_cons_nl_dim)
-    @assert length(boundary_cons_nl_lb) == length(boundary_cons_nl_ub)
-    @assert length(state_cons_box_ind) == length(state_cons_box_lb)
-    @assert length(state_cons_box_lb) == length(state_cons_box_ub)
-    @assert length(control_cons_box_ind) == length(control_cons_box_lb)
-    @assert length(control_cons_box_lb) == length(control_cons_box_ub)
-    @assert length(variable_cons_box_ind) == length(variable_cons_box_lb)
-    @assert length(variable_cons_box_lb) == length(variable_cons_box_ub)
-
-    function path_cons_nl!(val, t, x, u, v) # nonlinear path constraints (in place)
-        j = 1
-        for i in 1:length(path_cons_nl_f)
-            li = path_cons_nl_dim[i]
-            path_cons_nl_f[i](@view(val[j:(j + li - 1)]), t, x, u, v)
-            j = j + li
-        end
-        return nothing
-    end
-
-    function variable_cons_nl!(val, v) # nonlinear variable constraints
-        j = 1
-        for i in 1:length(variable_cons_nl_f)
-            li = variable_cons_nl_dim[i]
-            variable_cons_nl_f[i](@view(val[j:(j + li - 1)]), v)
-            j = j + li
-        end
-        return nothing
-    end
-
-    function boundary_cons_nl!(val, x0, xf, v) # nonlinear boundary constraints
-        j = 1
-        for i in 1:length(boundary_cons_nl_f)
-            li = boundary_cons_nl_dim[i]
-            boundary_cons_nl_f[i](@view(val[j:(j + li - 1)]), x0, xf, v)
-            j = j + li
-        end
-        return nothing
-    end
-
-    return (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub),
-    (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub),
-    (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub),
-    (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub),
-    (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub),
-    (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub)
-end
+(
+    variable_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TV2
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TV1,
+    TB,
+    TS,
+    TC,
+    TV2,
+} = ocp.constraints.variable_box
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
 """
-function dim_path_cons_nl(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:path, f::Function, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_path_constraints_nl(ocp::Model)::Int = length(path_constraints_nl(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 """
-function dim_boundary_cons_nl(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:boundary, f::Function, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_boundary_constraints_nl(ocp::Model)::Int = length(boundary_constraints_nl(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear variable constraints.
 """
-function dim_variable_cons_nl(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:variable, f::Function, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_variable_constraints_nl(ocp::Model)::Int = length(variable_constraints_nl(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on state.
 """
-function dim_state_cons_box(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:state, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_state_constraints_box(ocp::Model)::Int = length(state_constraints_box(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on control.
 """
-function dim_control_cons_box(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:control, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_control_constraints_box(ocp::Model)::Int = length(control_constraints_box(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on variable.
 """
-function dim_variable_cons_box(ocp::Model)
-    dim = 0
-    for (_, c) in ocp.constraints
-        dim += @match c begin
-            (:variable, rg::OrdinalRange{<:Int}, lb, ub) => length(lb)
-            _ => 0
-        end
-    end
-    return dim
-end
+dim_variable_constraints_box(ocp::Model)::Int = length(variable_constraints_box(ocp)[1])

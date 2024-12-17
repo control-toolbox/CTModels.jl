@@ -194,7 +194,7 @@ final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::Varia
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = ocp.times
 
 time_name(ocp::Model)::String = time_name(ocp.times)
@@ -208,7 +208,7 @@ time_name(ocp::Model)::String = time_name(ocp.times)
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = initial_time(ocp.times)
 
 (
@@ -220,7 +220,7 @@ time_name(ocp::Model)::String = time_name(ocp.times)
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = final_time(ocp.times)
 
 (
@@ -232,7 +232,7 @@ time_name(ocp::Model)::String = time_name(ocp.times)
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = initial_time(ocp.times, variable)
 
 (
@@ -244,7 +244,7 @@ time_name(ocp::Model)::String = time_name(ocp.times)
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = final_time(ocp.times, variable)
 
 initial_time_name(ocp::Model)::String = name(initial(ocp.times))
@@ -260,7 +260,7 @@ final_time_name(ocp::Model)::String = name(final(ocp.times))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = true
 
 (
@@ -272,7 +272,7 @@ final_time_name(ocp::Model)::String = name(final(ocp.times))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = false
 
 (
@@ -284,7 +284,7 @@ final_time_name(ocp::Model)::String = name(final(ocp.times))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = true
 
 (
@@ -296,7 +296,7 @@ final_time_name(ocp::Model)::String = name(final(ocp.times))
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = false
 
 has_free_initial_time(ocp::Model)::Bool = !has_fixed_initial_time(ocp)

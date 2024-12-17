@@ -124,7 +124,7 @@ has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = ocp.objective
 
 criterion(ocp::Model)::Symbol = criterion(objective(ocp))
@@ -138,7 +138,7 @@ criterion(ocp::Model)::Symbol = criterion(objective(ocp))
     V<:AbstractVariableModel,
     D<:Function,
     M<:Function,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = mayer(objective(ocp))
 (
     mayer(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::M
@@ -150,7 +150,7 @@ criterion(ocp::Model)::Symbol = criterion(objective(ocp))
     D<:Function,
     M<:Function,
     L<:Function,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = mayer(objective(ocp))
 function mayer(
     ocp::Model{T,S,C,V,D,<:LagrangeObjectiveModel,B}
@@ -160,7 +160,7 @@ function mayer(
     C<:AbstractControlModel,
     D<:Function,
     V<:AbstractVariableModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 }
     throw(
         CTBase.UnauthorizedCall("a Lagrange objective ocp does not have a Mayer function.")
@@ -176,7 +176,7 @@ end
     V<:AbstractVariableModel,
     D<:Function,
     L<:Function,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = lagrange(objective(ocp))
 (
     lagrange(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::L
@@ -188,7 +188,7 @@ end
     D<:Function,
     M<:Function,
     L<:Function,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = lagrange(objective(ocp))
 function lagrange(
     ocp::Model{T,S,C,V,D,<:MayerObjectiveModel,B}
@@ -198,7 +198,7 @@ function lagrange(
     C<:AbstractControlModel,
     D<:Function,
     V<:AbstractVariableModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 }
     throw(
         CTBase.UnauthorizedCall("a Mayer objective ocp does not have a Lagrange function.")

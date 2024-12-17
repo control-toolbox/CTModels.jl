@@ -192,6 +192,31 @@ struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
 end
 
 # ------------------------------------------------------------------------------ #
+# Constraints
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
+abstract type AbstractConstraintsModel end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct ConstraintsModel{TP<:Tuple, TV1<:Tuple, TB<:Tuple, TS<:Tuple, TC<:Tuple, TV2<:Tuple, TC_ALL<:ConstraintsDictType} <: AbstractConstraintsModel
+    path_nl::TP
+    variable_nl::TV1
+    boundary_nl::TB
+    state_box::TS
+    control_box::TC
+    variable_box::TV2
+    dict::TC_ALL
+end
+
+# ------------------------------------------------------------------------------ #
 # Model
 # ------------------------------------------------------------------------------ #
 """
@@ -213,7 +238,7 @@ struct Model{
     VariableModelType<:AbstractVariableModel,
     DynamicsModelType<:Function,
     ObjectiveModelType<:AbstractObjectiveModel,
-    ConstraintsModelType<:ConstraintsDictType,
+    ConstraintsModelType<:AbstractConstraintsModel,
 } <: AbstractModel
     times::TimesModelType
     state::StateModelType

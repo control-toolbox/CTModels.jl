@@ -28,7 +28,7 @@ function test_ocp()
     variable = CTModels.VariableModel("v", ["v₁", "v₂"])
     dynamics = dynamics_user!
     objective = CTModels.MayerObjectiveModel(mayer_user!, :min)
-    constraints = CTModels.ConstraintsDictType()
+    pre_constraints = CTModels.ConstraintsDictType()
 
     # add some constraints:
     # - path constraint: one of dimension 2, and another of dimension 1
@@ -40,37 +40,40 @@ function test_ocp()
 
     # path constraint
     f_path_a(r, t, x, u, v) = r .= x .+ u .+ v .+ t
-    CTModels.constraint!(constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2])
+    CTModels.__constraint!(pre_constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2])
     f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-    CTModels.constraint!(constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
 
     # boundary constraint
     f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
-    CTModels.constraint!(
-        constraints, :boundary, n, m, q; f=f_boundary_a, lb=[0, 1], ub=[1, 2]
+    CTModels.__constraint!(
+        pre_constraints, :boundary, n, m, q; f=f_boundary_a, lb=[0, 1], ub=[1, 2]
     )
     f_boundary_b(r, x0, xf, v) = r .= x0[1] - 1.0 + v[1] * (xf[1] - x0[1])
-    CTModels.constraint!(constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3])
 
     # variable constraint
     f_variable_a(r, v) = r .= 2v
-    CTModels.constraint!(
-        constraints, :variable, n, m, q; f=f_variable_a, lb=[0, 1], ub=[1, 2]
+    CTModels.__constraint!(
+        pre_constraints, :variable, n, m, q; f=f_variable_a, lb=[0, 1], ub=[1, 2]
     )
     f_variable_b(r, v) = r .= v[1] - 1.0
-    CTModels.constraint!(constraints, :variable, n, m, q; f=f_variable_b, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :variable, n, m, q; f=f_variable_b, lb=[3], ub=[3])
 
     # state box constraint
-    CTModels.constraint!(constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.__constraint!(pre_constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # control box constraint
-    CTModels.constraint!(constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.__constraint!(pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # variable box constraint
-    CTModels.constraint!(constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.constraint!(constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.__constraint!(pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.__constraint!(pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
+
+    # build constraints
+    constraints = CTModels.build_constraints(pre_constraints)
 
     # Model definition
     definition = quote
@@ -138,18 +141,21 @@ function test_ocp()
 
     # tests on constraints
     # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
-    @test CTModels.dim_path_cons_nl(ocp) == 3
-    @test CTModels.dim_boundary_cons_nl(ocp) == 3
-    @test CTModels.dim_variable_cons_nl(ocp) == 3
-    @test CTModels.dim_state_cons_box(ocp) == 3
-    @test CTModels.dim_control_cons_box(ocp) == 3
-    @test CTModels.dim_variable_cons_box(ocp) == 3
+    @test CTModels.dim_path_constraints_nl(ocp) == 3
+    @test CTModels.dim_boundary_constraints_nl(ocp) == 3
+    @test CTModels.dim_variable_constraints_nl(ocp) == 3
+    @test CTModels.dim_state_constraints_box(ocp) == 3
+    @test CTModels.dim_control_constraints_box(ocp) == 3
+    @test CTModels.dim_variable_constraints_box(ocp) == 3
 
     # Get all constraints and test. Be careful, the order is not guaranteed. 
     # We will check up to permutations by sorting the results.
-    (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub), (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub), (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub), (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub), (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub), (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub) = CTModels.constraints(
-        ocp
-    )
+    (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub) = CTModels.path_constraints_nl(ocp)
+    (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub) = CTModels.variable_constraints_nl(ocp)
+    (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub) = CTModels.boundary_constraints_nl(ocp)
+    (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub) = CTModels.state_constraints_box(ocp)
+    (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub) = CTModels.control_constraints_box(ocp)
+    (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub) = CTModels.variable_constraints_box(ocp)
 
     # path constraints
     @test sort(path_cons_nl_lb) == [0, 1, 3]

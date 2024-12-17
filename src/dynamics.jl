@@ -32,5 +32,5 @@ end
     V<:AbstractVariableModel,
     D<:Function,
     O<:AbstractObjectiveModel,
-    B<:ConstraintsDictType,
+    B<:AbstractConstraintsModel,
 } = ocp.dynamics
