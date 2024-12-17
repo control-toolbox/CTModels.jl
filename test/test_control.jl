@@ -18,6 +18,9 @@ function test_control()
 
     # control!
     ocp = CTModels.PreModel()
+    @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 0)
+
+    ocp = CTModels.PreModel()
     CTModels.control!(ocp, 1)
     @test CTModels.dimension(ocp.control) == 1
     @test CTModels.name(ocp.control) == "u"

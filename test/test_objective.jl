@@ -6,8 +6,8 @@ function test_objective()
     @test isconcretetype(CTModels.BolzaObjectiveModel{Function,Function}) # BolzaObjectiveModel
 
     # Functions
-    mayer!(r, x0, xf, v) = r .= x0 .+ xf .+ v
-    lagrange!(r, t, x, u, v) = r .= t .+ x .+ u .+ v
+    mayer!(x0, xf, v) = x0 .+ xf .+ v
+    lagrange!(t, x, u, v) = t .+ x .+ u .+ v
 
     # MayerObjectiveModel
     objective = CTModels.MayerObjectiveModel(mayer!, :min)

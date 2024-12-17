@@ -18,6 +18,9 @@ function test_state()
 
     # state!
     ocp = CTModels.PreModel()
+    @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 0)
+
+    ocp = CTModels.PreModel()
     CTModels.state!(ocp, 1)
     @test CTModels.dimension(ocp.state) == 1
     @test CTModels.name(ocp.state) == "x"

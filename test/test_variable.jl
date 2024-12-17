@@ -18,6 +18,12 @@ function test_variable()
 
     # variable!
     ocp = CTModels.PreModel()
+    CTModels.variable!(ocp, 0)
+    @test CTModels.dimension(ocp.variable) == 0
+    @test CTModels.name(ocp.variable) == ""
+    @test CTModels.components(ocp.variable) == String[]
+
+    ocp = CTModels.PreModel()
     CTModels.variable!(ocp, 1)
     @test CTModels.dimension(ocp.variable) == 1
     @test CTModels.name(ocp.variable) == "v"

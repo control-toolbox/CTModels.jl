@@ -79,13 +79,18 @@ function state!(
 
     # checkings
     __is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state has already been set."))
-    (n > 1) &&
-        (size(components_names, 1) ≠ n) &&
+
+    (n > 0) && (size(components_names, 1) ≠ n) &&
         throw(
             CTBase.IncorrectArgument(
                 "the number of state names must be equal to the state dimension"
             ),
         )
+
+    # if the dimension is 0 then throw an error
+    if n == 0
+        throw(CTBase.IncorrectArgument("the state dimension must be greater than 0"))
+    end
 
     # set the state
     ocp.state = StateModel(string(name), string.(components_names))

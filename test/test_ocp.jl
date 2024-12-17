@@ -7,8 +7,8 @@ function test_ocp()
     q = 2 # variable dimension
 
     # functions
-    mayer_user!(r, x0, xf, v) = r .= sum(xf .- x0 .- v)
-    lagrange_user!(r, t, x, u, v) = r .= sum(x .+ u .+ v .+ t)
+    mayer_user!(x0, xf, v) = sum(xf .- x0 .- v)
+    lagrange_user!(t, x, u, v) = sum(x .+ u .+ v .+ t)
     dynamics_user!(r, t, x, u, v) = r .= x .+ u .+ v .+ t
 
     # points
@@ -132,12 +132,8 @@ function test_ocp()
     @test CTModels.has_lagrange_cost(ocp) == false
 
     # tests on mayer
-    r = zeros(Float64, 1)
-    r_user = zeros(Float64, 1)
     mayer! = CTModels.mayer(ocp)
-    mayer!(r, x0, xf, v)
-    mayer_user!(r_user, x0, xf, v)
-    @test r == r_user
+    @test mayer!(x0, xf, v) == mayer_user!(x0, xf, v)
     @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp)
 
     # tests on constraints
@@ -277,12 +273,8 @@ function test_ocp()
     @test CTModels.has_lagrange_cost(ocp) == true
 
     # tests on lagrange
-    r = zeros(Float64, 1)
-    r_user = zeros(Float64, 1)
     lagrange! = CTModels.lagrange(ocp)
-    lagrange!(r, t, x, u, v)
-    lagrange_user!(r_user, t, x, u, v)
-    @test r == r_user
+    @test lagrange!(t, x, u, v) == lagrange_user!(t, x, u, v)
     @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp)
 
     # -------------------------------------------------------------------------- #
