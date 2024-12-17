@@ -212,7 +212,31 @@ time_name(ocp::Model)::String = time_name(ocp.times)
 } = initial_time(ocp.times)
 
 (
+    initial_time(ocp::Model{T,S,C,V,D,O,B}, ::Variable)::Time
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = initial_time(ocp.times)
+
+(
     final_time(ocp::Model{T,S,C,V,D,O,B})::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = final_time(ocp.times)
+
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B}, ::Variable)::Time
 ) where {
     T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
     S<:AbstractStateModel,

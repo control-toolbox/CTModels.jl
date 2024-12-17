@@ -1,5 +1,6 @@
 function test_constraints()
-    ∅ = Vector{Real}()
+
+    ∅ = Vector{Float64}()
 
     # From PreModel
     ocp_set = CTModels.PreModel()
