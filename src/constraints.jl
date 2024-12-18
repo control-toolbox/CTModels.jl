@@ -171,7 +171,9 @@ end
 constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 
 (
-    path_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TP
+    path_constraints_nl(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TP
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -188,7 +190,9 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 } = ocp.constraints.path_nl
 
 (
-    variable_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TV1
+    variable_constraints_nl(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TV1
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -205,7 +209,9 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 } = ocp.constraints.variable_nl
 
 (
-    boundary_constraints_nl(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TB
+    boundary_constraints_nl(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TB
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -222,7 +228,9 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 } = ocp.constraints.boundary_nl
 
 (
-    state_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TS
+    state_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TS
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -239,7 +247,9 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 } = ocp.constraints.state_box
 
 (
-    control_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TC
+    control_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TC
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -256,7 +266,9 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 } = ocp.constraints.control_box
 
 (
-    variable_constraints_box(ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP, TV1, TB, TS, TC, TV2, ConstraintsDictType}})::TV2
+    variable_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+    )::TV2
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,

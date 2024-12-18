@@ -81,7 +81,8 @@ function control!(
     __is_control_set(ocp) &&
         throw(CTBase.UnauthorizedCall("the control has already been set."))
 
-    (m > 0) && (size(components_names, 1) ≠ m) &&
+    (m > 0) &&
+        (size(components_names, 1) ≠ m) &&
         throw(
             CTBase.IncorrectArgument(
                 "the number of control names must be equal to the control dimension"
