@@ -1,5 +1,4 @@
 function test_constraints()
-
     ∅ = Vector{Float64}()
 
     # From PreModel

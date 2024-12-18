@@ -48,7 +48,8 @@ function variable!(
     __is_variable_set(ocp) &&
         throw(CTBase.UnauthorizedCall("the variable has already been set."))
 
-    (q > 0) && (size(components_names, 1) ≠ q) &&
+    (q > 0) &&
+        (size(components_names, 1) ≠ q) &&
         throw(
             CTBase.IncorrectArgument(
                 "the number of variable names must be equal to the variable dimension"
