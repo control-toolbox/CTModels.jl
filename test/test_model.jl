@@ -62,9 +62,6 @@ function test_model()
     CTModels.constraint!(
         pre_ocp, :boundary; f=f_boundary, lb=[0, 1], ub=[1, 2], label=:boundary
     )
-    CTModels.constraint!(
-        pre_ocp, :variable; f=f_variable, lb=[0, 1], ub=[1, 2], label=:variable
-    )
     CTModels.constraint!(pre_ocp, :state; rg=1:2, lb=[0, 1], ub=[1, 2], label=:state_rg)
     CTModels.constraint!(pre_ocp, :control; rg=1:2, lb=[0, 1], ub=[1, 2], label=:control_rg)
     CTModels.constraint!(

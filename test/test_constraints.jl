@@ -120,13 +120,6 @@ function test_constraints()
     )
     @test ocp_set.constraints[:boundary] == (:boundary, f_boundary, [0, 1], [1, 2])
 
-    # test with :variable constraint
-    f_variable(r, t, v) = r .= v .+ t
-    CTModels.constraint!(
-        ocp_set, :variable; f=f_variable, lb=[0, 1], ub=[1, 2], label=:variable
-    )
-    @test ocp_set.constraints[:variable] == (:variable, f_variable, [0, 1], [1, 2])
-
     # test with :state constraint and range
     CTModels.constraint!(ocp_set, :state; rg=1:2, lb=[0, 1], ub=[1, 2], label=:state_rg)
     @test ocp_set.constraints[:state_rg] == (:state, 1:2, [0, 1], [1, 2])

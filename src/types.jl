@@ -208,19 +208,17 @@ $(TYPEDFIELDS)
 """
 struct ConstraintsModel{
     TP<:Tuple,
-    TV1<:Tuple,
     TB<:Tuple,
     TS<:Tuple,
     TC<:Tuple,
-    TV2<:Tuple,
+    TV<:Tuple,
     TC_ALL<:ConstraintsDictType,
 } <: AbstractConstraintsModel
     path_nl::TP
-    variable_nl::TV1
     boundary_nl::TB
     state_box::TS
     control_box::TC
-    variable_box::TV2
+    variable_box::TV
     dict::TC_ALL
 end
 
@@ -383,31 +381,27 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct DualModel{
+    PC<:Function,
+    PC_Dual<:Function,
+    BC<:ctVector,
+    BC_Dual<:ctVector,
     SC_LB_Dual<:Function,
     SC_UB_Dual<:Function,
     CC_LB_Dual<:Function,
     CC_UB_Dual<:Function,
     VC_LB_Dual<:ctVector,
     VC_UB_Dual<:ctVector,
-    BC<:ctVector,
-    BC_Dual<:ctVector,
-    PC<:Function,
-    PC_Dual<:Function,
-    VC<:ctVector,
-    VC_Dual<:ctVector,
 } <: AbstractDualModel
+    path_constraints::PC
+    path_constraints_dual::PC_Dual
+    boundary_constraints::BC
+    boundary_constraints_dual::BC_Dual
     state_constraints_lb_dual::SC_LB_Dual
     state_constraints_ub_dual::SC_UB_Dual
     control_constraints_lb_dual::CC_LB_Dual
     control_constraints_ub_dual::CC_UB_Dual
     variable_constraints_lb_dual::VC_LB_Dual
     variable_constraints_ub_dual::VC_UB_Dual
-    boundary_constraints::BC
-    boundary_constraints_dual::BC_Dual
-    path_constraints::PC
-    path_constraints_dual::PC_Dual
-    variable_constraints::VC
-    variable_constraints_dual::VC_Dual
 end
 
 # ------------------------------------------------------------------------------ #

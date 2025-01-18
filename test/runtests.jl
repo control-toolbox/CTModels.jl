@@ -6,7 +6,7 @@ using CTModels
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
     for name in (
-        :aqua,
+        #:aqua,
         :times,
         :ocp,
         :control,

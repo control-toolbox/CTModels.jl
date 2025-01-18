@@ -11,18 +11,16 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
+    path_constraints::Matrix{Float64},
+    path_constraints_dual::Matrix{Float64},
+    boundary_constraints::Vector{Float64},
+    boundary_constraints_dual::Vector{Float64},
     state_constraints_lb_dual::Matrix{Float64},
     state_constraints_ub_dual::Matrix{Float64},
     control_constraints_lb_dual::Matrix{Float64},
     control_constraints_ub_dual::Matrix{Float64},
     variable_constraints_lb_dual::Vector{Float64},
     variable_constraints_ub_dual::Vector{Float64},
-    boundary_constraints::Vector{Float64},
-    boundary_constraints_dual::Vector{Float64},
-    path_constraints::Matrix{Float64},
-    path_constraints_dual::Matrix{Float64},
-    variable_constraints::Vector{Float64},
-    variable_constraints_dual::Vector{Float64},
 )
 
     # get dimensions
@@ -93,18 +91,16 @@ function build_solution(
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
     variable = VariableModelSolution(variable_name(ocp), variable_cpùomponents(ocp), var)
     dual = DualModel(
+        path_constraints_fun,
+        path_constraints_dual_fun,
+        boundary_constraints,
+        boundary_constraints_dual,
         state_constraints_lb_dual_fun,
         state_constraints_ub_dual_fun,
         control_constraints_lb_dual_fun,
         control_constraints_ub_dual_fun,
         variable_constraints_lb_dual,
         variable_constraints_ub_dual,
-        boundary_constraints,
-        boundary_constraints_dual,
-        path_constraints_fun,
-        path_constraints_dual_fun,
-        variable_constraints,
-        variable_constraints_dual,
     )
     solver_infos = SolverInfos(
         iterations, stopping, message, success, constraints_violation, infos
