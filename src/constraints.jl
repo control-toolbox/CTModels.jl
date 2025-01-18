@@ -106,14 +106,14 @@ function __constraint!(
 
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
             # set the constraint
-            if type ∈ [:boundary, :variable, :path]
+            if type ∈ [:boundary, :path]
                 ocp_constraints[label] = (type, f, lb, ub)
             else
                 throw(
                     CTBase.IncorrectArgument(
                         "the following type of constraint is not valid: " *
                         String(type) *
-                        ". Please choose in [ :boundary, :variable, :path ] or check the arguments of the constraint! method.",
+                        ". Please choose in [ :boundary, :path ] or check the arguments of the constraint! method.",
                     ),
                 )
             end
@@ -172,7 +172,7 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 
 (
     path_constraints_nl(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
     )::TP
 ) where {
     T<:TimesModel,
@@ -182,35 +182,15 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
     D<:Function,
     O<:AbstractObjectiveModel,
     TP,
-    TV1,
     TB,
     TS,
     TC,
-    TV2,
+    TV,
 } = ocp.constraints.path_nl
 
 (
-    variable_constraints_nl(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
-    )::TV1
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TV1,
-    TB,
-    TS,
-    TC,
-    TV2,
-} = ocp.constraints.variable_nl
-
-(
     boundary_constraints_nl(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
     )::TB
 ) where {
     T<:TimesModel,
@@ -220,16 +200,15 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
     D<:Function,
     O<:AbstractObjectiveModel,
     TP,
-    TV1,
     TB,
     TS,
     TC,
-    TV2,
+    TV,
 } = ocp.constraints.boundary_nl
 
 (
     state_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
     )::TS
 ) where {
     T<:TimesModel,
@@ -239,16 +218,15 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
     D<:Function,
     O<:AbstractObjectiveModel,
     TP,
-    TV1,
     TB,
     TS,
     TC,
-    TV2,
+    TV,
 } = ocp.constraints.state_box
 
 (
     control_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
     )::TC
 ) where {
     T<:TimesModel,
@@ -258,17 +236,16 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
     D<:Function,
     O<:AbstractObjectiveModel,
     TP,
-    TV1,
     TB,
     TS,
     TC,
-    TV2,
+    TV,
 } = ocp.constraints.control_box
 
 (
     variable_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TV1,TB,TS,TC,TV2,ConstraintsDictType}}
-    )::TV2
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TV
 ) where {
     T<:TimesModel,
     S<:AbstractStateModel,
@@ -277,11 +254,10 @@ constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
     D<:Function,
     O<:AbstractObjectiveModel,
     TP,
-    TV1,
     TB,
     TS,
     TC,
-    TV2,
+    TV,
 } = ocp.constraints.variable_box
 
 """
@@ -289,39 +265,32 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
 """
-dim_path_constraints_nl(ocp::Model)::Int = length(path_constraints_nl(ocp)[1])
+dim_path_constraints_nl(ocp::Model)::Dimension = length(path_constraints_nl(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 """
-dim_boundary_constraints_nl(ocp::Model)::Int = length(boundary_constraints_nl(ocp)[1])
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of nonlinear variable constraints.
-"""
-dim_variable_constraints_nl(ocp::Model)::Int = length(variable_constraints_nl(ocp)[1])
+dim_boundary_constraints_nl(ocp::Model)::Dimension = length(boundary_constraints_nl(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on state.
 """
-dim_state_constraints_box(ocp::Model)::Int = length(state_constraints_box(ocp)[1])
+dim_state_constraints_box(ocp::Model)::Dimension = length(state_constraints_box(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on control.
 """
-dim_control_constraints_box(ocp::Model)::Int = length(control_constraints_box(ocp)[1])
+dim_control_constraints_box(ocp::Model)::Dimension = length(control_constraints_box(ocp)[1])
 
 """
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on variable.
 """
-dim_variable_constraints_box(ocp::Model)::Int = length(variable_constraints_box(ocp)[1])
+dim_variable_constraints_box(ocp::Model)::Dimension = length(variable_constraints_box(ocp)[1])

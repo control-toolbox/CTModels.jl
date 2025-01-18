@@ -61,16 +61,6 @@ function test_ocp()
         pre_constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3]
     )
 
-    # variable constraint
-    f_variable_a(r, v) = r .= 2v
-    CTModels.__constraint!(
-        pre_constraints, :variable, n, m, q; f=f_variable_a, lb=[0, 1], ub=[1, 2]
-    )
-    f_variable_b(r, v) = r .= v[1] - 1.0
-    CTModels.__constraint!(
-        pre_constraints, :variable, n, m, q; f=f_variable_b, lb=[3], ub=[3]
-    )
-
     # state box constraint
     CTModels.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
     CTModels.__constraint!(pre_constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
@@ -154,7 +144,6 @@ function test_ocp()
     # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
     @test CTModels.dim_path_constraints_nl(ocp) == 3
     @test CTModels.dim_boundary_constraints_nl(ocp) == 3
-    @test CTModels.dim_variable_constraints_nl(ocp) == 3
     @test CTModels.dim_state_constraints_box(ocp) == 3
     @test CTModels.dim_control_constraints_box(ocp) == 3
     @test CTModels.dim_variable_constraints_box(ocp) == 3
@@ -162,9 +151,6 @@ function test_ocp()
     # Get all constraints and test. Be careful, the order is not guaranteed. 
     # We will check up to permutations by sorting the results.
     (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub) = CTModels.path_constraints_nl(ocp)
-    (variable_cons_nl_lb, variable_cons_nl!, variable_cons_nl_ub) = CTModels.variable_constraints_nl(
-        ocp
-    )
     (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub) = CTModels.boundary_constraints_nl(
         ocp
     )
@@ -198,17 +184,6 @@ function test_ocp()
     f_boundary_b(rb, x0, xf, v)
     r = zeros(Float64, 3)
     boundary_cons_nl!(r, x0, xf, v)
-    @test sort(r) == sort([ra; rb])
-
-    # variable constraints
-    @test sort(variable_cons_nl_lb) == [0, 1, 3]
-    @test sort(variable_cons_nl_ub) == [1, 2, 3]
-    ra = zeros(Float64, 2)
-    rb = zeros(Float64, 1)
-    f_variable_a(ra, v)
-    f_variable_b(rb, v)
-    r = zeros(Float64, 3)
-    variable_cons_nl!(r, v)
     @test sort(r) == sort([ra; rb])
 
     # state box constraints
