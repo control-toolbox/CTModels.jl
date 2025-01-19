@@ -89,7 +89,7 @@ function build_solution(
     time_grid = TimeGridModel(T)
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
-    variable = VariableModelSolution(variable_name(ocp), variable_cpùomponents(ocp), var)
+    variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
         path_constraints_fun,
         path_constraints_dual_fun,
