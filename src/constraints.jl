@@ -293,4 +293,5 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on variable.
 """
-dim_variable_constraints_box(ocp::Model)::Dimension = length(variable_constraints_box(ocp)[1])
+dim_variable_constraints_box(ocp::Model)::Dimension =
+    length(variable_constraints_box(ocp)[1])

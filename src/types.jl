@@ -207,12 +207,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct ConstraintsModel{
-    TP<:Tuple,
-    TB<:Tuple,
-    TS<:Tuple,
-    TC<:Tuple,
-    TV<:Tuple,
-    TC_ALL<:ConstraintsDictType,
+    TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple,TC_ALL<:ConstraintsDictType
 } <: AbstractConstraintsModel
     path_nl::TP
     boundary_nl::TB
