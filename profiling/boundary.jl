@@ -4,18 +4,18 @@ begin
 
     using JET
     using BenchmarkTools
-    using Profile 
+    using Profile
 
     # define problem with new model: simple integrator
     function simple_integrator_model()
         pre_ocp = CTModels.PreModel()
         CTModels.state!(pre_ocp, 1)
         CTModels.control!(pre_ocp, 2)
-        CTModels.time!(pre_ocp, t0=0.0, tf=1.0)
-        f!(r, t, x, u, v) = r .=  .- x[1] .- u[1] .+ u[2] 
+        CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+        f!(r, t, x, u, v) = r .= .-x[1] .- u[1] .+ u[2]
         CTModels.dynamics!(pre_ocp, f!)
-        l(t, x, u, v) = (u[1] .+ u[2]).^2
-        CTModels.objective!(pre_ocp, :min, lagrange=l)
+        l(t, x, u, v) = (u[1] .+ u[2]) .^ 2
+        CTModels.objective!(pre_ocp, :min; lagrange=l)
         function bc!(r, x0, xf, v)
             r[1] = x0[1]
             r[2] = xf[1]
@@ -75,5 +75,5 @@ let
     println("\n")
     println("--------------------------------")
     println("Boundary constraint from model")
-    @code_native debuginfo=:none dump_module=false boundary!(r, x0, xf, v)
+    @code_native debuginfo = :none dump_module = false boundary!(r, x0, xf, v)
 end

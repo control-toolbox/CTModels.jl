@@ -1,5 +1,4 @@
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
-
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
     path_cons_nl_lb = Vector{ctNumber}()
@@ -86,7 +85,7 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     function make_path_cons_nl(
         constraints_number::Int, 
         constraints_dimensions::Vector{Int}, 
-        constraints_functions::Function...
+        constraints_functions::Function...,
     )
         function path_cons_nl!(val, t, x, u, v)
             j = 1
@@ -110,9 +109,9 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     end
 
     function make_boundary_cons_nl(
-        constraints_number::Int, 
-        constraints_dimensions::Vector{Int}, 
-        constraints_functions::Function...
+        constraints_number::Int,
+        constraints_dimensions::Vector{Int},
+        constraints_functions::Function...,
     )
         function boundary_cons_nl!(val, x0, xf, v)
             j = 1
@@ -127,14 +126,12 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     end
 
     path_cons_nl! = make_path_cons_nl(
-        length_path_cons_nl, 
-        path_cons_nl_dim, 
-        path_cons_nl_f...)
+        length_path_cons_nl, path_cons_nl_dim, path_cons_nl_f...
+    )
 
     boundary_cons_nl! = make_boundary_cons_nl(
-        length_boundary_cons_nl, 
-        boundary_cons_nl_dim, 
-        boundary_cons_nl_f...)
+        length_boundary_cons_nl, boundary_cons_nl_dim, boundary_cons_nl_f...
+    )
 
     return ConstraintsModel(
         (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub),
