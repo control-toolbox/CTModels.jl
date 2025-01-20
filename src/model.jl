@@ -77,6 +77,15 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     function make_path_cons_nl(
         constraints_number::Int, 
         constraints_dimensions::Vector{Int}, 
+        constraints_function::Function # only one function
+    )
+        @assert constraints_number == 1
+        return constraints_function
+    end
+
+    function make_path_cons_nl(
+        constraints_number::Int, 
+        constraints_dimensions::Vector{Int}, 
         constraints_functions::Function...
     )
         function path_cons_nl!(val, t, x, u, v)
@@ -91,15 +100,14 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
         return path_cons_nl!
     end
 
-    # function path_cons_nl!(val, t, x, u, v) # nonlinear path constraints (in place)
-    #     j = 1
-    #     for i in 1:length_path_cons_nl
-    #         li = path_cons_nl_dim[i]
-    #         path_cons_nl_f[i](@view(val[j:(j + li - 1)]), t, x, u, v)
-    #         j += li
-    #     end
-    #     return nothing
-    # end
+    function make_boundary_cons_nl(
+        constraints_number::Int, 
+        constraints_dimensions::Vector{Int}, 
+        constraints_function::Function # only one function
+    )
+        @assert constraints_number == 1
+        return constraints_function
+    end
 
     function make_boundary_cons_nl(
         constraints_number::Int, 
@@ -117,16 +125,6 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
         end
         return boundary_cons_nl!
     end
-
-    # function boundary_cons_nl!(val, x0, xf, v) # nonlinear boundary constraints
-    #     j = 1
-    #     for i in 1:length_boundary_cons_nl
-    #         li = boundary_cons_nl_dim[i]
-    #         boundary_cons_nl_f[i](@view(val[j:(j + li - 1)]), x0, xf, v)
-    #         j += li
-    #     end
-    #     return nothing
-    # end
 
     path_cons_nl! = make_path_cons_nl(
         length_path_cons_nl, 

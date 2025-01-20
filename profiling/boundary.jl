@@ -21,22 +21,21 @@ begin
             r[2] = xf[1]
             return nothing
         end
-        #bc!(r, x0, xf, v) = r .= [x0[1], xf[1]]
-        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1)
-        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2)
-        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary3)
+        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1); N  = 2
+        #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2); N += 2
+        #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary3); N += 2
         CTModels.constraint!(pre_ocp, :control, rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg)
         CTModels.definition!(pre_ocp, Expr(:simple_integrator_min_energy))
         ocp = CTModels.build_model(pre_ocp)
-        return ocp
+        return ocp, N
     end
 
-    ocp = simple_integrator_model()
+    ocp, N = simple_integrator_model()
 
     x0 = [1.0]
     xf = [0.0]
     v  = Float64[]
-    r = zeros(Float64, 6)
+    r = zeros(Float64, N)
     bc_constraint = CTModels.boundary_constraints_nl(ocp)
     boundary! = bc_constraint[2]
     boundary!(r, x0, xf, v)
@@ -53,24 +52,27 @@ let
     println("--------------------------------")
     println("Boundary constraint")
     @code_warntype bc!(r, x0, xf, v)
-
+    println("\n")
     println("--------------------------------")
     println("Boundary constraint from model")
     @code_warntype boundary!(r, x0, xf, v)
 end
 
 let
+    println("--------------------------------")
     println("Boundary constraint")
-    @btime bc!(r, x0, xf, v)
+    display(@benchmark bc!(r, x0, xf, v))
+    println("\n")
+    println("--------------------------------")
     println("Boundary constraint from model")
-    @btime boundary!(r, x0, xf, v)
+    display(@benchmark boundary!(r, x0, xf, v))
 end
 
 let
     println("--------------------------------")
     println("Boundary constraint")
     @code_native debuginfo=:none dump_module=false bc!(r, x0, xf, v)
-
+    println("\n")
     println("--------------------------------")
     println("Boundary constraint from model")
     @code_native debuginfo=:none dump_module=false boundary!(r, x0, xf, v)
