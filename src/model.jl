@@ -74,17 +74,17 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     length_boundary_cons_nl::Int = length(boundary_cons_nl_f)
 
     function make_path_cons_nl(
-        constraints_number::Int, 
-        constraints_dimensions::Vector{Int}, 
-        constraints_function::Function # only one function
+        constraints_number::Int,
+        constraints_dimensions::Vector{Int},
+        constraints_function::Function, # only one function
     )
         @assert constraints_number == 1
         return constraints_function
     end
 
     function make_path_cons_nl(
-        constraints_number::Int, 
-        constraints_dimensions::Vector{Int}, 
+        constraints_number::Int,
+        constraints_dimensions::Vector{Int},
         constraints_functions::Function...,
     )
         function path_cons_nl!(val, t, x, u, v)
@@ -100,9 +100,9 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     end
 
     function make_boundary_cons_nl(
-        constraints_number::Int, 
-        constraints_dimensions::Vector{Int}, 
-        constraints_function::Function # only one function
+        constraints_number::Int,
+        constraints_dimensions::Vector{Int},
+        constraints_function::Function, # only one function
     )
         @assert constraints_number == 1
         return constraints_function
