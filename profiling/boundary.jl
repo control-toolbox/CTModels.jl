@@ -21,10 +21,15 @@ begin
             r[2] = xf[1]
             return nothing
         end
-        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1); N  = 2
+        CTModels.constraint!(
+            pre_ocp, :boundary; f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1
+        )
+        N = 2
         #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2); N += 2
         #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary3); N += 2
-        CTModels.constraint!(pre_ocp, :control, rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg)
+        CTModels.constraint!(
+            pre_ocp, :control; rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg
+        )
         CTModels.definition!(pre_ocp, Expr(:simple_integrator_min_energy))
         ocp = CTModels.build_model(pre_ocp)
         return ocp, N
@@ -34,7 +39,7 @@ begin
 
     x0 = [1.0]
     xf = [0.0]
-    v  = Float64[]
+    v = Float64[]
     r = zeros(Float64, N)
     bc_constraint = CTModels.boundary_constraints_nl(ocp)
     boundary! = bc_constraint[2]
@@ -71,7 +76,7 @@ end
 let
     println("--------------------------------")
     println("Boundary constraint")
-    @code_native debuginfo=:none dump_module=false bc!(r, x0, xf, v)
+    @code_native debuginfo = :none dump_module = false bc!(r, x0, xf, v)
     println("\n")
     println("--------------------------------")
     println("Boundary constraint from model")
