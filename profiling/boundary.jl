@@ -20,10 +20,15 @@ begin
             r[1] = x0[1]
             r[2] = xf[1]
             return nothing
+        end        
+        function bc2!(r, x0, xf, v)
+            r[1] = x0[1]
+            r[2] = xf[1]
+            return nothing
         end
         CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1); N  = 2
-        #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2); N += 2
-        #CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary3); N += 2
+        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2); N += 2
+        CTModels.constraint!(pre_ocp, :boundary, f=bc2!, lb=[-1, 0], ub=[-1, 0], label=:boundary3); N += 2
         CTModels.constraint!(pre_ocp, :control, rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg)
         CTModels.definition!(pre_ocp, Expr(:simple_integrator_min_energy))
         ocp = CTModels.build_model(pre_ocp)
@@ -56,6 +61,15 @@ let
     println("--------------------------------")
     println("Boundary constraint from model")
     @code_warntype boundary!(r, x0, xf, v)
+end
+
+let
+    println("--------------------------------")
+    println("Boundary constraint")
+    println(@report_opt bc!(r, x0, xf, v))
+    println("--------------------------------")
+    println("Boundary constraint from model")
+    println(@report_opt boundary!(r, x0, xf, v))
 end
 
 let
