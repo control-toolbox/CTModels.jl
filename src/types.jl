@@ -94,7 +94,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct VariableModelSolution{TS<:ctVector} <: AbstractVariableModel
+struct VariableModelSolution{TS<:Union{ctNumber, ctVector}} <: AbstractVariableModel
     name::String
     components::Vector{String}
     solution::TS
