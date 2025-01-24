@@ -431,7 +431,7 @@ struct Solution{
     control::ControlModelType
     variable::VariableModelType
     costate::CostateModelType
-    cost::ObjectiveValueType
+    objective::ObjectiveValueType
     dual::DualModelType
     solver_infos::SolverInfosType
 end

@@ -5,7 +5,7 @@ function build_solution(
     U::Matrix{Float64},
     v::Vector{Float64},
     P::Matrix{Float64};
-    cost::Float64,
+    objective::Float64,
     iterations::Int,
     constraints_violation::Float64,
     message::String,
@@ -39,7 +39,7 @@ function build_solution(
         T = LinRange(0, dim_NLP_steps, dim_NLP_steps + 1)
     end
 
-    # variables: remove additional state for lagrange cost
+    # variables: remove additional state for lagrange objective
     x = CTBase.ctinterpolate(T, CTBase.matrix2vec(X[:, 1:dim_x], 1))
     p = CTBase.ctinterpolate(T[1:(end - 1)], CTBase.matrix2vec(P[:, 1:dim_x], 1))
     u = CTBase.ctinterpolate(T, CTBase.matrix2vec(U[:, 1:dim_u], 1))
@@ -107,6 +107,6 @@ function build_solution(
     )
 
     return Solution(
-        time_grid, times(ocp), state, control, variable, fp, cost, dual, solver_infos
+        time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos
     )
 end
