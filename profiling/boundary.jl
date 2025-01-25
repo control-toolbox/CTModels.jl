@@ -20,7 +20,7 @@ begin
             r[1] = x0[1]
             r[2] = xf[1]
             return nothing
-        end        
+        end
         function bc2!(r, x0, xf, v)
             r[1] = x0[1]
             r[2] = xf[1]
@@ -30,8 +30,14 @@ begin
             pre_ocp, :boundary; f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1
         )
         N = 2
-        CTModels.constraint!(pre_ocp, :boundary, f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2); N += 2
-        CTModels.constraint!(pre_ocp, :boundary, f=bc2!, lb=[-1, 0], ub=[-1, 0], label=:boundary3); N += 2
+        CTModels.constraint!(
+            pre_ocp, :boundary; f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2
+        )
+        N += 2
+        CTModels.constraint!(
+            pre_ocp, :boundary; f=bc2!, lb=[-1, 0], ub=[-1, 0], label=:boundary3
+        )
+        N += 2
         CTModels.constraint!(
             pre_ocp, :control; rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg
         )

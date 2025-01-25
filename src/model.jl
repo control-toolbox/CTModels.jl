@@ -1,5 +1,4 @@
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
-    
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
     path_cons_nl_lb = Vector{ctNumber}()
