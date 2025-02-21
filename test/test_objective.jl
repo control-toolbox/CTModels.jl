@@ -6,29 +6,29 @@ function test_objective()
     @test isconcretetype(CTModels.BolzaObjectiveModel{Function,Function}) # BolzaObjectiveModel
 
     # Functions
-    mayer!(x0, xf, v) = x0 .+ xf .+ v
-    lagrange!(t, x, u, v) = t .+ x .+ u .+ v
+    mayer(x0, xf, v) = x0 .+ xf .+ v
+    lagrange(t, x, u, v) = t .+ x .+ u .+ v
 
     # MayerObjectiveModel
-    objective = CTModels.MayerObjectiveModel(mayer!, :min)
-    @test CTModels.mayer(objective) == mayer!
+    objective = CTModels.MayerObjectiveModel(mayer, :min)
+    @test CTModels.mayer(objective) == mayer
     @test CTModels.criterion(objective) == :min
     @test CTModels.has_mayer_cost(objective) == true
     @test CTModels.has_lagrange_cost(objective) == false
     @test_throws CTBase.UnauthorizedCall CTModels.lagrange(objective)
 
     # LagrangeObjectiveModel
-    objective = CTModels.LagrangeObjectiveModel(lagrange!, :max)
-    @test CTModels.lagrange(objective) == lagrange!
+    objective = CTModels.LagrangeObjectiveModel(lagrange, :max)
+    @test CTModels.lagrange(objective) == lagrange
     @test CTModels.criterion(objective) == :max
     @test CTModels.has_mayer_cost(objective) == false
     @test CTModels.has_lagrange_cost(objective) == true
     @test_throws CTBase.UnauthorizedCall CTModels.mayer(objective)
 
     # BolzaObjectiveModel
-    objective = CTModels.BolzaObjectiveModel(mayer!, lagrange!, :min)
-    @test CTModels.mayer(objective) == mayer!
-    @test CTModels.lagrange(objective) == lagrange!
+    objective = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
+    @test CTModels.mayer(objective) == mayer
+    @test CTModels.lagrange(objective) == lagrange
     @test CTModels.criterion(objective) == :min
     @test CTModels.has_mayer_cost(objective) == true
     @test CTModels.has_lagrange_cost(objective) == true
@@ -39,8 +39,8 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min; mayer=mayer!)
-    @test ocp.objective == CTModels.MayerObjectiveModel(mayer!, :min)
+    CTModels.objective!(ocp, :min; mayer=mayer)
+    @test ocp.objective == CTModels.MayerObjectiveModel(mayer, :min)
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
     @test CTModels.has_lagrange_cost(ocp.objective) == false
@@ -52,8 +52,8 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :max; lagrange=lagrange!)
-    @test ocp.objective == CTModels.LagrangeObjectiveModel(lagrange!, :max)
+    CTModels.objective!(ocp, :max; lagrange=lagrange)
+    @test ocp.objective == CTModels.LagrangeObjectiveModel(lagrange, :max)
     @test CTModels.criterion(ocp.objective) == :max
     @test CTModels.has_mayer_cost(ocp.objective) == false
     @test CTModels.has_lagrange_cost(ocp.objective) == true
@@ -65,8 +65,8 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min; mayer=mayer!, lagrange=lagrange!)
-    @test ocp.objective == CTModels.BolzaObjectiveModel(mayer!, lagrange!, :min)
+    CTModels.objective!(ocp, :min; mayer=mayer, lagrange=lagrange)
+    @test ocp.objective == CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
     @test CTModels.has_lagrange_cost(ocp.objective) == true
@@ -77,21 +77,21 @@ function test_objective()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
+    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
 
     # control not set
     ocp = CTModels.PreModel()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
+    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
 
     # times not set
     ocp = CTModels.PreModel()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
+    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
 
     # objective already set
     ocp = CTModels.PreModel()
@@ -99,15 +99,15 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min; mayer=mayer!)
-    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer!)
+    CTModels.objective!(ocp, :min; mayer=mayer)
+    @test_throws CTBase.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
 
     # variable set after the objective
     ocp = CTModels.PreModel()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
-    CTModels.objective!(ocp, :min; mayer=mayer!)
+    CTModels.objective!(ocp, :min; mayer=mayer)
     @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
 
     # no function given

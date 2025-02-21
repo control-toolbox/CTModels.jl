@@ -35,9 +35,9 @@ function test_model()
     @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
 
     # set objective
-    mayer!(r, x0, xf, v) = r .= x0 .+ xf .+ v
-    lagrange!(r, t, x, u, v) = r .= t .+ x .+ u .+ v
-    CTModels.objective!(pre_ocp, :min; mayer=mayer!, lagrange=lagrange!)
+    mayer(x0, xf, v) = x0 .+ xf .+ v
+    lagrange(t, x, u, v) = t .+ x .+ u .+ v
+    CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
 
     # exception: definition must be set
     @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
