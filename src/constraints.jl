@@ -164,6 +164,7 @@ function constraint!(
     )
 end
 
+as_vector(x::Nothing) = nothing
 as_vector(x::T) where {T <: Real} = [x]
 as_vector(x::Vector{T}) where {T <: Real} = x
 
