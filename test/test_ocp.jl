@@ -12,8 +12,8 @@ function test_ocp()
     q = 2 # variable dimension
 
     # functions
-    mayer_user!(x0, xf, v) = sum(xf .- x0 .- v)
-    lagrange_user!(t, x, u, v) = sum(x .+ u .+ v .+ t)
+    mayer_user(x0, xf, v) = sum(xf .- x0 .- v)
+    lagrange_user(t, x, u, v) = sum(x .+ u .+ v .+ t)
     dynamics_user!(r, t, x, u, v) = r .= x .+ u .+ v .+ t
 
     # points
@@ -32,7 +32,7 @@ function test_ocp()
     control = CTModels.ControlModel("u", ["u₁", "u₂"])
     variable = CTModels.VariableModel("v", ["v₁", "v₂"])
     dynamics = dynamics_user!
-    objective = CTModels.MayerObjectiveModel(mayer_user!, :min)
+    objective = CTModels.MayerObjectiveModel(mayer_user, :min)
     pre_constraints = CTModels.ConstraintsDictType()
 
     # add some constraints:
@@ -136,8 +136,8 @@ function test_ocp()
     @test CTModels.has_lagrange_cost(ocp) == false
 
     # tests on mayer
-    mayer! = CTModels.mayer(ocp)
-    @test mayer!(x0, xf, v) == mayer_user!(x0, xf, v)
+    mayer = CTModels.mayer(ocp)
+    @test mayer(x0, xf, v) == mayer_user(x0, xf, v)
     @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp)
 
     # tests on constraints
@@ -267,7 +267,7 @@ function test_ocp()
 
     # -------------------------------------------------------------------------- #
     # ocp with Lagrange objective
-    objective = CTModels.LagrangeObjectiveModel(lagrange_user!, :max)
+    objective = CTModels.LagrangeObjectiveModel(lagrange_user, :max)
     ocp = CTModels.Model(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
@@ -279,13 +279,13 @@ function test_ocp()
     @test CTModels.has_lagrange_cost(ocp) == true
 
     # tests on lagrange
-    lagrange! = CTModels.lagrange(ocp)
-    @test lagrange!(t, x, u, v) == lagrange_user!(t, x, u, v)
+    lagrange = CTModels.lagrange(ocp)
+    @test lagrange(t, x, u, v) == lagrange_user(t, x, u, v)
     @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp)
 
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective
-    objective = CTModels.BolzaObjectiveModel(mayer_user!, lagrange, :min)
+    objective = CTModels.BolzaObjectiveModel(mayer_user, lagrange, :min)
     ocp = CTModels.Model(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
