@@ -28,13 +28,13 @@ Set the objective of the optimal control problem.
 # Examples
 
 ```@example
-julia> function mayer!(r, x0, xf, v)
-           r[1] = x0[1] + xf[1] + v[1]
+julia> function mayer(x0, xf, v)
+           return x0[1] + xf[1] + v[1]
        end
-juila> function lagrange!(r, t, x, u, v)
-           r[1] = x[1] + u[1] + v[1]
+juila> function lagrange(t, x, u, v)
+           return x[1] + u[1] + v[1]
        end
-julia> objective!(ocp, :min, mayer=mayer!, lagrange=lagrange!)
+julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 """
 function objective!(
     ocp::PreModel,
