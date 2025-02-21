@@ -129,8 +129,8 @@ function constraint!(
     type::Symbol;
     rg::Union{OrdinalRange{<:Int},Nothing}=nothing,
     f::Union{Function,Nothing}=nothing,
-    lb::Union{ctVector,Nothing}=nothing,
-    ub::Union{ctVector,Nothing}=nothing,
+    lb::Union{ctNumber,ctVector,Nothing}=nothing,
+    ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
 )
 
@@ -156,8 +156,6 @@ function constraint!(
     n = dimension(ocp.state)
     m = dimension(ocp.control)
     q = dimension(ocp.variable)
-    println("lb =", as_vector(lb)) # debug
-    println("ub =", as_vector(ub)) # debug
     # add the constraint
     return __constraint!(
         ocp.constraints, type, n, m, q; rg=rg, f=f, lb=as_vector(lb), ub=as_vector(ub), label=label
