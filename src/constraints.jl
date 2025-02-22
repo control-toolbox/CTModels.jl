@@ -179,7 +179,7 @@ as_vector(x::Vector{T}) where {T<:ctNumber} = x
 # GETTERS
 # ------------------------------------------------------------------------------ #
 
-# From ContraintsModel
+# From ConstraintsModel
 constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
 
 (
