@@ -158,13 +158,22 @@ function constraint!(
     q = dimension(ocp.variable)
     # add the constraint
     return __constraint!(
-        ocp.constraints, type, n, m, q; rg=rg, f=f, lb=as_vector(lb), ub=as_vector(ub), label=label
+        ocp.constraints,
+        type,
+        n,
+        m,
+        q;
+        rg=rg,
+        f=f,
+        lb=as_vector(lb),
+        ub=as_vector(ub),
+        label=label,
     )
 end
 
 as_vector(x::Nothing) = nothing
-as_vector(x::T) where {T <: ctNumber} = [x]
-as_vector(x::Vector{T}) where {T <: ctNumber} = x
+as_vector(x::T) where {T<:ctNumber} = [x]
+as_vector(x::Vector{T}) where {T<:ctNumber} = x
 
 # ------------------------------------------------------------------------------ #
 # GETTERS
