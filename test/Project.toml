@@ -1,8 +1,10 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Aqua = "0.8"
 CTBase = "0.14"
+Plots = "1.40"

@@ -17,20 +17,3 @@ function dynamics!(ocp::PreModel, f::Function)::Nothing
 
     return nothing
 end
-
-# ------------------------------------------------------------------------------ #
-# GETTERS
-# ------------------------------------------------------------------------------ #
-
-# From Model
-(
-    dynamics(ocp::Model{T,S,C,V,D,O,B})::D
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:AbstractConstraintsModel,
-} = ocp.dynamics

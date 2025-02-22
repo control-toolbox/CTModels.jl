@@ -110,3 +110,223 @@ function build_solution(
         time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos
     )
 end
+
+# ------------------------------------------------------------------------------ #
+# Getters
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the state of the optimal control solution.
+
+"""
+function state_dimension(sol::Solution)::Dimension
+    return dimension(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the state of the optimal control solution.
+
+"""
+function state_components(sol::Solution)::Vector{String}
+    return components(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the state of the optimal control solution.
+
+"""
+function state_name(sol::Solution)::String
+    return name(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the state (function of time) of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> x  = state(sol)
+julia> x0 = x(t0)
+```
+"""
+(state(sol::Solution{TG,T,StateModelSolution{TS},C,V,Co,O,D,I})::TS) where {
+    TG<:AbstractTimeGridModel,
+    T<:AbstractTimesModel,
+    TS<:Function,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    Co<:Function,
+    O<:ctNumber,
+    D<:AbstractDualModel,
+    I<:AbstractSolverInfos,
+} = value(sol.state)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the control of the optimal control solution.
+
+"""
+function control_dimension(sol::Solution)::Dimension
+    return dimension(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the control of the optimal control solution.
+
+"""
+function control_components(sol::Solution)::Vector{String}
+    return components(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the control of the optimal control solution.
+
+"""
+function control_name(sol::Solution)::String
+    return name(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the control (function of time) of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> u  = control(sol)
+julia> u0 = u(t0) # control at initial time
+```
+"""
+(
+    control(sol::Solution{TG,T,S,ControlModelSolution{TS},V,Co,O,D,I})::TS
+) where {
+    TG<:AbstractTimeGridModel,
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    TS<:Function,
+    V<:AbstractVariableModel,
+    Co<:Function,
+    O<:ctNumber,
+    D<:AbstractDualModel,
+    I<:AbstractSolverInfos,
+} = value(sol.control)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the variable of the optimal control solution.
+
+"""
+function variable_dimension(sol::Solution)::Dimension
+    return dimension(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the variable of the optimal control solution.
+
+"""
+function variable_components(sol::Solution)::Vector{String}
+    return components(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the variable of the optimal control solution.
+
+"""
+function variable_name(sol::Solution)::String
+    return name(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the variable of the optimal control solution or `nothing`.
+
+```@example
+julia> v  = variable(sol)
+```
+"""
+(variable(sol::Solution{TG,T,S,C,VariableModelSolution{TS},Co,O,D,I})::TS) where {
+    TG<:AbstractTimeGridModel,
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    TS<:Union{ctNumber,ctVector},
+    Co<:Function,
+    O<:ctNumber,
+    D<:AbstractDualModel,
+    I<:AbstractSolverInfos,
+} = value(sol.variable)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the costate of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> p  = costate(sol)
+julia> p0 = p(t0)
+```
+"""
+(costate(sol::Solution{TG,T,S,C,V,Co,O,D,I})::Co) where {
+    TG<:AbstractTimeGridModel,
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    Co<:Function,
+    O<:ctNumber,
+    D<:AbstractDualModel,
+    I<:AbstractSolverInfos,
+} = sol.costate
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the initial time of the optimal control solution.
+
+"""
+initial_time_name(sol::Solution)::String = name(initial(sol.times))
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the final time of the optimal control solution.
+
+"""
+final_time_name(sol::Solution)::String = name(final(sol.times))
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the time component of the optimal control solution.
+
+"""
+function time_name(sol::Solution)::String
+    return name(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the time grid of the optimal control solution.
+
+"""
+time_grid(sol::OptimalControlSolution{TimeGridModel}) = sol.time_grid.value

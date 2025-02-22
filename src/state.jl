@@ -1,23 +1,6 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the name of the state.
-The default value is `"x"`.
-"""
-__state_name()::String = "x"
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the names of the states.
-The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
-"""
-__state_components(n::Dimension, name::String)::Vector{String} =
-    n > 1 ? [name * CTBase.ctindices(i) for i in range(1, n)] : [name]
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the state dimension and possibly the names of each component.
 
 !!! note
@@ -102,13 +85,13 @@ end
 # ------------------------------------------------------------------------------ #
 # GETTERS
 # ------------------------------------------------------------------------------ #
-
-# from StateModel
 name(model::StateModel)::String = model.name
-components(model::StateModel)::Vector{String} = model.components
-(dimension(model::StateModel)::Dimension) = length(components(model))
+name(model::StateModelSolution)::String = model.name
 
-# from Model
-state_name(ocp::Model)::String = name(ocp.state)
-state_components(ocp::Model)::Vector{String} = components(ocp.state)
-state_dimension(ocp::Model)::Dimension = dimension(ocp.state)
+components(model::StateModel)::Vector{String} = model.components
+components(model::StateModelSolution)::Vector{String} = model.components
+
+dimension(model::StateModel)::Dimension = length(components(model))
+dimension(model::StateModelSolution)::Dimension = length(components(model))
+
+(value(model::StateModelSolution{TS})::TS) where {TS} = model.value

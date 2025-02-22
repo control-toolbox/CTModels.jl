@@ -1,23 +1,6 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the control.
-The default value is `"u"`.
-"""
-__control_name()::String = "u"
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the names of the controls.
-The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
-"""
-__control_components(m::Dimension, name::String)::Vector{String} =
-    m > 1 ? [name * CTBase.ctindices(i) for i in range(1, m)] : [name]
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the control dimension and possibly the names of each coordinate.
 
 !!! note
@@ -102,13 +85,13 @@ end
 # ------------------------------------------------------------------------------ #
 # GETTERS
 # ------------------------------------------------------------------------------ #
-
-# from ControlModel
 name(model::ControlModel)::String = model.name
-components(model::ControlModel)::Vector{String} = model.components
-(dimension(model::ControlModel)::Dimension) = length(components(model))
+name(model::ControlModelSolution)::String = model.name
 
-# from Model
-control_name(ocp::Model)::String = name(ocp.control)
-control_components(ocp::Model)::Vector{String} = components(ocp.control)
-control_dimension(ocp::Model)::Dimension = dimension(ocp.control)
+components(model::ControlModel)::Vector{String} = model.components
+components(model::ControlModelSolution)::Vector{String} = model.components
+
+dimension(model::ControlModel)::Dimension = length(components(model))
+dimension(model::ControlModelSolution)::Dimension = length(components(model))
+
+(value(model::ControlModelSolution{TS})::TS) where {TS} = model.value

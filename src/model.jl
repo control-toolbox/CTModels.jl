@@ -189,3 +189,400 @@ function build_model(pre_ocp::PreModel)::Model
 
     return model
 end
+
+# ------------------------------------------------------------------------------ #
+# Getters
+# ------------------------------------------------------------------------------ #
+
+state_name(ocp::Model)::String = name(ocp.state)
+state_components(ocp::Model)::Vector{String} = components(ocp.state)
+state_dimension(ocp::Model)::Dimension = dimension(ocp.state)
+
+control_name(ocp::Model)::String = name(ocp.control)
+control_components(ocp::Model)::Vector{String} = components(ocp.control)
+control_dimension(ocp::Model)::Dimension = dimension(ocp.control)
+
+variable_name(ocp::Model)::String = name(ocp.variable)
+variable_components(ocp::Model)::Vector{String} = components(ocp.variable)
+variable_dimension(ocp::Model)::Dimension = dimension(ocp.variable)
+
+# TIMES
+(
+    times(ocp::Model{
+            T,
+            AbstractStateModel,
+            AbstractControlModel,
+            AbstractVariableModel,
+            Function,
+            AbstractObjectiveModel,
+            AbstractConstraintsModel
+        })::T
+) where {
+    T<:TimesModel
+} = ocp.times
+
+time_name(ocp::Model)::String = time_name(ocp.times)
+
+(
+    initial_time(ocp::Model{T,S,C,V,D,O,B})::Time
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = initial_time(ocp.times)
+
+(
+    initial_time(ocp::Model{T,S,C,V,D,O,B}, ::Variable)::Time
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = initial_time(ocp.times)
+
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B})::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = final_time(ocp.times)
+
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B}, ::Variable)::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = final_time(ocp.times)
+
+(
+    initial_time(ocp::Model{T,S,C,V,D,O,B}, variable::Variable)::Time
+) where {
+    T<:TimesModel{FreeTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = initial_time(ocp.times, variable)
+
+(
+    final_time(ocp::Model{T,S,C,V,D,O,B}, variable::Variable)::Time
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FreeTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = final_time(ocp.times, variable)
+
+initial_time_name(ocp::Model)::String = name(initial(ocp.times))
+
+final_time_name(ocp::Model)::String = name(final(ocp.times))
+
+(
+    has_fixed_initial_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{FixedTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = true
+
+(
+    has_fixed_initial_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{FreeTimeModel,<:AbstractTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = false
+
+(
+    has_fixed_final_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FixedTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = true
+
+(
+    has_fixed_final_time(ocp::Model{T,S,C,V,D,O,B})::Bool
+) where {
+    T<:TimesModel{<:AbstractTimeModel,FreeTimeModel},
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = false
+
+has_free_initial_time(ocp::Model)::Bool = !has_fixed_initial_time(ocp)
+has_free_final_time(ocp::Model)::Bool = !has_fixed_final_time(ocp)
+
+
+# OBJECTIVE
+(
+    objective(ocp::Model{T,S,C,V,D,O,B})::O
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = ocp.objective
+
+criterion(ocp::Model)::Symbol = criterion(objective(ocp))
+
+(
+    mayer(ocp::Model{T,S,C,V,D,MayerObjectiveModel{M},B})::M
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    M<:Function,
+    B<:AbstractConstraintsModel,
+} = mayer(objective(ocp))
+(
+    mayer(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::M
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    M<:Function,
+    L<:Function,
+    B<:AbstractConstraintsModel,
+} = mayer(objective(ocp))
+function mayer(
+    ocp::Model{T,S,C,V,D,<:LagrangeObjectiveModel,B}
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    D<:Function,
+    V<:AbstractVariableModel,
+    B<:AbstractConstraintsModel,
+}
+    throw(
+        CTBase.UnauthorizedCall("a Lagrange objective ocp does not have a Mayer function.")
+    )
+end
+
+(
+    lagrange(ocp::Model{T,S,C,V,D,LagrangeObjectiveModel{L},B})::L
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    L<:Function,
+    B<:AbstractConstraintsModel,
+} = lagrange(objective(ocp))
+(
+    lagrange(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::L
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    M<:Function,
+    L<:Function,
+    B<:AbstractConstraintsModel,
+} = lagrange(objective(ocp))
+function lagrange(
+    ocp::Model{T,S,C,V,D,<:MayerObjectiveModel,B}
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    D<:Function,
+    V<:AbstractVariableModel,
+    B<:AbstractConstraintsModel,
+}
+    throw(
+        CTBase.UnauthorizedCall("a Mayer objective ocp does not have a Lagrange function.")
+    )
+end
+
+has_mayer_cost(ocp::Model)::Bool = has_mayer_cost(objective(ocp))
+has_lagrange_cost(ocp::Model)::Bool = has_lagrange_cost(objective(ocp))
+
+# DYNAMICS
+(
+    dynamics(ocp::Model{T,S,C,V,D,O,B})::D
+) where {
+    T<:AbstractTimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    B<:AbstractConstraintsModel,
+} = ocp.dynamics
+
+# CONSTRAINTS
+constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
+
+(
+    path_constraints_nl(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TP
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TB,
+    TS,
+    TC,
+    TV,
+} = ocp.constraints.path_nl
+
+(
+    boundary_constraints_nl(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TB
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TB,
+    TS,
+    TC,
+    TV,
+} = ocp.constraints.boundary_nl
+
+(
+    state_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TS
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TB,
+    TS,
+    TC,
+    TV,
+} = ocp.constraints.state_box
+
+(
+    control_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TC
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TB,
+    TS,
+    TC,
+    TV,
+} = ocp.constraints.control_box
+
+(
+    variable_constraints_box(
+        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
+    )::TV
+) where {
+    T<:TimesModel,
+    S<:AbstractStateModel,
+    C<:AbstractControlModel,
+    V<:AbstractVariableModel,
+    D<:Function,
+    O<:AbstractObjectiveModel,
+    TP,
+    TB,
+    TS,
+    TC,
+    TV,
+} = ocp.constraints.variable_box
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear path constraints.
+"""
+dim_path_constraints_nl(ocp::Model)::Dimension = length(path_constraints_nl(ocp)[1])
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the boundary constraints.
+"""
+dim_boundary_constraints_nl(ocp::Model)::Dimension = length(boundary_constraints_nl(ocp)[1])
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of box constraints on state.
+"""
+dim_state_constraints_box(ocp::Model)::Dimension = length(state_constraints_box(ocp)[1])
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of box constraints on control.
+"""
+dim_control_constraints_box(ocp::Model)::Dimension = length(control_constraints_box(ocp)[1])
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of box constraints on variable.
+"""
+dim_variable_constraints_box(ocp::Model)::Dimension =
+    length(variable_constraints_box(ocp)[1])
