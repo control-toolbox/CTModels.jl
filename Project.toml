@@ -11,7 +11,7 @@ MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
-CTBase = "0.14.0"
+CTBase = "0.15"
 DocStringExtensions = "0.9.3"
 MLStyle = "0.4.17"
 MacroTools = "0.5.13"
