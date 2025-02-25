@@ -127,12 +127,12 @@ end
 function constraint!(
     ocp::PreModel,
     type::Symbol;
-    rg::Union{OrdinalRange{<:Int},Nothing}=nothing,
+    rg::Union{T,OrdinalRange{T},Nothing}=nothing,
     f::Union{Function,Nothing}=nothing,
     lb::Union{ctNumber,ctVector,Nothing}=nothing,
     ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
-)
+) where {T<:Int} 
 
     # checkings: times, state and control must be set before adding constraints
     !__is_state_set(ocp) &&
@@ -169,7 +169,7 @@ function constraint!(
         ub=as_vector(ub),
         label=label,
     )
-end
+end 
 
 as_vector(x::Nothing) = nothing
 as_vector(x::T) where {T<:ctNumber} = [x]
