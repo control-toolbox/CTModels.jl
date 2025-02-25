@@ -72,8 +72,14 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From MayerObjectiveModel
-criterion(model::MayerObjectiveModel)::Symbol = model.criterion
-(mayer(model::MayerObjectiveModel{M})::M) where {M<:Function} = model.mayer
+function criterion(model::MayerObjectiveModel)::Symbol 
+    return model.criterion
+end
+
+function mayer(model::MayerObjectiveModel{M})::M where {M<:Function}
+    return model.mayer
+end
+
 function lagrange(model::MayerObjectiveModel)
     throw(
         CTBase.UnauthorizedCall(
@@ -81,11 +87,20 @@ function lagrange(model::MayerObjectiveModel)
         ),
     )
 end
-has_mayer_cost(model::MayerObjectiveModel)::Bool = true
-has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
+
+function has_mayer_cost(model::MayerObjectiveModel)::Bool 
+    return true
+end
+
+function has_lagrange_cost(model::MayerObjectiveModel)::Bool 
+    return false
+end
 
 # From LagrangeObjectiveModel
-criterion(model::LagrangeObjectiveModel)::Symbol = model.criterion
+function criterion(model::LagrangeObjectiveModel)::Symbol 
+    return model.criterion
+end
+
 function mayer(model::LagrangeObjectiveModel)
     throw(
         CTBase.UnauthorizedCall(
@@ -93,14 +108,36 @@ function mayer(model::LagrangeObjectiveModel)
         ),
     )
 end
-(lagrange(model::LagrangeObjectiveModel{L})::L) where {L<:Function} = model.lagrange
-has_mayer_cost(model::LagrangeObjectiveModel)::Bool = false
-has_lagrange_cost(model::LagrangeObjectiveModel)::Bool = true
+
+function lagrange(model::LagrangeObjectiveModel{L})::L where {L<:Function}
+    return model.lagrange
+end
+
+function has_mayer_cost(model::LagrangeObjectiveModel)::Bool 
+    return false
+end
+
+function has_lagrange_cost(model::LagrangeObjectiveModel)::Bool 
+    return true
+end
 
 # From BolzaObjectiveModel
-criterion(model::BolzaObjectiveModel)::Symbol = model.criterion
-(mayer(model::BolzaObjectiveModel{M,L})::M) where {M<:Function,L<:Function} = model.mayer
-(lagrange(model::BolzaObjectiveModel{M,L})::L) where {M<:Function,L<:Function} =
-    model.lagrange
-has_mayer_cost(model::BolzaObjectiveModel)::Bool = true
-has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
+function criterion(model::BolzaObjectiveModel)::Symbol 
+    return model.criterion
+end
+
+function mayer(model::BolzaObjectiveModel{M,<:Function})::M where {M<:Function}
+    return model.mayer
+end
+
+function lagrange(model::BolzaObjectiveModel{<:Function,L})::L where {L<:Function}
+    return model.lagrange
+end
+
+function has_mayer_cost(model::BolzaObjectiveModel)::Bool 
+    return true
+end
+
+function has_lagrange_cost(model::BolzaObjectiveModel)::Bool 
+    return true
+end

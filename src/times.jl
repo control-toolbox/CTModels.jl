@@ -144,12 +144,23 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From FixedTimeModel
-time(model::FixedTimeModel)::Time = model.time
-name(model::FixedTimeModel)::String = model.name
+function time(model::FixedTimeModel{T})::T where {T<:Time} 
+    return model.time
+end
+
+function name(model::FixedTimeModel{<:Time})::String 
+    return model.name
+end
 
 # From FreeTimeModel
-index(model::FreeTimeModel)::Int = model.index
-name(model::FreeTimeModel)::String = model.name
+function index(model::FreeTimeModel)::Int
+    return model.index
+end
+
+function name(model::FreeTimeModel)::String 
+    return model.name
+end 
+
 function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
     # check if model.index in [1, length(variable)]
     !(1 ≤ model.index ≤ length(variable)) && throw(
@@ -161,17 +172,64 @@ function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ct
 end
 
 # From TimesModel
-(
-    initial(model::TimesModel{TI,TF})::TI
-) where {TI<:AbstractTimeModel,TF<:AbstractTimeModel} = model.initial
-(final(model::TimesModel{TI,TF})::TF) where {TI<:AbstractTimeModel,TF<:AbstractTimeModel} =
-    model.final
-time_name(model::TimesModel)::String = model.time_name
-initial_time(model::TimesModel{FixedTimeModel,<:AbstractTimeModel})::Time =
-    time(initial(model))
-final_time(model::TimesModel{<:AbstractTimeModel,FixedTimeModel})::Time = time(final(model))
-initial_time(
-    model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, variable::Variable
-)::Time = time(initial(model), variable)
-final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::Variable)::Time =
-    time(final(model), variable)
+function initial(model::TimesModel{TI,<:AbstractTimeModel})::TI where {TI<:AbstractTimeModel} 
+    return model.initial
+end
+
+function final(model::TimesModel{<:AbstractTimeModel,TF})::TF where {TF<:AbstractTimeModel}
+    return model.final
+end
+
+function time_name(model::TimesModel)::String 
+    return model.time_name
+end
+
+function initial_time_name(model::TimesModel)::String 
+    return name(initial(model))
+end
+
+function final_time_name(model::TimesModel)::String 
+    return name(final(model))
+end
+
+function initial_time(model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::T where {T<:Time}
+    return time(initial(model))
+end
+
+function final_time(model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::T where {T<:Time}
+    return time(final(model))
+end
+
+function initial_time(model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, 
+    variable::AbstractVector{T})::T where {T<:ctNumber} 
+    return time(initial(model), variable)
+end
+
+function final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, 
+    variable::AbstractVector{T})::T where {T<:ctNumber}
+    return time(final(model), variable)
+end
+
+function has_fixed_initial_time(times::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::Bool where {T<:Time}
+    return true
+end
+
+function has_fixed_initial_time(times::TimesModel{FreeTimeModel,<:AbstractTimeModel})::Bool
+    return false
+end
+
+function has_free_initial_time(times::TimesModel)::Bool
+    return !has_fixed_initial_time(times)
+end
+
+function has_fixed_final_time(times::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::Bool where {T<:Time}
+    return true
+end
+
+function has_fixed_final_time(times::TimesModel{<:AbstractTimeModel,FreeTimeModel})::Bool
+    return false
+end
+
+function has_free_final_time(times::TimesModel)::Bool
+    return !has_fixed_final_time(times)
+end

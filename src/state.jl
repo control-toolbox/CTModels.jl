@@ -85,13 +85,31 @@ end
 # ------------------------------------------------------------------------------ #
 # GETTERS
 # ------------------------------------------------------------------------------ #
-name(model::StateModel)::String = model.name
-name(model::StateModelSolution)::String = model.name
 
-components(model::StateModel)::Vector{String} = model.components
-components(model::StateModelSolution)::Vector{String} = model.components
+function name(model::StateModel)::String
+    return model.name
+end
 
-dimension(model::StateModel)::Dimension = length(components(model))
-dimension(model::StateModelSolution)::Dimension = length(components(model))
+function components(model::StateModel)::Vector{String}
+    return model.components
+end
 
-(value(model::StateModelSolution{TS})::TS) where {TS} = model.value
+function dimension(model::StateModel)::Dimension
+    return length(components(model))
+end
+
+function name(model::StateModelSolution)::String
+    return model.name
+end
+
+function components(model::StateModelSolution)::Vector{String}
+    return model.components
+end
+
+function dimension(model::StateModelSolution)::Dimension
+    return length(components(model))
+end
+
+function value(model::StateModelSolution{TS})::TS where {TS}
+    return model.value
+end

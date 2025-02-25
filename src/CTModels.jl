@@ -12,7 +12,6 @@ const Dimension = Int
 const ctNumber = Real
 const Time = ctNumber
 const ctVector = AbstractVector{<:ctNumber}
-const Variable = ctVector
 const ConstraintsDictType = Dict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
 }
@@ -22,6 +21,7 @@ const TimesDisc = Union{Times,StepRangeLen}
 #
 include("default.jl")
 include("types.jl")
+include("dual_model.jl")
 include("state.jl")
 include("control.jl")
 include("variable.jl")

@@ -212,9 +212,7 @@ function test_ocp()
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
-    @test CTModels.initial_time(ocp, ∅) == 0.0
     @test CTModels.final_time(ocp) == 10.0
-    @test CTModels.final_time(ocp, ∅) == 10.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
     @test CTModels.final_time_name(ocp) == "t_f"
@@ -234,7 +232,6 @@ function test_ocp()
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
-    @test CTModels.initial_time(ocp, ∅) == 0.0
     @test CTModels.final_time(ocp, [2.0, 50.0]) == 2.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
@@ -256,7 +253,6 @@ function test_ocp()
     # tests on times
     @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
     @test CTModels.final_time(ocp) == 10.0
-    @test CTModels.final_time(ocp, ∅) == 10.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
     @test CTModels.final_time_name(ocp) == "t_f"

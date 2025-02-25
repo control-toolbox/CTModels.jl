@@ -113,8 +113,8 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct FixedTimeModel <: AbstractTimeModel
-    time::Time
+struct FixedTimeModel{T<:Time} <: AbstractTimeModel
+    time::T
     name::String
 end
 

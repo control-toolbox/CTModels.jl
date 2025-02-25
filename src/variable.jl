@@ -54,16 +54,43 @@ end
 # ------------------------------------------------------------------------------ #
 # GETTERS
 # ------------------------------------------------------------------------------ #
-name(model::VariableModel)::String = model.name
-name(model::VariableModelSolution)::String = model.name
-name(::EmptyVariableModel)::String = ""
 
-components(model::VariableModel)::Vector{String} = model.components
-components(model::VariableModelSolution)::Vector{String} = model.components
-components(::EmptyVariableModel)::Vector{String} = String[]
+function name(model::VariableModel)::String
+    return model.name
+end
 
-dimension(model::VariableModel)::Dimension = length(components(model))
-dimension(model::VariableModelSolution)::Dimension = length(components(model))
-dimension(::EmptyVariableModel)::Dimension = 0
+function name(model::VariableModelSolution)::String
+    return model.name
+end
 
-(value(model::VariableModelSolution{TS})::TS) where {TS} = model.value
+function name(::EmptyVariableModel)::String
+    return ""
+end
+
+function components(model::VariableModel)::Vector{String}
+    return model.components
+end
+
+function components(model::VariableModelSolution)::Vector{String}
+    return model.components
+end
+
+function components(::EmptyVariableModel)::Vector{String}
+    return String[]
+end
+
+function dimension(model::VariableModel)::Dimension
+    return length(components(model))
+end
+
+function dimension(model::VariableModelSolution)::Dimension
+    return length(components(model))
+end
+
+function dimension(::EmptyVariableModel)::Dimension
+    return 0
+end
+
+function value(model::VariableModelSolution{TS})::TS where {TS} 
+    return model.value
+end

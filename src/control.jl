@@ -85,13 +85,30 @@ end
 # ------------------------------------------------------------------------------ #
 # GETTERS
 # ------------------------------------------------------------------------------ #
-name(model::ControlModel)::String = model.name
-name(model::ControlModelSolution)::String = model.name
+function name(model::ControlModel)::String 
+    return model.name
+end
 
-components(model::ControlModel)::Vector{String} = model.components
-components(model::ControlModelSolution)::Vector{String} = model.components
+function name(model::ControlModelSolution)::String 
+    return model.name
+end
 
-dimension(model::ControlModel)::Dimension = length(components(model))
-dimension(model::ControlModelSolution)::Dimension = length(components(model))
+function components(model::ControlModel)::Vector{String} 
+    return model.components
+end
 
-(value(model::ControlModelSolution{TS})::TS) where {TS} = model.value
+function components(model::ControlModelSolution)::Vector{String} 
+    return model.components
+end
+
+function dimension(model::ControlModel)::Dimension 
+    return length(components(model))
+end
+
+function dimension(model::ControlModelSolution)::Dimension 
+    return length(components(model))
+end
+
+function value(model::ControlModelSolution{TS})::TS where {TS} 
+    return model.value
+end
