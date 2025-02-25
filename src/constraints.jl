@@ -163,7 +163,7 @@ function constraint!(
         n,
         m,
         q;
-        rg=rg,
+        rg=as_range(rg),
         f=f,
         lb=as_vector(lb),
         ub=as_vector(ub),
@@ -174,6 +174,10 @@ end
 as_vector(x::Nothing) = nothing
 as_vector(x::T) where {T<:ctNumber} = [x]
 as_vector(x::Vector{T}) where {T<:ctNumber} = x
+
+as_range(r::Nothing) = nothing
+as_range(r::T) where {T<:Int} = r:r 
+as_range(r::OrdinalRange{T}) where {T<:Int} = r
 
 # ------------------------------------------------------------------------------ #
 # GETTERS
