@@ -27,12 +27,12 @@ $(TYPEDSIGNATURES)
 
 Used to set the default value of the plot size.
 """
-function __size_plot(sol::Solution, control::Symbol)
-    n = state_dimension(sol)
+function __size_plot(sol::CTModels.Solution, control::Symbol)
+    n = CTModels.state_dimension(sol)
     m = @match control begin
-        :components => control_dimension(sol)
+        :components => CTModels.control_dimension(sol)
         :norm => 1
-        :all => control_dimension(sol) + 1
+        :all => CTModels.control_dimension(sol) + 1
         _ => throw(
             CTBase.IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
         )

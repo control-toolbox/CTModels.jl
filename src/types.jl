@@ -439,4 +439,9 @@ struct Solution{
     solver_infos::SolverInfosType
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the time grid is empty from the solution.
+"""
 is_empty_time_grid(sol::Solution)::Bool = is_empty(sol.time_grid)

@@ -1,3 +1,8 @@
+"""
+$(TYPEDSIGNATURES)
+
+Add a constraint to a dictionary of constraints.
+"""
 function __constraint!(
     ocp_constraints::ConstraintsDictType,
     type::Symbol,
@@ -116,6 +121,12 @@ function __constraint!(
     return nothing
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Add a constraint to a pre-model.
+"""
 function constraint!(
     ocp::PreModel,
     type::Symbol;

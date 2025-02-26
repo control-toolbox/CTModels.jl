@@ -1,3 +1,9 @@
+"""
+$(TYPEDSIGNATURES)
+
+Build a concrete type constraints model from a dictionary of constraints.
+
+"""
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
@@ -144,6 +150,12 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     )
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a concrete type model from a pre-model.
+
+"""
 function build_model(pre_ocp::PreModel)::Model
 
     # checkings: times must be set
@@ -196,6 +208,11 @@ end
 # ------------------------------------------------------------------------------ #
 
 # State
+"""
+$(TYPEDSIGNATURES)
+
+Get the state from the model.
+"""
 function state(ocp::Model{
     <:TimesModel,
     T,
@@ -208,19 +225,39 @@ function state(ocp::Model{
     return ocp.state
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the state from the model.
+"""
 function state_name(ocp::Model)::String 
     return name(state(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the state from the model.
+"""
 function state_components(ocp::Model)::Vector{String} 
     return components(state(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the state dimension from the model.
+"""
 function state_dimension(ocp::Model)::Dimension 
     return dimension(state(ocp))
 end
 
 # Control
+"""
+$(TYPEDSIGNATURES)
+
+Get the control from the model.
+"""
 function control(ocp::Model{
     <:TimesModel,
     <:AbstractStateModel,
@@ -233,19 +270,39 @@ function control(ocp::Model{
     return ocp.control
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the control from the model.
+"""
 function control_name(ocp::Model)::String 
     return name(control(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the control from the model.
+"""
 function control_components(ocp::Model)::Vector{String} 
     return components(control(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the control dimension from the model.
+"""
 function control_dimension(ocp::Model)::Dimension 
     return dimension(control(ocp))
 end
 
 # Variable 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable from the model.
+"""
 function variable(ocp::Model{
     <:TimesModel,
     <:AbstractStateModel,
@@ -258,19 +315,39 @@ function variable(ocp::Model{
     return ocp.variable
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the variable from the model.
+"""
 function variable_name(ocp::Model)::String 
     return name(variable(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the variable from the model.
+"""
 function variable_components(ocp::Model)::Vector{String} 
     return components(variable(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable dimension from the model.
+"""
 function variable_dimension(ocp::Model)::Dimension 
     return dimension(variable(ocp))
 end
 
 # Times
+"""
+$(TYPEDSIGNATURES)
+
+Get the times from the model.
+"""
 function times(ocp::Model{
     T,
     <:AbstractStateModel,
@@ -284,11 +361,21 @@ function times(ocp::Model{
 end
 
 # Time name
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the time from the model.
+"""
 function time_name(ocp::Model)::String 
     return time_name(times(ocp))
 end
 
 # Initial time
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the model, for a fixed initial time.
+"""
 function initial_time(ocp::Model{
     <:TimesModel{FixedTimeModel{T},<:AbstractTimeModel},
     <:AbstractStateModel,
@@ -300,6 +387,11 @@ function initial_time(ocp::Model{
     return initial_time(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the model, for a free initial time.
+"""
 function initial_time(ocp::Model{
     <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
     <:AbstractStateModel,
@@ -311,19 +403,39 @@ function initial_time(ocp::Model{
     return initial_time(times(ocp), variable)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the initial time from the model.
+"""
 function initial_time_name(ocp::Model)::String 
     return initial_time_name(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is fixed.
+"""
 function has_fixed_initial_time(ocp::Model)::Bool
     return has_fixed_initial_time(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is free.
+"""
 function has_free_initial_time(ocp::Model)::Bool
     return has_free_initial_time(times(ocp))
 end
 
 # Final time
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the model, for a fixed final time.
+"""
 function final_time(ocp::Model{
     <:TimesModel{<:AbstractTimeModel,FixedTimeModel{T}},
     <:AbstractStateModel,
@@ -335,6 +447,11 @@ function final_time(ocp::Model{
     return final_time(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the model, for a free final time.
+"""
 function final_time(ocp::Model{
     <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
     <:AbstractStateModel,
@@ -346,19 +463,39 @@ function final_time(ocp::Model{
     return final_time(times(ocp), variable)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the final time from the model.
+"""
 function final_time_name(ocp::Model)::String 
     return final_time_name(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is fixed.
+"""
 function has_fixed_final_time(ocp::Model)::Bool
     return has_fixed_final_time(times(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is free.
+"""
 function has_free_final_time(ocp::Model)::Bool
     return has_free_final_time(times(ocp))
 end
 
 # Objective
+"""
+$(TYPEDSIGNATURES)
+
+Get the objective from the model.
+"""
 function objective(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -373,11 +510,21 @@ function objective(ocp::Model{
     return ocp.objective
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the type of criterion (:min or :max) from the model.
+"""
 function criterion(ocp::Model)::Symbol 
     return criterion(objective(ocp))
 end
 
 # Mayer
+"""
+$(TYPEDSIGNATURES)
+
+Get the Mayer cost from the model.
+"""
 function mayer(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -392,6 +539,11 @@ function mayer(ocp::Model{
     return mayer(objective(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the Mayer cost from the model.
+"""
 function mayer(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -406,27 +558,21 @@ function mayer(ocp::Model{
     return mayer(objective(ocp))
 end
 
-function mayer(
-    ocp::Model{
-        <:AbstractTimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:Function,
-        <:LagrangeObjectiveModel,
-        <:AbstractConstraintsModel
-    }
-)
-    throw(
-        CTBase.UnauthorizedCall("a Lagrange objective ocp does not have a Mayer function.")
-    )
-end
+"""
+$(TYPEDSIGNATURES)
 
+Check if the model has a Mayer cost.
+"""
 function has_mayer_cost(ocp::Model)::Bool 
     return has_mayer_cost(objective(ocp))
 end
 
 # Lagrange
+"""
+$(TYPEDSIGNATURES)
+
+Get the Lagrange cost from the model.
+"""
 function lagrange(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -441,6 +587,11 @@ function lagrange(ocp::Model{
     return lagrange(objective(ocp))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the Lagrange cost from the model.
+"""
 function lagrange(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -455,27 +606,21 @@ function lagrange(ocp::Model{
     return lagrange(objective(ocp))
 end
 
-function lagrange(
-    ocp::Model{
-        <:AbstractTimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:Function,
-        <:MayerObjectiveModel,
-        <:AbstractConstraintsModel
-    }
-)
-    throw(
-        CTBase.UnauthorizedCall("a Mayer objective ocp does not have a Lagrange function.")
-    )
-end
+"""
+$(TYPEDSIGNATURES)
 
+Check if the model has a Lagrange cost.
+"""
 function has_lagrange_cost(ocp::Model)::Bool 
     return has_lagrange_cost(objective(ocp))
 end
 
 # Dynamics
+"""
+$(TYPEDSIGNATURES)
+
+Get the dynamics from the model.
+"""
 function dynamics(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -491,6 +636,11 @@ function dynamics(ocp::Model{
 end
 
 # Constraints
+"""
+$(TYPEDSIGNATURES)
+
+Get the constraints from the model.
+"""
 function constraints(ocp::Model{
     <:AbstractTimesModel,
     <:AbstractStateModel,
@@ -505,10 +655,20 @@ function constraints(ocp::Model{
     return ocp.constraints
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get a labelled constraint from the model.
+"""
 function constraint(ocp::Model, label::Symbol)::Tuple # not type stable
     return constraints(ocp).dict[label]
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the nonlinear path constraints from the model.
+"""
 function path_constraints_nl(
     ocp::Model{
         <:TimesModel,
@@ -523,6 +683,11 @@ function path_constraints_nl(
     return constraints(ocp).path_nl
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the nonlinear boundary constraints from the model.
+"""
 function boundary_constraints_nl(
     ocp::Model{
         <:TimesModel,
@@ -537,6 +702,11 @@ function boundary_constraints_nl(
     return constraints(ocp).boundary_nl
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the box constraints on state from the model.
+"""
 function state_constraints_box(
     ocp::Model{
         <:TimesModel,
@@ -551,6 +721,11 @@ function state_constraints_box(
     return constraints(ocp).state_box
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the box constraints on control from the model.
+"""
 function control_constraints_box(
     ocp::Model{
         <:TimesModel,
@@ -565,6 +740,11 @@ function control_constraints_box(
     return constraints(ocp).control_box
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the box constraints on variable from the model.
+"""
 function variable_constraints_box(
     ocp::Model{
         <:TimesModel,

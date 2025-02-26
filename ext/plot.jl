@@ -42,7 +42,7 @@ Update the plot `p` with the i-th component of a vectorial function of time `f(t
 """
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
-    sol::Solution,
+    sol::CTModels.Solution,
     s::Symbol,
     i::Int,
     time::Symbol;
@@ -100,7 +100,7 @@ Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f
 - `time` can be `:default` or `:normalize`.
 """
 function __plot_time(
-    sol::Solution,
+    sol::CTModels.Solution,
     s::Symbol,
     i::Int,
     time::Symbol;
@@ -122,8 +122,8 @@ Update the plot `p` with a vectorial function of time `f(t) ∈ Rᵈ` where `f` 
 """
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
-    sol::Solution,
-    d::Dimension,
+    sol::CTModels.Solution,
+    d::CTModels.Dimension,
     s::Symbol,
     time::Symbol;
     t_label::String,
@@ -150,8 +150,8 @@ Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symb
 The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function __plot_time(
-    sol::Solution,
-    d::Dimension,
+    sol::CTModels.Solution,
+    d::CTModels.Dimension,
     s::Symbol,
     time::Symbol;
     t_label::String,
@@ -222,7 +222,7 @@ $(TYPEDSIGNATURES)
 Initial plot.
 """
 function __initial_plot(
-    sol::Solution;
+    sol::CTModels.Solution;
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     kwargs...,
@@ -319,6 +319,11 @@ function __initial_plot(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the series attributes.
+"""
 function __keep_series_attributes(; kwargs...)
     series_attributes = Plots.attributes(:Series)
 
@@ -344,7 +349,7 @@ Plot the optimal control solution `sol` using the layout `layout`.
 """
 function Plots.plot!(
     p::Plots.Plot,
-    sol::Solution;
+    sol::CTModels.Solution;
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
@@ -567,7 +572,7 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
 function Plots.plot(
-    sol::Solution;
+    sol::CTModels.Solution;
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
@@ -608,7 +613,7 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 - The argument `yy` can be `:state`, `:control` or `:costate`.
 """
 @recipe function f(
-    sol::Solution,
+    sol::CTModels.Solution,
     xx::Union{Symbol,Tuple{Symbol,Int}},
     yy::Union{Symbol,Tuple{Symbol,Int}},
     time::Symbol=:default,
@@ -624,8 +629,19 @@ corresponding respectively to the argument `xx` and the argument `yy`.
     return x, y
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the label for the plot of the optimal control solution `sol`
+corresponding to the argument `xx` and the argument `yy`.
+
+**Notes.**
+
+- The argument `xx` can be `:time`, `:state`, `:control` or `:costate`.
+- The argument `yy` can be `:state`, `:control` or `:costate`.
+"""
 function recipe_label(
-    sol::Solution,
+    sol::CTModels.Solution,
     xx::Union{Symbol,Tuple{Symbol,Int}},
     yy::Union{Symbol,Tuple{Symbol,Int}},
 )
@@ -640,10 +656,10 @@ function recipe_label(
         end
 
         label = @match s begin
-            :state => state_components(sol)[i]
-            :control => control_components(sol)[i]
-            :costate => "p" * state_components(sol)[i]
-            :control_norm => "‖" * control_name(sol) * "‖"
+            :state => CTModels.state_components(sol)[i]
+            :control => CTModels.control_components(sol)[i]
+            :costate => "p" * CTModels.state_components(sol)[i]
+            :control_norm => "‖" * CTModels.control_name(sol) * "‖"
             _ => error("Internal error, no such choice for label")
         end
     end
@@ -657,7 +673,7 @@ $(TYPEDSIGNATURES)
 Get the data for plotting.
 """
 function __get_data_plot(
-    sol::Solution, xx::Union{Symbol,Tuple{Symbol,Int}}; time::Symbol=:default
+    sol::CTModels.Solution, xx::Union{Symbol,Tuple{Symbol,Int}}; time::Symbol=:default
 )
 
     # if the time grid is empty then throw an error
@@ -665,10 +681,10 @@ function __get_data_plot(
         throw(CTBase.IncorrectArgument("The time grid is empty"))
     end
 
-    T = time_grid(sol)
-    X = state(sol).(T)
-    U = control(sol).(T)
-    P = costate(sol).(T)
+    T = CTModels.time_grid(sol)
+    X = CTModels.state(sol).(T)
+    U = CTModels.control(sol).(T)
+    P = CTModels.costate(sol).(T)
 
     vv, ii = @match xx begin
         ::Symbol => (xx, 1)

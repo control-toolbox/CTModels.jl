@@ -86,30 +86,65 @@ end
 # GETTERS
 # ------------------------------------------------------------------------------ #
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the state from the state model.
+"""
 function name(model::StateModel)::String
     return model.name
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the state from the state model.
+"""
 function components(model::StateModel)::Vector{String}
     return model.components
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the dimension of the state from the state model.
+"""
 function dimension(model::StateModel)::Dimension
     return length(components(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the state from the state model solution.
+"""
 function name(model::StateModelSolution)::String
     return model.name
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the state from the state model solution.
+"""
 function components(model::StateModelSolution)::Vector{String}
     return model.components
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the dimension of the state from the state model solution.
+"""
 function dimension(model::StateModelSolution)::Dimension
     return length(components(model))
 end
 
-function value(model::StateModelSolution{TS})::TS where {TS}
+"""
+$(TYPEDSIGNATURES)
+
+Get the state function from the state model solution.
+"""
+function value(model::StateModelSolution{TS})::TS where {TS<:Function}
     return model.value
 end

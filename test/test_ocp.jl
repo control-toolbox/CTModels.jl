@@ -138,7 +138,6 @@ function test_ocp()
     # tests on mayer
     mayer = CTModels.mayer(ocp)
     @test mayer(x0, xf, v) == mayer_user(x0, xf, v)
-    @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp)
 
     # tests on constraints
     # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
@@ -277,7 +276,6 @@ function test_ocp()
     # tests on lagrange
     lagrange = CTModels.lagrange(ocp)
     @test lagrange(t, x, u, v) == lagrange_user(t, x, u, v)
-    @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp)
 
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective

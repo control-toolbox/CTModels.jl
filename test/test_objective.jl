@@ -15,7 +15,6 @@ function test_objective()
     @test CTModels.criterion(objective) == :min
     @test CTModels.has_mayer_cost(objective) == true
     @test CTModels.has_lagrange_cost(objective) == false
-    @test_throws CTBase.UnauthorizedCall CTModels.lagrange(objective)
 
     # LagrangeObjectiveModel
     objective = CTModels.LagrangeObjectiveModel(lagrange, :max)
@@ -23,7 +22,6 @@ function test_objective()
     @test CTModels.criterion(objective) == :max
     @test CTModels.has_mayer_cost(objective) == false
     @test CTModels.has_lagrange_cost(objective) == true
-    @test_throws CTBase.UnauthorizedCall CTModels.mayer(objective)
 
     # BolzaObjectiveModel
     objective = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
@@ -44,7 +42,6 @@ function test_objective()
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
     @test CTModels.has_lagrange_cost(ocp.objective) == false
-    @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp.objective)
 
     # from PreModel with Lagrange objective
     ocp = CTModels.PreModel()
@@ -57,7 +54,6 @@ function test_objective()
     @test CTModels.criterion(ocp.objective) == :max
     @test CTModels.has_mayer_cost(ocp.objective) == false
     @test CTModels.has_lagrange_cost(ocp.objective) == true
-    @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp.objective)
 
     # from PreModel with Bolza objective
     ocp = CTModels.PreModel()

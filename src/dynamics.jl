@@ -1,3 +1,8 @@
+"""
+$(TYPEDSIGNATURES)
+
+Set the dynamics of the optimal control problem, in a pre-model.
+"""
 function dynamics!(ocp::PreModel, f::Function)::Nothing
 
     # checkings: times, state and control must be set before the dynamics

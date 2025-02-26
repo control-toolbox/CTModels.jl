@@ -144,23 +144,52 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From FixedTimeModel
+"""
+$(TYPEDSIGNATURES)
+
+Get the time from the fixed time model.
+"""
 function time(model::FixedTimeModel{T})::T where {T<:Time} 
     return model.time
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the time from the fixed time model.
+"""
 function name(model::FixedTimeModel{<:Time})::String 
     return model.name
 end
 
 # From FreeTimeModel
+"""
+$(TYPEDSIGNATURES)
+
+Get the index of the time variable from the free time model.
+"""
 function index(model::FreeTimeModel)::Int
     return model.index
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the time from the free time model.
+"""
 function name(model::FreeTimeModel)::String 
     return model.name
 end 
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the time from the free time model.
+
+# Exceptions
+
+- If the index of the time variable is not in [1, length(variable)], throw an error.
+"""
 function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
     # check if model.index in [1, length(variable)]
     !(1 ≤ model.index ≤ length(variable)) && throw(
@@ -172,64 +201,139 @@ function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ct
 end
 
 # From TimesModel
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the times model.
+"""
 function initial(model::TimesModel{TI,<:AbstractTimeModel})::TI where {TI<:AbstractTimeModel} 
     return model.initial
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the times model.
+"""
 function final(model::TimesModel{<:AbstractTimeModel,TF})::TF where {TF<:AbstractTimeModel}
     return model.final
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the time variable from the times model.
+"""
 function time_name(model::TimesModel)::String 
     return model.time_name
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the initial time from the times model.
+"""
 function initial_time_name(model::TimesModel)::String 
     return name(initial(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the final time from the times model.
+"""
 function final_time_name(model::TimesModel)::String 
     return name(final(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the times model, from a fixed initial time model.
+"""
 function initial_time(model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::T where {T<:Time}
     return time(initial(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the times model, from a fixed final time model.
+"""
 function final_time(model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::T where {T<:Time}
     return time(final(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the times model, from a free initial time model.
+"""
 function initial_time(model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, 
     variable::AbstractVector{T})::T where {T<:ctNumber} 
     return time(initial(model), variable)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the times model, from a free final time model.
+"""
 function final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, 
     variable::AbstractVector{T})::T where {T<:ctNumber}
     return time(final(model), variable)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is fixed. Return true.
+"""
 function has_fixed_initial_time(times::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::Bool where {T<:Time}
     return true
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is free. Return false.
+"""
 function has_fixed_initial_time(times::TimesModel{FreeTimeModel,<:AbstractTimeModel})::Bool
     return false
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is free.
+"""
 function has_free_initial_time(times::TimesModel)::Bool
     return !has_fixed_initial_time(times)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is fixed. Return true.
+"""
 function has_fixed_final_time(times::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::Bool where {T<:Time}
     return true
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is free. Return false.
+"""
 function has_fixed_final_time(times::TimesModel{<:AbstractTimeModel,FreeTimeModel})::Bool
     return false
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is free.
+"""
 function has_free_final_time(times::TimesModel)::Bool
     return !has_fixed_final_time(times)
 end

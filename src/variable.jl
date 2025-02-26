@@ -55,42 +55,92 @@ end
 # GETTERS
 # ------------------------------------------------------------------------------ #
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable name from the variable model.
+"""
 function name(model::VariableModel)::String
     return model.name
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable name from the variable model solution.
+"""
 function name(model::VariableModelSolution)::String
     return model.name
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable name from the empty variable model. Return an empty string.
+"""
 function name(::EmptyVariableModel)::String
     return ""
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the variable from the variable model.
+"""
 function components(model::VariableModel)::Vector{String}
     return model.components
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the variable from the variable model solution.
+"""
 function components(model::VariableModelSolution)::Vector{String}
     return model.components
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the variable from the empty variable model. Return an empty vector.
+"""
 function components(::EmptyVariableModel)::Vector{String}
     return String[]
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable dimension from the variable model.
+"""
 function dimension(model::VariableModel)::Dimension
     return length(components(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable dimension from the variable model solution.
+"""
 function dimension(model::VariableModelSolution)::Dimension
     return length(components(model))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable dimension from the empty variable model. Return 0.
+"""
 function dimension(::EmptyVariableModel)::Dimension
     return 0
 end
 
-function value(model::VariableModelSolution{TS})::TS where {TS} 
+"""
+$(TYPEDSIGNATURES)
+
+Get the variable from the variable model solution.
+"""
+function value(model::VariableModelSolution{TS})::TS where {TS<:Union{ctNumber,ctVector}}
     return model.value
 end

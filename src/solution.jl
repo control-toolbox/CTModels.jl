@@ -1,3 +1,38 @@
+"""
+$(TYPEDSIGNATURES)
+
+Build a solution from the optimal control problem, the time grid, the state, control, variable, and dual variables.
+
+# Arguments
+
+- `ocp::Model`: the optimal control problem.
+- `T::Vector{Float64}`: the time grid.
+- `X::Matrix{Float64}`: the state trajectory.
+- `U::Matrix{Float64}`: the control trajectory.
+- `v::Vector{Float64}`: the variable trajectory.
+- `P::Matrix{Float64}`: the costate trajectory.
+- `objective::Float64`: the objective value.
+- `iterations::Int`: the number of iterations.
+- `constraints_violation::Float64`: the constraints violation.
+- `message::String`: the message associated to the stopping criterion.
+- `stopping::Symbol`: the stopping criterion.
+- `success::Bool`: the success status.
+- `path_constraints::Matrix{Float64}`: the path constraints.
+- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
+- `boundary_constraints::Vector{Float64}`: the boundary constraints.
+- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
+- `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
+- `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
+- `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.
+- `control_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the control constraints.
+- `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
+- `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
+
+# Returns
+
+- `sol::Solution`: the optimal control solution.
+
+"""
 function build_solution(
     ocp::Model,
     T::Vector{Float64},
@@ -295,12 +330,12 @@ function costate(sol::Solution{
     <:AbstractStateModel,
     <:AbstractControlModel,
     <:AbstractVariableModel,
-    <:Function,
-    <:ctNumber,
     Co,
+    <:ctNumber,
+    <:AbstractDualModel,
     <:AbstractSolverInfos,
     })::Co where {Co<:Function}
-    return value(sol.costate)
+    return sol.costate
 end
 
 """
@@ -330,7 +365,7 @@ Return the name of the time component of the optimal control solution.
 
 """
 function time_name(sol::Solution)::String
-    return name(sol.times)
+    return time_name(sol.times)
 end
 
 """
@@ -559,3 +594,18 @@ function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
 end
 
+# --------------------------------------------------------------------------------------------------
+# print a solution
+"""
+$(TYPEDSIGNATURES)
+
+Prints the solution.
+"""
+function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
+    return print(io, typeof(sol))
+end
+
+function Base.show_default(io::IO, sol::Solution)
+    return print(io, typeof(sol))
+    #show(io, MIME("text/plain"), sol)
+end
