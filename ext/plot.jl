@@ -20,13 +20,13 @@ $(TYPEDEF)
 
 A node of a plot tree.
 """
-struct PlotNode <: AbstractPlotTreeElement
-    layout::Union{Symbol,Matrix{Any}}
-    children::Vector{<:AbstractPlotTreeElement}
+struct PlotNode{TL<:Union{Symbol,Matrix{Any}}, TC<:Vector{<:AbstractPlotTreeElement}} <: AbstractPlotTreeElement
+    layout::TL
+    children::TC
     function PlotNode(
         layout::Union{Symbol,Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement}
     )
-        return new(layout, children)
+        return new{typeof(layout), typeof(children)}(layout, children)
     end
 end
 
