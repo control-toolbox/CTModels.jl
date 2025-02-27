@@ -17,7 +17,8 @@ using Plots
         # :constraints,
         # :model,
         # :ocp,
-        :plot,        
+        # :plot,
+        :init,       
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

@@ -75,9 +75,9 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange objective
-    x = CTBase.ctinterpolate(T, CTBase.matrix2vec(X[:, 1:dim_x], 1))
-    p = CTBase.ctinterpolate(T[1:(end - 1)], CTBase.matrix2vec(P[:, 1:dim_x], 1))
-    u = CTBase.ctinterpolate(T, CTBase.matrix2vec(U[:, 1:dim_u], 1))
+    x = ctinterpolate(T, matrix2vec(X[:, 1:dim_x], 1))
+    p = ctinterpolate(T[1:(end - 1)], matrix2vec(P[:, 1:dim_x], 1))
+    u = ctinterpolate(T, matrix2vec(U[:, 1:dim_u], 1))
 
     # force scalar output when dimension is 1
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
@@ -90,32 +90,32 @@ function build_solution(
 
     # nonlinear constraints and dual variables
     path_constraints_fun =
-        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints, 1))(t)
+        t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
     path_constraints_dual_fun =
-        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints_dual, 1))(t)
+        t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
 
     # box constraints multipliers
     state_constraints_lb_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
         )(
             t
         )
     state_constraints_ub_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
         )(
             t
         )
     control_constraints_lb_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
         )(
             t
         )
     control_constraints_ub_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
         )(
             t
         )
