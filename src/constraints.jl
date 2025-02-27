@@ -130,12 +130,12 @@ Add a constraint to a pre-model.
 function constraint!(
     ocp::PreModel,
     type::Symbol;
-    rg::Union{T,OrdinalRange{T},Nothing}=nothing,
+    rg::Union{Int,OrdinalRange{Int},Nothing}=nothing,
     f::Union{Function,Nothing}=nothing,
     lb::Union{ctNumber,ctVector,Nothing}=nothing,
     ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
-) where {T<:Int}
+)
 
     # checkings: times, state and control must be set before adding constraints
     !__is_state_set(ocp) &&
