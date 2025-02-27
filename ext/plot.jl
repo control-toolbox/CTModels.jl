@@ -55,9 +55,12 @@ function __plot_time!(
     t_label = @match time begin
         :default => t_label
         :normalize => "normalized " * t_label
-        _ => CTBase.IncorrectArgument(
-            "Internal error, no such choice for time: $time. Use :default or :normalize",
-        )
+        :normalise => "normalised " * t_label
+        _ => throw(
+                CTBase.IncorrectArgument(
+                    "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise"
+                )
+            )
     end
 
     # reset ylims: ylims=:auto
