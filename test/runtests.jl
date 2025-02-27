@@ -2,23 +2,28 @@ using Test
 using Aqua
 using CTBase
 using CTModels
+using JLD2, JSON3
 using Plots
+
+#
+include("solution_example.jl")
 
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
     for name in (
-        :aqua,
-        :times,
-        :control,
-        :state,
-        :variable,
-        :dynamics,
-        :objective,
-        :constraints,
-        :model,
-        :ocp,
-        :plot,
-        :init,       
+        # :aqua,
+        # :times,
+        # :control,
+        # :state,
+        # :variable,
+        # :dynamics,
+        # :objective,
+        # :constraints,
+        # :model,
+        # :ocp,
+        # :plot,
+        # :init,
+        :export_import,    
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

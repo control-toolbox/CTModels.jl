@@ -19,6 +19,10 @@ const ConstraintsDictType = Dict{
 const Times = AbstractVector{<:Time}
 const TimesDisc = Union{Times,StepRangeLen}
 
+# to be extended
+export_ocp_solution(args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2, :JSON3))
+import_ocp_solution(args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2, :JSON3))
+
 #
 include("default.jl")
 include("utils.jl")

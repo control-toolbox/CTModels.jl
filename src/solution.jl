@@ -46,16 +46,16 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
-    path_constraints::Matrix{Float64},
-    path_constraints_dual::Matrix{Float64},
-    boundary_constraints::Vector{Float64},
-    boundary_constraints_dual::Vector{Float64},
-    state_constraints_lb_dual::Matrix{Float64},
-    state_constraints_ub_dual::Matrix{Float64},
-    control_constraints_lb_dual::Matrix{Float64},
-    control_constraints_ub_dual::Matrix{Float64},
-    variable_constraints_lb_dual::Vector{Float64},
-    variable_constraints_ub_dual::Vector{Float64},
+    path_constraints::Matrix{Float64}=zeros(0, 0),
+    path_constraints_dual::Matrix{Float64}=zeros(0, 0),
+    boundary_constraints::Vector{Float64}=zeros(0),
+    boundary_constraints_dual::Vector{Float64}=zeros(0),
+    state_constraints_lb_dual::Matrix{Float64}=zeros(0, 0),
+    state_constraints_ub_dual::Matrix{Float64}=zeros(0, 0),
+    control_constraints_lb_dual::Matrix{Float64}=zeros(0, 0),
+    control_constraints_ub_dual::Matrix{Float64}=zeros(0, 0),
+    variable_constraints_lb_dual::Vector{Float64}=zeros(0),
+    variable_constraints_ub_dual::Vector{Float64}=zeros(0),
 )
 
     # get dimensions
@@ -208,6 +208,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the state values at times `time_grid(sol)` of the optimal control solution or `nothing`.
+
+```@example
+julia> x  = state_discretized(sol)
+julia> x0 = x[1] # state at initial time
+```
+"""
+state_discretized(sol::Solution) = state(sol).(time_grid(sol))
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the dimension of the control of the optimal control solution.
 
 """
@@ -259,6 +271,18 @@ function control(sol::Solution{
     })::TS where {TS<:Function}
     return value(sol.control)
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the control values at times `time_grid(sol)` of the optimal control solution or `nothing`.
+
+```@example
+julia> u  = control_discretized(sol)
+julia> u0 = u[1] # control at initial time
+```
+"""
+control_discretized(sol::Solution) = control(sol).(time_grid(sol))
 
 """
 $(TYPEDSIGNATURES)
@@ -337,6 +361,18 @@ function costate(sol::Solution{
     })::Co where {Co<:Function}
     return sol.costate
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the costate values at times `time_grid(sol)` of the optimal control solution or `nothing`.
+
+```@example
+julia> p  = costate_discretized(sol)
+julia> p0 = p[1] # costate at initial time
+```
+"""
+costate_discretized(sol::Solution) = costate(sol).(time_grid(sol))
 
 """
 $(TYPEDSIGNATURES)
