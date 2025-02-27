@@ -132,7 +132,7 @@ function constraint!(
     lb::Union{ctNumber,ctVector,Nothing}=nothing,
     ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
-) where {T<:Int} 
+) where {T<:Int}
 
     # checkings: times, state and control must be set before adding constraints
     !__is_state_set(ocp) &&
@@ -169,14 +169,14 @@ function constraint!(
         ub=as_vector(ub),
         label=label,
     )
-end 
+end
 
 as_vector(x::Nothing) = nothing
 as_vector(x::T) where {T<:ctNumber} = [x]
 as_vector(x::Vector{T}) where {T<:ctNumber} = x
 
 as_range(r::Nothing) = nothing
-as_range(r::T) where {T<:Int} = r:r 
+as_range(r::T) where {T<:Int} = r:r
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
 
 # ------------------------------------------------------------------------------ #
