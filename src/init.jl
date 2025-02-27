@@ -7,6 +7,7 @@ function checkDim(actual_dim, target_dim)
     if !isnothing(target_dim) && actual_dim != target_dim
         error("Init dimension mismatch: got ", actual_dim, " instead of ", target_dim)
     end
+    return nothing
 end
 
 """
@@ -15,7 +16,7 @@ $(TYPEDSIGNATURES)
 Return true if argument is a vector of vectors
 """
 function isaVectVect(data)
-    return (data isa Vector) && (data[1] isa ctVector)
+    return (data isa AbstractVector) && (data[1] isa AbstractVector)
 end
 
 """
@@ -39,7 +40,7 @@ Convert matrix time-grid to vector
 function formatTimeGrid(time)
     if isnothing(time)
         return nothing
-    elseif time isa ctVector
+    elseif time isa AbstractVector
         return time
     else
         return vec(time)
@@ -72,7 +73,7 @@ $(TYPEDSIGNATURES)
 
 Build functional initialization: constant / 1D interpolation
 """
-function buildFunctionalInit(data::ctVector, time, dim)
+function buildFunctionalInit(data::Union{ctNumber, ctVector}, time, dim)
     if !isnothing(time) && (length(data) == length(time))
         # interpolation vs time, dim 1 case
         itp = ctinterpolate(time, data)
@@ -146,7 +147,7 @@ julia> init = Init(sol)
 mutable struct Init
     state_init::Function
     control_init::Function
-    variable_init::Union{Nothing,ctVector}
+    variable_init::Union{Nothing, ctNumber, ctVector}
     #costate_init::Function
     #multipliers_init::Union{Nothing, ctVector}
 

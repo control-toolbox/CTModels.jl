@@ -7,17 +7,17 @@ using Plots
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
     for name in (
-        # :aqua,
-        # :times,
-        # :control,
-        # :state,
-        # :variable,
-        # :dynamics,
-        # :objective,
-        # :constraints,
-        # :model,
-        # :ocp,
-        # :plot,
+        :aqua,
+        :times,
+        :control,
+        :state,
+        :variable,
+        :dynamics,
+        :objective,
+        :constraints,
+        :model,
+        :ocp,
+        :plot,
         :init,       
     )
         @testset "$(name)" begin

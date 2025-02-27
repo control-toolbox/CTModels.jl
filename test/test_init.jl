@@ -47,6 +47,7 @@ function test_init()
     x_vec = [[0, 0], [1, 2], [5, -1]]
     x_matrix = [0 0; 1 2; 5 -1]
     u_vec = [0, 0.3, 0.1]    
+    t_vec = [0, 0.1, 0.2]
 
     init = (state = x_const,)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
@@ -55,6 +56,24 @@ function test_init()
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
     init = (state = x_const, control = u_const, variable = v_const)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (state = x_func,)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (state = x_func, control = u_func)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (state = x_func, control = u_func, variable = v_const)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (time = t_vec, state = x_vec)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (time = t_vec, state = x_vec, control = u_vec)
+    @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
+
+    init = (time = t_vec, state = x_matrix, control = u_vec)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
 end
