@@ -1,7 +1,7 @@
 function test_times()
 
     #
-    @test isconcretetype(CTModels.FixedTimeModel)
+    @test isconcretetype(CTModels.FixedTimeModel{Float64})
     @test isconcretetype(CTModels.FreeTimeModel)
 
     # FixedTimeModel

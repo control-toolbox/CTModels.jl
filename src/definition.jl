@@ -23,13 +23,14 @@ $(TYPEDSIGNATURES)
 Return the model definition of the optimal control problem or `nothing`.
 
 """
-definition(ocp::Model)::Expr = ocp.definition
+function definition(ocp::Model)::Expr 
+    return ocp.definition
+end
 
 # ------------------------------------------------------------------------------ #
 # PRINT
 # ------------------------------------------------------------------------------ #
-
-__print(e::Expr, io::IO, l::Int) = begin
+function __print(e::Expr, io::IO, l::Int)
     @match e begin
         :(($a, $b)) => println(io, " "^l, a, ", ", b)
         _ => println(io, " "^l, e)

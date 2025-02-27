@@ -3,6 +3,7 @@ module CTModels
 # imports
 using CTBase: CTBase
 using DocStringExtensions
+using Interpolations
 using MLStyle
 using Parameters # @with_kw: to have default values in struct
 using MacroTools: striplines
@@ -12,7 +13,6 @@ const Dimension = Int
 const ctNumber = Real
 const Time = ctNumber
 const ctVector = AbstractVector{<:ctNumber}
-const Variable = ctVector
 const ConstraintsDictType = Dict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
 }
@@ -20,7 +20,11 @@ const Times = AbstractVector{<:Time}
 const TimesDisc = Union{Times,StepRangeLen}
 
 #
+include("default.jl")
+include("utils.jl")
 include("types.jl")
+include("init.jl")
+include("dual_model.jl")
 include("state.jl")
 include("control.jl")
 include("variable.jl")

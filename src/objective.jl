@@ -1,15 +1,6 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the type of criterion. Either :min or :max.
-The default value is `:min`.
-The other possible criterion type is `:max`.
-"""
-__criterion_type() = :min
-
-"""
-$(TYPEDSIGNATURES)
-
 Set the objective of the optimal control problem.
 
 # Arguments
@@ -81,130 +72,121 @@ end
 # ------------------------------------------------------------------------------ #
 
 # From MayerObjectiveModel
-criterion(model::MayerObjectiveModel)::Symbol = model.criterion
-(mayer(model::MayerObjectiveModel{M})::M) where {M<:Function} = model.mayer
-function lagrange(model::MayerObjectiveModel)
-    throw(
-        CTBase.UnauthorizedCall(
-            "a Mayer objective model does not have a Lagrange function."
-        ),
-    )
+"""
+$(TYPEDSIGNATURES)
+
+Get the criterion (:min or :max) of the Mayer objective model.
+"""
+function criterion(model::MayerObjectiveModel)::Symbol 
+    return model.criterion
 end
-has_mayer_cost(model::MayerObjectiveModel)::Bool = true
-has_lagrange_cost(model::MayerObjectiveModel)::Bool = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the Mayer function of the Mayer objective model.
+"""
+function mayer(model::MayerObjectiveModel{M})::M where {M<:Function}
+    return model.mayer
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Mayer objective model has a Mayer function. Return true.
+"""
+function has_mayer_cost(model::MayerObjectiveModel)::Bool 
+    return true
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Mayer objective model has a Lagrange function. Return false.
+"""
+function has_lagrange_cost(model::MayerObjectiveModel)::Bool 
+    return false
+end
 
 # From LagrangeObjectiveModel
-criterion(model::LagrangeObjectiveModel)::Symbol = model.criterion
-function mayer(model::LagrangeObjectiveModel)
-    throw(
-        CTBase.UnauthorizedCall(
-            "a Lagrange objective model does not have a Mayer function."
-        ),
-    )
+"""
+$(TYPEDSIGNATURES)
+
+Get the criterion (:min or :max) of the Lagrange objective model.
+"""
+function criterion(model::LagrangeObjectiveModel)::Symbol 
+    return model.criterion
 end
-(lagrange(model::LagrangeObjectiveModel{L})::L) where {L<:Function} = model.lagrange
-has_mayer_cost(model::LagrangeObjectiveModel)::Bool = false
-has_lagrange_cost(model::LagrangeObjectiveModel)::Bool = true
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the Lagrange function of the Lagrange objective model.
+"""
+function lagrange(model::LagrangeObjectiveModel{L})::L where {L<:Function}
+    return model.lagrange
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Lagrange objective model has a Mayer function. Return false.
+"""
+function has_mayer_cost(model::LagrangeObjectiveModel)::Bool 
+    return false
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Lagrange objective model has a Lagrange function. Return true.
+"""
+function has_lagrange_cost(model::LagrangeObjectiveModel)::Bool 
+    return true
+end
 
 # From BolzaObjectiveModel
-criterion(model::BolzaObjectiveModel)::Symbol = model.criterion
-(mayer(model::BolzaObjectiveModel{M,L})::M) where {M<:Function,L<:Function} = model.mayer
-(lagrange(model::BolzaObjectiveModel{M,L})::L) where {M<:Function,L<:Function} =
-    model.lagrange
-has_mayer_cost(model::BolzaObjectiveModel)::Bool = true
-has_lagrange_cost(model::BolzaObjectiveModel)::Bool = true
+"""
+$(TYPEDSIGNATURES)
 
-# From Model
-(
-    objective(ocp::Model{T,S,C,V,D,O,B})::O
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    B<:AbstractConstraintsModel,
-} = ocp.objective
-
-criterion(ocp::Model)::Symbol = criterion(objective(ocp))
-
-(
-    mayer(ocp::Model{T,S,C,V,D,MayerObjectiveModel{M},B})::M
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    M<:Function,
-    B<:AbstractConstraintsModel,
-} = mayer(objective(ocp))
-(
-    mayer(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::M
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    M<:Function,
-    L<:Function,
-    B<:AbstractConstraintsModel,
-} = mayer(objective(ocp))
-function mayer(
-    ocp::Model{T,S,C,V,D,<:LagrangeObjectiveModel,B}
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    D<:Function,
-    V<:AbstractVariableModel,
-    B<:AbstractConstraintsModel,
-}
-    throw(
-        CTBase.UnauthorizedCall("a Lagrange objective ocp does not have a Mayer function.")
-    )
+Get the criterion (:min or :max) of the Bolza objective model.
+"""
+function criterion(model::BolzaObjectiveModel)::Symbol 
+    return model.criterion
 end
 
-(
-    lagrange(ocp::Model{T,S,C,V,D,LagrangeObjectiveModel{L},B})::L
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    L<:Function,
-    B<:AbstractConstraintsModel,
-} = lagrange(objective(ocp))
-(
-    lagrange(ocp::Model{T,S,C,V,D,BolzaObjectiveModel{M,L},B})::L
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    M<:Function,
-    L<:Function,
-    B<:AbstractConstraintsModel,
-} = lagrange(objective(ocp))
-function lagrange(
-    ocp::Model{T,S,C,V,D,<:MayerObjectiveModel,B}
-) where {
-    T<:AbstractTimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    D<:Function,
-    V<:AbstractVariableModel,
-    B<:AbstractConstraintsModel,
-}
-    throw(
-        CTBase.UnauthorizedCall("a Mayer objective ocp does not have a Lagrange function.")
-    )
+"""
+$(TYPEDSIGNATURES)
+
+Get the Mayer function of the Bolza objective model.
+"""
+function mayer(model::BolzaObjectiveModel{M,<:Function})::M where {M<:Function}
+    return model.mayer
 end
 
-# has_mayer_cost and has_lagrange_cost
-has_mayer_cost(ocp::Model)::Bool = has_mayer_cost(objective(ocp))
-has_lagrange_cost(ocp::Model)::Bool = has_lagrange_cost(objective(ocp))
+"""
+$(TYPEDSIGNATURES)
+
+Get the Lagrange function of the Bolza objective model.
+"""
+function lagrange(model::BolzaObjectiveModel{<:Function,L})::L where {L<:Function}
+    return model.lagrange
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Bolza objective model has a Mayer function. Return true.
+"""
+function has_mayer_cost(model::BolzaObjectiveModel)::Bool 
+    return true
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the Bolza objective model has a Lagrange function. Return true.
+"""
+function has_lagrange_cost(model::BolzaObjectiveModel)::Bool 
+    return true
+end

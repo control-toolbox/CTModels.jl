@@ -138,7 +138,6 @@ function test_ocp()
     # tests on mayer
     mayer = CTModels.mayer(ocp)
     @test mayer(x0, xf, v) == mayer_user(x0, xf, v)
-    @test_throws CTBase.UnauthorizedCall CTModels.lagrange(ocp)
 
     # tests on constraints
     # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
@@ -212,9 +211,7 @@ function test_ocp()
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
-    @test CTModels.initial_time(ocp, ∅) == 0.0
     @test CTModels.final_time(ocp) == 10.0
-    @test CTModels.final_time(ocp, ∅) == 10.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
     @test CTModels.final_time_name(ocp) == "t_f"
@@ -234,7 +231,6 @@ function test_ocp()
 
     # tests on times
     @test CTModels.initial_time(ocp) == 0.0
-    @test CTModels.initial_time(ocp, ∅) == 0.0
     @test CTModels.final_time(ocp, [2.0, 50.0]) == 2.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
@@ -256,7 +252,6 @@ function test_ocp()
     # tests on times
     @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
     @test CTModels.final_time(ocp) == 10.0
-    @test CTModels.final_time(ocp, ∅) == 10.0
     @test CTModels.time_name(ocp) == "t"
     @test CTModels.initial_time_name(ocp) == "t₀"
     @test CTModels.final_time_name(ocp) == "t_f"
@@ -281,7 +276,6 @@ function test_ocp()
     # tests on lagrange
     lagrange = CTModels.lagrange(ocp)
     @test lagrange(t, x, u, v) == lagrange_user(t, x, u, v)
-    @test_throws CTBase.UnauthorizedCall CTModels.mayer(ocp)
 
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective

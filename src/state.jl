@@ -1,23 +1,6 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the name of the state.
-The default value is `"x"`.
-"""
-__state_name()::String = "x"
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the names of the states.
-The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
-"""
-__state_components(n::Dimension, name::String)::Vector{String} =
-    n > 1 ? [name * CTBase.ctindices(i) for i in range(1, n)] : [name]
-
-"""
-$(TYPEDSIGNATURES)
-
 Define the state dimension and possibly the names of each component.
 
 !!! note
@@ -103,12 +86,65 @@ end
 # GETTERS
 # ------------------------------------------------------------------------------ #
 
-# from StateModel
-name(model::StateModel)::String = model.name
-components(model::StateModel)::Vector{String} = model.components
-(dimension(model::StateModel)::Dimension) = length(components(model))
+"""
+$(TYPEDSIGNATURES)
 
-# from Model
-state_name(ocp::Model)::String = name(ocp.state)
-state_components(ocp::Model)::Vector{String} = components(ocp.state)
-state_dimension(ocp::Model)::Dimension = dimension(ocp.state)
+Get the name of the state from the state model.
+"""
+function name(model::StateModel)::String
+    return model.name
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the state from the state model.
+"""
+function components(model::StateModel)::Vector{String}
+    return model.components
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the dimension of the state from the state model.
+"""
+function dimension(model::StateModel)::Dimension
+    return length(components(model))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the name of the state from the state model solution.
+"""
+function name(model::StateModelSolution)::String
+    return model.name
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the components names of the state from the state model solution.
+"""
+function components(model::StateModelSolution)::Vector{String}
+    return model.components
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the dimension of the state from the state model solution.
+"""
+function dimension(model::StateModelSolution)::Dimension
+    return length(components(model))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the state function from the state model solution.
+"""
+function value(model::StateModelSolution{TS})::TS where {TS<:Function}
+    return model.value
+end

@@ -1,3 +1,38 @@
+"""
+$(TYPEDSIGNATURES)
+
+Build a solution from the optimal control problem, the time grid, the state, control, variable, and dual variables.
+
+# Arguments
+
+- `ocp::Model`: the optimal control problem.
+- `T::Vector{Float64}`: the time grid.
+- `X::Matrix{Float64}`: the state trajectory.
+- `U::Matrix{Float64}`: the control trajectory.
+- `v::Vector{Float64}`: the variable trajectory.
+- `P::Matrix{Float64}`: the costate trajectory.
+- `objective::Float64`: the objective value.
+- `iterations::Int`: the number of iterations.
+- `constraints_violation::Float64`: the constraints violation.
+- `message::String`: the message associated to the stopping criterion.
+- `stopping::Symbol`: the stopping criterion.
+- `success::Bool`: the success status.
+- `path_constraints::Matrix{Float64}`: the path constraints.
+- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
+- `boundary_constraints::Vector{Float64}`: the boundary constraints.
+- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
+- `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
+- `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
+- `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.
+- `control_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the control constraints.
+- `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
+- `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
+
+# Returns
+
+- `sol::Solution`: the optimal control solution.
+
+"""
 function build_solution(
     ocp::Model,
     T::Vector{Float64},
@@ -40,9 +75,9 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange objective
-    x = CTBase.ctinterpolate(T, CTBase.matrix2vec(X[:, 1:dim_x], 1))
-    p = CTBase.ctinterpolate(T[1:(end - 1)], CTBase.matrix2vec(P[:, 1:dim_x], 1))
-    u = CTBase.ctinterpolate(T, CTBase.matrix2vec(U[:, 1:dim_u], 1))
+    x = ctinterpolate(T, matrix2vec(X[:, 1:dim_x], 1))
+    p = ctinterpolate(T[1:(end - 1)], matrix2vec(P[:, 1:dim_x], 1))
+    u = ctinterpolate(T, matrix2vec(U[:, 1:dim_u], 1))
 
     # force scalar output when dimension is 1
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
@@ -55,32 +90,32 @@ function build_solution(
 
     # nonlinear constraints and dual variables
     path_constraints_fun =
-        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints, 1))(t)
+        t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
     path_constraints_dual_fun =
-        t -> CTBase.ctinterpolate(T, CTBase.matrix2vec(path_constraints_dual, 1))(t)
+        t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
 
     # box constraints multipliers
     state_constraints_lb_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
         )(
             t
         )
     state_constraints_ub_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
         )(
             t
         )
     control_constraints_lb_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
         )(
             t
         )
     control_constraints_ub_dual_fun =
-        t -> CTBase.ctinterpolate(
-            T, CTBase.matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(
+            T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
         )(
             t
         )
@@ -109,4 +144,468 @@ function build_solution(
     return Solution(
         time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos
     )
+end
+
+# ------------------------------------------------------------------------------ #
+# Getters
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the state of the optimal control solution.
+
+"""
+function state_dimension(sol::Solution)::Dimension
+    return dimension(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the state of the optimal control solution.
+
+"""
+function state_components(sol::Solution)::Vector{String}
+    return components(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the state of the optimal control solution.
+
+"""
+function state_name(sol::Solution)::String
+    return name(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the state (function of time) of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> x  = state(sol)
+julia> x0 = x(t0)
+```
+"""
+function state(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:StateModelSolution{TS},
+    <:AbstractControlModel,
+    <:AbstractVariableModel,
+    <:Function,
+    <:ctNumber,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::TS where {TS<:Function} 
+    return value(sol.state)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the control of the optimal control solution.
+
+"""
+function control_dimension(sol::Solution)::Dimension
+    return dimension(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the control of the optimal control solution.
+
+"""
+function control_components(sol::Solution)::Vector{String}
+    return components(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the control of the optimal control solution.
+
+"""
+function control_name(sol::Solution)::String
+    return name(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the control (function of time) of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> u  = control(sol)
+julia> u0 = u(t0) # control at initial time
+```
+"""
+function control(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:ControlModelSolution{TS},
+    <:AbstractVariableModel,
+    <:Function,
+    <:ctNumber,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::TS where {TS<:Function}
+    return value(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the variable of the optimal control solution.
+
+"""
+function variable_dimension(sol::Solution)::Dimension
+    return dimension(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the variable of the optimal control solution.
+
+"""
+function variable_components(sol::Solution)::Vector{String}
+    return components(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the variable of the optimal control solution.
+
+"""
+function variable_name(sol::Solution)::String
+    return name(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the variable of the optimal control solution or `nothing`.
+
+```@example
+julia> v  = variable(sol)
+```
+"""
+function variable(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:AbstractControlModel,
+    <:VariableModelSolution{TS},
+    <:Function,
+    <:ctNumber,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::TS where {TS<:Union{ctNumber,ctVector}}
+    return value(sol.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the costate of the optimal control solution.
+
+```@example
+julia> t0 = time_grid(sol)[1]
+julia> p  = costate(sol)
+julia> p0 = p(t0)
+```
+"""
+function costate(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:AbstractControlModel,
+    <:AbstractVariableModel,
+    Co,
+    <:ctNumber,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::Co where {Co<:Function}
+    return sol.costate
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the initial time of the optimal control solution.
+
+"""
+function initial_time_name(sol::Solution)::String 
+    return name(initial(sol.times))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the final time of the optimal control solution.
+
+"""
+function final_time_name(sol::Solution)::String 
+    return name(final(sol.times))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the time component of the optimal control solution.
+
+"""
+function time_name(sol::Solution)::String
+    return time_name(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the time grid of the optimal control solution.
+
+"""
+function time_grid(sol::Solution{
+    <:TimeGridModel{T},
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:AbstractControlModel,
+    <:AbstractVariableModel,
+    <:Function,
+    <:ctNumber,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::T where {T<:TimesDisc}
+    return sol.time_grid.value
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the objective value of the optimal control solution.
+
+"""
+function objective(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:AbstractControlModel,
+    <:AbstractVariableModel,
+    <:Function,
+    O,
+    <:AbstractDualModel,
+    <:AbstractSolverInfos,
+    })::O where {O<:ctNumber}
+    return sol.objective
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the number of iterations (if solved by an iterative method) of the optimal control solution.
+
+"""
+function iterations(sol::Solution)::Int
+    return sol.solver_infos.iterations
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the stopping criterion (a Symbol) of the optimal control solution.
+
+"""
+function stopping(sol::Solution)::Symbol
+    return sol.solver_infos.stopping
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the message associated to the stopping criterion of the optimal control solution.
+
+"""
+function message(sol::Solution)::String
+    return sol.solver_infos.message
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the success status of the optimal control solution.
+
+"""
+function success(sol::Solution)::Bool
+    return sol.solver_infos.success
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the constraints violation of the optimal control solution.
+
+"""
+function constraints_violation(sol::Solution)::Float64
+    return sol.solver_infos.constraints_violation
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return a dictionary of additional infos depending on the solver or `nothing`.
+
+"""
+function infos(sol::Solution)::Dict{Symbol,Any}
+    return sol.solver_infos.infos
+end
+
+# constraints and multipliers:
+# path_constraints::PC
+# path_constraints_dual::PC_Dual
+# boundary_constraints::BC
+# boundary_constraints_dual::BC_Dual
+# state_constraints_lb_dual::SC_LB_Dual
+# state_constraints_ub_dual::SC_UB_Dual
+# control_constraints_lb_dual::CC_LB_Dual
+# control_constraints_ub_dual::CC_UB_Dual
+# variable_constraints_lb_dual::VC_LB_Dual
+# variable_constraints_ub_dual::VC_UB_Dual
+
+function dual_model(sol::Solution{
+    <:AbstractTimeGridModel,
+    <:AbstractTimesModel,
+    <:AbstractStateModel,
+    <:AbstractControlModel,
+    <:AbstractVariableModel,
+    <:Function,
+    <:ctNumber,
+    DM,
+    <:AbstractSolverInfos,
+    })::DM where {DM<:AbstractDualModel}
+    return sol.dual
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the path constraints of the optimal control solution.
+
+"""
+function path_constraints(sol::Solution)
+    return path_constraints(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dual of the path constraints of the optimal control solution.
+
+"""
+function path_constraints_dual(sol::Solution)
+    return path_constraints_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the boundary constraints of the optimal control solution.
+
+"""
+function boundary_constraints(sol::Solution)
+    return boundary_constraints(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dual of the boundary constraints of the optimal control solution.
+
+"""
+function boundary_constraints_dual(sol::Solution)
+    return boundary_constraints_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the lower bound dual of the state constraints of the optimal control solution.
+
+"""
+function state_constraints_lb_dual(sol::Solution)
+    return state_constraints_lb_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the upper bound dual of the state constraints of the optimal control solution.
+
+"""
+function state_constraints_ub_dual(sol::Solution)
+    return state_constraints_ub_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the lower bound dual of the control constraints of the optimal control solution.
+
+"""
+function control_constraints_lb_dual(sol::Solution)
+    return control_constraints_lb_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the upper bound dual of the control constraints of the optimal control solution.
+
+"""
+function control_constraints_ub_dual(sol::Solution)
+    return control_constraints_ub_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the lower bound dual of the variable constraints of the optimal control solution.
+
+"""
+function variable_constraints_lb_dual(sol::Solution)
+    return variable_constraints_lb_dual(dual_model(sol))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the upper bound dual of the variable constraints of the optimal control solution.
+
+"""
+function variable_constraints_ub_dual(sol::Solution)
+    return variable_constraints_ub_dual(dual_model(sol))
+end
+
+# --------------------------------------------------------------------------------------------------
+# print a solution
+"""
+$(TYPEDSIGNATURES)
+
+Prints the solution.
+"""
+function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
+    return print(io, typeof(sol))
+end
+
+function Base.show_default(io::IO, sol::Solution)
+    return print(io, typeof(sol))
+    #show(io, MIME("text/plain"), sol)
 end

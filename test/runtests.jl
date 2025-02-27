@@ -2,13 +2,13 @@ using Test
 using Aqua
 using CTBase
 using CTModels
+using Plots
 
 #
 @testset verbose = true showtiming = true "CTModels tests" begin
     for name in (
-        #:aqua,
+        :aqua,
         :times,
-        :ocp,
         :control,
         :state,
         :variable,
@@ -16,6 +16,9 @@ using CTModels
         :objective,
         :constraints,
         :model,
+        :ocp,
+        :plot,
+        :init,       
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

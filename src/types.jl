@@ -26,7 +26,7 @@ $(TYPEDFIELDS)
 struct StateModelSolution{TS<:Function} <: AbstractStateModel
     name::String
     components::Vector{String}
-    solution::TS
+    value::TS
 end
 
 # ------------------------------------------------------------------------------ #
@@ -57,7 +57,7 @@ $(TYPEDFIELDS)
 struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     name::String
     components::Vector{String}
-    solution::TS
+    value::TS
 end
 
 # ------------------------------------------------------------------------------ #
@@ -97,7 +97,7 @@ $(TYPEDFIELDS)
 struct VariableModelSolution{TS<:Union{ctNumber,ctVector}} <: AbstractVariableModel
     name::String
     components::Vector{String}
-    solution::TS
+    value::TS
 end
 
 # ------------------------------------------------------------------------------ #
@@ -113,8 +113,8 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct FixedTimeModel <: AbstractTimeModel
-    time::Time
+struct FixedTimeModel{T<:Time} <: AbstractTimeModel
+    time::T
     name::String
 end
 
@@ -325,7 +325,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct TimeGridModel{T<:TimesDisc} <: AbstractTimeGridModel
-    grid::T
+    value::T
 end
 
 """
@@ -336,6 +336,9 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct EmptyTimeGridModel <: AbstractTimeGridModel end
+
+is_empty(model::EmptyTimeGridModel)::Bool = true
+is_empty(model::TimeGridModel)::Bool = false
 
 # ------------------------------------------------------------------------------ #
 # Solver infos
@@ -435,3 +438,10 @@ struct Solution{
     dual::DualModelType
     solver_infos::SolverInfosType
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the time grid is empty from the solution.
+"""
+is_empty_time_grid(sol::Solution)::Bool = is_empty(sol.time_grid)

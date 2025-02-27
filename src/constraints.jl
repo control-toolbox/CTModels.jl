@@ -1,11 +1,8 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the label of a constraint.
-A unique value is given to each constraint using the `gensym` function and prefixing by `:unamed`.
+Add a constraint to a dictionary of constraints.
 """
-__constraint_label() = gensym(:unamed)
-
 function __constraint!(
     ocp_constraints::ConstraintsDictType,
     type::Symbol,
@@ -124,15 +121,21 @@ function __constraint!(
     return nothing
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Add a constraint to a pre-model.
+"""
 function constraint!(
     ocp::PreModel,
     type::Symbol;
-    rg::Union{T,OrdinalRange{T},Nothing}=nothing,
+    rg::Union{Int,OrdinalRange{Int},Nothing}=nothing,
     f::Union{Function,Nothing}=nothing,
     lb::Union{ctNumber,ctVector,Nothing}=nothing,
     ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
-) where {T<:Int}
+)
 
     # checkings: times, state and control must be set before adding constraints
     !__is_state_set(ocp) &&
@@ -172,142 +175,9 @@ function constraint!(
 end
 
 as_vector(x::Nothing) = nothing
-as_vector(x::T) where {T<:ctNumber} = [x]
+(as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
 as_vector(x::Vector{T}) where {T<:ctNumber} = x
 
 as_range(r::Nothing) = nothing
 as_range(r::T) where {T<:Int} = r:r
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
-
-# ------------------------------------------------------------------------------ #
-# GETTERS
-# ------------------------------------------------------------------------------ #
-
-# From ConstraintsModel
-constraint(ocp::Model, label::Symbol)::Tuple = ocp.constraints.dict[label]
-
-(
-    path_constraints_nl(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
-    )::TP
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TB,
-    TS,
-    TC,
-    TV,
-} = ocp.constraints.path_nl
-
-(
-    boundary_constraints_nl(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
-    )::TB
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TB,
-    TS,
-    TC,
-    TV,
-} = ocp.constraints.boundary_nl
-
-(
-    state_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
-    )::TS
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TB,
-    TS,
-    TC,
-    TV,
-} = ocp.constraints.state_box
-
-(
-    control_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
-    )::TC
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TB,
-    TS,
-    TC,
-    TV,
-} = ocp.constraints.control_box
-
-(
-    variable_constraints_box(
-        ocp::Model{T,S,C,V,D,O,ConstraintsModel{TP,TB,TS,TC,TV,ConstraintsDictType}}
-    )::TV
-) where {
-    T<:TimesModel,
-    S<:AbstractStateModel,
-    C<:AbstractControlModel,
-    V<:AbstractVariableModel,
-    D<:Function,
-    O<:AbstractObjectiveModel,
-    TP,
-    TB,
-    TS,
-    TC,
-    TV,
-} = ocp.constraints.variable_box
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of nonlinear path constraints.
-"""
-dim_path_constraints_nl(ocp::Model)::Dimension = length(path_constraints_nl(ocp)[1])
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of the boundary constraints.
-"""
-dim_boundary_constraints_nl(ocp::Model)::Dimension = length(boundary_constraints_nl(ocp)[1])
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of box constraints on state.
-"""
-dim_state_constraints_box(ocp::Model)::Dimension = length(state_constraints_box(ocp)[1])
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of box constraints on control.
-"""
-dim_control_constraints_box(ocp::Model)::Dimension = length(control_constraints_box(ocp)[1])
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the dimension of box constraints on variable.
-"""
-dim_variable_constraints_box(ocp::Model)::Dimension =
-    length(variable_constraints_box(ocp)[1])
