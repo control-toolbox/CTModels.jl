@@ -20,13 +20,14 @@ $(TYPEDEF)
 
 A node of a plot tree.
 """
-struct PlotNode{TL<:Union{Symbol,Matrix{Any}}, TC<:Vector{<:AbstractPlotTreeElement}} <: AbstractPlotTreeElement
+struct PlotNode{TL<:Union{Symbol,Matrix{Any}},TC<:Vector{<:AbstractPlotTreeElement}} <:
+       AbstractPlotTreeElement
     layout::TL
     children::TC
     function PlotNode(
         layout::Union{Symbol,Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement}
     )
-        return new{typeof(layout), typeof(children)}(layout, children)
+        return new{typeof(layout),typeof(children)}(layout, children)
     end
 end
 
@@ -57,10 +58,10 @@ function __plot_time!(
         :normalize => "normalized " * t_label
         :normalise => "normalised " * t_label
         _ => throw(
-                CTBase.IncorrectArgument(
-                    "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise"
-                )
-            )
+            CTBase.IncorrectArgument(
+                "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
+            ),
+        )
     end
 
     # reset ylims: ylims=:auto

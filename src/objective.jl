@@ -77,7 +77,7 @@ $(TYPEDSIGNATURES)
 
 Get the criterion (:min or :max) of the Mayer objective model.
 """
-function criterion(model::MayerObjectiveModel)::Symbol 
+function criterion(model::MayerObjectiveModel)::Symbol
     return model.criterion
 end
 
@@ -95,7 +95,7 @@ $(TYPEDSIGNATURES)
 
 Check if the Mayer objective model has a Mayer function. Return true.
 """
-function has_mayer_cost(model::MayerObjectiveModel)::Bool 
+function has_mayer_cost(model::MayerObjectiveModel)::Bool
     return true
 end
 
@@ -104,7 +104,7 @@ $(TYPEDSIGNATURES)
 
 Check if the Mayer objective model has a Lagrange function. Return false.
 """
-function has_lagrange_cost(model::MayerObjectiveModel)::Bool 
+function has_lagrange_cost(model::MayerObjectiveModel)::Bool
     return false
 end
 
@@ -114,7 +114,7 @@ $(TYPEDSIGNATURES)
 
 Get the criterion (:min or :max) of the Lagrange objective model.
 """
-function criterion(model::LagrangeObjectiveModel)::Symbol 
+function criterion(model::LagrangeObjectiveModel)::Symbol
     return model.criterion
 end
 
@@ -132,7 +132,7 @@ $(TYPEDSIGNATURES)
 
 Check if the Lagrange objective model has a Mayer function. Return false.
 """
-function has_mayer_cost(model::LagrangeObjectiveModel)::Bool 
+function has_mayer_cost(model::LagrangeObjectiveModel)::Bool
     return false
 end
 
@@ -141,7 +141,7 @@ $(TYPEDSIGNATURES)
 
 Check if the Lagrange objective model has a Lagrange function. Return true.
 """
-function has_lagrange_cost(model::LagrangeObjectiveModel)::Bool 
+function has_lagrange_cost(model::LagrangeObjectiveModel)::Bool
     return true
 end
 
@@ -151,7 +151,7 @@ $(TYPEDSIGNATURES)
 
 Get the criterion (:min or :max) of the Bolza objective model.
 """
-function criterion(model::BolzaObjectiveModel)::Symbol 
+function criterion(model::BolzaObjectiveModel)::Symbol
     return model.criterion
 end
 
@@ -178,7 +178,7 @@ $(TYPEDSIGNATURES)
 
 Check if the Bolza objective model has a Mayer function. Return true.
 """
-function has_mayer_cost(model::BolzaObjectiveModel)::Bool 
+function has_mayer_cost(model::BolzaObjectiveModel)::Bool
     return true
 end
 
@@ -187,6 +187,6 @@ $(TYPEDSIGNATURES)
 
 Check if the Bolza objective model has a Lagrange function. Return true.
 """
-function has_lagrange_cost(model::BolzaObjectiveModel)::Bool 
+function has_lagrange_cost(model::BolzaObjectiveModel)::Bool
     return true
 end

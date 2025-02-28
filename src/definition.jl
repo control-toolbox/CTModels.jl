@@ -23,7 +23,7 @@ $(TYPEDSIGNATURES)
 Return the model definition of the optimal control problem or `nothing`.
 
 """
-function definition(ocp::Model)::Expr 
+function definition(ocp::Model)::Expr
     return ocp.definition
 end
 

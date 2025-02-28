@@ -17,7 +17,7 @@ function test_plot()
     CTModels.dynamics!(pre_ocp, dynamics!) # does not correspond to the solution
 
     # set objective
-    mayer(x0, xf, v) = x0[1] + xf[1] 
+    mayer(x0, xf, v) = x0[1] + xf[1]
     lagrange(t, x, u, v) = 0.5 * u[1]^2
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange) # does not correspond to the solution
 
@@ -42,7 +42,7 @@ function test_plot()
     t0 = 0.0
     tf = 1.0
     N = 201
-    T = range(t0, tf, length=N)
+    T = range(t0, tf; length=N)
     # convert T to a vector of Float64
     T = Vector{Float64}(T)
 
@@ -72,7 +72,7 @@ function test_plot()
     function p(t)
         return [α, -α * (t - t0) + β]
     end
-    P = vcat([p(t)' for t in T[1:end-1]]...)
+    P = vcat([p(t)' for t in T[1:(end - 1)]]...)
 
     # control: U Matrix{Float64}
     U = zeros(N, 1)
@@ -133,7 +133,13 @@ function test_plot()
     variable_constraints_ub_dual = zeros(0)
 
     # solution
-    sol = CTModels.build_solution(ocp, T, X, U, v, P; 
+    sol = CTModels.build_solution(
+        ocp,
+        T,
+        X,
+        U,
+        v,
+        P;
         objective=objective,
         iterations=iterations,
         constraints_violation=constraints_violation,
@@ -194,7 +200,9 @@ function test_plot()
     plt = plot(sol; layout=:group, control=:all)
     @test plot!(plt, sol; layout=:group, control=:all) isa Plots.Plot
 
-    @test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:group, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot!(
+        plt, sol; layout=:group, control=:wrong_choice
+    )
 
     # 
     plt = plot(sol; layout=:split, control=:components)
@@ -208,7 +216,9 @@ function test_plot()
     plt = plot(sol; layout=:split, control=:all)
     @test plot!(plt, sol; layout=:split, control=:all) isa Plots.Plot
 
-    @test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:split, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot!(
+        plt, sol; layout=:split, control=:wrong_choice
+    )
 
     #
     plt = plot(sol; layout=:split)

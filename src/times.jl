@@ -149,7 +149,7 @@ $(TYPEDSIGNATURES)
 
 Get the time from the fixed time model.
 """
-function time(model::FixedTimeModel{T})::T where {T<:Time} 
+function time(model::FixedTimeModel{T})::T where {T<:Time}
     return model.time
 end
 
@@ -158,7 +158,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the time from the fixed time model.
 """
-function name(model::FixedTimeModel{<:Time})::String 
+function name(model::FixedTimeModel{<:Time})::String
     return model.name
 end
 
@@ -177,9 +177,9 @@ $(TYPEDSIGNATURES)
 
 Get the name of the time from the free time model.
 """
-function name(model::FreeTimeModel)::String 
+function name(model::FreeTimeModel)::String
     return model.name
-end 
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -206,7 +206,9 @@ $(TYPEDSIGNATURES)
 
 Get the initial time from the times model.
 """
-function initial(model::TimesModel{TI,<:AbstractTimeModel})::TI where {TI<:AbstractTimeModel} 
+function initial(
+    model::TimesModel{TI,<:AbstractTimeModel}
+)::TI where {TI<:AbstractTimeModel}
     return model.initial
 end
 
@@ -224,7 +226,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the time variable from the times model.
 """
-function time_name(model::TimesModel)::String 
+function time_name(model::TimesModel)::String
     return model.time_name
 end
 
@@ -233,7 +235,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the initial time from the times model.
 """
-function initial_time_name(model::TimesModel)::String 
+function initial_time_name(model::TimesModel)::String
     return name(initial(model))
 end
 
@@ -242,7 +244,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the final time from the times model.
 """
-function final_time_name(model::TimesModel)::String 
+function final_time_name(model::TimesModel)::String
     return name(final(model))
 end
 
@@ -251,7 +253,9 @@ $(TYPEDSIGNATURES)
 
 Get the initial time from the times model, from a fixed initial time model.
 """
-function initial_time(model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::T where {T<:Time}
+function initial_time(
+    model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}
+)::T where {T<:Time}
     return time(initial(model))
 end
 
@@ -260,7 +264,9 @@ $(TYPEDSIGNATURES)
 
 Get the final time from the times model, from a fixed final time model.
 """
-function final_time(model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::T where {T<:Time}
+function final_time(
+    model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}
+)::T where {T<:Time}
     return time(final(model))
 end
 
@@ -269,8 +275,9 @@ $(TYPEDSIGNATURES)
 
 Get the initial time from the times model, from a free initial time model.
 """
-function initial_time(model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, 
-    variable::AbstractVector{T})::T where {T<:ctNumber} 
+function initial_time(
+    model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, variable::AbstractVector{T}
+)::T where {T<:ctNumber}
     return time(initial(model), variable)
 end
 
@@ -279,8 +286,9 @@ $(TYPEDSIGNATURES)
 
 Get the final time from the times model, from a free final time model.
 """
-function final_time(model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, 
-    variable::AbstractVector{T})::T where {T<:ctNumber}
+function final_time(
+    model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::AbstractVector{T}
+)::T where {T<:ctNumber}
     return time(final(model), variable)
 end
 
@@ -289,7 +297,9 @@ $(TYPEDSIGNATURES)
 
 Check if the initial time is fixed. Return true.
 """
-function has_fixed_initial_time(times::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel})::Bool where {T<:Time}
+function has_fixed_initial_time(
+    times::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}
+)::Bool where {T<:Time}
     return true
 end
 
@@ -316,7 +326,9 @@ $(TYPEDSIGNATURES)
 
 Check if the final time is fixed. Return true.
 """
-function has_fixed_final_time(times::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}})::Bool where {T<:Time}
+function has_fixed_final_time(
+    times::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}
+)::Bool where {T<:Time}
     return true
 end
 

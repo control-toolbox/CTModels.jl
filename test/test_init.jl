@@ -1,8 +1,8 @@
 function test_init()
-    
+
     # test checkDim function
     @test_throws Exception CTModels.checkDim(1, 2)
-    
+
     # test isaVectVect function
     # Return true if argument is a vector of vectors
     @test CTModels.isaVectVect([[1, 2], [3, 4]])
@@ -26,12 +26,18 @@ function test_init()
 
     # Build functional initialization: function case
     @test CTModels.buildFunctionalInit(t -> [t, t^2], range(0, 1, 11), 2)(0) == [0, 0]
-    @test_throws Exception CTModels.buildFunctionalInit(t -> [t, t^2], range(0, 1, 11), 1)(0)
+    @test_throws Exception CTModels.buildFunctionalInit(t -> [t, t^2], range(0, 1, 11), 1)(
+        0
+    )
 
     # test buildFunctionalInit function: general interpolation case
     # Build functional initialization: general interpolation case
-    @test CTModels.buildFunctionalInit([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], range(0, 1, 11), 1)(0) == 0
-    
+    @test CTModels.buildFunctionalInit(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], range(0, 1, 11), 1
+    )(
+        0
+    ) == 0
+
     # construction of Init
 
     # constant initial guess
@@ -46,34 +52,33 @@ function test_init()
     # interpolated initial guess
     x_vec = [[0, 0], [1, 2], [5, -1]]
     x_matrix = [0 0; 1 2; 5 -1]
-    u_vec = [0, 0.3, 0.1]    
+    u_vec = [0, 0.3, 0.1]
     t_vec = [0, 0.1, 0.2]
 
-    init = (state = x_const,)
+    init = (state=x_const,)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (state = x_const, control = u_const)
+    init = (state=x_const, control=u_const)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (state = x_const, control = u_const, variable = v_const)
+    init = (state=x_const, control=u_const, variable=v_const)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (state = x_func,)
+    init = (state=x_func,)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (state = x_func, control = u_func)
+    init = (state=x_func, control=u_func)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (state = x_func, control = u_func, variable = v_const)
+    init = (state=x_func, control=u_func, variable=v_const)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (time = t_vec, state = x_vec)
+    init = (time=t_vec, state=x_vec)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (time = t_vec, state = x_vec, control = u_vec)
+    init = (time=t_vec, state=x_vec, control=u_vec)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
 
-    init = (time = t_vec, state = x_matrix, control = u_vec)
+    init = (time=t_vec, state=x_matrix, control=u_vec)
     @test CTModels.Init(init; state_dim=2, control_dim=1, variable_dim=1) isa CTModels.Init
-
 end

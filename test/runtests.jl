@@ -18,7 +18,7 @@ using Plots
         :model,
         :ocp,
         :plot,
-        :init,       
+        :init,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

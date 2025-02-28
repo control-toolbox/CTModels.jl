@@ -53,7 +53,12 @@ julia> control_components(ocp)
 ["a", "b"]
 ```
 """
-function control!(ocp::PreModel, m::Dimension, name::T1=__control_name(), components_names::Vector{T2}=__control_components(m, string(name)))::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
+function control!(
+    ocp::PreModel,
+    m::Dimension,
+    name::T1=__control_name(),
+    components_names::Vector{T2}=__control_components(m, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings
     __is_control_set(ocp) &&
@@ -85,7 +90,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the control from the model.
 """
-function name(model::ControlModel)::String 
+function name(model::ControlModel)::String
     return model.name
 end
 
@@ -94,7 +99,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the control from the model solution.
 """
-function name(model::ControlModelSolution)::String 
+function name(model::ControlModelSolution)::String
     return model.name
 end
 
@@ -103,7 +108,7 @@ $(TYPEDSIGNATURES)
 
 Get the components names of the control from the model.
 """
-function components(model::ControlModel)::Vector{String} 
+function components(model::ControlModel)::Vector{String}
     return model.components
 end
 
@@ -112,7 +117,7 @@ $(TYPEDSIGNATURES)
 
 Get the components names of the control from the model solution.
 """
-function components(model::ControlModelSolution)::Vector{String} 
+function components(model::ControlModelSolution)::Vector{String}
     return model.components
 end
 
@@ -121,7 +126,7 @@ $(TYPEDSIGNATURES)
 
 Get the control dimension from the model.
 """
-function dimension(model::ControlModel)::Dimension 
+function dimension(model::ControlModel)::Dimension
     return length(components(model))
 end
 
@@ -130,7 +135,7 @@ $(TYPEDSIGNATURES)
 
 Get the control dimension from the model solution.
 """
-function dimension(model::ControlModelSolution)::Dimension 
+function dimension(model::ControlModelSolution)::Dimension
     return length(components(model))
 end
 

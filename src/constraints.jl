@@ -121,7 +121,6 @@ function __constraint!(
     return nothing
 end
 
-
 """
 $(TYPEDSIGNATURES)
 
