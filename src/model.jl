@@ -658,6 +658,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return if the constraints from the model are not empty.
+"""
+function isempty_constraints(ocp::Model)::Bool 
+    return Base.isempty(constraints(ocp))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Get a labelled constraint from the model.
 """
 function constraint(ocp::Model, label::Symbol)::Tuple # not type stable
@@ -765,7 +774,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear path constraints.
 """
 function dim_path_constraints_nl(ocp::Model)::Dimension 
-    return length(path_constraints_nl(ocp)[1])
+    return dim_path_constraints_nl(constraints(ocp))
 end
 
 """
@@ -774,7 +783,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the boundary constraints.
 """
 function dim_boundary_constraints_nl(ocp::Model)::Dimension 
-    return length(boundary_constraints_nl(ocp)[1])
+    return dim_boundary_constraints_nl(constraints(ocp))
 end
 
 """
@@ -783,7 +792,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on state.
 """
 function dim_state_constraints_box(ocp::Model)::Dimension 
-    return length(state_constraints_box(ocp)[1])
+    return dim_state_constraints_box(constraints(ocp))
 end
 
 """
@@ -792,7 +801,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on control.
 """
 function dim_control_constraints_box(ocp::Model)::Dimension
-    return length(control_constraints_box(ocp)[1])
+    return dim_control_constraints_box(constraints(ocp))
 end
 
 """
@@ -801,5 +810,5 @@ $(TYPEDSIGNATURES)
 Return the dimension of box constraints on variable.
 """
 function dim_variable_constraints_box(ocp::Model)::Dimension
-    return length(variable_constraints_box(ocp)[1])
+    return dim_variable_constraints_box(constraints(ocp))
 end
