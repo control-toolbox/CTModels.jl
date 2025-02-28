@@ -12,6 +12,11 @@ function solution_example()
     # set control
     CTModels.control!(pre_ocp, 1)
 
+    pre_ocp_returned = deepcopy(pre_ocp)
+    
+    # set control
+    CTModels.variable!(pre_ocp, 2)
+
     # set dynamics
     dynamics!(r, t, x, u, v) = r .= [x[1], u[1]]
     CTModels.dynamics!(pre_ocp, dynamics!) # does not correspond to the solution
@@ -20,6 +25,16 @@ function solution_example()
     mayer(x0, xf, v) = x0[1] + xf[1] 
     lagrange(t, x, u, v) = 0.5 * u[1]^2
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange) # does not correspond to the solution
+
+    # set some constraints
+    f_path(r, t, x, u, v) = r .= x .+ u .+ v .+ t
+    f_boundary(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
+    f_variable(r, t, v) = r .= v .+ t
+    CTModels.constraint!(pre_ocp, :path; f=f_path, lb=[0, 1], ub=[1, 2], label=:path)
+    CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=[0, 1], ub=[1, 2], label=:boundary)
+    CTModels.constraint!(pre_ocp, :state; rg=1:2, lb=[0, 1], ub=[1, 2], label=:state_rg)
+    CTModels.constraint!(pre_ocp, :control; rg=1:1, lb=[0], ub=[1], label=:control_rg)
+    CTModels.constraint!(pre_ocp, :variable; rg=1:2, lb=[0, 1], ub=[1, 2], label=:variable_rg)
 
     # set definition
     definition = quote
@@ -153,6 +168,6 @@ function solution_example()
     )    
 
     # return
-    return ocp, sol
+    return ocp, sol, pre_ocp_returned
 
 end

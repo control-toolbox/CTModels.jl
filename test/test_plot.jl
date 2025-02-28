@@ -1,7 +1,7 @@
 function test_plot()
 
     #
-    ocp, sol = solution_example()
+    ocp, sol, pre_ocp = solution_example()
 
     #
     @test plot(sol; time=:default) isa Plots.Plot
