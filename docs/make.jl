@@ -6,7 +6,7 @@ repo_url = "github.com/control-toolbox/CTModels.jl"
 makedocs(;
     remotes=nothing,
     warnonly=[:cross_references, :autodocs_block],
-    sitename="CTModels",
+    sitename="CTModels.jl",
     format=Documenter.HTML(;
         repolink="https://" * repo_url,
         prettyurls=false,
