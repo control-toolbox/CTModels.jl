@@ -121,7 +121,6 @@ function __constraint!(
     return nothing
 end
 
-
 """
 $(TYPEDSIGNATURES)
 
@@ -199,7 +198,9 @@ $(TYPEDSIGNATURES)
 
 Get the nonlinear path constraints from the model.
 """
-function path_constraints_nl(model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}) where TP
+function path_constraints_nl(
+    model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}
+) where {TP}
     return model.path_nl
 end
 
@@ -208,7 +209,9 @@ $(TYPEDSIGNATURES)
 
 Get the nonlinear boundary constraints from the model.
 """
-function boundary_constraints_nl(model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}) where TB
+function boundary_constraints_nl(
+    model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}
+) where {TB}
     return model.boundary_nl
 end
 
@@ -217,7 +220,9 @@ $(TYPEDSIGNATURES)
 
 Get the state box constraints from the model.
 """
-function state_constraints_box(model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple,<:ConstraintsDictType}) where TS
+function state_constraints_box(
+    model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple,<:ConstraintsDictType}
+) where {TS}
     return model.state_box
 end
 
@@ -226,7 +231,9 @@ $(TYPEDSIGNATURES)
 
 Get the control box constraints from the model.
 """
-function control_constraints_box(model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple,<:ConstraintsDictType}) where TC
+function control_constraints_box(
+    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple,<:ConstraintsDictType}
+) where {TC}
     return model.control_box
 end
 
@@ -235,7 +242,9 @@ $(TYPEDSIGNATURES)
 
 Get the variable box constraints from the model.
 """
-function variable_constraints_box(model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV,<:ConstraintsDictType}) where TV
+function variable_constraints_box(
+    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV,<:ConstraintsDictType}
+) where {TV}
     return model.variable_box
 end
 

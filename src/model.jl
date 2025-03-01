@@ -5,7 +5,6 @@ Build a concrete type constraints model from a dictionary of constraints.
 
 """
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
-    
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
     path_cons_nl_lb = Vector{ctNumber}()
@@ -213,15 +212,17 @@ $(TYPEDSIGNATURES)
 
 Get the state from the model.
 """
-function state(ocp::Model{
-    <:TimesModel,
-    T,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel
-})::T where {T<:AbstractStateModel}
+function state(
+    ocp::Model{
+        <:TimesModel,
+        T,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:AbstractStateModel}
     return ocp.state
 end
 
@@ -230,7 +231,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the state from the model.
 """
-function state_name(ocp::Model)::String 
+function state_name(ocp::Model)::String
     return name(state(ocp))
 end
 
@@ -239,7 +240,7 @@ $(TYPEDSIGNATURES)
 
 Get the components names of the state from the model.
 """
-function state_components(ocp::Model)::Vector{String} 
+function state_components(ocp::Model)::Vector{String}
     return components(state(ocp))
 end
 
@@ -248,7 +249,7 @@ $(TYPEDSIGNATURES)
 
 Get the state dimension from the model.
 """
-function state_dimension(ocp::Model)::Dimension 
+function state_dimension(ocp::Model)::Dimension
     return dimension(state(ocp))
 end
 
@@ -258,15 +259,17 @@ $(TYPEDSIGNATURES)
 
 Get the control from the model.
 """
-function control(ocp::Model{
-    <:TimesModel,
-    <:AbstractStateModel,
-    T,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel
-})::T where {T<:AbstractControlModel}
+function control(
+    ocp::Model{
+        <:TimesModel,
+        <:AbstractStateModel,
+        T,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:AbstractControlModel}
     return ocp.control
 end
 
@@ -275,7 +278,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the control from the model.
 """
-function control_name(ocp::Model)::String 
+function control_name(ocp::Model)::String
     return name(control(ocp))
 end
 
@@ -284,7 +287,7 @@ $(TYPEDSIGNATURES)
 
 Get the components names of the control from the model.
 """
-function control_components(ocp::Model)::Vector{String} 
+function control_components(ocp::Model)::Vector{String}
     return components(control(ocp))
 end
 
@@ -293,7 +296,7 @@ $(TYPEDSIGNATURES)
 
 Get the control dimension from the model.
 """
-function control_dimension(ocp::Model)::Dimension 
+function control_dimension(ocp::Model)::Dimension
     return dimension(control(ocp))
 end
 
@@ -303,15 +306,17 @@ $(TYPEDSIGNATURES)
 
 Get the variable from the model.
 """
-function variable(ocp::Model{
-    <:TimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    T,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel
-})::T where {T<:AbstractVariableModel}
+function variable(
+    ocp::Model{
+        <:TimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        T,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:AbstractVariableModel}
     return ocp.variable
 end
 
@@ -320,7 +325,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the variable from the model.
 """
-function variable_name(ocp::Model)::String 
+function variable_name(ocp::Model)::String
     return name(variable(ocp))
 end
 
@@ -329,7 +334,7 @@ $(TYPEDSIGNATURES)
 
 Get the components names of the variable from the model.
 """
-function variable_components(ocp::Model)::Vector{String} 
+function variable_components(ocp::Model)::Vector{String}
     return components(variable(ocp))
 end
 
@@ -338,7 +343,7 @@ $(TYPEDSIGNATURES)
 
 Get the variable dimension from the model.
 """
-function variable_dimension(ocp::Model)::Dimension 
+function variable_dimension(ocp::Model)::Dimension
     return dimension(variable(ocp))
 end
 
@@ -348,15 +353,17 @@ $(TYPEDSIGNATURES)
 
 Get the times from the model.
 """
-function times(ocp::Model{
-    T,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel
-    })::T where {T<:TimesModel}
+function times(
+    ocp::Model{
+        T,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:TimesModel}
     return ocp.times
 end
 
@@ -366,7 +373,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the time from the model.
 """
-function time_name(ocp::Model)::String 
+function time_name(ocp::Model)::String
     return time_name(times(ocp))
 end
 
@@ -376,14 +383,17 @@ $(TYPEDSIGNATURES)
 
 Get the initial time from the model, for a fixed initial time.
 """
-function initial_time(ocp::Model{
-    <:TimesModel{FixedTimeModel{T},<:AbstractTimeModel},
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel})::T where {T<:Time} 
+function initial_time(
+    ocp::Model{
+        <:TimesModel{FixedTimeModel{T},<:AbstractTimeModel},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:Time}
     return initial_time(times(ocp))
 end
 
@@ -392,14 +402,18 @@ $(TYPEDSIGNATURES)
 
 Get the initial time from the model, for a free initial time.
 """
-function initial_time(ocp::Model{
-    <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel}, variable::AbstractVector{T})::T where {T<:ctNumber}
+function initial_time(
+    ocp::Model{
+        <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+    variable::AbstractVector{T},
+)::T where {T<:ctNumber}
     return initial_time(times(ocp), variable)
 end
 
@@ -408,7 +422,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the initial time from the model.
 """
-function initial_time_name(ocp::Model)::String 
+function initial_time_name(ocp::Model)::String
     return initial_time_name(times(ocp))
 end
 
@@ -436,14 +450,17 @@ $(TYPEDSIGNATURES)
 
 Get the final time from the model, for a fixed final time.
 """
-function final_time(ocp::Model{
-    <:TimesModel{<:AbstractTimeModel,FixedTimeModel{T}},
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel})::T where {T<:Time} 
+function final_time(
+    ocp::Model{
+        <:TimesModel{<:AbstractTimeModel,FixedTimeModel{T}},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::T where {T<:Time}
     return final_time(times(ocp))
 end
 
@@ -452,14 +469,18 @@ $(TYPEDSIGNATURES)
 
 Get the final time from the model, for a free final time.
 """
-function final_time(ocp::Model{
-    <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel}, variable::AbstractVector{T})::T where {T<:ctNumber}
+function final_time(
+    ocp::Model{
+        <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+    variable::AbstractVector{T},
+)::T where {T<:ctNumber}
     return final_time(times(ocp), variable)
 end
 
@@ -468,7 +489,7 @@ $(TYPEDSIGNATURES)
 
 Get the name of the final time from the model.
 """
-function final_time_name(ocp::Model)::String 
+function final_time_name(ocp::Model)::String
     return final_time_name(times(ocp))
 end
 
@@ -496,17 +517,17 @@ $(TYPEDSIGNATURES)
 
 Get the objective from the model.
 """
-function objective(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    O,
-    <:AbstractConstraintsModel
-    })::O where {
-    O<:AbstractObjectiveModel
-} 
+function objective(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        O,
+        <:AbstractConstraintsModel,
+    },
+)::O where {O<:AbstractObjectiveModel}
     return ocp.objective
 end
 
@@ -515,7 +536,7 @@ $(TYPEDSIGNATURES)
 
 Get the type of criterion (:min or :max) from the model.
 """
-function criterion(ocp::Model)::Symbol 
+function criterion(ocp::Model)::Symbol
     return criterion(objective(ocp))
 end
 
@@ -525,17 +546,17 @@ $(TYPEDSIGNATURES)
 
 Get the Mayer cost from the model.
 """
-function mayer(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:MayerObjectiveModel{M},
-    <:AbstractConstraintsModel
-})::M where {
-    M<:Function
-} 
+function mayer(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:MayerObjectiveModel{M},
+        <:AbstractConstraintsModel,
+    },
+)::M where {M<:Function}
     return mayer(objective(ocp))
 end
 
@@ -544,17 +565,17 @@ $(TYPEDSIGNATURES)
 
 Get the Mayer cost from the model.
 """
-function mayer(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:BolzaObjectiveModel{M,<:Function},
-    <:AbstractConstraintsModel
-})::M where {
-    M<:Function
-} 
+function mayer(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:BolzaObjectiveModel{M,<:Function},
+        <:AbstractConstraintsModel,
+    },
+)::M where {M<:Function}
     return mayer(objective(ocp))
 end
 
@@ -563,7 +584,7 @@ $(TYPEDSIGNATURES)
 
 Check if the model has a Mayer cost.
 """
-function has_mayer_cost(ocp::Model)::Bool 
+function has_mayer_cost(ocp::Model)::Bool
     return has_mayer_cost(objective(ocp))
 end
 
@@ -573,17 +594,17 @@ $(TYPEDSIGNATURES)
 
 Get the Lagrange cost from the model.
 """
-function lagrange(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    LagrangeObjectiveModel{L},
-    <:AbstractConstraintsModel
-})::L where {
-    L<:Function
-} 
+function lagrange(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        LagrangeObjectiveModel{L},
+        <:AbstractConstraintsModel,
+    },
+)::L where {L<:Function}
     return lagrange(objective(ocp))
 end
 
@@ -592,17 +613,17 @@ $(TYPEDSIGNATURES)
 
 Get the Lagrange cost from the model.
 """
-function lagrange(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:BolzaObjectiveModel{<:Function,L},
-    <:AbstractConstraintsModel
-})::L where {
-    L<:Function
-} 
+function lagrange(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:BolzaObjectiveModel{<:Function,L},
+        <:AbstractConstraintsModel,
+    },
+)::L where {L<:Function}
     return lagrange(objective(ocp))
 end
 
@@ -611,7 +632,7 @@ $(TYPEDSIGNATURES)
 
 Check if the model has a Lagrange cost.
 """
-function has_lagrange_cost(ocp::Model)::Bool 
+function has_lagrange_cost(ocp::Model)::Bool
     return has_lagrange_cost(objective(ocp))
 end
 
@@ -621,17 +642,17 @@ $(TYPEDSIGNATURES)
 
 Get the dynamics from the model.
 """
-function dynamics(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    D,
-    <:AbstractObjectiveModel,
-    <:AbstractConstraintsModel
-})::D where {
-    D<:Function
-} 
+function dynamics(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        D,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::D where {D<:Function}
     return ocp.dynamics
 end
 
@@ -641,17 +662,17 @@ $(TYPEDSIGNATURES)
 
 Get the constraints from the model.
 """
-function constraints(ocp::Model{
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:AbstractObjectiveModel,
-    C
-})::C where {
-    C<:AbstractConstraintsModel
-} 
+function constraints(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        C,
+    },
+)::C where {C<:AbstractConstraintsModel}
     return ocp.constraints
 end
 
@@ -660,7 +681,7 @@ $(TYPEDSIGNATURES)
 
 Return if the constraints from the model are not empty.
 """
-function isempty_constraints(ocp::Model)::Bool 
+function isempty_constraints(ocp::Model)::Bool
     return Base.isempty(constraints(ocp))
 end
 
@@ -686,9 +707,9 @@ function path_constraints_nl(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}
-    }
-)::TP where {TP<:Tuple} 
+        <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType},
+    },
+)::TP where {TP<:Tuple}
     return constraints(ocp).path_nl
 end
 
@@ -705,9 +726,9 @@ function boundary_constraints_nl(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType}
-    }
-)::TB where {TB<:Tuple} 
+        <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType},
+    },
+)::TB where {TB<:Tuple}
     return constraints(ocp).boundary_nl
 end
 
@@ -724,9 +745,9 @@ function state_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple,<:ConstraintsDictType}
-    }
-)::TS where {TS<:Tuple} 
+        <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple,<:ConstraintsDictType},
+    },
+)::TS where {TS<:Tuple}
     return constraints(ocp).state_box
 end
 
@@ -743,9 +764,9 @@ function control_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple,<:ConstraintsDictType}
-    }
-)::TC where {TC<:Tuple} 
+        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple,<:ConstraintsDictType},
+    },
+)::TC where {TC<:Tuple}
     return constraints(ocp).control_box
 end
 
@@ -762,9 +783,9 @@ function variable_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV,<:ConstraintsDictType}
-    }
-)::TV where {TV<:Tuple} 
+        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV,<:ConstraintsDictType},
+    },
+)::TV where {TV<:Tuple}
     return constraints(ocp).variable_box
 end
 
@@ -773,7 +794,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
 """
-function dim_path_constraints_nl(ocp::Model)::Dimension 
+function dim_path_constraints_nl(ocp::Model)::Dimension
     return dim_path_constraints_nl(constraints(ocp))
 end
 
@@ -782,7 +803,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 """
-function dim_boundary_constraints_nl(ocp::Model)::Dimension 
+function dim_boundary_constraints_nl(ocp::Model)::Dimension
     return dim_boundary_constraints_nl(constraints(ocp))
 end
 
@@ -791,7 +812,7 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on state.
 """
-function dim_state_constraints_box(ocp::Model)::Dimension 
+function dim_state_constraints_box(ocp::Model)::Dimension
     return dim_state_constraints_box(constraints(ocp))
 end
 

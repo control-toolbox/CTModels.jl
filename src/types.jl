@@ -293,7 +293,6 @@ $(TYPEDSIGNATURES)
 """
 __is_definition_set(ocp::Model)::Bool = true
 
-
 """
 $(TYPEDEF)
 
@@ -359,11 +358,11 @@ $(TYPEDSIGNATURES)
 
 """
 function __is_consistent(ocp::PreModel)::Bool
-    return __is_times_set(ocp)   && 
-        __is_state_set(ocp)      &&
-        __is_control_set(ocp)    && 
-        __is_dynamics_set(ocp)   && 
-        __is_objective_set(ocp)
+    return __is_times_set(ocp) &&
+           __is_state_set(ocp) &&
+           __is_control_set(ocp) &&
+           __is_dynamics_set(ocp) &&
+           __is_objective_set(ocp)
 end
 
 """
@@ -371,14 +370,14 @@ $(TYPEDSIGNATURES)
 
 """
 function __is_empty(ocp::PreModel)::Bool
-    return !__is_times_set(ocp)   && 
-        !__is_state_set(ocp)      &&
-        !__is_control_set(ocp)    && 
-        !__is_dynamics_set(ocp)   && 
-        !__is_objective_set(ocp)  &&
-        !__is_definition_set(ocp) &&
-        !__is_variable_set(ocp)   &&
-        Base.isempty(ocp.constraints)
+    return !__is_times_set(ocp) &&
+           !__is_state_set(ocp) &&
+           !__is_control_set(ocp) &&
+           !__is_dynamics_set(ocp) &&
+           !__is_objective_set(ocp) &&
+           !__is_definition_set(ocp) &&
+           !__is_variable_set(ocp) &&
+           Base.isempty(ocp.constraints)
 end
 
 # ------------------------------------------------------------------------------ #

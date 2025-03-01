@@ -73,7 +73,7 @@ $(TYPEDSIGNATURES)
 
 Build functional initialization: constant / 1D interpolation
 """
-function buildFunctionalInit(data::Union{ctNumber, ctVector}, time, dim)
+function buildFunctionalInit(data::Union{ctNumber,ctVector}, time, dim)
     if !isnothing(time) && (length(data) == length(time))
         # interpolation vs time, dim 1 case
         itp = ctinterpolate(time, data)
@@ -147,7 +147,7 @@ julia> init = Init(sol)
 mutable struct Init
     state_init::Function
     control_init::Function
-    variable_init::Union{Nothing, ctNumber, ctVector}
+    variable_init::Union{Nothing,ctNumber,ctVector}
     #costate_init::Function
     #multipliers_init::Union{Nothing, ctVector}
 
@@ -185,9 +185,7 @@ mutable struct Init
 
     Init constructor with arguments grouped as named tuple or dict
     """
-    function Init(
-        init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing
-    )
+    function Init(init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing)
 
         # trivial case: default init
         x_init = nothing

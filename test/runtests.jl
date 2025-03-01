@@ -23,7 +23,7 @@ include("solution_example.jl")
         :ocp,
         :plot,
         :init,
-        :export_import,    
+        :export_import,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
