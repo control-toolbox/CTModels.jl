@@ -20,10 +20,10 @@ function CTModels.export_ocp_solution(
     elseif format == :JSON
         blob = Dict(
             "time_grid" => CTModels.time_grid(sol),
-            "state"     => CTModels.state_discretized(sol),
-            "control"   => CTModels.control_discretized(sol),
-            "variable"  => CTModels.variable(sol),
-            "costate"   => CTModels.costate_discretized(sol)[1:(end - 1), :],
+            "state" => CTModels.state_discretized(sol),
+            "control" => CTModels.control_discretized(sol),
+            "variable" => CTModels.variable(sol),
+            "costate" => CTModels.costate_discretized(sol)[1:(end - 1), :],
             "objective" => CTModels.objective(sol),
             "iterations" => CTModels.iterations(sol),
             "constraints_violation" => CTModels.constraints_violation(sol),
@@ -36,7 +36,9 @@ function CTModels.export_ocp_solution(
         end
     else
         throw(
-            CTBase.IncorrectArgument("Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format)
+            CTBase.IncorrectArgument(
+                "Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+            ),
         )
     end
     return nothing
@@ -80,7 +82,7 @@ function CTModels.import_ocp_solution(
             P = Matrix{Float64}(reduce(hcat, P)')
         end
         #println("typeof(costate): ", typeof(P))
-        
+
         # NB. convert vect{vect} to matrix
         return CTModels.build_solution(
             ocp,
@@ -98,7 +100,9 @@ function CTModels.import_ocp_solution(
         )
     else
         throw(
-            CTBase.IncorrectArgument("Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format)
+            CTBase.IncorrectArgument(
+                "Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+            ),
         )
     end
 end

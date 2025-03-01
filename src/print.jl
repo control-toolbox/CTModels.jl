@@ -23,7 +23,7 @@ $(TYPEDSIGNATURES)
 Return the model definition of the optimal control problem.
 
 """
-function definition(ocp::Model)::Expr 
+function definition(ocp::Model)::Expr
     return ocp.definition
 end
 
@@ -80,12 +80,12 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     is_variable_dependent = v_dim > 0
 
     # names
-    t_name   = time_name(ocp)
-    t0_name  = initial_time_name(ocp)
-    tf_name  = final_time_name(ocp)
-    x_name   = state_name(ocp)
-    u_name   = control_name(ocp)
-    v_name   = variable_name(ocp)
+    t_name = time_name(ocp)
+    t0_name = initial_time_name(ocp)
+    tf_name = final_time_name(ocp)
+    x_name = state_name(ocp)
+    u_name = control_name(ocp)
+    v_name = variable_name(ocp)
     xi_names = state_components(ocp)
     ui_names = control_components(ocp)
     vi_names = variable_components(ocp)
@@ -95,9 +95,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     _v = is_variable_dependent ? ", " * v_name : ""
 
     # other names
-    bounds_args_names  = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
-    mixed_args_names   = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
-    state_args_names   = x_name * "(" * t_name * ")"
+    bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+    mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+    state_args_names = x_name * "(" * t_name * ")"
     control_args_names = u_name * "(" * t_name * ")"
     variable_args_names = v_name
 
@@ -105,7 +105,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     some_printing && println(io)
     printstyled(io, "The "; bold=true)
     printstyled(io, "optimal control problem is of the form:\n"; bold=true)
-    println(io)    
+    println(io)
 
     # J
     printstyled(io, "    minimize  "; color=:blue)
@@ -132,7 +132,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         )
     else
         println(io, "")
-    end    
+    end
 
     # constraints
     println(io, "")
@@ -156,13 +156,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         tf_name *
         "] a.e.,",
     )
-    println(io, "")    
+    println(io, "")
 
     # other constraints: path, boundary, state, control, variable, boundary
-    dim_path_cons_nl      = dim_path_constraints_nl(ocp)
-    dim_boundary_cons_nl  = dim_boundary_constraints_nl(ocp)
-    dim_state_cons_box    = dim_state_constraints_box(ocp)
-    dim_control_cons_box  = dim_control_constraints_box(ocp)
+    dim_path_cons_nl = dim_path_constraints_nl(ocp)
+    dim_boundary_cons_nl = dim_boundary_constraints_nl(ocp)
+    dim_state_cons_box = dim_state_constraints_box(ocp)
+    dim_control_cons_box = dim_control_constraints_box(ocp)
     dim_variable_cons_box = dim_variable_constraints_box(ocp)
 
     has_constraints = false
@@ -244,14 +244,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         v_name_space *= " ∈ " * v_space
         # print
         print(
-            io,
-            "    where ",
-            x_name_space,
-            ", ",
-            u_name_space,
-            " and ",
-            v_name_space,
-            ".\n",
+            io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n"
         )
     else
         # print
@@ -270,7 +263,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     #println(io)
 
     # print table of settings
-    header = ["times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"]
+    header = [
+        "times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"
+    ]
     data = hcat(
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
@@ -298,11 +293,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         highlighters=(h1, h2),
         alignment=:c,
         compact_printing=true,
-    )   
+    )
 
     #
     return nothing
-
 end
 
 function Base.show_default(io::IO, ocp::Model)
@@ -356,12 +350,12 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         u_dim = dimension(ocp.control)
 
         # names
-        t_name   = time_name(ocp.times)
-        t0_name  = initial_time_name(ocp.times)
-        tf_name  = final_time_name(ocp.times)
-        x_name   = name(ocp.state)
-        u_name   = name(ocp.control)
-        v_name   = name(ocp.variable)
+        t_name = time_name(ocp.times)
+        t0_name = initial_time_name(ocp.times)
+        tf_name = final_time_name(ocp.times)
+        x_name = name(ocp.state)
+        u_name = name(ocp.control)
+        v_name = name(ocp.variable)
         xi_names = components(ocp.state)
         ui_names = components(ocp.control)
         vi_names = components(ocp.variable)
@@ -371,9 +365,11 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         _v = is_variable_dependent ? ", " * v_name : ""
 
         # other names
-        bounds_args_names  = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
-        mixed_args_names   = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
-        state_args_names   = x_name * "(" * t_name * ")"
+        bounds_args_names =
+            x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+        mixed_args_names =
+            t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+        state_args_names = x_name * "(" * t_name * ")"
         control_args_names = u_name * "(" * t_name * ")"
         variable_args_names = v_name
 
@@ -381,7 +377,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         some_printing && println(io)
         printstyled(io, "The "; bold=true)
         printstyled(io, "optimal control problem is of the form:\n"; bold=true)
-        println(io)    
+        println(io)
 
         # J
         printstyled(io, "    minimize  "; color=:blue)
@@ -389,7 +385,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
 
         # Mayer
         has_mayer_cost(ocp.objective) && print(io, "g(" * bounds_args_names * ")")
-        (has_mayer_cost(ocp.objective) && has_lagrange_cost(ocp.objective)) && print(io, " + ")
+        (has_mayer_cost(ocp.objective) && has_lagrange_cost(ocp.objective)) &&
+            print(io, " + ")
 
         # Lagrange
         if has_lagrange_cost(ocp.objective)
@@ -408,7 +405,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
             )
         else
             println(io, "")
-        end    
+        end
 
         # constraints
         println(io, "")
@@ -432,15 +429,15 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
             tf_name *
             "] a.e.,",
         )
-        println(io, "")    
+        println(io, "")
 
         # other constraints: path, boundary, state, control, variable, boundary
         constraints = build_constraints(ocp.constraints)
-        dim_path_cons_nl      = dim_path_constraints_nl(constraints)
-        dim_boundary_cons_nl  = dim_boundary_constraints_nl(constraints)
-        dim_state_cons_box    = dim_state_constraints_box(constraints)
-        dim_control_cons_box  = dim_control_constraints_box(constraints)
-        dim_variable_cons_box = dim_variable_constraints_box(constraints)        
+        dim_path_cons_nl = dim_path_constraints_nl(constraints)
+        dim_boundary_cons_nl = dim_boundary_constraints_nl(constraints)
+        dim_state_cons_box = dim_state_constraints_box(constraints)
+        dim_control_cons_box = dim_control_constraints_box(constraints)
+        dim_variable_cons_box = dim_variable_constraints_box(constraints)
         has_constraints = false
         if dim_path_cons_nl > 0
             has_constraints = true
@@ -535,7 +532,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         end
 
         some_printing = true
-    
     end
 
     # ------------------------------------------------------------------------------ #
@@ -548,7 +544,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     #println(io)
 
     # print table of settings
-    header = ["times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"]
+    header = [
+        "times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"
+    ]
     data = hcat(
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
@@ -576,11 +574,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         highlighters=(h1, h2),
         alignment=:c,
         compact_printing=true,
-    )   
+    )
 
     #
     return nothing
-
 end
 
 function Base.show_default(io::IO, ocp::PreModel)

@@ -34,7 +34,9 @@ function __size_plot(sol::CTModels.Solution, control::Symbol)
         :norm => 1
         :all => CTModels.control_dimension(sol) + 1
         _ => throw(
-            CTBase.IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
+            CTBase.IncorrectArgument(
+                "No such choice for control. Use :components, :norm or :all"
+            ),
         )
     end
     return (600, 140 * (n + m))

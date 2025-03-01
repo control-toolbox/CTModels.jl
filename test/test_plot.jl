@@ -45,7 +45,9 @@ function test_plot()
     plt = plot(sol; layout=:group, control=:all)
     @test plot!(plt, sol; layout=:group, control=:all) isa Plots.Plot
 
-    @test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:group, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot!(
+        plt, sol; layout=:group, control=:wrong_choice
+    )
 
     # 
     plt = plot(sol; layout=:split, control=:components)
@@ -59,7 +61,9 @@ function test_plot()
     plt = plot(sol; layout=:split, control=:all)
     @test plot!(plt, sol; layout=:split, control=:all) isa Plots.Plot
 
-    @test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:split, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot!(
+        plt, sol; layout=:split, control=:wrong_choice
+    )
 
     #
     plt = plot(sol; layout=:split)

@@ -89,36 +89,19 @@ function build_solution(
     infos = Dict{Symbol,Any}()
 
     # nonlinear constraints and dual variables
-    path_constraints_fun =
-        t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
+    path_constraints_fun = t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
     path_constraints_dual_fun =
         t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
 
     # box constraints multipliers
     state_constraints_lb_dual_fun =
-        t -> ctinterpolate(
-            T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
-        )(
-            t
-        )
+        t -> ctinterpolate(T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1))(t)
     state_constraints_ub_dual_fun =
-        t -> ctinterpolate(
-            T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
-        )(
-            t
-        )
+        t -> ctinterpolate(T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1))(t)
     control_constraints_lb_dual_fun =
-        t -> ctinterpolate(
-            T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
-        )(
-            t
-        )
+        t -> ctinterpolate(T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1))(t)
     control_constraints_ub_dual_fun =
-        t -> ctinterpolate(
-            T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
-        )(
-            t
-        )
+        t -> ctinterpolate(T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1))(t)
 
     # build Models
     time_grid = TimeGridModel(T)
@@ -191,17 +174,19 @@ julia> x  = state(sol)
 julia> x0 = x(t0)
 ```
 """
-function state(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:StateModelSolution{TS},
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:ctNumber,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::TS where {TS<:Function} 
+function state(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:StateModelSolution{TS},
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::TS where {TS<:Function}
     return value(sol.state)
 end
 
@@ -258,17 +243,19 @@ julia> u  = control(sol)
 julia> u0 = u(t0) # control at initial time
 ```
 """
-function control(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:ControlModelSolution{TS},
-    <:AbstractVariableModel,
-    <:Function,
-    <:ctNumber,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::TS where {TS<:Function}
+function control(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:ControlModelSolution{TS},
+        <:AbstractVariableModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::TS where {TS<:Function}
     return value(sol.control)
 end
 
@@ -323,17 +310,19 @@ Return the variable of the optimal control solution or `nothing`.
 julia> v  = variable(sol)
 ```
 """
-function variable(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:VariableModelSolution{TS},
-    <:Function,
-    <:ctNumber,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::TS where {TS<:Union{ctNumber,ctVector}}
+function variable(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:VariableModelSolution{TS},
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::TS where {TS<:Union{ctNumber,ctVector}}
     return value(sol.variable)
 end
 
@@ -348,17 +337,19 @@ julia> p  = costate(sol)
 julia> p0 = p(t0)
 ```
 """
-function costate(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    Co,
-    <:ctNumber,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::Co where {Co<:Function}
+function costate(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        Co,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::Co where {Co<:Function}
     return sol.costate
 end
 
@@ -380,7 +371,7 @@ $(TYPEDSIGNATURES)
 Return the name of the initial time of the optimal control solution.
 
 """
-function initial_time_name(sol::Solution)::String 
+function initial_time_name(sol::Solution)::String
     return name(initial(sol.times))
 end
 
@@ -390,7 +381,7 @@ $(TYPEDSIGNATURES)
 Return the name of the final time of the optimal control solution.
 
 """
-function final_time_name(sol::Solution)::String 
+function final_time_name(sol::Solution)::String
     return name(final(sol.times))
 end
 
@@ -410,17 +401,19 @@ $(TYPEDSIGNATURES)
 Return the time grid of the optimal control solution.
 
 """
-function time_grid(sol::Solution{
-    <:TimeGridModel{T},
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:ctNumber,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::T where {T<:TimesDisc}
+function time_grid(
+    sol::Solution{
+        <:TimeGridModel{T},
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::T where {T<:TimesDisc}
     return sol.time_grid.value
 end
 
@@ -430,17 +423,19 @@ $(TYPEDSIGNATURES)
 Return the objective value of the optimal control solution.
 
 """
-function objective(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    O,
-    <:AbstractDualModel,
-    <:AbstractSolverInfos,
-    })::O where {O<:ctNumber}
+function objective(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        O,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::O where {O<:ctNumber}
     return sol.objective
 end
 
@@ -516,17 +511,19 @@ end
 # variable_constraints_lb_dual::VC_LB_Dual
 # variable_constraints_ub_dual::VC_UB_Dual
 
-function dual_model(sol::Solution{
-    <:AbstractTimeGridModel,
-    <:AbstractTimesModel,
-    <:AbstractStateModel,
-    <:AbstractControlModel,
-    <:AbstractVariableModel,
-    <:Function,
-    <:ctNumber,
-    DM,
-    <:AbstractSolverInfos,
-    })::DM where {DM<:AbstractDualModel}
+function dual_model(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:ctNumber,
+        DM,
+        <:AbstractSolverInfos,
+    },
+)::DM where {DM<:AbstractDualModel}
     return sol.dual
 end
 
