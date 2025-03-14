@@ -378,6 +378,14 @@ function time_name(ocp::Model)::String
 end
 
 # Initial time
+function initial_time(ocp::AbstractModel)
+    throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
+end
+
+function initial_time(ocp::AbstractModel, variable::AbstractVector)
+    throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -445,6 +453,14 @@ function has_free_initial_time(ocp::Model)::Bool
 end
 
 # Final time
+function final_time(ocp::AbstractModel)
+    throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
+end
+
+function final_time(ocp::AbstractModel, variable::AbstractVector)
+    throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -541,6 +557,10 @@ function criterion(ocp::Model)::Symbol
 end
 
 # Mayer
+function mayer(ocp::AbstractModel)
+    throw(CTBase.UnauthorizedCall("This ocp has no Mayer objective."))
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -589,6 +609,10 @@ function has_mayer_cost(ocp::Model)::Bool
 end
 
 # Lagrange
+function lagrange(ocp::AbstractModel)
+    throw(CTBase.UnauthorizedCall("This ocp has no Lagrange objective."))
+end
+
 """
 $(TYPEDSIGNATURES)
 
