@@ -9,6 +9,7 @@ using MLStyle
 using Parameters # @with_kw: to have default values in struct
 using MacroTools: striplines
 using PrettyTables # To print a table
+import RecipesBase: plot, plot!, RecipesBase
 
 # aliases
 const Dimension = Int
@@ -29,6 +30,16 @@ import_ocp_solution(args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2, :JS
 include("default.jl")
 include("utils.jl")
 include("types.jl")
+
+# to be extended
+function RecipesBase.plot(sol::AbstractSolution; kwargs...)
+    throw(CTBase.ExtensionError(:Plots))
+end
+function RecipesBase.plot!(p::RecipesBase.AbstractPlot, sol::AbstractSolution; kwargs...)
+    throw(CTBase.ExtensionError(:Plots))
+end
+
+#
 include("init.jl")
 include("dual_model.jl")
 include("state.jl")
@@ -41,5 +52,8 @@ include("constraints.jl")
 include("print.jl")
 include("model.jl")
 include("solution.jl")
+
+#
+export plot, plot!
 
 end
