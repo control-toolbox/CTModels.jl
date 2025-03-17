@@ -173,4 +173,4 @@ plot!(plt, sol; time=:default, state_style=style, costate_style=style, control_s
 plt = plot(sol; layout=:group, control=:components)
 plot!(plt, sol; layout=:group, control=:components)
 plot!(plt, sol; layout=:group, control=:norm)
-plot!(plt, sol; layout=:group, control=:all)
+#plot!(plt, sol; layout=:group, control=:all)
