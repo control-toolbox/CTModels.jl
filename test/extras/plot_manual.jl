@@ -1,6 +1,8 @@
 using CTModels
 using Plots
 
+FUN=true
+
 # create a pre-model
 pre_ocp = CTModels.PreModel()
 
@@ -66,21 +68,21 @@ function x(t)
         b + β * (t - t0) - α * (t - t0)^2 / 2.0,
     ]
 end
-X = vcat([x(t)' for t in T]...)
+X = FUN ? x : vcat([x(t)' for t in T]...)
 
 # costate: P Matrix{Float64}
 P = zeros(N, 2)
 function p(t)
     return [α, -α * (t - t0) + β]
 end
-P = vcat([p(t)' for t in T[1:(end - 1)]]...)
+P = FUN ? p : vcat([p(t)' for t in T[1:(end - 1)]]...)
 
 # control: U Matrix{Float64}
 U = zeros(N, 1)
 function u(t)
     return [p(t)[2]]
 end
-U = vcat([u(t)' for t in T]...)
+U = FUN ? u : vcat([u(t)' for t in T]...)
 
 # variable: v Vector{Float64}
 v = Float64[]
