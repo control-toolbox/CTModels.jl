@@ -36,10 +36,10 @@ Build a solution from the optimal control problem, the time grid, the state, con
 function build_solution(
     ocp::Model,
     T::Vector{Float64},
-    X::Matrix{Float64},
-    U::Matrix{Float64},
+    X::TX,
+    U::TU,
     v::Vector{Float64},
-    P::Matrix{Float64};
+    P::TP;
     objective::Float64,
     iterations::Int,
     constraints_violation::Float64,
@@ -56,7 +56,11 @@ function build_solution(
     control_constraints_ub_dual::Matrix{Float64}=zeros(0, 0),
     variable_constraints_lb_dual::Vector{Float64}=zeros(0),
     variable_constraints_ub_dual::Vector{Float64}=zeros(0),
-)
+) where { 
+    TX <: Union{Matrix{Float64}, Function},
+    TU <: Union{Matrix{Float64}, Function},
+    TP <: Union{Matrix{Float64}, Function},
+    }
 
     # get dimensions
     dim_x = state_dimension(ocp)
@@ -75,9 +79,10 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange objective
-    x = ctinterpolate(T, matrix2vec(X[:, 1:dim_x], 1))
-    p = ctinterpolate(T[1:(end - 1)], matrix2vec(P[:, 1:dim_x], 1))
-    u = ctinterpolate(T, matrix2vec(U[:, 1:dim_u], 1))
+    x = TX <: Function ? X : ctinterpolate(T, matrix2vec(X[:, 1:dim_x], 1))
+    p = TU <: Function ? P : 
+        length(T) == 2 ? t -> P[1, 1:dim_x] : ctinterpolate(T[1:(end - 1)], matrix2vec(P[:, 1:dim_x], 1))
+    u = TP <: Function ? U : ctinterpolate(T, matrix2vec(U[:, 1:dim_u], 1))
 
     # force scalar output when dimension is 1
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
