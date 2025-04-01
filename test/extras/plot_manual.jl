@@ -1,7 +1,7 @@
 using CTModels
 using Plots
 
-FUN=true
+FUN = true
 
 # create a pre-model
 pre_ocp = CTModels.PreModel()

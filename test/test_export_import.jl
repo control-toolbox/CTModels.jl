@@ -18,7 +18,7 @@ function test_export_import()
     @test sol.objective == sol_reloaded.objective
 
     #
-    ocp, sol = solution_example(fun=true)
+    ocp, sol = solution_example(; fun=true)
 
     # JSON
     CTModels.export_ocp_solution(sol; filename_prefix="solution_test", format=:JSON)
@@ -33,5 +33,4 @@ function test_export_import()
         ocp; filename_prefix="solution_test", format=:JLD
     )
     @test sol.objective == sol_reloaded.objective
-
 end
