@@ -1,4 +1,4 @@
-function solution_example(;fun=false)
+function solution_example(; fun=false)
 
     # create a pre-model
     pre_ocp = CTModels.PreModel()
