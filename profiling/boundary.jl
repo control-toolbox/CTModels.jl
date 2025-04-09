@@ -27,15 +27,15 @@ begin
             return nothing
         end
         CTModels.constraint!(
-            pre_ocp, :boundary; f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary1
+            pre_ocp, :boundary; f=(bc!), lb=[-1, 0], ub=[-1, 0], label=:boundary1
         )
         N = 2
         CTModels.constraint!(
-            pre_ocp, :boundary; f=bc!, lb=[-1, 0], ub=[-1, 0], label=:boundary2
+            pre_ocp, :boundary; f=(bc!), lb=[-1, 0], ub=[-1, 0], label=:boundary2
         )
         N += 2
         CTModels.constraint!(
-            pre_ocp, :boundary; f=bc2!, lb=[-1, 0], ub=[-1, 0], label=:boundary3
+            pre_ocp, :boundary; f=(bc2!), lb=[-1, 0], ub=[-1, 0], label=:boundary3
         )
         N += 2
         CTModels.constraint!(
