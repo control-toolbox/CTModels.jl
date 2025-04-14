@@ -2,6 +2,44 @@
 $(TYPEDSIGNATURES)
 
 Add a constraint to a dictionary of constraints.
+
+## Arguments
+
+- `ocp_constraints`: The dictionary of constraints to which the constraint will be added.
+- `type`: The type of the constraint. It can be :state, :control, :variable, :boundary or :path.
+- `n`: The dimension of the state.
+- `m`: The dimension of the control.
+- `q`: The dimension of the variable.
+- `rg`: The range of the constraint. It can be an integer or a range of integers.
+- `f`: The function that defines the constraint. It must return a vector of the same dimension as the constraint.
+- `lb`: The lower bound of the constraint. It can be a number or a vector.
+- `ub`: The upper bound of the constraint. It can be a number or a vector.
+- `label`: The label of the constraint. It must be unique in the dictionary of constraints.
+
+## Requirements
+
+- The constraint must not be set before.
+- The lower bound `lb` and the upper bound `ub` cannot be both nothing.
+- The lower bound `lb` and the upper bound `ub` must have the same length, if both provided.
+
+If `rg` and `f` are not provided then, 
+
+- `type` must be :state, :control or :variable
+- `lb` and `ub` must be of dimension n, m or q respectively, when provided.
+
+If `rg` is provided, then:
+
+- `f` must not be provided.
+- `type` must be :state, :control or :variable.
+- `rg` must be a range of integers, and must be contained in 1:n, 1:m or 1:q respectively.
+
+If `f` is provided, then:
+
+- `rg` must not be provided.
+- `type` must be :boundary or :path.
+- `f` must be a function that returns a vector of the same dimension as the constraint.
+- `lb` and `ub` must be of the same dimension as the output of `f`, when provided.
+
 """
 function __constraint!(
     ocp_constraints::ConstraintsDictType,
@@ -124,7 +162,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a constraint to a pre-model.
+Add a constraint to a pre-model. See `[__constraint!](@ref)` for more details.
 """
 function constraint!(
     ocp::PreModel,
