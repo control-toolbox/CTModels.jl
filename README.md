@@ -21,6 +21,15 @@
 [blue-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
 [blue-url]: https://github.com/JuliaDiff/BlueStyle
 
+[release-img]: https://juliahub.com/docs/General/CTModels/stable/version.svg
+[release-url]: https://github.com/control-toolbox/CTModels.jl/releases
+
+[pkg-eval-img]: https://img.shields.io/badge/Julia-package-purple
+[pkg-eval-url]: https://juliahub.com/ui/Packages/General/CTModels
+
+[deps-img]: https://juliahub.com/docs/General/CTModels/stable/deps.svg
+[deps-url]: https://juliahub.com/ui/Packages/General/CTModels?t=2
+
 This repo is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
 The control-toolbox ecosystem gathers Julia packages for mathematical control and applications. The root package is [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to model and solve optimal control problems with ordinary differential equations by direct and indirect methods.
 
@@ -29,8 +38,10 @@ The control-toolbox ecosystem gathers Julia packages for mathematical control an
 | **Name**          | **Badge**         |
 :-------------------|:------------------|
 | Documentation     | [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url]                   | 
-| Code Status       | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] [![Aqua.jl][aqua-img]][aqua-url] [![Code Style: Blue][blue-img]][blue-url] |
+| Code Status       | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] [![Aqua.jl][aqua-img]][aqua-url] [![Code Style: Blue][blue-img]][blue-url] [![pkgeval][pkg-eval-img]][pkg-eval-url] |
+| Dependencies      | [![deps][deps-img]][deps-url] |
 | Licence           | [![License: MIT][licence-img]][licence-url]   |
+| Release           | [![Release][release-img]][release-url]        |
 
 ## Contributing
 
