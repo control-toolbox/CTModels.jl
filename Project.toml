@@ -20,7 +20,8 @@ JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [extensions]
-CTModelsExportImport = ["JLD2", "JSON3"]
+CTModelsJLD = "JLD2"
+CTModelsJSON = "JSON3"
 CTModelsPlots = "Plots"
 
 [compat]
@@ -28,7 +29,7 @@ CTBase = "0.16"
 DocStringExtensions = "0.9"
 Interpolations = "0.15"
 JLD2 = "0.5"
-JSON3 = "1"
+JSON3 = "1.14"
 LinearAlgebra = "1"
 MLStyle = "0.4"
 MacroTools = "0.5"

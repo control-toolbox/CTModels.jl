@@ -1,6 +1,20 @@
 """
 $(TYPEDSIGNATURES)
 
+Used to set the default value for the constraints.
+"""
+__constraints() = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of the format of the file to be used for export and import.
+"""
+__format() = :JLD
+
+"""
+$(TYPEDSIGNATURES)
+
 Used to set the default value of the label of a constraint.
 A unique value is given to each constraint using the `gensym` function and prefixing by `:unamed`.
 """

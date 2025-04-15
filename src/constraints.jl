@@ -211,13 +211,16 @@ function constraint!(
     )
 end
 
-as_vector(x::Nothing) = nothing
+as_vector(::Nothing) = nothing
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
 as_vector(x::Vector{T}) where {T<:ctNumber} = x
 
-as_range(r::Nothing) = nothing
+as_range(::Nothing) = nothing
 as_range(r::T) where {T<:Int} = r:r
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
+
+discretize(constraint::Function, grid::Vector{T}) where {T<:ctNumber} = constraint.(grid)
+discretize(::Nothing, grid::Vector{T}) where {T<:ctNumber} = nothing
 
 # ------------------------------------------------------------------------------ #
 # GETTERS

@@ -448,16 +448,16 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct DualModel{
-    PC<:Function,
-    PC_Dual<:Function,
-    BC<:ctVector,
-    BC_Dual<:ctVector,
-    SC_LB_Dual<:Function,
-    SC_UB_Dual<:Function,
-    CC_LB_Dual<:Function,
-    CC_UB_Dual<:Function,
-    VC_LB_Dual<:ctVector,
-    VC_UB_Dual<:ctVector,
+    PC        <:Union{Function, Nothing},
+    PC_Dual   <:Union{Function, Nothing},
+    BC        <:Union{ctVector, Nothing},
+    BC_Dual   <:Union{ctVector, Nothing},
+    SC_LB_Dual<:Union{Function, Nothing},
+    SC_UB_Dual<:Union{Function, Nothing},
+    CC_LB_Dual<:Union{Function, Nothing},
+    CC_UB_Dual<:Union{Function, Nothing},
+    VC_LB_Dual<:Union{ctVector, Nothing},
+    VC_UB_Dual<:Union{ctVector, Nothing},
 } <: AbstractDualModel
     path_constraints::PC
     path_constraints_dual::PC_Dual

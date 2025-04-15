@@ -2,7 +2,8 @@ using Test
 using Aqua
 using CTBase
 using CTModels
-using JLD2, JSON3
+using JLD2
+using JSON3
 using Plots
 
 #
