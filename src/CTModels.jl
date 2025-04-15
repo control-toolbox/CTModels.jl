@@ -29,12 +29,49 @@ const ConstraintsDictType = Dict{
 const Times = AbstractVector{<:Time}
 const TimesDisc = Union{Times,StepRangeLen}
 
-# to be extended
-export_ocp_solution(args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2, :JSON3))
-import_ocp_solution(args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2, :JSON3))
-
 #
 include("default.jl")
+
+# export / import
+abstract type AbstractTag end
+struct JLD2Tag <: AbstractTag end
+struct JSON3Tag <: AbstractTag end
+
+# to be extended
+export_ocp_solution(::JLD2Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2))
+import_ocp_solution(::JLD2Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2))
+export_ocp_solution(::JSON3Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JSON3))
+import_ocp_solution(::JSON3Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JSON3))
+
+function export_ocp_solution(args...; format=__format(), kwargs...)
+    if format == :JLD
+        return export_ocp_solution(JLD2Tag(), args...; kwargs...)        
+    elseif format == :JSON
+        return export_ocp_solution(JSON3Tag(), args...; kwargs...)
+    else
+        throw(
+            CTBase.IncorrectArgument(
+                "Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+            ),
+        )
+    end
+end
+
+function import_ocp_solution(args...; format=__format(), kwargs...)
+    if format == :JLD
+        return import_ocp_solution(JLD2Tag(), args...; kwargs...)        
+    elseif format == :JSON
+        return import_ocp_solution(JSON3Tag(), args...; kwargs...)
+    else
+        throw(
+            CTBase.IncorrectArgument(
+                "Import_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+            ),
+        )
+    end
+end
+
+#
 include("utils.jl")
 include("types.jl")
 

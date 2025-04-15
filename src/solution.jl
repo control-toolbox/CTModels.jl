@@ -46,16 +46,16 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
-    path_constraints::Matrix{Float64}=zeros(0, 0),
-    path_constraints_dual::Matrix{Float64}=zeros(0, 0),
-    boundary_constraints::Vector{Float64}=zeros(0),
-    boundary_constraints_dual::Vector{Float64}=zeros(0),
-    state_constraints_lb_dual::Matrix{Float64}=zeros(0, 0),
-    state_constraints_ub_dual::Matrix{Float64}=zeros(0, 0),
-    control_constraints_lb_dual::Matrix{Float64}=zeros(0, 0),
-    control_constraints_ub_dual::Matrix{Float64}=zeros(0, 0),
-    variable_constraints_lb_dual::Vector{Float64}=zeros(0),
-    variable_constraints_ub_dual::Vector{Float64}=zeros(0),
+    path_constraints            ::Union{Matrix{Float64},Nothing}=__constraints(),
+    path_constraints_dual       ::Union{Matrix{Float64},Nothing}=__constraints(),
+    boundary_constraints        ::Union{Vector{Float64},Nothing}=__constraints(),
+    boundary_constraints_dual   ::Union{Vector{Float64},Nothing}=__constraints(),
+    state_constraints_lb_dual   ::Union{Matrix{Float64},Nothing}=__constraints(),
+    state_constraints_ub_dual   ::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_lb_dual ::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_ub_dual ::Union{Matrix{Float64},Nothing}=__constraints(),
+    variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
@@ -99,18 +99,19 @@ function build_solution(
     infos = Dict{Symbol,Any}()
 
     # nonlinear constraints and dual variables
-    path_constraints_fun = t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
-    path_constraints_dual_fun =
+    path_constraints_fun = isnothing(path_constraints) ? nothing :
+        t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
+    path_constraints_dual_fun = isnothing(path_constraints_dual) ? nothing :
         t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
 
     # box constraints multipliers
-    state_constraints_lb_dual_fun =
+    state_constraints_lb_dual_fun = isnothing(state_constraints_lb_dual) ? nothing :
         t -> ctinterpolate(T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1))(t)
-    state_constraints_ub_dual_fun =
+    state_constraints_ub_dual_fun = isnothing(state_constraints_ub_dual) ? nothing :
         t -> ctinterpolate(T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1))(t)
-    control_constraints_lb_dual_fun =
+    control_constraints_lb_dual_fun = isnothing(control_constraints_lb_dual) ? nothing :
         t -> ctinterpolate(T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1))(t)
-    control_constraints_ub_dual_fun =
+    control_constraints_ub_dual_fun = isnothing(control_constraints_ub_dual) ? nothing :
         t -> ctinterpolate(T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1))(t)
 
     # build Models

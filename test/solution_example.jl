@@ -122,34 +122,34 @@ function solution_example(; fun=false)
     success = true
 
     # Path constraints: Matrix{Float64}
-    path_constraints = zeros(0, 0)
+    path_constraints = nothing
 
     # Path constraints dual: Matrix{Float64}
-    path_constraints_dual = zeros(0, 0)
+    path_constraints_dual = nothing
 
     # Boundary constraints: Vector{Float64}
-    boundary_constraints = zeros(0)
+    boundary_constraints = nothing
 
     # Boundary constraints dual: Vector{Float64}
-    boundary_constraints_dual = zeros(0)
+    boundary_constraints_dual = nothing
 
     # State constraints lower bound dual: Matrix{Float64}
-    state_constraints_lb_dual = zeros(0, 0)
+    state_constraints_lb_dual = nothing
 
     # State constraints upper bound dual: Matrix{Float64}
-    state_constraints_ub_dual = zeros(0, 0)
+    state_constraints_ub_dual = nothing
 
     # Control constraints lower bound dual: Matrix{Float64}
-    control_constraints_lb_dual = zeros(0, 0)
+    control_constraints_lb_dual = nothing
 
     # Control constraints upper bound dual: Matrix{Float64}
-    control_constraints_ub_dual = zeros(0, 0)
+    control_constraints_ub_dual = nothing
 
     # Variable constraints lower bound dual: Vector{Float64}
-    variable_constraints_lb_dual = zeros(0)
+    variable_constraints_lb_dual = nothing
 
     # Variable constraints upper bound dual: Vector{Float64}
-    variable_constraints_ub_dual = zeros(0)
+    variable_constraints_ub_dual = nothing
 
     # solution
     sol = CTModels.build_solution(
