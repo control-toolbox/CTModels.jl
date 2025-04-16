@@ -46,14 +46,14 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
-    path_constraints            ::Union{Matrix{Float64},Nothing}=__constraints(),
-    path_constraints_dual       ::Union{Matrix{Float64},Nothing}=__constraints(),
-    boundary_constraints        ::Union{Vector{Float64},Nothing}=__constraints(),
-    boundary_constraints_dual   ::Union{Vector{Float64},Nothing}=__constraints(),
-    state_constraints_lb_dual   ::Union{Matrix{Float64},Nothing}=__constraints(),
-    state_constraints_ub_dual   ::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_lb_dual ::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_ub_dual ::Union{Matrix{Float64},Nothing}=__constraints(),
+    path_constraints::Union{Matrix{Float64},Nothing}=__constraints(),
+    path_constraints_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    boundary_constraints::Union{Vector{Float64},Nothing}=__constraints(),
+    boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    state_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
 ) where {
@@ -99,20 +99,38 @@ function build_solution(
     infos = Dict{Symbol,Any}()
 
     # nonlinear constraints and dual variables
-    path_constraints_fun = isnothing(path_constraints) ? nothing :
+    path_constraints_fun = if isnothing(path_constraints)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
-    path_constraints_dual_fun = isnothing(path_constraints_dual) ? nothing :
+    end
+    path_constraints_dual_fun = if isnothing(path_constraints_dual)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
+    end
 
     # box constraints multipliers
-    state_constraints_lb_dual_fun = isnothing(state_constraints_lb_dual) ? nothing :
+    state_constraints_lb_dual_fun = if isnothing(state_constraints_lb_dual)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1))(t)
-    state_constraints_ub_dual_fun = isnothing(state_constraints_ub_dual) ? nothing :
+    end
+    state_constraints_ub_dual_fun = if isnothing(state_constraints_ub_dual)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1))(t)
-    control_constraints_lb_dual_fun = isnothing(control_constraints_lb_dual) ? nothing :
+    end
+    control_constraints_lb_dual_fun = if isnothing(control_constraints_lb_dual)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1))(t)
-    control_constraints_ub_dual_fun = isnothing(control_constraints_ub_dual) ? nothing :
+    end
+    control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
+        nothing
+    else
         t -> ctinterpolate(T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1))(t)
+    end
 
     # build Models
     time_grid = TimeGridModel(T)

@@ -45,7 +45,7 @@ import_ocp_solution(::JSON3Tag, args...; kwargs...) = throw(CTBase.ExtensionErro
 
 function export_ocp_solution(args...; format=__format(), kwargs...)
     if format == :JLD
-        return export_ocp_solution(JLD2Tag(), args...; kwargs...)        
+        return export_ocp_solution(JLD2Tag(), args...; kwargs...)
     elseif format == :JSON
         return export_ocp_solution(JSON3Tag(), args...; kwargs...)
     else
@@ -59,7 +59,7 @@ end
 
 function import_ocp_solution(args...; format=__format(), kwargs...)
     if format == :JLD
-        return import_ocp_solution(JLD2Tag(), args...; kwargs...)        
+        return import_ocp_solution(JLD2Tag(), args...; kwargs...)
     elseif format == :JSON
         return import_ocp_solution(JSON3Tag(), args...; kwargs...)
     else
