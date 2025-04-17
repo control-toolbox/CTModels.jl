@@ -1,6 +1,5 @@
 module CTModelsJSON
 
-using CTBase
 using CTModels
 using DocStringExtensions
 

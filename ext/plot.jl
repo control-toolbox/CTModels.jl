@@ -339,6 +339,8 @@ function __keep_series_attributes(; kwargs...)
     return out
 end
 
+# --------------------------------------------------------------------------------------------------
+# public plots: from a solution
 """
 $(TYPEDSIGNATURES)
 
@@ -604,6 +606,143 @@ function Plots.plot(
     )
 end
 
+# --------------------------------------------------------------------------------------------------
+# public plots: from a solution and the model
+"""
+$(TYPEDSIGNATURES)
+
+Plot the optimal control solution `sol` using the layout `layout`. The model is used to represent the initial and final times and the constraints.
+
+**Notes.**
+
+- The argument `layout` can be `:group` or `:split` (default).
+- `control` can be `:components`, `:norm` or `:all`.
+- `time` can be `:default` or `:normalize`.
+- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+- The keyword arguments `time_style` are passed to the `vline!` function of the `Plots` package. The `time_style` is passed to the plot of the vertical lines at the initial and final times.
+"""
+function Plots.plot!(
+    p::Plots.Plot,
+    sol::CTModels.Solution,
+    model::CTModels.Model;
+    layout::Symbol=__plot_layout(),
+    control::Symbol=__control_layout(),
+    time::Symbol=__time_normalization(),
+    solution_label::String="",
+    state_style=(),
+    state_constraint_style=(),
+    control_style=(),
+    control_constraint_style=(),
+    costate_style=(),
+    time_style=(),
+    kwargs...,
+)
+
+    # step 1: plot the solution
+    p = Plots.plot!(p, sol; 
+        layout=layout, 
+        control=control, 
+        time=time,
+        solution_label=solution_label,
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style, 
+        kwargs...)
+
+    # step 2: plot vertical lines at the initial and final times
+    if time == :normalize || time == :normalise
+        t0 = 0.0
+        tf = 1.0
+    else
+        t0 = if CTModels.has_fixed_initial_time(model)
+            CTModels.initial_time(model)
+        else
+            CTModels.initial_time(model, CTModels.variable(sol))
+        end
+        tf = if CTModels.has_fixed_final_time(model)
+            CTModels.final_time(model)
+        else
+            CTModels.final_time(model, CTModels.variable(sol))
+        end
+    end
+    for plt ∈ p.subplots
+        vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, time_style...)
+    end
+
+    # step 3: plot the control constraints if layout is :split
+    if layout == :split
+        ccs = control_constraint_style
+        n = CTModels.state_dimension(model)
+        cu = CTModels.control_constraints_box(model)
+        iu = 2n + 1
+        for i in 1:length(cu[1])
+            hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, ccs...) # lower bound
+            hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, ccs...) # upper bound
+        end
+    end
+
+    # step 4: plot the state constraints if layout is :split
+    if layout == :split
+        scs = state_constraint_style
+        cs = CTModels.state_constraints_box(model)
+        is = 1
+        for i in 1:length(cs[1])
+            hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, scs...) # lower bound
+            hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, scs...) # upper bound
+        end
+    end
+
+    return p
+
+end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Plot the optimal control solution `sol` using the layout `layout`. The model is used to represent the initial and final times and the constraints.
+
+**Notes.**
+
+- The argument `layout` can be `:group` or `:split` (default).
+- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+- The keyword arguments `time_style` are passed to the `vline!` function of the `Plots` package. The `time_style` is passed to the plot of the vertical lines at the initial and final times.
+"""
+function Plots.plot(
+    sol::CTModels.Solution,
+    model::CTModels.Model;
+    layout::Symbol=__plot_layout(),
+    control::Symbol=__control_layout(),
+    time::Symbol=__time_normalization(),
+    size=__size_plot(sol, control),
+    solution_label::String="",
+    state_style=(),
+    control_style=(),
+    costate_style=(),
+    time_style=(),
+    kwargs...,
+)
+    #
+    p = __initial_plot(sol; layout=layout, control=control, size=size, kwargs...)
+    #
+    return Plots.plot!(
+        p,
+        sol,
+        model;
+        layout=layout,
+        control=control,
+        time=time,
+        solution_label=solution_label,
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        time_style=time_style,
+        kwargs...,
+    )
+end
+
+# --------------------------------------------------------------------------------------------------
+# plot recipe
 """
 $(TYPEDSIGNATURES)
 
@@ -628,47 +767,13 @@ corresponding respectively to the argument `xx` and the argument `yy`.
     y = __get_data_plot(sol, yy; time=time)
 
     #
-    label = recipe_label(sol, xx, yy)
+    #label := recipe_label(sol, xx, yy)
+    color := 1           # default color
+    linestyle := :solid  # default linestyle
+    linewidth := 2       # default linewidth
+    z_order := :front    # default z_order
 
     return x, y
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the label for the plot of the optimal control solution `sol`
-corresponding to the argument `xx` and the argument `yy`.
-
-**Notes.**
-
-- The argument `xx` can be `:time`, `:state`, `:control` or `:costate`.
-- The argument `yy` can be `:state`, `:control` or `:costate`.
-"""
-function recipe_label(
-    sol::CTModels.Solution,
-    xx::Union{Symbol,Tuple{Symbol,Int}},
-    yy::Union{Symbol,Tuple{Symbol,Int}},
-)
-
-    #
-    label = false
-    #
-    if xx isa Symbol && xx == :time
-        s, i = @match yy begin
-            ::Symbol => (yy, 1)
-            _ => yy
-        end
-
-        label = @match s begin
-            :state => CTModels.state_components(sol)[i]
-            :control => CTModels.control_components(sol)[i]
-            :costate => "p" * CTModels.state_components(sol)[i]
-            :control_norm => "‖" * CTModels.control_name(sol) * "‖"
-            _ => error("Internal error, no such choice for label")
-        end
-    end
-    #
-    return label
 end
 
 """

@@ -41,3 +41,12 @@ function __size_plot(sol::CTModels.Solution, control::Symbol)
     end
     return (600, 140 * (n + m))
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of state style for the plots.
+"""
+function __state_style()
+    return (color=1, linestyle=:solid, linewidth=2)
+end
