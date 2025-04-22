@@ -3,7 +3,6 @@ module CTModelsJLD
 using CTBase
 using CTModels
 using DocStringExtensions
-
 using JLD2
 
 """
@@ -21,7 +20,7 @@ end
 """
 $(TYPEDSIGNATURES)
   
-Read OCP solution in JLD format
+Import OCP solution in JLD format
 """
 function CTModels.import_ocp_solution(
     ::CTModels.JLD2Tag, ocp::CTModels.Model; filename_prefix="solution"

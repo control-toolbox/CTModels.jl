@@ -15,6 +15,10 @@
 # variable_constraints_lb_dual::VC_LB_Dual
 # variable_constraints_ub_dual::VC_UB_Dual
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function path_constraints(
     model::DualModel{
         PC,
@@ -32,6 +36,10 @@ function path_constraints(
     return model.path_constraints
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function path_constraints_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -49,6 +57,10 @@ function path_constraints_dual(
     return model.path_constraints_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function boundary_constraints(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -66,6 +78,10 @@ function boundary_constraints(
     return model.boundary_constraints
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function boundary_constraints_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -83,6 +99,10 @@ function boundary_constraints_dual(
     return model.boundary_constraints_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function state_constraints_lb_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -100,6 +120,10 @@ function state_constraints_lb_dual(
     return model.state_constraints_lb_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function state_constraints_ub_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -117,6 +141,10 @@ function state_constraints_ub_dual(
     return model.state_constraints_ub_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function control_constraints_lb_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -134,6 +162,10 @@ function control_constraints_lb_dual(
     return model.control_constraints_lb_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function control_constraints_ub_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -151,6 +183,10 @@ function control_constraints_ub_dual(
     return model.control_constraints_ub_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function variable_constraints_lb_dual(
     model::DualModel{
         <:Union{Function,Nothing},
@@ -168,6 +204,10 @@ function variable_constraints_lb_dual(
     return model.variable_constraints_lb_dual
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function variable_constraints_ub_dual(
     model::DualModel{
         <:Union{Function,Nothing},

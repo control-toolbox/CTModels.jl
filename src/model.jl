@@ -453,10 +453,18 @@ function has_free_initial_time(ocp::Model)::Bool
 end
 
 # Final time
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function final_time(ocp::AbstractModel)
     throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function final_time(ocp::AbstractModel, variable::AbstractVector)
     throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
 end

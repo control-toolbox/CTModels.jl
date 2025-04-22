@@ -580,6 +580,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function Base.show_default(io::IO, ocp::PreModel)
     return print(io, typeof(ocp))
 end
