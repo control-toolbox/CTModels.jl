@@ -55,7 +55,7 @@ end
 """
 $(TYPEDSIGNATURES)
   
-Read OCP solution in JSON format
+Import OCP solution in JSON format
 """
 function CTModels.import_ocp_solution(
     ::CTModels.JSON3Tag, ocp::CTModels.Model; filename_prefix="solution"

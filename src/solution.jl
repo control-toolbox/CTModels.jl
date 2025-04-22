@@ -540,6 +540,10 @@ end
 # variable_constraints_lb_dual::VC_LB_Dual
 # variable_constraints_ub_dual::VC_UB_Dual
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function dual_model(
     sol::Solution{
         <:AbstractTimeGridModel,
@@ -667,6 +671,10 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     return print(io, typeof(sol))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function Base.show_default(io::IO, sol::Solution)
     return print(io, typeof(sol))
     #show(io, MIME("text/plain"), sol)
