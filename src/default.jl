@@ -94,3 +94,11 @@ function __variable_components(q::Dimension, name::String)::Vector{String}
         return q > 1 ? [name * CTBase.ctindices(i) for i in range(1, q)] : [name]
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of the storage of elements in a matrix.
+The default value is `1`.
+"""
+__matrix_dimension_storage() = 1

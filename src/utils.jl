@@ -10,25 +10,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
+Transforms `A` to a Vector{<:Vector{<:ctNumber}}.
 
 **Note.** `dim` ∈ {1, 2} is the dimension along which the matrix is transformed.
 """
 function matrix2vec(
-    x::Matrix{<:ctNumber}, dim::Int=__matrix_dimension_stock()
+    A::Matrix{<:ctNumber}, dim::Int=__matrix_dimension_storage()
 )::Vector{<:Vector{<:ctNumber}}
-    m, n = size(x)
-    y = nothing
-    if dim == 1
-        y = [x[1, :]]
-        for i in 2:m
-            y = vcat(y, [x[i, :]])
-        end
-    else
-        y = [x[:, 1]]
-        for j in 2:n
-            y = vcat(y, [x[:, j]])
-        end
-    end
-    return y
+    return dim==1 ?  [A[i,:] for i in 1:size(A,1)] : [A[:,i] for i in 1:size(A,2)]
 end
