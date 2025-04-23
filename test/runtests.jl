@@ -25,6 +25,7 @@ include("solution_example.jl")
         :plot,
         :init,
         :export_import,
+        :utils,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
