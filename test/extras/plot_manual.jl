@@ -105,35 +105,35 @@ stopping = :Solve_Succeeded
 # Success: Bool
 success = true
 
-# Path constraints: Matrix{Float64}
-path_constraints = zeros(0, 0)
+# # Path constraints: Matrix{Float64}
+# path_constraints = zeros(0, 0)
 
-# Path constraints dual: Matrix{Float64}
-path_constraints_dual = zeros(0, 0)
+# # Path constraints dual: Matrix{Float64}
+# path_constraints_dual = zeros(0, 0)
 
-# Boundary constraints: Vector{Float64}
-boundary_constraints = zeros(0)
+# # Boundary constraints: Vector{Float64}
+# boundary_constraints = zeros(0)
 
-# Boundary constraints dual: Vector{Float64}
-boundary_constraints_dual = zeros(0)
+# # Boundary constraints dual: Vector{Float64}
+# boundary_constraints_dual = zeros(0)
 
-# State constraints lower bound dual: Matrix{Float64}
-state_constraints_lb_dual = zeros(0, 0)
+# # State constraints lower bound dual: Matrix{Float64}
+# state_constraints_lb_dual = zeros(0, 0)
 
-# State constraints upper bound dual: Matrix{Float64}
-state_constraints_ub_dual = zeros(0, 0)
+# # State constraints upper bound dual: Matrix{Float64}
+# state_constraints_ub_dual = zeros(0, 0)
 
-# Control constraints lower bound dual: Matrix{Float64}
-control_constraints_lb_dual = zeros(0, 0)
+# # Control constraints lower bound dual: Matrix{Float64}
+# control_constraints_lb_dual = zeros(0, 0)
 
-# Control constraints upper bound dual: Matrix{Float64}
-control_constraints_ub_dual = zeros(0, 0)
+# # Control constraints upper bound dual: Matrix{Float64}
+# control_constraints_ub_dual = zeros(0, 0)
 
-# Variable constraints lower bound dual: Vector{Float64}
-variable_constraints_lb_dual = zeros(0)
+# # Variable constraints lower bound dual: Vector{Float64}
+# variable_constraints_lb_dual = zeros(0)
 
-# Variable constraints upper bound dual: Vector{Float64}
-variable_constraints_ub_dual = zeros(0)
+# # Variable constraints upper bound dual: Vector{Float64}
+# variable_constraints_ub_dual = zeros(0)
 
 # solution
 sol = CTModels.build_solution(
@@ -149,16 +149,16 @@ sol = CTModels.build_solution(
     message=message,
     stopping=stopping,
     success=success,
-    path_constraints=path_constraints,
-    path_constraints_dual=path_constraints_dual,
-    boundary_constraints=boundary_constraints,
-    boundary_constraints_dual=boundary_constraints_dual,
-    state_constraints_lb_dual=state_constraints_lb_dual,
-    state_constraints_ub_dual=state_constraints_ub_dual,
-    control_constraints_lb_dual=control_constraints_lb_dual,
-    control_constraints_ub_dual=control_constraints_ub_dual,
-    variable_constraints_lb_dual=variable_constraints_lb_dual,
-    variable_constraints_ub_dual=variable_constraints_ub_dual,
+    # path_constraints=path_constraints,
+    # path_constraints_dual=path_constraints_dual,
+    # boundary_constraints=boundary_constraints,
+    # boundary_constraints_dual=boundary_constraints_dual,
+    # state_constraints_lb_dual=state_constraints_lb_dual,
+    # state_constraints_ub_dual=state_constraints_ub_dual,
+    # control_constraints_lb_dual=control_constraints_lb_dual,
+    # control_constraints_ub_dual=control_constraints_ub_dual,
+    # variable_constraints_lb_dual=variable_constraints_lb_dual,
+    # variable_constraints_ub_dual=variable_constraints_ub_dual,
 )
 
 #

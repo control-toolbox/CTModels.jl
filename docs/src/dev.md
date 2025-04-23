@@ -8,10 +8,9 @@ CurrentModule =  CTModels
 ## CTModels 
 
 ```@autodocs
+Pages   = ["CTModels.jl"]
 Modules = [CTModels]
 Order   = [:module]
-Pages   = ["CTModels.jl"]
-Private = false
 ```
 
 ## Index
@@ -27,6 +26,5 @@ Order   = [:constant, :type, :function, :macro]
 ```@autodocs
 Modules = [CTModels]
 Order   = [:constant, :type, :function, :macro]
-Public  = false
 ```
 

@@ -79,15 +79,26 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange objective
-    x = TX <: Function ? X : ctinterpolate(T, matrix2vec(X[:, 1:dim_x], 1))
-    p = if TU <: Function
+    x = if TX <: Function 
+        X 
+    else
+        V = matrix2vec(X[:, 1:dim_x], 1)
+        ctinterpolate(T, V)
+    end
+    p = if TP <: Function
         P
     elseif length(T) == 2
         t -> P[1, 1:dim_x]
     else
-        ctinterpolate(T[1:(end - 1)], matrix2vec(P[:, 1:dim_x], 1))
+        V = matrix2vec(P[:, 1:dim_x], 1)
+        ctinterpolate(T[1:(end - 1)], V)
     end
-    u = TP <: Function ? U : ctinterpolate(T, matrix2vec(U[:, 1:dim_u], 1))
+    u = if TU <: Function 
+        U
+    else
+        V = matrix2vec(U[:, 1:dim_u], 1)
+        ctinterpolate(T, V)
+    end
 
     # force scalar output when dimension is 1
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
@@ -102,34 +113,44 @@ function build_solution(
     path_constraints_fun = if isnothing(path_constraints)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(path_constraints, 1))(t)
+        V = matrix2vec(path_constraints, 1)
+        t -> ctinterpolate(T, V)(t)
     end
+
     path_constraints_dual_fun = if isnothing(path_constraints_dual)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(path_constraints_dual, 1))(t)
+        V = matrix2vec(path_constraints_dual, 1)
+        t -> ctinterpolate(T, V)(t)
     end
 
     # box constraints multipliers
     state_constraints_lb_dual_fun = if isnothing(state_constraints_lb_dual)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1))(t)
+        V = matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(T, V)(t)
     end
+
     state_constraints_ub_dual_fun = if isnothing(state_constraints_ub_dual)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1))(t)
+        V = matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
+        t -> ctinterpolate(T, V)(t)
     end
+
     control_constraints_lb_dual_fun = if isnothing(control_constraints_lb_dual)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1))(t)
+        V = matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(T, V)(t)
     end
+    
     control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
         nothing
     else
-        t -> ctinterpolate(T, matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1))(t)
+        V = matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
+        t -> ctinterpolate(T, V)(t)
     end
 
     # build Models
@@ -540,6 +561,10 @@ end
 # variable_constraints_lb_dual::VC_LB_Dual
 # variable_constraints_ub_dual::VC_UB_Dual
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function dual_model(
     sol::Solution{
         <:AbstractTimeGridModel,
@@ -667,6 +692,10 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     return print(io, typeof(sol))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function Base.show_default(io::IO, sol::Solution)
     return print(io, typeof(sol))
     #show(io, MIME("text/plain"), sol)
