@@ -16,9 +16,7 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=[
-        "Introduction" => "index.md", 
-        "Developers" => "dev.md"],
+    pages=["Introduction" => "index.md", "Developers" => "dev.md"],
     checkdocs=:none,
 )
 
