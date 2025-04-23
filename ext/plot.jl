@@ -242,20 +242,20 @@ function __initial_plot(
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pu = Plots.plot() # control
-                return Plots.plot(px, pp, pu; layout=(1, 3), kwargs...)
+                return Plots.plot(px, pp, pu; layout=(1, 3), bottommargin=5mm, kwargs...)
             end
             :norm => begin
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pn = Plots.plot() # control norm
-                return Plots.plot(px, pp, pn; layout=(1, 3), kwargs...)
+                return Plots.plot(px, pp, pn; layout=(1, 3), bottommargin=5mm, kwargs...)
             end
             :all => begin
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pu = Plots.plot() # control
                 pn = Plots.plot() # control norm
-                return Plots.plot(px, pp, pu, pn; layout=(2, 2), kwargs...)
+                return Plots.plot(px, pp, pu, pn; layout=(2, 2), bottommargin=5mm, kwargs...)
             end
             _ => throw(
                 CTBase.IncorrectArgument(
@@ -375,6 +375,9 @@ function Plots.plot!(
     u_label = CTModels.control_name(sol)
     t_label = CTModels.time_name(sol)
 
+    #
+    title_font = font(12, Plots.default(:fontfamily))
+
     # split series attributes 
     series_attr = __keep_series_attributes(; kwargs...)
 
@@ -388,6 +391,7 @@ function Plots.plot!(
             t_label=t_label,
             labels=x_labels .* solution_label,
             title="state",
+            titlefont=title_font,
             lims=:auto,
             series_attr...,
             state_style...,
@@ -401,6 +405,7 @@ function Plots.plot!(
             t_label=t_label,
             labels="p" .* x_labels .* solution_label,
             title="costate",
+            titlefont=title_font,
             lims=:auto,
             series_attr...,
             costate_style...,
@@ -416,6 +421,7 @@ function Plots.plot!(
                     t_label=t_label,
                     labels=u_labels .* solution_label,
                     title="control",
+                    titlefont=title_font,
                     lims=:auto,
                     series_attr...,
                     control_style...,
@@ -431,6 +437,7 @@ function Plots.plot!(
                     t_label=t_label,
                     label="‖" * u_label * "‖" .* solution_label,
                     title="control norm",
+                    titlefont=title_font,
                     lims=:auto,
                     series_attr...,
                     control_style...,
@@ -446,6 +453,7 @@ function Plots.plot!(
                     t_label=t_label,
                     labels=u_labels .* solution_label,
                     title="control",
+                    titlefont=title_font,
                     lims=:auto,
                     series_attr...,
                     control_style...,
@@ -459,6 +467,7 @@ function Plots.plot!(
                     t_label=t_label,
                     label="‖" * u_label * "‖" .* solution_label,
                     title="control norm",
+                    titlefont=title_font,
                     lims=:auto,
                     series_attr...,
                     control_style...,
