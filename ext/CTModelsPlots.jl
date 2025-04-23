@@ -9,6 +9,7 @@ using CTBase
 using CTModels
 using LinearAlgebra
 using Plots # redefine plot, plot!
+using Plots.Measures
 #import Plots: plot, plot!
 
 include("default.jl")
