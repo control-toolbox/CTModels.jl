@@ -79,8 +79,8 @@ function build_solution(
     end
 
     # variables: remove additional state for lagrange objective
-    x = if TX <: Function 
-        X 
+    x = if TX <: Function
+        X
     else
         V = matrix2vec(X[:, 1:dim_x], 1)
         ctinterpolate(T, V)
@@ -93,7 +93,7 @@ function build_solution(
         V = matrix2vec(P[:, 1:dim_x], 1)
         ctinterpolate(T[1:(end - 1)], V)
     end
-    u = if TU <: Function 
+    u = if TU <: Function
         U
     else
         V = matrix2vec(U[:, 1:dim_u], 1)
@@ -145,7 +145,7 @@ function build_solution(
         V = matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
         t -> ctinterpolate(T, V)(t)
     end
-    
+
     control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
         nothing
     else

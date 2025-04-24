@@ -17,5 +17,5 @@ Transforms `A` to a Vector{<:Vector{<:ctNumber}}.
 function matrix2vec(
     A::Matrix{<:ctNumber}, dim::Int=__matrix_dimension_storage()
 )::Vector{<:Vector{<:ctNumber}}
-    return dim==1 ?  [A[i,:] for i in 1:size(A,1)] : [A[:,i] for i in 1:size(A,2)]
+    return dim==1 ? [A[i, :] for i in 1:size(A, 1)] : [A[:, i] for i in 1:size(A, 2)]
 end

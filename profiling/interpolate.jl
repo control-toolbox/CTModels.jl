@@ -7,7 +7,6 @@ begin
     using Profile
 
     function make_interpolation()
-
         T = [0, 1]
 
         A = [
