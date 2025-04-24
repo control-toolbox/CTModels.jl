@@ -255,7 +255,9 @@ function __initial_plot(
                 pp = Plots.plot() # costate
                 pu = Plots.plot() # control
                 pn = Plots.plot() # control norm
-                return Plots.plot(px, pp, pu, pn; layout=(2, 2), bottommargin=5mm, kwargs...)
+                return Plots.plot(
+                    px, pp, pu, pn; layout=(2, 2), bottommargin=5mm, kwargs...
+                )
             end
             _ => throw(
                 CTBase.IncorrectArgument(
