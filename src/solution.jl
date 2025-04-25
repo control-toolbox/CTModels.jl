@@ -46,8 +46,8 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
-    path_constraints::Union{Matrix{Float64},Nothing}=__constraints(),
-    path_constraints_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    path_constraints::TPC=__constraints(),
+    path_constraints_dual::TPCD=__constraints(),
     boundary_constraints::Union{Vector{Float64},Nothing}=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
     state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
@@ -57,9 +57,11 @@ function build_solution(
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
 ) where {
-    TX<:Union{Matrix{Float64},Function},
-    TU<:Union{Matrix{Float64},Function},
-    TP<:Union{Matrix{Float64},Function},
+    TX  <:Union{Matrix{Float64},Function},
+    TU  <:Union{Matrix{Float64},Function},
+    TP  <:Union{Matrix{Float64},Function},
+    TPC <:Union{Matrix{Float64},Function,Nothing},
+    TPCD<:Union{Matrix{Float64},Function,Nothing},
 }
 
     # get dimensions
@@ -112,6 +114,8 @@ function build_solution(
     # nonlinear constraints and dual variables
     path_constraints_fun = if isnothing(path_constraints)
         nothing
+    elseif TPC <: Function 
+        path_constraints
     else
         V = matrix2vec(path_constraints, 1)
         t -> ctinterpolate(T, V)(t)
@@ -119,6 +123,8 @@ function build_solution(
 
     path_constraints_dual_fun = if isnothing(path_constraints_dual)
         nothing
+    elseif TPC <: Function 
+        path_constraints_dual
     else
         V = matrix2vec(path_constraints_dual, 1)
         t -> ctinterpolate(T, V)(t)
@@ -159,9 +165,9 @@ function build_solution(
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
-        path_constraints_fun,
+        #path_constraints_fun,
         path_constraints_dual_fun,
-        boundary_constraints,
+        #boundary_constraints,
         boundary_constraints_dual,
         state_constraints_lb_dual_fun,
         state_constraints_ub_dual_fun,

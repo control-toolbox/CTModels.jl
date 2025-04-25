@@ -15,26 +15,26 @@
 # variable_constraints_lb_dual::VC_LB_Dual
 # variable_constraints_ub_dual::VC_UB_Dual
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-"""
-function path_constraints(
-    model::DualModel{
-        PC,
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
-    },
-)::PC where {PC<:Union{Function,Nothing}}
-    return model.path_constraints
-end
+# """
+# function path_constraints(
+#     model::DualModel{
+#         PC,
+#         <:Union{Function,Nothing},
+#         <:Union{ctVector,Nothing},
+#         <:Union{ctVector,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{ctVector,Nothing},
+#         <:Union{ctVector,Nothing},
+#     },
+# )::PC where {PC<:Union{Function,Nothing}}
+#     return model.path_constraints
+# end
 
 """
 $(TYPEDSIGNATURES)
@@ -42,9 +42,9 @@ $(TYPEDSIGNATURES)
 """
 function path_constraints_dual(
     model::DualModel{
-        <:Union{Function,Nothing},
+        #<:Union{Function,Nothing},
         PC_Dual,
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
@@ -57,26 +57,26 @@ function path_constraints_dual(
     return model.path_constraints_dual
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-"""
-function boundary_constraints(
-    model::DualModel{
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        BC,
-        <:Union{ctVector,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
-    },
-)::BC where {BC<:Union{Function,Nothing}}
-    return model.boundary_constraints
-end
+# """
+# function boundary_constraints(
+#     model::DualModel{
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         BC,
+#         <:Union{ctVector,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{Function,Nothing},
+#         <:Union{ctVector,Nothing},
+#         <:Union{ctVector,Nothing},
+#     },
+# )::BC where {BC<:Union{Function,Nothing}}
+#     return model.boundary_constraints
+# end
 
 """
 $(TYPEDSIGNATURES)
@@ -84,9 +84,9 @@ $(TYPEDSIGNATURES)
 """
 function boundary_constraints_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         BC_Dual,
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
@@ -105,9 +105,9 @@ $(TYPEDSIGNATURES)
 """
 function state_constraints_lb_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         SC_LB_Dual,
         <:Union{Function,Nothing},
@@ -126,9 +126,9 @@ $(TYPEDSIGNATURES)
 """
 function state_constraints_ub_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         SC_UB_Dual,
@@ -147,9 +147,9 @@ $(TYPEDSIGNATURES)
 """
 function control_constraints_lb_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
@@ -168,9 +168,9 @@ $(TYPEDSIGNATURES)
 """
 function control_constraints_ub_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
@@ -189,9 +189,9 @@ $(TYPEDSIGNATURES)
 """
 function variable_constraints_lb_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
@@ -210,9 +210,9 @@ $(TYPEDSIGNATURES)
 """
 function variable_constraints_ub_dual(
     model::DualModel{
+        #<:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        #<:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
