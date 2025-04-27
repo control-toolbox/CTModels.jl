@@ -564,8 +564,8 @@ function __plot!(
             cs = CTModels.state_constraints_box(model)
             is = 1
             for i in 1:length(cs[1])
-                hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, state_bounds_style...) # lower bound
-                hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, state_bounds_style...) # upper bound
+                hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., state_bounds_style...) # lower bound
+                hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., state_bounds_style...) # upper bound
             end
         end
 
@@ -644,8 +644,8 @@ function __plot!(
             cu = CTModels.control_constraints_box(model)
             iu = 2n + 1
             for i in 1:length(cu[1])
-                hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, control_bounds_style...) # lower bound
-                hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, control_bounds_style...) # upper bound
+                hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., control_bounds_style...) # lower bound
+                hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., control_bounds_style...) # upper bound
             end
         end
 
@@ -691,8 +691,8 @@ function __plot!(
 
             # plot the lower and upper bounds for the path constraints
             for i in 1:nc
-                hline!(p[ic + i - 1], [cp[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, path_bounds_style...) # lower bound
-                hline!(p[ic + i - 1], [cp[3][i]], color=4, linewidth=1, label=:none, z_order=:back, path_bounds_style...) # upper bound
+                hline!(p[ic + i - 1], [cp[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., path_bounds_style...) # lower bound
+                hline!(p[ic + i - 1], [cp[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., path_bounds_style...) # upper bound
             end
         end
     else
@@ -717,7 +717,7 @@ function __plot!(
             end
         end
         for plt ∈ p.subplots
-            vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, time_style...)
+            vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, series_attr..., time_style...)
         end
     end
 
@@ -750,9 +750,10 @@ function __plot(
     path_style::Tuple,
     path_bounds_style::Tuple,
     dual_path_style::Tuple,
-    size=__size_plot(sol, model, control),
+    size=__size_plot(sol, model, control, layout),
     kwargs...,
 )
+
     p = __initial_plot(sol; layout=layout, control=control, model=model, size=size, kwargs...)
 
     return __plot!(
@@ -839,11 +840,11 @@ function Plots.plot(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    size=__size_plot(sol, nothing, control),
     solution_label::String=__plot_label_suffix(),
     state_style=__plot_style(),
     control_style=__plot_style(),
     costate_style=__plot_style(),
+    size=__size_plot(sol, nothing, control, layout),
     kwargs...,
 )
     return __plot(
@@ -953,7 +954,7 @@ function Plots.plot(
     path_style::Tuple=__plot_style(),
     path_bounds_style::Tuple=__plot_style(),
     dual_path_style::Tuple=__plot_style(),
-    size=__size_plot(sol, model, control),
+    size=__size_plot(sol, model, control, layout),
     kwargs...,
 )
     return __plot(

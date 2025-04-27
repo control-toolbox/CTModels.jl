@@ -8,7 +8,6 @@ include("../solution_example_path_constraints.jl")
 
 ocp, sol = solution_example_path_constraints()
 
-
 #
 @test plot(sol; time=:default) isa Plots.Plot
 @test plot(sol; time=:normalize) isa Plots.Plot
