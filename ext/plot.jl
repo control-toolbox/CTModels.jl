@@ -1054,7 +1054,7 @@ function __get_data_plot(
         end
         :control => begin
             U = CTModels.control(sol).(T)
-           [U[i][ii] for i in 1:m] 
+            [U[i][ii] for i in 1:m] 
         end
         :costate => begin
             P = CTModels.costate(sol).(T)
@@ -1065,8 +1065,10 @@ function __get_data_plot(
             [norm(U[i]) for i in 1:m]
         end
         :path_constraint => begin 
-            pc = CTModels.path_constraints_nl(model)
+            X = CTModels.state(sol).(T)
+            U = CTModels.control(sol).(T)
             v = CTModels.variable(sol)
+            pc = CTModels.path_constraints_nl(model)
             C = zeros(Float64, m)
             g = zeros(Float64, length(pc[1]))
             for i in 1:m
