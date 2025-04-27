@@ -1,6 +1,5 @@
 module CTModelsJLD
 
-using CTBase
 using CTModels
 using DocStringExtensions
 using JLD2

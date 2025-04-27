@@ -46,9 +46,7 @@ function build_solution(
     message::String,
     stopping::Symbol,
     success::Bool,
-    path_constraints::Union{Matrix{Float64},Nothing}=__constraints(),
-    path_constraints_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    boundary_constraints::Union{Vector{Float64},Nothing}=__constraints(),
+    path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
     state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     state_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
@@ -57,9 +55,10 @@ function build_solution(
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
 ) where {
-    TX<:Union{Matrix{Float64},Function},
-    TU<:Union{Matrix{Float64},Function},
-    TP<:Union{Matrix{Float64},Function},
+    TX  <:Union{Matrix{Float64},Function},
+    TU  <:Union{Matrix{Float64},Function},
+    TP  <:Union{Matrix{Float64},Function},
+    TPCD<:Union{Matrix{Float64},Function,Nothing},
 }
 
     # get dimensions
@@ -110,15 +109,10 @@ function build_solution(
     infos = Dict{Symbol,Any}()
 
     # nonlinear constraints and dual variables
-    path_constraints_fun = if isnothing(path_constraints)
-        nothing
-    else
-        V = matrix2vec(path_constraints, 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-
     path_constraints_dual_fun = if isnothing(path_constraints_dual)
         nothing
+    elseif TPCD <: Function 
+        path_constraints_dual
     else
         V = matrix2vec(path_constraints_dual, 1)
         t -> ctinterpolate(T, V)(t)
@@ -159,9 +153,7 @@ function build_solution(
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
-        path_constraints_fun,
         path_constraints_dual_fun,
-        boundary_constraints,
         boundary_constraints_dual,
         state_constraints_lb_dual_fun,
         state_constraints_ub_dual_fun,
@@ -182,7 +174,6 @@ end
 # ------------------------------------------------------------------------------ #
 # Getters
 # ------------------------------------------------------------------------------ #
-
 """
 $(TYPEDSIGNATURES)
 
@@ -548,18 +539,6 @@ Return a dictionary of additional infos depending on the solver or `nothing`.
 function infos(sol::Solution)::Dict{Symbol,Any}
     return sol.solver_infos.infos
 end
-
-# constraints and multipliers:
-# path_constraints::PC
-# path_constraints_dual::PC_Dual
-# boundary_constraints::BC
-# boundary_constraints_dual::BC_Dual
-# state_constraints_lb_dual::SC_LB_Dual
-# state_constraints_ub_dual::SC_UB_Dual
-# control_constraints_lb_dual::CC_LB_Dual
-# control_constraints_ub_dual::CC_UB_Dual
-# variable_constraints_lb_dual::VC_LB_Dual
-# variable_constraints_ub_dual::VC_UB_Dual
 
 """
 $(TYPEDSIGNATURES)

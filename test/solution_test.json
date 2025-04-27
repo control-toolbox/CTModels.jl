@@ -1,6 +1,5 @@
 {
     "boundary_constraints_dual": null,
-    "boundary_constraints": null,
     "objective": 6,
     "state_constraints_ub_dual": null,
     "control_constraints_ub_dual": null,
@@ -1019,7 +1018,6 @@
     ],
     "path_constraints_dual": null,
     "variable_constraints_lb_dual": null,
-    "path_constraints": null,
     "iterations": 0,
     "success": true,
     "constraints_violation": 0,
