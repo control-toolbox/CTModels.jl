@@ -27,7 +27,6 @@ function CTModels.export_ocp_solution(
         "message" => CTModels.message(sol),
         "stopping" => CTModels.stopping(sol),
         "success" => CTModels.success(sol),
-        #"path_constraints" => CTModels.discretize(CTModels.path_constraints(sol), T),
         "path_constraints_dual" =>
             CTModels.discretize(CTModels.path_constraints_dual(sol), T),
         "state_constraints_lb_dual" =>
@@ -38,7 +37,6 @@ function CTModels.export_ocp_solution(
             CTModels.discretize(CTModels.control_constraints_lb_dual(sol), T),
         "control_constraints_ub_dual" =>
             CTModels.discretize(CTModels.control_constraints_ub_dual(sol), T),
-        #"boundary_constraints" => CTModels.boundary_constraints(sol),            # ctVector or Nothing
         "boundary_constraints_dual" => CTModels.boundary_constraints_dual(sol),       # ctVector or Nothing
         "variable_constraints_lb_dual" => CTModels.variable_constraints_lb_dual(sol),    # ctVector or Nothing
         "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing
@@ -80,15 +78,7 @@ function CTModels.import_ocp_solution(
         P = Matrix{Float64}(reduce(hcat, P)')
     end
 
-    # get path constraints (and dual): convert to matrix
-    # path_constraints = if isnothing(blob["path_constraints"])
-    #     nothing
-    # else
-    #     stack(blob["path_constraints"]; dims=1)
-    # end
-    # if path_constraints isa Vector # if path_constraints is a Vector, convert it to a Matrix
-    #     path_constraints = Matrix{Float64}(reduce(hcat, path_constraints)')
-    # end
+    # get dual path constraints: convert to matrix
     path_constraints_dual = if isnothing(blob["path_constraints_dual"])
         nothing
     else
@@ -142,8 +132,7 @@ function CTModels.import_ocp_solution(
         )
     end
 
-    # get boundary constraints (and dual): no conversion needed
-    #boundary_constraints = blob["boundary_constraints"]
+    # get dual of boundary constraints: no conversion needed
     boundary_constraints_dual = blob["boundary_constraints_dual"]
 
     # get variable constraints dual: no conversion needed
@@ -164,13 +153,11 @@ function CTModels.import_ocp_solution(
         message=blob.message,
         stopping=Symbol(blob.stopping),
         success=blob.success,
-        #path_constraints=path_constraints,
         path_constraints_dual=path_constraints_dual,
         state_constraints_lb_dual=state_constraints_lb_dual,
         state_constraints_ub_dual=state_constraints_ub_dual,
         control_constraints_lb_dual=control_constraints_lb_dual,
         control_constraints_ub_dual=control_constraints_ub_dual,
-        #boundary_constraints=boundary_constraints,
         boundary_constraints_dual=boundary_constraints_dual,
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,

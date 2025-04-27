@@ -21,6 +21,7 @@ using Parameters # @with_kw: to have default values in struct
 using MacroTools: striplines
 using PrettyTables # To print a table
 using RecipesBase: plot, plot!, RecipesBase
+using OrderedCollections: OrderedDict
 
 # aliases
 
@@ -96,7 +97,7 @@ julia> const TimesDisc = Union{Times, StepRangeLen}
 
 See also: [`ConstraintsModel`](@ref), [`PreModel`](@ref) and [`Model`](@ref).
 """
-const ConstraintsDictType = Dict{
+const ConstraintsDictType = OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
 }
 

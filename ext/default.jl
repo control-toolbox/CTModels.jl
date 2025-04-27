@@ -27,9 +27,13 @@ $(TYPEDSIGNATURES)
 
 Used to set the default value of the plot size.
 """
-function __size_plot(sol::CTModels.Solution, control::Symbol)
+function __size_plot(
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model, Nothing},
+    control::Symbol
+)
     n = CTModels.state_dimension(sol)
-    m = @match control begin
+    l = @match control begin
         :components => CTModels.control_dimension(sol)
         :norm => 1
         :all => CTModels.control_dimension(sol) + 1
@@ -39,14 +43,20 @@ function __size_plot(sol::CTModels.Solution, control::Symbol)
             ),
         )
     end
-    return (600, 140 * (n + m))
+    nc = model === nothing ? 0 : CTModels.dim_path_constraints_nl(model)
+    return (600, 140 * (n + l + nc))
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of state style for the plots.
+Default style for the plot. Must be an empty tuple.
 """
-function __state_style()
-    return (color=1, linestyle=:solid, linewidth=2)
-end
+__plot_style() = ()
+
+"""
+$(TYPEDSIGNATURES)
+
+Default suffix label for the plot. Must be an empty string.
+"""
+__plot_label_suffix() = ""

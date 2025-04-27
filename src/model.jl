@@ -9,25 +9,30 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     path_cons_nl_dim = Vector{Int}()
     path_cons_nl_lb = Vector{ctNumber}()
     path_cons_nl_ub = Vector{ctNumber}()
+    path_cons_nl_labels = Vector{Symbol}()
 
     boundary_cons_nl_f = Vector{Function}() # nonlinear boundary constraints
     boundary_cons_nl_dim = Vector{Int}()
     boundary_cons_nl_lb = Vector{ctNumber}()
     boundary_cons_nl_ub = Vector{ctNumber}()
+    boundary_cons_nl_labels = Vector{Symbol}()
 
     state_cons_box_ind = Vector{Int}() # state range
     state_cons_box_lb = Vector{ctNumber}()
     state_cons_box_ub = Vector{ctNumber}()
+    state_cons_box_labels = Vector{Symbol}()
 
     control_cons_box_ind = Vector{Int}() # control range
     control_cons_box_lb = Vector{ctNumber}()
     control_cons_box_ub = Vector{ctNumber}()
+    control_cons_box_labels = Vector{Symbol}()
 
     variable_cons_box_ind = Vector{Int}() # variable range
     variable_cons_box_lb = Vector{ctNumber}()
     variable_cons_box_ub = Vector{ctNumber}()
+    variable_cons_box_labels = Vector{Symbol}()
 
-    for (_, c) in constraints
+    for (label, c) in constraints
         type = c[1]
         lb = c[3]
         ub = c[4]
@@ -37,44 +42,46 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
             push!(path_cons_nl_dim, length(lb))
             append!(path_cons_nl_lb, lb)
             append!(path_cons_nl_ub, ub)
+            for i in 1:length(lb)
+                push!(path_cons_nl_labels, label) 
+            end
         elseif type == :boundary
             f = c[2]
             push!(boundary_cons_nl_f, f)
             push!(boundary_cons_nl_dim, length(lb))
             append!(boundary_cons_nl_lb, lb)
             append!(boundary_cons_nl_ub, ub)
+            for i in 1:length(lb)
+                push!(boundary_cons_nl_labels, label)
+            end
         elseif type == :state
             rg = c[2]
             append!(state_cons_box_ind, rg)
             append!(state_cons_box_lb, lb)
             append!(state_cons_box_ub, ub)
+            for i in 1:length(lb)
+                push!(state_cons_box_labels, label)
+            end
         elseif type == :control
             rg = c[2]
             append!(control_cons_box_ind, rg)
             append!(control_cons_box_lb, lb)
             append!(control_cons_box_ub, ub)
+            for i in 1:length(lb)
+                push!(control_cons_box_labels, label)
+            end
         elseif type == :variable
             rg = c[2]
             append!(variable_cons_box_ind, rg)
             append!(variable_cons_box_lb, lb)
             append!(variable_cons_box_ub, ub)
+            for i in 1:length(lb)
+                push!(variable_cons_box_labels, label)
+            end
         else
             error("Internal error")
         end
     end
-
-    #
-    @assert length(path_cons_nl_f) == length(path_cons_nl_dim)
-    @assert length(path_cons_nl_lb) == length(path_cons_nl_ub)
-    @assert length(boundary_cons_nl_f) == length(boundary_cons_nl_dim)
-    @assert length(boundary_cons_nl_lb) == length(boundary_cons_nl_ub)
-    #
-    @assert length(state_cons_box_ind) == length(state_cons_box_lb)
-    @assert length(state_cons_box_lb) == length(state_cons_box_ub)
-    @assert length(control_cons_box_ind) == length(control_cons_box_lb)
-    @assert length(control_cons_box_lb) == length(control_cons_box_ub)
-    @assert length(variable_cons_box_ind) == length(variable_cons_box_lb)
-    @assert length(variable_cons_box_lb) == length(variable_cons_box_ub)
 
     length_path_cons_nl::Int = length(path_cons_nl_f)
     length_boundary_cons_nl::Int = length(boundary_cons_nl_f)
@@ -140,12 +147,11 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     )
 
     return ConstraintsModel(
-        (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub),
-        (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub),
-        (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub),
-        (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub),
-        (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub),
-        constraints,
+        (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub, path_cons_nl_labels),
+        (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub, boundary_cons_nl_labels),
+        (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub, state_cons_box_labels),
+        (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub, control_cons_box_labels),
+        (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub, variable_cons_box_labels),
     )
 end
 
@@ -711,7 +717,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return if the constraints from the model are not empty.
+Return true if the model has constraints or false if not.
 """
 function isempty_constraints(ocp::Model)::Bool
     return Base.isempty(constraints(ocp))
@@ -739,7 +745,7 @@ function path_constraints_nl(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType},
+        <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple},
     },
 )::TP where {TP<:Tuple}
     return constraints(ocp).path_nl
@@ -758,7 +764,7 @@ function boundary_constraints_nl(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple,<:ConstraintsDictType},
+        <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple},
     },
 )::TB where {TB<:Tuple}
     return constraints(ocp).boundary_nl
@@ -777,7 +783,7 @@ function state_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple,<:ConstraintsDictType},
+        <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple},
     },
 )::TS where {TS<:Tuple}
     return constraints(ocp).state_box
@@ -796,7 +802,7 @@ function control_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple,<:ConstraintsDictType},
+        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple},
     },
 )::TC where {TC<:Tuple}
     return constraints(ocp).control_box
@@ -815,7 +821,7 @@ function variable_constraints_box(
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
-        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV,<:ConstraintsDictType},
+        <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV},
     },
 )::TV where {TV<:Tuple}
     return constraints(ocp).variable_box

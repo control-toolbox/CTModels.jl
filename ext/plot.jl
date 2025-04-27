@@ -10,10 +10,7 @@ $(TYPEDEF)
 
 A leaf of a plot tree.
 """
-struct PlotLeaf <: AbstractPlotTreeElement
-    value::Tuple{Symbol,Int}
-    PlotLeaf(value::Tuple{Symbol,Int}) = new(value)
-end
+struct PlotLeaf <: AbstractPlotTreeElement end
 
 """
 $(TYPEDEF)
@@ -32,7 +29,7 @@ struct PlotNode{TL<:Union{Symbol,Matrix{Any}},TC<:Vector{<:AbstractPlotTreeEleme
 end
 
 # --------------------------------------------------------------------------------------------------
-# internal plots
+# internal plots: plot a function of time
 """
 $(TYPEDSIGNATURES)
 
@@ -44,6 +41,7 @@ Update the plot `p` with the i-th component of a vectorial function of time `f(t
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
     sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
     s::Symbol,
     i::Int,
     time::Symbol;
@@ -66,8 +64,8 @@ function __plot_time!(
 
     # reset ylims: ylims=:auto
     Plots.plot!(
-        p, sol, :time, (s, i), time; ylims=:auto, xlabel=t_label, label=label, kwargs...
-    ) # use simple plot
+        p, sol, model, :time, (s, i), time; ylims=:auto, xlabel=t_label, label=label, kwargs...
+    ) # use plot recipe
 
     # change ylims if the gap between min and max is less than a tol
     tol = 1e-3
@@ -105,6 +103,7 @@ Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f
 """
 function __plot_time(
     sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
     s::Symbol,
     i::Int,
     time::Symbol;
@@ -113,7 +112,7 @@ function __plot_time(
     kwargs...,
 )
     return __plot_time!(
-        Plots.plot(), sol, s, i, time; t_label=t_label, label=label, kwargs...
+        Plots.plot(), sol, model, s, i, time; t_label=t_label, label=label, kwargs...
     )
 end
 
@@ -127,6 +126,7 @@ Update the plot `p` with a vectorial function of time `f(t) ∈ Rᵈ` where `f` 
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
     sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
     d::CTModels.Dimension,
     s::Symbol,
     time::Symbol;
@@ -135,13 +135,10 @@ function __plot_time!(
     title::String,
     kwargs...,
 )
-
-    #
     Plots.plot!(p; xlabel="time", title=title, kwargs...)
 
-    #
     for i in range(1, d)
-        __plot_time!(p, sol, s, i, time; t_label=t_label, label=labels[i], kwargs...)
+        __plot_time!(p, sol, model, s, i, time; t_label=t_label, label=labels[i], kwargs...)
     end
 
     return p
@@ -155,6 +152,7 @@ The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function __plot_time(
     sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
     d::CTModels.Dimension,
     s::Symbol,
     time::Symbol;
@@ -166,6 +164,7 @@ function __plot_time(
     return __plot_time!(
         Plots.plot(),
         sol,
+        model,
         d,
         s,
         time;
@@ -176,12 +175,14 @@ function __plot_time(
     )
 end
 
+# --------------------------------------------------------------------------------------------------
+# 
 """
 $(TYPEDSIGNATURES)
 
 Generate a{r*h} where `r` is a real number and `h` is the height of the plot.
 """
-function __width(r::Real)::Expr
+function __height(r::Real)::Expr
     i = Expr(:call, :*, r, :h)
     a = Expr(:curly, :a, i)
     return a
@@ -220,6 +221,8 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     return ps
 end
 
+# --------------------------------------------------------------------------------------------------
+# private plots: initial plot
 """
 $(TYPEDSIGNATURES)
 
@@ -227,8 +230,9 @@ Initial plot.
 """
 function __initial_plot(
     sol::CTModels.Solution;
-    layout::Symbol=__plot_layout(),
-    control::Symbol=__control_layout(),
+    layout::Symbol,
+    control::Symbol,
+    model::Union{CTModels.Model,Nothing},
     kwargs...,
 )
 
@@ -271,26 +275,29 @@ function __initial_plot(
         costate_plots = Vector{PlotLeaf}()
         control_plots = Vector{PlotLeaf}()
 
+        # create the state and costate plots
         for i in 1:n
-            push!(state_plots, PlotLeaf((:state, i)))
-            push!(costate_plots, PlotLeaf((:costate, i)))
+            push!(state_plots, PlotLeaf())
+            push!(costate_plots, PlotLeaf())
         end
+
+        # create the control plots
         l = m
         @match control begin
             :components => begin
                 for i in 1:m
-                    push!(control_plots, PlotLeaf((:control, i)))
+                    push!(control_plots, PlotLeaf())
                 end
             end
             :norm => begin
-                push!(control_plots, PlotLeaf((:control_norm, -1)))
+                push!(control_plots, PlotLeaf())
                 l = 1
             end
             :all => begin
                 for i in 1:m
-                    push!(control_plots, PlotLeaf((:control, i)))
+                    push!(control_plots, PlotLeaf())
                 end
-                push!(control_plots, PlotLeaf((:control_norm, -1)))
+                push!(control_plots, PlotLeaf())
                 l = m + 1
             end
             _ => throw(
@@ -300,20 +307,47 @@ function __initial_plot(
             )
         end
 
-        #
+        # assemble the state and costate plots
         node_x = PlotNode(:column, state_plots)
         node_p = PlotNode(:column, costate_plots)
-        node_u = PlotNode(:column, control_plots)
         node_xp = PlotNode(:row, [node_x, node_p])
 
-        #
-        r = round(n / (n + l); digits=2)
-        a = __width(r)
+        # assemble the control plots
+        node_u = PlotNode(:column, control_plots)
+
+        # create the root node
+        a = __height(round(n / (n + l); digits=2))
         @eval lay = @layout [
             $a
             b
         ]
         root = PlotNode(lay, [node_xp, node_u])
+
+        # Add the path constraints and their dual variables (in two columns as for state and costate) plots 
+        # if layout is :split, model is not nothing and there are path constraints
+        nc = model === nothing ? 0 : CTModels.dim_path_constraints_nl(model)
+        if nc > 0
+            # create the path constraints and dual variables plots
+            path_constraints_plots = Vector{PlotLeaf}()
+            path_constraints_dual_plots = Vector{PlotLeaf}()
+            for i in 1:nc
+                push!(path_constraints_plots, PlotLeaf())
+                push!(path_constraints_dual_plots, PlotLeaf())
+            end
+
+            # assemble the path constraints and dual variables plots
+            node_co = PlotNode(:column, path_constraints_plots)
+            node_cp = PlotNode(:column, path_constraints_dual_plots)
+            node_cocp = PlotNode(:row, [node_co, node_cp])
+
+            # update the root node
+            c = __height(round(nc / (n + l + nc); digits=2))
+            @eval lay = @layout [
+                a
+                $c
+            ]
+            root = PlotNode(lay, [root, node_cocp])
+        end
 
         # plot
         return __plot_tree(root; kwargs...)
@@ -340,11 +374,11 @@ function __keep_series_attributes(; kwargs...)
 end
 
 # --------------------------------------------------------------------------------------------------
-# public plots: from a solution
+# private plots: from a solution and optionally the model
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol` using the layout `layout`.
+Plot the optimal control solution `sol`.
 
 **Notes.**
 
@@ -353,16 +387,23 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - `time` can be `:default` or `:normalize`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
-function Plots.plot!(
+function __plot!(
     p::Plots.Plot,
     sol::CTModels.Solution;
-    layout::Symbol=__plot_layout(),
-    control::Symbol=__control_layout(),
-    time::Symbol=__time_normalization(),
-    solution_label::String="",
-    state_style=(),
-    control_style=(),
-    costate_style=(),
+    solution_label::String,
+    model::Union{CTModels.Model,Nothing},
+    time::Symbol,
+    control::Symbol,
+    layout::Symbol,
+    time_style::Tuple,
+    state_style::Tuple,
+    state_bounds_style::Tuple,
+    control_style::Tuple,
+    control_bounds_style::Tuple,
+    costate_style::Tuple,
+    path_style::Tuple,
+    path_bounds_style::Tuple,
+    dual_path_style::Tuple,
     kwargs...,
 )
     if solution_label != ""
@@ -387,6 +428,7 @@ function Plots.plot!(
         __plot_time!(
             p[1],
             sol,
+            model,
             n,
             :state,
             time;
@@ -401,6 +443,7 @@ function Plots.plot!(
         __plot_time!(
             p[2],
             sol,
+            model,
             n,
             :costate,
             time;
@@ -417,6 +460,7 @@ function Plots.plot!(
                 __plot_time!(
                     p[3],
                     sol,
+                    model,
                     m,
                     :control,
                     time;
@@ -433,6 +477,7 @@ function Plots.plot!(
                 __plot_time!(
                     p[3],
                     sol,
+                    model,
                     :control_norm,
                     -1,
                     time;
@@ -449,6 +494,7 @@ function Plots.plot!(
                 __plot_time!(
                     p[3],
                     sol,
+                    model,
                     m,
                     :control,
                     time;
@@ -463,6 +509,7 @@ function Plots.plot!(
                 __plot_time!(
                     p[4],
                     sol,
+                    model,
                     :control_norm,
                     -1,
                     time;
@@ -483,14 +530,17 @@ function Plots.plot!(
         end
 
     elseif layout == :split
+
+        # plot the state and costate
         for i in 1:n
             __plot_time!(
                 p[i],
                 sol,
+                model,
                 :state,
                 i,
                 time;
-                t_label=t_label,
+                t_label = i==n ? t_label : "",
                 label=x_labels[i] * solution_label,
                 series_attr...,
                 state_style...,
@@ -498,25 +548,40 @@ function Plots.plot!(
             __plot_time!(
                 p[i + n],
                 sol,
+                model,
                 :costate,
                 i,
                 time;
-                t_label=t_label,
+                t_label = i==n ? t_label : "",
                 label="p" * x_labels[i] * solution_label,
                 series_attr...,
                 costate_style...,
             )
         end
+
+        # plot the state constraints if layout is :split and model is not nothing
+        if !(model === nothing)
+            cs = CTModels.state_constraints_box(model)
+            is = 1
+            for i in 1:length(cs[1])
+                hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, state_bounds_style...) # lower bound
+                hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, state_bounds_style...) # upper bound
+            end
+        end
+
+        # plot the control
+        l = m
         @match control begin
             :components => begin
                 for i in 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
+                        model,
                         :control,
                         i,
                         time;
-                        t_label=t_label,
+                        t_label = i==m ? t_label : "",
                         label=u_labels[i] * solution_label,
                         series_attr...,
                         control_style...,
@@ -524,9 +589,11 @@ function Plots.plot!(
                 end
             end
             :norm => begin
+                l = 1
                 __plot_time!(
                     p[2 * n + 1],
                     sol,
+                    model,
                     :control_norm,
                     -1,
                     time;
@@ -537,14 +604,16 @@ function Plots.plot!(
                 )
             end
             :all => begin
+                l = m + 1
                 for i in 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
+                        model,
                         :control,
                         i,
                         time;
-                        t_label=t_label,
+                        t_label="",
                         label=u_labels[i] * solution_label,
                         series_attr...,
                         control_style...,
@@ -553,6 +622,7 @@ function Plots.plot!(
                 __plot_time!(
                     p[2 * n + m + 1],
                     sol,
+                    model,
                     :control_norm,
                     -1,
                     time;
@@ -569,8 +639,86 @@ function Plots.plot!(
             )
         end
 
+        # plot the control constraints if layout is :split and model is not nothing
+        if !(model === nothing) && (control != :norm)
+            cu = CTModels.control_constraints_box(model)
+            iu = 2n + 1
+            for i in 1:length(cu[1])
+                hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, control_bounds_style...) # lower bound
+                hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, control_bounds_style...) # upper bound
+            end
+        end
+
+        # plot the path constraints if layout is :split, model is not nothing and there are path constraints
+        # and the dual variables
+        nc = if model === nothing
+            0
+        else
+            CTModels.dim_path_constraints_nl(model)
+        end
+        if nc >0
+            # retrieve the constraints
+            cp = CTModels.path_constraints_nl(model)
+
+            # plot the constraints and the dual variables
+            ic = 2n + l + 1
+            for i in 1:nc
+                __plot_time!(
+                    p[ic + i - 1],
+                    sol,
+                    model,
+                    :path_constraint,
+                    i,
+                    time;
+                    t_label = i==nc ? t_label : "",
+                    label = string(cp[4][i]) * solution_label,
+                    series_attr...,
+                    path_style...,
+                )
+                __plot_time!(
+                    p[ic + i - 1 + nc],
+                    sol,
+                    model,
+                    :dual_path_constraint,
+                    i,
+                    time;
+                    t_label = i==nc ? t_label : "",
+                    label = "dual " * string(cp[4][i]) * solution_label,
+                    series_attr...,
+                    dual_path_style...,
+                )
+            end
+
+            # plot the lower and upper bounds for the path constraints
+            for i in 1:nc
+                hline!(p[ic + i - 1], [cp[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, path_bounds_style...) # lower bound
+                hline!(p[ic + i - 1], [cp[3][i]], color=4, linewidth=1, label=:none, z_order=:back, path_bounds_style...) # upper bound
+            end
+        end
     else
         throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))
+    end
+
+    # plot vertical lines at the initial and final times if model is not nothing
+    if !(model === nothing)
+        if time == :normalize || time == :normalise
+            t0 = 0.0
+            tf = 1.0
+        else
+            t0 = if CTModels.has_fixed_initial_time(model)
+                CTModels.initial_time(model)
+            else
+                CTModels.initial_time(model, CTModels.variable(sol))
+            end
+            tf = if CTModels.has_fixed_final_time(model)
+                CTModels.final_time(model)
+            else
+                CTModels.final_time(model, CTModels.variable(sol))
+            end
+        end
+        for plt ∈ p.subplots
+            vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, time_style...)
+        end
     end
 
     return p
@@ -579,7 +727,107 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Plot the optimal control solution `sol`.
+
+**Notes.**
+
+- The argument `layout` can be `:group` or `:split` (default).
+- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+"""
+function __plot(
+    sol::CTModels.Solution;
+    solution_label::String,
+    model::Union{CTModels.Model,Nothing},
+    time::Symbol,
+    control::Symbol,
+    layout::Symbol,
+    time_style::Tuple,
+    state_style::Tuple,
+    state_bounds_style::Tuple,
+    control_style::Tuple,
+    control_bounds_style::Tuple,
+    costate_style::Tuple,
+    path_style::Tuple,
+    path_bounds_style::Tuple,
+    dual_path_style::Tuple,
+    size=__size_plot(sol, model, control),
+    kwargs...,
+)
+    p = __initial_plot(sol; layout=layout, control=control, model=model, size=size, kwargs...)
+
+    return __plot!(
+        p,
+        sol;
+        layout=layout,
+        control=control,
+        time=time,
+        solution_label=solution_label,
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        model=model,
+        state_bounds_style=state_bounds_style,
+        control_bounds_style=control_bounds_style,
+        time_style=time_style,
+        path_style=path_style,
+        path_bounds_style=path_bounds_style,
+        dual_path_style=dual_path_style,
+        kwargs...,
+    )
+end
+
+# --------------------------------------------------------------------------------------------------
+# public plots: from a solution
+"""
+$(TYPEDSIGNATURES)
+
 Plot the optimal control solution `sol` using the layout `layout`.
+
+**Notes.**
+
+- The argument `layout` can be `:group` or `:split` (default).
+- `control` can be `:components`, `:norm` or `:all`.
+- `time` can be `:default` or `:normalize`.
+- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+"""
+function Plots.plot!(
+    p::Plots.Plot,
+    sol::CTModels.Solution;
+    layout::Symbol=__plot_layout(),
+    control::Symbol=__control_layout(),
+    time::Symbol=__time_normalization(),
+    solution_label::String=__plot_label_suffix(),
+    state_style=__plot_style(),
+    control_style=__plot_style(),
+    costate_style=__plot_style(),
+    kwargs...,
+)
+
+    return __plot!(
+        p,
+        sol;
+        layout=layout,
+        control=control,
+        time=time,
+        solution_label=solution_label,
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        model=nothing,
+        state_bounds_style=(),
+        control_bounds_style=(),
+        time_style=(),
+        path_style=(),
+        path_bounds_style=(),
+        dual_path_style=(),
+        kwargs...,
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Plot the optimal control solution `sol`.
 
 **Notes.**
 
@@ -591,18 +839,14 @@ function Plots.plot(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    size=__size_plot(sol, control),
-    solution_label::String="",
-    state_style=(),
-    control_style=(),
-    costate_style=(),
+    size=__size_plot(sol, nothing, control),
+    solution_label::String=__plot_label_suffix(),
+    state_style=__plot_style(),
+    control_style=__plot_style(),
+    costate_style=__plot_style(),
     kwargs...,
 )
-    #
-    p = __initial_plot(sol; layout=layout, control=control, size=size, kwargs...)
-    #
-    return Plots.plot!(
-        p,
+    return __plot(
         sol;
         layout=layout,
         control=control,
@@ -611,6 +855,14 @@ function Plots.plot(
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
+        model=nothing,
+        state_bounds_style=(),
+        control_bounds_style=(),
+        time_style=(),
+        path_style=(),
+        path_bounds_style=(),
+        dual_path_style=(),
+        size=size,
         kwargs...,
     )
 end
@@ -637,71 +889,39 @@ function Plots.plot!(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    solution_label::String="",
-    state_style=(),
-    state_constraint_style=(),
-    control_style=(),
-    control_constraint_style=(),
-    costate_style=(),
-    time_style=(),
+    solution_label::String=__plot_label_suffix(),
+    state_style::Tuple=__plot_style(),
+    state_bounds_style::Tuple=__plot_style(),
+    control_style::Tuple=__plot_style(),
+    control_bounds_style::Tuple=__plot_style(),
+    costate_style::Tuple=__plot_style(),
+    time_style::Tuple=__plot_style(),
+    path_style::Tuple=__plot_style(),
+    path_bounds_style::Tuple=__plot_style(),
+    dual_path_style::Tuple=__plot_style(),
     kwargs...,
 )
 
-    # step 1: plot the solution
-    p = Plots.plot!(p, sol; 
-        layout=layout, 
-        control=control, 
+    # plot the solution with infos from the model
+    return __plot!(
+        p,
+        sol;
+        layout=layout,
+        control=control,
         time=time,
         solution_label=solution_label,
         state_style=state_style,
         control_style=control_style,
-        costate_style=costate_style, 
-        kwargs...)
-
-    # step 2: plot vertical lines at the initial and final times
-    if time == :normalize || time == :normalise
-        t0 = 0.0
-        tf = 1.0
-    else
-        t0 = if CTModels.has_fixed_initial_time(model)
-            CTModels.initial_time(model)
-        else
-            CTModels.initial_time(model, CTModels.variable(sol))
-        end
-        tf = if CTModels.has_fixed_final_time(model)
-            CTModels.final_time(model)
-        else
-            CTModels.final_time(model, CTModels.variable(sol))
-        end
-    end
-    for plt ∈ p.subplots
-        vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, time_style...)
-    end
-
-    # step 3: plot the control constraints if layout is :split
-    if layout == :split
-        ccs = control_constraint_style
-        n = CTModels.state_dimension(model)
-        cu = CTModels.control_constraints_box(model)
-        iu = 2n + 1
-        for i in 1:length(cu[1])
-            hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, ccs...) # lower bound
-            hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, ccs...) # upper bound
-        end
-    end
-
-    # step 4: plot the state constraints if layout is :split
-    if layout == :split
-        scs = state_constraint_style
-        cs = CTModels.state_constraints_box(model)
-        is = 1
-        for i in 1:length(cs[1])
-            hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, scs...) # lower bound
-            hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, scs...) # upper bound
-        end
-    end
-
-    return p
+        costate_style=costate_style,
+        model=model,
+        state_bounds_style=state_bounds_style,
+        control_bounds_style=control_bounds_style,
+        time_style=time_style,
+        path_style=path_style,
+        path_bounds_style=path_bounds_style,
+        dual_path_style=dual_path_style,
+        kwargs...,
+    )
 
 end
 
@@ -723,21 +943,21 @@ function Plots.plot(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    size=__size_plot(sol, control),
-    solution_label::String="",
-    state_style=(),
-    control_style=(),
-    costate_style=(),
-    time_style=(),
+    solution_label::String=__plot_label_suffix(),
+    state_style::Tuple=__plot_style(),
+    state_bounds_style::Tuple=__plot_style(),
+    control_style::Tuple=__plot_style(),
+    control_bounds_style::Tuple=__plot_style(),
+    costate_style::Tuple=__plot_style(),
+    time_style::Tuple=__plot_style(),
+    path_style::Tuple=__plot_style(),
+    path_bounds_style::Tuple=__plot_style(),
+    dual_path_style::Tuple=__plot_style(),
+    size=__size_plot(sol, model, control),
     kwargs...,
 )
-    #
-    p = __initial_plot(sol; layout=layout, control=control, size=size, kwargs...)
-    #
-    return Plots.plot!(
-        p,
-        sol,
-        model;
+    return __plot(
+        sol;
         layout=layout,
         control=control,
         time=time,
@@ -745,7 +965,14 @@ function Plots.plot(
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
+        model=model,
+        state_bounds_style=state_bounds_style,
+        control_bounds_style=control_bounds_style,
         time_style=time_style,
+        path_style=path_style,
+        path_bounds_style=path_bounds_style,
+        dual_path_style=dual_path_style,
+        size=size,
         kwargs...,
     )
 end
@@ -766,14 +993,15 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 """
 @recipe function f(
     sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
     xx::Union{Symbol,Tuple{Symbol,Int}},
     yy::Union{Symbol,Tuple{Symbol,Int}},
     time::Symbol=:default,
 )
 
     #
-    x = __get_data_plot(sol, xx; time=time)
-    y = __get_data_plot(sol, yy; time=time)
+    x = __get_data_plot(sol, model, xx; time=time)
+    y = __get_data_plot(sol, model, yy; time=time)
 
     #
     #label := recipe_label(sol, xx, yy)
@@ -791,7 +1019,10 @@ $(TYPEDSIGNATURES)
 Get the data for plotting.
 """
 function __get_data_plot(
-    sol::CTModels.Solution, xx::Union{Symbol,Tuple{Symbol,Int}}; time::Symbol=:default
+    sol::CTModels.Solution, 
+    model::Union{CTModels.Model,Nothing},
+    xx::Union{Symbol,Tuple{Symbol,Int}}; 
+    time::Symbol=:default
 )
 
     # if the time grid is empty then throw an error
@@ -799,16 +1030,12 @@ function __get_data_plot(
         throw(CTBase.IncorrectArgument("The time grid is empty"))
     end
 
-    T = CTModels.time_grid(sol)
-    X = CTModels.state(sol).(T)
-    U = CTModels.control(sol).(T)
-    P = CTModels.costate(sol).(T)
-
     vv, ii = @match xx begin
         ::Symbol => (xx, 1)
         _ => xx
     end
 
+    T = CTModels.time_grid(sol)
     m = size(T, 1)
     return @match vv begin
         :time => begin
@@ -821,10 +1048,37 @@ function __get_data_plot(
                 )
             end
         end
-        :state => [X[i][ii] for i in 1:m]
-        :control => [U[i][ii] for i in 1:m]
-        :costate => [P[i][ii] for i in 1:m]
-        :control_norm => [norm(U[i]) for i in 1:m]
+        :state => begin
+            X = CTModels.state(sol).(T)
+            [X[i][ii] for i in 1:m] 
+        end
+        :control => begin
+            U = CTModels.control(sol).(T)
+           [U[i][ii] for i in 1:m] 
+        end
+        :costate => begin
+            P = CTModels.costate(sol).(T)
+            [P[i][ii] for i in 1:m] 
+        end
+        :control_norm => begin
+            U = CTModels.control(sol).(T)
+            [norm(U[i]) for i in 1:m]
+        end
+        :path_constraint => begin 
+            pc = CTModels.path_constraints_nl(model)
+            v = CTModels.variable(sol)
+            C = zeros(Float64, m)
+            g = zeros(Float64, length(pc[1]))
+            for i in 1:m
+                pc[2](g, T[i], X[i], U[i], v)
+                C[i] = g[ii]
+            end
+            C
+        end
+        :dual_path_constraint => begin
+            D = CTModels.path_constraints_dual(sol).(T)
+            [D[i][ii] for i in 1:m]
+        end
         _ => error("Internal error, no such choice for xx")
     end
 end

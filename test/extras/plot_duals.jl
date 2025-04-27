@@ -17,11 +17,11 @@ function OCP(t0, tf, x0)
         u ∈ R, control
         x(t0) == x0,            (initial_con)
         0 ≤ u(t) ≤ +Inf,        (u_con) 
-        -Inf ≤ x(t) + u(t) ≤ 0, (mixed_con)
-        -3 ≤ x(t) + 1 ≤ 1,      (state_con)
+        -Inf ≤ x(t) + u(t) ≤ 0
+        [-3, 1] ≤ [x(t) + 1, u(t) + 1] ≤ [1, 2.5],      (2)
         ẋ(t) == u(t)
         ∫(-u(t)) → min
-    end
+    end true;
 
     return ocp 
 end;
@@ -38,8 +38,7 @@ function SOL(ocp, t0, tf)
     v = Float64[]
 
     #
-    path_constraints(t) = [x(t)+u(t), x(t)+1]
-    path_constraints_dual(t) = [-(p(t)+1), 0]
+    path_constraints_dual(t) = [-(p(t)+1), 0, t]
 
     # 
     times = range(t0, tf, 201)
@@ -55,7 +54,6 @@ function SOL(ocp, t0, tf)
         message="",
         stopping=:optimal,
         success=true,
-        path_constraints=path_constraints,
         path_constraints_dual=path_constraints_dual,
     )
 
@@ -64,31 +62,4 @@ end;
 
 sol = SOL(ocp, t0, tf);
 
-plt = plot(sol, ocp, size=(800, 800))
-
-# add the constraint x(t) + u(t) <= 0 and the dual
-T = CTModels.time_grid(sol);
-X = CTModels.state(sol);
-U = CTModels.control(sol);
-V = CTModels.variable(sol);
-g_lb = CTModels.path_constraints_nl(ocp)[1];
-g_ub = CTModels.path_constraints_nl(ocp)[3];
-g    = CTModels.path_constraints_nl(ocp)[2];
-c    = zeros(length(g_lb), length(T));
-for i in eachindex(T)
-    t = T[i]
-    g((@view c[:, i]), t, X(t), U(t), V)
-end
-d = CTModels.path_constraints_dual(sol);
-
-plt_c1 = plot(T, c[1, :], label="x(t) + u(t)", color=:blue, lw=2);
-plt_d1 = plot(T, t -> d(t)[1], label="dual", color=:red, lw=2);
-
-plt_c2 = plot(T, c[2, :], label="x(t) + 1", color=:blue, lw=2);
-plt_d2 = plot(T, t -> d(t)[2], label="dual", color=:red, lw=2);
-
-plt_cons = plot(plt_c1, plt_d1, plt_c2, plt_d2, layout=(2, 2));
-
-plot(plt, plt_cons, layout=(2, 1))
-
-
+plt = plot(sol, ocp)
