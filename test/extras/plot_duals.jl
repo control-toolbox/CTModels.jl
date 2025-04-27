@@ -17,7 +17,7 @@ function OCP(t0, tf, x0)
         u ∈ R, control
         x(t0) == x0,            (initial_con)
         0 ≤ u(t) ≤ +Inf,        (u_con) 
-        -Inf ≤ x(t) + u(t) ≤ 0
+        -Inf ≤ x(t) + u(t) ≤ 0,  (mixed_con)
         [-3, 1] ≤ [x(t) + 1, u(t) + 1] ≤ [1, 2.5],      (2)
         ẋ(t) == u(t)
         ∫(-u(t)) → min
@@ -63,3 +63,10 @@ end;
 sol = SOL(ocp, t0, tf);
 
 plt = plot(sol, ocp)
+
+mixed_con_dual = CTModels.dual(sol, ocp, :mixed_con)
+plot(range(t0, tf, length=101), mixed_con_dual)
+
+eq2_dual = CTModels.dual(sol, ocp, :eq2)
+plot(range(t0, tf, length=101), t -> eq2_dual(t)[1], label="eq2_dual 1")
+plot!(range(t0, tf, length=101), t -> eq2_dual(t)[2], label="eq2_dual 2")
