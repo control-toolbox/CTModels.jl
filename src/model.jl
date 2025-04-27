@@ -726,15 +726,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get a labelled constraint from the model.
-"""
-function constraint(ocp::Model, label::Symbol)::Tuple # not type stable
-    return constraints(ocp).dict[label]
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Get the nonlinear path constraints from the model.
 """
 function path_constraints_nl(

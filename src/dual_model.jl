@@ -7,6 +7,28 @@
 $(TYPEDSIGNATURES)
 
 """
+function dual(sol::Solution, model::Model, label::Symbol)::Function
+    cp = path_constraints_nl(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        # get the corresponding dual values
+        duals = path_constraints_dual(sol)
+        if length(indices) == 1
+            return t -> duals(t)[indices[1]]
+        else
+            return t -> duals(t)[indices]
+        end
+    else
+        CTBase.IncorrectArgument("Label $label not found in the model.")
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
 function path_constraints_dual(
     model::DualModel{
         PC_Dual,
