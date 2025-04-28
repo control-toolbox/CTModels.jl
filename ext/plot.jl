@@ -64,7 +64,16 @@ function __plot_time!(
 
     # reset ylims: ylims=:auto
     Plots.plot!(
-        p, sol, model, :time, (s, i), time; ylims=:auto, xlabel=t_label, label=label, kwargs...
+        p,
+        sol,
+        model,
+        :time,
+        (s, i),
+        time;
+        ylims=:auto,
+        xlabel=t_label,
+        label=label,
+        kwargs...,
     ) # use plot recipe
 
     # change ylims if the gap between min and max is less than a tol
@@ -542,7 +551,7 @@ function __plot!(
                 :state,
                 i,
                 time;
-                t_label = i==n ? t_label : "",
+                t_label=i==n ? t_label : "",
                 label=x_labels[i] * solution_label,
                 series_attr...,
                 state_style...,
@@ -554,7 +563,7 @@ function __plot!(
                 :costate,
                 i,
                 time;
-                t_label = i==n ? t_label : "",
+                t_label=i==n ? t_label : "",
                 label="p" * x_labels[i] * solution_label,
                 series_attr...,
                 costate_style...,
@@ -566,8 +575,26 @@ function __plot!(
             cs = CTModels.state_constraints_box(model)
             is = 1
             for i in 1:length(cs[1])
-                hline!(p[is + cs[2][i] - 1], [cs[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., state_bounds_style...) # lower bound
-                hline!(p[is + cs[2][i] - 1], [cs[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., state_bounds_style...) # upper bound
+                hline!(
+                    p[is + cs[2][i] - 1],
+                    [cs[1][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    state_bounds_style...,
+                ) # lower bound
+                hline!(
+                    p[is + cs[2][i] - 1],
+                    [cs[3][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    state_bounds_style...,
+                ) # upper bound
             end
         end
 
@@ -583,7 +610,7 @@ function __plot!(
                         :control,
                         i,
                         time;
-                        t_label = i==m ? t_label : "",
+                        t_label=i==m ? t_label : "",
                         label=u_labels[i] * solution_label,
                         series_attr...,
                         control_style...,
@@ -646,8 +673,26 @@ function __plot!(
             cu = CTModels.control_constraints_box(model)
             iu = 2n + 1
             for i in 1:length(cu[1])
-                hline!(p[iu + cu[2][i] - 1], [cu[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., control_bounds_style...) # lower bound
-                hline!(p[iu + cu[2][i] - 1], [cu[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., control_bounds_style...) # upper bound
+                hline!(
+                    p[iu + cu[2][i] - 1],
+                    [cu[1][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    control_bounds_style...,
+                ) # lower bound
+                hline!(
+                    p[iu + cu[2][i] - 1],
+                    [cu[3][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    control_bounds_style...,
+                ) # upper bound
             end
         end
 
@@ -658,7 +703,7 @@ function __plot!(
         else
             CTModels.dim_path_constraints_nl(model)
         end
-        if nc >0
+        if nc > 0
             # retrieve the constraints
             cp = CTModels.path_constraints_nl(model)
 
@@ -672,8 +717,8 @@ function __plot!(
                     :path_constraint,
                     i,
                     time;
-                    t_label = i==nc ? t_label : "",
-                    label = string(cp[4][i]) * solution_label,
+                    t_label=i==nc ? t_label : "",
+                    label=string(cp[4][i]) * solution_label,
                     series_attr...,
                     path_style...,
                 )
@@ -684,8 +729,8 @@ function __plot!(
                     :dual_path_constraint,
                     i,
                     time;
-                    t_label = i==nc ? t_label : "",
-                    label = "dual " * string(cp[4][i]) * solution_label,
+                    t_label=i==nc ? t_label : "",
+                    label="dual " * string(cp[4][i]) * solution_label,
                     series_attr...,
                     dual_path_style...,
                 )
@@ -693,8 +738,26 @@ function __plot!(
 
             # plot the lower and upper bounds for the path constraints
             for i in 1:nc
-                hline!(p[ic + i - 1], [cp[1][i]]; color=4, linewidth=1, label=:none, z_order=:back, series_attr..., path_bounds_style...) # lower bound
-                hline!(p[ic + i - 1], [cp[3][i]], color=4, linewidth=1, label=:none, z_order=:back, series_attr..., path_bounds_style...) # upper bound
+                hline!(
+                    p[ic + i - 1],
+                    [cp[1][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    path_bounds_style...,
+                ) # lower bound
+                hline!(
+                    p[ic + i - 1],
+                    [cp[3][i]];
+                    color=4,
+                    linewidth=1,
+                    label=:none,
+                    z_order=:back,
+                    series_attr...,
+                    path_bounds_style...,
+                ) # upper bound
             end
         end
     else
@@ -718,8 +781,18 @@ function __plot!(
                 CTModels.final_time(model, CTModels.variable(sol))
             end
         end
-        for plt ∈ p.subplots
-            vline!(plt, [t0, tf]; color=:black, linestyle=:dash, linewidth=1, label=:none, z_order=:back, series_attr..., time_style...)
+        for plt in p.subplots
+            vline!(
+                plt,
+                [t0, tf];
+                color=:black,
+                linestyle=:dash,
+                linewidth=1,
+                label=:none,
+                z_order=:back,
+                series_attr...,
+                time_style...,
+            )
         end
     end
 
@@ -755,8 +828,9 @@ function __plot(
     size=__size_plot(sol, model, control, layout),
     kwargs...,
 )
-
-    p = __initial_plot(sol; layout=layout, control=control, model=model, size=size, kwargs...)
+    p = __initial_plot(
+        sol; layout=layout, control=control, model=model, size=size, kwargs...
+    )
 
     return __plot!(
         p,
@@ -805,7 +879,6 @@ function Plots.plot!(
     costate_style=__plot_style(),
     kwargs...,
 )
-
     return __plot!(
         p,
         sol;
@@ -925,9 +998,7 @@ function Plots.plot!(
         dual_path_style=dual_path_style,
         kwargs...,
     )
-
 end
-
 
 """
 $(TYPEDSIGNATURES)
@@ -1022,10 +1093,10 @@ $(TYPEDSIGNATURES)
 Get the data for plotting.
 """
 function __get_data_plot(
-    sol::CTModels.Solution, 
+    sol::CTModels.Solution,
     model::Union{CTModels.Model,Nothing},
-    xx::Union{Symbol,Tuple{Symbol,Int}}; 
-    time::Symbol=:default
+    xx::Union{Symbol,Tuple{Symbol,Int}};
+    time::Symbol=:default,
 )
 
     # if the time grid is empty then throw an error
@@ -1053,21 +1124,21 @@ function __get_data_plot(
         end
         :state => begin
             X = CTModels.state(sol).(T)
-            [X[i][ii] for i in 1:m] 
+            [X[i][ii] for i in 1:m]
         end
         :control => begin
             U = CTModels.control(sol).(T)
-            [U[i][ii] for i in 1:m] 
+            [U[i][ii] for i in 1:m]
         end
         :costate => begin
             P = CTModels.costate(sol).(T)
-            [P[i][ii] for i in 1:m] 
+            [P[i][ii] for i in 1:m]
         end
         :control_norm => begin
             U = CTModels.control(sol).(T)
             [norm(U[i]) for i in 1:m]
         end
-        :path_constraint => begin 
+        :path_constraint => begin
             X = CTModels.state(sol).(T)
             U = CTModels.control(sol).(T)
             v = CTModels.variable(sol)

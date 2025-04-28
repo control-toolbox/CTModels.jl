@@ -206,9 +206,8 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct ConstraintsModel{
-    TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple
-} <: AbstractConstraintsModel
+struct ConstraintsModel{TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple} <:
+       AbstractConstraintsModel
     path_nl::TP
     boundary_nl::TB
     state_box::TS

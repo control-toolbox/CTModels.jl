@@ -75,9 +75,7 @@ plt = plot(sol; layout=:group, control=:norm)
 plt = plot(sol; layout=:group, control=:all)
 @test plot!(plt, sol; layout=:group, control=:all) isa Plots.Plot
 
-@test_throws CTBase.IncorrectArgument plot!(
-    plt, sol; layout=:group, control=:wrong_choice
-)
+@test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:group, control=:wrong_choice)
 
 plt = plot(sol, ocp; layout=:group, control=:components)
 @test plot!(plt, sol, ocp; layout=:group, control=:components) isa Plots.Plot

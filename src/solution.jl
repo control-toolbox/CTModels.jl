@@ -55,9 +55,9 @@ function build_solution(
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
 ) where {
-    TX  <:Union{Matrix{Float64},Function},
-    TU  <:Union{Matrix{Float64},Function},
-    TP  <:Union{Matrix{Float64},Function},
+    TX<:Union{Matrix{Float64},Function},
+    TU<:Union{Matrix{Float64},Function},
+    TP<:Union{Matrix{Float64},Function},
     TPCD<:Union{Matrix{Float64},Function,Nothing},
 }
 
@@ -111,7 +111,7 @@ function build_solution(
     # nonlinear constraints and dual variables
     path_constraints_dual_fun = if isnothing(path_constraints_dual)
         nothing
-    elseif TPCD <: Function 
+    elseif TPCD <: Function
         path_constraints_dual
     else
         V = matrix2vec(path_constraints_dual, 1)

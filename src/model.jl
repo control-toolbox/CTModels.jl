@@ -43,7 +43,7 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
             append!(path_cons_nl_lb, lb)
             append!(path_cons_nl_ub, ub)
             for i in 1:length(lb)
-                push!(path_cons_nl_labels, label) 
+                push!(path_cons_nl_labels, label)
             end
         elseif type == :boundary
             f = c[2]
@@ -148,10 +148,25 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
 
     return ConstraintsModel(
         (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub, path_cons_nl_labels),
-        (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub, boundary_cons_nl_labels),
+        (
+            boundary_cons_nl_lb,
+            boundary_cons_nl!,
+            boundary_cons_nl_ub,
+            boundary_cons_nl_labels,
+        ),
         (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub, state_cons_box_labels),
-        (control_cons_box_lb, control_cons_box_ind, control_cons_box_ub, control_cons_box_labels),
-        (variable_cons_box_lb, variable_cons_box_ind, variable_cons_box_ub, variable_cons_box_labels),
+        (
+            control_cons_box_lb,
+            control_cons_box_ind,
+            control_cons_box_ub,
+            control_cons_box_labels,
+        ),
+        (
+            variable_cons_box_lb,
+            variable_cons_box_ind,
+            variable_cons_box_ub,
+            variable_cons_box_labels,
+        ),
     )
 end
 
