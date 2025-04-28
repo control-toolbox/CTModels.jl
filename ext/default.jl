@@ -29,9 +29,9 @@ Used to set the default value of the plot size.
 """
 function __size_plot(
     sol::CTModels.Solution,
-    model::Union{CTModels.Model, Nothing},
+    model::Union{CTModels.Model,Nothing},
     control::Symbol,
-    layout::Symbol
+    layout::Symbol,
 )
     if layout === :group
         if control === :all
