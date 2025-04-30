@@ -10,9 +10,9 @@ $(TYPEDSIGNATURES)
 Export OCP solution in JLD format
 """
 function CTModels.export_ocp_solution(
-    ::CTModels.JLD2Tag, sol::CTModels.Solution; filename_prefix="solution"
+    ::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String="solution"
 )
-    save_object(filename_prefix * ".jld2", sol)
+    save_object(filename * ".jld2", sol)
     return nothing
 end
 
@@ -22,9 +22,9 @@ $(TYPEDSIGNATURES)
 Import OCP solution in JLD format
 """
 function CTModels.import_ocp_solution(
-    ::CTModels.JLD2Tag, ocp::CTModels.Model; filename_prefix="solution"
+    ::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String="solution"
 )
-    return load_object(filename_prefix * ".jld2")
+    return load_object(filename * ".jld2")
 end
 
 end

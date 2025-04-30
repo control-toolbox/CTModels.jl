@@ -163,11 +163,11 @@ Export a solution in JLD or JSON formats.
 # Examples
 
 ```julia-repl
-julia> CTModels.export_ocp_solution(sol; filename_prefix="solution", format=:JSON)
-julia> CTModels.export_ocp_solution(sol; filename_prefix="solution", format=:JLD)
+julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
+julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JLD)
 ```
 """
-function export_ocp_solution(args...; format=__format(), kwargs...)
+function export_ocp_solution(args...; format::Symbol=__format(), kwargs...)
     if format == :JLD
         return export_ocp_solution(JLD2Tag(), args...; kwargs...)
     elseif format == :JSON
@@ -175,7 +175,7 @@ function export_ocp_solution(args...; format=__format(), kwargs...)
     else
         throw(
             CTBase.IncorrectArgument(
-                "Export_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+                "unknown format (should be :JLD or :JSON): " * string(format)
             ),
         )
     end
@@ -189,11 +189,11 @@ Import a solution from a JLD or JSON file.
 # Examples
 
 ```julia-repl
-julia> sol = CTModels.import_ocp_solution(ocp; filename_prefix="solution", format=:JSON)
-julia> sol = CTModels.import_ocp_solution(ocp; filename_prefix="solution", format=:JLD)
+julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JSON)
+julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JLD)
 ```
 """
-function import_ocp_solution(args...; format=__format(), kwargs...)
+function import_ocp_solution(args...; format::Symbol=__format(), kwargs...)
     if format == :JLD
         return import_ocp_solution(JLD2Tag(), args...; kwargs...)
     elseif format == :JSON
@@ -201,7 +201,7 @@ function import_ocp_solution(args...; format=__format(), kwargs...)
     else
         throw(
             CTBase.IncorrectArgument(
-                "Import_ocp_solution: unknown format (should be :JLD or :JSON): ", format
+                "unknown format (should be :JLD or :JSON): " * string(format)
             ),
         )
     end
@@ -221,14 +221,14 @@ function RecipesBase.plot(sol::AbstractSolution; kwargs...)
     throw(CTBase.ExtensionError(:Plots))
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-Plot a solution on an existing plot.
-"""
-function RecipesBase.plot!(p::RecipesBase.AbstractPlot, sol::AbstractSolution; kwargs...)
-    throw(CTBase.ExtensionError(:Plots))
-end
+# Plot a solution on an existing plot.
+# """
+# function RecipesBase.plot!(p::RecipesBase.AbstractPlot, sol::AbstractSolution; kwargs...)
+#     throw(CTBase.ExtensionError(:Plots))
+# end
 
 #
 include("init.jl")

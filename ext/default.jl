@@ -61,7 +61,7 @@ $(TYPEDSIGNATURES)
 
 Default style for the plot. Must be an empty tuple.
 """
-__plot_style() = ()
+__plot_style() = NamedTuple()
 
 """
 $(TYPEDSIGNATURES)

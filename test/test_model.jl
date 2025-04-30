@@ -73,4 +73,32 @@ function test_model()
 
     # check the type of the model
     @test model isa CTModels.Model
+
+    # print the premodel
+    display(pre_ocp)
+
+    # -------------------------------------------------------------------------- #
+    # Just for printing
+    #
+    pre_ocp = CTModels.PreModel()
+    CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+    CTModels.state!(pre_ocp, 1, "y", ["y"])
+    CTModels.control!(pre_ocp, 1, "u", ["u"])
+    CTModels.variable!(pre_ocp, 1, "v", ["v"])
+    CTModels.dynamics!(pre_ocp, dynamics!)
+    CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
+    CTModels.definition!(pre_ocp, quote end)
+    display(pre_ocp)
+
+    #
+    pre_ocp = CTModels.PreModel()
+    CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+    CTModels.state!(pre_ocp, 2, "y", ["q", "p"])
+    CTModels.control!(pre_ocp, 2, "u", ["w", "z"])
+    CTModels.variable!(pre_ocp, 2, "v", ["c", "d"])
+    CTModels.dynamics!(pre_ocp, dynamics!)
+    CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
+    CTModels.definition!(pre_ocp, quote end)
+    display(pre_ocp)
+
 end

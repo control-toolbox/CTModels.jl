@@ -103,27 +103,27 @@ function __plot_time!(
     return p
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
-- The argument `s` can be `:state`, `:control` or `:costate`.
-- `time` can be `:default` or `:normalize`.
-"""
-function __plot_time(
-    sol::CTModels.Solution,
-    model::Union{CTModels.Model,Nothing},
-    s::Symbol,
-    i::Int,
-    time::Symbol;
-    t_label::String,
-    label::String,
-    kwargs...,
-)
-    return __plot_time!(
-        Plots.plot(), sol, model, s, i, time; t_label=t_label, label=label, kwargs...
-    )
-end
+# Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
+# - The argument `s` can be `:state`, `:control` or `:costate`.
+# - `time` can be `:default` or `:normalize`.
+# """
+# function __plot_time(
+#     sol::CTModels.Solution,
+#     model::Union{CTModels.Model,Nothing},
+#     s::Symbol,
+#     i::Int,
+#     time::Symbol;
+#     t_label::String,
+#     label::String,
+#     kwargs...,
+# )
+#     return __plot_time!(
+#         Plots.plot(), sol, model, s, i, time; t_label=t_label, label=label, kwargs...
+#     )
+# end
 
 """
 $(TYPEDSIGNATURES)
@@ -153,36 +153,36 @@ function __plot_time!(
     return p
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
-The argument `s` can be `:state`, `:control` or `:costate`.
-"""
-function __plot_time(
-    sol::CTModels.Solution,
-    model::Union{CTModels.Model,Nothing},
-    d::CTModels.Dimension,
-    s::Symbol,
-    time::Symbol;
-    t_label::String,
-    labels::Vector{String},
-    title::String,
-    kwargs...,
-)
-    return __plot_time!(
-        Plots.plot(),
-        sol,
-        model,
-        d,
-        s,
-        time;
-        t_label=t_label,
-        labels=labels,
-        title=title,
-        kwargs...,
-    )
-end
+# Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
+# The argument `s` can be `:state`, `:control` or `:costate`.
+# """
+# function __plot_time(
+#     sol::CTModels.Solution,
+#     model::Union{CTModels.Model,Nothing},
+#     d::CTModels.Dimension,
+#     s::Symbol,
+#     time::Symbol;
+#     t_label::String,
+#     labels::Vector{String},
+#     title::String,
+#     kwargs...,
+# )
+#     return __plot_time!(
+#         Plots.plot(),
+#         sol,
+#         model,
+#         d,
+#         s,
+#         time;
+#         t_label=t_label,
+#         labels=labels,
+#         title=title,
+#         kwargs...,
+#     )
+# end
 
 # --------------------------------------------------------------------------------------------------
 # 
@@ -406,15 +406,15 @@ function __plot!(
     time::Symbol,
     control::Symbol,
     layout::Symbol,
-    time_style::Tuple,
-    state_style::Tuple,
-    state_bounds_style::Tuple,
-    control_style::Tuple,
-    control_bounds_style::Tuple,
-    costate_style::Tuple,
-    path_style::Tuple,
-    path_bounds_style::Tuple,
-    dual_path_style::Tuple,
+    time_style::NamedTuple,
+    state_style::NamedTuple,
+    state_bounds_style::NamedTuple,
+    control_style::NamedTuple,
+    control_bounds_style::NamedTuple,
+    costate_style::NamedTuple,
+    path_style::NamedTuple,
+    path_bounds_style::NamedTuple,
+    dual_path_style::NamedTuple,
     kwargs...,
 )
     if solution_label != ""
@@ -816,15 +816,15 @@ function __plot(
     time::Symbol,
     control::Symbol,
     layout::Symbol,
-    time_style::Tuple,
-    state_style::Tuple,
-    state_bounds_style::Tuple,
-    control_style::Tuple,
-    control_bounds_style::Tuple,
-    costate_style::Tuple,
-    path_style::Tuple,
-    path_bounds_style::Tuple,
-    dual_path_style::Tuple,
+    time_style::NamedTuple,
+    state_style::NamedTuple,
+    state_bounds_style::NamedTuple,
+    control_style::NamedTuple,
+    control_bounds_style::NamedTuple,
+    costate_style::NamedTuple,
+    path_style::NamedTuple,
+    path_bounds_style::NamedTuple,
+    dual_path_style::NamedTuple,
     size=__size_plot(sol, model, control, layout),
     kwargs...,
 )
@@ -890,12 +890,12 @@ function Plots.plot!(
         control_style=control_style,
         costate_style=costate_style,
         model=nothing,
-        state_bounds_style=(),
-        control_bounds_style=(),
-        time_style=(),
-        path_style=(),
-        path_bounds_style=(),
-        dual_path_style=(),
+        state_bounds_style=__plot_style(),
+        control_bounds_style=__plot_style(),
+        time_style=__plot_style(),
+        path_style=__plot_style(),
+        path_bounds_style=__plot_style(),
+        dual_path_style=__plot_style(),
         kwargs...,
     )
 end
@@ -932,12 +932,12 @@ function Plots.plot(
         control_style=control_style,
         costate_style=costate_style,
         model=nothing,
-        state_bounds_style=(),
-        control_bounds_style=(),
-        time_style=(),
-        path_style=(),
-        path_bounds_style=(),
-        dual_path_style=(),
+        state_bounds_style=__plot_style(),
+        control_bounds_style=__plot_style(),
+        time_style=__plot_style(),
+        path_style=__plot_style(),
+        path_bounds_style=__plot_style(),
+        dual_path_style=__plot_style(),
         size=size,
         kwargs...,
     )
@@ -966,15 +966,15 @@ function Plots.plot!(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style::Tuple=__plot_style(),
-    state_bounds_style::Tuple=__plot_style(),
-    control_style::Tuple=__plot_style(),
-    control_bounds_style::Tuple=__plot_style(),
-    costate_style::Tuple=__plot_style(),
-    time_style::Tuple=__plot_style(),
-    path_style::Tuple=__plot_style(),
-    path_bounds_style::Tuple=__plot_style(),
-    dual_path_style::Tuple=__plot_style(),
+    state_style::NamedTuple=__plot_style(),
+    state_bounds_style::NamedTuple=__plot_style(),
+    control_style::NamedTuple=__plot_style(),
+    control_bounds_style::NamedTuple=__plot_style(),
+    costate_style::NamedTuple=__plot_style(),
+    time_style::NamedTuple=__plot_style(),
+    path_style::NamedTuple=__plot_style(),
+    path_bounds_style::NamedTuple=__plot_style(),
+    dual_path_style::NamedTuple=__plot_style(),
     kwargs...,
 )
 
@@ -1018,15 +1018,15 @@ function Plots.plot(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style::Tuple=__plot_style(),
-    state_bounds_style::Tuple=__plot_style(),
-    control_style::Tuple=__plot_style(),
-    control_bounds_style::Tuple=__plot_style(),
-    costate_style::Tuple=__plot_style(),
-    time_style::Tuple=__plot_style(),
-    path_style::Tuple=__plot_style(),
-    path_bounds_style::Tuple=__plot_style(),
-    dual_path_style::Tuple=__plot_style(),
+    state_style::NamedTuple=__plot_style(),
+    state_bounds_style::NamedTuple=__plot_style(),
+    control_style::NamedTuple=__plot_style(),
+    control_bounds_style::NamedTuple=__plot_style(),
+    costate_style::NamedTuple=__plot_style(),
+    time_style::NamedTuple=__plot_style(),
+    path_style::NamedTuple=__plot_style(),
+    path_bounds_style::NamedTuple=__plot_style(),
+    dual_path_style::NamedTuple=__plot_style(),
     size=__size_plot(sol, model, control, layout),
     kwargs...,
 )
