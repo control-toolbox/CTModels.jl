@@ -211,12 +211,9 @@ function test_solution()
         )
         @test CTModels.dual(sol_, ocp, :path)(1) == [5.0, 6.0]
         @test CTModels.dual(sol_, ocp, :boundary) == [3.0, 2.0]
-        @test CTModels.dual(sol_, ocp, :state_rg, bound=:lower)(1) == [5.0, 6.0]
-        @test CTModels.dual(sol_, ocp, :state_rg, bound=:upper)(1) == -[5.0, 6.0]
-        @test CTModels.dual(sol_, ocp, :control_rg, bound=:lower)(1) == 3.0
-        @test CTModels.dual(sol_, ocp, :control_rg, bound=:upper)(1) == -3.0
-        @test CTModels.dual(sol_, ocp, :variable_rg, bound=:lower) == [1.0, 2.0]
-        @test CTModels.dual(sol_, ocp, :variable_rg, bound=:upper) == -[1.0, 2.0]
+        @test CTModels.dual(sol_, ocp, :state_rg)(1) == [5.0, 6.0] - (-[5.0, 6.0])
+        @test CTModels.dual(sol_, ocp, :control_rg)(1) == 3.0 - (-3.0)
+        @test CTModels.dual(sol_, ocp, :variable_rg) == [1.0, 2.0] - (-[1.0, 2.0])
     end
 
 end
