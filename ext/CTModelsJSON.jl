@@ -11,16 +11,16 @@ $(TYPEDSIGNATURES)
 Export OCP solution in JSON format
 """
 function CTModels.export_ocp_solution(
-    ::CTModels.JSON3Tag, sol::CTModels.Solution; filename_prefix="solution"
+    ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String="solution"
 )
     T = CTModels.time_grid(sol)
 
     blob = Dict(
         "time_grid" => CTModels.time_grid(sol),
-        "state" => CTModels.state_discretized(sol),
-        "control" => CTModels.control_discretized(sol),
+        "state" => CTModels.discretize(CTModels.state(sol), T), 
+        "control" => CTModels.discretize(CTModels.control(sol), T),
         "variable" => CTModels.variable(sol),
-        "costate" => CTModels.costate_discretized(sol)[1:(end - 1), :],
+        "costate" => CTModels.discretize(CTModels.costate(sol), T),
         "objective" => CTModels.objective(sol),
         "iterations" => CTModels.iterations(sol),
         "constraints_violation" => CTModels.constraints_violation(sol),
@@ -42,7 +42,7 @@ function CTModels.export_ocp_solution(
         "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing
     )
 
-    open(filename_prefix * ".json", "w") do io
+    open(filename * ".json", "w") do io
         JSON3.pretty(io, blob)
     end
 
@@ -55,9 +55,9 @@ $(TYPEDSIGNATURES)
 Import OCP solution in JSON format
 """
 function CTModels.import_ocp_solution(
-    ::CTModels.JSON3Tag, ocp::CTModels.Model; filename_prefix="solution"
+    ::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String="solution"
 )
-    json_string = read(filename_prefix * ".json", String)
+    json_string = read(filename * ".json", String)
     blob = JSON3.read(json_string)
 
     # get state

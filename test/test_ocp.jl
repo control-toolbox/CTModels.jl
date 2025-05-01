@@ -267,6 +267,9 @@ function test_ocp()
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
+    # print
+    display(ocp)
+
     # tests on objective
     @test CTModels.objective(ocp) == objective
     @test CTModels.criterion(ocp) == :max
@@ -289,4 +292,42 @@ function test_ocp()
     @test CTModels.criterion(ocp) == :min
     @test CTModels.has_mayer_cost(ocp) == true
     @test CTModels.has_lagrange_cost(ocp) == true
+
+
+    # -------------------------------------------------------------------------- #
+    # Just for printing
+    #
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "a"), CTModels.FreeTimeModel(2, "b"), "s"
+    )
+    state = CTModels.StateModel("y", ["y"])
+    control = CTModels.ControlModel("u", ["u"])
+    variable = CTModels.VariableModel("v", ["v"])
+    dynamics = dynamics_user!
+    objective = CTModels.MayerObjectiveModel(mayer_user, :min)
+    pre_constraints = CTModels.ConstraintsDictType()
+    constraints = CTModels.build_constraints(pre_constraints)
+    definition = quote end
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
+    display(ocp)
+
+    #
+    times = CTModels.TimesModel(
+        CTModels.FreeTimeModel(1, "a"), CTModels.FreeTimeModel(2, "b"), "s"
+    )
+    state = CTModels.StateModel("y", ["q", "p"])
+    control = CTModels.ControlModel("u", ["w", "z"])
+    variable = CTModels.VariableModel("v", ["c", "d"])
+    dynamics = dynamics_user!
+    objective = CTModels.MayerObjectiveModel(mayer_user, :min)
+    pre_constraints = CTModels.ConstraintsDictType()
+    constraints = CTModels.build_constraints(pre_constraints)
+    definition = quote end
+    ocp = CTModels.Model(
+        times, state, control, variable, dynamics, objective, constraints, definition
+    )
+    display(ocp)
+
 end

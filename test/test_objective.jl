@@ -61,7 +61,7 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    CTModels.objective!(ocp, :min; mayer=mayer, lagrange=lagrange)
+    CTModels.objective!(ocp; mayer=mayer, lagrange=lagrange) # default criterion is :min
     @test ocp.objective == CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
     @test CTModels.criterion(ocp.objective) == :min
     @test CTModels.has_mayer_cost(ocp.objective) == true
