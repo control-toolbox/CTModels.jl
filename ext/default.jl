@@ -25,6 +25,33 @@ __time_normalization() = :default
 """
 $(TYPEDSIGNATURES)
 
+"""
+__description() = (:state, :states,
+    :costate, :costates, 
+    :control, :controls, 
+    :constraint, :constraints, :cons,
+    :dual, :duals)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+function clean(description)
+    # remove the nouns in plural form
+    description = replace(description, 
+        :states => :state, 
+        :costates => :costate, 
+        :controls => :control, 
+        :constraints => :cons,
+        :constraint => :cons, 
+        :duals => :dual)
+    # remove the duplicates
+    return tuple(Set(description)...)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Used to set the default value of the plot size.
 """
 function __size_plot(
@@ -32,9 +59,26 @@ function __size_plot(
     model::Union{CTModels.Model,Nothing},
     control::Symbol,
     layout::Symbol,
+    description::Symbol...
 )
-    if layout === :group
-        if control === :all
+
+    # set the default description if not given and then clean it
+    description = description == () ? __description() : description
+    description = clean(description)
+
+    #
+    if layout == :group
+        nb_plots = 0
+        nb_plots += :state ∈ description ? 1 : 0
+        nb_plots += :costate ∈ description ? 1 : 0
+        if :control in description
+            if control == :components || control == :norm
+                nb_plots += 1
+            elseif control === :all
+                nb_plots += 2
+            end
+        end
+        if control == :all && nb_plots == 4
             return (600, 560)
         else
             return (600, 280)
@@ -54,6 +98,7 @@ function __size_plot(
         nc = model === nothing ? 0 : CTModels.dim_path_constraints_nl(model)
         return (600, 140 * (n + l + nc))
     end
+
 end
 
 """
