@@ -28,6 +28,7 @@ include("solution_example.jl")
         :init,
         :export_import,
         :utils,
+        :solution,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

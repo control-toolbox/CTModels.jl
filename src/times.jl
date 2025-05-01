@@ -23,9 +23,9 @@ By default, the name is "t".
 Consider you want to set the name of the time variable to "s".
 
 ```@example
-julia> time!(ocp, t0=0, tf=1, name="s") # name is a String
+julia> time!(ocp, t0=0, tf=1, time_name="s") # time_name is a String
 # or
-julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol  
+julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol  
 ```
 """
 function time!(

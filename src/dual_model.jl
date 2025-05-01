@@ -7,7 +7,9 @@
 $(TYPEDSIGNATURES)
 
 """
-function dual(sol::Solution, model::Model, label::Symbol)::Function
+function dual(sol::Solution, model::Model, label::Symbol; bound::Symbol=:lower)
+
+    # check if the label is in the path constraints
     cp = path_constraints_nl(model)
     labels = cp[4] # vector of labels
     if label in labels
@@ -20,9 +22,88 @@ function dual(sol::Solution, model::Model, label::Symbol)::Function
         else
             return t -> duals(t)[indices]
         end
-    else
-        CTBase.IncorrectArgument("Label $label not found in the model.")
     end
+
+    # check if the label is in the boundary constraints
+    cp = boundary_constraints_nl(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        # get the corresponding dual values
+        duals = boundary_constraints_dual(sol)
+        if length(indices) == 1
+            return duals[indices[1]]
+        else
+            return duals[indices]
+        end
+    end
+
+    # check if the label is in the state constraints
+    cp = state_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        # get the corresponding dual values, either lower or upper bound
+        duals = if bound == :lower
+            state_constraints_lb_dual(sol)
+        elseif bound == :upper
+            state_constraints_ub_dual(sol)
+        else
+            return CTBase.IncorrectArgument("bound must be :lower or :upper")
+        end
+        if length(indices) == 1
+            return t -> duals(t)[indices[1]]
+        else
+            return t -> duals(t)[indices]
+        end
+    end
+
+    # check if the label is in the control constraints
+    cp = control_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        # get the corresponding dual values, either lower or upper bound
+        duals = if bound == :lower
+            control_constraints_lb_dual(sol)
+        elseif bound == :upper
+            control_constraints_ub_dual(sol)
+        else
+            return CTBase.IncorrectArgument("bound must be :lower or :upper")
+        end
+        if length(indices) == 1
+            return t -> duals(t)[indices[1]]
+        else
+            return t -> duals(t)[indices]
+        end
+    end
+
+    # check if the label is in the variable constraints
+    cp = variable_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        # get the corresponding dual values, either lower or upper bound
+        duals = if bound == :lower
+            variable_constraints_lb_dual(sol)
+        elseif bound == :upper
+            variable_constraints_ub_dual(sol)
+        else
+            return CTBase.IncorrectArgument("bound must be :lower or :upper")
+        end
+        if length(indices) == 1
+            return duals[indices[1]]
+        else
+            return duals[indices]
+        end
+    end
+
+    # return an exception if the label is not found
+    return CTBase.IncorrectArgument("Label $label not found in the model.")
 end
 
 """
@@ -59,7 +140,7 @@ function boundary_constraints_dual(
         <:Union{ctVector,Nothing},
         <:Union{ctVector,Nothing},
     },
-)::BC_Dual where {BC_Dual<:Union{Function,Nothing}}
+)::BC_Dual where {BC_Dual<:Union{ctVector,Nothing}}
     return model.boundary_constraints_dual
 end
 
@@ -154,7 +235,7 @@ function variable_constraints_lb_dual(
         VC_LB_Dual,
         <:Union{ctVector,Nothing},
     },
-)::VC_LB_Dual where {VC_LB_Dual<:Union{Function,Nothing}}
+)::VC_LB_Dual where {VC_LB_Dual<:Union{ctVector,Nothing}}
     return model.variable_constraints_lb_dual
 end
 
@@ -173,6 +254,6 @@ function variable_constraints_ub_dual(
         <:Union{ctVector,Nothing},
         VC_UB_Dual,
     },
-)::VC_UB_Dual where {VC_UB_Dual<:Union{Function,Nothing}}
+)::VC_UB_Dual where {VC_UB_Dual<:Union{ctVector,Nothing}}
     return model.variable_constraints_ub_dual
 end

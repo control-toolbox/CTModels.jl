@@ -17,9 +17,7 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `message::String`: the message associated to the stopping criterion.
 - `stopping::Symbol`: the stopping criterion.
 - `success::Bool`: the success status.
-- `path_constraints::Matrix{Float64}`: the path constraints.
 - `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
-- `boundary_constraints::Vector{Float64}`: the boundary constraints.
 - `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
 - `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
 - `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
@@ -81,22 +79,25 @@ function build_solution(
     x = if TX <: Function
         X
     else
+        N = size(X, 1)
         V = matrix2vec(X[:, 1:dim_x], 1)
-        ctinterpolate(T, V)
+        ctinterpolate(T[1:N], V)
     end
     p = if TP <: Function
         P
     elseif length(T) == 2
         t -> P[1, 1:dim_x]
     else
+        L = size(P, 1)
         V = matrix2vec(P[:, 1:dim_x], 1)
-        ctinterpolate(T[1:(end - 1)], V)
+        ctinterpolate(T[1:L], V)
     end
     u = if TU <: Function
         U
     else
+        M = size(U, 1)
         V = matrix2vec(U[:, 1:dim_u], 1)
-        ctinterpolate(T, V)
+        ctinterpolate(T[1:M], V)
     end
 
     # force scalar output when dimension is 1
@@ -117,6 +118,14 @@ function build_solution(
         V = matrix2vec(path_constraints_dual, 1)
         t -> ctinterpolate(T, V)(t)
     end
+    # force scalar output when dimension is 1
+    fpcd = if isnothing(path_constraints_dual)
+        nothing
+    else
+        (dim_path_constraints_nl(ocp) == 1) ? 
+            deepcopy(t -> path_constraints_dual_fun(t)[1]) : 
+            deepcopy(t -> path_constraints_dual_fun(t))
+    end
 
     # box constraints multipliers
     state_constraints_lb_dual_fun = if isnothing(state_constraints_lb_dual)
@@ -125,6 +134,14 @@ function build_solution(
         V = matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
         t -> ctinterpolate(T, V)(t)
     end
+    # force scalar output when dimension is 1
+    fscbd = if isnothing(state_constraints_lb_dual)
+        nothing
+    else
+        (dim_state_constraints_box(ocp) == 1) ? 
+            deepcopy(t -> state_constraints_lb_dual_fun(t)[1]) : 
+            deepcopy(t -> state_constraints_lb_dual_fun(t))
+    end
 
     state_constraints_ub_dual_fun = if isnothing(state_constraints_ub_dual)
         nothing
@@ -132,12 +149,28 @@ function build_solution(
         V = matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
         t -> ctinterpolate(T, V)(t)
     end
+    # force scalar output when dimension is 1
+    fscud = if isnothing(state_constraints_ub_dual)
+        nothing
+    else
+        (dim_state_constraints_box(ocp) == 1) ? 
+            deepcopy(t -> state_constraints_ub_dual_fun(t)[1]) : 
+            deepcopy(t -> state_constraints_ub_dual_fun(t))
+    end 
 
     control_constraints_lb_dual_fun = if isnothing(control_constraints_lb_dual)
         nothing
     else
         V = matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
         t -> ctinterpolate(T, V)(t)
+    end
+    # force scalar output when dimension is 1
+    fccbd = if isnothing(control_constraints_lb_dual)
+        nothing
+    else
+        (dim_control_constraints_box(ocp) == 1) ? 
+            deepcopy(t -> control_constraints_lb_dual_fun(t)[1]) : 
+            deepcopy(t -> control_constraints_lb_dual_fun(t))
     end
 
     control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
@@ -146,19 +179,27 @@ function build_solution(
         V = matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
         t -> ctinterpolate(T, V)(t)
     end
-
+    # force scalar output when dimension is 1
+    fccud = if isnothing(control_constraints_ub_dual)
+        nothing
+    else
+        (dim_control_constraints_box(ocp) == 1) ? 
+            deepcopy(t -> control_constraints_ub_dual_fun(t)[1]) : 
+            deepcopy(t -> control_constraints_ub_dual_fun(t))
+    end
+    
     # build Models
     time_grid = TimeGridModel(T)
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
-        path_constraints_dual_fun,
+        fpcd,
         boundary_constraints_dual,
-        state_constraints_lb_dual_fun,
-        state_constraints_ub_dual_fun,
-        control_constraints_lb_dual_fun,
-        control_constraints_ub_dual_fun,
+        fscbd,
+        fscud,
+        fccbd,
+        fccud,
         variable_constraints_lb_dual,
         variable_constraints_ub_dual,
     )
@@ -234,18 +275,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the state values at times `time_grid(sol)` of the optimal control solution or `nothing`.
-
-```@example
-julia> x  = state_discretized(sol)
-julia> x0 = x[1] # state at initial time
-```
-"""
-state_discretized(sol::Solution) = state(sol).(time_grid(sol))
-
-"""
-$(TYPEDSIGNATURES)
-
 Return the dimension of the control of the optimal control solution.
 
 """
@@ -299,18 +328,6 @@ function control(
 )::TS where {TS<:Function}
     return value(sol.control)
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the control values at times `time_grid(sol)` of the optimal control solution or `nothing`.
-
-```@example
-julia> u  = control_discretized(sol)
-julia> u0 = u[1] # control at initial time
-```
-"""
-control_discretized(sol::Solution) = control(sol).(time_grid(sol))
 
 """
 $(TYPEDSIGNATURES)
@@ -393,18 +410,6 @@ function costate(
 )::Co where {Co<:Function}
     return sol.costate
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the costate values at times `time_grid(sol)` of the optimal control solution or `nothing`.
-
-```@example
-julia> p  = costate_discretized(sol)
-julia> p0 = p[1] # costate at initial time
-```
-"""
-costate_discretized(sol::Solution) = costate(sol).(time_grid(sol))
 
 """
 $(TYPEDSIGNATURES)
@@ -563,31 +568,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the path constraints of the optimal control solution.
-
-"""
-function path_constraints(sol::Solution)
-    return path_constraints(dual_model(sol))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Return the dual of the path constraints of the optimal control solution.
 
 """
 function path_constraints_dual(sol::Solution)
     return path_constraints_dual(dual_model(sol))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the boundary constraints of the optimal control solution.
-
-"""
-function boundary_constraints(sol::Solution)
-    return boundary_constraints(dual_model(sol))
 end
 
 """

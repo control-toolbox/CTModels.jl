@@ -17,10 +17,10 @@ function CTModels.export_ocp_solution(
 
     blob = Dict(
         "time_grid" => CTModels.time_grid(sol),
-        "state" => CTModels.state_discretized(sol),
-        "control" => CTModels.control_discretized(sol),
+        "state" => CTModels.discretize(CTModels.state(sol), T), 
+        "control" => CTModels.discretize(CTModels.control(sol), T),
         "variable" => CTModels.variable(sol),
-        "costate" => CTModels.costate_discretized(sol)[1:(end - 1), :],
+        "costate" => CTModels.discretize(CTModels.costate(sol), T),
         "objective" => CTModels.objective(sol),
         "iterations" => CTModels.iterations(sol),
         "constraints_violation" => CTModels.constraints_violation(sol),
