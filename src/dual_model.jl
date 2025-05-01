@@ -7,7 +7,7 @@
 $(TYPEDSIGNATURES)
 
 """
-function dual(sol::Solution, model::Model, label::Symbol; bound::Symbol=:lower)
+function dual(sol::Solution, model::Model, label::Symbol)
 
     # check if the label is in the path constraints
     cp = path_constraints_nl(model)
@@ -45,18 +45,13 @@ function dual(sol::Solution, model::Model, label::Symbol; bound::Symbol=:lower)
     if label in labels
         # get all the indices of the label
         indices = findall(x -> x == label, labels)
-        # get the corresponding dual values, either lower or upper bound
-        duals = if bound == :lower
-            state_constraints_lb_dual(sol)
-        elseif bound == :upper
-            state_constraints_ub_dual(sol)
-        else
-            return CTBase.IncorrectArgument("bound must be :lower or :upper")
-        end
+        # get the corresponding dual values
+        duals_lb = state_constraints_lb_dual(sol)
+        duals_ub = state_constraints_ub_dual(sol)
         if length(indices) == 1
-            return t -> duals(t)[indices[1]]
+            return t -> ( duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]] )
         else
-            return t -> duals(t)[indices]
+            return t -> ( duals_lb(t)[indices] - duals_ub(t)[indices] )
         end
     end
 
@@ -67,17 +62,12 @@ function dual(sol::Solution, model::Model, label::Symbol; bound::Symbol=:lower)
         # get all the indices of the label
         indices = findall(x -> x == label, labels)
         # get the corresponding dual values, either lower or upper bound
-        duals = if bound == :lower
-            control_constraints_lb_dual(sol)
-        elseif bound == :upper
-            control_constraints_ub_dual(sol)
-        else
-            return CTBase.IncorrectArgument("bound must be :lower or :upper")
-        end
+        duals_lb = control_constraints_lb_dual(sol)
+        duals_ub = control_constraints_ub_dual(sol)
         if length(indices) == 1
-            return t -> duals(t)[indices[1]]
+            return t -> ( duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]] )
         else
-            return t -> duals(t)[indices]
+            return t -> ( duals_lb(t)[indices] - duals_ub(t)[indices] )
         end
     end
 
@@ -88,17 +78,12 @@ function dual(sol::Solution, model::Model, label::Symbol; bound::Symbol=:lower)
         # get all the indices of the label
         indices = findall(x -> x == label, labels)
         # get the corresponding dual values, either lower or upper bound
-        duals = if bound == :lower
-            variable_constraints_lb_dual(sol)
-        elseif bound == :upper
-            variable_constraints_ub_dual(sol)
-        else
-            return CTBase.IncorrectArgument("bound must be :lower or :upper")
-        end
+        duals_lb = variable_constraints_lb_dual(sol)
+        duals_ub = variable_constraints_ub_dual(sol)
         if length(indices) == 1
-            return duals[indices[1]]
+            return duals_lb[indices[1]] - duals_ub[indices[1]]
         else
-            return duals[indices]
+            return duals_lb[indices] - duals_ub[indices]
         end
     end
 
