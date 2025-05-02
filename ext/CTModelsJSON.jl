@@ -17,7 +17,7 @@ function CTModels.export_ocp_solution(
 
     blob = Dict(
         "time_grid" => CTModels.time_grid(sol),
-        "state" => CTModels.discretize(CTModels.state(sol), T), 
+        "state" => CTModels.discretize(CTModels.state(sol), T),
         "control" => CTModels.discretize(CTModels.control(sol), T),
         "variable" => CTModels.variable(sol),
         "costate" => CTModels.discretize(CTModels.costate(sol), T),

@@ -49,9 +49,9 @@ function dual(sol::Solution, model::Model, label::Symbol)
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
         if length(indices) == 1
-            return t -> ( duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]] )
+            return t -> (duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]])
         else
-            return t -> ( duals_lb(t)[indices] - duals_ub(t)[indices] )
+            return t -> (duals_lb(t)[indices] - duals_ub(t)[indices])
         end
     end
 
@@ -65,9 +65,9 @@ function dual(sol::Solution, model::Model, label::Symbol)
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
         if length(indices) == 1
-            return t -> ( duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]] )
+            return t -> (duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]])
         else
-            return t -> ( duals_lb(t)[indices] - duals_ub(t)[indices] )
+            return t -> (duals_lb(t)[indices] - duals_ub(t)[indices])
         end
     end
 

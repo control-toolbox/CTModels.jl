@@ -122,9 +122,11 @@ function build_solution(
     fpcd = if isnothing(path_constraints_dual)
         nothing
     else
-        (dim_path_constraints_nl(ocp) == 1) ? 
-            deepcopy(t -> path_constraints_dual_fun(t)[1]) : 
+        if (dim_path_constraints_nl(ocp) == 1)
+            deepcopy(t -> path_constraints_dual_fun(t)[1])
+        else
             deepcopy(t -> path_constraints_dual_fun(t))
+        end
     end
 
     # box constraints multipliers
@@ -138,9 +140,11 @@ function build_solution(
     fscbd = if isnothing(state_constraints_lb_dual)
         nothing
     else
-        (dim_state_constraints_box(ocp) == 1) ? 
-            deepcopy(t -> state_constraints_lb_dual_fun(t)[1]) : 
+        if (dim_state_constraints_box(ocp) == 1)
+            deepcopy(t -> state_constraints_lb_dual_fun(t)[1])
+        else
             deepcopy(t -> state_constraints_lb_dual_fun(t))
+        end
     end
 
     state_constraints_ub_dual_fun = if isnothing(state_constraints_ub_dual)
@@ -153,10 +157,12 @@ function build_solution(
     fscud = if isnothing(state_constraints_ub_dual)
         nothing
     else
-        (dim_state_constraints_box(ocp) == 1) ? 
-            deepcopy(t -> state_constraints_ub_dual_fun(t)[1]) : 
+        if (dim_state_constraints_box(ocp) == 1)
+            deepcopy(t -> state_constraints_ub_dual_fun(t)[1])
+        else
             deepcopy(t -> state_constraints_ub_dual_fun(t))
-    end 
+        end
+    end
 
     control_constraints_lb_dual_fun = if isnothing(control_constraints_lb_dual)
         nothing
@@ -168,9 +174,11 @@ function build_solution(
     fccbd = if isnothing(control_constraints_lb_dual)
         nothing
     else
-        (dim_control_constraints_box(ocp) == 1) ? 
-            deepcopy(t -> control_constraints_lb_dual_fun(t)[1]) : 
+        if (dim_control_constraints_box(ocp) == 1)
+            deepcopy(t -> control_constraints_lb_dual_fun(t)[1])
+        else
             deepcopy(t -> control_constraints_lb_dual_fun(t))
+        end
     end
 
     control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
@@ -183,11 +191,13 @@ function build_solution(
     fccud = if isnothing(control_constraints_ub_dual)
         nothing
     else
-        (dim_control_constraints_box(ocp) == 1) ? 
-            deepcopy(t -> control_constraints_ub_dual_fun(t)[1]) : 
+        if (dim_control_constraints_box(ocp) == 1)
+            deepcopy(t -> control_constraints_ub_dual_fun(t)[1])
+        else
             deepcopy(t -> control_constraints_ub_dual_fun(t))
+        end
     end
-    
+
     # build Models
     time_grid = TimeGridModel(T)
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
