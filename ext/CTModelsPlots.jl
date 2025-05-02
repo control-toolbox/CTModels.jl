@@ -12,6 +12,7 @@ using Plots # redefine plot, plot!
 using Plots.Measures
 #import Plots: plot, plot!
 
+include("plot_utils.jl")
 include("default.jl")
 include("plot.jl")
 
