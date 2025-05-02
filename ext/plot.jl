@@ -231,7 +231,7 @@ function __initial_plot(
                 :control ∈ description && push!(plots, Plots.plot()) # control
                 :control ∈ description && push!(plots, Plots.plot()) # control norm
                 if length(plots) == 4
-                    return Plots.plot(plots...; layout=(2, 2), bottommargin=5mm, kwargs...)   
+                    return Plots.plot(plots...; layout=(2, 2), kwargs...)   
                 else
                     return Plots.plot(plots...; layout=(1, length(plots)), bottommargin=5mm, kwargs...)
                 end
@@ -255,6 +255,9 @@ function __initial_plot(
             :state ∈ description   && push!(state_plots, PlotLeaf())
             :costate ∈ description && push!(costate_plots, PlotLeaf())
         end
+
+        println("state_plots: ", state_plots)
+        println("costate_plots: ", costate_plots)
 
         # create the control plots
         if :control ∈ description
@@ -284,10 +287,6 @@ function __initial_plot(
             end
         end
 
-        # starting root
-        root = EmptyPlot()
-        nblines = 0
-
         # assemble the state and costate plots
         node_x = isempty(state_plots)   ? EmptyPlot() : PlotNode(:column, state_plots)
         node_p = isempty(costate_plots) ? EmptyPlot() : PlotNode(:column, costate_plots)
@@ -301,6 +300,8 @@ function __initial_plot(
         node_u = isempty(control_plots) ? EmptyPlot() : PlotNode(:column, control_plots)
 
         # create the root node
+        root = EmptyPlot()
+        nblines = 0
         if ( !(node_xp isa EmptyPlot) && !(node_u isa EmptyPlot) )
             nblines = n + l
             a = __height(round(n / nblines; digits=2))
@@ -309,9 +310,12 @@ function __initial_plot(
                 b
             ]
             root = PlotNode(lay, [node_xp, node_u])
-        else
-            root = node_xp isa EmptyPlot ? node_u : node_xp
-            nblines = node_xp isa EmptyPlot ? l : n
+        elseif !(node_xp isa EmptyPlot)
+            root = node_xp
+            nblines = n
+        elseif !(node_u isa EmptyPlot)
+            root = node_u
+            nblines = l
         end
 
         # Add the path constraints and their dual variables (in two columns as for state and costate) plots 
@@ -336,8 +340,9 @@ function __initial_plot(
             end
 
             # update the root node
-            if !(node_cocp isa EmptyPlot)    
-                c = __height(round(nc / (nblines + nc); digits=2))
+            if !(node_cocp isa EmptyPlot)
+                nblines += nc  
+                c = __height(round(nc / nblines; digits=2))
                 @eval lay = @layout [
                     a
                     $c
@@ -347,7 +352,7 @@ function __initial_plot(
         end
 
         # plot
-        return __plot_tree(root; kwargs...)
+        return nblines==1 ? __plot_tree(root; bottommargin=5mm, kwargs...) : __plot_tree(root; kwargs...)
 
     else
         throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))

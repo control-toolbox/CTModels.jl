@@ -79,16 +79,17 @@ function __size_plot(
             end
         end
         if control == :all && nb_plots == 4
-            return (600, 560)
+            return (600, 420)
         else
             return (600, 280)
         end
     else
         n = CTModels.state_dimension(sol)
+        m = CTModels.control_dimension(sol)
         l = @match control begin
-            :components => CTModels.control_dimension(sol)
+            :components => m
             :norm => 1
-            :all => CTModels.control_dimension(sol) + 1
+            :all => m + 1
             _ => throw(
                 CTBase.IncorrectArgument(
                     "No such choice for control. Use :components, :norm or :all"
@@ -96,7 +97,17 @@ function __size_plot(
             )
         end
         nc = model === nothing ? 0 : CTModels.dim_path_constraints_nl(model)
-        return (600, 140 * (n + l + nc))
+        nb_lines = 0
+        nb_lines += (:state ∈ description || :costate ∈ description) ? n : 0
+        nb_lines += :control ∈ description ? l : 0
+        nb_lines += (:cons ∈ description || :dual ∈ description) ? nc : 0
+        if nb_lines==1
+            return (600, 280)
+        elseif nb_lines==2
+            return (600, 420)
+        else 
+            return (600, 140 * nb_lines)
+        end
     end
 
 end

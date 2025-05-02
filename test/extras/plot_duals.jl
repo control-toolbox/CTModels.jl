@@ -62,10 +62,19 @@ end;
 sol = SOL(ocp, t0, tf);
 
 plt = plot(sol, ocp)
+plt = plot(sol, ocp, :state)
+plt = plot(sol, ocp, :state, :costate)
+plt = plot(sol, ocp, :state, :control)
+plt = plot(sol, ocp, :state, :control, :constraint)
+plt = plot(sol, ocp, :costate)
+plt = plot(sol, ocp, :control)
+plt = plot(sol, ocp, :constraint)
+plt = plot(sol, ocp, :dual)
+plt = plot(sol, ocp, :constraint, :dual)
 
-mixed_con_dual = CTModels.dual(sol, ocp, :mixed_con)
-plot(range(t0, tf; length=101), mixed_con_dual)
+# mixed_con_dual = CTModels.dual(sol, ocp, :mixed_con)
+# plot(range(t0, tf; length=101), mixed_con_dual)
 
-eq2_dual = CTModels.dual(sol, ocp, :eq2)
-plot(range(t0, tf; length=101), t -> eq2_dual(t)[1]; label="eq2_dual 1")
-plot!(range(t0, tf; length=101), t -> eq2_dual(t)[2]; label="eq2_dual 2")
+# eq2_dual = CTModels.dual(sol, ocp, :eq2)
+# plot(range(t0, tf; length=101), t -> eq2_dual(t)[1]; label="eq2_dual 1")
+# plot!(range(t0, tf; length=101), t -> eq2_dual(t)[2]; label="eq2_dual 2")

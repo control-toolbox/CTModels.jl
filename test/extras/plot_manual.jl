@@ -129,7 +129,9 @@ end;
 sol = get_solution();
 
 # layout = :group
-plot(sol; layout=:group)
+plot(sol; layout=:group, control=:components)
+plot(sol; layout=:group, control=:norm)
+plot(sol; layout=:group, control=:all)
 plot(sol, :state; layout=:group)
 plot(sol, :costate; layout=:group)
 plot(sol, :control; layout=:group)
@@ -147,6 +149,7 @@ plot(sol, :control; layout=:split, control=:norm)
 plot(sol, :state, :control; layout=:split)
 plot(sol, :control; layout=:split, control=:all)
 plot(sol, :state, :control; layout=:split, control=:all)
+plot(sol, :state, :costate; layout=:split)
 nothing
 # plt = plot(sol; size=(700, 450), time=:normalise)
 
