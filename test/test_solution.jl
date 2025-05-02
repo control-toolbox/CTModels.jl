@@ -63,16 +63,8 @@ function test_solution()
         :variable_constraints_lb_dual => variable_constraints_lb_dual,
         :variable_constraints_ub_dual => variable_constraints_ub_dual,
     )
-    sol = CTModels.build_solution(
-        ocp,
-        T,
-        X,
-        U,
-        v,
-        P;
-        kwargs...,
-    )
-            
+    sol = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...)
+
     # call getters and check the values
     @testset "state" begin
         @test CTModels.state_dimension(sol) == 2
@@ -135,29 +127,50 @@ function test_solution()
         # path constraints dual: matrix and function
         path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
         path_constraints_dual_func = t -> [1.0+4.0*t, 2.0+4.0*t]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
-            path_constraints_dual=path_constraints_dual,
+        sol_ = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual
         )
         @test CTModels.path_constraints_dual(sol_)(1) == [5.0, 6.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
-            path_constraints_dual=path_constraints_dual_func,
+        sol_ = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual_func
         )
         @test CTModels.path_constraints_dual(sol_)(1) == [5.0, 6.0]
         # boundary constraints dual: vector
         boundary_constraints_dual = [3.0, 2.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             boundary_constraints_dual=boundary_constraints_dual,
         )
         @test CTModels.boundary_constraints_dual(sol_) == [3.0, 2.0]
         # state constraints lower bounds dual: matrix
         state_constraints_lb_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             state_constraints_lb_dual=state_constraints_lb_dual,
         )
         @test CTModels.state_constraints_lb_dual(sol_)(1) == [5.0, 6.0]
         # state constraints upper bounds dual: matrix
         state_constraints_ub_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             state_constraints_ub_dual=state_constraints_ub_dual,
         )
         @test CTModels.state_constraints_ub_dual(sol_)(1) == [5.0, 6.0]
@@ -165,25 +178,53 @@ function test_solution()
         ccld = zeros(3, 1)
         ccld[:, 1] = [1.0, 2.0, 3.0]
         control_constraints_lb_dual = ccld
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             control_constraints_lb_dual=control_constraints_lb_dual,
         )
         @test CTModels.control_constraints_lb_dual(sol_)(1) == 3.0
         # control constraints upper bounds dual: matrix
         control_constraints_ub_dual = ccld
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             control_constraints_ub_dual=control_constraints_ub_dual,
         )
         @test CTModels.control_constraints_ub_dual(sol_)(1) == 3.0
         # variable constraints lower bounds dual: vector
         variable_constraints_lb_dual = [1.0, 2.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             variable_constraints_lb_dual=variable_constraints_lb_dual,
         )
         @test CTModels.variable_constraints_lb_dual(sol_) == [1.0, 2.0]
         # variable constraints upper bounds dual: vector
         variable_constraints_ub_dual = [1.0, 2.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             variable_constraints_ub_dual=variable_constraints_ub_dual,
         )
         @test CTModels.variable_constraints_ub_dual(sol_) == [1.0, 2.0]
@@ -191,15 +232,22 @@ function test_solution()
     @testset "dual from label" begin
         path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
         boundary_constraints_dual = [3.0, 2.0]
-        state_constraints_lb_dual =  [1.0 2.0; 3.0 4.0; 5.0 6.0]
+        state_constraints_lb_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
         state_constraints_ub_dual = -[1.0 2.0; 3.0 4.0; 5.0 6.0]
         control_constraints_lb_dual = zeros(3, 1)
         control_constraints_lb_dual[:, 1] = [1.0, 2.0, 3.0]
         control_constraints_ub_dual = zeros(3, 1)
         control_constraints_ub_dual[:, 1] = -[1.0, 2.0, 3.0]
-        variable_constraints_lb_dual =  [1.0, 2.0]
+        variable_constraints_lb_dual = [1.0, 2.0]
         variable_constraints_ub_dual = -[1.0, 2.0]
-        sol_ = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...,
+        sol_ = CTModels.build_solution(
+            ocp,
+            T,
+            X,
+            U,
+            v,
+            P;
+            kwargs...,
             path_constraints_dual=path_constraints_dual,
             boundary_constraints_dual=boundary_constraints_dual,
             state_constraints_lb_dual=state_constraints_lb_dual,
@@ -215,5 +263,4 @@ function test_solution()
         @test CTModels.dual(sol_, ocp, :control_rg)(1) == 3.0 - (-3.0)
         @test CTModels.dual(sol_, ocp, :variable_rg) == [1.0, 2.0] - (-[1.0, 2.0])
     end
-
 end

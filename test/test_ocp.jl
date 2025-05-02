@@ -293,7 +293,6 @@ function test_ocp()
     @test CTModels.has_mayer_cost(ocp) == true
     @test CTModels.has_lagrange_cost(ocp) == true
 
-
     # -------------------------------------------------------------------------- #
     # Just for printing
     #
@@ -329,5 +328,4 @@ function test_ocp()
         times, state, control, variable, dynamics, objective, constraints, definition
     )
     display(ocp)
-
 end

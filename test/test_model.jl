@@ -100,5 +100,4 @@ function test_model()
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
     display(pre_ocp)
-
 end
