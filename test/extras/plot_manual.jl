@@ -150,7 +150,7 @@ plot(sol; layout=:group, costate_style=:none, control_style=:none)
 
 # layout = :split
 plot(sol; layout=:split)
-plot(sol, :state; layout=:split)
+plot(sol, :state)
 plot(sol, :costate; layout=:split)
 plot(sol, :control; layout=:split)
 plot(sol, :control; layout=:split, control=:norm)
@@ -166,6 +166,15 @@ plot(sol; layout=:split, control_style=:none)
 plot(sol; layout=:split, state_style=:none, control_style=:none)
 plot(sol; layout=:split, state_style=:none, costate_style=:none)
 plot(sol; layout=:split, costate_style=:none, control_style=:none)
+
+# change style
+plot(sol; state_style=(linestyle=:dash, linewidth=1))
+plot(sol; costate_style=(linestyle=:dash, linewidth=1))
+plot(sol; control_style=(linestyle=:dash, linewidth=1))
+plot(sol; state_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
+plot(sol; state_style=(linestyle=:dash, linewidth=1), costate_style=(linestyle=:dash, linewidth=1))
+plot(sol; costate_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
+plot(sol; state_style=:none, costate_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
 nothing
 # plt = plot(sol; size=(700, 450), time=:normalise)
 
