@@ -80,6 +80,8 @@ function __plot_time!(
         ylims=:auto,
         xlabel=t_label,
         label=label,
+        linewidth=2,
+        z_order=:front,
         kwargs...,
     ) # use plot recipe
 
@@ -270,9 +272,6 @@ function __initial_plot(
             do_plot_state   && push!(state_plots, PlotLeaf())
             do_plot_costate && push!(costate_plots, PlotLeaf())
         end
-
-        println("state_plots: ", state_plots)
-        println("costate_plots: ", costate_plots)
 
         # create the control plots
         if do_plot_control
@@ -1220,11 +1219,11 @@ corresponding respectively to the argument `xx` and the argument `yy`.
     y = __get_data_plot(sol, model, yy; time=time)
 
     #
-    #label := recipe_label(sol, xx, yy)
+    # label := recipe_label(sol, xx, yy)
     # color := 1           # default color
-    linestyle := :solid  # default linestyle
-    linewidth := 2       # default linewidth
-    z_order := :front    # default z_order
+    # linestyle := :solid  # default linestyle
+    # linewidth := 2       # default linewidth
+    # z_order := :front    # default z_order
 
     return x, y
 end
