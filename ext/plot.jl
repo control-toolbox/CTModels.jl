@@ -199,12 +199,27 @@ function __initial_plot(
     layout::Symbol,
     control::Symbol,
     model::Union{CTModels.Model,Nothing},
+    state_style::Union{NamedTuple, Symbol},
+    control_style::Union{NamedTuple, Symbol},
+    costate_style::Union{NamedTuple, Symbol},
+    path_style::Union{NamedTuple, Symbol},
+    dual_style::Union{NamedTuple, Symbol},
     kwargs...,
 )
 
     # set the default description if not given and then clean it
     description = description == () ? __description() : description
     description = clean(description)
+
+    # check what to plot
+    do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        description...; 
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style
+    )
 
     # parameters
     n = CTModels.state_dimension(sol)
@@ -214,22 +229,22 @@ function __initial_plot(
         plots = Vector{Plots.Plot}()
         @match control begin
             :components => begin
-                :state ∈ description   && push!(plots, Plots.plot()) # state
-                :costate ∈ description && push!(plots, Plots.plot()) # costate
-                :control ∈ description && push!(plots, Plots.plot()) # control
+                do_plot_state   && push!(plots, Plots.plot()) # state
+                do_plot_costate && push!(plots, Plots.plot()) # costate
+                do_plot_control && push!(plots, Plots.plot()) # control
                 return Plots.plot(plots...; layout=(1, length(plots)), bottommargin=5mm, kwargs...)
             end
             :norm => begin
-                :state ∈ description   && push!(plots, Plots.plot()) # state
-                :costate ∈ description && push!(plots, Plots.plot()) # costate
-                :control ∈ description && push!(plots, Plots.plot()) # control norm
+                do_plot_state   && push!(plots, Plots.plot()) # state
+                do_plot_costate && push!(plots, Plots.plot()) # costate
+                do_plot_control && push!(plots, Plots.plot()) # control norm
                 return Plots.plot(plots...; layout=(1, length(plots)), bottommargin=5mm, kwargs...)
             end
             :all => begin
-                :state ∈ description   && push!(plots, Plots.plot()) # state
-                :costate ∈ description && push!(plots, Plots.plot()) # costate
-                :control ∈ description && push!(plots, Plots.plot()) # control
-                :control ∈ description && push!(plots, Plots.plot()) # control norm
+                do_plot_state   && push!(plots, Plots.plot()) # state
+                do_plot_costate && push!(plots, Plots.plot()) # costate
+                do_plot_control && push!(plots, Plots.plot()) # control
+                do_plot_control && push!(plots, Plots.plot()) # control norm
                 if length(plots) == 4
                     return Plots.plot(plots...; layout=(2, 2), kwargs...)   
                 else
@@ -252,15 +267,15 @@ function __initial_plot(
 
         # create the state and costate plots
         for i in 1:n
-            :state ∈ description   && push!(state_plots, PlotLeaf())
-            :costate ∈ description && push!(costate_plots, PlotLeaf())
+            do_plot_state   && push!(state_plots, PlotLeaf())
+            do_plot_costate && push!(costate_plots, PlotLeaf())
         end
 
         println("state_plots: ", state_plots)
         println("costate_plots: ", costate_plots)
 
         # create the control plots
-        if :control ∈ description
+        if do_plot_control
             l = m
             @match control begin
                 :components => begin
@@ -326,8 +341,8 @@ function __initial_plot(
             path_constraints_plots = Vector{PlotLeaf}()
             path_constraints_dual_plots = Vector{PlotLeaf}()
             for i in 1:nc
-                :cons ∈ description && push!(path_constraints_plots, PlotLeaf())
-                :dual ∈ description && push!(path_constraints_dual_plots, PlotLeaf())
+                do_plot_path && push!(path_constraints_plots, PlotLeaf())
+                do_plot_dual && push!(path_constraints_dual_plots, PlotLeaf())
             end
 
             # assemble the path constraints and dual variables plots
@@ -398,21 +413,40 @@ function __plot!(
     time::Symbol,
     control::Symbol,
     layout::Symbol,
-    time_style::NamedTuple,
-    state_style::NamedTuple,
-    state_bounds_style::NamedTuple,
-    control_style::NamedTuple,
-    control_bounds_style::NamedTuple,
-    costate_style::NamedTuple,
-    path_style::NamedTuple,
-    path_bounds_style::NamedTuple,
-    dual_path_style::NamedTuple,
+    time_style::Union{NamedTuple, Symbol},
+    state_style::Union{NamedTuple, Symbol},
+    state_bounds_style::Union{NamedTuple, Symbol},
+    control_style::Union{NamedTuple, Symbol},
+    control_bounds_style::Union{NamedTuple, Symbol},
+    costate_style::Union{NamedTuple, Symbol},
+    path_style::Union{NamedTuple, Symbol},
+    path_bounds_style::Union{NamedTuple, Symbol},
+    dual_style::Union{NamedTuple, Symbol},
     kwargs...,
 )
 
     # set the default description if not given and then clean it
     description = description == () ? __description() : description
     description = clean(description)
+
+    # check what to plot
+    do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        description...; 
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style
+    )
+
+    # check what to decorate
+    do_decorate_time, do_decorate_state_bounds, do_decorate_control_bounds, do_decorate_path_bounds = do_decorate(
+        model=model,
+        time_style=time_style,
+        state_bounds_style=state_bounds_style,
+        control_bounds_style=control_bounds_style,
+        path_bounds_style=path_bounds_style,
+    )
 
     # add an empty space to the label if the label is not empty
     if solution_label != ""
@@ -440,7 +474,7 @@ function __plot!(
         icur = 1
 
         # state
-        if :state ∈ description
+        if do_plot_state
             __plot_time!(
                 p[icur],
                 sol,
@@ -460,7 +494,7 @@ function __plot!(
         end
 
         # costate
-        if :costate ∈ description
+        if do_plot_costate
             __plot_time!(
                 p[icur],
                 sol,
@@ -480,7 +514,7 @@ function __plot!(
         end
 
         # control
-        if :control ∈ description
+        if do_plot_control
             @match control begin
                 :components => begin
                     __plot_time!(
@@ -566,7 +600,7 @@ function __plot!(
         icur = 1
 
         # state
-        if :state ∈ description
+        if do_plot_state
 
             # index for first state plot
             is = icur
@@ -589,7 +623,7 @@ function __plot!(
             end
 
             # state constraints if model is not nothing
-            if !(model === nothing)
+            if do_decorate_state_bounds
                 cs = CTModels.state_constraints_box(model)
                 for i in 1:length(cs[1])
                     hline!(
@@ -618,7 +652,7 @@ function __plot!(
         end # end state
 
         # costate
-        if :costate ∈ description
+        if do_plot_costate
             for i in 1:n
                 __plot_time!(
                     p[icur],
@@ -637,7 +671,7 @@ function __plot!(
         end # end costate
 
         # control
-        if :control ∈ description
+        if do_plot_control
 
             # index for first control plot
             iu = icur
@@ -717,7 +751,7 @@ function __plot!(
             end
 
             # control constraints if model is not nothing
-            if !(model === nothing) && (control != :norm)
+            if do_decorate_control_bounds && (control != :norm)
                 cu = CTModels.control_constraints_box(model)
                 for i in 1:length(cu[1])
                     hline!(
@@ -757,7 +791,7 @@ function __plot!(
             cp = CTModels.path_constraints_nl(model)
 
             # path constraints
-            if :cons ∈ description 
+            if do_plot_path 
 
                 # index for first path constraints plot
                 ic = icur
@@ -780,33 +814,35 @@ function __plot!(
                 end
 
                 # path constraints bounds
-                for i in 1:nc
-                    hline!(
-                        p[ic + i - 1],
-                        [cp[1][i]];
-                        color=4,
-                        linewidth=1,
-                        label=:none,
-                        z_order=:back,
-                        series_attr...,
-                        path_bounds_style...,
-                    ) # lower bound
-                    hline!(
-                        p[ic + i - 1],
-                        [cp[3][i]];
-                        color=4,
-                        linewidth=1,
-                        label=:none,
-                        z_order=:back,
-                        series_attr...,
-                        path_bounds_style...,
-                    ) # upper bound
+                if do_decorate_path_bounds
+                    for i in 1:nc
+                        hline!(
+                            p[ic + i - 1],
+                            [cp[1][i]];
+                            color=4,
+                            linewidth=1,
+                            label=:none,
+                            z_order=:back,
+                            series_attr...,
+                            path_bounds_style...,
+                        ) # lower bound
+                        hline!(
+                            p[ic + i - 1],
+                            [cp[3][i]];
+                            color=4,
+                            linewidth=1,
+                            label=:none,
+                            z_order=:back,
+                            series_attr...,
+                            path_bounds_style...,
+                        ) # upper bound
+                    end
                 end
 
             end # end path constraints
 
             # dual variables
-            if :dual ∈ description
+            if do_plot_dual
                 for i in 1:nc
                     __plot_time!(
                         p[icur],
@@ -818,7 +854,7 @@ function __plot!(
                         t_label=i==nc ? t_label : "",
                         label="dual " * string(cp[4][i]) * solution_label,
                         series_attr...,
-                        dual_path_style...,
+                        dual_style...,
                     )
                     icur += 1
                 end
@@ -830,7 +866,7 @@ function __plot!(
     end # end layout
 
     # plot vertical lines at the initial and final times if model is not nothing
-    if !(model === nothing)
+    if do_decorate_time
         if time == :normalize || time == :normalise
             t0 = 0.0
             tf = 1.0
@@ -882,20 +918,37 @@ function __plot(
     time::Symbol,
     control::Symbol,
     layout::Symbol,
-    time_style::NamedTuple,
-    state_style::NamedTuple,
-    state_bounds_style::NamedTuple,
-    control_style::NamedTuple,
-    control_bounds_style::NamedTuple,
-    costate_style::NamedTuple,
-    path_style::NamedTuple,
-    path_bounds_style::NamedTuple,
-    dual_path_style::NamedTuple,
-    size=__size_plot(sol, model, control, layout, description...),
+    time_style::Union{NamedTuple, Symbol},
+    state_style::Union{NamedTuple, Symbol},
+    state_bounds_style::Union{NamedTuple, Symbol},
+    control_style::Union{NamedTuple, Symbol},
+    control_bounds_style::Union{NamedTuple, Symbol},
+    costate_style::Union{NamedTuple, Symbol},
+    path_style::Union{NamedTuple, Symbol},
+    path_bounds_style::Union{NamedTuple, Symbol},
+    dual_style::Union{NamedTuple, Symbol},
+    size=__size_plot(
+        sol, model, control, layout, description...;
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style,
+        ),
     kwargs...,
 )
     p = __initial_plot(
-        sol, description...; layout=layout, control=control, model=model, size=size, kwargs...
+        sol, description...; 
+        layout=layout, 
+        control=control, 
+        model=model, 
+        size=size,
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style,
+        kwargs...
     )
 
     return __plot!(
@@ -915,7 +968,7 @@ function __plot(
         time_style=time_style,
         path_style=path_style,
         path_bounds_style=path_bounds_style,
-        dual_path_style=dual_path_style,
+        dual_style=dual_style,
         kwargs...,
     )
 end
@@ -964,7 +1017,7 @@ function Plots.plot!(
         time_style=__plot_style(),
         path_style=__plot_style(),
         path_bounds_style=__plot_style(),
-        dual_path_style=__plot_style(),
+        dual_style=__plot_style(),
         kwargs...,
     )
 end
@@ -989,7 +1042,14 @@ function Plots.plot(
     state_style=__plot_style(),
     control_style=__plot_style(),
     costate_style=__plot_style(),
-    size=__size_plot(sol, nothing, control, layout, description...),
+    size=__size_plot(
+        sol, nothing, control, layout, description...;
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=:none,
+        dual_style=:none,
+        ),
     kwargs...,
 )
     return __plot(
@@ -1008,7 +1068,7 @@ function Plots.plot(
         time_style=__plot_style(),
         path_style=__plot_style(),
         path_bounds_style=__plot_style(),
-        dual_path_style=__plot_style(),
+        dual_style=__plot_style(),
         size=size,
         kwargs...,
     )
@@ -1038,15 +1098,15 @@ function Plots.plot!(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style::NamedTuple=__plot_style(),
-    state_bounds_style::NamedTuple=__plot_style(),
-    control_style::NamedTuple=__plot_style(),
-    control_bounds_style::NamedTuple=__plot_style(),
-    costate_style::NamedTuple=__plot_style(),
-    time_style::NamedTuple=__plot_style(),
-    path_style::NamedTuple=__plot_style(),
-    path_bounds_style::NamedTuple=__plot_style(),
-    dual_path_style::NamedTuple=__plot_style(),
+    state_style::Union{NamedTuple, Symbol}=__plot_style(),
+    state_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    control_style::Union{NamedTuple, Symbol}=__plot_style(),
+    control_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    costate_style::Union{NamedTuple, Symbol}=__plot_style(),
+    time_style::Union{NamedTuple, Symbol}=__plot_style(),
+    path_style::Union{NamedTuple, Symbol}=__plot_style(),
+    path_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    dual_style::Union{NamedTuple, Symbol}=__plot_style(),
     kwargs...,
 )
 
@@ -1068,7 +1128,7 @@ function Plots.plot!(
         time_style=time_style,
         path_style=path_style,
         path_bounds_style=path_bounds_style,
-        dual_path_style=dual_path_style,
+        dual_style=dual_style,
         kwargs...,
     )
 end
@@ -1092,16 +1152,23 @@ function Plots.plot(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style::NamedTuple=__plot_style(),
-    state_bounds_style::NamedTuple=__plot_style(),
-    control_style::NamedTuple=__plot_style(),
-    control_bounds_style::NamedTuple=__plot_style(),
-    costate_style::NamedTuple=__plot_style(),
-    time_style::NamedTuple=__plot_style(),
-    path_style::NamedTuple=__plot_style(),
-    path_bounds_style::NamedTuple=__plot_style(),
-    dual_path_style::NamedTuple=__plot_style(),
-    size=__size_plot(sol, model, control, layout, description...),
+    state_style::Union{NamedTuple, Symbol}=__plot_style(),
+    state_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    control_style::Union{NamedTuple, Symbol}=__plot_style(),
+    control_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    costate_style::Union{NamedTuple, Symbol}=__plot_style(),
+    time_style::Union{NamedTuple, Symbol}=__plot_style(),
+    path_style::Union{NamedTuple, Symbol}=__plot_style(),
+    path_bounds_style::Union{NamedTuple, Symbol}=__plot_style(),
+    dual_style::Union{NamedTuple, Symbol}=__plot_style(),
+    size=__size_plot(
+        sol, model, control, layout, description...;
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style,
+        ),
     kwargs...,
 )
     return __plot(
@@ -1120,7 +1187,7 @@ function Plots.plot(
         time_style=time_style,
         path_style=path_style,
         path_bounds_style=path_bounds_style,
-        dual_path_style=dual_path_style,
+        dual_style=dual_style,
         size=size,
         kwargs...,
     )

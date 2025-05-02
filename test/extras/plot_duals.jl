@@ -61,16 +61,43 @@ end;
 
 sol = SOL(ocp, t0, tf);
 
+# from description
 plt = plot(sol, ocp)
+plt = plot(sol, ocp; layout=:group)
 plt = plot(sol, ocp, :state)
 plt = plot(sol, ocp, :state, :costate)
 plt = plot(sol, ocp, :state, :control)
-plt = plot(sol, ocp, :state, :control, :constraint)
+plt = plot(sol, ocp, :state, :control, :path)
 plt = plot(sol, ocp, :costate)
 plt = plot(sol, ocp, :control)
-plt = plot(sol, ocp, :constraint)
+plt = plot(sol, ocp, :path)
 plt = plot(sol, ocp, :dual)
-plt = plot(sol, ocp, :constraint, :dual)
+plt = plot(sol, ocp, :path, :dual)
+
+# style is :none
+plot(sol, ocp; layout=:split, state_style=:none)
+plot(sol, ocp; layout=:split, costate_style=:none)
+plot(sol, ocp; layout=:split, control_style=:none)
+plot(sol, ocp; layout=:split, path_style=:none)
+plot(sol, ocp; layout=:split, dual_style=:none)
+plot(sol, ocp; layout=:split, state_style=:none, control_style=:none)
+plot(sol, ocp; layout=:split, state_style=:none, costate_style=:none)
+plot(sol, ocp; layout=:split, costate_style=:none, control_style=:none)
+plot(sol, ocp; layout=:split, path_style=:none, control_style=:none)
+plot(sol, ocp; layout=:split, dual_style=:none, control_style=:none)
+
+# no decorations
+plot(sol, ocp; layout=:split, time_style=:none)
+plot(sol, ocp; layout=:split, state_bounds_style=:none)
+plot(sol, ocp; layout=:split, control_bounds_style=:none)
+plot(sol, ocp; layout=:split, path_bounds_style=:none)
+plot(sol, ocp; layout=:split, state_bounds_style=:none, control_bounds_style=:none)
+plot(sol, ocp; layout=:split, state_bounds_style=:none, path_bounds_style=:none)
+plot(sol, ocp; layout=:split, control_bounds_style=:none, path_bounds_style=:none)
+plot(sol, ocp; layout=:split, state_bounds_style=:none, control_bounds_style=:none, path_bounds_style=:none)
+plot(sol, ocp; layout=:split, time_style=:none, state_bounds_style=:none)
+plot(sol, ocp; layout=:split, time_style=:none, control_bounds_style=:none)
+plot(sol, ocp; layout=:split, time_style=:none, control_bounds_style=:none, path_bounds_style=:none)
 
 # mixed_con_dual = CTModels.dual(sol, ocp, :mixed_con)
 # plot(range(t0, tf; length=101), mixed_con_dual)

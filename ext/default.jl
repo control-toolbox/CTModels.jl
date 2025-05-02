@@ -29,25 +29,8 @@ $(TYPEDSIGNATURES)
 __description() = (:state, :states,
     :costate, :costates, 
     :control, :controls, 
-    :constraint, :constraints, :cons,
+    :constraint, :constraints, :cons, :path,
     :dual, :duals)
-
-"""
-$(TYPEDSIGNATURES)
-
-"""
-function clean(description)
-    # remove the nouns in plural form
-    description = replace(description, 
-        :states => :state, 
-        :costates => :costate, 
-        :controls => :control, 
-        :constraints => :cons,
-        :constraint => :cons, 
-        :duals => :dual)
-    # remove the duplicates
-    return tuple(Set(description)...)
-end
 
 """
 $(TYPEDSIGNATURES)
@@ -59,19 +42,34 @@ function __size_plot(
     model::Union{CTModels.Model,Nothing},
     control::Symbol,
     layout::Symbol,
-    description::Symbol...
+    description::Symbol...;
+    state_style::Union{NamedTuple, Symbol},
+    control_style::Union{NamedTuple, Symbol},
+    costate_style::Union{NamedTuple, Symbol},
+    path_style::Union{NamedTuple, Symbol},
+    dual_style::Union{NamedTuple, Symbol},
 )
 
     # set the default description if not given and then clean it
     description = description == () ? __description() : description
     description = clean(description)
 
+    # check what to plot
+    do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        description...; 
+        state_style=state_style,
+        control_style=control_style,
+        costate_style=costate_style,
+        path_style=path_style,
+        dual_style=dual_style
+    )
+
     #
     if layout == :group
         nb_plots = 0
-        nb_plots += :state ∈ description ? 1 : 0
-        nb_plots += :costate ∈ description ? 1 : 0
-        if :control in description
+        nb_plots += do_plot_state ? 1 : 0
+        nb_plots += do_plot_costate ? 1 : 0
+        if do_plot_control
             if control == :components || control == :norm
                 nb_plots += 1
             elseif control === :all
@@ -98,9 +96,9 @@ function __size_plot(
         end
         nc = model === nothing ? 0 : CTModels.dim_path_constraints_nl(model)
         nb_lines = 0
-        nb_lines += (:state ∈ description || :costate ∈ description) ? n : 0
-        nb_lines += :control ∈ description ? l : 0
-        nb_lines += (:cons ∈ description || :dual ∈ description) ? nc : 0
+        nb_lines += (do_plot_state || do_plot_costate) ? n : 0
+        nb_lines += do_plot_control ? l : 0
+        nb_lines += (do_plot_path || do_plot_dual) ? nc : 0
         if nb_lines==1
             return (600, 280)
         elseif nb_lines==2
