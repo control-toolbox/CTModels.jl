@@ -26,11 +26,22 @@ __time_normalization() = :default
 $(TYPEDSIGNATURES)
 
 """
-__description() = (:state, :states,
-    :costate, :costates, 
-    :control, :controls, 
-    :constraint, :constraints, :cons, :path,
-    :dual, :duals)
+function __description()
+    (
+        :state,
+        :states,
+        :costate,
+        :costates,
+        :control,
+        :controls,
+        :constraint,
+        :constraints,
+        :cons,
+        :path,
+        :dual,
+        :duals,
+    )
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -43,11 +54,11 @@ function __size_plot(
     control::Symbol,
     layout::Symbol,
     description::Symbol...;
-    state_style::Union{NamedTuple, Symbol},
-    control_style::Union{NamedTuple, Symbol},
-    costate_style::Union{NamedTuple, Symbol},
-    path_style::Union{NamedTuple, Symbol},
-    dual_style::Union{NamedTuple, Symbol},
+    state_style::Union{NamedTuple,Symbol},
+    control_style::Union{NamedTuple,Symbol},
+    costate_style::Union{NamedTuple,Symbol},
+    path_style::Union{NamedTuple,Symbol},
+    dual_style::Union{NamedTuple,Symbol},
 )
 
     # set the default description if not given and then clean it
@@ -56,12 +67,12 @@ function __size_plot(
 
     # check what to plot
     do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
-        description...; 
+        description...;
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
         path_style=path_style,
-        dual_style=dual_style
+        dual_style=dual_style,
     )
 
     #
@@ -103,11 +114,10 @@ function __size_plot(
             return (600, 280)
         elseif nb_lines==2
             return (600, 420)
-        else 
+        else
             return (600, 140 * nb_lines)
         end
     end
-
 end
 
 """
