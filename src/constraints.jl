@@ -342,9 +342,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get a labelled constraint from the model.
+Get a labelled constraint from the model. Returns a tuple of the form
+`(type, f, lb, ub)` where `type` is the type of the constraint, `f` is the function
+of the constraint, `lb` is the lower bound of the constraint and `ub` is the upper
+bound of the constraint. 
+
+The function returns an exception if the label is not found in the model.
 """
-function constraint(model::Model, label::Symbol)::Function # not type stable
+function constraint(model::Model, label::Symbol)::Tuple # not type stable
 
     # check if the label is in the path constraints
     cp = path_constraints_nl(model)
@@ -357,7 +362,11 @@ function constraint(model::Model, label::Symbol)::Function # not type stable
             cp[2](r_, t, x, u, v)
             r .= r_[indices]
         end
-        return to_out_of_place(fc!, length(indices))
+        return (:path, # type of the constraint
+            to_out_of_place(fc!, length(indices)), # function
+            length(indices)==1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
+            length(indices)==1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
+            )
     end
 
     # check if the label is in the boundary constraints
@@ -371,7 +380,11 @@ function constraint(model::Model, label::Symbol)::Function # not type stable
             cp[2](r_, x0, xf, v)
             r .= r_[indices]
         end
-        return to_out_of_place(fc!, length(indices))
+        return (:boundary, # type of the constraint
+            to_out_of_place(fc!, length(indices)),
+            length(indices)==1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
+            length(indices)==1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
+            )
     end
 
     # check if the label is in the state constraints
@@ -379,16 +392,22 @@ function constraint(model::Model, label::Symbol)::Function # not type stable
     labels = cp[4] # vector of labels
     if label in labels
         # get all the indices of the label
-        indices = Int[]
+        indices_state = Int[]
+        indices_bound = Int[]
         for i in eachindex(labels)
             if labels[i] == label
-                push!(indices, cp[2][i])
+                push!(indices_state, cp[2][i])
+                push!(indices_bound, i)
             end
         end
         fc = (t, x, u, v) -> begin
-            length(indices) == 1 ? x[indices[1]] : x[indices]
+            length(indices_state) == 1 ? x[indices_state[1]] : x[indices_state]
         end
-        return fc
+        return (:state, # type of the constraint
+            fc,
+            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
+            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            )
     end
 
     # check if the label is in the control constraints
@@ -396,16 +415,22 @@ function constraint(model::Model, label::Symbol)::Function # not type stable
     labels = cp[4] # vector of labels
     if label in labels
         # get all the indices of the label
-        indices = Int[]
+        indices_state = Int[]
+        indices_bound = Int[]
         for i in eachindex(labels)
             if labels[i] == label
-                push!(indices, cp[2][i])
+                push!(indices_state, cp[2][i])
+                push!(indices_bound, i)
             end
         end
         fc = (t, x, u, v) -> begin
-            length(indices) == 1 ? u[indices[1]] : u[indices]
+            length(indices_state) == 1 ? u[indices_state[1]] : u[indices_state]
         end
-        return fc
+        return (:control, # type of the constraint
+            fc,
+            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
+            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            )
     end
 
     # check if the label is in the variable constraints
@@ -413,16 +438,25 @@ function constraint(model::Model, label::Symbol)::Function # not type stable
     labels = cp[4] # vector of labels
     if label in labels
         # get all the indices of the label
-        indices = Int[]
+        indices_state = Int[]
+        indices_bound = Int[]
         for i in eachindex(labels)
             if labels[i] == label
-                push!(indices, cp[2][i])
+                push!(indices_state, cp[2][i])
+                push!(indices_bound, i)
             end
         end
-        fc = (t, x, u, v) -> begin
-            length(indices) == 1 ? v[indices[1]] : v[indices]
+        fc = (x0, xf, v) -> begin
+            length(indices_state) == 1 ? v[indices_state[1]] : v[indices_state]
         end
-        return fc
+        return (:variable, # type of the constraint
+            fc,
+            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
+            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            )
     end
+    
+    # return an exception if the label is not found
+    return CTBase.IncorrectArgument("Label $label not found in the model.")
 
 end
