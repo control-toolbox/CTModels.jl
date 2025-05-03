@@ -1,6 +1,7 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
+CTParser = "32681960-a1b1-40db-9bff-a1ca817385d1"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
