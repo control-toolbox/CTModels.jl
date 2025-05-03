@@ -337,3 +337,92 @@ Return the dimension of variable box constraints.
 function dim_variable_constraints_box(model::ConstraintsModel)::Dimension
     return length(variable_constraints_box(model)[1])
 end
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDSIGNATURES)
+
+Get a labelled constraint from the model.
+"""
+function constraint(model::Model, label::Symbol)::Function # not type stable
+
+    # check if the label is in the path constraints
+    cp = path_constraints_nl(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        fc! = (r, t, x, u, v) -> begin
+            r_ = zeros(length(cp[1]))
+            cp[2](r_, t, x, u, v)
+            r .= r_[indices]
+        end
+        return to_out_of_place(fc!, length(indices))
+    end
+
+    # check if the label is in the boundary constraints
+    cp = boundary_constraints_nl(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = findall(x -> x == label, labels)
+        fc! = (r, x0, xf, v) -> begin
+            r_ = zeros(length(cp[1]))
+            cp[2](r_, x0, xf, v)
+            r .= r_[indices]
+        end
+        return to_out_of_place(fc!, length(indices))
+    end
+
+    # check if the label is in the state constraints
+    cp = state_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = Int[]
+        for i in eachindex(labels)
+            if labels[i] == label
+                push!(indices, cp[2][i])
+            end
+        end
+        fc = (t, x, u, v) -> begin
+            length(indices) == 1 ? x[indices[1]] : x[indices]
+        end
+        return fc
+    end
+
+    # check if the label is in the control constraints
+    cp = control_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = Int[]
+        for i in eachindex(labels)
+            if labels[i] == label
+                push!(indices, cp[2][i])
+            end
+        end
+        fc = (t, x, u, v) -> begin
+            length(indices) == 1 ? u[indices[1]] : u[indices]
+        end
+        return fc
+    end
+
+    # check if the label is in the variable constraints
+    cp = variable_constraints_box(model)
+    labels = cp[4] # vector of labels
+    if label in labels
+        # get all the indices of the label
+        indices = Int[]
+        for i in eachindex(labels)
+            if labels[i] == label
+                push!(indices, cp[2][i])
+            end
+        end
+        fc = (t, x, u, v) -> begin
+            length(indices) == 1 ? v[indices[1]] : v[indices]
+        end
+        return fc
+    end
+
+end
