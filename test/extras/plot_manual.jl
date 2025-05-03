@@ -2,7 +2,6 @@ using CTModels
 using Plots
 
 function get_solution()
-
     FUN = true
 
     # create a pre-model
@@ -171,10 +170,27 @@ plot(sol; layout=:split, costate_style=:none, control_style=:none)
 plot(sol; state_style=(linestyle=:dash, linewidth=1))
 plot(sol; costate_style=(linestyle=:dash, linewidth=1))
 plot(sol; control_style=(linestyle=:dash, linewidth=1))
-plot(sol; state_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
-plot(sol; state_style=(linestyle=:dash, linewidth=1), costate_style=(linestyle=:dash, linewidth=1))
-plot(sol; costate_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
-plot(sol; state_style=:none, costate_style=(linestyle=:dash, linewidth=1), control_style=(linestyle=:dash, linewidth=1))
+plot(
+    sol;
+    state_style=(linestyle=:dash, linewidth=1),
+    control_style=(linestyle=:dash, linewidth=1),
+)
+plot(
+    sol;
+    state_style=(linestyle=:dash, linewidth=1),
+    costate_style=(linestyle=:dash, linewidth=1),
+)
+plot(
+    sol;
+    costate_style=(linestyle=:dash, linewidth=1),
+    control_style=(linestyle=:dash, linewidth=1),
+)
+plot(
+    sol;
+    state_style=:none,
+    costate_style=(linestyle=:dash, linewidth=1),
+    control_style=(linestyle=:dash, linewidth=1),
+)
 nothing
 # plt = plot(sol; size=(700, 450), time=:normalise)
 

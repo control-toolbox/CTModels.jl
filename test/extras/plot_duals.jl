@@ -94,10 +94,24 @@ plot(sol, ocp; layout=:split, path_bounds_style=:none)
 plot(sol, ocp; layout=:split, state_bounds_style=:none, control_bounds_style=:none)
 plot(sol, ocp; layout=:split, state_bounds_style=:none, path_bounds_style=:none)
 plot(sol, ocp; layout=:split, control_bounds_style=:none, path_bounds_style=:none)
-plot(sol, ocp; layout=:split, state_bounds_style=:none, control_bounds_style=:none, path_bounds_style=:none)
+plot(
+    sol,
+    ocp;
+    layout=:split,
+    state_bounds_style=:none,
+    control_bounds_style=:none,
+    path_bounds_style=:none,
+)
 plot(sol, ocp; layout=:split, time_style=:none, state_bounds_style=:none)
 plot(sol, ocp; layout=:split, time_style=:none, control_bounds_style=:none)
-plot(sol, ocp; layout=:split, time_style=:none, control_bounds_style=:none, path_bounds_style=:none)
+plot(
+    sol,
+    ocp;
+    layout=:split,
+    time_style=:none,
+    control_bounds_style=:none,
+    path_bounds_style=:none,
+)
 
 # mixed_con_dual = CTModels.dual(sol, ocp, :mixed_con)
 # plot(range(t0, tf; length=101), mixed_con_dual)
