@@ -131,5 +131,4 @@ function test_constraints()
     # test with :variable constraint and range
     CTModels.constraint!(ocp_set, :variable; rg=1:1, lb=[1], ub=[1], label=:variable_rg)
     @test ocp_set.constraints[:variable_rg] == (:variable, 1:1, [1], [1])
-
 end

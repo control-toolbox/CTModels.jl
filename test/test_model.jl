@@ -59,15 +59,21 @@ function test_model()
     f_boundary(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
 
     CTModels.constraint!(pre_ocp, :path; f=f_path, lb=[-0, -1], ub=[1, 2], label=:path)
-    CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=[-2, -3], ub=[3, 4], label=:boundary)
+    CTModels.constraint!(
+        pre_ocp, :boundary; f=f_boundary, lb=[-2, -3], ub=[3, 4], label=:boundary
+    )
     CTModels.constraint!(pre_ocp, :state; rg=1:2, lb=[-4, -5], ub=[5, 6], label=:state)
     CTModels.constraint!(pre_ocp, :control; rg=1:2, lb=[-6, -7], ub=[7, 8], label=:control)
-    CTModels.constraint!(pre_ocp, :variable; rg=1:2, lb=[-8, -9], ub=[9, 10], label=:variable)
+    CTModels.constraint!(
+        pre_ocp, :variable; rg=1:2, lb=[-8, -9], ub=[9, 10], label=:variable
+    )
 
     f_path_scalar(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
     f_boundary_scalar(r, x0, xf, v) = r .= x0[1] + v[1] * (xf[1] - x0[1])
     CTModels.constraint!(pre_ocp, :path; f=f_path_scalar, lb=-10, ub=11, label=:path_scalar)
-    CTModels.constraint!(pre_ocp, :boundary; f=f_boundary_scalar, lb=-11, ub=12, label=:boundary_scalar)
+    CTModels.constraint!(
+        pre_ocp, :boundary; f=f_boundary_scalar, lb=-11, ub=12, label=:boundary_scalar
+    )
     CTModels.constraint!(pre_ocp, :state; rg=1, lb=-12, ub=13, label=:state_scalar)
     CTModels.constraint!(pre_ocp, :control; rg=1, lb=-13, ub=14, label=:control_scalar)
     CTModels.constraint!(pre_ocp, :variable; rg=1, lb=-14, ub=15, label=:variable_scalar)
@@ -96,7 +102,8 @@ function test_model()
     @test CTModels.constraint(model, :control)[2](t, x, u, v) == u
     @test CTModels.constraint(model, :variable)[2](x0, xf, v) == v
     @test CTModels.constraint(model, :path_scalar)[2](t, x, u, v) == x[1] + u[1] + v[1] + t
-    @test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) == x0[1] + v[1] * (xf[1] - x0[1])
+    @test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) ==
+        x0[1] + v[1] * (xf[1] - x0[1])
     @test CTModels.constraint(model, :state_scalar)[2](t, x, u, v) == x[1]
     @test CTModels.constraint(model, :control_scalar)[2](t, x, u, v) == u[1]
     @test CTModels.constraint(model, :variable_scalar)[2](x0, xf, v) == v[1]
@@ -175,5 +182,4 @@ function test_model()
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
     display(pre_ocp)
-
 end
