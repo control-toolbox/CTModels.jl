@@ -104,7 +104,9 @@ function test_plot()
     @test plot(sol, ocp; layout=:group, control=:components) isa Plots.Plot
     @test plot(sol, ocp; layout=:group, control=:norm) isa Plots.Plot
     @test plot(sol, ocp; layout=:group, control=:all) isa Plots.Plot
-    @test_throws CTBase.IncorrectArgument plot(sol, ocp; layout=:group, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot(
+        sol, ocp; layout=:group, control=:wrong_choice
+    )
 
     #
     @test plot(sol; layout=:split, control=:components) isa Plots.Plot
@@ -115,7 +117,9 @@ function test_plot()
     @test plot(sol, ocp; layout=:split, control=:components) isa Plots.Plot
     @test plot(sol, ocp; layout=:split, control=:norm) isa Plots.Plot
     @test plot(sol, ocp; layout=:split, control=:all) isa Plots.Plot
-    @test_throws CTBase.IncorrectArgument plot(sol, ocp; layout=:split, control=:wrong_choice)
+    @test_throws CTBase.IncorrectArgument plot(
+        sol, ocp; layout=:split, control=:wrong_choice
+    )
 
     #
     @test plot(sol; layout=:split) isa Plots.Plot
@@ -217,5 +221,4 @@ function test_plot()
     @test plot!(plt, sol, ocp; layout=:group) isa Plots.Plot
 
     @test_throws CTBase.IncorrectArgument plot!(plt, sol, ocp; layout=:wrong_choice)
-
 end

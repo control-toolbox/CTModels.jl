@@ -362,11 +362,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
             cp[2](r_, t, x, u, v)
             r .= r_[indices]
         end
-        return (:path, # type of the constraint
+        return (
+            :path, # type of the constraint
             to_out_of_place(fc!, length(indices)), # function
-            length(indices)==1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
-            length(indices)==1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
-            )
+            length(indices) == 1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
+            length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
+        )
     end
 
     # check if the label is in the boundary constraints
@@ -380,11 +381,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
             cp[2](r_, x0, xf, v)
             r .= r_[indices]
         end
-        return (:boundary, # type of the constraint
+        return (
+            :boundary, # type of the constraint
             to_out_of_place(fc!, length(indices)),
             length(indices)==1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
-            length(indices)==1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
-            )
+            length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
+        )
     end
 
     # check if the label is in the state constraints
@@ -400,14 +402,16 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
                 push!(indices_bound, i)
             end
         end
-        fc = (t, x, u, v) -> begin
-            length(indices_state) == 1 ? x[indices_state[1]] : x[indices_state]
-        end
-        return (:state, # type of the constraint
+        fc =
+            (t, x, u, v) -> begin
+                length(indices_state) == 1 ? x[indices_state[1]] : x[indices_state]
+            end
+        return (
+            :state, # type of the constraint
             fc,
             length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
-            )
+            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+        )
     end
 
     # check if the label is in the control constraints
@@ -423,14 +427,16 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
                 push!(indices_bound, i)
             end
         end
-        fc = (t, x, u, v) -> begin
-            length(indices_state) == 1 ? u[indices_state[1]] : u[indices_state]
-        end
-        return (:control, # type of the constraint
+        fc =
+            (t, x, u, v) -> begin
+                length(indices_state) == 1 ? u[indices_state[1]] : u[indices_state]
+            end
+        return (
+            :control, # type of the constraint
             fc,
             length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
-            )
+            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+        )
     end
 
     # check if the label is in the variable constraints
@@ -446,17 +452,18 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
                 push!(indices_bound, i)
             end
         end
-        fc = (x0, xf, v) -> begin
-            length(indices_state) == 1 ? v[indices_state[1]] : v[indices_state]
-        end
-        return (:variable, # type of the constraint
+        fc =
+            (x0, xf, v) -> begin
+                length(indices_state) == 1 ? v[indices_state[1]] : v[indices_state]
+            end
+        return (
+            :variable, # type of the constraint
             fc,
             length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound)==1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
-            )
+            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+        )
     end
-    
+
     # return an exception if the label is not found
     return CTBase.IncorrectArgument("Label $label not found in the model.")
-
 end
