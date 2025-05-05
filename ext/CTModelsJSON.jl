@@ -64,18 +64,24 @@ function CTModels.import_ocp_solution(
     X = stack(blob["state"]; dims=1)
     if X isa Vector # if X is a Vector, convert it to a Matrix
         X = Matrix{Float64}(reduce(hcat, X)')
+    else
+        X = Matrix{Float64}(X)
     end
 
     # get control
     U = stack(blob["control"]; dims=1)
     if U isa Vector # if U is a Vector, convert it to a Matrix
         U = Matrix{Float64}(reduce(hcat, U)')
+    else
+        U = Matrix{Float64}(U)
     end
 
     # get costate
     P = stack(blob["costate"]; dims=1)
     if P isa Vector # if P is a Vector, convert it to a Matrix
         P = Matrix{Float64}(reduce(hcat, P)')
+    else
+        P = Matrix{Float64}(P)
     end
 
     # get dual path constraints: convert to matrix
@@ -86,6 +92,8 @@ function CTModels.import_ocp_solution(
     end
     if path_constraints_dual isa Vector # if path_constraints_dual is a Vector, convert it to a Matrix
         path_constraints_dual = Matrix{Float64}(reduce(hcat, path_constraints_dual)')
+    elseif !isnothing(path_constraints_dual)
+        path_constraints_dual = Matrix{Float64}(path_constraints_dual)
     end
 
     # get state constraints (and dual): convert to matrix
@@ -98,6 +106,8 @@ function CTModels.import_ocp_solution(
         state_constraints_lb_dual = Matrix{Float64}(
             reduce(hcat, state_constraints_lb_dual)'
         )
+    elseif !isnothing(state_constraints_lb_dual)
+        state_constraints_lb_dual = Matrix{Float64}(state_constraints_lb_dual)
     end
     state_constraints_ub_dual = if isnothing(blob["state_constraints_ub_dual"])
         nothing
@@ -108,6 +118,8 @@ function CTModels.import_ocp_solution(
         state_constraints_ub_dual = Matrix{Float64}(
             reduce(hcat, state_constraints_ub_dual)'
         )
+    elseif !isnothing(state_constraints_ub_dual)
+        state_constraints_ub_dual = Matrix{Float64}(state_constraints_ub_dual)
     end
 
     # get control constraints (and dual): convert to matrix
@@ -120,6 +132,8 @@ function CTModels.import_ocp_solution(
         control_constraints_lb_dual = Matrix{Float64}(
             reduce(hcat, control_constraints_lb_dual)'
         )
+    elseif !isnothing(control_constraints_lb_dual)
+        control_constraints_lb_dual = Matrix{Float64}(control_constraints_lb_dual)
     end
     control_constraints_ub_dual = if isnothing(blob["control_constraints_ub_dual"])
         nothing
@@ -130,14 +144,25 @@ function CTModels.import_ocp_solution(
         control_constraints_ub_dual = Matrix{Float64}(
             reduce(hcat, control_constraints_ub_dual)'
         )
+    elseif !isnothing(control_constraints_ub_dual)
+        control_constraints_ub_dual = Matrix{Float64}(control_constraints_ub_dual)
     end
 
     # get dual of boundary constraints: no conversion needed
     boundary_constraints_dual = blob["boundary_constraints_dual"]
+    if !isnothing(boundary_constraints_dual)
+        boundary_constraints_dual = Vector{Float64}(boundary_constraints_dual)
+    end
 
     # get variable constraints dual: no conversion needed
     variable_constraints_lb_dual = blob["variable_constraints_lb_dual"]
+    if !isnothing(variable_constraints_lb_dual)
+        variable_constraints_lb_dual = Vector{Float64}(blob["variable_constraints_lb_dual"])
+    end
     variable_constraints_ub_dual = blob["variable_constraints_ub_dual"]
+    if !isnothing(variable_constraints_ub_dual)
+        variable_constraints_ub_dual = Vector{Float64}(blob["variable_constraints_ub_dual"])
+    end
 
     # NB. convert vect{vect} to matrix
     return CTModels.build_solution(

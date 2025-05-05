@@ -15,7 +15,7 @@ function solution_example_path_constraints()
             [-3, 1] ≤ [x(t) + 1, u(t) + 1] ≤ [1, 2.5], (2)
             ẋ(t) == u(t)
             ∫(-u(t)) → min
-        end true;
+        end;
 
         return ocp
     end

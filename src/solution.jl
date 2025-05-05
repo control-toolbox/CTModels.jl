@@ -140,7 +140,7 @@ function build_solution(
     fscbd = if isnothing(state_constraints_lb_dual)
         nothing
     else
-        if (dim_state_constraints_box(ocp) == 1)
+        if (dim_x == 1)
             deepcopy(t -> state_constraints_lb_dual_fun(t)[1])
         else
             deepcopy(t -> state_constraints_lb_dual_fun(t))
@@ -157,7 +157,7 @@ function build_solution(
     fscud = if isnothing(state_constraints_ub_dual)
         nothing
     else
-        if (dim_state_constraints_box(ocp) == 1)
+        if (dim_x == 1)
             deepcopy(t -> state_constraints_ub_dual_fun(t)[1])
         else
             deepcopy(t -> state_constraints_ub_dual_fun(t))
@@ -174,7 +174,7 @@ function build_solution(
     fccbd = if isnothing(control_constraints_lb_dual)
         nothing
     else
-        if (dim_control_constraints_box(ocp) == 1)
+        if (dim_u == 1)
             deepcopy(t -> control_constraints_lb_dual_fun(t)[1])
         else
             deepcopy(t -> control_constraints_lb_dual_fun(t))
@@ -191,7 +191,7 @@ function build_solution(
     fccud = if isnothing(control_constraints_ub_dual)
         nothing
     else
-        if (dim_control_constraints_box(ocp) == 1)
+        if (dim_u == 1)
             deepcopy(t -> control_constraints_ub_dual_fun(t)[1])
         else
             deepcopy(t -> control_constraints_ub_dual_fun(t))
