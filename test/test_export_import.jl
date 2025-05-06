@@ -39,7 +39,7 @@ function test_export_import()
         x(0) == [-1, 0]
         x(1) == [0, 0]
         ẋ(t) == [x₂(t), u(t)]
-        ∫( 0.5u(t)^2 ) → min
+        ∫(0.5u(t)^2) → min
     end;
 
     sol = CTDirect.solve(ocp)
@@ -53,5 +53,4 @@ function test_export_import()
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
     sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
-
 end
