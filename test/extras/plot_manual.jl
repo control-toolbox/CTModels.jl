@@ -148,7 +148,7 @@ plot(sol; layout=:group, state_style=:none, costate_style=:none)
 plot(sol; layout=:group, costate_style=:none, control_style=:none)
 
 # layout = :split
-plot(sol; layout=:split)
+plot(sol; layout=:split, label="tat")
 plot(sol, :state)
 plot(sol, :costate; layout=:split)
 plot(sol, :control; layout=:split)

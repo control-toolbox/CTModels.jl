@@ -53,7 +53,7 @@ function __plot_time!(
     i::Int,
     time::Symbol;
     t_label::String,
-    label::String,
+    y_label::String="",
     kwargs...,
 )
 
@@ -79,7 +79,7 @@ function __plot_time!(
         time;
         ylims=:auto,
         xlabel=t_label,
-        label=label,
+        ylabel=y_label,
         linewidth=2,
         z_order=:front,
         kwargs...,
@@ -181,7 +181,7 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     kwargs_plot = depth == 0 ? kwargs : ()
     ps = @match node.layout begin
         :row => plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
-        :column => plot(subplots...; layout=(size(subplots, 1), 1), kwargs_plot...)
+        :column => plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
         _ => plot(subplots...; layout=node.layout, kwargs_plot...)
     end
 
@@ -467,7 +467,7 @@ function __plot!(
 
     # add an empty space to the label if the label is not empty
     if solution_label != ""
-        solution_label = " " * solution_label
+        @warn "Deprecated: `solution_label` keyword argument is replaced by `label`."
     end
 
     #
@@ -479,7 +479,8 @@ function __plot!(
     t_label = CTModels.time_name(sol)
 
     #
-    title_font = font(12, Plots.default(:fontfamily))
+    title_font = font(10, Plots.default(:fontfamily))
+    label_font_size = 10
 
     # split series attributes 
     series_attr = __keep_series_attributes(; kwargs...)
@@ -500,7 +501,7 @@ function __plot!(
                 :state,
                 time;
                 t_label=t_label,
-                labels=x_labels .* solution_label,
+                labels=x_labels,
                 title="state",
                 titlefont=title_font,
                 lims=:auto,
@@ -520,7 +521,7 @@ function __plot!(
                 :costate,
                 time;
                 t_label=t_label,
-                labels="p" .* x_labels .* solution_label,
+                labels="p" .* x_labels,
                 title="costate",
                 titlefont=title_font,
                 lims=:auto,
@@ -542,7 +543,7 @@ function __plot!(
                         :control,
                         time;
                         t_label=t_label,
-                        labels=u_labels .* solution_label,
+                        labels=u_labels,
                         title="control",
                         titlefont=title_font,
                         lims=:auto,
@@ -560,7 +561,7 @@ function __plot!(
                         -1,
                         time;
                         t_label=t_label,
-                        label="‖" * u_label * "‖" .* solution_label,
+                        label="‖" * u_label * "‖",
                         title="control norm",
                         titlefont=title_font,
                         lims=:auto,
@@ -578,7 +579,7 @@ function __plot!(
                         :control,
                         time;
                         t_label=t_label,
-                        labels=u_labels .* solution_label,
+                        labels=u_labels,
                         title="control",
                         titlefont=title_font,
                         lims=:auto,
@@ -594,7 +595,7 @@ function __plot!(
                         -1,
                         time;
                         t_label=t_label,
-                        label="‖" * u_label * "‖" .* solution_label,
+                        label="‖" * u_label * "‖",
                         title="control norm",
                         titlefont=title_font,
                         lims=:auto,
@@ -624,6 +625,7 @@ function __plot!(
 
             # state trajectory
             for i in 1:n
+                title = i==1 ? "state" : ""
                 __plot_time!(
                     p[icur],
                     sol,
@@ -632,7 +634,12 @@ function __plot!(
                     i,
                     time;
                     t_label=i==n ? t_label : "",
-                    label=x_labels[i] * solution_label,
+                    xguidefontsize=label_font_size,
+                    y_label=x_labels[i],
+                    yguidefontsize=label_font_size,
+                    label="",
+                    title=title,
+                    titlefont=title_font,
                     series_attr...,
                     state_style...,
                 )
@@ -648,20 +655,20 @@ function __plot!(
                         [cs[1][i]];
                         color=4,
                         linewidth=1,
-                        label=:none,
                         z_order=:back,
                         series_attr...,
                         state_bounds_style...,
+                        label=:none,
                     ) # lower bound
                     hline!(
                         p[is + cs[2][i] - 1],
                         [cs[3][i]];
                         color=4,
                         linewidth=1,
-                        label=:none,
                         z_order=:back,
                         series_attr...,
                         state_bounds_style...,
+                        label=:none,
                     ) # upper bound
                 end
             end
@@ -670,6 +677,8 @@ function __plot!(
         # costate
         if do_plot_costate
             for i in 1:n
+                title = i==1 ? "costate" : ""
+                y_label = do_plot_state ? "" : "p" * x_labels[i]
                 __plot_time!(
                     p[icur],
                     sol,
@@ -678,7 +687,12 @@ function __plot!(
                     i,
                     time;
                     t_label=i==n ? t_label : "",
-                    label="p" * x_labels[i] * solution_label,
+                    xguidefontsize=label_font_size,
+                    y_label=y_label,
+                    yguidefontsize=label_font_size,
+                    label="",
+                    title=title,
+                    titlefont=title_font,
                     series_attr...,
                     costate_style...,
                 )
@@ -697,6 +711,7 @@ function __plot!(
             @match control begin
                 :components => begin
                     for i in 1:m
+                        title = i==1 ? "control" : ""
                         __plot_time!(
                             p[icur],
                             sol,
@@ -705,7 +720,12 @@ function __plot!(
                             i,
                             time;
                             t_label=i==m ? t_label : "",
-                            label=u_labels[i] * solution_label,
+                            xguidefontsize=label_font_size,
+                            y_label=u_labels[i],
+                            yguidefontsize=label_font_size,
+                            label="",
+                            title=title,
+                            titlefont=title_font,
                             series_attr...,
                             control_style...,
                         )
@@ -714,6 +734,7 @@ function __plot!(
                 end
                 :norm => begin
                     l = 1
+                    title = "control"
                     __plot_time!(
                         p[icur],
                         sol,
@@ -722,7 +743,12 @@ function __plot!(
                         -1,
                         time;
                         t_label=t_label,
-                        label="‖" * u_label * "‖" * solution_label,
+                        xguidefontsize=label_font_size,
+                        y_label="‖" * u_label * "‖",
+                        yguidefontsize=label_font_size,
+                        label="",
+                        title=title,
+                        titlefont=title_font,
                         series_attr...,
                         control_style...,
                     )
@@ -731,6 +757,7 @@ function __plot!(
                 :all => begin
                     l = m + 1
                     for i in 1:m
+                        title = i==1 ? "control" : ""
                         __plot_time!(
                             p[icur],
                             sol,
@@ -739,7 +766,11 @@ function __plot!(
                             i,
                             time;
                             t_label="",
-                            label=u_labels[i] * solution_label,
+                            y_label=u_labels[i],
+                            yguidefontsize=label_font_size,
+                            label="",
+                            title=title,
+                            titlefont=title_font,
                             series_attr...,
                             control_style...,
                         )
@@ -753,7 +784,10 @@ function __plot!(
                         -1,
                         time;
                         t_label=t_label,
-                        label="‖" * u_label * "‖" * solution_label,
+                        xguidefontsize=label_font_size,
+                        y_label="‖" * u_label * "‖",
+                        yguidefontsize=label_font_size,
+                        label="",
                         series_attr...,
                         control_style...,
                     )
@@ -775,20 +809,20 @@ function __plot!(
                         [cu[1][i]];
                         color=4,
                         linewidth=1,
-                        label=:none,
                         z_order=:back,
                         series_attr...,
                         control_bounds_style...,
+                        label=:none,
                     ) # lower bound
                     hline!(
                         p[iu + cu[2][i] - 1],
                         [cu[3][i]];
                         color=4,
                         linewidth=1,
-                        label=:none,
                         z_order=:back,
                         series_attr...,
                         control_bounds_style...,
+                        label=:none,
                     ) # upper bound
                 end
             end
@@ -813,6 +847,7 @@ function __plot!(
 
                 # path constraints trajectory
                 for i in 1:nc
+                    title = i==1 ? "path constraints" : ""
                     __plot_time!(
                         p[icur],
                         sol,
@@ -821,7 +856,12 @@ function __plot!(
                         i,
                         time;
                         t_label=i==nc ? t_label : "",
-                        label=string(cp[4][i]) * solution_label,
+                        xguidefontsize=label_font_size,
+                        y_label=string(cp[4][i]),
+                        yguidefontsize=label_font_size,
+                        label="",
+                        title=title,
+                        titlefont=title_font,
                         series_attr...,
                         path_style...,
                     )
@@ -836,20 +876,20 @@ function __plot!(
                             [cp[1][i]];
                             color=4,
                             linewidth=1,
-                            label=:none,
                             z_order=:back,
                             series_attr...,
                             path_bounds_style...,
+                            label=:none,
                         ) # lower bound
                         hline!(
                             p[ic + i - 1],
                             [cp[3][i]];
                             color=4,
                             linewidth=1,
-                            label=:none,
                             z_order=:back,
                             series_attr...,
                             path_bounds_style...,
+                            label=:none,
                         ) # upper bound
                     end
                 end
@@ -858,6 +898,8 @@ function __plot!(
             # dual variables
             if do_plot_dual
                 for i in 1:nc
+                    title = i==1 ? "dual" : ""
+                    y_label = do_plot_path ? "" : "dual " * string(cp[4][i])
                     __plot_time!(
                         p[icur],
                         sol,
@@ -866,7 +908,12 @@ function __plot!(
                         i,
                         time;
                         t_label=i==nc ? t_label : "",
-                        label="dual " * string(cp[4][i]) * solution_label,
+                        xguidefontsize=label_font_size,
+                        y_label=y_label,
+                        yguidefontsize=label_font_size,
+                        label="",
+                        title=title,
+                        titlefont=title_font,
                         series_attr...,
                         dual_style...,
                     )
@@ -902,10 +949,10 @@ function __plot!(
                 color=:black,
                 linestyle=:dash,
                 linewidth=1,
-                label=:none,
                 z_order=:back,
                 series_attr...,
                 time_style...,
+                label=:none,
             )
         end
     end
