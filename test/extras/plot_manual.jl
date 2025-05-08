@@ -148,7 +148,7 @@ plot(sol; layout=:group, state_style=:none, costate_style=:none)
 plot(sol; layout=:group, costate_style=:none, control_style=:none)
 
 # layout = :split
-plot(sol; layout=:split)
+plot(sol; layout=:split, label="tat")
 plot(sol, :state)
 plot(sol, :costate; layout=:split)
 plot(sol, :control; layout=:split)
@@ -192,10 +192,10 @@ plot(
     control_style=(linestyle=:dash, linewidth=1),
 )
 nothing
-# plt = plot(sol; size=(700, 450), time=:normalise)
 
-# style = (linestyle=:dash,)
-# plot!(plt, sol; time=:default, state_style=style, costate_style=style, control_style=style)
+plt = plot(sol; size=(700, 450), time=:normalise, label="sol1")
+style = (linestyle=:dash,)
+plot!(plt, sol; time=:normalise, label="sol2", state_style=style, costate_style=style, control_style=style)
 
 # #
 # plt = plot(sol; layout=:group, control=:components)
