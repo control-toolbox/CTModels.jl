@@ -60,8 +60,8 @@ function __plot_time!(
     # t_label depends if time is normalize or not
     t_label = @match time begin
         :default => t_label
-        :normalize => "normalized " * t_label
-        :normalise => "normalised " * t_label
+        :normalize => t_label == "" ? "" : t_label * " (normalized)"
+        :normalise => t_label == "" ? "" : t_label * " (normalised)"
         _ => throw(
             CTBase.IncorrectArgument(
                 "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
