@@ -988,7 +988,7 @@ function __plot(
     path_style::Union{NamedTuple,Symbol},
     path_bounds_style::Union{NamedTuple,Symbol},
     dual_style::Union{NamedTuple,Symbol},
-    size=__size_plot(
+    size::Tuple=__size_plot(
         sol,
         model,
         control,
@@ -1061,9 +1061,9 @@ function Plots.plot!(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style=__plot_style(),
-    control_style=__plot_style(),
-    costate_style=__plot_style(),
+    state_style::Union{NamedTuple,Symbol}=__plot_style(),
+    control_style::Union{NamedTuple,Symbol}=__plot_style(),
+    costate_style::Union{NamedTuple,Symbol}=__plot_style(),
     kwargs...,
 )
     return __plot!(
@@ -1105,10 +1105,10 @@ function Plots.plot(
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
     solution_label::String=__plot_label_suffix(),
-    state_style=__plot_style(),
-    control_style=__plot_style(),
-    costate_style=__plot_style(),
-    size=__size_plot(
+    state_style::Union{NamedTuple,Symbol}=__plot_style(),
+    control_style::Union{NamedTuple,Symbol}=__plot_style(),
+    costate_style::Union{NamedTuple,Symbol}=__plot_style(),
+    size::Tuple=__size_plot(
         sol,
         nothing,
         control,
@@ -1231,7 +1231,7 @@ function Plots.plot(
     path_style::Union{NamedTuple,Symbol}=__plot_style(),
     path_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     dual_style::Union{NamedTuple,Symbol}=__plot_style(),
-    size=__size_plot(
+    size::Tuple=__size_plot(
         sol,
         model,
         control,
