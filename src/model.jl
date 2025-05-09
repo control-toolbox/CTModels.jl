@@ -449,6 +449,26 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Get the initial time from the model, for a free initial time.
+"""
+function initial_time(
+    ocp::Model{
+        <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+    variable::T,
+)::T where {T<:ctNumber}
+    return initial_time(times(ocp), [variable])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Get the name of the initial time from the model.
 """
 function initial_time_name(ocp::Model)::String
@@ -527,6 +547,26 @@ function final_time(
     variable::AbstractVector{T},
 )::T where {T<:ctNumber}
     return final_time(times(ocp), variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the model, for a free final time.
+"""
+function final_time(
+    ocp::Model{
+        <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+    variable::T,
+)::T where {T<:ctNumber}
+    return final_time(times(ocp), [variable])
 end
 
 """
