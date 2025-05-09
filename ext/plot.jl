@@ -181,7 +181,8 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     kwargs_plot = depth == 0 ? kwargs : ()
     ps = @match node.layout begin
         :row => plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
-        :column => plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
+        :column =>
+            plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
         _ => plot(subplots...; layout=node.layout, kwargs_plot...)
     end
 

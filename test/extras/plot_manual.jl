@@ -195,7 +195,15 @@ nothing
 
 plt = plot(sol; size=(700, 450), time=:normalise, label="sol1")
 style = (linestyle=:dash,)
-plot!(plt, sol; time=:normalise, label="sol2", state_style=style, costate_style=style, control_style=style)
+plot!(
+    plt,
+    sol;
+    time=:normalise,
+    label="sol2",
+    state_style=style,
+    costate_style=style,
+    control_style=style,
+)
 
 # #
 # plt = plot(sol; layout=:group, control=:components)
