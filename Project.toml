@@ -28,7 +28,7 @@ CTModelsPlots = "Plots"
 [compat]
 CTBase = "0.16"
 DocStringExtensions = "0.9"
-Interpolations = "0.15"
+Interpolations = "0.16"
 JLD2 = "0.5"
 JSON3 = "1.14"
 LinearAlgebra = "1"
