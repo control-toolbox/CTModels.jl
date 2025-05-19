@@ -490,6 +490,7 @@ struct Solution{
     ObjectiveValueType<:ctNumber,
     DualModelType<:AbstractDualModel,
     SolverInfosType<:AbstractSolverInfos,
+    ModelType<:AbstractModel,
 } <: AbstractSolution
     time_grid::TimeGridModelType
     times::TimesModelType
@@ -500,6 +501,7 @@ struct Solution{
     objective::ObjectiveValueType
     dual::DualModelType
     solver_infos::SolverInfosType
+    model::ModelType
 end
 
 """
