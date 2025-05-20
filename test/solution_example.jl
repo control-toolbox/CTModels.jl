@@ -101,7 +101,7 @@ function solution_example(; fun=false)
     U = fun ? u : vcat([u(t)' for t in T]...)
 
     # variable: v Vector{Float64}
-    v = Float64[]
+    v = [1.0, 1.0] #Float64[]
 
     # objective: Float64
     objective = 0.5 * (α^2 * (tf - t0)^3 / 3 + β^2 * (tf - t0) - α * β * (tf - t0)^2)
