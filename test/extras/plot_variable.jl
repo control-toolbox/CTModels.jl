@@ -28,4 +28,4 @@ ocp = @def begin
 end
 
 sol = CTDirect.solve(ocp; print_level=4)
-plot(sol, ocp)
+plot(sol)

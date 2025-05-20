@@ -221,15 +221,6 @@ function RecipesBase.plot(sol::AbstractSolution; kwargs...)
     throw(CTBase.ExtensionError(:Plots))
 end
 
-# """
-# $(TYPEDSIGNATURES)
-
-# Plot a solution on an existing plot.
-# """
-# function RecipesBase.plot!(p::RecipesBase.AbstractPlot, sol::AbstractSolution; kwargs...)
-#     throw(CTBase.ExtensionError(:Plots))
-# end
-
 #
 include("init.jl")
 include("dual_model.jl")

@@ -66,6 +66,7 @@ function test_solution()
     sol = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...)
 
     # call getters and check the values
+    @test CTModels.model(sol) isa CTModels.Model
     @testset "state" begin
         @test CTModels.state_dimension(sol) == 2
         @test CTModels.state_name(sol) == "y"

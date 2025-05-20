@@ -67,6 +67,7 @@ function __size_plot(
 
     # check what to plot
     do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        sol,
         description...;
         state_style=state_style,
         control_style=control_style,

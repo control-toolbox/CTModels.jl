@@ -216,6 +216,7 @@ function __initial_plot(
 
     # check what to plot
     do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        sol,
         description...;
         state_style=state_style,
         control_style=control_style,
@@ -449,6 +450,7 @@ function __plot!(
 
     # check what to plot
     do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual = do_plot(
+        sol,
         description...;
         state_style=state_style,
         control_style=control_style,
@@ -1040,116 +1042,11 @@ function __plot(
 end
 
 # --------------------------------------------------------------------------------------------------
-# public plots: from a solution
-"""
-$(TYPEDSIGNATURES)
-
-Plot the optimal control solution `sol` using the layout `layout`.
-
-**Notes.**
-
-- The argument `layout` can be `:group` or `:split` (default).
-- `control` can be `:components`, `:norm` or `:all`.
-- `time` can be `:default` or `:normalize`.
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
-"""
-function Plots.plot!(
-    p::Plots.Plot,
-    sol::CTModels.Solution,
-    description::Symbol...;
-    layout::Symbol=__plot_layout(),
-    control::Symbol=__control_layout(),
-    time::Symbol=__time_normalization(),
-    solution_label::String=__plot_label_suffix(),
-    state_style::Union{NamedTuple,Symbol}=__plot_style(),
-    control_style::Union{NamedTuple,Symbol}=__plot_style(),
-    costate_style::Union{NamedTuple,Symbol}=__plot_style(),
-    kwargs...,
-)
-    return __plot!(
-        p,
-        sol,
-        description...;
-        layout=layout,
-        control=control,
-        time=time,
-        solution_label=solution_label,
-        state_style=state_style,
-        control_style=control_style,
-        costate_style=costate_style,
-        model=nothing,
-        state_bounds_style=__plot_style(),
-        control_bounds_style=__plot_style(),
-        time_style=__plot_style(),
-        path_style=__plot_style(),
-        path_bounds_style=__plot_style(),
-        dual_style=__plot_style(),
-        kwargs...,
-    )
-end
-
+# public plots
 """
 $(TYPEDSIGNATURES)
 
 Plot the optimal control solution `sol`.
-
-**Notes.**
-
-- The argument `layout` can be `:group` or `:split` (default).
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
-"""
-function Plots.plot(
-    sol::CTModels.Solution,
-    description::Symbol...;
-    layout::Symbol=__plot_layout(),
-    control::Symbol=__control_layout(),
-    time::Symbol=__time_normalization(),
-    solution_label::String=__plot_label_suffix(),
-    state_style::Union{NamedTuple,Symbol}=__plot_style(),
-    control_style::Union{NamedTuple,Symbol}=__plot_style(),
-    costate_style::Union{NamedTuple,Symbol}=__plot_style(),
-    size::Tuple=__size_plot(
-        sol,
-        nothing,
-        control,
-        layout,
-        description...;
-        state_style=state_style,
-        control_style=control_style,
-        costate_style=costate_style,
-        path_style=:none,
-        dual_style=:none,
-    ),
-    kwargs...,
-)
-    return __plot(
-        sol,
-        description...;
-        layout=layout,
-        control=control,
-        time=time,
-        solution_label=solution_label,
-        state_style=state_style,
-        control_style=control_style,
-        costate_style=costate_style,
-        model=nothing,
-        state_bounds_style=__plot_style(),
-        control_bounds_style=__plot_style(),
-        time_style=__plot_style(),
-        path_style=__plot_style(),
-        path_bounds_style=__plot_style(),
-        dual_style=__plot_style(),
-        size=size,
-        kwargs...,
-    )
-end
-
-# --------------------------------------------------------------------------------------------------
-# public plots: from a solution and the model
-"""
-$(TYPEDSIGNATURES)
-
-Plot the optimal control solution `sol` using the layout `layout`. The model is used to represent the initial and final times and the constraints.
 
 **Notes.**
 
@@ -1162,7 +1059,6 @@ Plot the optimal control solution `sol` using the layout `layout`. The model is 
 function Plots.plot!(
     p::Plots.Plot,
     sol::CTModels.Solution,
-    model::CTModels.Model,
     description::Symbol...;
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
@@ -1192,7 +1088,7 @@ function Plots.plot!(
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
-        model=model,
+        model=CTModels.model(sol),
         state_bounds_style=state_bounds_style,
         control_bounds_style=control_bounds_style,
         time_style=time_style,
@@ -1206,7 +1102,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol` using the layout `layout`. The model is used to represent the initial and final times and the constraints.
+Plot the optimal control solution `sol`.
 
 **Notes.**
 
@@ -1216,7 +1112,6 @@ Plot the optimal control solution `sol` using the layout `layout`. The model is 
 """
 function Plots.plot(
     sol::CTModels.Solution,
-    model::CTModels.Model,
     description::Symbol...;
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
@@ -1233,7 +1128,7 @@ function Plots.plot(
     dual_style::Union{NamedTuple,Symbol}=__plot_style(),
     size::Tuple=__size_plot(
         sol,
-        model,
+        CTModels.model(sol),
         control,
         layout,
         description...;
@@ -1255,7 +1150,7 @@ function Plots.plot(
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
-        model=model,
+        model=CTModels.model(sol),
         state_bounds_style=state_bounds_style,
         control_bounds_style=control_bounds_style,
         time_style=time_style,

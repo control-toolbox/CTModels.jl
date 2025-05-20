@@ -218,7 +218,7 @@ function build_solution(
     )
 
     return Solution(
-        time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos
+        time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos, ocp
     )
 end
 
@@ -277,6 +277,7 @@ function state(
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::TS where {TS<:Function}
     return value(sol.state)
@@ -334,6 +335,7 @@ function control(
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::TS where {TS<:Function}
     return value(sol.control)
@@ -389,6 +391,7 @@ function variable(
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::TS where {TS<:Union{ctNumber,ctVector}}
     return value(sol.variable)
@@ -416,6 +419,7 @@ function costate(
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::Co where {Co<:Function}
     return sol.costate
@@ -468,6 +472,7 @@ function time_grid(
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::T where {T<:TimesDisc}
     return sol.time_grid.value
@@ -490,6 +495,7 @@ function objective(
         O,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::O where {O<:ctNumber}
     return sol.objective
@@ -570,6 +576,7 @@ function dual_model(
         <:ctNumber,
         DM,
         <:AbstractSolverInfos,
+        <:AbstractModel,
     },
 )::DM where {DM<:AbstractDualModel}
     return sol.dual
@@ -655,6 +662,27 @@ function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+"""
+function model(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+        TM,
+    },
+)::TM where {TM<:AbstractModel}
+    return sol.model
+end
+
 # --------------------------------------------------------------------------------------------------
 # print a solution
 """
@@ -663,7 +691,7 @@ $(TYPEDSIGNATURES)
 Prints the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    return print(io, typeof(sol))
+    return print(io, "Optimal Control Solution")
 end
 
 """
@@ -671,6 +699,6 @@ $(TYPEDSIGNATURES)
 
 """
 function Base.show_default(io::IO, sol::Solution)
-    return print(io, typeof(sol))
+    return print(io, "Optimal Control Solution")
     #show(io, MIME("text/plain"), sol)
 end
