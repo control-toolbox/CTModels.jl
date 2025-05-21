@@ -1,8 +1,24 @@
 """
 $(TYPEDSIGNATURES)
 
-Build a concrete type constraints model from a dictionary of constraints.
+Constructs a `ConstraintsModel` from a dictionary of constraints.
 
+This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured `ConstraintsModel`.
+
+# Arguments
+- `constraints::ConstraintsDictType`: A dictionary mapping constraint labels to tuples of the form `(type, function_or_range, lower_bound, upper_bound)`.
+
+# Returns
+- `ConstraintsModel`: A structured model encapsulating all provided constraints.
+
+# Example
+```julia-repl
+constraints = OrderedDict(
+    :c1 => (:path, f1, [0.0], [1.0]),
+    :c2 => (:state, 1:2, [-1.0, -1.0], [1.0, 1.0])
+)
+model = build_constraints(constraints)
+```
 """
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
@@ -173,8 +189,25 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Build a concrete type model from a pre-model.
+Builds a concrete `Model` from a `PreModel`.
 
+This function finalizes a pre-defined optimal control problem (`PreModel`) by verifying that all necessary components (times, state, control, dynamics) are set. It then constructs a `Model` instance, incorporating optional components like objective and constraints if they are defined.
+
+# Arguments
+- `pre_ocp::PreModel`: The pre-defined optimal control problem to be finalized.
+
+# Returns
+- `Model`: A fully constructed model ready for solving.
+
+# Example
+```julia-repl
+pre_ocp = PreModel()
+times!(pre_ocp, 0.0, 1.0, 100)
+state!(pre_ocp, 2, "x", ["x1", "x2"])
+control!(pre_ocp, 1, "u", ["u1"])
+dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
+model = build_model(pre_ocp)
+```
 """
 function build_model(pre_ocp::PreModel)::Model
 

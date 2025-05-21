@@ -1,16 +1,23 @@
 """
 $(TYPEDSIGNATURES)
 
-Define the variable dimension and possibly the names of each component.
+Define a new variable in the optimal control problem `ocp` with dimension `q`.
+
+This function registers a named variable (e.g. "state", "control", or other) to be used in the problem definition. You may optionally specify a name and individual component names.
 
 !!! note
+    You can call `variable!` only once. It must be called before setting the objective or dynamics.
 
-    You can use variable! once to set the variable dimension.
+# Arguments
+- `ocp`: The `PreModel` where the variable is registered.
+- `q`: The dimension of the variable (number of components).
+- `name`: A name for the variable (default: auto-generated from `q`).
+- `components_names`: A vector of strings or symbols for each component (default: `["v₁", "v₂", ...]`).
 
 # Examples
-```@example
-julia> variable!(ocp, 1, "v")
-julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
+```julia-repl
+variable!(ocp, 1, "v")
+variable!(ocp, 2, "v", ["v₁", "v₂"])
 ```
 """
 function variable!(
@@ -58,7 +65,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable name from the variable model.
+Return the name of the variable stored in the model.
 """
 function name(model::VariableModel)::String
     return model.name
@@ -67,7 +74,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable name from the variable model solution.
+Return the name of the variable stored in the model solution.
 """
 function name(model::VariableModelSolution)::String
     return model.name
@@ -76,7 +83,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable name from the empty variable model. Return an empty string.
+Return an empty string, since no variable is defined.
 """
 function name(::EmptyVariableModel)::String
     return ""
@@ -85,7 +92,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the variable from the variable model.
+Return the names of the components of the variable.
 """
 function components(model::VariableModel)::Vector{String}
     return model.components
@@ -94,7 +101,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the variable from the variable model solution.
+Return the names of the components from the variable solution.
 """
 function components(model::VariableModelSolution)::Vector{String}
     return model.components
@@ -103,7 +110,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the variable from the empty variable model. Return an empty vector.
+Return an empty vector since there are no variable components defined.
 """
 function components(::EmptyVariableModel)::Vector{String}
     return String[]
@@ -112,7 +119,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable dimension from the variable model.
+Return the dimension (number of components) of the variable.
 """
 function dimension(model::VariableModel)::Dimension
     return length(components(model))
@@ -121,7 +128,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable dimension from the variable model solution.
+Return the number of components in the variable solution.
 """
 function dimension(model::VariableModelSolution)::Dimension
     return length(components(model))
@@ -130,7 +137,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable dimension from the empty variable model. Return 0.
+Return `0` since no variable is defined.
 """
 function dimension(::EmptyVariableModel)::Dimension
     return 0
@@ -139,7 +146,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable from the variable model solution.
+Return the value stored in the variable solution model.
 """
 function value(model::VariableModelSolution{TS})::TS where {TS<:Union{ctNumber,ctVector}}
     return model.value

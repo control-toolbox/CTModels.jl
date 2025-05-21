@@ -1,30 +1,59 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the layout of the plots.
-Either :split or :group.
+Default layout for the full plot.
+
+Returns `:split`, which arranges each component (e.g. state, control) in separate subplots.
+
+Possible values:
+- `:split`: One subplot per component (default).
+- `:group`: Combine components into shared subplots.
+
+Used as the default for `layout` in `plot(sol; layout=...)`.
 """
 __plot_layout() = :split
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the layout of the control plots.
-Either :components or :norm or :all.
+Default layout for control input visualization.
+
+Returns `:components`, which plots each control component individually.
+
+Possible values:
+- `:components`: One plot per control component (default).
+- `:norm`: Single plot showing the control norm ‖u(t)‖.
+- `:all`: Show both components and norm.
+
+Used as the default for `control` in `plot(sol; control=...)`.
 """
 __control_layout() = :components
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the time grid normalization.
-Either :default or :normalize or :normalise.
+Default time axis normalization.
+
+Returns `:default`, which plots against real time.
+
+Possible values:
+- `:default`: Plot time in original units (default).
+- `:normalize`: Normalize time to [0, 1].
+- `:normalise`: Same as `:normalize`, British spelling.
+
+Used as the default for `time` in `plot(sol; time=...)`.
 """
 __time_normalization() = :default
 
 """
 $(TYPEDSIGNATURES)
 
+Return the default list of description symbols to be plotted if the user does not specify any.
+
+Includes aliases for backward compatibility.
+
+Returns a tuple of symbols, such as:
+- `:state`, `:costate`, `:control`, `:path`, `:dual`, ...
 """
 function __description()
     (
@@ -46,7 +75,20 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the plot size.
+Compute a default size `(width, height)` for the plot figure.
+
+This depends on the number of subplots, which is inferred from:
+- The layout (`:group` or `:split`)
+- The presence of state, control, costate, path constraint, or dual variable plots
+- The number of state and control variables
+- The control layout choice (`:components`, `:norm`, `:all`)
+
+Used internally in the `plot` function to automatically size the output plot.
+
+# Example
+```julia-repl
+julia> size = __size_plot(sol, model, :components, :split; ...)
+```
 """
 function __size_plot(
     sol::CTModels.Solution,
@@ -124,13 +166,21 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default style for the plot. Must be an empty tuple.
+Default plot style.
+
+Returns an empty `NamedTuple()`, which means no style override is applied.
+
+Used when no user-defined style is passed for plotting states, controls, etc.
 """
 __plot_style() = NamedTuple()
 
 """
 $(TYPEDSIGNATURES)
 
-Default suffix label for the plot. Must be an empty string.
+Default suffix used for the solution label in plots.
+
+Returns an empty string `""`.
+
+This label can be used to distinguish multiple solutions in comparative plots.
 """
 __plot_label_suffix() = ""
