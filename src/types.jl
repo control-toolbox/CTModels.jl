@@ -303,7 +303,7 @@ $(TYPEDFIELDS)
     state::Union{AbstractStateModel,Nothing} = nothing
     control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{Function,Nothing} = nothing
+    dynamics::Union{Function,Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}},Nothing} = nothing
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
     definition::Union{Expr,Nothing} = nothing
@@ -355,17 +355,47 @@ __is_definition_set(ocp::PreModel)::Bool = !isnothing(ocp.definition)
 $(TYPEDSIGNATURES)
 
 """
+function __is_dynamics_complete(ocp::PreModel)::Bool
+    if isnothing(ocp.dynamics)
+        return false
+    elseif ocp.dynamics isa Function
+        return true
+    else # ocp.dynamics isa Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
+        if !__is_state_set(ocp)
+            error("Internal error. The state muste be set.")
+        end
+        n = length(ocp.state.components)
+        covered = falses(n)
+        for (range, _) in ocp.dynamics
+            for i in range
+                if 1 <= i <= n
+                    covered[i] = true
+                else
+                    error("Internal error. Dynamics index $i out of bounds for state of size $n.")
+                end
+            end
+        end
+        return all(covered)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return true if all the required fields are set in the PreModel.
+"""
 function __is_consistent(ocp::PreModel)::Bool
     return __is_times_set(ocp) &&
            __is_state_set(ocp) &&
            __is_control_set(ocp) &&
-           __is_dynamics_set(ocp) &&
+           __is_dynamics_complete(ocp) &&
            __is_objective_set(ocp)
 end
 
 """
 $(TYPEDSIGNATURES)
 
+Return true if nothing has been set.
 """
 function __is_empty(ocp::PreModel)::Bool
     return !__is_times_set(ocp) &&

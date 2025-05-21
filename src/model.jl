@@ -195,6 +195,12 @@ function build_model(pre_ocp::PreModel)::Model
         CTBase.UnauthorizedCall("the dynamics must be set before building the model.")
     )
 
+    # checkings: dynamics must be complete
+    # if not complete, it is given component-wise
+    __is_dynamics_complete(pre_ocp) || throw(
+        CTBase.UnauthorizedCall("all the components of the dynamics must be set before building the model.")
+    )
+
     # checkings: objective must be set
     __is_objective_set(pre_ocp) || throw(
         CTBase.UnauthorizedCall("the objective must be set before building the model.")
@@ -210,7 +216,11 @@ function build_model(pre_ocp::PreModel)::Model
     state = pre_ocp.state
     control = pre_ocp.control
     variable = pre_ocp.variable
-    dynamics = pre_ocp.dynamics
+    dynamics = if pre_ocp.dynamics isa Function
+        pre_ocp.dynamics
+    else
+        __build_dynamics_from_parts(pre_ocp.dynamics)
+    end
     objective = pre_ocp.objective
     constraints = build_constraints(pre_ocp.constraints)
     definition = pre_ocp.definition
