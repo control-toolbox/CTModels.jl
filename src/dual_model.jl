@@ -6,6 +6,26 @@
 """
 $(TYPEDSIGNATURES)
 
+Return the dual variable associated with a constraint identified by its `label`.
+
+Searches through all constraint types (path, boundary, state, control, and variable constraints)
+defined in the model and returns the corresponding dual value(s) from the solution. If the label
+is found multiple times, a vector of values is returned.
+
+# Arguments
+- `sol::Solution`: Solution object containing dual variables.
+- `model::Model`: Model containing constraint definitions.
+- `label::Symbol`: Symbol corresponding to a constraint label.
+
+# Returns
+A function of time `t` for time-dependent constraints, or a scalar/vector for time-invariant duals.
+If the label is not found, throws an `IncorrectArgument` exception.
+
+# Examples
+```julia-repl
+julia> dual_fun = dual(sol, model, :velocity_limit)
+julia> dual_value_at_t1 = dual_fun(1.0)
+```
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 
@@ -94,6 +114,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual function associated with the nonlinear path constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for path constraints.
+
+# Returns
+A function mapping time `t` to the vector of dual values, or `nothing` if not set.
 """
 function path_constraints_dual(
     model::DualModel{
@@ -113,6 +140,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual vector associated with the boundary constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for boundary constraints.
+
+# Returns
+A vector of dual values, or `nothing` if not set.
 """
 function boundary_constraints_dual(
     model::DualModel{
@@ -132,6 +166,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual function associated with the lower bounds of state constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for state lower bounds.
+
+# Returns
+A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 """
 function state_constraints_lb_dual(
     model::DualModel{
@@ -151,6 +192,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual function associated with the upper bounds of state constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for state upper bounds.
+
+# Returns
+A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 """
 function state_constraints_ub_dual(
     model::DualModel{
@@ -170,6 +218,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual function associated with the lower bounds of control constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for control lower bounds.
+
+# Returns
+A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 """
 function control_constraints_lb_dual(
     model::DualModel{
@@ -189,6 +244,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual function associated with the upper bounds of control constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for control upper bounds.
+
+# Returns
+A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 """
 function control_constraints_ub_dual(
     model::DualModel{
@@ -208,6 +270,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual vector associated with the lower bounds of variable constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for variable lower bounds.
+
+# Returns
+A vector of dual values, or `nothing` if not set.
 """
 function variable_constraints_lb_dual(
     model::DualModel{
@@ -227,6 +296,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual vector associated with the upper bounds of variable constraints.
+
+# Arguments
+- `model::DualModel`: A model including dual variables for variable upper bounds.
+
+# Returns
+A vector of dual values, or `nothing` if not set.
 """
 function variable_constraints_ub_dual(
     model::DualModel{

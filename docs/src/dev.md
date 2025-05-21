@@ -28,3 +28,6 @@ Modules = [CTModels]
 Order   = [:constant, :type, :function, :macro]
 ```
 
+```@docs
+plot(::CTModels.Solution, ::Symbol...)
+```
