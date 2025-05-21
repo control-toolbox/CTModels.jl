@@ -1,5 +1,13 @@
 using Documenter
 using CTModels
+using Plots
+
+# to add docstrings from external packages
+Modules = [Plots]
+for Module in Modules
+    isnothing(DocMeta.getdocmeta(Module, :DocTestSetup)) &&
+        DocMeta.setdocmeta!(Module, :DocTestSetup, :(using $Module); recursive=true)
+end
 
 repo_url = "github.com/control-toolbox/CTModels.jl"
 

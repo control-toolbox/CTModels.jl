@@ -217,7 +217,7 @@ $(TYPEDSIGNATURES)
 
 Plot a solution.
 """
-function RecipesBase.plot(sol::AbstractSolution; kwargs...)
+function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
     throw(CTBase.ExtensionError(:Plots))
 end
 
