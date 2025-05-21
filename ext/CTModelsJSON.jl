@@ -7,8 +7,27 @@ using JSON3
 
 """
 $(TYPEDSIGNATURES)
-  
-Export OCP solution in JSON format
+
+Export an optimal control solution to a `.json` file using the JSON3 format.
+
+This function serializes a `CTModels.Solution` into a structured JSON dictionary,
+including all primal and dual information, which can be read by external tools.
+
+# Arguments
+- `::CTModels.JSON3Tag`: A tag used to dispatch the export method for JSON3.
+- `sol::CTModels.Solution`: The solution to be saved.
+
+# Keyword Arguments
+- `filename::String = "solution"`: Base filename. The `.json` extension is automatically appended.
+
+# Notes
+The exported JSON includes the time grid, state, control, costate, objective, solver info, and all constraint duals (if available).
+
+# Example
+```julia-repl
+julia> export_ocp_solution(JSON3Tag(), sol; filename="mysolution")
+# → creates "mysolution.json"
+```
 """
 function CTModels.export_ocp_solution(
     ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String="solution"
@@ -51,8 +70,29 @@ end
 
 """
 $(TYPEDSIGNATURES)
-  
-Import OCP solution in JSON format
+
+Import an optimal control solution from a `.json` file exported with `export_ocp_solution`.
+
+This function reads the JSON contents and reconstructs a `CTModels.Solution` object,
+including the discretized primal and dual trajectories.
+
+# Arguments
+- `::CTModels.JSON3Tag`: A tag used to dispatch the import method for JSON3.
+- `ocp::CTModels.Model`: The model associated with the optimal control problem. Used to rebuild the full solution.
+
+# Keyword Arguments
+- `filename::String = "solution"`: Base filename. The `.json` extension is automatically appended.
+
+# Returns
+- `CTModels.Solution`: A reconstructed solution instance.
+
+# Notes
+Handles both vector and matrix encodings of signals. If dual fields are missing or `null`, the corresponding attributes are set to `nothing`.
+
+# Example
+```julia-repl
+julia> sol = import_ocp_solution(JSON3Tag(), model; filename="mysolution")
+```
 """
 function CTModels.import_ocp_solution(
     ::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String="solution"

@@ -1,21 +1,28 @@
 """
 $(TYPEDEF)
 
-Abstract node for plot.
+Abstract supertype for nodes used in the plot tree structure.
+This serves as a base for elements like `PlotLeaf`, `PlotNode`, and `EmptyPlot`.
 """
 abstract type AbstractPlotTreeElement end
 
 """
 $(TYPEDEF)
 
-A leaf of a plot tree.
+Represents a leaf node in a plot tree.
+
+Typically used as an individual plot element without any children.
 """
 struct PlotLeaf <: AbstractPlotTreeElement end
 
 """
 $(TYPEDEF)
 
-A node of a plot tree.
+Represents a node with a layout and children in a plot tree.
+
+# Fields
+- `layout::Union{Symbol, Matrix{Any}}`: Layout specification, e.g., `:row`, `:column`, or a custom layout matrix.
+- `children::Vector{<:AbstractPlotTreeElement}`: Subplots or nested plot nodes.
 """
 struct PlotNode{TL<:Union{Symbol,Matrix{Any}},TC<:Vector{<:AbstractPlotTreeElement}} <:
        AbstractPlotTreeElement
@@ -31,7 +38,9 @@ end
 """
 $(TYPEDEF)
 
-An empty node of a plot tree.
+Represents an empty placeholder in the plot tree.
+
+Used to maintain layout consistency when certain plots are omitted.
 """
 struct EmptyPlot <: AbstractPlotTreeElement end
 
@@ -40,10 +49,20 @@ struct EmptyPlot <: AbstractPlotTreeElement end
 """
 $(TYPEDSIGNATURES)
 
-Update the plot `p` with the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where
-`f` is given by the symbol `s`.
-- The argument `s` can be `:state`, `:control` or `:costate`.
-- `time` can be `:default` or `:normalize`.
+Plot a single component `i` of a time-dependent vector-valued quantity (`:state`, `:control`, `:costate`, etc.).
+
+# Arguments
+- `p`: A `Plots.Plot` or `Plots.Subplot` object to update.
+- `sol`: An optimal control `Solution`.
+- `model`: The associated `Model` or `nothing`.
+- `s`: Symbol indicating the signal type (`:state`, `:control`, `:costate`, `:control_norm`, etc.).
+- `i`: Component index (use `-1` for `:control_norm`).
+- `time`: Time normalization option (`:default`, `:normalize`, `:normalise`).
+
+# Keyword Arguments
+- `t_label`: Label for the time axis.
+- `y_label`: Label for the vertical axis.
+- `kwargs...`: Additional plotting options.
 """
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
@@ -115,9 +134,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Update the plot `p` with a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
-- The argument `s` can be `:state`, `:control` or `:costate`.
-- `time` can be `:default` or `:normalize`.
+Plot all components of a vector-valued signal over time.
+
+# Arguments
+- `d`: Dimension of the signal (number of components).
+- `labels`: Vector of string labels for each component.
+- `title`: Title of the subplot.
+
+Other arguments are the same as for the scalar version of `__plot_time!`.
 """
 function __plot_time!(
     p::Union{Plots.Plot,Plots.Subplot},
@@ -145,7 +169,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Generate a{r*h} where `r` is a real number and `h` is the height of the plot.
+Return an expression `a{r*h}` to control relative plot height when using custom layouts.
+
+Used for vertical space control in plot trees.
 """
 function __height(r::Real)::Expr
     i = Expr(:call, :*, r, :h)
@@ -156,7 +182,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot a leaf.
+Return an empty plot for a `PlotLeaf`.
+
+Used as a placeholder in layout trees.
 """
 function __plot_tree(leaf::PlotLeaf, depth::Int; kwargs...)
     return Plots.plot()
@@ -165,7 +193,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot a node.
+Recursively assemble a hierarchical plot layout from a `PlotNode`.
+
+Each node may represent a row, column, or custom layout and contain children (subplots or nested nodes).
+
+# Arguments
+- `node`: The root of a plot subtree.
+- `depth`: Current depth (used to control spacing/layout).
 """
 function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     #
@@ -194,7 +228,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Initial plot.
+Initialize the layout and create an empty plot canvas according to `layout` and `control` parameters.
+
+# Keyword Arguments
+- `layout`: Plot layout style (`:group` or `:split`).
+- `control`: What to plot for controls (`:components`, `:norm`, `:all`).
+- `state_style`, `control_style`, etc.: Plot styles for various signals.
 """
 function __initial_plot(
     sol::CTModels.Solution,
@@ -396,7 +435,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the series attributes.
+Filter keyword arguments to retain only those relevant for plotting series.
+
+Returns a list of key-value pairs recognized by `Plots`.
 """
 function __keep_series_attributes(; kwargs...)
     series_attributes = Plots.attributes(:Series)
@@ -414,14 +455,16 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol`.
+Plot an optimal control `Solution` on a given plot `p`.
 
-**Notes.**
+This updates an existing plot object with the trajectory of states, controls, costates,
+constraints, and duals based on the provided `layout` and `description`.
 
-- The argument `layout` can be `:group` or `:split` (default).
-- `control` can be `:components`, `:norm` or `:all`.
-- `time` can be `:default` or `:normalize`.
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+# Keyword Arguments
+Includes options such as:
+- `layout`, `control`, `time`
+- `state_style`, `control_style`, `costate_style`, etc.
+- `solution_label`: Label to annotate the plotted solution.
 """
 function __plot!(
     p::Plots.Plot,
@@ -966,12 +1009,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol`.
+Construct and return a new plot for the provided `Solution`.
 
-**Notes.**
+This is a wrapper that calls `__initial_plot` and then fills it using `__plot!`.
 
-- The argument `layout` can be `:group` or `:split` (default).
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
+Use this to obtain a standalone plot.
 """
 function __plot(
     sol::CTModels.Solution,
@@ -1046,15 +1088,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol`.
+Update an existing plot `p` with the optimal control `Solution`.
 
-**Notes.**
-
-- The argument `layout` can be `:group` or `:split` (default).
-- `control` can be `:components`, `:norm` or `:all`.
-- `time` can be `:default` or `:normalize`.
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
-- The keyword arguments `time_style` are passed to the `vline!` function of the `Plots` package. The `time_style` is passed to the plot of the vertical lines at the initial and final times.
+See `__plot!` for full behavior and keyword arguments.
 """
 function Plots.plot!(
     p::Plots.Plot,
@@ -1102,13 +1138,79 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the optimal control solution `sol`.
+Plot the components of an optimal control `Solution`.
 
-**Notes.**
+This is the main user-facing function to visualize the solution of an optimal control problem
+solved with the ControlToolbox.jl ecosystem.
 
-- The argument `layout` can be `:group` or `:split` (default).
-- The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
-- The keyword arguments `time_style` are passed to the `vline!` function of the `Plots` package. The `time_style` is passed to the plot of the vertical lines at the initial and final times.
+It generates a plot (or set of subplots) showing the evolution of the state, control, costate,
+path constraints, and dual variables over time, depending on the user’s choices.
+
+# Arguments
+
+- `sol::CTModels.Solution`: The optimal control solution to visualize. Typically the result of solving a problem using CTDirect.jl or CTKnitro.jl.
+- `description::Symbol...`: A variable number of symbols indicating which components to include in the plot. Common values include:
+  - `:state` – plot the state trajectory.
+  - `:costate` – plot the costate (adjoint) variables.
+  - `:control` – plot the control signal.
+  - `:path` – plot the values of nonlinear path constraints.
+  - `:dual` – plot the dual variables (Lagrange multipliers) associated with path constraints.
+
+If no symbols are provided, a default set is used based on the problem and styles.
+
+# Keyword Arguments
+
+- `layout::Symbol = :group`: Specifies how to arrange plots.
+  - `:group`: Fewer plots, grouping similar variables together (e.g., all states in one subplot).
+  - `:split`: One plot per variable component, stacked in a layout.
+
+- `control::Symbol = :components`: Defines how to represent control inputs.
+  - `:components`: One curve per control component.
+  - `:norm`: Single curve showing ‖u(t)‖.
+  - `:all`: Plot both components and norm.
+
+- `time::Symbol = :default`: Time normalization for plots.
+  - `:default`: Real time scale.
+  - `:normalize` or `:normalise`: Normalized to the interval [0, 1].
+
+- `solution_label::String = ""`: Label to annotate this solution in the legend. (Deprecated: use `label` instead) 
+
+## Style Options (Optional)
+
+All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or a `Symbol` referring to a predefined style. These allow you to customize color, line style, markers, etc.
+
+- `state_style`: Plot style for state components.
+- `costate_style`: Plot style for costate components.
+- `control_style`: Plot style for control components.
+- `dual_style`: Plot style for dual variables.
+- `path_style`: Plot style for path constraint values.
+
+## Bounds Decorations (Optional)
+
+Use these options to show bounds on the plots if applicable and defined in the model.
+
+- `state_bounds_style`: Style for state variable bounds.
+- `control_bounds_style`: Style for control bounds.
+- `path_bounds_style`: Style for path constraint bounds.
+- `time_style`: Style for vertical lines at initial and final time.
+
+# Returns
+
+- A `Plots.Plot` object, which can be displayed, saved, or further customized.
+
+# Example
+
+```julia-repl
+# plot the state and control with default layout
+julia> plot(sol, :state, :control)
+
+# customize layout and styles
+julia> plot(sol, :state, :control;
+     layout = :split,
+     control = :all,
+     state_style = (color=:blue, linestyle=:solid),
+     control_style = (color=:red, linestyle=:dash))
+```
 """
 function Plots.plot(
     sol::CTModels.Solution,
@@ -1167,14 +1269,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `x` and `y` for the plot of the optimal control solution `sol` 
-corresponding respectively to the argument `xx` and the argument `yy`.
+A Plots.jl recipe for plotting `Solution` data.
 
-**Notes.**
+Returns the `(x, y)` values based on symbolic references like `:state`, `:control`, `:time`, etc.
 
-- The argument `xx` can be `:time`, `:state`, `:control` or `:costate`.
-- If `xx` is `:time`, then, a label is added to the plot.
-- The argument `yy` can be `:state`, `:control` or `:costate`.
+# Arguments
+- `xx`: Symbol or `(Symbol, Int)` indicating the x-axis.
+- `yy`: Symbol or `(Symbol, Int)` indicating the y-axis.
 """
 @recipe function f(
     sol::CTModels.Solution,
@@ -1201,7 +1302,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the data for plotting.
+Extract data for plotting from a `Solution` and optional `Model`.
+
+# Arguments
+- `xx`: Symbol or `(Symbol, Int)` indicating the quantity and component.
+- `time`: Whether to normalize the time grid.
+
+Supported values for `xx`:
+- `:time`, `:state`, `:control`, `:costate`, `:control_norm`
+- `:path_constraint`, `:dual_path_constraint`
 """
 function __get_data_plot(
     sol::CTModels.Solution,
