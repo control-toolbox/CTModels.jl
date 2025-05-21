@@ -6,7 +6,7 @@ Add a constraint to a dictionary of constraints.
 ## Arguments
 
 - `ocp_constraints`: The dictionary of constraints to which the constraint will be added.
-- `type`: The type of the constraint. It can be :state, :control, :variable, :boundary or :path.
+- `type`: The type of the constraint. It can be `:state`, `:control`, `:variable`, `:boundary`, or `:path`.
 - `n`: The dimension of the state.
 - `m`: The dimension of the control.
 - `q`: The dimension of the variable.
@@ -19,27 +19,34 @@ Add a constraint to a dictionary of constraints.
 ## Requirements
 
 - The constraint must not be set before.
-- The lower bound `lb` and the upper bound `ub` cannot be both nothing.
+- The lower bound `lb` and the upper bound `ub` cannot be both `nothing`.
 - The lower bound `lb` and the upper bound `ub` must have the same length, if both provided.
 
 If `rg` and `f` are not provided then, 
 
-- `type` must be :state, :control or :variable
-- `lb` and `ub` must be of dimension n, m or q respectively, when provided.
+- `type` must be `:state`, `:control`, or `:variable`.
+- `lb` and `ub` must be of dimension `n`, `m`, or `q` respectively, when provided.
 
 If `rg` is provided, then:
 
 - `f` must not be provided.
-- `type` must be :state, :control or :variable.
-- `rg` must be a range of integers, and must be contained in 1:n, 1:m or 1:q respectively.
+- `type` must be `:state`, `:control`, or `:variable`.
+- `rg` must be a range of integers, and must be contained in `1:n`, `1:m`, or `1:q` respectively.
 
 If `f` is provided, then:
 
 - `rg` must not be provided.
-- `type` must be :boundary or :path.
+- `type` must be `:boundary` or `:path`.
 - `f` must be a function that returns a vector of the same dimension as the constraint.
 - `lb` and `ub` must be of the same dimension as the output of `f`, when provided.
 
+## Example
+
+```julia-repl
+# Example of adding a state constraint
+julia> ocp_constraints = Dict()
+__constraint!(ocp_constraints, :state, 3, 2, 1, lb=[0.0], ub=[1.0], label=:my_constraint)
+```
 """
 function __constraint!(
     ocp_constraints::ConstraintsDictType,
@@ -162,7 +169,25 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a constraint to a pre-model. See `[__constraint!](@ref)` for more details.
+Add a constraint to a pre-model. See [__constraint!](@ref) for more details.
+
+## Arguments
+
+- `ocp`: The pre-model to which the constraint will be added.
+- `type`: The type of the constraint. It can be `:state`, `:control`, `:variable`, `:boundary`, or `:path`.
+- `rg`: The range of the constraint. It can be an integer or a range of integers.
+- `f`: The function that defines the constraint. It must return a vector of the same dimension as the constraint.
+- `lb`: The lower bound of the constraint. It can be a number or a vector.
+- `ub`: The upper bound of the constraint. It can be a number or a vector.
+- `label`: The label of the constraint. It must be unique in the pre-model.
+
+## Example
+
+```julia-repl
+# Example of adding a control constraint to a pre-model
+julia> ocp = PreModel()
+julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_constraint)
+```
 """
 function constraint!(
     ocp::PreModel,
@@ -229,6 +254,22 @@ discretize(::Nothing, grid::Vector{T}) where {T<:ctNumber} = nothing
 $(TYPEDSIGNATURES)
 
 Return if the constraints model is empty or not.
+
+## Arguments
+
+- `model`: The constraints model to check for emptiness.
+
+## Returns
+
+- `Bool`: Returns `true` if the model has no constraints, `false` otherwise.
+
+## Example
+
+```julia-repl
+# Example of checking if a constraints model is empty
+julia> model = ConstraintsModel(...)
+julia> isempty(model)  # Returns true if there are no constraints
+```
 """
 function Base.isempty(model::ConstraintsModel)::Bool
     return length(path_constraints_nl(model)[1]) == 0 &&
@@ -238,10 +279,27 @@ function Base.isempty(model::ConstraintsModel)::Bool
            length(variable_constraints_box(model)[1]) == 0
 end
 
+
 """
 $(TYPEDSIGNATURES)
 
 Get the nonlinear path constraints from the model.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the path constraints.
+
+## Returns
+
+- The nonlinear path constraints.
+
+## Example
+
+```julia-repl
+# Example of retrieving nonlinear path constraints
+julia> model = ConstraintsModel(...)
+julia> path_constraints = path_constraints_nl(model)
+```
 """
 function path_constraints_nl(
     model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple}, # ,<:ConstraintsDictType}
@@ -253,6 +311,22 @@ end
 $(TYPEDSIGNATURES)
 
 Get the nonlinear boundary constraints from the model.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the boundary constraints.
+
+## Returns
+
+- The nonlinear boundary constraints.
+
+## Example
+
+```julia-repl
+# Example of retrieving nonlinear boundary constraints
+julia> model = ConstraintsModel(...)
+julia> boundary_constraints = boundary_constraints_nl(model)
+```
 """
 function boundary_constraints_nl(
     model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple}, # ,<:ConstraintsDictType}
@@ -264,6 +338,22 @@ end
 $(TYPEDSIGNATURES)
 
 Get the state box constraints from the model.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the state box constraints.
+
+## Returns
+
+- The state box constraints.
+
+## Example
+
+```julia-repl
+# Example of retrieving state box constraints
+julia> model = ConstraintsModel(...)
+julia> state_constraints = state_constraints_box(model)
+```
 """
 function state_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple}, # ,<:ConstraintsDictType}
@@ -275,6 +365,22 @@ end
 $(TYPEDSIGNATURES)
 
 Get the control box constraints from the model.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the control box constraints.
+
+## Returns
+
+- The control box constraints.
+
+## Example
+
+```julia-repl
+# Example of retrieving control box constraints
+julia> model = ConstraintsModel(...)
+julia> control_constraints = control_constraints_box(model)
+```
 """
 function control_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple}, # ,<:ConstraintsDictType}
@@ -286,6 +392,22 @@ end
 $(TYPEDSIGNATURES)
 
 Get the variable box constraints from the model.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the variable box constraints.
+
+## Returns
+
+- The variable box constraints.
+
+## Example
+
+```julia-repl
+# Example of retrieving variable box constraints
+julia> model = ConstraintsModel(...)
+julia> variable_constraints = variable_constraints_box(model)
+```
 """
 function variable_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV}, # ,<:ConstraintsDictType}
@@ -297,6 +419,22 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the dimension of path constraints.
+
+## Returns
+
+- `Dimension`: The dimension of the nonlinear path constraints.
+
+## Example
+
+```julia-repl
+# Example of getting the dimension of nonlinear path constraints
+julia> model = ConstraintsModel(...)
+julia> dim_path = dim_path_constraints_nl(model)
+```
 """
 function dim_path_constraints_nl(model::ConstraintsModel)::Dimension
     return length(path_constraints_nl(model)[1])
@@ -306,6 +444,22 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear boundary constraints.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the dimension of boundary constraints.
+
+## Returns
+
+- `Dimension`: The dimension of the nonlinear boundary constraints.
+
+## Example
+
+```julia-repl
+# Example of getting the dimension of nonlinear boundary constraints
+julia> model = ConstraintsModel(...)
+julia> dim_boundary = dim_boundary_constraints_nl(model)
+```
 """
 function dim_boundary_constraints_nl(model::ConstraintsModel)::Dimension
     return length(boundary_constraints_nl(model)[1])
@@ -315,6 +469,22 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of state box constraints.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the dimension of state box constraints.
+
+## Returns
+
+- `Dimension`: The dimension of the state box constraints.
+
+## Example
+
+```julia-repl
+julia> # Example of getting the dimension of state box constraints
+julia> model = ConstraintsModel(...)
+julia> dim_state = dim_state_constraints_box(model)
+```
 """
 function dim_state_constraints_box(model::ConstraintsModel)::Dimension
     return length(state_constraints_box(model)[1])
@@ -324,6 +494,22 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of control box constraints.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the dimension of control box constraints.
+
+## Returns
+
+- `Dimension`: The dimension of the control box constraints.
+
+## Example
+
+```julia-repl
+julia> # Example of getting the dimension of control box constraints
+julia> model = ConstraintsModel(...)
+julia> dim_control = dim_control_constraints_box(model)
+```
 """
 function dim_control_constraints_box(model::ConstraintsModel)::Dimension
     return length(control_constraints_box(model)[1])
@@ -333,6 +519,22 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of variable box constraints.
+
+## Arguments
+
+- `model`: The constraints model from which to retrieve the dimension of variable box constraints.
+
+## Returns
+
+- `Dimension`: The dimension of the variable box constraints.
+
+## Example
+
+```julia-repl
+julia> # Example of getting the dimension of variable box constraints
+julia> model = ConstraintsModel(...)
+julia> dim_variable = dim_variable_constraints_box(model)
+```
 """
 function dim_variable_constraints_box(model::ConstraintsModel)::Dimension
     return length(variable_constraints_box(model)[1])
@@ -348,6 +550,23 @@ of the constraint, `lb` is the lower bound of the constraint and `ub` is the upp
 bound of the constraint. 
 
 The function returns an exception if the label is not found in the model.
+
+## Arguments
+
+- `model`: The model from which to retrieve the constraint.
+- `label`: The label of the constraint to retrieve.
+
+## Returns
+
+- `Tuple`: A tuple containing the type, function, lower bound, and upper bound of the constraint.
+
+## Example
+
+```julia-repl
+julia> # Example of getting a labelled constraint from the model
+julia> model = Model(...)
+julia> constraint_info = constraint(model, :my_constraint)
+```
 """
 function constraint(model::Model, label::Symbol)::Tuple # not type stable
 
