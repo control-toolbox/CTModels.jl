@@ -38,7 +38,10 @@ function do_plot(
     do_plot_costate = :costate ∈ description && costate_style != :none
     do_plot_control = :control ∈ description && control_style != :none
     do_plot_path = :path ∈ description && path_style != :none
-    do_plot_dual = :dual ∈ description && dual_style != :none && !isnothing(CTModels.path_constraints_dual(sol))
+    do_plot_dual =
+        :dual ∈ description &&
+        dual_style != :none &&
+        !isnothing(CTModels.path_constraints_dual(sol))
 
     return (do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual)
 end

@@ -218,7 +218,16 @@ function build_solution(
     )
 
     return Solution(
-        time_grid, times(ocp), state, control, variable, fp, objective, dual, solver_infos, ocp
+        time_grid,
+        times(ocp),
+        state,
+        control,
+        variable,
+        fp,
+        objective,
+        dual,
+        solver_infos,
+        ocp,
     )
 end
 
