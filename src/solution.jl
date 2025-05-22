@@ -700,14 +700,66 @@ $(TYPEDSIGNATURES)
 Prints the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    return print(io, "Optimal Control Solution")
+    println(io, "Optimal Control Solution")
+    println(io, "────────────────────────")
+
+    # Status
+    println(io, "• Success       : ", success(sol))
+    println(io, "• Stopping      : ", stopping(sol))
+    println(io, "• Message       : ", message(sol))
+    println(io, "• Iterations    : ", iterations(sol))
+    println(io, "• Objective     : ", objective(sol))
+    println(io, "• Constraint violation: ", constraints_violation(sol))
+
+    println(io)
+    println(io, "Time")
+    println(io, "────")
+    println(io, "• Name          : ", time_name(sol))
+    println(io, "• Grid          : ", time_grid(sol))
+    println(io, "• Grid length   : ", length(time_grid(sol)))
+
+    println(io)
+    println(io, "State")
+    println(io, "─────")
+    println(io, "• Name          : ", state_name(sol))
+    println(io, "• Dimension     : ", state_dimension(sol))
+    println(io, "• Components    : ", join(state_components(sol), ", "))
+
+    println(io)
+    println(io, "Control")
+    println(io, "───────")
+    println(io, "• Name          : ", control_name(sol))
+    println(io, "• Dimension     : ", control_dimension(sol))
+    println(io, "• Components    : ", join(control_components(sol), ", "))
+
+    # Variable block (optional)
+    v_dim = variable_dimension(sol)
+    if v_dim > 0
+        println(io)
+        println(io, "Variable")
+        println(io, "────────")
+        println(io, "• Name          : ", variable_name(sol))
+        println(io, "• Dimension     : ", v_dim)
+        println(io, "• Components    : ", join(variable_components(sol), ", "))
+        println(io, "• Value         : ", variable(sol))
+    end
+
+    println(io)
+    println(io, "Duals")
+    println(io, "─────")
+    println(io, "• Boundary constraints dual     : ", boundary_constraints_dual(sol))
+    if v_dim > 0
+        println(io, "• Variable constraints dual (lb): ", variable_constraints_lb_dual(sol))
+        println(io, "• Variable constraints dual (ub): ", variable_constraints_ub_dual(sol))
+    end
+
 end
 
-"""
-$(TYPEDSIGNATURES)
+# """
+# $(TYPEDSIGNATURES)
 
-"""
-function Base.show_default(io::IO, sol::Solution)
-    return print(io, "Optimal Control Solution")
-    #show(io, MIME("text/plain"), sol)
-end
+# """
+# function Base.show_default(io::IO, sol::Solution)
+#     return print(io, "Optimal Control Solution")
+#     #show(io, MIME("text/plain"), sol)
+# end
