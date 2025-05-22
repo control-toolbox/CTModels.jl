@@ -104,6 +104,10 @@ const ConstraintsDictType = OrderedDict{
 #
 include("default.jl")
 
+#
+include("utils.jl")
+include("types.jl")
+
 # export / import
 """
 $(TYPEDEF)
@@ -132,28 +136,28 @@ $(TYPEDSIGNATURES)
 
 Export a solution in JLD format.
 """
-export_ocp_solution(::JLD2Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2))
+export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String) = throw(CTBase.ExtensionError(:JLD2))
 
 """
 $(TYPEDSIGNATURES)
 
 Import a solution from a JLD file.
 """
-import_ocp_solution(::JLD2Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JLD2))
+import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String) = throw(CTBase.ExtensionError(:JLD2))
 
 """
 $(TYPEDSIGNATURES)
 
 Export a solution in JSON format.
 """
-export_ocp_solution(::JSON3Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JSON3))
+export_ocp_solution(::JSON3Tag, ::AbstractSolution;  filename::String) = throw(CTBase.ExtensionError(:JSON3))
 
 """
 $(TYPEDSIGNATURES)
 
 Import a solution from a JLD file.
 """
-import_ocp_solution(::JSON3Tag, args...; kwargs...) = throw(CTBase.ExtensionError(:JSON3))
+import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String) = throw(CTBase.ExtensionError(:JSON3))
 
 """
 $(TYPEDSIGNATURES)
@@ -167,11 +171,11 @@ julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
 julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JLD)
 ```
 """
-function export_ocp_solution(args...; format::Symbol=__format(), kwargs...)
+function export_ocp_solution(sol::AbstractSolution; format::Symbol=__format(), filename::String=__filename_export_import())
     if format == :JLD
-        return export_ocp_solution(JLD2Tag(), args...; kwargs...)
+        return export_ocp_solution(JLD2Tag(), sol; filename=filename)
     elseif format == :JSON
-        return export_ocp_solution(JSON3Tag(), args...; kwargs...)
+        return export_ocp_solution(JSON3Tag(), sol; filename=filename)
     else
         throw(
             CTBase.IncorrectArgument(
@@ -193,11 +197,11 @@ julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JSON
 julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JLD)
 ```
 """
-function import_ocp_solution(args...; format::Symbol=__format(), kwargs...)
+function import_ocp_solution(ocp::AbstractModel; format::Symbol=__format(), filename::String=__filename_export_import())
     if format == :JLD
-        return import_ocp_solution(JLD2Tag(), args...; kwargs...)
+        return import_ocp_solution(JLD2Tag(), ocp; filename=filename)
     elseif format == :JSON
-        return import_ocp_solution(JSON3Tag(), args...; kwargs...)
+        return import_ocp_solution(JSON3Tag(), ocp; filename=filename)
     else
         throw(
             CTBase.IncorrectArgument(
@@ -206,10 +210,6 @@ function import_ocp_solution(args...; format::Symbol=__format(), kwargs...)
         )
     end
 end
-
-#
-include("utils.jl")
-include("types.jl")
 
 # to be extended
 """
