@@ -62,14 +62,14 @@ function __constraint!(
 )
 
     # checkings: the constraint must not be set before
-    label ∈ keys(ocp_constraints) && throw(
+    @ensure(!(label ∈ keys(ocp_constraints)),
         CTBase.UnauthorizedCall(
             "the constraint named " * String(label) * " already exists."
         ),
     )
 
     # checkings: lb and ub cannot be both nothing
-    (isnothing(lb) && isnothing(ub)) && throw(
+    @ensure(!(isnothing(lb) && isnothing(ub)),
         CTBase.UnauthorizedCall(
             "The lower bound `lb` and the upper bound `ub` cannot be both nothing."
         ),
@@ -80,7 +80,7 @@ function __constraint!(
     isnothing(ub) && (ub = Inf * ones(eltype(lb), length(lb)))
 
     # lb and ub must have the same length
-    length(lb) != length(ub) && throw(
+    @ensure(length(lb) == length(ub),
         CTBase.IncorrectArgument(
             "the lower bound `lb` and the upper bound `ub` must have the same length."
         ),
@@ -107,28 +107,28 @@ function __constraint!(
                     ),
                 )
             end
-            (length(rg) != length(lb)) && throw(CTBase.IncorrectArgument(txt))
+            @ensure(length(rg) == length(lb), CTBase.IncorrectArgument(txt))
             __constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
             txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
-            (length(rg) != length(lb)) && throw(CTBase.IncorrectArgument(txt))
+            @ensure(length(rg) == length(lb), CTBase.IncorrectArgument(txt))
             # check if the range is valid
             if type == :state
-                !all(1 .≤ rg .≤ n) && throw(
+                @ensure(all(1 .≤ rg .≤ n),
                     CTBase.IncorrectArgument(
                         "the range of the state constraint must be contained in 1:$n",
                     ),
                 )
             elseif type == :control
-                !all(1 .≤ rg .≤ m) && throw(
+                @ensure(all(1 .≤ rg .≤ m),
                     CTBase.IncorrectArgument(
                         "the range of the control constraint must be contained in 1:$m",
                     ),
                 )
             elseif type == :variable
-                !all(1 .≤ rg .≤ q) && throw(
+                @ensure(all(1 .≤ rg .≤ q),
                     CTBase.IncorrectArgument(
                         "the range of the variable constraint must be contained in 1:$q",
                     ),

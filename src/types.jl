@@ -313,43 +313,67 @@ end
 $(TYPEDSIGNATURES)
 
 """
-__is_times_set(ocp::PreModel)::Bool = !isnothing(ocp.times)
+__is_set(x) = !isnothing(x)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_state_set(ocp::PreModel)::Bool = !isnothing(ocp.state)
+__is_times_set(ocp::PreModel)::Bool = __is_set(ocp.times)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_control_set(ocp::PreModel)::Bool = !isnothing(ocp.control)
+__is_state_set(ocp::PreModel)::Bool = __is_set(ocp.state)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_variable_set(ocp::PreModel)::Bool = !(ocp.variable isa EmptyVariableModel)
+__is_control_set(ocp::PreModel)::Bool = __is_set(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_dynamics_set(ocp::PreModel)::Bool = !isnothing(ocp.dynamics)
+__is_variable_empty(v) = v isa EmptyVariableModel
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_objective_set(ocp::PreModel)::Bool = !isnothing(ocp.objective)
+__is_variable_set(ocp::PreModel)::Bool = !__is_variable_empty(ocp.variable)
 
 """
 $(TYPEDSIGNATURES)
 
 """
-__is_definition_set(ocp::PreModel)::Bool = !isnothing(ocp.definition)
+__is_dynamics_set(ocp::PreModel)::Bool = __is_set(ocp.dynamics)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+__is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+__is_definition_set(ocp::PreModel)::Bool = __is_set(ocp.definition)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+function state_dimension(ocp::PreModel)::Dimension
+    if !__is_state_set(ocp)
+        return 0
+    else
+        return length(ocp.state.components)
+    end
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -362,16 +386,16 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
         if !__is_state_set(ocp)
-            error("Internal error. The state muste be set.")
+            throw(CTBase.UnauthorizedCall("the state must be set."))
         end
-        n = length(ocp.state.components)
+        n = state_dimension(ocp)
         covered = falses(n)
         for (range, _) in ocp.dynamics
             for i in range
                 if 1 <= i <= n
                     covered[i] = true
                 else
-                    error("Internal error. Dynamics index $i out of bounds for state of size $n.")
+                    throw(CTBase.UnauthorizedCall("Dynamics index $i out of bounds for state of size $n."))
                 end
             end
         end

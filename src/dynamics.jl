@@ -21,23 +21,17 @@ Throws `CTBase.UnauthorizedCall` if called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
 
-    # checkings: times, state and control must be set before the dynamics
-    !__is_state_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the state must be set before the dynamics."))
-    !__is_control_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the control must be set before the dynamics."))
-    !__is_times_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the times must be set before the dynamics."))
-
-    # checkings: the dynamics must not be set before
-    __is_dynamics_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the dynamics has already been set."))
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the dynamics.")
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the dynamics.")
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the dynamics.")
+    @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall("the dynamics has already been set.")
 
     # set the dynamics
     ocp.dynamics = f
 
     return nothing
 end
+
 
 """
 $(TYPEDSIGNATURES)
@@ -65,20 +59,26 @@ Throws `CTBase.UnauthorizedCall` if:
 - The state, control, or times are not yet set.
 - The dynamics are already defined completely.
 - Any index in `rg` overlaps with an existing dynamics range.
+
+# Example
+```julia-repl
+julia> dynamics!(ocp, 1:2, (out, t, x, u, v) -> out .= x[1:2] .+ u[1:2])
+julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
+```
 """
 function dynamics!(ocp::PreModel, rg::AbstractUnitRange{<:Integer}, f::Function)::Nothing
 
-    # checkings: times, state and control must be set before the dynamics
-    !__is_state_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the state must be set before the dynamics."))
-    !__is_control_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the control must be set before the dynamics."))
-    !__is_times_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the times must be set before the dynamics."))
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the dynamics.")
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the dynamics.")
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the dynamics.")
+    @ensure !__is_dynamics_complete(ocp) CTBase.UnauthorizedCall("the dynamics has already been set.")
 
-    # checkings: the dynamics must not be complete
-    __is_dynamics_complete(ocp) &&
-        throw(CTBase.UnauthorizedCall("the dynamics is already complete."))
+    # Check indices in rg are within valid state index bounds
+    for i in rg
+        if i < 1 || i > state_dimension(ocp)
+            throw(CTBase.IncorrectArgument("index $i in the range is out of valid bounds [1, $(state_dimension(ocp))]."))
+        end
+    end
 
     # initialize dynamics container if needed
     if isnothing(ocp.dynamics)
@@ -100,6 +100,40 @@ function dynamics!(ocp::PreModel, rg::AbstractUnitRange{<:Integer}, f::Function)
     push!(ocp.dynamics, (rg, f))
 
     return nothing
+end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Define partial dynamics for a single state variable index in an optimal control problem.
+
+This is a convenience method for defining dynamics affecting only one element of the state vector. It wraps the scalar index `i` into a range `i:i` and delegates to the general partial dynamics method.
+
+# Arguments
+- `ocp::PreModel`: The optimal control problem being defined.
+- `i::Integer`: The index of the state variable to which the function `f` applies.
+- `f::Function`: A function of the form `(out, t, x, u, v) -> ...`, which updates the scalar output `out[1]` in-place.
+
+# Behavior
+This is equivalent to calling:
+```julia-repl
+julia> dynamics!(ocp, i:i, f)
+```
+
+# Errors
+Throws the same errors as the range-based method if:
+- The model is not properly initialized.
+- The index `i` overlaps with existing dynamics.
+- A full dynamics function is already defined.
+
+# Example
+```julia-repl
+julia> dynamics!(ocp, 3, (out, t, x, u, v) -> out[1] = x[3]^2 + u[1])
+```
+"""
+function dynamics!(ocp::PreModel, i::Integer, f::Function)::Nothing
+    return dynamics!(ocp, i:i, f)
 end
 
 """

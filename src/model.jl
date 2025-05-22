@@ -1,6 +1,34 @@
 """
 $(TYPEDSIGNATURES)
 
+Appends box constraint data to the provided vectors.
+
+# Arguments
+- `inds::Vector{Int}`: Vector of indices to which the range `rg` will be appended.
+- `lbs::Vector{<:Real}`: Vector of lower bounds to which `lb` will be appended.
+- `ubs::Vector{<:Real}`: Vector of upper bounds to which `ub` will be appended.
+- `labels::Vector{String}`: Vector of labels to which the `label` will be repeated and appended.
+- `rg::AbstractVector{Int}`: Index range corresponding to the constraint variables.
+- `lb::AbstractVector{<:Real}`: Lower bounds associated with `rg`.
+- `ub::AbstractVector{<:Real}`: Upper bounds associated with `rg`.
+- `label::String`: Label describing the constraint block (e.g., "state", "control").
+
+# Notes
+- All input vectors (`rg`, `lb`, `ub`) must have the same length.
+- The function modifies the `inds`, `lbs`, `ubs`, and `labels` vectors in-place.
+"""
+function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
+    append!(inds, rg)
+    append!(lbs, lb)
+    append!(ubs, ub)
+    for _ in 1:length(lb)
+        push!(labels, label)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Constructs a `ConstraintsModel` from a dictionary of constraints.
 
 This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured `ConstraintsModel`.
@@ -71,31 +99,13 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
                 push!(boundary_cons_nl_labels, label)
             end
         elseif type == :state
-            rg = c[2]
-            append!(state_cons_box_ind, rg)
-            append!(state_cons_box_lb, lb)
-            append!(state_cons_box_ub, ub)
-            for i in 1:length(lb)
-                push!(state_cons_box_labels, label)
-            end
+            append_box_constraints!(state_cons_box_ind, state_cons_box_lb, state_cons_box_ub, state_cons_box_labels, c[2], lb, ub, label)
         elseif type == :control
-            rg = c[2]
-            append!(control_cons_box_ind, rg)
-            append!(control_cons_box_lb, lb)
-            append!(control_cons_box_ub, ub)
-            for i in 1:length(lb)
-                push!(control_cons_box_labels, label)
-            end
+            append_box_constraints!(control_cons_box_ind, control_cons_box_lb, control_cons_box_ub, control_cons_box_labels, c[2], lb, ub, label)
         elseif type == :variable
-            rg = c[2]
-            append!(variable_cons_box_ind, rg)
-            append!(variable_cons_box_lb, lb)
-            append!(variable_cons_box_ub, ub)
-            for i in 1:length(lb)
-                push!(variable_cons_box_labels, label)
-            end
+            append_box_constraints!(variable_cons_box_ind, variable_cons_box_lb, variable_cons_box_ub, variable_cons_box_labels, c[2], lb, ub, label)
         else
-            error("Internal error")
+            throw(CTBase.UnauthorizedCall("Unknown constraint type: $type for label $label."))
         end
     end
 
@@ -116,16 +126,24 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
         constraints_dimensions::Vector{Int},
         constraints_functions::Function...,
     )
-        function path_cons_nl!(val, t, x, u, v)
-            j = 1
-            for i in 1:constraints_number
-                li = constraints_dimensions[i]
-                constraints_functions[i](@view(val[j:(j + li - 1)]), t, x, u, v)
-                j += li
+        let
+            # Create local copies of the inputs to capture them safely
+            cn = constraints_number
+            cd = constraints_dimensions
+            cf = constraints_functions
+
+            function path_cons_nl!(val, t, x, u, v)
+                j = 1
+                for i in 1:cn
+                    li = cd[i]
+                    cf[i](@view(val[j:(j + li - 1)]), t, x, u, v)
+                    j += li
+                end
+                return nothing
             end
-            return nothing
+
+            return path_cons_nl!
         end
-        return path_cons_nl!
     end
 
     function make_boundary_cons_nl(
@@ -142,16 +160,18 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
         constraints_dimensions::Vector{Int},
         constraints_functions::Function...,
     )
-        function boundary_cons_nl!(val, x0, xf, v)
-            j = 1
-            for i in 1:constraints_number
-                li = constraints_dimensions[i]
-                constraints_functions[i](@view(val[j:(j + li - 1)]), x0, xf, v)
-                j += li
+        let cfs = constraints_functions
+            function boundary_cons_nl!(val, x0, xf, v)
+                j = 1
+                for i in 1:constraints_number
+                    li = constraints_dimensions[i]
+                    cfs[i](@view(val[j:(j + li - 1)]), x0, xf, v)
+                    j += li
+                end
+                return nothing
             end
-            return nothing
+            return boundary_cons_nl!
         end
-        return boundary_cons_nl!
     end
 
     path_cons_nl! = make_path_cons_nl(
@@ -211,40 +231,15 @@ model = build_model(pre_ocp)
 """
 function build_model(pre_ocp::PreModel)::Model
 
-    # checkings: times must be set
-    __is_times_set(pre_ocp) ||
-        throw(CTBase.UnauthorizedCall("the times must be set before building the model."))
+    @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall("the times must be set before building the model.")
+    @ensure __is_state_set(pre_ocp) CTBase.UnauthorizedCall("the state must be set before building the model.")
+    @ensure __is_control_set(pre_ocp) CTBase.UnauthorizedCall("the control must be set before building the model.")
+    @ensure __is_dynamics_set(pre_ocp) CTBase.UnauthorizedCall("the dynamics must be set before building the model.")
+    @ensure __is_dynamics_complete(pre_ocp) CTBase.UnauthorizedCall("all the components of the dynamics must be set before building the model.")
+    @ensure __is_objective_set(pre_ocp) CTBase.UnauthorizedCall("the objective must be set before building the model.")
+    @ensure !isnothing(pre_ocp.definition) CTBase.UnauthorizedCall("the definition must be set before building the model.")
 
-    # checkings: state must be set
-    __is_state_set(pre_ocp) ||
-        throw(CTBase.UnauthorizedCall("the state must be set before building the model."))
-
-    # checkings: control must be set
-    __is_control_set(pre_ocp) ||
-        throw(CTBase.UnauthorizedCall("the control must be set before building the model."))
-
-    # checkings: dynamics must be set
-    __is_dynamics_set(pre_ocp) || throw(
-        CTBase.UnauthorizedCall("the dynamics must be set before building the model.")
-    )
-
-    # checkings: dynamics must be complete
-    # if not complete, it is given component-wise
-    __is_dynamics_complete(pre_ocp) || throw(
-        CTBase.UnauthorizedCall("all the components of the dynamics must be set before building the model.")
-    )
-
-    # checkings: objective must be set
-    __is_objective_set(pre_ocp) || throw(
-        CTBase.UnauthorizedCall("the objective must be set before building the model.")
-    )
-
-    # checkings: definition must be set
-    isnothing(pre_ocp.definition) && throw(
-        CTBase.UnauthorizedCall("the definition must be set before building the model.")
-    )
-
-    # get all necessary fields
+    # extract components from PreModel
     times = pre_ocp.times
     state = pre_ocp.state
     control = pre_ocp.control

@@ -87,3 +87,25 @@ function to_out_of_place(f!, n; T=Float64)
     end
     return isnothing(f!) ? nothing : f
 end
+
+"""
+    @ensure condition exception
+
+Throws the provided `exception` if `condition` is false.
+
+# Usage
+```julia-repl
+julia> @ensure x > 0 CTBase.IncorrectArgument("x must be positive")
+```
+
+# Arguments
+- `condition`: A Boolean expression to test.
+- `exception`: An instance of an exception to throw if `condition` is false.
+
+# Throws
+- The provided `exception` if the condition is not satisfied.
+"""
+macro ensure(cond, exc)
+    return esc(:( if !($cond) throw($exc) end ))
+end
+
