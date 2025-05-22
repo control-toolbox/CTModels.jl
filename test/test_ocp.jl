@@ -88,7 +88,7 @@ function test_ocp()
     end
 
     # concrete ocp
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -205,7 +205,7 @@ function test_ocp()
     times = CTModels.TimesModel(
         CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
     )
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -225,7 +225,7 @@ function test_ocp()
     times = CTModels.TimesModel(
         CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FreeTimeModel(1, "t_f"), "t"
     )
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -245,7 +245,7 @@ function test_ocp()
     times = CTModels.TimesModel(
         CTModels.FreeTimeModel(1, "t₀"), CTModels.FixedTimeModel(10.0, "t_f"), "t"
     )
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -263,7 +263,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with Lagrange objective
     objective = CTModels.LagrangeObjectiveModel(lagrange_user, :max)
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -283,7 +283,7 @@ function test_ocp()
     # -------------------------------------------------------------------------- #
     # ocp with both Mayer and Lagrange objective, that is Bolza objective
     objective = CTModels.BolzaObjectiveModel(mayer_user, lagrange, :min)
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -307,7 +307,7 @@ function test_ocp()
     pre_constraints = CTModels.ConstraintsDictType()
     constraints = CTModels.build_constraints(pre_constraints)
     definition = quote end
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
     display(ocp)
@@ -324,7 +324,7 @@ function test_ocp()
     pre_constraints = CTModels.ConstraintsDictType()
     constraints = CTModels.build_constraints(pre_constraints)
     definition = quote end
-    ocp = CTModels.Model(
+    ocp = CTModels.Model{CTModels.NonAutonomous}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
     display(ocp)

@@ -54,6 +54,12 @@ function test_model()
     end
     CTModels.definition!(pre_ocp, definition)
 
+    # exception: time dependence must be set
+    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+
+    # set time dependence
+    CTModels.time_dependence!(pre_ocp; autonomous=false)
+
     # set some constraints
     f_path(r, t, x, u, v) = r .= x .+ u .+ v .+ t
     f_boundary(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)

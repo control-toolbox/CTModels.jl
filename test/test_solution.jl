@@ -24,6 +24,7 @@ function test_solution()
         pre_ocp, :variable; rg=1:2, lb=[0, 1], ub=[1, 2], label=:variable_rg
     )
     CTModels.definition!(pre_ocp, quote end)
+    CTModels.time_dependence!(pre_ocp; autonomous=false)
     ocp = CTModels.build_model(pre_ocp)
 
     # create a solution

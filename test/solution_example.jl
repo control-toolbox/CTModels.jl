@@ -52,6 +52,8 @@ function solution_example(; fun=false)
     end
     CTModels.definition!(pre_ocp, definition) # does not correspond to the solution
 
+    CTModels.time_dependence!(pre_ocp; autonomous=false)
+
     # build model
     ocp = CTModels.build_model(pre_ocp)
 

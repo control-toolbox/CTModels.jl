@@ -2,6 +2,22 @@
 """
 $(TYPEDEF)
 """
+abstract type TimeDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type Autonomous<:TimeDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type NonAutonomous<:TimeDependence end
+
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+"""
 abstract type AbstractStateModel end
 
 """
@@ -231,6 +247,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct Model{
+    TD<:TimeDependence,
     TimesModelType<:AbstractTimesModel,
     StateModelType<:AbstractStateModel,
     ControlModelType<:AbstractControlModel,
@@ -247,7 +264,30 @@ struct Model{
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
     definition::Expr
+
+    function Model{TD}(  # TD must be specified explicitly
+        times::AbstractTimesModel,
+        state::AbstractStateModel,
+        control::AbstractControlModel,
+        variable::AbstractVariableModel,
+        dynamics::Function,
+        objective::AbstractObjectiveModel,
+        constraints::AbstractConstraintsModel,
+        definition::Expr,
+    ) where {TD<:TimeDependence}
+        return new{TD,
+                   typeof(times),
+                   typeof(state),
+                   typeof(control),
+                   typeof(variable),
+                   typeof(dynamics),
+                   typeof(objective),
+                   typeof(constraints)}(
+            times, state, control, variable, dynamics, objective, constraints, definition
+        )
+    end
 end
+
 
 """
 $(TYPEDSIGNATURES)
@@ -307,6 +347,7 @@ $(TYPEDFIELDS)
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
     definition::Union{Expr,Nothing} = nothing
+    autonomous::Union{Bool,Nothing} = nothing
 end
 
 """
@@ -314,6 +355,12 @@ $(TYPEDSIGNATURES)
 
 """
 __is_set(x) = !isnothing(x)
+
+"""
+$(TYPEDSIGNATURES)
+
+"""
+__is_autonomous_set(ocp::PreModel)::Bool = __is_set(ocp.autonomous)
 
 """
 $(TYPEDSIGNATURES)
@@ -408,7 +455,8 @@ function __is_consistent(ocp::PreModel)::Bool
            __is_state_set(ocp) &&
            __is_control_set(ocp) &&
            __is_dynamics_complete(ocp) &&
-           __is_objective_set(ocp)
+           __is_objective_set(ocp) &&
+           __is_autonomous_set(ocp)
 end
 
 """
@@ -424,6 +472,7 @@ function __is_empty(ocp::PreModel)::Bool
            !__is_objective_set(ocp) &&
            !__is_definition_set(ocp) &&
            !__is_variable_set(ocp) &&
+           !__is_autonomous_set(ocp) &&
            Base.isempty(ocp.constraints)
 end
 
