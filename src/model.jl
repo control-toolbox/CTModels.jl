@@ -209,7 +209,7 @@ dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
 model = build_model(pre_ocp)
 ```
 """
-function build_model(pre_ocp::PreModel)::Model
+function build_model(pre_ocp::PreModel; autonomous = true)::Model
 
     # checkings: times must be set
     __is_times_set(pre_ocp) ||
@@ -250,7 +250,7 @@ function build_model(pre_ocp::PreModel)::Model
 
     # create the model
     model = Model(
-        times, state, control, variable, dynamics, objective, constraints, definition
+        times, state, control, variable, dynamics, objective, constraints, definition, autonomous # autonomous is passed by the parser
     )
 
     return model
@@ -780,6 +780,26 @@ function dynamics(
     },
 )::D where {D<:Function}
     return ocp.dynamics
+end
+
+# is_autonomous
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem is autonomous or not.
+"""
+function is_autonomous(
+    ocp::Model{
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)::Bool
+    return ocp.autonomous
 end
 
 # Constraints

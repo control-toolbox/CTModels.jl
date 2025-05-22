@@ -247,6 +247,7 @@ struct Model{
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
     definition::Expr
+    autonomous::Bool
 end
 
 """
