@@ -368,11 +368,8 @@ $(TYPEDSIGNATURES)
 
 """
 function state_dimension(ocp::PreModel)::Dimension
-    if !__is_state_set(ocp)
-        return 0
-    else
-        return length(ocp.state.components)
-    end
+    @ensure(__is_state_set(ocp), throw(CTBase.UnauthorizedCall("the state must be set.")))
+    return length(ocp.state.components)
 end
 
 """
