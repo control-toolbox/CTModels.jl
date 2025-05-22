@@ -279,7 +279,6 @@ function Base.isempty(model::ConstraintsModel)::Bool
            length(variable_constraints_box(model)[1]) == 0
 end
 
-
 """
 $(TYPEDSIGNATURES)
 
