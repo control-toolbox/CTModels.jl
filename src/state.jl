@@ -56,31 +56,23 @@ julia> state_components(ocp)
 function state!(
     ocp::PreModel,
     n::Dimension,
-    name::T1=__state_name(),
-    components_names::Vector{T2}=__state_components(n, string(name)),
-)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
+    name::T1 = __state_name(),
+    components_names::Vector{T2} = __state_components(n, string(name)),
+)::Nothing where {T1<:Union{String,Symbol}, T2<:Union{String,Symbol}}
 
     # checkings
-    __is_state_set(ocp) && throw(CTBase.UnauthorizedCall("the state has already been set."))
-
-    (n > 0) &&
-        (size(components_names, 1) ≠ n) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "the number of state names must be equal to the state dimension"
-            ),
-        )
-
-    # if the dimension is 0 then throw an error
-    if n == 0
-        throw(CTBase.IncorrectArgument("the state dimension must be greater than 0"))
-    end
+    @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
+    @ensure n > 0 CTBase.IncorrectArgument("the state dimension must be greater than 0")
+    @ensure size(components_names, 1) == n CTBase.IncorrectArgument(
+        "the number of state names must be equal to the state dimension"
+    )
 
     # set the state
     ocp.state = StateModel(string(name), string.(components_names))
 
     return nothing
 end
+
 
 # ------------------------------------------------------------------------------ #
 # GETTERS

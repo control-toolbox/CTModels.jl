@@ -30,108 +30,66 @@ julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol
 """
 function time!(
     ocp::PreModel;
-    t0::Union{Time,Nothing}=nothing,
-    tf::Union{Time,Nothing}=nothing,
-    ind0::Union{Int,Nothing}=nothing,
-    indf::Union{Int,Nothing}=nothing,
-    time_name::Union{String,Symbol}=__time_name(),
+    t0::Union{Time,Nothing} = nothing,
+    tf::Union{Time,Nothing} = nothing,
+    ind0::Union{Int,Nothing} = nothing,
+    indf::Union{Int,Nothing} = nothing,
+    time_name::Union{String,Symbol} = __time_name(),
 )::Nothing
 
-    # check if the function has been already called
-    __is_times_set(ocp) && throw(CTBase.UnauthorizedCall("the time has already been set."))
+    @ensure !__is_times_set(ocp) CTBase.UnauthorizedCall("the time has already been set.")
 
-    # If t0 or tf is free, check if the problem has a variable set
-    # and in this case check consistency, meaning that ind0 and indf must belong
-    # to 1 <= ind0, indf <= q, where q is the variable dimension.
-    # Otherwise, throw an error.
-    (!isnothing(ind0) || !isnothing(indf)) &&
-        !__is_variable_set(ocp) &&
-        throw(
-            CTBase.UnauthorizedCall(
-                "the variable must be set before calling time! if t0 or tf is free."
-            ),
-        )
+    @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) CTBase.UnauthorizedCall(
+        "the variable must be set before calling time! if t0 or tf is free."
+    )
 
-    # check consistency with the variable
     if __is_variable_set(ocp)
         q = dimension(ocp.variable)
 
-        !isnothing(ind0) &&
-            !(1 ≤ ind0 ≤ q) && # t0 is free
-            throw(
-                CTBase.IncorrectArgument(
-                    "the index of the t0 variable must be contained in 1:$q"
-                ),
-            )
+        @ensure isnothing(ind0) || (1 ≤ ind0 ≤ q) CTBase.IncorrectArgument(
+            "the index of the t0 variable must be contained in 1:$q"
+        )
 
-        !isnothing(indf) &&
-            !(1 ≤ indf ≤ q) && # tf is free
-            throw(
-                CTBase.IncorrectArgument(
-                    "the index of the tf variable must be contained in 1:$q"
-                ),
-            )
+        @ensure isnothing(indf) || (1 ≤ indf ≤ q) CTBase.IncorrectArgument(
+            "the index of the tf variable must be contained in 1:$q"
+        )
     end
 
-    # check consistency
-    !isnothing(t0) &&
-        !isnothing(ind0) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "Providing t0 and ind0 has no sense. The initial time cannot be fixed and free.",
-            ),
-        )
-    isnothing(t0) &&
-        isnothing(ind0) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free).",
-            ),
-        )
-    !isnothing(tf) &&
-        !isnothing(indf) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "Providing tf and indf has no sense. The final time cannot be fixed and free.",
-            ),
-        )
-    isnothing(tf) &&
-        isnothing(indf) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free).",
-            ),
-        )
+    @ensure isnothing(t0) || isnothing(ind0) CTBase.IncorrectArgument(
+        "Providing t0 and ind0 has no sense. The initial time cannot be fixed and free."
+    )
 
-    #
+    @ensure !(isnothing(t0) && isnothing(ind0)) CTBase.IncorrectArgument(
+        "Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free)."
+    )
+
+    @ensure isnothing(tf) || isnothing(indf) CTBase.IncorrectArgument(
+        "Providing tf and indf has no sense. The final time cannot be fixed and free."
+    )
+
+    @ensure !(isnothing(tf) && isnothing(indf)) CTBase.IncorrectArgument(
+        "Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free)."
+    )
+
     time_name = time_name isa String ? time_name : string(time_name)
 
-    # core
     (initial_time, final_time) = @match (t0, ind0, tf, indf) begin
-        (::Time, ::Nothing, ::Time, ::Nothing) => begin # (t0, tf)
-            (
-                FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
-                FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
-            )
-        end
-        (::Nothing, ::Int, ::Time, ::Nothing) => begin # (ind0, tf)
-            (
-                FreeTimeModel(ind0, components(ocp.variable)[ind0]),
-                FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
-            )
-        end
-        (::Time, ::Nothing, ::Nothing, ::Int) => begin # (t0, indf)
-            (
-                FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
-                FreeTimeModel(indf, components(ocp.variable)[indf]),
-            )
-        end
-        (::Nothing, ::Int, ::Nothing, ::Int) => begin # (ind0, indf)
-            (
-                FreeTimeModel(ind0, components(ocp.variable)[ind0]),
-                FreeTimeModel(indf, components(ocp.variable)[indf]),
-            )
-        end
+        (::Time, ::Nothing, ::Time, ::Nothing) => (
+            FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
+            FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
+        )
+        (::Nothing, ::Int, ::Time, ::Nothing) => (
+            FreeTimeModel(ind0, components(ocp.variable)[ind0]),
+            FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),
+        )
+        (::Time, ::Nothing, ::Nothing, ::Int) => (
+            FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
+            FreeTimeModel(indf, components(ocp.variable)[indf]),
+        )
+        (::Nothing, ::Int, ::Nothing, ::Int) => (
+            FreeTimeModel(ind0, components(ocp.variable)[ind0]),
+            FreeTimeModel(indf, components(ocp.variable)[indf]),
+        )
         _ => throw(CTBase.IncorrectArgument("Provided arguments are inconsistent."))
     end
 
@@ -191,14 +149,12 @@ Get the time from the free time model.
 - If the index of the time variable is not in [1, length(variable)], throw an error.
 """
 function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
-    # check if model.index in [1, length(variable)]
-    !(1 ≤ model.index ≤ length(variable)) && throw(
-        CTBase.IncorrectArgument(
-            "the index of the time variable must be contained in 1:$(length(variable))"
-        ),
+    @ensure 1 ≤ model.index ≤ length(variable) CTBase.IncorrectArgument(
+        "the index of the time variable must be contained in 1:$(length(variable))"
     )
     return variable[model.index]
 end
+
 
 # From TimesModel
 """
