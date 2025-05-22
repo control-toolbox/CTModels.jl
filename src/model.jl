@@ -237,7 +237,8 @@ function build_model(pre_ocp::PreModel)::Model
     @ensure __is_dynamics_set(pre_ocp) CTBase.UnauthorizedCall("the dynamics must be set before building the model.")
     @ensure __is_dynamics_complete(pre_ocp) CTBase.UnauthorizedCall("all the components of the dynamics must be set before building the model.")
     @ensure __is_objective_set(pre_ocp) CTBase.UnauthorizedCall("the objective must be set before building the model.")
-    @ensure !isnothing(pre_ocp.definition) CTBase.UnauthorizedCall("the definition must be set before building the model.")
+    @ensure __is_definition_set(pre_ocp) CTBase.UnauthorizedCall("the definition must be set before building the model.")
+    @ensure __is_autonomous_set(pre_ocp) CTBase.UnauthorizedCall("the time dependence, autonomous=true or false, must be set before building the model.")
 
     # extract components from PreModel
     times = pre_ocp.times
@@ -252,9 +253,10 @@ function build_model(pre_ocp::PreModel)::Model
     objective = pre_ocp.objective
     constraints = build_constraints(pre_ocp.constraints)
     definition = pre_ocp.definition
+	TD = is_autonomous(pre_ocp) ? Autonomous : NonAutonomous
 
     # create the model
-    model = Model(
+    model = Model{TD}(
         times, state, control, variable, dynamics, objective, constraints, definition
     )
 
@@ -265,6 +267,40 @@ end
 # Getters
 # ------------------------------------------------------------------------------ #
 
+# time dependence
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model is autonomous.
+"""
+function is_autonomous(
+	::Model{
+		Autonomous,
+		<:TimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+	})
+    return true
+end
+
+function is_autonomous(
+	::Model{
+		NonAutonomous,
+		<:TimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+	})
+    return false
+end
+
 # State
 """
 $(TYPEDSIGNATURES)
@@ -273,6 +309,7 @@ Get the state from the model.
 """
 function state(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         T,
         <:AbstractControlModel,
@@ -320,6 +357,7 @@ Get the control from the model.
 """
 function control(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         T,
@@ -367,6 +405,7 @@ Get the variable from the model.
 """
 function variable(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -414,6 +453,7 @@ Get the times from the model.
 """
 function times(
     ocp::Model{
+        <:TimeDependence,
         T,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -452,6 +492,7 @@ Get the initial time from the model, for a fixed initial time.
 """
 function initial_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{FixedTimeModel{T},<:AbstractTimeModel},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -471,6 +512,7 @@ Get the initial time from the model, for a free initial time.
 """
 function initial_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -491,6 +533,7 @@ Get the initial time from the model, for a free initial time.
 """
 function initial_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{FreeTimeModel,<:AbstractTimeModel},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -555,6 +598,7 @@ Get the final time from the model, for a fixed final time.
 """
 function final_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{<:AbstractTimeModel,FixedTimeModel{T}},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -574,6 +618,7 @@ Get the final time from the model, for a free final time.
 """
 function final_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -594,6 +639,7 @@ Get the final time from the model, for a free final time.
 """
 function final_time(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel{<:AbstractTimeModel,FreeTimeModel},
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -642,6 +688,7 @@ Get the objective from the model.
 """
 function objective(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -675,6 +722,7 @@ Get the Mayer cost from the model.
 """
 function mayer(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -694,6 +742,7 @@ Get the Mayer cost from the model.
 """
 function mayer(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -727,6 +776,7 @@ Get the Lagrange cost from the model.
 """
 function lagrange(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -746,6 +796,7 @@ Get the Lagrange cost from the model.
 """
 function lagrange(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -775,6 +826,7 @@ Get the dynamics from the model.
 """
 function dynamics(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -795,6 +847,7 @@ Get the constraints from the model.
 """
 function constraints(
     ocp::Model{
+        <:TimeDependence,
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -823,6 +876,7 @@ Get the nonlinear path constraints from the model.
 """
 function path_constraints_nl(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -842,6 +896,7 @@ Get the nonlinear boundary constraints from the model.
 """
 function boundary_constraints_nl(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -861,6 +916,7 @@ Get the box constraints on state from the model.
 """
 function state_constraints_box(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -880,6 +936,7 @@ Get the box constraints on control from the model.
 """
 function control_constraints_box(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -899,6 +956,7 @@ Get the box constraints on variable from the model.
 """
 function variable_constraints_box(
     ocp::Model{
+        <:TimeDependence,
         <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
