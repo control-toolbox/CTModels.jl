@@ -382,9 +382,7 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
     elseif ocp.dynamics isa Function
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
-        if !__is_state_set(ocp)
-            throw(CTBase.UnauthorizedCall("the state must be set."))
-        end
+        @ensure(__is_state_set(ocp), throw(CTBase.UnauthorizedCall("the state must be set.")))
         n = state_dimension(ocp)
         covered = falses(n)
         for (range, _) in ocp.dynamics
