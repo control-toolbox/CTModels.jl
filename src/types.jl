@@ -368,7 +368,7 @@ $(TYPEDSIGNATURES)
 
 """
 function state_dimension(ocp::PreModel)::Dimension
-    @ensure(__is_state_set(ocp), throw(CTBase.UnauthorizedCall("the state must be set.")))
+    @ensure(__is_state_set(ocp), CTBase.UnauthorizedCall("the state must be set."))
     return length(ocp.state.components)
 end
 
@@ -382,7 +382,7 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
     elseif ocp.dynamics isa Function
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
-        @ensure(__is_state_set(ocp), throw(CTBase.UnauthorizedCall("the state must be set.")))
+        @ensure(__is_state_set(ocp), CTBase.UnauthorizedCall("the state must be set."))
         n = state_dimension(ocp)
         covered = falses(n)
         for (range, _) in ocp.dynamics

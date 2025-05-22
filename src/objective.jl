@@ -30,31 +30,23 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 """
 function objective!(
     ocp::PreModel,
-    criterion::Symbol=__criterion_type();
-    mayer::Union{Function,Nothing}=nothing,
-    lagrange::Union{Function,Nothing}=nothing,
+    criterion::Symbol = __criterion_type();
+    mayer::Union{Function, Nothing} = nothing,
+    lagrange::Union{Function, Nothing} = nothing,
 )::Nothing
 
-    # checkings: times, state and control and variable must be set before the objective
-    !__is_state_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the state must be set before the objective."))
-    !__is_control_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the control must be set before the objective."))
-    !__is_times_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the times must be set before the objective."))
+    # checkings: times, state, and control must be set before the objective
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the objective.")
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the objective.")
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the objective.")
 
-    # checkings: the objective must not be set before
-    __is_objective_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the objective has already been set."))
+    # checkings: the objective must not already be set
+    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall("the objective has already been set.")
 
     # checkings: at least one of the two functions must be given
-    isnothing(mayer) &&
-        isnothing(lagrange) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function.",
-            ),
-        )
+    @ensure !(isnothing(mayer) && isnothing(lagrange)) CTBase.IncorrectArgument(
+        "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function."
+    )
 
     # set the objective
     if !isnothing(mayer) && isnothing(lagrange)
@@ -67,6 +59,7 @@ function objective!(
 
     return nothing
 end
+
 
 # ------------------------------------------------------------------------------ #
 # GETTERS

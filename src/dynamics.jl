@@ -173,8 +173,8 @@ julia> println(val)  # prints [1.5, 2.5, 6.0]
 """
 function __build_dynamics_from_parts(parts::Vector{<:Tuple{<:AbstractUnitRange{<:Integer}, <:Function}})::Function
     function dyn!(val, t, x, u, v)
-        for (rg, f) in parts
-            f(@view(val[rg]), t, x, u, v)
+        for (rg, f!) in parts
+            f!(@view(val[rg]), t, x, u, v)
         end
         return nothing
     end

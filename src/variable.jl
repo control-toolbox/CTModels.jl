@@ -23,37 +23,29 @@ variable!(ocp, 2, "v", ["v₁", "v₂"])
 function variable!(
     ocp::PreModel,
     q::Dimension,
-    name::T1=__variable_name(q),
-    components_names::Vector{T2}=__variable_components(q, string(name)),
-)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
+    name::T1 = __variable_name(q),
+    components_names::Vector{T2} = __variable_components(q, string(name)),
+)::Nothing where {T1<:Union{String,Symbol}, T2<:Union{String,Symbol}}
 
-    # checkings
-    __is_variable_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the variable has already been set."))
+    @ensure !__is_variable_set(ocp) CTBase.UnauthorizedCall(
+        "the variable has already been set."
+    )
 
-    (q > 0) &&
-        (size(components_names, 1) ≠ q) &&
-        throw(
-            CTBase.IncorrectArgument(
-                "the number of variable names must be equal to the variable dimension"
-            ),
-        )
+    @ensure (q ≤ 0) || (size(components_names, 1) == q) CTBase.IncorrectArgument(
+        "the number of variable names must be equal to the variable dimension"
+    )
 
-    # the objective must not be set before the variable
-    __is_objective_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the objective must be set after the variable."))
+    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
+        "the objective must be set after the variable."
+    )
 
-    # the dynamics must not be set before the variable
-    __is_dynamics_set(ocp) &&
-        throw(CTBase.UnauthorizedCall("the dynamics must be set after the variable."))
+    @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall(
+        "the dynamics must be set after the variable."
+    )
 
-    # set the variable
-    # if the dimension is 0 then set an empty variable
-    if q == 0
-        ocp.variable = EmptyVariableModel()
-    else
-        ocp.variable = VariableModel(string(name), string.(components_names))
-    end
+    ocp.variable = q == 0 ?
+        EmptyVariableModel() :
+        VariableModel(string(name), string.(components_names))
 
     return nothing
 end
