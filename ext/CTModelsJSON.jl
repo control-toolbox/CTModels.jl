@@ -29,9 +29,7 @@ julia> export_ocp_solution(JSON3Tag(), sol; filename="mysolution")
 # → creates "mysolution.json"
 ```
 """
-function CTModels.export_ocp_solution(
-    ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String="solution"
-)
+function CTModels.export_ocp_solution(::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String)
     T = CTModels.time_grid(sol)
 
     blob = Dict(
@@ -94,9 +92,7 @@ Handles both vector and matrix encodings of signals. If dual fields are missing 
 julia> sol = import_ocp_solution(JSON3Tag(), model; filename="mysolution")
 ```
 """
-function CTModels.import_ocp_solution(
-    ::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String="solution"
-)
+function CTModels.import_ocp_solution(::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String)
     json_string = read(filename * ".json", String)
     blob = JSON3.read(json_string)
 
