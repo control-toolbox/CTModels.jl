@@ -26,9 +26,9 @@ include("solution_example_path_constraints.jl")
         :constraints,
         :model,
         :ocp,
-        :plot,
+        # :plot,
         :init,
-        :export_import,
+        # :export_import,
         :utils,
         :solution,
     )
