@@ -1,8 +1,13 @@
 using JLD2
 using JSON3
 
+function remove_if_exists(filename::String)
+    isfile(filename) && rm(filename)
+end
+
 function test_export_import()
 
+    try 
     #
     ocp, sol = solution_example()
 
@@ -53,4 +58,12 @@ function test_export_import()
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
     sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
+
+    finally
+        
+        remove_if_exists("solution_test.jld2")
+        remove_if_exists("solution_test.json")
+
+    end
+
 end
