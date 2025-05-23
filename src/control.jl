@@ -42,12 +42,14 @@ julia> control_components(ocp)
 function control!(
     ocp::PreModel,
     m::Dimension,
-    name::T1 = __control_name(),
-    components_names::Vector{T2} = __control_components(m, string(name)),
-)::Nothing where {T1<:Union{String,Symbol}, T2<:Union{String,Symbol}}
+    name::T1=__control_name(),
+    components_names::Vector{T2}=__control_components(m, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings using @ensure
-    @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall("the control has already been set.")
+    @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall(
+        "the control has already been set."
+    )
     @ensure m > 0 CTBase.IncorrectArgument("the control dimension must be greater than 0")
     @ensure size(components_names, 1) == m CTBase.IncorrectArgument(
         "the number of control names must be equal to the control dimension"
@@ -58,7 +60,6 @@ function control!(
 
     return nothing
 end
-
 
 # ------------------------------------------------------------------------------ #
 # GETTERS

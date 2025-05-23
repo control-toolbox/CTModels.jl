@@ -752,7 +752,6 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
         println(io, "• Variable constraints dual (lb): ", variable_constraints_lb_dual(sol))
         println(io, "• Variable constraints dual (ub): ", variable_constraints_ub_dual(sol))
     end
-
 end
 
 # """

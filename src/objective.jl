@@ -30,22 +30,30 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 """
 function objective!(
     ocp::PreModel,
-    criterion::Symbol = __criterion_type();
-    mayer::Union{Function, Nothing} = nothing,
-    lagrange::Union{Function, Nothing} = nothing,
+    criterion::Symbol=__criterion_type();
+    mayer::Union{Function,Nothing}=nothing,
+    lagrange::Union{Function,Nothing}=nothing,
 )::Nothing
 
     # checkings: times, state, and control must be set before the objective
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the objective.")
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the objective.")
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the objective.")
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
+        "the state must be set before the objective."
+    )
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
+        "the control must be set before the objective."
+    )
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
+        "the times must be set before the objective."
+    )
 
     # checkings: the objective must not already be set
-    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall("the objective has already been set.")
+    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
+        "the objective has already been set."
+    )
 
     # checkings: at least one of the two functions must be given
     @ensure !(isnothing(mayer) && isnothing(lagrange)) CTBase.IncorrectArgument(
-        "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function."
+        "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function.",
     )
 
     # set the objective
@@ -59,7 +67,6 @@ function objective!(
 
     return nothing
 end
-
 
 # ------------------------------------------------------------------------------ #
 # GETTERS

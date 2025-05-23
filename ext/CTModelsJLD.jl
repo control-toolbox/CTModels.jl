@@ -25,7 +25,9 @@ julia> export_ocp_solution(JLD2Tag(), sol; filename="mysolution")
 # → creates "mysolution.jld2"
 ```
 """
-function CTModels.export_ocp_solution(::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String)
+function CTModels.export_ocp_solution(
+    ::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String
+)
     save_object(filename * ".jld2", sol)
     return nothing
 end
@@ -52,7 +54,9 @@ This function loads a previously saved `CTModels.Solution` from disk.
 julia> sol = import_ocp_solution(JLD2Tag(), model; filename="mysolution")
 ```
 """
-function CTModels.import_ocp_solution(::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String)
+function CTModels.import_ocp_solution(
+    ::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String
+)
     return load_object(filename * ".jld2")
 end
 

@@ -109,7 +109,6 @@ function dual(sol::Solution, model::Model, label::Symbol)
 
     # throw an exception if the label is not found
     throw(CTBase.IncorrectArgument("Label $label not found in the model."))
-    
 end
 
 """

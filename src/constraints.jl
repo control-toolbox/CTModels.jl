@@ -62,14 +62,16 @@ function __constraint!(
 )
 
     # checkings: the constraint must not be set before
-    @ensure(!(label ∈ keys(ocp_constraints)),
+    @ensure(
+        !(label ∈ keys(ocp_constraints)),
         CTBase.UnauthorizedCall(
             "the constraint named " * String(label) * " already exists."
         ),
     )
 
     # checkings: lb and ub cannot be both nothing
-    @ensure(!(isnothing(lb) && isnothing(ub)),
+    @ensure(
+        !(isnothing(lb) && isnothing(ub)),
         CTBase.UnauthorizedCall(
             "The lower bound `lb` and the upper bound `ub` cannot be both nothing."
         ),
@@ -80,7 +82,8 @@ function __constraint!(
     isnothing(ub) && (ub = Inf * ones(eltype(lb), length(lb)))
 
     # lb and ub must have the same length
-    @ensure(length(lb) == length(ub),
+    @ensure(
+        length(lb) == length(ub),
         CTBase.IncorrectArgument(
             "the lower bound `lb` and the upper bound `ub` must have the same length."
         ),
@@ -116,21 +119,24 @@ function __constraint!(
             @ensure(length(rg) == length(lb), CTBase.IncorrectArgument(txt))
             # check if the range is valid
             if type == :state
-                @ensure(all(1 .≤ rg .≤ n),
+                @ensure(
+                    all(1 .≤ rg .≤ n),
                     CTBase.IncorrectArgument(
-                        "the range of the state constraint must be contained in 1:$n",
+                        "the range of the state constraint must be contained in 1:$n"
                     ),
                 )
             elseif type == :control
-                @ensure(all(1 .≤ rg .≤ m),
+                @ensure(
+                    all(1 .≤ rg .≤ m),
                     CTBase.IncorrectArgument(
-                        "the range of the control constraint must be contained in 1:$m",
+                        "the range of the control constraint must be contained in 1:$m"
                     ),
                 )
             elseif type == :variable
-                @ensure(all(1 .≤ rg .≤ q),
+                @ensure(
+                    all(1 .≤ rg .≤ q),
                     CTBase.IncorrectArgument(
-                        "the range of the variable constraint must be contained in 1:$q",
+                        "the range of the variable constraint must be contained in 1:$q"
                     ),
                 )
             else
@@ -192,21 +198,27 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 function constraint!(
     ocp::PreModel,
     type::Symbol;
-    rg::Union{Int, OrdinalRange{Int}, Nothing} = nothing,
-    f::Union{Function, Nothing} = nothing,
-    lb::Union{ctNumber, ctVector, Nothing} = nothing,
-    ub::Union{ctNumber, ctVector, Nothing} = nothing,
-    label::Symbol = __constraint_label(),
+    rg::Union{Int,OrdinalRange{Int},Nothing}=nothing,
+    f::Union{Function,Nothing}=nothing,
+    lb::Union{ctNumber,ctVector,Nothing}=nothing,
+    ub::Union{ctNumber,ctVector,Nothing}=nothing,
+    label::Symbol=__constraint_label(),
 )
 
     # checkings: times, state and control must be set before adding constraints
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before adding constraints.")
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before adding constraints.")
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before adding constraints.")
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
+        "the state must be set before adding constraints."
+    )
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
+        "the control must be set before adding constraints."
+    )
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
+        "the times must be set before adding constraints."
+    )
 
     # checkings: variable must be set if using type=:variable
     @ensure (type != :variable || __is_variable_set(ocp)) CTBase.UnauthorizedCall(
-        "the ocp has no variable, you cannot use constraint! function with type=:variable. If it is a mistake, please set the variable first."
+        "the ocp has no variable, you cannot use constraint! function with type=:variable. If it is a mistake, please set the variable first.",
     )
 
     # dimensions
@@ -221,14 +233,13 @@ function constraint!(
         n,
         m,
         q;
-        rg = as_range(rg),
-        f = f,
-        lb = as_vector(lb),
-        ub = as_vector(ub),
-        label = label,
+        rg=as_range(rg),
+        f=f,
+        lb=as_vector(lb),
+        ub=as_vector(ub),
+        label=label,
     )
 end
-
 
 as_vector(::Nothing) = nothing
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]

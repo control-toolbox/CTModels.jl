@@ -106,6 +106,9 @@ julia> @ensure x > 0 CTBase.IncorrectArgument("x must be positive")
 - The provided `exception` if the condition is not satisfied.
 """
 macro ensure(cond, exc)
-    return esc(:( if !($cond) throw($exc) end ))
+    return esc(:(
+        if !($cond)
+            throw($exc)
+        end
+    ))
 end
-

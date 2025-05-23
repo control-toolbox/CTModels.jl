@@ -1,5 +1,4 @@
 function test_ext_exceptions()
-
     ocp, sol, pre_ocp = solution_example()
 
     # export
@@ -17,5 +16,4 @@ function test_ext_exceptions()
     # plot
     @test_throws CTBase.ExtensionError CTModels.plot(sol)
     @test_throws MethodError CTModels.plot(sol, 1)
-
 end

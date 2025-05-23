@@ -91,7 +91,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     vi_names = variable_components(ocp)
 
     # dependencies
-    t_ = !is_autonomous(ocp) ? t_name * ", " : "" 
+    t_ = !is_autonomous(ocp) ? t_name * ", " : ""
     _v = is_variable_dependent ? ", " * v_name : ""
 
     # other names
@@ -104,9 +104,11 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     #
     some_printing && println(io)
     printstyled(io, "The "; bold=true)
-    !is_autonomous(ocp) ? 
-	    printstyled(io, "(non autonomous) ", bold = true) :
-	    printstyled(io, "(autonomous) ", bold = true)
+    if !is_autonomous(ocp)
+        printstyled(io, "(non autonomous) "; bold=true)
+    else
+        printstyled(io, "(autonomous) "; bold=true)
+    end
     printstyled(io, "optimal control problem is of the form:\n"; bold=true)
     println(io)
 
@@ -364,7 +366,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         vi_names = components(ocp.variable)
 
         # dependencies
-        t_ = !is_autonomous(ocp) ? t_name * ", " : "" 
+        t_ = !is_autonomous(ocp) ? t_name * ", " : ""
         _v = is_variable_dependent ? ", " * v_name : ""
 
         # other names
@@ -379,9 +381,11 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         #
         some_printing && println(io)
         printstyled(io, "The "; bold=true)
-        !is_autonomous(ocp) ? 
-            printstyled(io, "(non autonomous) ", bold = true) :
-            printstyled(io, "(autonomous) ", bold = true)
+        if !is_autonomous(ocp)
+            printstyled(io, "(non autonomous) "; bold=true)
+        else
+            printstyled(io, "(autonomous) "; bold=true)
+        end
         printstyled(io, "optimal control problem is of the form:\n"; bold=true)
         println(io)
 

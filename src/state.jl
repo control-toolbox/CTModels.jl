@@ -56,9 +56,9 @@ julia> state_components(ocp)
 function state!(
     ocp::PreModel,
     n::Dimension,
-    name::T1 = __state_name(),
-    components_names::Vector{T2} = __state_components(n, string(name)),
-)::Nothing where {T1<:Union{String,Symbol}, T2<:Union{String,Symbol}}
+    name::T1=__state_name(),
+    components_names::Vector{T2}=__state_components(n, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checkings
     @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
