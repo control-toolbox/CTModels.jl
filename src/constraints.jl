@@ -54,11 +54,12 @@ function __constraint!(
     n::Dimension,
     m::Dimension,
     q::Dimension;
-    rg::Union{OrdinalRange{<:Int},Nothing}=nothing,
+    rg::Union{Int,OrdinalRange{Int},Nothing}=nothing,
     f::Union{Function,Nothing}=nothing,
-    lb::Union{ctVector,Nothing}=nothing,
-    ub::Union{ctVector,Nothing}=nothing,
+    lb::Union{ctNumber,ctVector,Nothing}=nothing,
+    ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
+    codim_f::Union{Dimension,Nothing}=nothing,
 )
 
     # checkings: the constraint must not be set before
@@ -153,6 +154,14 @@ function __constraint!(
         end
 
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            # ensure that codim_f has same length as lb if codim_f is not nothing
+            if codim_f !== nothing
+                @ensure(
+                    length(lb) == codim_f,
+                    CTBase.IncorrectArgument("The length of `lb` and `ub` must match codim_f = $codim_f.")
+                )
+            end
+
             # set the constraint
             if type ∈ [:boundary, :path]
                 ocp_constraints[label] = (type, f, lb, ub)
@@ -203,6 +212,7 @@ function constraint!(
     lb::Union{ctNumber,ctVector,Nothing}=nothing,
     ub::Union{ctNumber,ctVector,Nothing}=nothing,
     label::Symbol=__constraint_label(),
+    codim_f::Union{Dimension,Nothing}=nothing,
 )
 
     # checkings: times, state and control must be set before adding constraints
@@ -238,6 +248,7 @@ function constraint!(
         lb=as_vector(lb),
         ub=as_vector(ub),
         label=label,
+        codim_f=codim_f,
     )
 end
 
