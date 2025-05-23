@@ -275,19 +275,20 @@ struct Model{
         constraints::AbstractConstraintsModel,
         definition::Expr,
     ) where {TD<:TimeDependence}
-        return new{TD,
-                   typeof(times),
-                   typeof(state),
-                   typeof(control),
-                   typeof(variable),
-                   typeof(dynamics),
-                   typeof(objective),
-                   typeof(constraints)}(
+        return new{
+            TD,
+            typeof(times),
+            typeof(state),
+            typeof(control),
+            typeof(variable),
+            typeof(dynamics),
+            typeof(objective),
+            typeof(constraints),
+        }(
             times, state, control, variable, dynamics, objective, constraints, definition
         )
     end
 end
-
 
 """
 $(TYPEDSIGNATURES)
@@ -343,7 +344,9 @@ $(TYPEDFIELDS)
     state::Union{AbstractStateModel,Nothing} = nothing
     control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{Function,Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}},Nothing} = nothing
+    dynamics::Union{
+        Function,Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}},Nothing
+    } = nothing
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
     definition::Union{Expr,Nothing} = nothing
@@ -437,7 +440,11 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
                 if 1 <= i <= n
                     covered[i] = true
                 else
-                    throw(CTBase.UnauthorizedCall("Dynamics index $i out of bounds for state of size $n."))
+                    throw(
+                        CTBase.UnauthorizedCall(
+                            "Dynamics index $i out of bounds for state of size $n."
+                        ),
+                    )
                 end
             end
         end

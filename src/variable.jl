@@ -23,10 +23,9 @@ variable!(ocp, 2, "v", ["v₁", "v₂"])
 function variable!(
     ocp::PreModel,
     q::Dimension,
-    name::T1 = __variable_name(q),
-    components_names::Vector{T2} = __variable_components(q, string(name)),
-)::Nothing where {T1<:Union{String,Symbol}, T2<:Union{String,Symbol}}
-
+    name::T1=__variable_name(q),
+    components_names::Vector{T2}=__variable_components(q, string(name)),
+)::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
     @ensure !__is_variable_set(ocp) CTBase.UnauthorizedCall(
         "the variable has already been set."
     )
@@ -43,9 +42,11 @@ function variable!(
         "the dynamics must be set after the variable."
     )
 
-    ocp.variable = q == 0 ?
-        EmptyVariableModel() :
+    ocp.variable = if q == 0
+        EmptyVariableModel()
+    else
         VariableModel(string(name), string.(components_names))
+    end
 
     return nothing
 end

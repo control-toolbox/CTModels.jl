@@ -30,13 +30,12 @@ julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol
 """
 function time!(
     ocp::PreModel;
-    t0::Union{Time,Nothing} = nothing,
-    tf::Union{Time,Nothing} = nothing,
-    ind0::Union{Int,Nothing} = nothing,
-    indf::Union{Int,Nothing} = nothing,
-    time_name::Union{String,Symbol} = __time_name(),
+    t0::Union{Time,Nothing}=nothing,
+    tf::Union{Time,Nothing}=nothing,
+    ind0::Union{Int,Nothing}=nothing,
+    indf::Union{Int,Nothing}=nothing,
+    time_name::Union{String,Symbol}=__time_name(),
 )::Nothing
-
     @ensure !__is_times_set(ocp) CTBase.UnauthorizedCall("the time has already been set.")
 
     @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) CTBase.UnauthorizedCall(
@@ -60,7 +59,7 @@ function time!(
     )
 
     @ensure !(isnothing(t0) && isnothing(ind0)) CTBase.IncorrectArgument(
-        "Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free)."
+        "Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free).",
     )
 
     @ensure isnothing(tf) || isnothing(indf) CTBase.IncorrectArgument(
@@ -68,7 +67,7 @@ function time!(
     )
 
     @ensure !(isnothing(tf) && isnothing(indf)) CTBase.IncorrectArgument(
-        "Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free)."
+        "Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free).",
     )
 
     time_name = time_name isa String ? time_name : string(time_name)
@@ -154,7 +153,6 @@ function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ct
     )
     return variable[model.index]
 end
-
 
 # From TimesModel
 """

@@ -99,13 +99,42 @@ function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
                 push!(boundary_cons_nl_labels, label)
             end
         elseif type == :state
-            append_box_constraints!(state_cons_box_ind, state_cons_box_lb, state_cons_box_ub, state_cons_box_labels, c[2], lb, ub, label)
+            append_box_constraints!(
+                state_cons_box_ind,
+                state_cons_box_lb,
+                state_cons_box_ub,
+                state_cons_box_labels,
+                c[2],
+                lb,
+                ub,
+                label,
+            )
         elseif type == :control
-            append_box_constraints!(control_cons_box_ind, control_cons_box_lb, control_cons_box_ub, control_cons_box_labels, c[2], lb, ub, label)
+            append_box_constraints!(
+                control_cons_box_ind,
+                control_cons_box_lb,
+                control_cons_box_ub,
+                control_cons_box_labels,
+                c[2],
+                lb,
+                ub,
+                label,
+            )
         elseif type == :variable
-            append_box_constraints!(variable_cons_box_ind, variable_cons_box_lb, variable_cons_box_ub, variable_cons_box_labels, c[2], lb, ub, label)
+            append_box_constraints!(
+                variable_cons_box_ind,
+                variable_cons_box_lb,
+                variable_cons_box_ub,
+                variable_cons_box_labels,
+                c[2],
+                lb,
+                ub,
+                label,
+            )
         else
-            throw(CTBase.UnauthorizedCall("Unknown constraint type: $type for label $label."))
+            throw(
+                CTBase.UnauthorizedCall("Unknown constraint type: $type for label $label.")
+            )
         end
     end
 
@@ -230,15 +259,30 @@ model = build_model(pre_ocp)
 ```
 """
 function build_model(pre_ocp::PreModel)::Model
-
-    @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall("the times must be set before building the model.")
-    @ensure __is_state_set(pre_ocp) CTBase.UnauthorizedCall("the state must be set before building the model.")
-    @ensure __is_control_set(pre_ocp) CTBase.UnauthorizedCall("the control must be set before building the model.")
-    @ensure __is_dynamics_set(pre_ocp) CTBase.UnauthorizedCall("the dynamics must be set before building the model.")
-    @ensure __is_dynamics_complete(pre_ocp) CTBase.UnauthorizedCall("all the components of the dynamics must be set before building the model.")
-    @ensure __is_objective_set(pre_ocp) CTBase.UnauthorizedCall("the objective must be set before building the model.")
-    @ensure __is_definition_set(pre_ocp) CTBase.UnauthorizedCall("the definition must be set before building the model.")
-    @ensure __is_autonomous_set(pre_ocp) CTBase.UnauthorizedCall("the time dependence, autonomous=true or false, must be set before building the model.")
+    @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the times must be set before building the model."
+    )
+    @ensure __is_state_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the state must be set before building the model."
+    )
+    @ensure __is_control_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the control must be set before building the model."
+    )
+    @ensure __is_dynamics_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the dynamics must be set before building the model."
+    )
+    @ensure __is_dynamics_complete(pre_ocp) CTBase.UnauthorizedCall(
+        "all the components of the dynamics must be set before building the model."
+    )
+    @ensure __is_objective_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the objective must be set before building the model."
+    )
+    @ensure __is_definition_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the definition must be set before building the model."
+    )
+    @ensure __is_autonomous_set(pre_ocp) CTBase.UnauthorizedCall(
+        "the time dependence, autonomous=true or false, must be set before building the model.",
+    )
 
     # extract components from PreModel
     times = pre_ocp.times
@@ -253,7 +297,7 @@ function build_model(pre_ocp::PreModel)::Model
     objective = pre_ocp.objective
     constraints = build_constraints(pre_ocp.constraints)
     definition = pre_ocp.definition
-	TD = is_autonomous(pre_ocp) ? Autonomous : NonAutonomous
+    TD = is_autonomous(pre_ocp) ? Autonomous : NonAutonomous
 
     # create the model
     model = Model{TD}(
@@ -274,30 +318,32 @@ $(TYPEDSIGNATURES)
 Return `true` if the model is autonomous.
 """
 function is_autonomous(
-	::Model{
-		Autonomous,
-		<:TimesModel,
+    ::Model{
+        Autonomous,
+        <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
-	})
+    },
+)
     return true
 end
 
 function is_autonomous(
-	::Model{
-		NonAutonomous,
-		<:TimesModel,
+    ::Model{
+        NonAutonomous,
+        <:TimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
-	})
+    },
+)
     return false
 end
 

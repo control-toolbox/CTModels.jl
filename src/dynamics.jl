@@ -20,18 +20,24 @@ dynamics have already been set.
 Throws `CTBase.UnauthorizedCall` if called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
-
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the dynamics.")
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the dynamics.")
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the dynamics.")
-    @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall("the dynamics has already been set.")
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
+        "the state must be set before the dynamics."
+    )
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
+        "the control must be set before the dynamics."
+    )
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
+        "the times must be set before the dynamics."
+    )
+    @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall(
+        "the dynamics has already been set."
+    )
 
     # set the dynamics
     ocp.dynamics = f
 
     return nothing
 end
-
 
 """
 $(TYPEDSIGNATURES)
@@ -67,31 +73,50 @@ julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
 ```
 """
 function dynamics!(ocp::PreModel, rg::AbstractUnitRange{<:Integer}, f::Function)::Nothing
-
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall("the state must be set before the dynamics.")
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall("the control must be set before the dynamics.")
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall("the times must be set before the dynamics.")
-    @ensure !__is_dynamics_complete(ocp) CTBase.UnauthorizedCall("the dynamics has already been set.")
+    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
+        "the state must be set before the dynamics."
+    )
+    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
+        "the control must be set before the dynamics."
+    )
+    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
+        "the times must be set before the dynamics."
+    )
+    @ensure !__is_dynamics_complete(ocp) CTBase.UnauthorizedCall(
+        "the dynamics has already been set."
+    )
 
     # Check indices in rg are within valid state index bounds
     for i in rg
         if i < 1 || i > state_dimension(ocp)
-            throw(CTBase.IncorrectArgument("index $i in the range is out of valid bounds [1, $(state_dimension(ocp))]."))
+            throw(
+                CTBase.IncorrectArgument(
+                    "index $i in the range is out of valid bounds [1, $(state_dimension(ocp))].",
+                ),
+            )
         end
     end
 
     # initialize dynamics container if needed
     if isnothing(ocp.dynamics)
-        ocp.dynamics = Vector{Tuple{UnitRange{Int}, Function}}()
+        ocp.dynamics = Vector{Tuple{UnitRange{Int},Function}}()
     elseif ocp.dynamics isa Function
-        throw(CTBase.UnauthorizedCall("cannot add partial dynamics: dynamics already defined as a single function."))
+        throw(
+            CTBase.UnauthorizedCall(
+                "cannot add partial dynamics: dynamics already defined as a single function.",
+            ),
+        )
     end
 
     # check that indices in rg are not already covered
     for (existing_range, _) in ocp.dynamics
         for i in rg
             if i in existing_range
-                throw(CTBase.UnauthorizedCall("index $i in the range already has assigned dynamics."))
+                throw(
+                    CTBase.UnauthorizedCall(
+                        "index $i in the range already has assigned dynamics."
+                    ),
+                )
             end
         end
     end
@@ -101,7 +126,6 @@ function dynamics!(ocp::PreModel, rg::AbstractUnitRange{<:Integer}, f::Function)
 
     return nothing
 end
-
 
 """
 $(TYPEDSIGNATURES)
@@ -171,7 +195,9 @@ julia> dyn!(val, 0.0, [1.0, 2.0, 3.0], [0.5, 0.5], 2.0)
 julia> println(val)  # prints [1.5, 2.5, 6.0]
 ```
 """
-function __build_dynamics_from_parts(parts::Vector{<:Tuple{<:AbstractUnitRange{<:Integer}, <:Function}})::Function
+function __build_dynamics_from_parts(
+    parts::Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
+)::Function
     function dyn!(val, t, x, u, v)
         for (rg, f!) in parts
             f!(@view(val[rg]), t, x, u, v)
@@ -180,4 +206,3 @@ function __build_dynamics_from_parts(parts::Vector{<:Tuple{<:AbstractUnitRange{<
     end
     return dyn!
 end
-

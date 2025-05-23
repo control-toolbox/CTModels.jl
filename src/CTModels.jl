@@ -136,28 +136,36 @@ $(TYPEDSIGNATURES)
 
 Export a solution in JLD format.
 """
-export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String) = throw(CTBase.ExtensionError(:JLD2))
+function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
+    throw(CTBase.ExtensionError(:JLD2))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Import a solution from a JLD file.
 """
-import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String) = throw(CTBase.ExtensionError(:JLD2))
+function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
+    throw(CTBase.ExtensionError(:JLD2))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Export a solution in JSON format.
 """
-export_ocp_solution(::JSON3Tag, ::AbstractSolution;  filename::String) = throw(CTBase.ExtensionError(:JSON3))
+function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
+    throw(CTBase.ExtensionError(:JSON3))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Import a solution from a JLD file.
 """
-import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String) = throw(CTBase.ExtensionError(:JSON3))
+function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
+    throw(CTBase.ExtensionError(:JSON3))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -171,7 +179,11 @@ julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
 julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JLD)
 ```
 """
-function export_ocp_solution(sol::AbstractSolution; format::Symbol=__format(), filename::String=__filename_export_import())
+function export_ocp_solution(
+    sol::AbstractSolution;
+    format::Symbol=__format(),
+    filename::String=__filename_export_import(),
+)
     if format == :JLD
         return export_ocp_solution(JLD2Tag(), sol; filename=filename)
     elseif format == :JSON
@@ -197,7 +209,11 @@ julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JSON
 julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JLD)
 ```
 """
-function import_ocp_solution(ocp::AbstractModel; format::Symbol=__format(), filename::String=__filename_export_import())
+function import_ocp_solution(
+    ocp::AbstractModel;
+    format::Symbol=__format(),
+    filename::String=__filename_export_import(),
+)
     if format == :JLD
         return import_ocp_solution(JLD2Tag(), ocp; filename=filename)
     elseif format == :JSON
