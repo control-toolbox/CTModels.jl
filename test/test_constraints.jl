@@ -53,7 +53,7 @@ function test_constraints()
     # x(1) == [0, 0, 1] must raise an error if x is of dimension 2
     @test_throws CTBase.IncorrectArgument CTModels.constraint!(
         ocp_set, :boundary, lb=[0, 0, 1], ub=[0, 1, 2], codim_f=2
-    )    
+    )
 
     # if no range nor function is provided, lb and ub must have the right length:
     # depending on state, control, or variable

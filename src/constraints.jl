@@ -158,7 +158,9 @@ function __constraint!(
             if codim_f !== nothing
                 @ensure(
                     length(lb) == codim_f,
-                    CTBase.IncorrectArgument("The length of `lb` and `ub` must match codim_f = $codim_f.")
+                    CTBase.IncorrectArgument(
+                        "The length of `lb` and `ub` must match codim_f = $codim_f."
+                    )
                 )
             end
 
