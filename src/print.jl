@@ -269,21 +269,21 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
 
     # print table of settings
     header = [
-        "times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"
+        "variable", "times*", "state*", "control*", "constraints", "dynamics*", "objective*"
     ]
-    data = hcat(
+    begin
+        (data = hcat(is_variable_dependent ? "V" : "X"))
+    end
+    data = hcat(data,
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
         __is_control_set(ocp) ? "V" : "X",
     )
-    begin
-        (data = hcat(data, is_variable_dependent ? "V" : "X"))
-    end
     data = hcat(
         data,
+        isempty_constraints(ocp) ? "X" : "V",
         __is_dynamics_set(ocp) ? "V" : "X",
         __is_objective_set(ocp) ? "V" : "X",
-        isempty_constraints(ocp) ? "X" : "V",
     )
     println("")
     h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
@@ -555,21 +555,21 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
 
     # print table of settings
     header = [
-        "times*", "state*", "control*", "variable", "dynamics*", "objective*", "constraints"
+        "variable", "times*", "state*", "control*", "constraints", "dynamics*", "objective*"
     ]
-    data = hcat(
+    begin
+        (data = hcat(is_variable_dependent ? "V" : "X"))
+    end
+    data = hcat(data,
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
         __is_control_set(ocp) ? "V" : "X",
     )
-    begin
-        (data = hcat(data, is_variable_dependent ? "V" : "X"))
-    end
     data = hcat(
         data,
+        Base.isempty(ocp.constraints) ? "X" : "V",
         __is_dynamics_set(ocp) ? "V" : "X",
         __is_objective_set(ocp) ? "V" : "X",
-        Base.isempty(ocp.constraints) ? "X" : "V",
     )
     println("")
     h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)

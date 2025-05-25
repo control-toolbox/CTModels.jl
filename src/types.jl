@@ -469,6 +469,21 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return true if the PreModel can be built into a Model.
+"""
+function __is_complete(ocp::PreModel)::Bool
+    return __is_times_set(ocp) &&
+           __is_state_set(ocp) &&
+           __is_control_set(ocp) &&
+           __is_dynamics_complete(ocp) &&
+           __is_objective_set(ocp) &&
+           __is_definition_set(ocp) &&
+           __is_autonomous_set(ocp)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return true if nothing has been set.
 """
 function __is_empty(ocp::PreModel)::Bool
