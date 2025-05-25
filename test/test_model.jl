@@ -176,6 +176,7 @@ function test_model()
     CTModels.dynamics!(pre_ocp, dynamics!)
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
+    CTModels.time_dependence!(pre_ocp; autonomous=false)
     display(pre_ocp)
 
     #
@@ -187,5 +188,6 @@ function test_model()
     CTModels.dynamics!(pre_ocp, dynamics!)
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
+    CTModels.time_dependence!(pre_ocp; autonomous=true)
     display(pre_ocp)
 end
