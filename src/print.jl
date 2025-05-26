@@ -274,7 +274,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     begin
         (data = hcat(is_variable_dependent ? "V" : "X"))
     end
-    data = hcat(data,
+    data = hcat(
+        data,
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
         __is_control_set(ocp) ? "V" : "X",
@@ -560,7 +561,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     begin
         (data = hcat(is_variable_dependent ? "V" : "X"))
     end
-    data = hcat(data,
+    data = hcat(
+        data,
         __is_times_set(ocp) ? "V" : "X",
         __is_state_set(ocp) ? "V" : "X",
         __is_control_set(ocp) ? "V" : "X",
