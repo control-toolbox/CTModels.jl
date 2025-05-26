@@ -49,31 +49,34 @@ model = build_constraints(constraints)
 ```
 """
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
+
+    LocalNumber = Float64
+
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
     path_cons_nl_dim = Vector{Int}()
-    path_cons_nl_lb = Vector{ctNumber}()
-    path_cons_nl_ub = Vector{ctNumber}()
+    path_cons_nl_lb = Vector{LocalNumber}()
+    path_cons_nl_ub = Vector{LocalNumber}()
     path_cons_nl_labels = Vector{Symbol}()
 
     boundary_cons_nl_f = Vector{Function}() # nonlinear boundary constraints
     boundary_cons_nl_dim = Vector{Int}()
-    boundary_cons_nl_lb = Vector{ctNumber}()
-    boundary_cons_nl_ub = Vector{ctNumber}()
+    boundary_cons_nl_lb = Vector{LocalNumber}()
+    boundary_cons_nl_ub = Vector{LocalNumber}()
     boundary_cons_nl_labels = Vector{Symbol}()
 
     state_cons_box_ind = Vector{Int}() # state range
-    state_cons_box_lb = Vector{ctNumber}()
-    state_cons_box_ub = Vector{ctNumber}()
+    state_cons_box_lb = Vector{LocalNumber}()
+    state_cons_box_ub = Vector{LocalNumber}()
     state_cons_box_labels = Vector{Symbol}()
 
     control_cons_box_ind = Vector{Int}() # control range
-    control_cons_box_lb = Vector{ctNumber}()
-    control_cons_box_ub = Vector{ctNumber}()
+    control_cons_box_lb = Vector{LocalNumber}()
+    control_cons_box_ub = Vector{LocalNumber}()
     control_cons_box_labels = Vector{Symbol}()
 
     variable_cons_box_ind = Vector{Int}() # variable range
-    variable_cons_box_lb = Vector{ctNumber}()
-    variable_cons_box_ub = Vector{ctNumber}()
+    variable_cons_box_lb = Vector{LocalNumber}()
+    variable_cons_box_ub = Vector{LocalNumber}()
     variable_cons_box_labels = Vector{Symbol}()
 
     for (label, c) in constraints
