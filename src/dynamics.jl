@@ -47,7 +47,7 @@ subset of state indices specified by the range `rg`.
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
-- `rg::AbstractUnitRange{<:Integer}`: Range of state indices to which `f` applies.
+- `rg::AbstractRange{<:Int}`: Range of state indices to which `f` applies.
 - `f::Function`: A function describing the dynamics over the specified state indices.
 
 # Preconditions
@@ -72,7 +72,7 @@ julia> dynamics!(ocp, 1:2, (out, t, x, u, v) -> out .= x[1:2] .+ u[1:2])
 julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
 ```
 """
-function dynamics!(ocp::PreModel, rg::AbstractUnitRange{<:Integer}, f::Function)::Nothing
+function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothing
     @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
         "the state must be set before the dynamics."
     )
@@ -168,7 +168,7 @@ Build a combined dynamics function from multiple parts.
 This function constructs an in-place dynamics function `dyn!` by composing several sub-functions, each responsible for updating a specific segment of the output vector.
 
 # Arguments
-- `parts::Vector{<:Tuple{<:AbstractUnitRange{<:Integer}, <:Function}}`: 
+- `parts::Vector{<:Tuple{<:AbstractRange{<:Int}, <:Function}}`: 
   A vector of tuples, where each tuple contains:
   - A range specifying the indices in the output vector `val` that the corresponding function updates.
   - A function `f` with the signature `(output_segment, t, x, u, v)`, which updates the slice of `val` indicated by the range.
@@ -196,7 +196,7 @@ julia> println(val)  # prints [1.5, 2.5, 6.0]
 ```
 """
 function __build_dynamics_from_parts(
-    parts::Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
+    parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
 )::Function
     function dyn!(val, t, x, u, v)
         for (rg, f!) in parts

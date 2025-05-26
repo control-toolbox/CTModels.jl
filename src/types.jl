@@ -345,7 +345,7 @@ $(TYPEDFIELDS)
     control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
     dynamics::Union{
-        Function,Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}},Nothing
+        Function,Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}},Nothing
     } = nothing
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
@@ -431,7 +431,7 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
         return false
     elseif ocp.dynamics isa Function
         return true
-    else # ocp.dynamics isa Vector{<:Tuple{<:AbstractUnitRange{<:Integer},<:Function}}
+    else # ocp.dynamics isa Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
         @ensure(__is_state_set(ocp), CTBase.UnauthorizedCall("the state must be set."))
         n = state_dimension(ocp)
         covered = falses(n)
