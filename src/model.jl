@@ -49,7 +49,6 @@ model = build_constraints(constraints)
 ```
 """
 function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
-
     LocalNumber = Float64
 
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints

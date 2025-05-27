@@ -344,9 +344,8 @@ $(TYPEDFIELDS)
     state::Union{AbstractStateModel,Nothing} = nothing
     control::Union{AbstractControlModel,Nothing} = nothing
     variable::AbstractVariableModel = EmptyVariableModel()
-    dynamics::Union{
-        Function,Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}},Nothing
-    } = nothing
+    dynamics::Union{Function,Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}},Nothing} =
+        nothing
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
     definition::Union{Expr,Nothing} = nothing
