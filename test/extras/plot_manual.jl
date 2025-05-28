@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate(".")
+
 using CTModels
 using Plots
 
@@ -36,6 +39,8 @@ function get_solution()
         ∫(0.5u(t)^2) → min
     end
     CTModels.definition!(pre_ocp, definition) # does not correspond to the solution
+
+    CTModels.time_dependence!(pre_ocp; autonomous=false)
 
     # build model
     ocp = CTModels.build_model(pre_ocp)
@@ -127,7 +132,15 @@ end;
 
 sol = get_solution();
 
+#
+plt = plot(size=(800,800))
+pp = plot!(plt, sol)
+
+pp
+plt
+
 # layout = :group
+
 plot(sol; layout=:group, control=:components)
 plot(sol; layout=:group, control=:norm)
 plot(sol; layout=:group, control=:all)

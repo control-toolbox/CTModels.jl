@@ -1112,6 +1112,47 @@ function Plots.plot!(
     kwargs...,
 )
 
+    model = CTModels.model(sol)
+
+    # check if the plot is empty
+    if isempty(p.series_list)
+        
+        attr = NamedTuple((Symbol(key),value) for (key,value) in p.attr if key != :layout)
+
+        pnew = __initial_plot(
+            sol,
+            description...;
+            layout=layout,
+            control=control,
+            model=model,
+            size=__size_plot(
+                sol,
+                model,
+                control,
+                layout,
+                description...;
+                state_style=state_style,
+                control_style=control_style,
+                costate_style=costate_style,
+                path_style=path_style,
+                dual_style=dual_style,
+            ),
+            state_style=state_style,
+            control_style=control_style,
+            costate_style=costate_style,
+            path_style=path_style,
+            dual_style=dual_style,
+            attr...,
+            kwargs...,
+        )
+
+        # replace p by pnew, must have a side effect
+        for k ∈ fieldnames(typeof(p))
+           setfield!(p, k, getfield(pnew, k))
+        end
+        
+    end
+
     # plot the solution with infos from the model
     return __plot!(
         p,
@@ -1124,7 +1165,7 @@ function Plots.plot!(
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
-        model=CTModels.model(sol),
+        model=model,
         state_bounds_style=state_bounds_style,
         control_bounds_style=control_bounds_style,
         time_style=time_style,
