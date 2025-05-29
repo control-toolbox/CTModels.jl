@@ -133,7 +133,7 @@ end;
 sol = get_solution();
 
 #
-plt = plot(size=(800,800))
+plt = plot(; size=(800, 800))
 pp = plot!(plt, sol)
 
 pp
