@@ -1111,13 +1111,11 @@ function Plots.plot!(
     dual_style::Union{NamedTuple,Symbol}=__plot_style(),
     kwargs...,
 )
-
     model = CTModels.model(sol)
 
     # check if the plot is empty
     if isempty(p.series_list)
-        
-        attr = NamedTuple((Symbol(key),value) for (key,value) in p.attr if key != :layout)
+        attr = NamedTuple((Symbol(key), value) for (key, value) in p.attr if key != :layout)
 
         pnew = __initial_plot(
             sol,
@@ -1147,10 +1145,9 @@ function Plots.plot!(
         )
 
         # replace p by pnew, must have a side effect
-        for k ∈ fieldnames(typeof(p))
-           setfield!(p, k, getfield(pnew, k))
+        for k in fieldnames(typeof(p))
+            setfield!(p, k, getfield(pnew, k))
         end
-        
     end
 
     # plot the solution with infos from the model
