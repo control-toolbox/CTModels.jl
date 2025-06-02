@@ -264,6 +264,7 @@ struct Model{
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
     definition::Expr
+    f_exa::Union{Function,Nothing}
 
     function Model{TD}(  # TD must be specified explicitly
         times::AbstractTimesModel,
@@ -274,6 +275,7 @@ struct Model{
         objective::AbstractObjectiveModel,
         constraints::AbstractConstraintsModel,
         definition::Expr,
+        f_exa::Union{Function,Nothing}
     ) where {TD<:TimeDependence}
         return new{
             TD,
@@ -285,7 +287,7 @@ struct Model{
             typeof(objective),
             typeof(constraints),
         }(
-            times, state, control, variable, dynamics, objective, constraints, definition
+            times, state, control, variable, dynamics, objective, constraints, definition, f_exa
         )
     end
 end

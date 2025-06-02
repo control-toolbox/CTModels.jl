@@ -260,7 +260,7 @@ dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
 model = build_model(pre_ocp)
 ```
 """
-function build_model(pre_ocp::PreModel)::Model
+function build_model(pre_ocp::PreModel; f_exa = nothing)::Model
     @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall(
         "the times must be set before building the model."
     )
@@ -303,7 +303,7 @@ function build_model(pre_ocp::PreModel)::Model
 
     # create the model
     model = Model{TD}(
-        times, state, control, variable, dynamics, objective, constraints, definition
+        times, state, control, variable, dynamics, objective, constraints, definition, f_exa
     )
 
     return model
@@ -885,6 +885,28 @@ function dynamics(
     },
 )::D where {D<:Function}
     return ocp.dynamics
+end
+
+# f_exa
+"""
+$(TYPEDSIGNATURES)
+
+Get the f_exa from the model, if defined.
+"""
+function f_exa(
+    ocp::Model{
+        <:TimeDependence,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+    },
+)
+    @ensure !isnothing(ocp.f_exa) CTBase.UnauthorizedCall("first parse with :exa backend")
+    return ocp.f_exa
 end
 
 # Constraints
