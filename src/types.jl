@@ -255,6 +255,7 @@ struct Model{
     DynamicsModelType<:Function,
     ObjectiveModelType<:AbstractObjectiveModel,
     ConstraintsModelType<:AbstractConstraintsModel,
+    BuildExaModelType<:Union{Function,Nothing},
 } <: AbstractModel
     times::TimesModelType
     state::StateModelType
@@ -264,6 +265,7 @@ struct Model{
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
     definition::Expr
+    build_examodel::BuildExaModelType
 
     function Model{TD}(  # TD must be specified explicitly
         times::AbstractTimesModel,
@@ -274,6 +276,7 @@ struct Model{
         objective::AbstractObjectiveModel,
         constraints::AbstractConstraintsModel,
         definition::Expr,
+        build_examodel::Union{Function,Nothing}
     ) where {TD<:TimeDependence}
         return new{
             TD,
@@ -284,8 +287,9 @@ struct Model{
             typeof(dynamics),
             typeof(objective),
             typeof(constraints),
+            typeof(build_examodel),
         }(
-            times, state, control, variable, dynamics, objective, constraints, definition
+            times, state, control, variable, dynamics, objective, constraints, definition, build_examodel
         )
     end
 end

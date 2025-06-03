@@ -45,10 +45,10 @@ constraints = OrderedDict(
     :c1 => (:path, f1, [0.0], [1.0]),
     :c2 => (:state, 1:2, [-1.0, -1.0], [1.0, 1.0])
 )
-model = build_constraints(constraints)
+model = build(constraints)
 ```
 """
-function build_constraints(constraints::ConstraintsDictType)::ConstraintsModel
+function build(constraints::ConstraintsDictType)::ConstraintsModel
     LocalNumber = Float64
 
     path_cons_nl_f = Vector{Function}() # nonlinear path constraints
@@ -240,7 +240,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Builds a concrete `Model` from a `PreModel`.
+Converts a mutable `PreModel` into an immutable `Model`.
 
 This function finalizes a pre-defined optimal control problem (`PreModel`) by verifying that all necessary components (times, state, control, dynamics) are set. It then constructs a `Model` instance, incorporating optional components like objective and constraints if they are defined.
 
@@ -257,10 +257,10 @@ times!(pre_ocp, 0.0, 1.0, 100)
 state!(pre_ocp, 2, "x", ["x1", "x2"])
 control!(pre_ocp, 1, "u", ["u1"])
 dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
-model = build_model(pre_ocp)
+model = build(pre_ocp)
 ```
 """
-function build_model(pre_ocp::PreModel)::Model
+function build(pre_ocp::PreModel; build_examodel = nothing)::Model
     @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall(
         "the times must be set before building the model."
     )
@@ -297,13 +297,13 @@ function build_model(pre_ocp::PreModel)::Model
         __build_dynamics_from_parts(pre_ocp.dynamics)
     end
     objective = pre_ocp.objective
-    constraints = build_constraints(pre_ocp.constraints)
+    constraints = build(pre_ocp.constraints)
     definition = pre_ocp.definition
     TD = is_autonomous(pre_ocp) ? Autonomous : NonAutonomous
 
     # create the model
     model = Model{TD}(
-        times, state, control, variable, dynamics, objective, constraints, definition
+        times, state, control, variable, dynamics, objective, constraints, definition, build_examodel
     )
 
     return model
@@ -329,6 +329,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )
     return true
@@ -344,6 +345,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )
     return false
@@ -365,6 +367,7 @@ function state(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractStateModel}
     return ocp.state
@@ -413,6 +416,7 @@ function control(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractControlModel}
     return ocp.control
@@ -461,6 +465,7 @@ function variable(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractVariableModel}
     return ocp.variable
@@ -509,6 +514,7 @@ function times(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:TimesModel}
     return ocp.times
@@ -548,6 +554,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
     return initial_time(times(ocp))
@@ -568,6 +575,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
 )::T where {T<:ctNumber}
@@ -589,6 +597,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
     variable::T,
 )::T where {T<:ctNumber}
@@ -654,6 +663,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
     return final_time(times(ocp))
@@ -674,6 +684,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
 )::T where {T<:ctNumber}
@@ -695,6 +706,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
     variable::T,
 )::T where {T<:ctNumber}
@@ -744,6 +756,7 @@ function objective(
         <:Function,
         O,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::O where {O<:AbstractObjectiveModel}
     return ocp.objective
@@ -778,6 +791,7 @@ function mayer(
         <:Function,
         <:MayerObjectiveModel{M},
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
     return mayer(objective(ocp))
@@ -798,6 +812,7 @@ function mayer(
         <:Function,
         <:BolzaObjectiveModel{M,<:Function},
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
     return mayer(objective(ocp))
@@ -832,6 +847,7 @@ function lagrange(
         <:Function,
         LagrangeObjectiveModel{L},
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
     return lagrange(objective(ocp))
@@ -852,6 +868,7 @@ function lagrange(
         <:Function,
         <:BolzaObjectiveModel{<:Function,L},
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
     return lagrange(objective(ocp))
@@ -882,9 +899,53 @@ function dynamics(
         D,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:Union{Function,Nothing},
     },
 )::D where {D<:Function}
     return ocp.dynamics
+end
+
+# build_examodel
+"""
+$(TYPEDSIGNATURES)
+
+Get the build_examodel from the model.
+"""
+function get_build_examodel(
+    ocp::Model{
+        <:TimeDependence,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+        <:Function,
+    },
+)
+    return ocp.build_examodel
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return an error (UnauthorizedCall) since the model is not built with the :exa backend.
+"""
+function get_build_examodel(
+    ::Model{
+        <:TimeDependence,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+        <:Nothing,
+    },
+)
+    throw(CTBase.UnauthorizedCall("first parse with :exa backend"))
 end
 
 # Constraints
@@ -903,6 +964,7 @@ function constraints(
         <:Function,
         <:AbstractObjectiveModel,
         C,
+        <:Union{Function,Nothing},
     },
 )::C where {C<:AbstractConstraintsModel}
     return ocp.constraints
@@ -932,6 +994,7 @@ function path_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple},
+        <:Union{Function,Nothing},
     },
 )::TP where {TP<:Tuple}
     return constraints(ocp).path_nl
@@ -952,6 +1015,7 @@ function boundary_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple},
+        <:Union{Function,Nothing},
     },
 )::TB where {TB<:Tuple}
     return constraints(ocp).boundary_nl
@@ -972,6 +1036,7 @@ function state_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple},
+        <:Union{Function,Nothing},
     },
 )::TS where {TS<:Tuple}
     return constraints(ocp).state_box
@@ -992,6 +1057,7 @@ function control_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple},
+        <:Union{Function,Nothing},
     },
 )::TC where {TC<:Tuple}
     return constraints(ocp).control_box
@@ -1012,6 +1078,7 @@ function variable_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV},
+        <:Union{Function,Nothing},
     },
 )::TV where {TV<:Tuple}
     return constraints(ocp).variable_box

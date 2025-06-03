@@ -25,7 +25,7 @@ function test_solution()
     )
     CTModels.definition!(pre_ocp, quote end)
     CTModels.time_dependence!(pre_ocp; autonomous=false)
-    ocp = CTModels.build_model(pre_ocp)
+    ocp = CTModels.build(pre_ocp)
 
     # create a solution
     T = [0.0, 0.5, 1.0]

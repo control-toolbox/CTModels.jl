@@ -4,19 +4,19 @@ function test_model()
     pre_ocp = CTModels.PreModel()
 
     # exception: times must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set times
     CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
 
     # exception: state must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set state
     CTModels.state!(pre_ocp, 2)
 
     # exception: control must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set control
     CTModels.control!(pre_ocp, 2)
@@ -25,14 +25,14 @@ function test_model()
     CTModels.variable!(pre_ocp, 2)
 
     # exception: dynamics must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set dynamics
     dynamics!(r, t, x, u, v) = r .= t .+ x .+ u .+ v
     CTModels.dynamics!(pre_ocp, dynamics!)
 
     # exception: objective must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set objective
     mayer(x0, xf, v) = x0 .+ xf .+ v
@@ -40,7 +40,7 @@ function test_model()
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
 
     # exception: definition must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set definition
     definition = quote
@@ -55,7 +55,7 @@ function test_model()
     CTModels.definition!(pre_ocp, definition)
 
     # exception: time dependence must be set
-    @test_throws CTBase.UnauthorizedCall CTModels.build_model(pre_ocp)
+    @test_throws CTBase.UnauthorizedCall CTModels.build(pre_ocp)
 
     # set time dependence
     CTModels.time_dependence!(pre_ocp; autonomous=false)
@@ -88,7 +88,7 @@ function test_model()
     CTModels.constraint!(pre_ocp, :variable; rg=2, lb=-17, ub=18, label=:variable_scalar_2)
 
     # build the model
-    model = CTModels.build_model(pre_ocp)
+    model = CTModels.build(pre_ocp)
 
     # check the type of the model
     @test model isa CTModels.Model

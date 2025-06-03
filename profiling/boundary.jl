@@ -42,7 +42,7 @@ begin
             pre_ocp, :control; rg=1:2, lb=[0, 0], ub=[Inf, Inf], label=:control_rg
         )
         CTModels.definition!(pre_ocp, Expr(:simple_integrator_min_energy))
-        ocp = CTModels.build_model(pre_ocp)
+        ocp = CTModels.build(pre_ocp)
         return ocp, N
     end
 
