@@ -55,7 +55,7 @@ function solution_example(; fun=false)
     CTModels.time_dependence!(pre_ocp; autonomous=false)
 
     # build model
-    ocp = CTModels.build_model(pre_ocp)
+    ocp = CTModels.build(pre_ocp)
 
     # create a solution
 

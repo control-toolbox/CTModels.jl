@@ -1,43 +1,4 @@
 # ------------------------------------------------------------------------------ #
-# SETTER
-# ------------------------------------------------------------------------------ #
-
-"""
-$(TYPEDSIGNATURES)
-
-Set the model definition of the optimal control problem.
-
-"""
-function definition!(ocp::PreModel, definition::Expr)::Nothing
-    ocp.definition = definition
-    return nothing
-end
-
-# ------------------------------------------------------------------------------ #
-# GETTERS
-# ------------------------------------------------------------------------------ #
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the model definition of the optimal control problem.
-
-"""
-function definition(ocp::Model)::Expr
-    return ocp.definition
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the model definition of the optimal control problem or `nothing`.
-
-"""
-function definition(ocp::PreModel)
-    return ocp.definition
-end
-
-# ------------------------------------------------------------------------------ #
 # PRINT
 # ------------------------------------------------------------------------------ #
 function __print(e::Expr, io::IO, l::Int)
@@ -443,7 +404,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         println(io, "")
 
         # other constraints: path, boundary, state, control, variable, boundary
-        constraints = build_constraints(ocp.constraints)
+        constraints = build(ocp.constraints)
         dim_path_cons_nl = dim_path_constraints_nl(constraints)
         dim_boundary_cons_nl = dim_boundary_constraints_nl(constraints)
         dim_state_cons_box = dim_state_constraints_box(constraints)
