@@ -909,7 +909,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the build_examodel from the model, if defined.
+Get the build_examodel from the model.
 """
 function get_build_examodel(
     ocp::Model{
@@ -930,7 +930,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the build_examodel from the model, if defined.
+Return an error (UnauthorizedCall) since the model is not built with the :exa backend.
 """
 function get_build_examodel(
     ::Model{
