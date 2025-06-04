@@ -1176,27 +1176,27 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the components of an optimal control `Solution`.
+Plot the components of an optimal control solution.
 
 This is the main user-facing function to visualize the solution of an optimal control problem
 solved with the control-toolbox ecosystem.
 
-It generates a plot (or set of subplots) showing the evolution of the state, control, costate,
-path constraints, and dual variables over time, depending on the user’s choices.
+It generates a set of subplots showing the evolution of the state, control, costate,
+path constraints, and dual variables over time, depending on the problem and the user’s choices.
 
 # Arguments
 
-- `sol::CTModels.Solution`: The optimal control solution to visualize. Typically the result after solving a problem.
+- `sol::CTModels.Solution`: The optimal control solution to visualise.
 - `description::Symbol...`: A variable number of symbols indicating which components to include in the plot. Common values include:
-  - `:state` – plot the state trajectory.
-  - `:costate` – plot the costate (adjoint) variables.
-  - `:control` – plot the control signal.
-  - `:path` – plot the values of nonlinear path constraints.
-  - `:dual` – plot the dual variables (Lagrange multipliers) associated with path constraints.
+  - `:state` – plot the state.
+  - `:costate` – plot the costate (adjoint).
+  - `:control` – plot the control.
+  - `:path` – plot the path constraints.
+  - `:dual` – plot the dual variables (or Lagrange multipliers) associated with path constraints.
 
 If no symbols are provided, a default set is used based on the problem and styles.
 
-# Keyword Arguments
+# Keyword Arguments (Optional)
 
 - `layout::Symbol = :group`: Specifies how to arrange plots.
   - `:group`: Fewer plots, grouping similar variables together (e.g., all states in one subplot).
@@ -1204,33 +1204,33 @@ If no symbols are provided, a default set is used based on the problem and style
 
 - `control::Symbol = :components`: Defines how to represent control inputs.
   - `:components`: One curve per control component.
-  - `:norm`: Single curve showing ‖u(t)‖.
+  - `:norm`: Single curve showing the Euclidean norm ‖u(t)‖.
   - `:all`: Plot both components and norm.
 
-- `time::Symbol = :default`: Time normalization for plots.
+- `time::Symbol = :default`: Time normalisation for plots.
   - `:default`: Real time scale.
-  - `:normalize` or `:normalise`: Normalized to the interval [0, 1].
+  - `:normalize` or `:normalise`: Normalised to the interval [0, 1].
 
 - `solution_label::String = ""`: Label to annotate this solution in the legend. (Deprecated: use `label` instead) 
 
 ## Style Options (Optional)
 
-All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or the `Symbol` `:none` referring to not plot the associated element. These allow you to customize color, line style, markers, etc.
+All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or the `Symbol` `:none` referring to not plot the associated element. These allow you to customise color, line style, markers, etc.
 
-- `state_style`: Plot style for state components.
-- `costate_style`: Plot style for costate components.
-- `control_style`: Plot style for control components.
-- `dual_style`: Plot style for dual variables.
-- `path_style`: Plot style for path constraint values.
+- `time_style`: Style for vertical lines at initial and final time.
+- `state_style`: Style for state components.
+- `costate_style`: Style for costate components.
+- `control_style`: Style for control components.
+- `path_style`: Style for path constraint values.
+- `dual_style`: Style for dual variables.
 
 ## Bounds Decorations (Optional)
 
-Use these options to show bounds on the plots if applicable and defined in the model. If set to `:none` then it is not shown on the plots.
+Use these options to customise bounds on the plots if applicable and defined in the model. Set to `:none` to hide.
 
-- `state_bounds_style`: Style for state variable bounds.
+- `state_bounds_style`: Style for state bounds.
 - `control_bounds_style`: Style for control bounds.
 - `path_bounds_style`: Style for path constraint bounds.
-- `time_style`: Style for vertical lines at initial and final time.
 
 # Returns
 
@@ -1239,15 +1239,19 @@ Use these options to show bounds on the plots if applicable and defined in the m
 # Example
 
 ```julia-repl
-# plot the state and control with default layout
+# basic plot
+julia> plot(sol)
+
+# plot only the state and control
 julia> plot(sol, :state, :control)
 
-# customize layout and styles
-julia> plot(sol, :state, :control;
-     layout = :split,
-     control = :all,
-     state_style = (color=:blue, linestyle=:solid),
-     control_style = (color=:red, linestyle=:dash))
+# customise layout and styles, no costate
+julia> plot(sol;
+       layout = :split,
+       control = :all,
+       state_style = (color=:blue, linestyle=:solid),
+       control_style = (color=:red, linestyle=:dash),
+       costate_style = :none)       
 ```
 """
 function Plots.plot(
