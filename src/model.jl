@@ -260,7 +260,7 @@ dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
 model = build(pre_ocp)
 ```
 """
-function build(pre_ocp::PreModel; build_examodel = nothing)::Model
+function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall(
         "the times must be set before building the model."
     )
@@ -303,7 +303,15 @@ function build(pre_ocp::PreModel; build_examodel = nothing)::Model
 
     # create the model
     model = Model{TD}(
-        times, state, control, variable, dynamics, objective, constraints, definition, build_examodel
+        times,
+        state,
+        control,
+        variable,
+        dynamics,
+        objective,
+        constraints,
+        definition,
+        build_examodel,
     )
 
     return model

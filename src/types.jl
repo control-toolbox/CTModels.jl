@@ -276,7 +276,7 @@ struct Model{
         objective::AbstractObjectiveModel,
         constraints::AbstractConstraintsModel,
         definition::Expr,
-        build_examodel::Union{Function,Nothing}
+        build_examodel::Union{Function,Nothing},
     ) where {TD<:TimeDependence}
         return new{
             TD,
@@ -289,7 +289,15 @@ struct Model{
             typeof(constraints),
             typeof(build_examodel),
         }(
-            times, state, control, variable, dynamics, objective, constraints, definition, build_examodel
+            times,
+            state,
+            control,
+            variable,
+            dynamics,
+            objective,
+            constraints,
+            definition,
+            build_examodel,
         )
     end
 end
