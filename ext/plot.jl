@@ -1186,7 +1186,7 @@ path constraints, and dual variables over time, depending on the user’s choice
 
 # Arguments
 
-- `sol::CTModels.Solution`: The optimal control solution to visualize. Typically the result of solving a problem using CTDirect.jl or CTKnitro.jl.
+- `sol::CTModels.Solution`: The optimal control solution to visualize. Typically the result after solving a problem.
 - `description::Symbol...`: A variable number of symbols indicating which components to include in the plot. Common values include:
   - `:state` – plot the state trajectory.
   - `:costate` – plot the costate (adjoint) variables.
@@ -1215,7 +1215,7 @@ If no symbols are provided, a default set is used based on the problem and style
 
 ## Style Options (Optional)
 
-All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or a `Symbol` referring to a predefined style. These allow you to customize color, line style, markers, etc.
+All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or the `Symbol` `:none` referring to not plot the associated element. These allow you to customize color, line style, markers, etc.
 
 - `state_style`: Plot style for state components.
 - `costate_style`: Plot style for costate components.
@@ -1225,7 +1225,7 @@ All style-related keyword arguments can be either a `NamedTuple` of plotting att
 
 ## Bounds Decorations (Optional)
 
-Use these options to show bounds on the plots if applicable and defined in the model.
+Use these options to show bounds on the plots if applicable and defined in the model. If set to `:none` then it is not shown on the plots.
 
 - `state_bounds_style`: Style for state variable bounds.
 - `control_bounds_style`: Style for control bounds.
