@@ -1179,7 +1179,7 @@ $(TYPEDSIGNATURES)
 Plot the components of an optimal control `Solution`.
 
 This is the main user-facing function to visualize the solution of an optimal control problem
-solved with the ControlToolbox.jl ecosystem.
+solved with the control-toolbox ecosystem.
 
 It generates a plot (or set of subplots) showing the evolution of the state, control, costate,
 path constraints, and dual variables over time, depending on the user’s choices.
