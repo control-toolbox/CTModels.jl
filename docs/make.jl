@@ -1,9 +1,15 @@
 using Documenter
 using CTModels
 using Plots
+using JSON3
+using JLD2
+
+const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
+const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
+const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
 
 # to add docstrings from external packages
-Modules = [Plots]
+Modules = [Plots, CTModelsPlots, CTModelsJSON, CTModelsJLD]
 for Module in Modules
     isnothing(DocMeta.getdocmeta(Module, :DocTestSetup)) &&
         DocMeta.setdocmeta!(Module, :DocTestSetup, :(using $Module); recursive=true)
@@ -24,7 +30,32 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=["Introduction" => "index.md", "Developers" => "dev.md"],
+    pages=[
+        "Introduction" => "index.md", 
+        "API" => [
+            "constraints.md",
+            "control.md",
+            "ctmodels.md",
+            "default.md",
+            "definition.md",
+            "dual_model.md",
+            "dynamics.md",
+            "init.md",
+            "jld.md",
+            "json.md",
+            "model.md",
+            "objective.md",
+            "plot.md",
+            "print.md",
+            "solution.md",
+            "state.md",
+            "time_dependence.md",
+            "times.md",
+            "types.md",
+            "utils.md",
+            "variable.md",
+            ]
+        ],
     checkdocs=:none,
 )
 
