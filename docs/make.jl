@@ -17,6 +17,30 @@ end
 
 repo_url = "github.com/control-toolbox/CTModels.jl"
 
+API_PAGES = [
+    "constraints.md",
+    "control.md",
+    "ctmodels.md",
+    "default.md",
+    "definition.md",
+    "dual_model.md",
+    "dynamics.md",
+    "init.md",
+    "jld.md",
+    "json.md",
+    "model.md",
+    "objective.md",
+    "plot.md",
+    "print.md",
+    "solution.md",
+    "state.md",
+    "time_dependence.md",
+    "times.md",
+    "types.md",
+    "utils.md",
+    "variable.md"
+]
+
 makedocs(;
     remotes=nothing,
     warnonly=[:cross_references, :autodocs_block],
@@ -32,29 +56,7 @@ makedocs(;
     ),
     pages=[
         "Introduction" => "index.md", 
-        "API" => [
-            "constraints.md",
-            "control.md",
-            "ctmodels.md",
-            "default.md",
-            "definition.md",
-            "dual_model.md",
-            "dynamics.md",
-            "init.md",
-            "jld.md",
-            "json.md",
-            "model.md",
-            "objective.md",
-            "plot.md",
-            "print.md",
-            "solution.md",
-            "state.md",
-            "time_dependence.md",
-            "times.md",
-            "types.md",
-            "utils.md",
-            "variable.md",
-            ]
+        "API" => API_PAGES,
         ],
     checkdocs=:none,
 )

@@ -10,10 +10,6 @@ Order = [:module, :constant, :type, :function, :macro]
 
 ## Documentation
 
-```@docs
-plot(::CTModels.Solution, ::Symbol...)
-```
-
 ```@autodocs
 Modules = [CTModelsPlots]
 Order = [:module, :constant, :type, :function, :macro]

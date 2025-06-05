@@ -4,7 +4,7 @@
 
 ```@index
 Pages   = ["json.md"]
-Modules = [CTModelsJSON]
+Modules = [CTModels, CTModelsJSON]
 Order = [:module, :constant, :type, :function, :macro]
 ```
 

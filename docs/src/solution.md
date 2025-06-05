@@ -4,7 +4,7 @@
 
 ```@index
 Pages   = ["solution.md"]
-Modules = [CTModels]
+Modules = [CTModels, Base]
 Order = [:module, :constant, :type, :function, :macro]
 ```
 
