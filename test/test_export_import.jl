@@ -12,17 +12,13 @@ function test_export_import()
 
     # JSON
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
-    sol_reloaded = CTModels.import_ocp_solution(
-        ocp; filename="solution_test", format=:JSON
-    )
+    sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
     @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
 
     # JLD
     CTModels.export_ocp_solution(sol; filename="solution_test") # default is :JLD)
-    sol_reloaded = CTModels.import_ocp_solution(
-        ocp; filename="solution_test", format=:JLD
-    )
+    sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JLD)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
     @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
 
@@ -31,17 +27,13 @@ function test_export_import()
 
     # JSON
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
-    sol_reloaded = CTModels.import_ocp_solution(
-        ocp; filename="solution_test", format=:JSON
-    )
+    sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
     @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
 
     # JLD
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JLD)
-    sol_reloaded = CTModels.import_ocp_solution(
-        ocp; filename="solution_test", format=:JLD
-    )
+    sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JLD)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
     @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
 
@@ -68,14 +60,11 @@ function test_export_import()
 
     # JSON
     CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
-    sol_reloaded = CTModels.import_ocp_solution(
-        ocp; filename="solution_test", format=:JSON
-    )
+    sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
     @test sol.objective ≈ sol_reloaded.objective atol=1e-8
     @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
 
     # Cleanup
     remove_if_exists("solution_test.jld2")
     remove_if_exists("solution_test.json")
-
 end

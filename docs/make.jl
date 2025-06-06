@@ -38,7 +38,7 @@ API_PAGES = [
     "times.md",
     "types.md",
     "utils.md",
-    "variable.md"
+    "variable.md",
 ]
 
 makedocs(;
@@ -54,10 +54,7 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=[
-        "Introduction" => "index.md", 
-        "API" => API_PAGES,
-        ],
+    pages=["Introduction" => "index.md", "API" => API_PAGES],
     checkdocs=:none,
 )
 
