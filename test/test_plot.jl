@@ -35,6 +35,24 @@ function test_plot()
     @test plot!(plt, sol; time=:normalise) isa Plots.Plot
     @test_throws CTBase.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
 
+    plot(sol; time=:default)
+    @test plot!(sol; time=:default) isa Plots.Plot
+    @test plot!(sol; time=:normalize) isa Plots.Plot
+    @test plot!(sol; time=:normalise) isa Plots.Plot
+    @test_throws CTBase.IncorrectArgument plot!(sol; time=:wrong_choice)
+
+    plt = plot()
+    @test plot!(plt, sol; time=:default) isa Plots.Plot
+    @test plot!(plt, sol; time=:normalize) isa Plots.Plot
+    @test plot!(plt, sol; time=:normalise) isa Plots.Plot
+    @test_throws CTBase.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
+
+    plot()
+    @test plot!(sol; time=:default) isa Plots.Plot
+    @test plot!(sol; time=:normalize) isa Plots.Plot
+    @test plot!(sol; time=:normalise) isa Plots.Plot
+    @test_throws CTBase.IncorrectArgument plot!(sol; time=:wrong_choice)
+
     # 
     plt = plot(sol; layout=:group, control=:components)
     @test plot!(plt, sol; layout=:group, control=:components) isa Plots.Plot
@@ -133,11 +151,11 @@ function test_plot()
     @test plot!(plt, sol; time=:normalise) isa Plots.Plot
     @test_throws CTBase.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
 
-    plt = plot(sol; time=:default)
-    @test plot!(plt, sol; time=:default) isa Plots.Plot
-    @test plot!(plt, sol; time=:normalize) isa Plots.Plot
-    @test plot!(plt, sol; time=:normalise) isa Plots.Plot
-    @test_throws CTBase.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
+    plot(sol; time=:default)
+    @test plot!(sol; time=:default) isa Plots.Plot
+    @test plot!(sol; time=:normalize) isa Plots.Plot
+    @test plot!(sol; time=:normalise) isa Plots.Plot
+    @test_throws CTBase.IncorrectArgument plot!(sol; time=:wrong_choice)
 
     # 
     plt = plot(sol; layout=:group, control=:components)

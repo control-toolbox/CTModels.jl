@@ -130,39 +130,24 @@ JSON tag for export/import functions.
 """
 struct JSON3Tag <: AbstractTag end
 
-# to be extended
-"""
-$(TYPEDSIGNATURES)
+# -----------------------------
+# to be extended: no docstrings
+function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
+    throw(CTBase.ExtensionError(:Plots))
+end
 
-Export a solution in JLD format.
-"""
 function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
     throw(CTBase.ExtensionError(:JLD2))
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Import a solution from a JLD file.
-"""
 function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
     throw(CTBase.ExtensionError(:JLD2))
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Export a solution in JSON format.
-"""
 function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
     throw(CTBase.ExtensionError(:JSON3))
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Import a solution from a JLD file.
-"""
 function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
     throw(CTBase.ExtensionError(:JSON3))
 end
@@ -170,13 +155,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Export a solution in JLD or JSON formats.
+Export a solution in JLD or JSON formats. Redirect to one of the methods:
+
+- [`export_ocp_solution(JLD2Tag(), sol, filename=filename)`](@ref export_ocp_solution(::CTModels.JLD2Tag, ::CTModels.Solution))
+- [`export_ocp_solution(JSON3Tag(), sol, filename=filename)`](@ref export_ocp_solution(::CTModels.JSON3Tag, ::CTModels.Solution))
 
 # Examples
 
 ```julia-repl
-julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
-julia> CTModels.export_ocp_solution(sol; filename="solution", format=:JLD)
+julia> using JSON3
+julia> export_ocp_solution(sol; filename="solution", format=:JSON)
+julia> using JLD2
+julia> export_ocp_solution(sol; filename="solution", format=:JLD)  # JLD is the default
 ```
 """
 function export_ocp_solution(
@@ -200,13 +190,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Import a solution from a JLD or JSON file.
+Import a solution from a JLD or JSON file. Redirect to one of the methods:
+
+- [`import_ocp_solution(JLD2Tag(), ocp, filename=filename)`](@ref import_ocp_solution(::CTModels.JLD2Tag, ::CTModels.Model))
+- [`import_ocp_solution(JSON3Tag(), ocp, filename=filename)`](@ref import_ocp_solution(::CTModels.JSON3Tag, ::CTModels.Model))
 
 # Examples
 
 ```julia-repl
-julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JSON)
-julia> sol = CTModels.import_ocp_solution(ocp; filename="solution", format=:JLD)
+julia> using JSON3
+julia> sol = import_ocp_solution(ocp; filename="solution", format=:JSON)
+julia> using JLD2
+julia> sol = import_ocp_solution(ocp; filename="solution", format=:JLD)  # JLD is the default
 ```
 """
 function import_ocp_solution(
@@ -225,38 +220,6 @@ function import_ocp_solution(
             ),
         )
     end
-end
-
-# to be extended
-"""
-$(TYPEDSIGNATURES)
-
-Plot a solution from an optimal control problem.
-
-This function dispatches on a solution type that inherits from `AbstractSolution`. It is intended to visualize various components of the solution (such as state trajectories, controls, costates, or any other variables defined in the model).
-
-!!! note
-    This function requires the `Plots.jl` package to be available. If it is not loaded, a `CTBase.ExtensionError(:Plots)` is thrown.
-
-# Arguments
-- `sol::AbstractSolution`: A solution object returned by solving a control problem.
-- `description::Symbol...`: Optional symbols specifying what to plot (e.g., `:state`, `:control`, `:costate`, etc.). If empty, a default set of components is plotted.
-- `kwargs...`: Additional keyword arguments passed to the underlying plotting routines (e.g., `xlabel`, `ylabel`, `legend`, etc.).
-
-# Returns
-- A plot object (if `Plots.jl` is available) visualizing the selected components of the solution.
-
-# Example
-```julia-repl
-julia> using Plots
-julia> plot(sol, :state, :control, xlabel = "Time", layout = (2,1))
-```
-
-# Throws
-- `CTBase.ExtensionError` if the `Plots` package is not available or not loaded.
-"""
-function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(CTBase.ExtensionError(:Plots))
 end
 
 #

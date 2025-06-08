@@ -134,6 +134,8 @@ sol = get_solution();
 
 #
 plt = plot(; size=(800, 800))
+p = Plots.current();
+pp = plot!(sol)
 pp = plot!(plt, sol)
 
 pp

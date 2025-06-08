@@ -237,7 +237,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of the state of the optimal control solution.
+Return the dimension of the state.
 
 """
 function state_dimension(sol::Solution)::Dimension
@@ -247,7 +247,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the names of the components of the state of the optimal control solution.
+Return the names of the components of the state.
 
 """
 function state_components(sol::Solution)::Vector{String}
@@ -257,7 +257,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the state of the optimal control solution.
+Return the name of the state.
 
 """
 function state_name(sol::Solution)::String
@@ -267,12 +267,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the state (function of time) of the optimal control solution.
+Return the state as a function of time.
 
 ```@example
-julia> t0 = time_grid(sol)[1]
 julia> x  = state(sol)
-julia> x0 = x(t0)
+julia> t0 = time_grid(sol)[1]
+julia> x0 = x(t0) # state at the initial time
 ```
 """
 function state(
@@ -295,7 +295,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of the control of the optimal control solution.
+Return the dimension of the control.
 
 """
 function control_dimension(sol::Solution)::Dimension
@@ -305,7 +305,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the names of the components of the control of the optimal control solution.
+Return the names of the components of the control.
 
 """
 function control_components(sol::Solution)::Vector{String}
@@ -315,7 +315,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the control of the optimal control solution.
+Return the name of the control.
 
 """
 function control_name(sol::Solution)::String
@@ -325,12 +325,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the control (function of time) of the optimal control solution.
+Return the control as a function of time.
 
 ```@example
-julia> t0 = time_grid(sol)[1]
 julia> u  = control(sol)
-julia> u0 = u(t0) # control at initial time
+julia> t0 = time_grid(sol)[1]
+julia> u0 = u(t0) # control at the initial time
 ```
 """
 function control(
@@ -353,7 +353,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of the variable of the optimal control solution.
+Return the dimension of the variable.
 
 """
 function variable_dimension(sol::Solution)::Dimension
@@ -363,7 +363,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the names of the components of the variable of the optimal control solution.
+Return the names of the components of the variable.
 
 """
 function variable_components(sol::Solution)::Vector{String}
@@ -373,7 +373,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the variable of the optimal control solution.
+Return the name of the variable.
 
 """
 function variable_name(sol::Solution)::String
@@ -383,7 +383,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the variable of the optimal control solution or `nothing`.
+Return the variable or `nothing`.
 
 ```@example
 julia> v  = variable(sol)
@@ -409,12 +409,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the costate of the optimal control solution.
+Return the costate as a function of time.
 
 ```@example
-julia> t0 = time_grid(sol)[1]
 julia> p  = costate(sol)
-julia> p0 = p(t0)
+julia> t0 = time_grid(sol)[1]
+julia> p0 = p(t0) # costate at the initial time
 ```
 """
 function costate(
@@ -437,7 +437,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the initial time of the optimal control solution.
+Return the name of the initial time.
 
 """
 function initial_time_name(sol::Solution)::String
@@ -447,7 +447,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the final time of the optimal control solution.
+Return the name of the final time.
 
 """
 function final_time_name(sol::Solution)::String
@@ -457,7 +457,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the name of the time component of the optimal control solution.
+Return the name of the time component.
 
 """
 function time_name(sol::Solution)::String
@@ -467,7 +467,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the time grid of the optimal control solution.
+Return the time grid.
 
 """
 function time_grid(
@@ -490,7 +490,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the objective value of the optimal control solution.
+Return the objective value.
 
 """
 function objective(
@@ -513,7 +513,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the number of iterations (if solved by an iterative method) of the optimal control solution.
+Return the number of iterations (if solved by an iterative method).
 
 """
 function iterations(sol::Solution)::Int
@@ -523,7 +523,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the stopping criterion (a Symbol) of the optimal control solution.
+Return the stopping criterion (a Symbol).
 
 """
 function stopping(sol::Solution)::Symbol
@@ -533,7 +533,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the message associated to the stopping criterion of the optimal control solution.
+Return the message associated to the stopping criterion.
 
 """
 function message(sol::Solution)::String
@@ -543,7 +543,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the success status of the optimal control solution.
+Return the success status.
 
 """
 function success(sol::Solution)::Bool
@@ -553,7 +553,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the constraints violation of the optimal control solution.
+Return the constraints violation.
 
 """
 function constraints_violation(sol::Solution)::Float64
@@ -594,7 +594,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dual of the path constraints of the optimal control solution.
+Return the dual of the path constraints.
 
 """
 function path_constraints_dual(sol::Solution)
@@ -604,7 +604,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dual of the boundary constraints of the optimal control solution.
+Return the dual of the boundary constraints.
 
 """
 function boundary_constraints_dual(sol::Solution)
@@ -614,7 +614,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the lower bound dual of the state constraints of the optimal control solution.
+Return the lower bound dual of the state constraints.
 
 """
 function state_constraints_lb_dual(sol::Solution)
@@ -624,7 +624,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the upper bound dual of the state constraints of the optimal control solution.
+Return the upper bound dual of the state constraints.
 
 """
 function state_constraints_ub_dual(sol::Solution)
@@ -634,7 +634,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the lower bound dual of the control constraints of the optimal control solution.
+Return the lower bound dual of the control constraints.
 
 """
 function control_constraints_lb_dual(sol::Solution)
@@ -644,7 +644,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the upper bound dual of the control constraints of the optimal control solution.
+Return the upper bound dual of the control constraints.
 
 """
 function control_constraints_ub_dual(sol::Solution)
@@ -654,7 +654,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the lower bound dual of the variable constraints of the optimal control solution.
+Return the lower bound dual of the variable constraints.
 
 """
 function variable_constraints_lb_dual(sol::Solution)
@@ -664,7 +664,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the upper bound dual of the variable constraints of the optimal control solution.
+Return the upper bound dual of the variable constraints.
 
 """
 function variable_constraints_ub_dual(sol::Solution)

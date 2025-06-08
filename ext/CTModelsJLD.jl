@@ -21,6 +21,7 @@ allowing it to be reloaded later.
 
 # Example
 ```julia-repl
+julia> using JLD2
 julia> export_ocp_solution(JLD2Tag(), sol; filename="mysolution")
 # → creates "mysolution.jld2"
 ```
@@ -51,6 +52,7 @@ This function loads a previously saved `CTModels.Solution` from disk.
 
 # Example
 ```julia-repl
+julia> using JLD2
 julia> sol = import_ocp_solution(JLD2Tag(), model; filename="mysolution")
 ```
 """
