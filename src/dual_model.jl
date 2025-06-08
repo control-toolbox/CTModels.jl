@@ -9,8 +9,7 @@ $(TYPEDSIGNATURES)
 Return the dual variable associated with a constraint identified by its `label`.
 
 Searches through all constraint types (path, boundary, state, control, and variable constraints)
-defined in the model and returns the corresponding dual value(s) from the solution. If the label
-is found multiple times, a vector of values is returned.
+defined in the model and returns the corresponding dual value from the solution.
 
 # Arguments
 - `sol::Solution`: Solution object containing dual variables.
@@ -20,12 +19,6 @@ is found multiple times, a vector of values is returned.
 # Returns
 A function of time `t` for time-dependent constraints, or a scalar/vector for time-invariant duals.
 If the label is not found, throws an `IncorrectArgument` exception.
-
-# Examples
-```julia-repl
-julia> dual_fun = dual(sol, model, :velocity_limit)
-julia> dual_value_at_t1 = dual_fun(1.0)
-```
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 

@@ -562,9 +562,8 @@ end
 $(TYPEDSIGNATURES)
 
 Get a labelled constraint from the model. Returns a tuple of the form
-`(type, f, lb, ub)` where `type` is the type of the constraint, `f` is the function
-of the constraint, `lb` is the lower bound of the constraint and `ub` is the upper
-bound of the constraint. 
+`(type, f, lb, ub)` where `type` is the type of the constraint, `f` is the function, 
+`lb` is the lower bound and `ub` is the upper bound. 
 
 The function returns an exception if the label is not found in the model.
 
@@ -576,14 +575,6 @@ The function returns an exception if the label is not found in the model.
 ## Returns
 
 - `Tuple`: A tuple containing the type, function, lower bound, and upper bound of the constraint.
-
-## Example
-
-```julia-repl
-julia> # Example of getting a labelled constraint from the model
-julia> model = Model(...)
-julia> constraint_info = constraint(model, :my_constraint)
-```
 """
 function constraint(model::Model, label::Symbol)::Tuple # not type stable
 

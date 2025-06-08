@@ -363,7 +363,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the state from the model.
+Return the state struct.
 """
 function state(
     ocp::Model{
@@ -384,7 +384,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the state from the model.
+Return the name of the state.
 """
 function state_name(ocp::Model)::String
     return name(state(ocp))
@@ -393,7 +393,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the state from the model.
+Return the names of the components of the state.
 """
 function state_components(ocp::Model)::Vector{String}
     return components(state(ocp))
@@ -402,7 +402,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the state dimension from the model.
+Return the state dimension.
 """
 function state_dimension(ocp::Model)::Dimension
     return dimension(state(ocp))
@@ -412,7 +412,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the control from the model.
+Return the control struct.
 """
 function control(
     ocp::Model{
@@ -433,7 +433,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the control from the model.
+Return the name of the control.
 """
 function control_name(ocp::Model)::String
     return name(control(ocp))
@@ -442,7 +442,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the control from the model.
+Return the names of the components of the control.
 """
 function control_components(ocp::Model)::Vector{String}
     return components(control(ocp))
@@ -451,7 +451,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the control dimension from the model.
+Return the control dimension.
 """
 function control_dimension(ocp::Model)::Dimension
     return dimension(control(ocp))
@@ -461,7 +461,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable from the model.
+Return the variable struct.
 """
 function variable(
     ocp::Model{
@@ -482,7 +482,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the variable from the model.
+Return the name of the variable.
 """
 function variable_name(ocp::Model)::String
     return name(variable(ocp))
@@ -491,7 +491,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the components names of the variable from the model.
+Return the names of the components of the variable.
 """
 function variable_components(ocp::Model)::Vector{String}
     return components(variable(ocp))
@@ -500,7 +500,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the variable dimension from the model.
+Return the variable dimension.
 """
 function variable_dimension(ocp::Model)::Dimension
     return dimension(variable(ocp))
@@ -510,7 +510,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the times from the model.
+Return the times struct.
 """
 function times(
     ocp::Model{
@@ -532,7 +532,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the time from the model.
+Return the name of the time.
 """
 function time_name(ocp::Model)::String
     return time_name(times(ocp))
@@ -550,7 +550,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the initial time from the model, for a fixed initial time.
+Return the initial time, for a fixed initial time.
 """
 function initial_time(
     ocp::Model{
@@ -571,7 +571,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the initial time from the model, for a free initial time.
+Return the initial time, for a free initial time.
 """
 function initial_time(
     ocp::Model{
@@ -593,7 +593,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the initial time from the model, for a free initial time.
+Return the initial time, for a free initial time.
 """
 function initial_time(
     ocp::Model{
@@ -615,7 +615,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the initial time from the model.
+Return the name of the initial time.
 """
 function initial_time_name(ocp::Model)::String
     return initial_time_name(times(ocp))
@@ -659,7 +659,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the final time from the model, for a fixed final time.
+Return the final time, for a fixed final time.
 """
 function final_time(
     ocp::Model{
@@ -680,7 +680,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the final time from the model, for a free final time.
+Return the final time, for a free final time.
 """
 function final_time(
     ocp::Model{
@@ -702,7 +702,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the final time from the model, for a free final time.
+Return the final time, for a free final time.
 """
 function final_time(
     ocp::Model{
@@ -724,7 +724,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the name of the final time from the model.
+Return the name of the final time.
 """
 function final_time_name(ocp::Model)::String
     return final_time_name(times(ocp))
@@ -752,7 +752,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the objective from the model.
+Return the objective struct.
 """
 function objective(
     ocp::Model{
@@ -773,7 +773,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the type of criterion (:min or :max) from the model.
+Return the type of criterion (:min or :max).
 """
 function criterion(ocp::Model)::Symbol
     return criterion(objective(ocp))
@@ -787,7 +787,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Mayer cost from the model.
+Return the Mayer cost.
 """
 function mayer(
     ocp::Model{
@@ -808,7 +808,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Mayer cost from the model.
+Return the Mayer cost.
 """
 function mayer(
     ocp::Model{
@@ -843,7 +843,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Lagrange cost from the model.
+Return the Lagrange cost.
 """
 function lagrange(
     ocp::Model{
@@ -864,7 +864,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Lagrange cost from the model.
+Return the Lagrange cost.
 """
 function lagrange(
     ocp::Model{
@@ -895,7 +895,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the dynamics from the model.
+Return the dynamics.
 """
 function dynamics(
     ocp::Model{
@@ -917,7 +917,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the build_examodel from the model.
+Return the build_examodel.
 """
 function get_build_examodel(
     ocp::Model{
@@ -929,9 +929,9 @@ function get_build_examodel(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
-        <:Function,
+        BE,
     },
-)
+)::BE where {BE<:Function}
     return ocp.build_examodel
 end
 
@@ -960,7 +960,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the constraints from the model.
+Return the constraints struct.
 """
 function constraints(
     ocp::Model{
@@ -990,7 +990,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the nonlinear path constraints from the model.
+Return the nonlinear path constraints.
 """
 function path_constraints_nl(
     ocp::Model{
@@ -1011,7 +1011,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the nonlinear boundary constraints from the model.
+Return the nonlinear boundary constraints.
 """
 function boundary_constraints_nl(
     ocp::Model{
@@ -1032,7 +1032,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the box constraints on state from the model.
+Return the box constraints on state.
 """
 function state_constraints_box(
     ocp::Model{
@@ -1053,7 +1053,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the box constraints on control from the model.
+Return the box constraints on control.
 """
 function control_constraints_box(
     ocp::Model{
@@ -1074,7 +1074,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the box constraints on variable from the model.
+Return the box constraints on variable.
 """
 function variable_constraints_box(
     ocp::Model{

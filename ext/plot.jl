@@ -464,13 +464,11 @@ constraints, and duals based on the provided `layout` and `description`.
 Includes options such as:
 - `layout`, `control`, `time`
 - `state_style`, `control_style`, `costate_style`, etc.
-- `solution_label`: Label to annotate the plotted solution.
 """
 function __plot!(
     p::Plots.Plot,
     sol::CTModels.Solution,
     description::Symbol...;
-    solution_label::String,
     model::Union{CTModels.Model,Nothing},
     time::Symbol,
     control::Symbol,
@@ -510,11 +508,6 @@ function __plot!(
         control_bounds_style=control_bounds_style,
         path_bounds_style=path_bounds_style,
     )
-
-    # add an empty space to the label if the label is not empty
-    if solution_label != ""
-        @warn "Deprecated: `solution_label` keyword argument is replaced by `label`."
-    end
 
     #
     n = CTModels.state_dimension(sol)
@@ -1018,7 +1011,6 @@ Use this to obtain a standalone plot.
 function __plot(
     sol::CTModels.Solution,
     description::Symbol...;
-    solution_label::String,
     model::Union{CTModels.Model,Nothing},
     time::Symbol,
     control::Symbol,
@@ -1068,7 +1060,6 @@ function __plot(
         layout=layout,
         control=control,
         time=time,
-        solution_label=solution_label,
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
@@ -1088,9 +1079,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Update an existing plot `p` with the optimal control `Solution`.
+Modify Plot `p` with the optimal control solution `sol`.
 
-See `__plot!` for full behavior and keyword arguments.
+See [`plot`](@ref plot(::CTModels.Solution)) for full behavior and keyword arguments.
 """
 function Plots.plot!(
     p::Plots.Plot,
@@ -1099,7 +1090,6 @@ function Plots.plot!(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    solution_label::String=__plot_label_suffix(),
     state_style::Union{NamedTuple,Symbol}=__plot_style(),
     state_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     control_style::Union{NamedTuple,Symbol}=__plot_style(),
@@ -1158,7 +1148,6 @@ function Plots.plot!(
         layout=layout,
         control=control,
         time=time,
-        solution_label=solution_label,
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,
@@ -1176,9 +1165,53 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Modify Plot `current()` with the optimal control solution `sol`.
+
+See [`plot`](@ref plot(::CTModels.Solution)) for full behavior and keyword arguments.
+"""
+function Plots.plot!(
+    sol::CTModels.Solution,
+    description::Symbol...;
+    layout::Symbol=__plot_layout(),
+    control::Symbol=__control_layout(),
+    time::Symbol=__time_normalization(),
+    state_style::Union{NamedTuple,Symbol}=__plot_style(),
+    state_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
+    control_style::Union{NamedTuple,Symbol}=__plot_style(),
+    control_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
+    costate_style::Union{NamedTuple,Symbol}=__plot_style(),
+    time_style::Union{NamedTuple,Symbol}=__plot_style(),
+    path_style::Union{NamedTuple,Symbol}=__plot_style(),
+    path_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
+    dual_style::Union{NamedTuple,Symbol}=__plot_style(),
+    kwargs...,
+)
+    return Plots.plot!(
+        Plots.current(),
+        sol,
+        description...;
+        layout,
+        control,
+        time,
+        state_style,
+        state_bounds_style,
+        control_style,
+        control_bounds_style,
+        costate_style,
+        time_style,
+        path_style,
+        path_bounds_style,
+        dual_style,
+        kwargs...,
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Plot the components of an optimal control solution.
 
-This is the main user-facing function to visualize the solution of an optimal control problem
+This is the main user-facing function to visualise the solution of an optimal control problem
 solved with the control-toolbox ecosystem.
 
 It generates a set of subplots showing the evolution of the state, control, costate,
@@ -1211,13 +1244,11 @@ If no symbols are provided, a default set is used based on the problem and style
   - `:default`: Real time scale.
   - `:normalize` or `:normalise`: Normalised to the interval [0, 1].
 
-- `solution_label::String = ""`: Label to annotate this solution in the legend. (Deprecated: use `label` instead) 
-
 ## Style Options (Optional)
 
 All style-related keyword arguments can be either a `NamedTuple` of plotting attributes or the `Symbol` `:none` referring to not plot the associated element. These allow you to customise color, line style, markers, etc.
 
-- `time_style`: Style for vertical lines at initial and final time.
+- `time_style`: Style for vertical lines at initial and final times.
 - `state_style`: Style for state components.
 - `costate_style`: Style for costate components.
 - `control_style`: Style for control components.
@@ -1234,7 +1265,7 @@ Use these options to customise bounds on the plots if applicable and defined in 
 
 # Returns
 
-- A `Plots.Plot` object, which can be displayed, saved, or further customized.
+- A `Plots.Plot` object, which can be displayed, saved, or further customised.
 
 # Example
 
@@ -1247,7 +1278,7 @@ julia> plot(sol, :state, :control)
 
 # customise layout and styles, no costate
 julia> plot(sol;
-       layout = :split,
+       layout = :group,
        control = :all,
        state_style = (color=:blue, linestyle=:solid),
        control_style = (color=:red, linestyle=:dash),
@@ -1260,7 +1291,6 @@ function Plots.plot(
     layout::Symbol=__plot_layout(),
     control::Symbol=__control_layout(),
     time::Symbol=__time_normalization(),
-    solution_label::String=__plot_label_suffix(),
     state_style::Union{NamedTuple,Symbol}=__plot_style(),
     state_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     control_style::Union{NamedTuple,Symbol}=__plot_style(),
@@ -1290,7 +1320,6 @@ function Plots.plot(
         layout=layout,
         control=control,
         time=time,
-        solution_label=solution_label,
         state_style=state_style,
         control_style=control_style,
         costate_style=costate_style,

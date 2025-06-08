@@ -76,7 +76,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the criterion (:min or :max) of the Mayer objective model.
+Return the criterion (:min or :max).
 """
 function criterion(model::MayerObjectiveModel)::Symbol
     return model.criterion
@@ -85,7 +85,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Mayer function of the Mayer objective model.
+Return the Mayer function.
 """
 function mayer(model::MayerObjectiveModel{M})::M where {M<:Function}
     return model.mayer
@@ -94,18 +94,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Check if the Mayer objective model has a Mayer function. Return true.
+Return true.
 """
-function has_mayer_cost(model::MayerObjectiveModel)::Bool
+function has_mayer_cost(::MayerObjectiveModel)::Bool
     return true
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Check if the Mayer objective model has a Lagrange function. Return false.
+Return false.
 """
-function has_lagrange_cost(model::MayerObjectiveModel)::Bool
+function has_lagrange_cost(::MayerObjectiveModel)::Bool
     return false
 end
 
@@ -113,7 +113,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the criterion (:min or :max) of the Lagrange objective model.
+Return the criterion (:min or :max).
 """
 function criterion(model::LagrangeObjectiveModel)::Symbol
     return model.criterion
@@ -122,7 +122,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Lagrange function of the Lagrange objective model.
+Return the Lagrange function.
 """
 function lagrange(model::LagrangeObjectiveModel{L})::L where {L<:Function}
     return model.lagrange
@@ -131,18 +131,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Check if the Lagrange objective model has a Mayer function. Return false.
+Return false.
 """
-function has_mayer_cost(model::LagrangeObjectiveModel)::Bool
+function has_mayer_cost(::LagrangeObjectiveModel)::Bool
     return false
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Check if the Lagrange objective model has a Lagrange function. Return true.
+Return true.
 """
-function has_lagrange_cost(model::LagrangeObjectiveModel)::Bool
+function has_lagrange_cost(::LagrangeObjectiveModel)::Bool
     return true
 end
 
@@ -150,7 +150,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the criterion (:min or :max) of the Bolza objective model.
+Return the criterion (:min or :max).
 """
 function criterion(model::BolzaObjectiveModel)::Symbol
     return model.criterion
@@ -159,7 +159,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Mayer function of the Bolza objective model.
+Return the Mayer function.
 """
 function mayer(model::BolzaObjectiveModel{M,<:Function})::M where {M<:Function}
     return model.mayer
@@ -168,7 +168,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the Lagrange function of the Bolza objective model.
+Return the Lagrange function.
 """
 function lagrange(model::BolzaObjectiveModel{<:Function,L})::L where {L<:Function}
     return model.lagrange
@@ -177,17 +177,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Check if the Bolza objective model has a Mayer function. Return true.
+Return true.
 """
-function has_mayer_cost(model::BolzaObjectiveModel)::Bool
+function has_mayer_cost(::BolzaObjectiveModel)::Bool
     return true
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Check if the Bolza objective model has a Lagrange function. Return true.
+Return true.
 """
-function has_lagrange_cost(model::BolzaObjectiveModel)::Bool
+function has_lagrange_cost(::BolzaObjectiveModel)::Bool
     return true
 end
