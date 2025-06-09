@@ -325,7 +325,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if the model is autonomous.
+Return `true`.
 """
 function is_autonomous(
     ::Model{
@@ -343,6 +343,11 @@ function is_autonomous(
     return true
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return `true`.
+"""
 function is_autonomous(
     ::Model{
         NonAutonomous,
