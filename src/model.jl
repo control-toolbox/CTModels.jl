@@ -41,11 +41,11 @@ This function processes a dictionary where each entry defines a constraint with 
 
 # Example
 ```julia-repl
-constraints = OrderedDict(
+julia> constraints = OrderedDict(
     :c1 => (:path, f1, [0.0], [1.0]),
     :c2 => (:state, 1:2, [-1.0, -1.0], [1.0, 1.0])
 )
-model = build(constraints)
+julia> model = build(constraints)
 ```
 """
 function build(constraints::ConstraintsDictType)::ConstraintsModel
@@ -252,12 +252,12 @@ This function finalizes a pre-defined optimal control problem (`PreModel`) by ve
 
 # Example
 ```julia-repl
-pre_ocp = PreModel()
-times!(pre_ocp, 0.0, 1.0, 100)
-state!(pre_ocp, 2, "x", ["x1", "x2"])
-control!(pre_ocp, 1, "u", ["u1"])
-dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
-model = build(pre_ocp)
+julia> pre_ocp = PreModel()
+julia> times!(pre_ocp, 0.0, 1.0, 100)
+julia> state!(pre_ocp, 2, "x", ["x1", "x2"])
+julia> control!(pre_ocp, 1, "u", ["u1"])
+julia> dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
+julia> model = build(pre_ocp)
 ```
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
