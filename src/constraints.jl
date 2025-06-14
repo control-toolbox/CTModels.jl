@@ -45,7 +45,7 @@ If `f` is provided, then:
 ```julia-repl
 # Example of adding a state constraint
 julia> ocp_constraints = Dict()
-__constraint!(ocp_constraints, :state, 3, 2, 1, lb=[0.0], ub=[1.0], label=:my_constraint)
+julia> __constraint!(ocp_constraints, :state, 3, 2, 1, lb=[0.0], ub=[1.0], label=:my_constraint)
 ```
 """
 function __constraint!(

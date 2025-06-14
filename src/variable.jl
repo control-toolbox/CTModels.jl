@@ -16,8 +16,8 @@ This function registers a named variable (e.g. "state", "control", or other) to 
 
 # Examples
 ```julia-repl
-variable!(ocp, 1, "v")
-variable!(ocp, 2, "v", ["v₁", "v₂"])
+julia> variable!(ocp, 1, "v")
+julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
 ```
 """
 function variable!(
