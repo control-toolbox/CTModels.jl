@@ -43,6 +43,20 @@ The control-toolbox ecosystem gathers Julia packages for mathematical control an
 | Licence           | [![License: MIT][licence-img]][licence-url]   |
 | Release           | [![Release][release-img]][release-url]        |
 
+## Installation
+
+To install CTModels.jl please 
+<a href="https://docs.julialang.org/en/v1/manual/getting-started/">open Julia's interactive session (known as REPL)</a> 
+and press <kbd>]</kbd> key in the REPL to use the package mode, then add the package:
+
+```julia
+julia> ]
+pkg> add CTModels
+```
+
+> [!TIP]
+> If you are new to Julia, please follow this [guidelines](https://github.com/orgs/control-toolbox/discussions/64).
+
 ## Contributing
 
 [issue-url]: https://github.com/control-toolbox/CTModels.jl/issues
