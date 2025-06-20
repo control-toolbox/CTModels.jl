@@ -106,10 +106,10 @@ function get_solution()
     message = "Solve_Succeeded"
 
     # Stopping: Symbol
-    stopping = :Solve_Succeeded
+    status = :Solve_Succeeded
 
     # Success: Bool
-    success = true
+    successful = true
 
     # solution
     sol = CTModels.build_solution(
@@ -123,8 +123,8 @@ function get_solution()
         iterations=iterations,
         constraints_violation=constraints_violation,
         message=message,
-        stopping=stopping,
-        success=success,
+        status=status,
+        successful=successful,
     )
 
     return sol

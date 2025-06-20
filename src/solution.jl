@@ -14,9 +14,9 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `objective::Float64`: the objective value.
 - `iterations::Int`: the number of iterations.
 - `constraints_violation::Float64`: the constraints violation.
-- `message::String`: the message associated to the stopping criterion.
-- `stopping::Symbol`: the stopping criterion.
-- `success::Bool`: the success status.
+- `message::String`: the message associated to the status criterion.
+- `status::Symbol`: the status criterion.
+- `successful::Bool`: the successful status.
 - `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
 - `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
 - `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
@@ -42,8 +42,8 @@ function build_solution(
     iterations::Int,
     constraints_violation::Float64,
     message::String,
-    stopping::Symbol,
-    success::Bool,
+    status::Symbol,
+    successful::Bool,
     path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
     state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
@@ -214,7 +214,7 @@ function build_solution(
         variable_constraints_ub_dual,
     )
     solver_infos = SolverInfos(
-        iterations, stopping, message, success, constraints_violation, infos
+        iterations, status, message, successful, constraints_violation, infos
     )
 
     return Solution(
@@ -523,17 +523,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the stopping criterion (a Symbol).
+Return the status criterion (a Symbol).
 
 """
-function stopping(sol::Solution)::Symbol
-    return sol.solver_infos.stopping
+function status(sol::Solution)::Symbol
+    return sol.solver_infos.status
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the message associated to the stopping criterion.
+Return the message associated to the status criterion.
 
 """
 function message(sol::Solution)::String
@@ -543,11 +543,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the success status.
+Return the successful status.
 
 """
-function success(sol::Solution)::Bool
-    return sol.solver_infos.success
+function successful(sol::Solution)::Bool
+    return sol.solver_infos.successful
 end
 
 """
@@ -704,33 +704,33 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     println(io, "────────────────────────")
 
     # Status
-    println(io, "• Success       : ", success(sol))
-    println(io, "• Stopping      : ", stopping(sol))
-    println(io, "• Message       : ", message(sol))
-    println(io, "• Iterations    : ", iterations(sol))
-    println(io, "• Objective     : ", objective(sol))
+    println(io, "• Successful : ", successful(sol))
+    println(io, "• Status     : ", status(sol))
+    println(io, "• Message    : ", message(sol))
+    println(io, "• Iterations : ", iterations(sol))
+    println(io, "• Objective  : ", objective(sol))
     println(io, "• Constraint violation: ", constraints_violation(sol))
 
     println(io)
     println(io, "Time")
     println(io, "────")
-    println(io, "• Name          : ", time_name(sol))
-    println(io, "• Grid          : ", time_grid(sol))
-    println(io, "• Grid length   : ", length(time_grid(sol)))
+    println(io, "• Name        : ", time_name(sol))
+    println(io, "• Grid        : ", time_grid(sol))
+    println(io, "• Grid length : ", length(time_grid(sol)))
 
     println(io)
     println(io, "State")
     println(io, "─────")
-    println(io, "• Name          : ", state_name(sol))
-    println(io, "• Dimension     : ", state_dimension(sol))
-    println(io, "• Components    : ", join(state_components(sol), ", "))
+    println(io, "• Name        : ", state_name(sol))
+    println(io, "• Dimension   : ", state_dimension(sol))
+    println(io, "• Components  : ", join(state_components(sol), ", "))
 
     println(io)
     println(io, "Control")
     println(io, "───────")
-    println(io, "• Name          : ", control_name(sol))
-    println(io, "• Dimension     : ", control_dimension(sol))
-    println(io, "• Components    : ", join(control_components(sol), ", "))
+    println(io, "• Name        : ", control_name(sol))
+    println(io, "• Dimension   : ", control_dimension(sol))
+    println(io, "• Components  : ", join(control_components(sol), ", "))
 
     # Variable block (optional)
     v_dim = variable_dimension(sol)
@@ -738,16 +738,16 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
         println(io)
         println(io, "Variable")
         println(io, "────────")
-        println(io, "• Name          : ", variable_name(sol))
-        println(io, "• Dimension     : ", v_dim)
-        println(io, "• Components    : ", join(variable_components(sol), ", "))
-        println(io, "• Value         : ", variable(sol))
+        println(io, "• Name       : ", variable_name(sol))
+        println(io, "• Dimension  : ", v_dim)
+        println(io, "• Components : ", join(variable_components(sol), ", "))
+        println(io, "• Value      : ", variable(sol))
     end
 
     println(io)
     println(io, "Duals")
     println(io, "─────")
-    println(io, "• Boundary constraints dual     : ", boundary_constraints_dual(sol))
+    println(io, "• Boundary constraints dual: ", boundary_constraints_dual(sol))
     if v_dim > 0
         println(io, "• Variable constraints dual (lb): ", variable_constraints_lb_dual(sol))
         println(io, "• Variable constraints dual (ub): ", variable_constraints_ub_dual(sol))

@@ -51,8 +51,8 @@ function SOL(ocp, t0, tf)
         iterations=-1,
         constraints_violation=0.0,
         message="",
-        stopping=:optimal,
-        success=true,
+        status=:optimal,
+        successful=true,
         path_constraints_dual=path_constraints_dual,
     )
 
