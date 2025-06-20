@@ -33,7 +33,7 @@ include("solution_example.jl")
     end
 end
 
-# test with CTDirect and CTParser
+# test with CTDirect and CTParser: must be commented if new version of CTModels, that is breaking
 
 # using CTDirect
 # using NLPModelsIpopt
