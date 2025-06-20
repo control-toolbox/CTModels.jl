@@ -118,10 +118,10 @@ function solution_example(; fun=false)
     message = "Solve_Succeeded"
 
     # Stopping: Symbol
-    stopping = :Solve_Succeeded
+    status = :Solve_Succeeded
 
     # Success: Bool
-    success = true
+    successful = true
 
     # Path constraints: Matrix{Float64}
     path_constraints = nothing
@@ -165,8 +165,8 @@ function solution_example(; fun=false)
         iterations=iterations,
         constraints_violation=constraints_violation,
         message=message,
-        stopping=stopping,
-        success=success,
+        status=status,
+        successful=successful,
         path_constraints_dual=path_constraints_dual,
         boundary_constraints_dual=boundary_constraints_dual,
         state_constraints_lb_dual=state_constraints_lb_dual,

@@ -45,8 +45,8 @@ function CTModels.export_ocp_solution(
         "iterations" => CTModels.iterations(sol),
         "constraints_violation" => CTModels.constraints_violation(sol),
         "message" => CTModels.message(sol),
-        "stopping" => CTModels.stopping(sol),
-        "success" => CTModels.success(sol),
+        "status" => CTModels.status(sol),
+        "successful" => CTModels.successful(sol),
         "path_constraints_dual" =>
             CTModels.discretize(CTModels.path_constraints_dual(sol), T),
         "state_constraints_lb_dual" =>
@@ -218,8 +218,8 @@ function CTModels.import_ocp_solution(
         iterations=blob.iterations,
         constraints_violation=Float64(blob.constraints_violation),
         message=blob.message,
-        stopping=Symbol(blob.stopping),
-        success=blob.success,
+        status=Symbol(blob.status),
+        successful=blob.successful,
         path_constraints_dual=path_constraints_dual,
         state_constraints_lb_dual=state_constraints_lb_dual,
         state_constraints_ub_dual=state_constraints_ub_dual,

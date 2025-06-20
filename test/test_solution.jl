@@ -38,8 +38,8 @@ function test_solution()
     iterations = 10
     constraints_violation = 12.0
     message = "message"
-    stopping = :stopping
-    success = true
+    status = :status
+    successful = true
     path_constraints_dual = nothing
     boundary_constraints_dual = nothing
     state_constraints_lb_dual = nothing
@@ -53,8 +53,8 @@ function test_solution()
         :iterations => iterations,
         :constraints_violation => constraints_violation,
         :message => message,
-        :stopping => stopping,
-        :success => success,
+        :status => status,
+        :successful => successful,
         :path_constraints_dual => path_constraints_dual,
         :boundary_constraints_dual => boundary_constraints_dual,
         :state_constraints_lb_dual => state_constraints_lb_dual,
@@ -113,8 +113,8 @@ function test_solution()
         @test CTModels.iterations(sol) == 10
         @test CTModels.constraints_violation(sol) == 12.0
         @test CTModels.message(sol) == "message"
-        @test CTModels.stopping(sol) == :stopping
-        @test CTModels.success(sol) == true
+        @test CTModels.status(sol) == :status
+        @test CTModels.successful(sol) == true
         @test CTModels.infos(sol) == Dict()
     end
     @testset "dual to constraints" begin

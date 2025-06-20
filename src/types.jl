@@ -554,9 +554,9 @@ $(TYPEDFIELDS)
 """
 struct SolverInfos{TI<:Dict{Symbol,Any}} <: AbstractSolverInfos
     iterations::Int # number of iterations
-    stopping::Symbol # the stopping criterion
-    message::String # the message corresponding to the stopping criterion
-    success::Bool # whether or not the method has finished successfully: CN1, stagnation vs iterations max
+    status::Symbol # the status criterion
+    message::String # the message corresponding to the status criterion
+    successful::Bool # whether or not the method has finished successfully: CN1, stagnation vs iterations max
     constraints_violation::Float64 # the constraints violation
     infos::TI # additional informations
 end
