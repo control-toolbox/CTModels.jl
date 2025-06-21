@@ -43,7 +43,6 @@ end
 # #
 # include("solution_example_path_constraints.jl")
 
-
 # @testset verbose = true showtiming = true "CTModels tests" begin
 #     for name in (
 #         :plot,
