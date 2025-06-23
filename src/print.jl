@@ -20,6 +20,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
 
     # ------------------------------------------------------------------------------ #
     # print the code
+    printstyled(io, "\nAbstract defintion:\n\n"; bold=true)
     tab = 4
     code = striplines(definition(ocp))
     @match code.head begin
@@ -225,7 +226,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     #
     some_printing && println(io)
     printstyled(io, "Declarations "; bold=true)
-    printstyled(io, "(* required):\n"; bold=false)
+    printstyled(io, "(* required):\n"; bold=true)
     #println(io)
 
     # print table of settings
@@ -293,6 +294,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
 
         # ------------------------------------------------------------------------------ #
         # print the code
+        printstyled(io, "\nAbstract defintion:\n\n"; bold=true)
         tab = 4
         code = striplines(definition(ocp))
         @match code.head begin
@@ -512,7 +514,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     #
     some_printing && println(io)
     printstyled(io, "Declarations "; bold=true)
-    printstyled(io, "(* required):\n"; bold=false)
+    printstyled(io, "(* required):\n"; bold=true)
     #println(io)
 
     # print table of settings

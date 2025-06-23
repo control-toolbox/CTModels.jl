@@ -12,8 +12,6 @@ function solution_example(; fun=false)
     # set control
     CTModels.control!(pre_ocp, 1)
 
-    pre_ocp_returned = deepcopy(pre_ocp)
-
     # set control
     CTModels.variable!(pre_ocp, 2)
 
@@ -53,6 +51,8 @@ function solution_example(; fun=false)
     CTModels.definition!(pre_ocp, definition) # does not correspond to the solution
 
     CTModels.time_dependence!(pre_ocp; autonomous=false)
+
+    pre_ocp_returned = deepcopy(pre_ocp)
 
     # build model
     ocp = CTModels.build(pre_ocp)
