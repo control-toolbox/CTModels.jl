@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("./")
+Pkg.activate(".")
 
 using CTBase
 using CTModels
