@@ -20,7 +20,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
 
     # ------------------------------------------------------------------------------ #
     # print the code
-    printstyled(io, "\nAbstract defintion:\n\n"; bold=true)
+    printstyled(io, "Abstract defintion:\n\n"; bold=true)
     tab = 4
     code = striplines(definition(ocp))
     @match code.head begin
@@ -294,7 +294,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
 
         # ------------------------------------------------------------------------------ #
         # print the code
-        printstyled(io, "\nAbstract defintion:\n\n"; bold=true)
+        printstyled(io, "Abstract defintion:\n\n"; bold=true)
         tab = 4
         code = striplines(definition(ocp))
         @match code.head begin
