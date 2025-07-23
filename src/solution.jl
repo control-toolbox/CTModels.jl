@@ -66,9 +66,9 @@ function build_solution(
 
     # check that time grid is strictly increasing
     # if not proceed with list of indexes as time grid
-    if !issorted(T; lt=<=)
+    if !issorted(T; lt=<)
         println(
-            "WARNING: time grid at solution is not strictly increasing, replacing with list of indices...",
+            "WARNING: time grid at solution is not increasing, replacing with list of indices...",
         )
         println(T)
         dim_NLP_steps = length(T) - 1
