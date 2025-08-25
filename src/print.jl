@@ -251,13 +251,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     println("")
     h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
     h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
+    style = TextTableStyle(first_line_column_label = crayon"yellow bold")
     pretty_table(
         io,
         data;
-        header=header,
-        header_crayon=crayon"yellow",
-        crop=:none,
-        highlighters=(h1, h2),
+        column_labels=header,
+        style= style,
+        highlighters=[h1, h2],
         alignment=:c,
         compact_printing=true,
     )
@@ -538,13 +538,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     println("")
     h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
     h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
+    style = TextTableStyle(first_line_column_label = crayon"yellow bold")
     pretty_table(
         io,
         data;
-        header=header,
-        header_crayon=crayon"yellow",
-        crop=:none,
-        highlighters=(h1, h2),
+        column_labels=header,
+        style= style,
+        highlighters=[h1, h2],
         alignment=:c,
         compact_printing=true,
     )
