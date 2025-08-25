@@ -254,7 +254,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     pretty_table(
         io,
         data;
-        tf=tf_unicode_rounded,
         header=header,
         header_crayon=crayon"yellow",
         crop=:none,
@@ -542,7 +541,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     pretty_table(
         io,
         data;
-        tf=tf_unicode_rounded,
         header=header,
         header_crayon=crayon"yellow",
         crop=:none,
