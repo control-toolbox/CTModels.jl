@@ -1,7 +1,7 @@
 name = "CTModels"
 uuid = "34c4fa32-2049-4079-8329-de33c2a22e2d"
 authors = ["Olivier Cots <olivier.cots@toulouse-inp.fr>"]
-version = "0.6.3"
+version = "0.6.4"
 
 [deps]
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
@@ -29,7 +29,7 @@ CTModelsPlots = "Plots"
 CTBase = "0.16"
 DocStringExtensions = "0.9"
 Interpolations = "0.16"
-JLD2 = "0.5"
+JLD2 = "0.6"
 JSON3 = "1"
 LinearAlgebra = "1"
 MLStyle = "0.4"

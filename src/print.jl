@@ -249,6 +249,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         __is_objective_set(ocp) ? "V" : "X",
     )
     println("")
+    #### PrettyTables v2
     h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
     h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold=true, foreground=:green)
     pretty_table(
@@ -262,6 +263,19 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         alignment=:c,
         compact_printing=true,
     )
+    #### PrettyTables v3
+    # h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
+    # h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
+    # style = TextTableStyle(first_line_column_label = crayon"yellow bold")
+    # pretty_table(
+    #     io,
+    #     data;
+    #     column_labels=header,
+    #     style= style,
+    #     highlighters=[h1, h2],
+    #     alignment=:c,
+    #     compact_printing=true,
+    # )
 
     #
     return nothing
@@ -537,6 +551,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         __is_objective_set(ocp) ? "V" : "X",
     )
     println("")
+    #### PrettyTables v2
     h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
     h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold=true, foreground=:green)
     pretty_table(
@@ -550,6 +565,19 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         alignment=:c,
         compact_printing=true,
     )
+    #### PrettyTables v3
+    # h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
+    # h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
+    # style = TextTableStyle(first_line_column_label = crayon"yellow bold")
+    # pretty_table(
+    #     io,
+    #     data;
+    #     column_labels=header,
+    #     style= style,
+    #     highlighters=[h1, h2],
+    #     alignment=:c,
+    #     compact_printing=true,
+    # )
 
     #
     return nothing
