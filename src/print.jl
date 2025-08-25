@@ -249,8 +249,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         __is_objective_set(ocp) ? "V" : "X",
     )
     println("")
-    h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
-    h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold=true, foreground=:green)
+    h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
+    h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
     pretty_table(
         io,
         data;
@@ -537,8 +537,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         __is_objective_set(ocp) ? "V" : "X",
     )
     println("")
-    h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
-    h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold=true, foreground=:green)
+    h1 = TextHighlighter((data, i, j) -> data[i, j] == "X", crayon"bold red")
+    h2 = TextHighlighter((data, i, j) -> data[i, j] == "V", crayon"bold green")
     pretty_table(
         io,
         data;
