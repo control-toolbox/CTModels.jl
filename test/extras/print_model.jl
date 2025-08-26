@@ -7,7 +7,7 @@ using CTModels
 
 include("../solution_example.jl")
 
-ocp, sol, pre_ocp = solution_example()
+ocp, sol, pre_ocp = solution_example();
 
 ocp
 

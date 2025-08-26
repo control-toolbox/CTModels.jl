@@ -19,7 +19,6 @@ using Interpolations
 using MLStyle
 using Parameters # @with_kw: to have default values in struct
 using MacroTools: striplines
-using PrettyTables # To print a table
 using RecipesBase: plot, plot!, RecipesBase
 using OrderedCollections: OrderedDict
 
