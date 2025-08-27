@@ -8,7 +8,7 @@ function __print(e::Expr, io::IO, l::Int)
     end
 end
 
-function __print_abstract_definition(io::IO, ocp::Union{Model, PreModel})
+function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     @assert hasproperty(definition(ocp), :head)
     printstyled(io, "Abstract defintion:\n\n"; bold=true)
     tab = 4
@@ -56,10 +56,8 @@ function __print_mathematical_definition(
     _v = is_variable_dependent ? ", " * v_name : ""
 
     # other names
-    bounds_args_names = 
-        x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
-    mixed_args_names = 
-        t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+    bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+    mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
     state_args_names = x_name * "(" * t_name * ")"
     control_args_names = u_name * "(" * t_name * ")"
     variable_args_names = v_name
@@ -214,7 +212,6 @@ function __print_mathematical_definition(
     end
     return true
 end
-
 
 """
 $(TYPEDSIGNATURES)
@@ -381,7 +378,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
             dim_control_cons_box,
             dim_variable_cons_box,
         )
-
     end
 
     return nothing
