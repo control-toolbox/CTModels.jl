@@ -62,6 +62,7 @@ Plot a single component `i` of a time-dependent vector-valued quantity (`:state`
 # Keyword Arguments
 - `t_label`: Label for the time axis.
 - `y_label`: Label for the vertical axis.
+- `color`: color of the graph
 - `kwargs...`: Additional plotting options.
 """
 function __plot_time!(
@@ -73,6 +74,7 @@ function __plot_time!(
     time::Symbol;
     t_label::String,
     y_label::String="",
+    color,
     kwargs...,
 )
 
@@ -88,6 +90,25 @@ function __plot_time!(
         )
     end
 
+    #
+    f(; kwargs...) = kwargs
+    kwargs_plot = isnothing(color) ? f(;
+        ylims=:auto, 
+        xlabel=t_label, 
+        ylabel=y_label, 
+        linewidth=2, 
+        z_order=:front, 
+        kwargs...
+        ) : f(;
+        color=color,
+        ylims=:auto, 
+        xlabel=t_label, 
+        ylabel=y_label, 
+        linewidth=2, 
+        z_order=:front, 
+        kwargs...
+    ) 
+
     # reset ylims: ylims=:auto
     Plots.plot!(
         p,
@@ -96,12 +117,7 @@ function __plot_time!(
         :time,
         (s, i),
         time;
-        ylims=:auto,
-        xlabel=t_label,
-        ylabel=y_label,
-        linewidth=2,
-        z_order=:front,
-        kwargs...,
+        kwargs_plot...,
     ) # use plot recipe
 
     # change ylims if the gap between min and max is less than a tol
@@ -153,12 +169,13 @@ function __plot_time!(
     t_label::String,
     labels::Vector{String},
     title::String,
+    color,
     kwargs...,
 )
     Plots.plot!(p; xlabel="time", title=title, kwargs...)
 
     for i in range(1, d)
-        __plot_time!(p, sol, model, s, i, time; t_label=t_label, label=labels[i], kwargs...)
+        __plot_time!(p, sol, model, s, i, time; color=color, t_label=t_label, label=labels[i], kwargs...)
     end
 
     return p
@@ -482,6 +499,7 @@ function __plot!(
     path_style::Union{NamedTuple,Symbol},
     path_bounds_style::Union{NamedTuple,Symbol},
     dual_style::Union{NamedTuple,Symbol},
+    color,
     kwargs...,
 )
 
@@ -544,6 +562,7 @@ function __plot!(
                 title="state",
                 titlefont=title_font,
                 lims=:auto,
+                color=nothing,
                 series_attr...,
                 state_style...,
             )
@@ -564,6 +583,7 @@ function __plot!(
                 title="costate",
                 titlefont=title_font,
                 lims=:auto,
+                color=nothing,
                 series_attr...,
                 costate_style...,
             )
@@ -586,6 +606,7 @@ function __plot!(
                         title="control",
                         titlefont=title_font,
                         lims=:auto,
+                        color=nothing,
                         series_attr...,
                         control_style...,
                     )
@@ -604,6 +625,7 @@ function __plot!(
                         title="control norm",
                         titlefont=title_font,
                         lims=:auto,
+                        color=nothing,
                         series_attr...,
                         control_style...,
                     )
@@ -622,6 +644,7 @@ function __plot!(
                         title="control",
                         titlefont=title_font,
                         lims=:auto,
+                        color=nothing,
                         series_attr...,
                         control_style...,
                     )
@@ -638,6 +661,7 @@ function __plot!(
                         title="control norm",
                         titlefont=title_font,
                         lims=:auto,
+                        color=nothing,
                         series_attr...,
                         control_style...,
                     )
@@ -679,6 +703,7 @@ function __plot!(
                     label="",
                     title=title,
                     titlefont=title_font,
+                    color=color,
                     series_attr...,
                     state_style...,
                 )
@@ -692,7 +717,7 @@ function __plot!(
                     hline!(
                         p[is + cs[2][i] - 1],
                         [cs[1][i]];
-                        color=4,
+                        color=15,
                         linewidth=1,
                         z_order=:back,
                         series_attr...,
@@ -702,7 +727,7 @@ function __plot!(
                     hline!(
                         p[is + cs[2][i] - 1],
                         [cs[3][i]];
-                        color=4,
+                        color=15,
                         linewidth=1,
                         z_order=:back,
                         series_attr...,
@@ -732,6 +757,7 @@ function __plot!(
                     label="",
                     title=title,
                     titlefont=title_font,
+                    color=color,
                     series_attr...,
                     costate_style...,
                 )
@@ -765,6 +791,7 @@ function __plot!(
                             label="",
                             title=title,
                             titlefont=title_font,
+                            color=color,
                             series_attr...,
                             control_style...,
                         )
@@ -788,6 +815,7 @@ function __plot!(
                         label="",
                         title=title,
                         titlefont=title_font,
+                        color=color,
                         series_attr...,
                         control_style...,
                     )
@@ -810,6 +838,7 @@ function __plot!(
                             label="",
                             title=title,
                             titlefont=title_font,
+                            color=color,
                             series_attr...,
                             control_style...,
                         )
@@ -827,6 +856,7 @@ function __plot!(
                         y_label="‖" * u_label * "‖",
                         yguidefontsize=label_font_size,
                         label="",
+                        color=color,
                         series_attr...,
                         control_style...,
                     )
@@ -846,7 +876,7 @@ function __plot!(
                     hline!(
                         p[iu + cu[2][i] - 1],
                         [cu[1][i]];
-                        color=4,
+                        color=15,
                         linewidth=1,
                         z_order=:back,
                         series_attr...,
@@ -856,7 +886,7 @@ function __plot!(
                     hline!(
                         p[iu + cu[2][i] - 1],
                         [cu[3][i]];
-                        color=4,
+                        color=15,
                         linewidth=1,
                         z_order=:back,
                         series_attr...,
@@ -901,6 +931,7 @@ function __plot!(
                         label="",
                         title=title,
                         titlefont=title_font,
+                        color=color,
                         series_attr...,
                         path_style...,
                     )
@@ -913,7 +944,7 @@ function __plot!(
                         hline!(
                             p[ic + i - 1],
                             [cp[1][i]];
-                            color=4,
+                            color=15,
                             linewidth=1,
                             z_order=:back,
                             series_attr...,
@@ -923,7 +954,7 @@ function __plot!(
                         hline!(
                             p[ic + i - 1],
                             [cp[3][i]];
-                            color=4,
+                            color=15,
                             linewidth=1,
                             z_order=:back,
                             series_attr...,
@@ -953,6 +984,7 @@ function __plot!(
                         label="",
                         title=title,
                         titlefont=title_font,
+                        color=color,
                         series_attr...,
                         dual_style...,
                     )
@@ -1036,6 +1068,7 @@ function __plot(
         path_style=path_style,
         dual_style=dual_style,
     ),
+    color,
     kwargs...,
 )
     p = __initial_plot(
@@ -1070,6 +1103,7 @@ function __plot(
         path_style=path_style,
         path_bounds_style=path_bounds_style,
         dual_style=dual_style,
+        color=color,
         kwargs...,
     )
 end
@@ -1099,6 +1133,7 @@ function Plots.plot!(
     path_style::Union{NamedTuple,Symbol}=__plot_style(),
     path_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     dual_style::Union{NamedTuple,Symbol}=__plot_style(),
+    color=nothing,
     kwargs...,
 )
     model = CTModels.model(sol)
@@ -1158,6 +1193,7 @@ function Plots.plot!(
         path_style=path_style,
         path_bounds_style=path_bounds_style,
         dual_style=dual_style,
+        color=color,
         kwargs...,
     )
 end
@@ -1184,6 +1220,7 @@ function Plots.plot!(
     path_style::Union{NamedTuple,Symbol}=__plot_style(),
     path_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     dual_style::Union{NamedTuple,Symbol}=__plot_style(),
+    color=nothing,
     kwargs...,
 )
     return Plots.plot!(
@@ -1202,6 +1239,7 @@ function Plots.plot!(
         path_style,
         path_bounds_style,
         dual_style,
+        color=color,
         kwargs...,
     )
 end
@@ -1243,6 +1281,8 @@ If no symbols are provided, a default set is used based on the problem and style
 - `time::Symbol = :default`: Time normalisation for plots.
   - `:default`: Real time scale.
   - `:normalize` or `:normalise`: Normalised to the interval [0, 1].
+
+- `color`: set the color of the all the graphs.
 
 ## Style Options (Optional)
 
@@ -1312,6 +1352,7 @@ function Plots.plot(
         path_style=path_style,
         dual_style=dual_style,
     ),
+    color=nothing,
     kwargs...,
 )
     return __plot(
@@ -1331,6 +1372,7 @@ function Plots.plot(
         path_bounds_style=path_bounds_style,
         dual_style=dual_style,
         size=size,
+        color=color,
         kwargs...,
     )
 end

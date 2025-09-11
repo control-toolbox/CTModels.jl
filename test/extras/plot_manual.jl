@@ -1,3 +1,4 @@
+using Revise
 using Pkg
 Pkg.activate(".")
 
@@ -135,7 +136,7 @@ sol = get_solution();
 #
 plt = plot(; size=(800, 800))
 p = Plots.current();
-pp = plot!(sol)
+pp = plot!(sol; color=2)
 pp = plot!(plt, sol)
 
 pp
@@ -208,11 +209,12 @@ plot(
 )
 nothing
 
-plt = plot(sol; size=(700, 450), time=:normalise, label="sol1")
+plt = plot(sol; color=15, size=(700, 450), time=:normalise, label="sol1")
 style = (linestyle=:dash,)
 plot!(
     plt,
     sol;
+    color=1,
     time=:normalise,
     label="sol2",
     state_style=style,

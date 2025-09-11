@@ -1,7 +1,7 @@
 name = "CTModels"
 uuid = "34c4fa32-2049-4079-8329-de33c2a22e2d"
 authors = ["Olivier Cots <olivier.cots@toulouse-inp.fr>"]
-version = "0.6.5"
+version = "0.6.6"
 
 [deps]
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
