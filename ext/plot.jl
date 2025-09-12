@@ -92,33 +92,22 @@ function __plot_time!(
 
     #
     f(; kwargs...) = kwargs
-    kwargs_plot = isnothing(color) ? f(;
-        ylims=:auto, 
-        xlabel=t_label, 
-        ylabel=y_label, 
-        linewidth=2, 
-        z_order=:front, 
-        kwargs...
-        ) : f(;
+    kwargs_plot = if isnothing(color)
+        f(; ylims=:auto, xlabel=t_label, ylabel=y_label, linewidth=2, z_order=:front, kwargs...)
+    else
+        f(;
         color=color,
-        ylims=:auto, 
-        xlabel=t_label, 
-        ylabel=y_label, 
-        linewidth=2, 
-        z_order=:front, 
-        kwargs...
-    ) 
+        ylims=:auto,
+        xlabel=t_label,
+        ylabel=y_label,
+        linewidth=2,
+        z_order=:front,
+        kwargs...,
+    )
+    end
 
     # reset ylims: ylims=:auto
-    Plots.plot!(
-        p,
-        sol,
-        model,
-        :time,
-        (s, i),
-        time;
-        kwargs_plot...,
-    ) # use plot recipe
+    Plots.plot!(p, sol, model, :time, (s, i), time; kwargs_plot...) # use plot recipe
 
     # change ylims if the gap between min and max is less than a tol
     tol = 1e-3
@@ -175,7 +164,18 @@ function __plot_time!(
     Plots.plot!(p; xlabel="time", title=title, kwargs...)
 
     for i in range(1, d)
-        __plot_time!(p, sol, model, s, i, time; color=color, t_label=t_label, label=labels[i], kwargs...)
+        __plot_time!(
+            p,
+            sol,
+            model,
+            s,
+            i,
+            time;
+            color=color,
+            t_label=t_label,
+            label=labels[i],
+            kwargs...,
+        )
     end
 
     return p
