@@ -96,14 +96,14 @@ function __plot_time!(
         f(; ylims=:auto, xlabel=t_label, ylabel=y_label, linewidth=2, z_order=:front, kwargs...)
     else
         f(;
-        color=color,
-        ylims=:auto,
-        xlabel=t_label,
-        ylabel=y_label,
-        linewidth=2,
-        z_order=:front,
-        kwargs...,
-    )
+            color=color,
+            ylims=:auto,
+            xlabel=t_label,
+            ylabel=y_label,
+            linewidth=2,
+            z_order=:front,
+            kwargs...,
+        )
     end
 
     # reset ylims: ylims=:auto
