@@ -10,7 +10,7 @@ end
 
 function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     @assert hasproperty(definition(ocp), :head)
-    printstyled(io, "Abstract defintion:\n\n"; bold=true)
+    printstyled(io, "Abstract definition:\n\n"; bold=true)
     tab = 4
     code = striplines(definition(ocp))
     @match code.head begin
