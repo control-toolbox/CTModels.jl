@@ -12,3 +12,5 @@ ocp, sol, pre_ocp = solution_example();
 ocp
 
 pre_ocp
+
+sol
