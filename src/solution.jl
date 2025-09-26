@@ -711,7 +711,15 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
 
     # Variable (si définie)
     if variable_dimension(sol) > 0
-        println(io, "\n• Variable: ", variable_name(sol), " = (", join(variable_components(sol), ", "), ") = ", variable(sol))
+        println(
+            io,
+            "\n• Variable: ",
+            variable_name(sol),
+            " = (",
+            join(variable_components(sol), ", "),
+            ") = ",
+            variable(sol),
+        )
         if dim_variable_constraints_box(model(sol)) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
