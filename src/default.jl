@@ -16,9 +16,9 @@ __format() = :JLD
 $(TYPEDSIGNATURES)
 
 Used to set the default value of the label of a constraint.
-A unique value is given to each constraint using the `gensym` function and prefixing by `:unamed`.
+A unique value is given to each constraint using the `gensym` function and prefixing by `:unnamed`.
 """
-__constraint_label() = gensym(:unamed)
+__constraint_label() = gensym(:unnamed)
 
 """
 $(TYPEDSIGNATURES)

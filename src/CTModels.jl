@@ -88,7 +88,7 @@ See also: [`Time`](@ref), [`Times`](@ref).
 const TimesDisc = Union{Times,StepRangeLen}
 
 """
-Type alias for a dictionnary of constraints. This is used to store constraints before building the model.
+Type alias for a dictionary of constraints. This is used to store constraints before building the model.
 
 ```@example
 julia> const TimesDisc = Union{Times, StepRangeLen}

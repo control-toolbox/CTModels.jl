@@ -1,3 +1,4 @@
+using Revise
 using CTModels
 using Plots
 import CTParser: CTParser, @def
