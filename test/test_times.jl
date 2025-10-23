@@ -72,7 +72,7 @@ function test_times()
     @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, t0=0.0, indf=1)
     @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, ind0=1, indf=2)
 
-    # index must statisfy 1 <= index <= q
+    # index must satisfy 1 <= index <= q
     ocp = CTModels.PreModel()
     CTModels.variable!(ocp, 2)
     @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, ind0=0, tf=10.0)

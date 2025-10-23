@@ -558,7 +558,7 @@ struct SolverInfos{TI<:Dict{Symbol,Any}} <: AbstractSolverInfos
     message::String # the message corresponding to the status criterion
     successful::Bool # whether or not the method has finished successfully: CN1, stagnation vs iterations max
     constraints_violation::Float64 # the constraints violation
-    infos::TI # additional informations
+    infos::TI # additional information
 end
 
 # ------------------------------------------------------------------------------ #
