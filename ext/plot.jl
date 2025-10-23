@@ -186,19 +186,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return an expression `a{r*h}` to control relative plot height when using custom layouts.
-
-Used for vertical space control in plot trees.
-"""
-function __height(r::Real)::Expr
-    i = Expr(:call, :*, r, :h)
-    a = Expr(:curly, :a, i)
-    return a
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Return an empty plot for a `PlotLeaf`.
 
 Used as a placeholder in layout trees.
@@ -382,11 +369,10 @@ function __initial_plot(
         nblines = 0
         if (!(node_xp isa EmptyPlot) && !(node_u isa EmptyPlot))
             nblines = n + l
-            a = __height(round(n / nblines; digits=2))
-            @eval lay = @layout [
-                $a
-                b
-            ]
+            h = round(n / nblines; digits=2)
+            lay = Matrix{Any}(undef, 2, 1)
+            lay[1, 1] = (label = :a, width = :auto, height = h)
+            lay[2, 1] = (label = :b, blank = false)
             root = PlotNode(lay, [node_xp, node_u])
         elseif !(node_xp isa EmptyPlot)
             root = node_xp
@@ -428,11 +414,10 @@ function __initial_plot(
             # update the root node
             if !(node_cocp isa EmptyPlot)
                 nblines += nc
-                c = __height(round(nc / nblines; digits=2))
-                @eval lay = @layout [
-                    a
-                    $c
-                ]
+                h = round(nc / nblines; digits=2)
+                lay = Matrix{Any}(undef, 2, 1)
+                lay[1, 1] = (label = :a, blank = false)
+                lay[2, 1] = (label = :b, width = :auto, height = h)
                 root = PlotNode(lay, [root, node_cocp])
             end
         end
