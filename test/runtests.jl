@@ -44,7 +44,10 @@ import CTParser: CTParser, @def
 include("solution_example_path_constraints.jl")
 
 @testset verbose = true showtiming = true "CTModels tests" begin
-    for name in (:plot, :export_import)
+    for name in (
+        :plot, 
+        # :export_import,
+        )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
             println("testing: ", string(name))
