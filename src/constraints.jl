@@ -62,7 +62,7 @@ function __constraint!(
     codim_f::Union{Dimension,Nothing}=nothing,
 )
 
-    # checkings: the constraint must not be set before
+    # checks: the constraint must not be set before
     @ensure(
         !(label ∈ keys(ocp_constraints)),
         CTBase.UnauthorizedCall(
@@ -70,7 +70,7 @@ function __constraint!(
         ),
     )
 
-    # checkings: lb and ub cannot be both nothing
+    # checks: lb and ub cannot be both nothing
     @ensure(
         !(isnothing(lb) && isnothing(ub)),
         CTBase.UnauthorizedCall(
@@ -217,7 +217,7 @@ function constraint!(
     codim_f::Union{Dimension,Nothing}=nothing,
 )
 
-    # checkings: times, state and control must be set before adding constraints
+    # checks: times, state and control must be set before adding constraints
     @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
         "the state must be set before adding constraints."
     )
@@ -228,7 +228,7 @@ function constraint!(
         "the times must be set before adding constraints."
     )
 
-    # checkings: variable must be set if using type=:variable
+    # checks: variable must be set if using type=:variable
     @ensure (type != :variable || __is_variable_set(ocp)) CTBase.UnauthorizedCall(
         "the ocp has no variable, you cannot use constraint! function with type=:variable. If it is a mistake, please set the variable first.",
     )

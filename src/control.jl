@@ -46,7 +46,7 @@ function control!(
     components_names::Vector{T2}=__control_components(m, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
-    # checkings using @ensure
+    # checks using @ensure
     @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall(
         "the control has already been set."
     )
