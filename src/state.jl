@@ -60,7 +60,7 @@ function state!(
     components_names::Vector{T2}=__state_components(n, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
-    # checkings
+    # checks
     @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
     @ensure n > 0 CTBase.IncorrectArgument("the state dimension must be greater than 0")
     @ensure size(components_names, 1) == n CTBase.IncorrectArgument(

@@ -15,7 +15,7 @@ function test_times()
     @test CTModels.name(time) == "s"
     @test_throws CTBase.IncorrectArgument CTModels.time(time, Float64[])
 
-    # some checkings
+    # some checks
     ocp = CTModels.PreModel()
     @test isnothing(ocp.times)
     @test !CTModels.__is_times_set(ocp)

@@ -9,7 +9,7 @@ function test_variable()
     @test CTModels.name(variable) == "v"
     @test CTModels.components(variable) == ["v₁", "v₂"]
 
-    # some checkings
+    # some checks
     ocp = CTModels.PreModel()
     @test ocp.variable isa CTModels.EmptyVariableModel
     @test !CTModels.__is_variable_set(ocp)

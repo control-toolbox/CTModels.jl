@@ -35,7 +35,7 @@ function objective!(
     lagrange::Union{Function,Nothing}=nothing,
 )::Nothing
 
-    # checkings: times, state, and control must be set before the objective
+    # checks: times, state, and control must be set before the objective
     @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
         "the state must be set before the objective."
     )
@@ -46,12 +46,12 @@ function objective!(
         "the times must be set before the objective."
     )
 
-    # checkings: the objective must not already be set
+    # checks: the objective must not already be set
     @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
         "the objective has already been set."
     )
 
-    # checkings: at least one of the two functions must be given
+    # checks: at least one of the two functions must be given
     @ensure !(isnothing(mayer) && isnothing(lagrange)) CTBase.IncorrectArgument(
         "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function.",
     )

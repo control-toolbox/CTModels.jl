@@ -9,7 +9,7 @@ function test_state()
     @test CTModels.name(state) == "y"
     @test CTModels.components(state) == ["u", "v"]
 
-    # some checkings
+    # some checks
     ocp = CTModels.PreModel()
     @test isnothing(ocp.state)
     @test !CTModels.__is_state_set(ocp)

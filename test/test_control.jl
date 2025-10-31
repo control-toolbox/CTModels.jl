@@ -9,7 +9,7 @@ function test_control()
     @test CTModels.name(control) == "u"
     @test CTModels.components(control) == ["u₁", "u₂"]
 
-    # some checkings
+    # some checks
     ocp = CTModels.PreModel()
     @test isnothing(ocp.control)
     @test !CTModels.__is_control_set(ocp)
