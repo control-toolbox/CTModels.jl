@@ -1,16 +1,10 @@
 # ------------------------------------------------------------------------------
 # Model backends
 # ------------------------------------------------------------------------------
-abstract type AbstractOptimizationModeler <: AbstractOCPTool end
 
 # ------------------------------------------------------------------------------
 # ADNLPModels
 # ------------------------------------------------------------------------------
-struct ADNLPModeler{Vals,Srcs} <: AbstractOptimizationModeler
-    options_values::Vals
-    options_sources::Srcs
-end
-
 __adnlp_model_show_time() = false
 __adnlp_model_backend() = :optimized
 
@@ -52,11 +46,6 @@ end
 # ------------------------------------------------------------------------------
 # ExaModels
 # ------------------------------------------------------------------------------
-struct ExaModeler{BaseType<:AbstractFloat,Vals,Srcs} <: AbstractOptimizationModeler
-    options_values::Vals
-    options_sources::Srcs
-end
-
 __exa_model_base_type() = Float64
 __exa_model_backend() = nothing
 

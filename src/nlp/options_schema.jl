@@ -1,7 +1,5 @@
 # Internal metadata schema for backend and discretizer options.
 
-abstract type AbstractOCPTool end
-
 function get_symbol(tool::AbstractOCPTool)
     return get_symbol(typeof(tool))
 end
@@ -16,12 +14,6 @@ end
 
 function tool_package_name(::Type{T}) where {T<:AbstractOCPTool}
     return missing
-end
-
-struct OptionSpec
-    type::Any         # Expected Julia type for the option value, or `missing` if unknown.
-    default::Any
-    description::Any  # Short English description (String) or `missing` if not documented yet.
 end
 
 # ---------------------------------------------------------------------------

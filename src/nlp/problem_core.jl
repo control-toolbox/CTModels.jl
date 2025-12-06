@@ -1,17 +1,8 @@
 # builders of NLP models
-abstract type AbstractBuilder end
-abstract type AbstractModelBuilder <: AbstractBuilder end
-
-struct ADNLPModelBuilder{T<:Function} <: AbstractModelBuilder
-    f::T
-end
 function (builder::ADNLPModelBuilder)(initial_guess; kwargs...)::ADNLPModels.ADNLPModel
     return builder.f(initial_guess; kwargs...)
 end
 
-struct ExaModelBuilder{T<:Function} <: AbstractModelBuilder
-    f::T
-end
 function (builder::ExaModelBuilder)(
     ::Type{BaseType}, initial_guess; kwargs...
 )::ExaModels.ExaModel where {BaseType<:AbstractFloat}
@@ -19,10 +10,8 @@ function (builder::ExaModelBuilder)(
 end
 
 # helpers to build solutions
-abstract type AbstractSolutionBuilder <: AbstractBuilder end
 
 # problem
-abstract type AbstractOptimizationProblem end
 
 function get_exa_model_builder(prob::AbstractOptimizationProblem)
     throw(

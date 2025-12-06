@@ -106,11 +106,11 @@ const ConstraintsDictType = OrderedDict{
 }
 
 #
-include("default.jl")
+include(joinpath(@__DIR__, "core", "default.jl"))
 
 #
-include("utils.jl")
-include("types.jl")
+include(joinpath(@__DIR__, "core", "utils.jl"))
+include(joinpath(@__DIR__, "core", "types.jl"))
 
 # export / import
 """
@@ -228,29 +228,29 @@ end
 
 #
 #include("init.jl")
-include("dual_model.jl")
-include("state.jl")
-include("control.jl")
-include("variable.jl")
-include("times.jl")
-include("dynamics.jl")
-include("objective.jl")
-include("constraints.jl")
-include("time_dependence.jl")
-include("definition.jl")
-include("print.jl")
-include("model.jl")
-include("solution.jl")
+include(joinpath(@__DIR__, "ocp", "dual_model.jl"))
+include(joinpath(@__DIR__, "ocp", "state.jl"))
+include(joinpath(@__DIR__, "ocp", "control.jl"))
+include(joinpath(@__DIR__, "ocp", "variable.jl"))
+include(joinpath(@__DIR__, "ocp", "times.jl"))
+include(joinpath(@__DIR__, "ocp", "dynamics.jl"))
+include(joinpath(@__DIR__, "ocp", "objective.jl"))
+include(joinpath(@__DIR__, "ocp", "constraints.jl"))
+include(joinpath(@__DIR__, "ocp", "time_dependence.jl"))
+include(joinpath(@__DIR__, "ocp", "definition.jl"))
+include(joinpath(@__DIR__, "ocp", "print.jl"))
+include(joinpath(@__DIR__, "ocp", "model.jl"))
+include(joinpath(@__DIR__, "ocp", "solution.jl"))
 
 # new from CTSolvers
 const AbstractOptimalControlProblem = CTModels.AbstractModel
 const AbstractOptimalControlSolution = CTModels.AbstractSolution
-include("options_schema.jl")
-include("problem_core.jl")
-include("nlp_backends.jl")
-include("discretized_ocp.jl")
-include("model_api.jl")
-include("initial_guess.jl")
+include(joinpath(@__DIR__, "nlp", "options_schema.jl"))
+include(joinpath(@__DIR__, "nlp", "problem_core.jl"))
+include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))
+include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))
+include(joinpath(@__DIR__, "nlp", "model_api.jl"))
+include(joinpath(@__DIR__, "init", "initial_guess.jl"))
 
 #
 export plot, plot!
