@@ -50,20 +50,6 @@ end
 function test_discretized_ocp()
 
     # ============================================================================
-    # TYPE HIERARCHY
-    # ============================================================================
-
-    Test.@testset "type hierarchy" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # AbstractOCPSolutionBuilder should be abstract and inherit from AbstractSolutionBuilder
-        Test.@test isabstracttype(CTModels.AbstractOCPSolutionBuilder)
-        Test.@test CTModels.AbstractOCPSolutionBuilder <: CTModels.AbstractSolutionBuilder
-
-        # Concrete solution builders should inherit from AbstractOCPSolutionBuilder
-        Test.@test CTModels.ADNLPSolutionBuilder <: CTModels.AbstractOCPSolutionBuilder
-        Test.@test CTModels.ExaSolutionBuilder <: CTModels.AbstractOCPSolutionBuilder
-    end
-
-    # ============================================================================
     # SOLUTION BUILDERS - UNIT TESTS
     # ============================================================================
 

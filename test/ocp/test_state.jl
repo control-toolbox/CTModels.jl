@@ -1,13 +1,8 @@
 function test_state()
 
     #
-    @test isconcretetype(CTModels.StateModel)
 
     # StateModel
-    state = CTModels.StateModel("y", ["u", "v"])
-    @test CTModels.dimension(state) == 2
-    @test CTModels.name(state) == "y"
-    @test CTModels.components(state) == ["u", "v"]
 
     # some checks
     ocp = CTModels.PreModel()

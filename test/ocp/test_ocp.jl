@@ -102,8 +102,9 @@ function test_ocp()
         build_examodel,
     )
 
-    # print
-    display(ocp)
+    # print (captured, no terminal output)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), ocp)
 
     # tests on times
     @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
@@ -309,8 +310,9 @@ function test_ocp()
         build_examodel,
     )
 
-    # print
-    display(ocp)
+    # print (captured, no terminal output)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), ocp)
 
     # tests on objective
     @test CTModels.objective(ocp) == objective
@@ -368,7 +370,8 @@ function test_ocp()
         definition,
         build_examodel,
     )
-    display(ocp)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), ocp)
 
     #
     times = CTModels.TimesModel(
@@ -393,5 +396,6 @@ function test_ocp()
         definition,
         build_examodel,
     )
-    display(ocp)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), ocp)
 end

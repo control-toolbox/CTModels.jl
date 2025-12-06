@@ -162,8 +162,9 @@ function test_model()
     @test CTModels.constraint(model, :control_scalar_2)[4] == 17
     @test CTModels.constraint(model, :variable_scalar_2)[4] == 18
 
-    # print the premodel
-    display(pre_ocp)
+    # print the premodel (captured, no terminal output)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), pre_ocp)
 
     # -------------------------------------------------------------------------- #
     # Just for printing
@@ -177,7 +178,8 @@ function test_model()
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
     CTModels.time_dependence!(pre_ocp; autonomous=false)
-    display(pre_ocp)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), pre_ocp)
 
     #
     pre_ocp = CTModels.PreModel()
@@ -189,5 +191,6 @@ function test_model()
     CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
     CTModels.definition!(pre_ocp, quote end)
     CTModels.time_dependence!(pre_ocp; autonomous=true)
-    display(pre_ocp)
+    io = IOBuffer()
+    show(io, MIME"text/plain"(), pre_ocp)
 end

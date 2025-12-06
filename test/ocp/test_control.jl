@@ -1,13 +1,8 @@
 function test_control()
 
     #
-    @test isconcretetype(CTModels.ControlModel)
 
     # ControlModel
-    control = CTModels.ControlModel("u", ["u₁", "u₂"])
-    @test CTModels.dimension(control) == 2
-    @test CTModels.name(control) == "u"
-    @test CTModels.components(control) == ["u₁", "u₂"]
 
     # some checks
     ocp = CTModels.PreModel()

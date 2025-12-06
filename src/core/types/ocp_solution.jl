@@ -44,7 +44,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct SolverInfos{TI<:Dict{Symbol,Any}} <: AbstractSolverInfos
+struct SolverInfos{V,TI<:Dict{Symbol,V}} <: AbstractSolverInfos
     iterations::Int # number of iterations
     status::Symbol # the status criterion
     message::String # the message corresponding to the status criterion

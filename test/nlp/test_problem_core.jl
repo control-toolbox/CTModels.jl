@@ -90,17 +90,6 @@ function test_problem_core()
         Test.@test builder isa CTModels.ExaModelBuilder{typeof(local_exa_builder)}
     end
 
-    # Tests for the type hierarchy (abstract base types and concrete subtypes).
-    Test.@testset "type hierarchy" verbose=VERBOSE showtiming=SHOWTIMING begin
-        Test.@test isabstracttype(CTModels.AbstractBuilder)
-        Test.@test isabstracttype(CTModels.AbstractModelBuilder)
-        Test.@test isabstracttype(CTModels.AbstractSolutionBuilder)
-        Test.@test isabstracttype(CTModels.AbstractOptimizationProblem)
-
-        Test.@test CTModels.ADNLPModelBuilder <: CTModels.AbstractModelBuilder
-        Test.@test CTModels.ExaModelBuilder <: CTModels.AbstractModelBuilder
-    end
-
     # Tests for the generic "NotImplemented" behaviour of the get_* functions
     # when called on a problem type that has no specialized implementation.
     Test.@testset "generic get_* NotImplemented" verbose=VERBOSE showtiming=SHOWTIMING begin

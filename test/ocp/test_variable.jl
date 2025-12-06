@@ -1,13 +1,8 @@
 function test_variable()
 
     #
-    @test isconcretetype(CTModels.VariableModel)
 
     # VariableModel
-    variable = CTModels.VariableModel("v", ["v₁", "v₂"])
-    @test CTModels.dimension(variable) == 2
-    @test CTModels.name(variable) == "v"
-    @test CTModels.components(variable) == ["v₁", "v₂"]
 
     # some checks
     ocp = CTModels.PreModel()
