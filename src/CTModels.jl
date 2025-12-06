@@ -21,6 +21,11 @@ using Parameters # @with_kw: to have default values in struct
 using MacroTools: striplines
 using RecipesBase: plot, plot!, RecipesBase
 using OrderedCollections: OrderedDict
+using SolverCore
+using ADNLPModels
+using ExaModels
+using KernelAbstractions
+using NLPModels
 
 # aliases
 
@@ -222,7 +227,7 @@ function import_ocp_solution(
 end
 
 #
-include("init.jl")
+#include("init.jl")
 include("dual_model.jl")
 include("state.jl")
 include("control.jl")
@@ -236,6 +241,16 @@ include("definition.jl")
 include("print.jl")
 include("model.jl")
 include("solution.jl")
+
+# new from CTSolvers
+const AbstractOptimalControlProblem = CTModels.AbstractModel
+const AbstractOptimalControlSolution = CTModels.AbstractSolution
+include("options_schema.jl")
+include("problem_core.jl")
+include("nlp_backends.jl")
+include("discretized_ocp.jl")
+include("model_api.jl")
+include("initial_guess.jl")
 
 #
 export plot, plot!
