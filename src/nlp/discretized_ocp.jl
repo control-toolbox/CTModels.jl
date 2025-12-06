@@ -1,6 +1,12 @@
-# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------ #
 # Discretized optimal control problem
-# ------------------------------------------------------------------------------
+#
+# This file implements helper methods that operate on
+# [`DiscretizedOptimalControlProblem`](@ref) and its associated
+# back-end builders (`ADNLPSolutionBuilder`, `ExaSolutionBuilder`,
+# `OCPBackendBuilders`), which are part of the
+# [`AbstractOCPTool`](@ref)-based optimization interface.
+# ------------------------------------------------------------------------------ #
 # Helpers
 function (builder::ADNLPSolutionBuilder)(nlp_solution::SolverCore.AbstractExecutionStats)
     return builder.f(nlp_solution)

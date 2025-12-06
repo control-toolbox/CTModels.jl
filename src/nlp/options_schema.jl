@@ -1,5 +1,14 @@
 # Internal metadata schema for backend and discretizer options.
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a short `Symbol` identifying the package or implementation used by a
+given [`AbstractOCPTool`](@ref).
+
+Concrete tool types are expected to specialize this method on their own type,
+for example `get_symbol(::Type{<:MyTool}) = :mytool`.
+"""
 function get_symbol(tool::AbstractOCPTool)
     return get_symbol(typeof(tool))
 end
@@ -40,6 +49,19 @@ function OptionSpec(; type=missing, default=missing, description=missing)
 end
 
 # Default: no metadata for a given tool type.
+"""
+$(TYPEDSIGNATURES)
+
+Return the option metadata specification for a concrete
+[`AbstractOCPTool`](@ref) subtype.
+
+Concrete tools typically specialize this method on their own type and return a
+`NamedTuple` whose fields correspond to option names and whose values are
+[`OptionSpec`](@ref) instances.
+
+The default implementation returns `missing`, meaning that no option metadata
+is available for the given tool type.
+"""
 function _option_specs(::Type{T}) where {T<:AbstractOCPTool}
     return missing
 end
@@ -324,6 +346,32 @@ function _validate_option_kwargs(
     _validate_option_kwargs(user_nt, typeof(x); strict_keys=strict_keys)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a normalized pair of option `values` and `sources` for a concrete
+[`AbstractOCPTool`](@ref) subtype.
+
+This helper is typically used in the keyword-only constructor of a tool type,
+for example `MyTool(; kwargs...) = MyTool(_build_ocp_tool_options(MyTool; kwargs...)...)`.
+
+# Arguments
+
+- `::Type{T}`: concrete subtype of `AbstractOCPTool`.
+- `strict_keys::Bool`: if `true`, unknown option keys are rejected with a
+  detailed error; if `false`, unknown keys are accepted.
+- `kwargs...`: user-supplied option values.
+
+# Returns
+
+A pair `(values, sources)` where:
+
+- `values::NamedTuple`: effective option values after merging tool defaults
+  (from [`default_options`](@ref)) with the user keywords.
+- `sources::NamedTuple`: for each option name, either `:ct_default` or
+  `:user` indicating whether the value comes from the tool defaults or from
+  user input.
+"""
 function _build_ocp_tool_options(
     ::Type{T}; strict_keys::Bool=false, kwargs...
 ) where {T<:AbstractOCPTool}
