@@ -13,8 +13,12 @@ function test_CTModels()
         Test.@test CTModels.ctNumber == Real
         Test.@test CTModels.Time === CTModels.ctNumber
 
-        Test.@test CTModels.ctVector === AbstractVector{<:CTModels.ctNumber}
-        Test.@test CTModels.Times === AbstractVector{<:CTModels.Time}
+        # For parametric aliases, test mutual <: rather than strict identity
+        Test.@test CTModels.ctVector <: AbstractVector{<:CTModels.ctNumber}
+        Test.@test AbstractVector{<:CTModels.ctNumber} <: CTModels.ctVector
+
+        Test.@test CTModels.Times <: AbstractVector{<:CTModels.Time}
+        Test.@test AbstractVector{<:CTModels.Time} <: CTModels.Times
 
         Test.@test CTModels.JLD2Tag <: CTModels.AbstractTag
         Test.@test CTModels.JSON3Tag <: CTModels.AbstractTag

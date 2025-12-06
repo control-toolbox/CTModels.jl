@@ -6,6 +6,7 @@ using ADNLPModels
 using SolverCore
 using NLPModels
 using ExaModels
+using OrderedCollections: OrderedDict
 
 # Tests parameters
 const VERBOSE = true
@@ -18,117 +19,176 @@ include(joinpath("problems", "rosenbrock.jl"))
 include(joinpath("problems", "max1minusx2.jl"))
 include(joinpath("problems", "elec.jl"))
 include(joinpath("problems", "beam.jl"))
+include(joinpath("problems", "solution_example_path_constraints.jl"))
 
-function _testfile_path(name::Symbol)
-    if name in (
-        :times,
-        :control,
-        :state,
-        :variable,
-        :dynamics,
-        :objective,
-        :constraints,
-        :ocp,
-        :model,
-        :solution,
+# ---------------------------------------------------------------------------#
+# Test selection infrastructure (aligned with CTSolvers)
+# ---------------------------------------------------------------------------#
+
+function default_tests()
+    return OrderedDict(
+        # Extension exceptions, before any extensions are triggered
+        :notrigger => OrderedDict(
+            :ext_exceptions => true,
+        ),
+
+        # Meta / quality tests
+        :meta => OrderedDict(
+            :aqua     => true,
+            :CTModels => true,
+        ),
+
+        # Tests in test/ocp
+        :ocp => OrderedDict(
+            :times           => true,
+            :time_dependence => true,
+            :state           => true,
+            :control         => true,
+            :variable        => true,
+            :dynamics        => true,
+            :objective       => true,
+            :constraints     => true,
+            :definition      => true,
+            :model           => true,
+            :ocp             => true,
+            :dual_model      => true,
+            :print           => true,
+            :solution        => true,
+        ),
+
+        # Core utilities and type-level tests in test/core
+        :core => OrderedDict(
+            :utils               => true,
+            :default             => true,
+            :types               => true,
+            :ocp_components      => true,
+            :ocp_model_types     => true,
+            :ocp_solution_types  => true,
+            :nlp_types           => true,
+            :initial_guess_types => true,
+        ),
+
+        # Tests in test/nlp
+        :nlp => OrderedDict(
+            :problem_core    => true,
+            :options_schema  => true,
+            :nlp_backends    => true,
+            :discretized_ocp => true,
+            :model_api       => true,
+        ),
+
+        # Tests in test/init
+        :init => OrderedDict(
+            :initial_guess => true,
+        ),
+
+        # IO-related tests in test/io
+        :io => OrderedDict(
+            :export_import => true,
+        ),
+
+        # Plot-related tests in test/plot
+        :plot => OrderedDict(
+            :plot => true,
+        ),
     )
-        return joinpath("ocp", "test_$(name).jl")
-    elseif name in (
-        :definition,
-        :dual_model,
-        :print,
-        :time_dependence,
-    )
-        return joinpath("ocp", "test_$(name).jl")
-    elseif name in (
-        :utils,
-        :default,
-        :types,
-        :ocp_components,
-        :ocp_model_types,
-        :ocp_solution_types,
-        :nlp_types,
-        :initial_guess_types,
-    )
-        return joinpath("core", "test_$(name).jl")
-    elseif name in (
-        :problem_core,
-        :options_schema,
-        :nlp_backends,
-        :discretized_ocp,
-        :model_api,
-    )
-        return joinpath("nlp", "test_$(name).jl")
-    elseif name in (:initial_guess,)
-        return joinpath("init", "test_$(name).jl")
-    elseif name in (:ext_exceptions,)
-        return joinpath("io", "test_$(name).jl")
-    elseif name in (:plot,)
-        return joinpath("plot", "test_$(name).jl")
-    elseif name in (:export_import,)
-        return joinpath("io", "test_$(name).jl")
-    elseif name in (:aqua, :CTModels)
-        return joinpath("meta", "test_$(name).jl")
-    else
-        return "test_$(name).jl"
-    end
 end
 
-#
-@testset verbose=VERBOSE showtiming=SHOWTIMING "CTModels tests" begin
-    for name in (
-        # extension behavior first (no external packages loaded yet)
-        :ext_exceptions,
+const TEST_SELECTIONS = isempty(ARGS) ? Symbol[] : Symbol.(ARGS)
 
-        # meta/quality tests
-        :aqua,
-        :CTModels,
+const TEST_GROUP_INFO = Dict(
+    :notrigger => (title="Extension exceptions",             subdir="io"),
+    :meta      => (title="Meta / quality",                   subdir="meta"),
+    :ocp       => (title="OCP continuous-time layer",        subdir="ocp"),
+    :core      => (title="Core utilities and types",         subdir="core"),
+    :nlp       => (title="NLP / backends / discretized OCP", subdir="nlp"),
+    :init      => (title="Initial guess",                    subdir="init"),
+    :io        => (title="IO / export / import",             subdir="io"),
+    :plot      => (title="Plotting",                         subdir="plot"),
+)
 
-        # OCP continuous-time layer
-        :times,
-        :time_dependence,
-        :state,
-        :control,
-        :variable,
-        :dynamics,
-        :objective,
-        :constraints,
-        :definition,
-        :model,
-        :ocp,
-        :dual_model,
-        :print,
+function selected_tests()
+    tests = default_tests()
+    sels = TEST_SELECTIONS
 
-        # Core utilities and high-level solution layer
-        :utils,
-        :solution,
+    # No selection: default configuration
+    if isempty(sels)
+        return tests
+    end
 
-        # NLP / backends / discretized OCP
-        :problem_core,
-        :options_schema,
-        :nlp_backends,
-        :discretized_ocp,
+    # Single :all selection: enable everything
+    if length(sels) == 1 && sels[1] == :all
+        for (_, group_tests) in tests
+            for k in keys(group_tests)
+                group_tests[k] = true
+            end
+        end
+        return tests
+    end
 
-        # Model API and initial guesses
-        :model_api,
-        :initial_guess,
-
-        # Core type aggregators (can be extended with real tests later)
-        :default,
-        :types,
-        :ocp_components,
-        :ocp_model_types,
-        :ocp_solution_types,
-        :nlp_types,
-        :initial_guess_types,
-    )
-        @testset "$(name)" begin
-            test_name = Symbol(:test_, name)
-            println("testing: ", string(name))
-            include(_testfile_path(name))
-            @eval $test_name()
+    # Otherwise start with everything disabled
+    for (_, group_tests) in tests
+        for k in keys(group_tests)
+            group_tests[k] = false
         end
     end
+
+    # Apply each selector
+    for sel in sels
+        # :all mixed with others -> just enable everything and stop
+        if sel == :all
+            for (_, group_tests) in tests
+                for k in keys(group_tests)
+                    group_tests[k] = true
+                end
+            end
+            break
+        end
+
+        # sel = group key (e.g. :meta, :ocp, :nlp, :io, :plot, ...)
+        if haskey(tests, sel)
+            for k in keys(tests[sel])
+                tests[sel][k] = true
+            end
+            continue
+        end
+
+        # sel = leaf key (e.g. :times, :nlp_backends, :plot, ...)
+        for (_, group_tests) in tests
+            if haskey(group_tests, sel)
+                group_tests[sel] = true
+                break
+            end
+        end
+    end
+
+    return tests
+end
+
+const SELECTED_TESTS = selected_tests()
+
+function run_test_group(group::Symbol, tests::OrderedDict{Symbol,Bool})
+    any(values(tests)) || return nothing
+    info = TEST_GROUP_INFO[group]
+    title = info.title
+    subdir = info.subdir
+    println("========== $(title) tests ==========")
+    @testset "$(title)" verbose=VERBOSE showtiming=SHOWTIMING begin
+        for (name, enabled) in tests
+            enabled || continue
+            @testset "$(name)" verbose=VERBOSE showtiming=SHOWTIMING begin
+                test_name = Symbol(:test_, name)
+                println("testing: ", string(name))
+                include(joinpath(subdir, string(test_name, ".jl")))
+                @eval $test_name()
+            end
+        end
+    end
+    println("✓ $(title) tests passed\n")
+end
+
+for (group, tests) in SELECTED_TESTS
+    run_test_group(group, tests)
 end
 
 # test with CTDirect and CTParser: must be commented if new version of CTModels, that is breaking
