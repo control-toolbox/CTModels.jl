@@ -25,6 +25,7 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `control_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the control constraints.
 - `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
 - `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
+- `infos::Dict{Symbol,Any}`: additional solver information dictionary.
 
 # Returns
 
@@ -52,6 +53,7 @@ function build_solution(
     control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
@@ -106,8 +108,7 @@ function build_solution(
     fp = (dim_x == 1) ? deepcopy(t -> p(t)[1]) : deepcopy(t -> p(t))
     var = (dim_v == 1) ? v[1] : v
 
-    # misc infos
-    infos = Dict{Symbol,Any}()
+    # misc infos (use provided infos or empty dict)
 
     # nonlinear constraints and dual variables
     path_constraints_dual_fun = if isnothing(path_constraints_dual)

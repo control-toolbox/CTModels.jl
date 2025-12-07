@@ -370,4 +370,68 @@ function test_export_import()
 
         remove_if_exists("solution_no_duals.json")
     end
+
+    Test.@testset "JSON: solver infos dict preserved" verbose=VERBOSE showtiming=SHOWTIMING begin
+        # Create a solution with custom infos
+        ocp, sol_base = solution_example()
+        T = CTModels.time_grid(sol_base)
+
+        # Build a new solution with custom infos
+        x = CTModels.state(sol_base)
+        u = CTModels.control(sol_base)
+        p = CTModels.costate(sol_base)
+        v = CTModels.variable(sol_base)
+
+        custom_infos = Dict{Symbol,Any}(
+            :solver_name => "TestSolver",
+            :tolerance => 1e-6,
+            :max_iterations => 1000,
+            :converged => true,
+            :residuals => [1e-3, 1e-5, 1e-8],
+            :nested => Dict{Symbol,Any}(:a => 1, :b => "test"),
+        )
+
+        sol = CTModels.build_solution(
+            ocp,
+            Vector{Float64}(T),
+            x,
+            u,
+            isa(v, Number) ? [v] : v,
+            p;
+            objective=CTModels.objective(sol_base),
+            iterations=CTModels.iterations(sol_base),
+            constraints_violation=CTModels.constraints_violation(sol_base),
+            message=CTModels.message(sol_base),
+            status=CTModels.status(sol_base),
+            successful=CTModels.successful(sol_base),
+            infos=custom_infos,
+        )
+
+        # Verify infos is set correctly
+        @test CTModels.infos(sol)[:solver_name] == "TestSolver"
+        @test CTModels.infos(sol)[:tolerance] == 1e-6
+
+        # Export and import
+        CTModels.export_ocp_solution(sol; filename="solution_with_infos", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_with_infos", format=:JSON)
+
+        # Verify infos is preserved
+        reloaded_infos = CTModels.infos(sol_reloaded)
+        @test reloaded_infos[:solver_name] == "TestSolver"
+        @test reloaded_infos[:tolerance] == 1e-6
+        @test reloaded_infos[:max_iterations] == 1000
+        @test reloaded_infos[:converged] == true
+        @test reloaded_infos[:residuals] == [1e-3, 1e-5, 1e-8]
+        @test reloaded_infos[:nested][:a] == 1
+        @test reloaded_infos[:nested][:b] == "test"
+
+        # Verify JSON structure
+        json_string = read("solution_with_infos.json", String)
+        blob = JSON3.read(json_string)
+        @test haskey(blob, "infos")
+        @test blob["infos"]["solver_name"] == "TestSolver"
+        @test blob["infos"]["tolerance"] == 1e-6
+
+        remove_if_exists("solution_with_infos.json")
+    end
 end
