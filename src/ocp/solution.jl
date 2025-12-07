@@ -574,6 +574,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dual model containing all constraint multipliers.
 """
 function dual_model(
     sol::Solution{
@@ -675,6 +676,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the optimal control problem model associated with the solution.
 """
 function model(
     sol::Solution{

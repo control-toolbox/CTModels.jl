@@ -1,6 +1,17 @@
 # ------------------------------------------------------------------------------ #
 # PRINT
 # ------------------------------------------------------------------------------ #
+"""
+$(TYPEDSIGNATURES)
+
+Print an expression with indentation.
+
+# Arguments
+
+- `e::Expr`: The expression to print.
+- `io::IO`: The output stream.
+- `l::Int`: The indentation level (number of spaces).
+"""
 function __print(e::Expr, io::IO, l::Int)
     @match e begin
         :(($a, $b)) => println(io, " "^l, a, ", ", b)
@@ -8,6 +19,20 @@ function __print(e::Expr, io::IO, l::Int)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print the abstract definition of an optimal control problem.
+
+# Arguments
+
+- `io::IO`: The output stream.
+- `ocp::Union{Model,PreModel}`: The optimal control problem.
+
+# Returns
+
+- `Bool`: `true` if something was printed.
+"""
 function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     @assert hasproperty(definition(ocp), :head)
     printstyled(io, "Abstract definition:\n\n"; bold=true)
@@ -20,6 +45,18 @@ function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     return true
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print the mathematical definition of an optimal control problem.
+
+Displays the problem in standard mathematical notation with objective,
+dynamics, and constraints.
+
+# Returns
+
+- `Bool`: `true` if something was printed.
+"""
 function __print_mathematical_definition(
     io::IO,
     some_printing::Bool,
@@ -289,6 +326,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Default show method for a [`Model`](@ref).
+
+Prints only the type name.
+"""
 function Base.show_default(io::IO, ocp::Model)
     return print(io, typeof(ocp))
 end
@@ -386,6 +430,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Default show method for a [`PreModel`](@ref).
+
+Prints only the type name.
 """
 function Base.show_default(io::IO, ocp::PreModel)
     return print(io, typeof(ocp))

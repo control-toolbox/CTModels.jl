@@ -215,6 +215,23 @@ function test_export_import()
         # Time grid
         @test CTModels.time_grid(sol_reloaded) ≈ CTModels.time_grid(sol) atol=1e-10
 
+        # Metadata: dimensions, names, components and time labels
+        @test CTModels.state_dimension(sol_reloaded) == CTModels.state_dimension(sol)
+        @test CTModels.control_dimension(sol_reloaded) == CTModels.control_dimension(sol)
+        @test CTModels.variable_dimension(sol_reloaded) == CTModels.variable_dimension(sol)
+
+        @test CTModels.state_name(sol_reloaded) == CTModels.state_name(sol)
+        @test CTModels.control_name(sol_reloaded) == CTModels.control_name(sol)
+        @test CTModels.variable_name(sol_reloaded) == CTModels.variable_name(sol)
+
+        @test CTModels.state_components(sol_reloaded) == CTModels.state_components(sol)
+        @test CTModels.control_components(sol_reloaded) == CTModels.control_components(sol)
+        @test CTModels.variable_components(sol_reloaded) == CTModels.variable_components(sol)
+
+        @test CTModels.initial_time_name(sol_reloaded) == CTModels.initial_time_name(sol)
+        @test CTModels.final_time_name(sol_reloaded) == CTModels.final_time_name(sol)
+        @test CTModels.time_name(sol_reloaded) == CTModels.time_name(sol)
+
         # Variable
         @test CTModels.variable(sol_reloaded) ≈ CTModels.variable(sol) atol=1e-10
 

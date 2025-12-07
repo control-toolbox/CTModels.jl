@@ -4,31 +4,72 @@
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type representing time dependence of an optimal control problem.
+
+Used as a type parameter to distinguish between autonomous and non-autonomous
+systems at the type level, enabling dispatch and compile-time optimisations.
+
+See also: [`Autonomous`](@ref), [`NonAutonomous`](@ref).
 """
 abstract type TimeDependence end
 
 """
 $(TYPEDEF)
+
+Type tag indicating that the dynamics and other functions of an optimal control
+problem do not explicitly depend on time.
+
+For autonomous systems, the dynamics have the form `ẋ = f(x, u)` rather than
+`ẋ = f(t, x, u)`.
+
+See also: [`TimeDependence`](@ref), [`NonAutonomous`](@ref).
 """
 abstract type Autonomous<:TimeDependence end
 
 """
 $(TYPEDEF)
+
+Type tag indicating that the dynamics and other functions of an optimal control
+problem explicitly depend on time.
+
+For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
+
+See also: [`TimeDependence`](@ref), [`Autonomous`](@ref).
 """
 abstract type NonAutonomous<:TimeDependence end
 
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for state variable models in optimal control problems.
+
+Subtypes describe the state space structure including dimension, naming, and
+optionally the state trajectory itself.
+
+See also: [`StateModel`](@ref), [`StateModelSolution`](@ref).
 """
 abstract type AbstractStateModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+State model describing the structure of the state variable in an optimal control
+problem definition.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the state variable (e.g., `"x"`).
+- `components::Vector{String}`: Names of individual state components (e.g., `["x₁", "x₂"]`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> sm = CTModels.StateModel("x", ["position", "velocity"])
+```
 """
 struct StateModel <: AbstractStateModel
     name::String
@@ -38,9 +79,26 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+State model for a solved optimal control problem, including the state trajectory.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the state variable.
+- `components::Vector{String}`: Names of individual state components.
+- `value::TS`: A function `t -> x(t)` returning the state vector at time `t`.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> x_traj = t -> [cos(t), sin(t)]
+julia> sms = CTModels.StateModelSolution("x", ["x₁", "x₂"], x_traj)
+julia> sms.value(0.0)
+2-element Vector{Float64}:
+ 1.0
+ 0.0
+```
 """
 struct StateModelSolution{TS<:Function} <: AbstractStateModel
     name::String
@@ -51,15 +109,34 @@ end
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for control variable models in optimal control problems.
+
+Subtypes describe the control space structure including dimension, naming, and
+optionally the control trajectory itself.
+
+See also: [`ControlModel`](@ref), [`ControlModelSolution`](@ref).
 """
 abstract type AbstractControlModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Control model describing the structure of the control variable in an optimal
+control problem definition.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the control variable (e.g., `"u"`).
+- `components::Vector{String}`: Names of individual control components (e.g., `["u₁", "u₂"]`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> cm = CTModels.ControlModel("u", ["thrust", "steering"])
+```
 """
 struct ControlModel <: AbstractControlModel
     name::String
@@ -69,9 +146,25 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+Control model for a solved optimal control problem, including the control trajectory.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the control variable.
+- `components::Vector{String}`: Names of individual control components.
+- `value::TS`: A function `t -> u(t)` returning the control vector at time `t`.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> u_traj = t -> [sin(t)]
+julia> cms = CTModels.ControlModelSolution("u", ["u₁"], u_traj)
+julia> cms.value(π/2)
+1-element Vector{Float64}:
+ 1.0
+```
 """
 struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     name::String
@@ -82,15 +175,34 @@ end
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for optimisation variable models in optimal control problems.
+
+Optimisation variables are decision variables that do not depend on time, such as
+free final time or unknown parameters.
+
+See also: [`VariableModel`](@ref), [`EmptyVariableModel`](@ref), [`VariableModelSolution`](@ref).
 """
 abstract type AbstractVariableModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Variable model describing the structure of the optimisation variable in an optimal
+control problem definition.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the variable (e.g., `"v"`).
+- `components::Vector{String}`: Names of individual variable components (e.g., `["tf", "λ"]`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> vm = CTModels.VariableModel("v", ["final_time", "parameter"])
+```
 """
 struct VariableModel <: AbstractVariableModel
     name::String
@@ -100,18 +212,41 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+Sentinel type representing the absence of optimisation variables in an optimal
+control problem.
 
-$(TYPEDFIELDS)
+Used when the problem has no free parameters or free final time.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> evm = CTModels.EmptyVariableModel()
+```
 """
 struct EmptyVariableModel <: AbstractVariableModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Variable model for a solved optimal control problem, including the variable value.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `name::String`: Display name for the variable.
+- `components::Vector{String}`: Names of individual variable components.
+- `value::TS`: The optimisation variable value (scalar or vector).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> vms = CTModels.VariableModelSolution("v", ["tf"], 2.5)
+julia> vms.value
+2.5
+```
 """
 struct VariableModelSolution{TS<:Union{ctNumber,ctVector}} <: AbstractVariableModel
     name::String
@@ -122,15 +257,35 @@ end
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for time boundary models (initial or final time).
+
+Subtypes represent either fixed or free time boundaries in an optimal control
+problem.
+
+See also: [`FixedTimeModel`](@ref), [`FreeTimeModel`](@ref).
 """
 abstract type AbstractTimeModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Time model representing a fixed (known) time boundary.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `time::T`: The fixed time value.
+- `name::String`: Display name for this time (e.g., `"t₀"` or `"tf"`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> t0 = CTModels.FixedTimeModel(0.0, "t₀")
+julia> t0.time
+0.0
+```
 """
 struct FixedTimeModel{T<:Time} <: AbstractTimeModel
     time::T
@@ -140,9 +295,24 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+Time model representing a free (optimised) time boundary.
 
-$(TYPEDFIELDS)
+The actual time value is stored in the optimisation variable at the given index.
+
+# Fields
+
+- `index::Int`: Index into the optimisation variable where this time is stored.
+- `name::String`: Display name for this time (e.g., `"tf"`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> tf = CTModels.FreeTimeModel(1, "tf")
+julia> tf.index
+1
+```
 """
 struct FreeTimeModel <: AbstractTimeModel
     index::Int
@@ -151,15 +321,33 @@ end
 
 """
 $(TYPEDEF)
+
+Abstract base type for combined initial and final time models.
+
+See also: [`TimesModel`](@ref).
 """
 abstract type AbstractTimesModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Combined model for initial and final times in an optimal control problem.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `initial::TI`: The initial time model (fixed or free).
+- `final::TF`: The final time model (fixed or free).
+- `time_name::String`: Display name for the time variable (e.g., `"t"`).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> t0 = CTModels.FixedTimeModel(0.0, "t₀")
+julia> tf = CTModels.FixedTimeModel(1.0, "tf")
+julia> times = CTModels.TimesModel(t0, tf, "t")
+```
 """
 struct TimesModel{TI<:AbstractTimeModel,TF<:AbstractTimeModel} <: AbstractTimesModel
     initial::TI
@@ -170,15 +358,34 @@ end
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for objective function models in optimal control problems.
+
+Subtypes represent different forms of the cost functional: Mayer (terminal cost),
+Lagrange (integral cost), or Bolza (both).
+
+See also: [`MayerObjectiveModel`](@ref), [`LagrangeObjectiveModel`](@ref), [`BolzaObjectiveModel`](@ref).
 """
 abstract type AbstractObjectiveModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Objective model with only a Mayer (terminal) cost: `g(x(t₀), x(tf), v)`.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `mayer::TM`: The Mayer cost function `(x0, xf, v) -> g(x0, xf, v)`.
+- `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> g = (x0, xf, v) -> xf[1]^2
+julia> obj = CTModels.MayerObjectiveModel(g, :min)
+```
 """
 struct MayerObjectiveModel{TM<:Function} <: AbstractObjectiveModel
     mayer::TM
@@ -188,9 +395,21 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+Objective model with only a Lagrange (integral) cost: `∫ f⁰(t, x, u, v) dt`.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `lagrange::TL`: The Lagrange integrand `(t, x, u, v) -> f⁰(t, x, u, v)`.
+- `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> f0 = (t, x, u, v) -> u[1]^2
+julia> obj = CTModels.LagrangeObjectiveModel(f0, :min)
+```
 """
 struct LagrangeObjectiveModel{TL<:Function} <: AbstractObjectiveModel
     lagrange::TL
@@ -200,9 +419,24 @@ end
 """
 $(TYPEDEF)
 
-**Fields**
+Objective model with both Mayer and Lagrange costs (Bolza form):
+`g(x(t₀), x(tf), v) + ∫ f⁰(t, x, u, v) dt`.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `mayer::TM`: The Mayer cost function `(x0, xf, v) -> g(x0, xf, v)`.
+- `lagrange::TL`: The Lagrange integrand `(t, x, u, v) -> f⁰(t, x, u, v)`.
+- `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> g = (x0, xf, v) -> xf[1]^2
+julia> f0 = (t, x, u, v) -> u[1]^2
+julia> obj = CTModels.BolzaObjectiveModel(g, f0, :min)
+```
 """
 struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
     mayer::TM
@@ -215,15 +449,37 @@ end
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
+
+Abstract base type for constraint models in optimal control problems.
+
+Subtypes store all constraint information including path constraints, boundary
+constraints, and box constraints on state, control, and variables.
+
+See also: [`ConstraintsModel`](@ref).
 """
 abstract type AbstractConstraintsModel end
 
 """
 $(TYPEDEF)
 
-**Fields**
+Container for all constraints in an optimal control problem.
 
-$(TYPEDFIELDS)
+# Fields
+
+- `path_nl::TP`: Tuple of nonlinear path constraints `(t, x, u, v) -> c(t, x, u, v)`.
+- `boundary_nl::TB`: Tuple of nonlinear boundary constraints `(x0, xf, v) -> b(x0, xf, v)`.
+- `state_box::TS`: Tuple of box constraints on state variables (lower/upper bounds).
+- `control_box::TC`: Tuple of box constraints on control variables (lower/upper bounds).
+- `variable_box::TV`: Tuple of box constraints on optimisation variables (lower/upper bounds).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> # Typically constructed internally by the model builder
+julia> cm = CTModels.ConstraintsModel((), (), (), (), ())
+```
 """
 struct ConstraintsModel{TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple} <:
        AbstractConstraintsModel

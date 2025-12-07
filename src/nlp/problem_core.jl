@@ -1,8 +1,20 @@
 # builders of NLP models
+"""
+$(TYPEDSIGNATURES)
+
+Invoke the ADNLPModels model builder to construct an NLP model from an initial guess.
+"""
 function (builder::ADNLPModelBuilder)(initial_guess; kwargs...)::ADNLPModels.ADNLPModel
     return builder.f(initial_guess; kwargs...)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Invoke the ExaModels model builder to construct an NLP model from an initial guess.
+
+The `BaseType` parameter specifies the floating-point type for the model.
+"""
 function (builder::ExaModelBuilder)(
     ::Type{BaseType}, initial_guess; kwargs...
 )::ExaModels.ExaModel where {BaseType<:AbstractFloat}

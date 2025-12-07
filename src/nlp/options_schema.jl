@@ -13,14 +13,33 @@ function get_symbol(tool::AbstractOCPTool)
     return get_symbol(typeof(tool))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Default implementation that throws `CTBase.NotImplemented`.
+
+Concrete tool types must specialize this method.
+"""
 function get_symbol(::Type{T}) where {T<:AbstractOCPTool}
     throw(CTBase.NotImplemented("get_symbol not implemented for $(T)"))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the package name associated with a tool instance.
+"""
 function tool_package_name(tool::AbstractOCPTool)
     return tool_package_name(typeof(tool))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the package name for a tool type.
+
+Default implementation returns `missing`.
+"""
 function tool_package_name(::Type{T}) where {T<:AbstractOCPTool}
     return missing
 end
@@ -44,10 +63,6 @@ end
 #   - description : short human-readable description (or `missing`).
 # ---------------------------------------------------------------------------
 
-function OptionSpec(; type=missing, default=missing, description=missing)
-    OptionSpec(type, default, description)
-end
-
 # Default: no metadata for a given tool type.
 """
 $(TYPEDSIGNATURES)
@@ -66,34 +81,78 @@ function _option_specs(::Type{T}) where {T<:AbstractOCPTool}
     return missing
 end
 
-# Convenience overload to accept instances as well as types.
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload to accept tool instances.
+"""
 _option_specs(x::AbstractOCPTool) = _option_specs(typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the current option values for a tool instance.
+"""
 function _options_values(tool::AbstractOCPTool)
     return tool.options_values
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the option sources (`:ct_default` or `:user`) for a tool instance.
+"""
 function _option_sources(tool::AbstractOCPTool)
     return tool.options_sources
 end
 
-# Retrieve the list of known option keys for a given tool type.
+"""
+$(TYPEDSIGNATURES)
+
+Return the list of known option keys for a tool type.
+
+Returns `missing` if no option metadata is available.
+"""
 function options_keys(tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return missing
     return propertynames(specs)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 options_keys(x::AbstractOCPTool) = options_keys(typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Check if `key` is a valid option key for the given tool type.
+
+Returns `missing` if no option metadata is available.
+"""
 function is_an_option_key(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return missing
     return key in propertynames(specs)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 is_an_option_key(key::Symbol, x::AbstractOCPTool) = is_an_option_key(key, typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the expected type for an option key.
+
+Returns `missing` if the key is unknown or no type is specified.
+"""
 function option_type(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return missing
@@ -104,8 +163,20 @@ function option_type(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     return spec.type
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 option_type(key::Symbol, x::AbstractOCPTool) = option_type(key, typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the description for an option key.
+
+Returns `missing` if the key is unknown or no description is available.
+"""
 function option_description(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return missing
@@ -116,8 +187,20 @@ function option_description(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     return spec.description
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 option_description(key::Symbol, x::AbstractOCPTool) = option_description(key, typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the default value for an option key.
+
+Returns `missing` if the key is unknown or no default is specified.
+"""
 function option_default(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return missing
@@ -128,8 +211,20 @@ function option_default(key::Symbol, tool_type::Type{<:AbstractOCPTool})
     return spec.default
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 option_default(key::Symbol, x::AbstractOCPTool) = option_default(key, typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a `NamedTuple` of default option values for a tool type.
+
+Only options with non-missing defaults are included.
+"""
 function default_options(tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     specs === missing && return NamedTuple()
@@ -143,13 +238,29 @@ function default_options(tool_type::Type{<:AbstractOCPTool})
     return (; pairs...)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 default_options(x::AbstractOCPTool) = default_options(typeof(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Filter a `NamedTuple` by excluding specified keys.
+"""
 function _filter_options(nt::NamedTuple, exclude)
     return (; (k => v for (k, v) in pairs(nt) if !(k in exclude))...)
 end
 
-# Simple Levenshtein distance for suggestion of close option names.
+"""
+$(TYPEDSIGNATURES)
+
+Compute the Levenshtein distance between two strings.
+
+Used for suggesting similar option names when a typo is detected.
+"""
 function _string_distance(a::AbstractString, b::AbstractString)
     m = lastindex(a)
     n = lastindex(b)
@@ -177,7 +288,13 @@ function _string_distance(a::AbstractString, b::AbstractString)
     return dp[m + 1, n + 1]
 end
 
-# Suggest up to `max_suggestions` closest option keys for a tool type.
+"""
+$(TYPEDSIGNATURES)
+
+Suggest up to `max_suggestions` closest option keys for a tool type.
+
+Used to provide helpful error messages when an unknown option is specified.
+"""
 function _suggest_option_keys(
     key::Symbol, tool_type::Type{<:AbstractOCPTool}; max_suggestions::Int=3
 )
@@ -190,6 +307,11 @@ function _suggest_option_keys(
     return [distances[i][2] for i in 1:take]
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 function _suggest_option_keys(key::Symbol, x::AbstractOCPTool; max_suggestions::Int=3)
     _suggest_option_keys(key, typeof(x); max_suggestions=max_suggestions)
 end
@@ -200,6 +322,11 @@ end
 # used when parsing user keyword arguments.
 # ---------------------------------------------------------------------------
 
+"""
+$(TYPEDSIGNATURES)
+
+Generate and throw an error for an unknown option key with suggestions.
+"""
 function _unknown_option_error(
     key::Symbol, tool_type::Type{<:AbstractOCPTool}, context::AbstractString
 )
@@ -213,6 +340,13 @@ function _unknown_option_error(
     throw(CTBase.IncorrectArgument(msg))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the current value of an option for a tool instance.
+
+Throws an error if the option is unknown or has no value.
+"""
 function get_option_value(tool::AbstractOCPTool, key::Symbol)
     vals = _options_values(tool)
     if haskey(vals, key)
@@ -232,6 +366,13 @@ function get_option_value(tool::AbstractOCPTool, key::Symbol)
     throw(CTBase.IncorrectArgument(msg))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the source (`:ct_default` or `:user`) of an option value.
+
+Throws an error if the option is unknown.
+"""
 function get_option_source(tool::AbstractOCPTool, key::Symbol)
     srcs = _option_sources(tool)
     if haskey(srcs, key)
@@ -249,6 +390,13 @@ function get_option_source(tool::AbstractOCPTool, key::Symbol)
     throw(CTBase.IncorrectArgument(msg))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Get the default value of an option for a tool instance.
+
+Throws an error if the option is unknown.
+"""
 function get_option_default(tool::AbstractOCPTool, key::Symbol)
     tool_type = typeof(tool)
     specs = _option_specs(tool_type)
@@ -258,7 +406,11 @@ function get_option_default(tool::AbstractOCPTool, key::Symbol)
     return option_default(key, tool_type)
 end
 
-# Human-readable listing of options and their metadata.
+"""
+$(TYPEDSIGNATURES)
+
+Print a human-readable listing of options and their metadata for a tool type.
+"""
 function _show_options(tool_type::Type{<:AbstractOCPTool})
     specs = _option_specs(tool_type)
     if specs === missing
@@ -274,22 +426,43 @@ function _show_options(tool_type::Type{<:AbstractOCPTool})
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 function _show_options(x::AbstractOCPTool)
     return _show_options(typeof(x))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Display available options for a tool type.
+
+Prints option names, types, and descriptions to stdout.
+"""
 function show_options(tool_type::Type{<:AbstractOCPTool})
     return _show_options(tool_type)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 function show_options(x::AbstractOCPTool)
     return _show_options(typeof(x))
 end
 
-# Validate user-supplied keyword options against the metadata of a tool.
-# If `strict_keys` is true, unknown keys trigger an error. If false, unknown
-# keys are accepted and only known keys are type-checked when a type is
-# available in the metadata.
+"""
+$(TYPEDSIGNATURES)
+
+Validate user-supplied keyword options against tool metadata.
+
+If `strict_keys` is `true`, unknown keys trigger an error. If `false`, unknown
+keys are accepted and only known keys are type-checked.
+"""
 function _validate_option_kwargs(
     user_nt::NamedTuple, tool_type::Type{<:AbstractOCPTool}; strict_keys::Bool=false
 )
@@ -340,6 +513,11 @@ function _validate_option_kwargs(
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload for tool instances.
+"""
 function _validate_option_kwargs(
     user_nt::NamedTuple, x::AbstractOCPTool; strict_keys::Bool=false
 )

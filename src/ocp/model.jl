@@ -325,7 +325,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true`.
+Return `true` for an autonomous model.
 """
 function is_autonomous(
     ::Model{
@@ -346,7 +346,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true`.
+Return `false` for a non-autonomous model.
 """
 function is_autonomous(
     ::Model{
@@ -544,10 +544,20 @@ function time_name(ocp::Model)::String
 end
 
 # Initial time
+"""
+$(TYPEDSIGNATURES)
+
+Throw an error for unsupported initial time access.
+"""
 function initial_time(ocp::AbstractModel)
     throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Throw an error for unsupported initial time access with variable.
+"""
 function initial_time(ocp::AbstractModel, variable::AbstractVector)
     throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
 end
@@ -648,6 +658,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Throw an error for unsupported final time access.
 """
 function final_time(ocp::AbstractModel)
     throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
@@ -656,6 +667,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Throw an error for unsupported final time access with variable.
 """
 function final_time(ocp::AbstractModel, variable::AbstractVector)
     throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
@@ -785,6 +797,11 @@ function criterion(ocp::Model)::Symbol
 end
 
 # Mayer
+"""
+$(TYPEDSIGNATURES)
+
+Throw an error when accessing Mayer cost on a model without one.
+"""
 function mayer(ocp::AbstractModel)
     throw(CTBase.UnauthorizedCall("This ocp has no Mayer objective."))
 end
@@ -841,6 +858,11 @@ function has_mayer_cost(ocp::Model)::Bool
 end
 
 # Lagrange
+"""
+$(TYPEDSIGNATURES)
+
+Throw an error when accessing Lagrange cost on a model without one.
+"""
 function lagrange(ocp::AbstractModel)
     throw(CTBase.UnauthorizedCall("This ocp has no Lagrange objective."))
 end

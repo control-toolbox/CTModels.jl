@@ -106,5 +106,8 @@ __matrix_dimension_storage() = 1
 """
 $(TYPEDSIGNATURES)
 
+Return the default filename (without extension) for exporting and importing solutions.
+
+The default value is `"solution"`.
 """
 __filename_export_import() = "solution"

@@ -1,10 +1,63 @@
 # ------------------------------------------------------------------------------
 # Initial guess
 # ------------------------------------------------------------------------------
+"""
+$(TYPEDSIGNATURES)
+
+Create a pre-initialisation object for an initial guess.
+
+This function creates an [`OptimalControlPreInit`](@ref) that can later be
+processed into a full [`OptimalControlInitialGuess`](@ref).
+
+# Arguments
+
+- `state`: Raw state initialisation data (function, vector, matrix, or `nothing`).
+- `control`: Raw control initialisation data (function, vector, matrix, or `nothing`).
+- `variable`: Raw variable initialisation data (scalar, vector, or `nothing`).
+
+# Returns
+
+- `OptimalControlPreInit`: A pre-initialisation container.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> pre = CTModels.pre_initial_guess(state=t -> [0.0, 0.0], control=t -> [1.0])
+```
+"""
 function pre_initial_guess(; state=nothing, control=nothing, variable=nothing)
     return OptimalControlPreInit(state, control, variable)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Construct a validated initial guess for an optimal control problem.
+
+Builds an [`OptimalControlInitialGuess`](@ref) from the provided state, control,
+and variable data, validating dimensions against the problem definition.
+
+# Arguments
+
+- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `state`: State initialisation (function `t -> x(t)`, constant, vector, or `nothing`).
+- `control`: Control initialisation (function `t -> u(t)`, constant, vector, or `nothing`).
+- `variable`: Variable initialisation (scalar, vector, or `nothing`).
+
+# Returns
+
+- `OptimalControlInitialGuess`: A validated initial guess.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> [1.0])
+```
+"""
 function initial_guess(
     ocp::AbstractOptimalControlProblem;
     state::Union{Nothing,Function,Real,Vector{<:Real}}=nothing,
@@ -18,8 +71,20 @@ function initial_guess(
     return _validate_initial_guess(ocp, init)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the state function directly when provided as a function.
+"""
 initial_state(::AbstractOptimalControlProblem, state::Function) = state
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert a scalar state value to a constant function for 1D state problems.
+
+Throws `CTBase.IncorrectArgument` if the state dimension is not 1.
+"""
 function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
     dim = state_dimension(ocp)
     if dim == 1
@@ -30,6 +95,13 @@ function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build an initialisation function combining block-level and component-level data.
+
+Merges a base initialisation with per-component overrides.
+"""
 function _build_block_with_components(
     ocp::AbstractOptimalControlProblem, role::Symbol, block_data, comp_data::Dict{Int,Any}
 )
@@ -122,6 +194,13 @@ function _build_block_with_components(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a component-level initialisation function from data.
+
+Handles both time-dependent `(time, data)` tuples and time-independent data.
+"""
 function _build_component_function(data)
     # Support (time, data) tuples for per-component time grids
     if data isa Tuple && length(data) == 2
@@ -133,6 +212,11 @@ function _build_component_function(data)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a component function from time-independent data (scalar, vector, or function).
+"""
 function _build_component_function_without_time(data)
     if data isa Function
         return data
@@ -154,6 +238,13 @@ function _build_component_function_without_time(data)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a component function from data with an associated time grid.
+
+Interpolates vector data over the time grid.
+"""
 function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
         return data
@@ -184,6 +275,13 @@ function _build_component_function_with_time(data, time::AbstractVector)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert a state vector to a constant function.
+
+Throws `CTBase.IncorrectArgument` if the vector length does not match the state dimension.
+"""
 function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real})
     dim = state_dimension(ocp)
     if length(state) != dim
@@ -195,6 +293,13 @@ function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real}
     return t -> state
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a default state initialisation function when no state is provided.
+
+Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
+"""
 function initial_state(ocp::AbstractOptimalControlProblem, ::Nothing)
     dim = state_dimension(ocp)
     if dim == 1
@@ -204,8 +309,20 @@ function initial_state(ocp::AbstractOptimalControlProblem, ::Nothing)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the control function directly when provided as a function.
+"""
 initial_control(::AbstractOptimalControlProblem, control::Function) = control
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert a scalar control value to a constant function for 1D control problems.
+
+Throws `CTBase.IncorrectArgument` if the control dimension is not 1.
+"""
 function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
     dim = control_dimension(ocp)
     if dim == 1
@@ -216,6 +333,13 @@ function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert a control vector to a constant function.
+
+Throws `CTBase.IncorrectArgument` if the vector length does not match the control dimension.
+"""
 function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:Real})
     dim = control_dimension(ocp)
     if length(control) != dim
@@ -227,6 +351,13 @@ function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:R
     return t -> control
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a default control initialisation function when no control is provided.
+
+Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
+"""
 function initial_control(ocp::AbstractOptimalControlProblem, ::Nothing)
     dim = control_dimension(ocp)
     if dim == 1
@@ -236,6 +367,13 @@ function initial_control(ocp::AbstractOptimalControlProblem, ::Nothing)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a scalar variable value for 1D variable problems.
+
+Throws `CTBase.IncorrectArgument` if the variable dimension is not 1.
+"""
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     dim = variable_dimension(ocp)
     if dim == 0
@@ -249,6 +387,13 @@ function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a variable vector.
+
+Throws `CTBase.IncorrectArgument` if the vector length does not match the variable dimension.
+"""
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<:Real})
     dim = variable_dimension(ocp)
     if length(variable) != dim
@@ -263,6 +408,13 @@ function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<
     return variable
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return a default variable initialisation when no variable is provided.
+
+Returns an empty vector if `dim == 0`, `0.1` if `dim == 1`, or `fill(0.1, dim)` otherwise.
+"""
 function initial_variable(ocp::AbstractOptimalControlProblem, ::Nothing)
     dim = variable_dimension(ocp)
     if dim == 0
@@ -276,20 +428,56 @@ function initial_variable(ocp::AbstractOptimalControlProblem, ::Nothing)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Extract the state trajectory function from an initial guess.
+"""
 function state(init::OptimalControlInitialGuess{X,<:Function})::X where {X<:Function}
     return init.state
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Extract the control trajectory function from an initial guess.
+"""
 function control(init::OptimalControlInitialGuess{<:Function,U})::U where {U<:Function}
     return init.control
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Extract the variable value from an initial guess.
+"""
 function variable(
     init::OptimalControlInitialGuess{<: Function,<: Function,V}
 )::V where {V<:Union{Real,Vector{<:Real}}}
     return init.variable
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Validate an initial guess against an optimal control problem.
+
+Checks that the dimensions of state, control, and variable match the problem
+definition. Returns the validated initial guess or throws an error.
+
+# Arguments
+
+- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `init::AbstractOptimalControlInitialGuess`: The initial guess to validate.
+
+# Returns
+
+- The validated initial guess.
+
+# Throws
+
+- `CTBase.IncorrectArgument` if dimensions do not match.
+"""
 function validate_initial_guess(
     ocp::AbstractOptimalControlProblem, init::AbstractOptimalControlInitialGuess
 )
@@ -301,6 +489,13 @@ function validate_initial_guess(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Internal validation of an [`OptimalControlInitialGuess`](@ref).
+
+Samples the state and control functions at a test time and verifies dimensions.
+"""
 function _validate_initial_guess(
     ocp::AbstractOptimalControlProblem, init::OptimalControlInitialGuess
 )
@@ -387,6 +582,35 @@ function _validate_initial_guess(
     return init
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build an initial guess from various input formats.
+
+Accepts multiple input types and converts them to an [`OptimalControlInitialGuess`](@ref):
+- `nothing` or `()`: Returns default initial guess.
+- `AbstractOptimalControlInitialGuess`: Returns as-is.
+- `AbstractOptimalControlPreInit`: Converts from pre-initialisation.
+- `AbstractSolution`: Warm-starts from a previous solution.
+- `NamedTuple`: Parses named fields for state, control, and variable.
+
+# Arguments
+
+- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `init_data`: The initial guess data in one of the supported formats.
+
+# Returns
+
+- `OptimalControlInitialGuess`: A validated initial guess.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> [1.0]))
+```
+"""
 function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
     if init_data === nothing || init_data === ()
         return initial_guess(ocp)
@@ -404,6 +628,14 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build an initial guess from a previous solution (warm start).
+
+Extracts state, control, and variable trajectories from the solution and validates
+dimensions against the current problem.
+"""
 function _initial_guess_from_solution(
     ocp::AbstractOptimalControlProblem, sol::AbstractSolution
 )
@@ -429,6 +661,14 @@ function _initial_guess_from_solution(
     return _validate_initial_guess(ocp, init)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build an initial guess from a `NamedTuple`.
+
+Parses keys for state, control, variable (by name or component) and constructs
+the appropriate initialisation functions.
+"""
 function _initial_guess_from_namedtuple(
     ocp::AbstractOptimalControlProblem, init_data::NamedTuple
 )
@@ -661,6 +901,11 @@ function _initial_guess_from_namedtuple(
     return _validate_initial_guess(ocp, init)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert a [`OptimalControlPreInit`](@ref) to an initial guess.
+"""
 function _initial_guess_from_preinit(
     ocp::AbstractOptimalControlProblem, preinit::OptimalControlPreInit
 )
@@ -668,6 +913,11 @@ function _initial_guess_from_preinit(
     return _initial_guess_from_namedtuple(ocp, nt)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Normalise time grid data to a vector format.
+"""
 function _format_time_grid(time_data)
     if time_data === nothing
         return nothing
@@ -685,6 +935,11 @@ function _format_time_grid(time_data)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convert matrix data to vector-of-vectors format for time-grid interpolation.
+"""
 function _format_init_data_for_grid(data)
     if data isa AbstractMatrix
         return matrix2vec(data, 1)
@@ -693,6 +948,13 @@ function _format_init_data_for_grid(data)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a time-dependent initialisation function from data and a time grid.
+
+Interpolates the provided data over the time grid to create a callable function.
+"""
 function _build_time_dependent_init(
     ocp::AbstractOptimalControlProblem, role::Symbol, data, time::AbstractVector
 )

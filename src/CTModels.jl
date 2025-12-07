@@ -135,23 +135,63 @@ JSON tag for export/import functions.
 struct JSON3Tag <: AbstractTag end
 
 # -----------------------------
-# to be extended: no docstrings
+# to be extended
+"""
+$(TYPEDSIGNATURES)
+
+Plot an optimal control solution.
+
+This method requires the Plots extension to be loaded.
+Throws `CTBase.ExtensionError` if Plots is not available.
+"""
 function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
     throw(CTBase.ExtensionError(:Plots))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Export an optimal control solution to a JLD2 file.
+
+This method requires the JLD2 extension to be loaded.
+Throws `CTBase.ExtensionError` if JLD2 is not available.
+"""
 function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
     throw(CTBase.ExtensionError(:JLD2))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Import an optimal control solution from a JLD2 file.
+
+This method requires the JLD2 extension to be loaded.
+Throws `CTBase.ExtensionError` if JLD2 is not available.
+"""
 function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
     throw(CTBase.ExtensionError(:JLD2))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Export an optimal control solution to a JSON file.
+
+This method requires the JSON3 extension to be loaded.
+Throws `CTBase.ExtensionError` if JSON3 is not available.
+"""
 function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
     throw(CTBase.ExtensionError(:JSON3))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Import an optimal control solution from a JSON file.
+
+This method requires the JSON3 extension to be loaded.
+Throws `CTBase.ExtensionError` if JSON3 is not available.
+"""
 function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
     throw(CTBase.ExtensionError(:JSON3))
 end
@@ -243,7 +283,18 @@ include(joinpath(@__DIR__, "ocp", "model.jl"))
 include(joinpath(@__DIR__, "ocp", "solution.jl"))
 
 # new from CTSolvers
+"""
+Type alias for [`AbstractModel`](@ref).
+
+Provides compatibility with CTSolvers naming conventions.
+"""
 const AbstractOptimalControlProblem = CTModels.AbstractModel
+
+"""
+Type alias for [`AbstractSolution`](@ref).
+
+Provides compatibility with CTSolvers naming conventions.
+"""
 const AbstractOptimalControlSolution = CTModels.AbstractSolution
 include(joinpath(@__DIR__, "nlp", "options_schema.jl"))
 include(joinpath(@__DIR__, "nlp", "problem_core.jl"))
