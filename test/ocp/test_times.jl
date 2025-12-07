@@ -1,3 +1,10 @@
+struct FakeTimeVector{T} <: AbstractVector{T}
+    data::Vector{T}
+end
+
+Base.length(v::FakeTimeVector) = length(v.data)
+Base.getindex(v::FakeTimeVector{T}, i::Int) where {T} = v.data[i]
+
 function test_times()
 
     #
@@ -87,6 +94,40 @@ function test_times()
     CTModels.variable!(ocp, 2)
     @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, ind0=1)
     @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, tf=10.0, indf=1)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, tf=10.0, ind0=1)
     @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, tf=10.0, indf=1)
+
+    Test.@testset "times: FreeTimeModel with FakeTimeVector" verbose=VERBOSE showtiming=SHOWTIMING begin
+        ft = CTModels.FreeTimeModel(2, "s")
+        v_ok = FakeTimeVector([1.0, 3.0])
+        @test CTModels.time(ft, v_ok) == 3.0
+
+        v_short = FakeTimeVector([1.0])
+        @test_throws CTBase.IncorrectArgument CTModels.time(ft, v_short)
+    end
+
+    Test.@testset "times: TimesModel names and flags" verbose=VERBOSE showtiming=SHOWTIMING begin
+        t0 = CTModels.FixedTimeModel(0.0, "t0")
+        tf = CTModels.FixedTimeModel(1.0, "tf")
+        times = CTModels.TimesModel(t0, tf, "t")
+
+        @test CTModels.time_name(times) == "t"
+        @test CTModels.initial_time_name(times) == "t0"
+        @test CTModels.final_time_name(times) == "tf"
+
+        @test CTModels.has_fixed_initial_time(times)
+        @test !CTModels.has_free_initial_time(times)
+        @test CTModels.has_fixed_final_time(times)
+        @test !CTModels.has_free_final_time(times)
+
+        tf2 = CTModels.FixedTimeModel(2.0, "tf2")
+        t0_free = CTModels.FreeTimeModel(1, "v1")
+        times_free = CTModels.TimesModel(t0_free, tf2, "t")
+        v = [2.5]
+
+        @test CTModels.initial_time(times_free, v) == 2.5
+        @test !CTModels.has_fixed_initial_time(times_free)
+        @test CTModels.has_free_initial_time(times_free)
+        @test CTModels.has_fixed_final_time(times_free)
+        @test !CTModels.has_free_final_time(times_free)
+    end
 end

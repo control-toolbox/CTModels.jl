@@ -19,7 +19,7 @@ include(joinpath("problems", "rosenbrock.jl"))
 include(joinpath("problems", "max1minusx2.jl"))
 include(joinpath("problems", "elec.jl"))
 include(joinpath("problems", "beam.jl"))
-include(joinpath("problems", "solution_example_path_constraints.jl"))
+include(joinpath("problems", "solution_example_dual.jl"))
 
 # ---------------------------------------------------------------------------#
 # Test selection infrastructure (aligned with CTSolvers)
@@ -199,7 +199,7 @@ end
 # import CTParser: CTParser, @def
 
 # #
-# include(joinpath("problems", "solution_example_path_constraints.jl"))
+# include(joinpath("problems", "solution_example_dual.jl"))
 
 # @testset verbose=VERBOSE showtiming=SHOWTIMING "CTModels tests" begin
 #     for name in (

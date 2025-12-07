@@ -1,4 +1,4 @@
-function solution_example_path_constraints()
+function solution_example_dual()
     t0 = 0
     tf = 1
     x0 = -1
