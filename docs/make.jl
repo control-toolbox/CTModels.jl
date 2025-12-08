@@ -1,14 +1,11 @@
 using Documenter
 using CTModels
-#using CTBase  # For automatic_reference_documentation
+using CTBase  # For automatic_reference_documentation
 using Plots
 using JSON3
 using JLD2
 using Markdown
 using MarkdownAST: MarkdownAST
-
-include(joinpath(@__DIR__, "docutils", "DocumenterReference.jl"))
-using .DocumenterReference
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configuration
@@ -21,7 +18,6 @@ draft = false  # Draft mode: if true, @example blocks in markdown are not execut
 const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
 const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
 const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
-#const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 
 # to add docstrings from external packages
 Modules = [Plots, CTModelsPlots, CTModelsJSON, CTModelsJLD]
@@ -82,7 +78,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Main module
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("CTModels.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -95,7 +91,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Core: Types
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src(
                     "core/types.jl",
@@ -115,7 +111,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Core: Default & Utils
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("core/default.jl", "core/utils.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -128,7 +124,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Model (model, definition, time_dependence)
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src(
                     "ocp/model.jl",
@@ -145,7 +141,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Times
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/times.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -158,7 +154,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: State, Control, Variable
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/state.jl", "ocp/control.jl", "ocp/variable.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -171,7 +167,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Dynamics & Objective
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/dynamics.jl", "ocp/objective.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -184,7 +180,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Constraints
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/constraints.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -197,7 +193,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Solution & Dual
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/solution.jl", "ocp/dual_model.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -210,7 +206,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # OCP: Print
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("ocp/print.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -223,7 +219,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Initial Guess
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src("init/initial_guess.jl")],
                 exclude=EXCLUDE_SYMBOLS,
@@ -236,7 +232,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # NLP Backends
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModels => src(
                     "nlp/nlp_backends.jl",
@@ -255,7 +251,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Extension: Plot
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CTModelsPlots => ext(
                     "CTModelsPlots.jl",
@@ -274,7 +270,7 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             # Extension: JLD & JSON (combined)
             # ───────────────────────────────────────────────────────────────────
-            DocumenterReference.automatic_reference_documentation(;
+            CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[
                     CTModelsJSON => ext("CTModelsJSON.jl"),
