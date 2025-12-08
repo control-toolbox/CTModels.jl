@@ -255,58 +255,56 @@ function constraint!(
 end
 
 """
-$(TYPEDSIGNATURES)
+    as_vector(::Nothing) -> Nothing
 
-Convert `nothing` to `nothing` (identity for missing vectors).
+Return `nothing` unchanged.
 """
 as_vector(::Nothing) = nothing
 
 """
-$(TYPEDSIGNATURES)
+    as_vector(x::T) -> Vector{T} where {T<:ctNumber}
 
 Wrap a scalar number into a single-element vector.
 """
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
 
 """
-$(TYPEDSIGNATURES)
+    as_vector(x::Vector{T}) -> Vector{T} where {T<:ctNumber}
 
-Return a vector unchanged (identity for vectors).
+Return a vector unchanged.
 """
 as_vector(x::Vector{T}) where {T<:ctNumber} = x
 
 """
-$(TYPEDSIGNATURES)
+    as_range(::Nothing) -> Nothing
 
-Convert `nothing` to `nothing` (identity for missing ranges).
+Return `nothing` unchanged.
 """
 as_range(::Nothing) = nothing
 
 """
-$(TYPEDSIGNATURES)
+    as_range(r::Int) -> UnitRange{Int}
 
 Convert a scalar integer to a single-element range `r:r`.
 """
 as_range(r::T) where {T<:Int} = r:r
 
 """
-$(TYPEDSIGNATURES)
+    as_range(r::OrdinalRange{Int}) -> OrdinalRange{Int}
 
-Return an ordinal range unchanged (identity for ranges).
+Return an ordinal range unchanged.
 """
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
 
 """
-$(TYPEDSIGNATURES)
+    discretize(constraint::Function, grid::Vector{T}) -> Vector where {T<:ctNumber}
 
 Discretise a constraint function over a time grid.
-
-Returns a vector of constraint values at each grid point.
 """
 discretize(constraint::Function, grid::Vector{T}) where {T<:ctNumber} = constraint.(grid)
 
 """
-$(TYPEDSIGNATURES)
+    discretize(::Nothing, grid::Vector{T}) -> Nothing where {T<:ctNumber}
 
 Return `nothing` when discretising a missing constraint.
 """

@@ -10,7 +10,7 @@ Modelers implement the
 [`AbstractOptimizationModeler`](@ref CTModels.AbstractOptimizationModeler)
 interface and are also
 [`AbstractOCPTool`](@ref CTModels.AbstractOCPTool)s. This means they follow
-both the options interface (see [`ocp_tools.md`](@ref)) and a calling
+both the options interface (see [OCP Tools](ocp_tools.md)) and a calling
 interface specific to optimization problems.
 
 ## Overview of the contract
@@ -54,7 +54,7 @@ not specialized.
 
 Because `AbstractOptimizationModeler <: AbstractOCPTool`, modelers follow the
 same options pattern as other tools. See
-[`ocp_tools.md`](@ref) for a detailed discussion.
+[OCP Tools](ocp_tools.md) for a detailed discussion.
 
 In short, a typical modeler definition looks like:
 
@@ -148,5 +148,5 @@ To integrate a new modeler into such a registry, you typically:
    [`tool_package_name`](@ref CTModels.tool_package_name).
 3. Add the modeler type to the appropriate `REGISTERED_*` constant.
 
-See also the `ocp_tools.md` page for the generic `AbstractOCPTool` interface
+See also the [OCP Tools](ocp_tools.md) page for the generic `AbstractOCPTool` interface
 and examples such as `ADNLPModeler` and `ExaModeler`.

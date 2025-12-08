@@ -122,4 +122,4 @@ A typical workflow is:
    to turn the back-end solution into an OCP-related representation.
 
 For the implementation of modelers and tools, see also
-[`ocp_tools.md`](@ref) and the separate page on optimization modelers.
+[OCP Tools](ocp_tools.md) and the separate page on optimization modelers.

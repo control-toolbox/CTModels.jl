@@ -63,6 +63,10 @@ end
 #   - description : short human-readable description (or `missing`).
 # ---------------------------------------------------------------------------
 
+function OptionSpec(; type=missing, default=missing, description=missing)
+    OptionSpec(type, default, description)
+end
+
 # Default: no metadata for a given tool type.
 """
 $(TYPEDSIGNATURES)

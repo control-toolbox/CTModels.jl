@@ -20,7 +20,7 @@ Concrete subtypes `T <: AbstractOCPTool` are expected to:
   - `options_sources::NamedTuple` — provenance for each option
     (`:ct_default` or `:user`).
 - optionally provide option metadata by specializing
-  [`_option_specs(::Type{T})`](@ref), returning a `NamedTuple` of
+  [`_option_specs`](@ref CTModels._option_specs), returning a `NamedTuple` of
   [`OptionSpec`](@ref) values.
 - typically define a keyword-only constructor
   `T(; kwargs...)` implemented using [`_build_ocp_tool_options`](@ref), so
@@ -53,19 +53,6 @@ struct OptionSpec
     default::Any
     description::Any  # Short English description (String) or `missing` if not documented yet.
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Construct an [`OptionSpec`](@ref) with keyword arguments.
-
-# Keyword Arguments
-
-- `type`: Expected Julia type for the option value (default: `missing`).
-- `default`: Default value (default: `missing`).
-- `description`: Human-readable description (default: `missing`).
-"""
-OptionSpec(; type=missing, default=missing, description=missing) = OptionSpec(type, default, description)
 
 """
 $(TYPEDEF)

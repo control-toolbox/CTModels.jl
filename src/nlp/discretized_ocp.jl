@@ -40,7 +40,7 @@ Return the original optimal control problem from a discretised problem.
 
 # Returns
 
-- The underlying [`Model`](@ref) (optimal control problem).
+- The underlying [`Model`](@ref CTModels.Model) (optimal control problem).
 """
 function ocp_model(prob::DiscretizedOptimalControlProblem)
     return prob.optimal_control_problem
