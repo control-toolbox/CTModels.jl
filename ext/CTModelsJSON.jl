@@ -5,6 +5,81 @@ using DocStringExtensions
 
 using JSON3
 
+# ============================================================================
+# Helper functions for serializing/deserializing infos Dict{Symbol,Any}
+# ============================================================================
+
+"""
+Convert Dict{Symbol,Any} to Dict{String,Any} for JSON serialization.
+Only serializes JSON-compatible types (numbers, strings, bools, arrays, dicts).
+"""
+function _serialize_infos(infos::Dict{Symbol,Any})::Dict{String,Any}
+    result = Dict{String,Any}()
+    for (k, v) in infos
+        result[string(k)] = _serialize_value(v)
+    end
+    return result
+end
+
+"""
+Serialize a single value to JSON-compatible format.
+"""
+function _serialize_value(v)
+    if v isa Number || v isa String || v isa Bool || isnothing(v)
+        return v
+    elseif v isa Symbol
+        return string(v)
+    elseif v isa AbstractVector
+        return [_serialize_value(x) for x in v]
+    elseif v isa AbstractDict
+        result = Dict{String,Any}()
+        for (dk, dv) in v
+            result[string(dk)] = _serialize_value(dv)
+        end
+        return result
+    else
+        # For non-serializable types, convert to string representation
+        return string(v)
+    end
+end
+
+"""
+Convert Dict{String,Any} back to Dict{Symbol,Any} after JSON deserialization.
+"""
+function _deserialize_infos(blob)::Dict{Symbol,Any}
+    if isnothing(blob) || isempty(blob)
+        return Dict{Symbol,Any}()
+    end
+    result = Dict{Symbol,Any}()
+    for (k, v) in blob
+        result[Symbol(k)] = _deserialize_value(v)
+    end
+    return result
+end
+
+"""
+Deserialize a single value from JSON format.
+"""
+function _deserialize_value(v)
+    if v isa Number || v isa String || v isa Bool || isnothing(v)
+        return v
+    elseif v isa AbstractVector
+        return [_deserialize_value(x) for x in v]
+    elseif v isa AbstractDict
+        result = Dict{Symbol,Any}()
+        for (dk, dv) in v
+            result[Symbol(dk)] = _deserialize_value(dv)
+        end
+        return result
+    else
+        return v
+    end
+end
+
+# ============================================================================
+# Export function
+# ============================================================================
+
 """
 $(TYPEDSIGNATURES)
 
@@ -60,6 +135,8 @@ function CTModels.export_ocp_solution(
         "boundary_constraints_dual" => CTModels.boundary_constraints_dual(sol),       # ctVector or Nothing
         "variable_constraints_lb_dual" => CTModels.variable_constraints_lb_dual(sol),    # ctVector or Nothing
         "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing
+        # Additional solver infos (Dict{Symbol,Any} → Dict{String,Any} for JSON)
+        "infos" => _serialize_infos(CTModels.infos(sol)),
     )
 
     open(filename * ".json", "w") do io
@@ -206,6 +283,13 @@ function CTModels.import_ocp_solution(
         variable_constraints_ub_dual = Vector{Float64}(blob["variable_constraints_ub_dual"])
     end
 
+    # get additional solver infos
+    infos = if haskey(blob, "infos")
+        _deserialize_infos(blob["infos"])
+    else
+        Dict{Symbol,Any}()
+    end
+
     # NB. convert vect{vect} to matrix
     return CTModels.build_solution(
         ocp,
@@ -228,6 +312,7 @@ function CTModels.import_ocp_solution(
         boundary_constraints_dual=boundary_constraints_dual,
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,
+        infos=infos,
     )
 end
 
