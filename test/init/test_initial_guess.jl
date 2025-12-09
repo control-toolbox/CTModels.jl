@@ -315,9 +315,7 @@ function test_initial_guess()
             control=(time, control_samples),
             variable=Float64[],
         )
-        Test.@test_throws CTBase.IncorrectArgument CTModels.build_initial_guess(
-            ocp, bad_nt
-        )
+        Test.@test_throws CTBase.IncorrectArgument CTModels.build_initial_guess(ocp, bad_nt)
     end
 
     Test.@testset "time-grid NamedTuple with 2D state matrix" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -400,9 +398,7 @@ function test_initial_guess()
     Test.@testset "uniqueness between block and component specs" verbose=VERBOSE showtiming=SHOWTIMING begin
         ocp = DummyOCP2DNoVar()
         bad_nt = (state=[0.0, 0.0], x1=1.0)
-        Test.@test_throws CTBase.IncorrectArgument CTModels.build_initial_guess(
-            ocp, bad_nt
-        )
+        Test.@test_throws CTBase.IncorrectArgument CTModels.build_initial_guess(ocp, bad_nt)
     end
 
     Test.@testset "warm-start from AbstractSolution" verbose=VERBOSE showtiming=SHOWTIMING begin

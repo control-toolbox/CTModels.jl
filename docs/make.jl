@@ -93,14 +93,16 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CTModels => src(
-                    "core/types.jl",
-                    "core/types/ocp_model.jl",
-                    "core/types/ocp_components.jl",
-                    "core/types/ocp_solution.jl",
-                    "core/types/initial_guess.jl",
-                    "core/types/nlp.jl",
-                )],
+                primary_modules=[
+                    CTModels => src(
+                        "core/types.jl",
+                        "core/types/ocp_model.jl",
+                        "core/types/ocp_components.jl",
+                        "core/types/ocp_solution.jl",
+                        "core/types/initial_guess.jl",
+                        "core/types/nlp.jl",
+                    ),
+                ],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
@@ -126,11 +128,13 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CTModels => src(
-                    "ocp/model.jl",
-                    "ocp/definition.jl",
-                    "ocp/time_dependence.jl",
-                )],
+                primary_modules=[
+                    CTModels => src(
+                        "ocp/model.jl",
+                        "ocp/definition.jl",
+                        "ocp/time_dependence.jl",
+                    ),
+                ],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
@@ -156,7 +160,9 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CTModels => src("ocp/state.jl", "ocp/control.jl", "ocp/variable.jl")],
+                primary_modules=[
+                    CTModels => src("ocp/state.jl", "ocp/control.jl", "ocp/variable.jl")
+                ],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
@@ -234,13 +240,15 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CTModels => src(
-                    "nlp/nlp_backends.jl",
-                    "nlp/options_schema.jl",
-                    "nlp/problem_core.jl",
-                    "nlp/discretized_ocp.jl",
-                    "nlp/model_api.jl",
-                )],
+                primary_modules=[
+                    CTModels => src(
+                        "nlp/nlp_backends.jl",
+                        "nlp/options_schema.jl",
+                        "nlp/problem_core.jl",
+                        "nlp/discretized_ocp.jl",
+                        "nlp/model_api.jl",
+                    ),
+                ],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
@@ -253,12 +261,14 @@ makedocs(;
             # ───────────────────────────────────────────────────────────────────
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CTModelsPlots => ext(
-                    "CTModelsPlots.jl",
-                    "plot.jl",
-                    "plot_default.jl",
-                    "plot_utils.jl",
-                )],
+                primary_modules=[
+                    CTModelsPlots => ext(
+                        "CTModelsPlots.jl",
+                        "plot.jl",
+                        "plot_default.jl",
+                        "plot_utils.jl",
+                    ),
+                ],
                 external_modules_to_document=[Plots],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,

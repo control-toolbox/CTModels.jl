@@ -60,14 +60,7 @@ function test_ocp_solution_types()
         objective_val = 0.0
 
         dual = CTModels.DualModel(
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
+            nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing
         )
 
         infos = CTModels.SolverInfos(0, :unknown, "", false, 0.0, Dict{Symbol,Any}())
@@ -166,24 +159,10 @@ function test_ocp_solution_types()
         objective_val = 42.0
 
         dual = CTModels.DualModel(
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
-            nothing,
+            nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing
         )
 
-        infos = CTModels.SolverInfos(
-            15,
-            :converged,
-            "ok",
-            true,
-            0.0,
-            Dict(:nit => 15),
-        )
+        infos = CTModels.SolverInfos(15, :converged, "ok", true, 0.0, Dict(:nit => 15))
 
         dynamics = (r, t, x, u, v) -> nothing
         objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
@@ -232,4 +211,3 @@ function test_ocp_solution_types()
         Test.@test summary.objective == 42.0
     end
 end
-

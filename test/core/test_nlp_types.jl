@@ -27,4 +27,3 @@ function test_nlp_types()
         Test.@test CTModels.ExaSolutionBuilder <: CTModels.AbstractOCPSolutionBuilder
     end
 end
-

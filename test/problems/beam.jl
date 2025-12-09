@@ -6,7 +6,6 @@
 #   - name :: a short problem name
 #   - init :: NamedTuple of components for CTSolvers.initial_guess
 function Beam()
-
     pre_ocp = CTModels.PreModel()
 
     CTModels.variable!(pre_ocp, 0)
@@ -34,10 +33,14 @@ function Beam()
         r[4] = xf[2] + 1.0
         return nothing
     end
-    CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4), label=:beam_boundary)
+    CTModels.constraint!(
+        pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4), label=:beam_boundary
+    )
 
     CTModels.constraint!(pre_ocp, :state; rg=1:1, lb=[0.0], ub=[0.1], label=:beam_state_x1)
-    CTModels.constraint!(pre_ocp, :control; rg=1:1, lb=[-10.0], ub=[10.0], label=:beam_control_u)
+    CTModels.constraint!(
+        pre_ocp, :control; rg=1:1, lb=[-10.0], ub=[10.0], label=:beam_control_u
+    )
 
     definition = quote
         t ∈ [0, 1], time

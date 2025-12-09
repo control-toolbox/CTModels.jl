@@ -17,8 +17,9 @@ function test_initial_guess_types()
         Test.@test ig.variable === variable_vec
 
         # Type parameters should reflect the concrete field types
-        Test.@test ig isa
-            CTModels.OptimalControlInitialGuess{typeof(state_fun),typeof(control_fun),typeof(variable_vec)}
+        Test.@test ig isa CTModels.OptimalControlInitialGuess{
+            typeof(state_fun),typeof(control_fun),typeof(variable_vec)
+        }
     end
 
     Test.@testset "OptimalControlPreInit structure" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -59,4 +60,3 @@ function test_initial_guess_types()
         Test.@test v == variable_val
     end
 end
-

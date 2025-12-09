@@ -1,6 +1,6 @@
 using Plots
 
-struct FakeModelDoPlot{N}  <: CTModels.AbstractModel end
+struct FakeModelDoPlot{N} <: CTModels.AbstractModel end
 
 struct FakeSolutionDoPlot{N} <: CTModels.AbstractSolution
     ocp::FakeModelDoPlot{N}
@@ -310,11 +310,7 @@ function test_plot()
     end
 
     Test.@testset "plot helpers: __keep_series_attributes" verbose=VERBOSE showtiming=SHOWTIMING begin
-        attrs = plots_ext.__keep_series_attributes(
-            color=:red,
-            linestyle=:dash,
-            foo=1,
-        )
+        attrs = plots_ext.__keep_series_attributes(color=:red, linestyle=:dash, foo=1)
         keys = [kv[1] for kv in attrs]
 
         # Unknown attributes should be filtered out
@@ -369,9 +365,7 @@ function test_plot()
         Test.@test plot!(plt, sol; time=:default) isa Plots.Plot
         Test.@test plot!(plt, sol; time=:normalize) isa Plots.Plot
         Test.@test plot!(plt, sol; time=:normalise) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot!(
-            plt, sol; time=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
 
         # plot!(sol, ...) variants with implicit current plot
         plot(sol; time=:default)
@@ -385,9 +379,7 @@ function test_plot()
         Test.@test plot!(plt2, sol; time=:default) isa Plots.Plot
         Test.@test plot!(plt2, sol; time=:normalize) isa Plots.Plot
         Test.@test plot!(plt2, sol; time=:normalise) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot!(
-            plt2, sol; time=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot!(plt2, sol; time=:wrong_choice)
     end
 
     Test.@testset "plot!(...) – layout and control options" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -427,9 +419,7 @@ function test_plot()
 
         plt = plot(sol; layout=:group)
         Test.@test plot!(plt, sol; layout=:group) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot!(
-            plt, sol; layout=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot!(plt, sol; layout=:wrong_choice)
     end
 
     Test.@testset "display(sol) – side effect" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -447,9 +437,7 @@ function test_plot()
         Test.@test plot(sol_pc; time=:default) isa Plots.Plot
         Test.@test plot(sol_pc; time=:normalize) isa Plots.Plot
         Test.@test plot(sol_pc; time=:normalise) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot(
-            sol_pc; time=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot(sol_pc; time=:wrong_choice)
 
         # layout/control
         Test.@test plot(sol_pc; layout=:group, control=:components) isa Plots.Plot
@@ -468,9 +456,7 @@ function test_plot()
 
         Test.@test plot(sol_pc; layout=:split) isa Plots.Plot
         Test.@test plot(sol_pc; layout=:group) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot(
-            sol_pc; layout=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot(sol_pc; layout=:wrong_choice)
     end
 
     Test.@testset "plot!(sol with path constraints) – layout and time" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -479,9 +465,7 @@ function test_plot()
         Test.@test plot!(plt, sol_pc; time=:default) isa Plots.Plot
         Test.@test plot!(plt, sol_pc; time=:normalize) isa Plots.Plot
         Test.@test plot!(plt, sol_pc; time=:normalise) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot!(
-            plt, sol_pc; time=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot!(plt, sol_pc; time=:wrong_choice)
 
         # layout/control
         plt = plot(sol_pc; layout=:group, control=:components)
@@ -517,9 +501,6 @@ function test_plot()
 
         plt = plot(sol_pc; layout=:group)
         Test.@test plot!(plt, sol_pc; layout=:group) isa Plots.Plot
-        Test.@test_throws CTBase.IncorrectArgument plot!(
-            plt, sol_pc; layout=:wrong_choice
-        )
+        Test.@test_throws CTBase.IncorrectArgument plot!(plt, sol_pc; layout=:wrong_choice)
     end
 end
-

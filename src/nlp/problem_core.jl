@@ -37,7 +37,7 @@ construct the corresponding NLP model. The default implementation throws
 """
 function get_exa_model_builder(prob::AbstractOptimizationProblem)
     throw(
-        CTBase.NotImplemented("get_exa_model_builder not implemented for $(typeof(prob))"),
+        CTBase.NotImplemented("get_exa_model_builder not implemented for $(typeof(prob))")
     )
 end
 
@@ -53,7 +53,7 @@ throws `CTBase.NotImplemented`.
 """
 function get_adnlp_model_builder(prob::AbstractOptimizationProblem)
     throw(
-        CTBase.NotImplemented("get_adnlp_model_builder not implemented for $(typeof(prob))"),
+        CTBase.NotImplemented("get_adnlp_model_builder not implemented for $(typeof(prob))")
     )
 end
 
@@ -70,7 +70,7 @@ throws `CTBase.NotImplemented`.
 function get_adnlp_solution_builder(prob::AbstractOptimizationProblem)
     throw(
         CTBase.NotImplemented(
-            "get_adnlp_solution_builder not implemented for $(typeof(prob))",
+            "get_adnlp_solution_builder not implemented for $(typeof(prob))"
         ),
     )
 end
@@ -88,7 +88,7 @@ throws `CTBase.NotImplemented`.
 function get_exa_solution_builder(prob::AbstractOptimizationProblem)
     throw(
         CTBase.NotImplemented(
-            "get_exa_solution_builder not implemented for $(typeof(prob))",
+            "get_exa_solution_builder not implemented for $(typeof(prob))"
         ),
     )
 end

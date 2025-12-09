@@ -27,4 +27,3 @@ function test_dual_model()
         Test.@test CTModels.variable_constraints_ub_dual(dual) === vc_ub
     end
 end
-

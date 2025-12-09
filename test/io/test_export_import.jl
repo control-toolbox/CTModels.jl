@@ -23,7 +23,9 @@ function test_export_import()
         ocp, sol = solution_example()
 
         CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_test", format=:JSON
+        )
 
         @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
         @test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
@@ -37,7 +39,9 @@ function test_export_import()
         ocp, sol = solution_example(; fun=true)
 
         CTModels.export_ocp_solution(sol; filename="solution_test_fun", format=:JSON)
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test_fun", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_test_fun", format=:JSON
+        )
 
         @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
         @test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
@@ -52,7 +56,9 @@ function test_export_import()
         Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
             CTModels.export_ocp_solution(sol; filename="solution_test") # default is :JLD
         end
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_test", format=:JLD)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_test", format=:JLD
+        )
 
         @test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol=1e-8
         @test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
@@ -77,14 +83,25 @@ function test_export_import()
 
         # Verify all expected keys are present
         expected_keys = [
-            "time_grid", "state", "control", "variable", "costate",
-            "objective", "iterations", "constraints_violation",
-            "message", "status", "successful",
+            "time_grid",
+            "state",
+            "control",
+            "variable",
+            "costate",
+            "objective",
+            "iterations",
+            "constraints_violation",
+            "message",
+            "status",
+            "successful",
             "path_constraints_dual",
-            "state_constraints_lb_dual", "state_constraints_ub_dual",
-            "control_constraints_lb_dual", "control_constraints_ub_dual",
+            "state_constraints_lb_dual",
+            "state_constraints_ub_dual",
+            "control_constraints_lb_dual",
+            "control_constraints_ub_dual",
             "boundary_constraints_dual",
-            "variable_constraints_lb_dual", "variable_constraints_ub_dual",
+            "variable_constraints_lb_dual",
+            "variable_constraints_ub_dual",
         ]
         for key in expected_keys
             @test haskey(blob, key)
@@ -202,12 +219,15 @@ function test_export_import()
         ocp, sol = solution_example_dual()
 
         CTModels.export_ocp_solution(sol; filename="solution_import_test", format=:JSON)
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_import_test", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_import_test", format=:JSON
+        )
 
         # Scalar fields
         @test CTModels.objective(sol_reloaded) ≈ CTModels.objective(sol) atol=1e-8
         @test CTModels.iterations(sol_reloaded) == CTModels.iterations(sol)
-        @test CTModels.constraints_violation(sol_reloaded) ≈ CTModels.constraints_violation(sol) atol=1e-8
+        @test CTModels.constraints_violation(sol_reloaded) ≈
+            CTModels.constraints_violation(sol) atol=1e-8
         @test CTModels.message(sol_reloaded) == CTModels.message(sol)
         @test CTModels.status(sol_reloaded) == CTModels.status(sol)
         @test CTModels.successful(sol_reloaded) == CTModels.successful(sol)
@@ -226,7 +246,8 @@ function test_export_import()
 
         @test CTModels.state_components(sol_reloaded) == CTModels.state_components(sol)
         @test CTModels.control_components(sol_reloaded) == CTModels.control_components(sol)
-        @test CTModels.variable_components(sol_reloaded) == CTModels.variable_components(sol)
+        @test CTModels.variable_components(sol_reloaded) ==
+            CTModels.variable_components(sol)
 
         @test CTModels.initial_time_name(sol_reloaded) == CTModels.initial_time_name(sol)
         @test CTModels.final_time_name(sol_reloaded) == CTModels.final_time_name(sol)
@@ -375,7 +396,9 @@ function test_export_import()
         @test isnothing(blob["variable_constraints_ub_dual"])
 
         # Import and verify duals are nothing
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_no_duals", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_no_duals", format=:JSON
+        )
         @test isnothing(CTModels.path_constraints_dual(sol_reloaded))
         @test isnothing(CTModels.boundary_constraints_dual(sol_reloaded))
         @test isnothing(CTModels.state_constraints_lb_dual(sol_reloaded))
@@ -430,7 +453,9 @@ function test_export_import()
 
         # Export and import
         CTModels.export_ocp_solution(sol; filename="solution_with_infos", format=:JSON)
-        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="solution_with_infos", format=:JSON)
+        sol_reloaded = CTModels.import_ocp_solution(
+            ocp; filename="solution_with_infos", format=:JSON
+        )
 
         # Verify infos is preserved
         reloaded_infos = CTModels.infos(sol_reloaded)
