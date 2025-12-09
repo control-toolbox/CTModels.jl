@@ -50,4 +50,3 @@ function test_definition()
         Test.@test CTModels.definition(model) === expr
     end
 end
-

@@ -78,4 +78,3 @@ function test_print()
         Test.@test occursin("optimal control problem is of the form:", s)
     end
 end
-

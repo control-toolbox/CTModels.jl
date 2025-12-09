@@ -28,7 +28,6 @@ function test_types()
             CTModels.AbstractOptimalControlInitialGuess
 
         Test.@test isabstracttype(CTModels.AbstractOptimalControlPreInit)
-        Test.@test CTModels.OptimalControlPreInit <:
-            CTModels.AbstractOptimalControlPreInit
+        Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit
     end
 end

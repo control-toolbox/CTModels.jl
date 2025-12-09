@@ -28,83 +28,72 @@ include(joinpath("problems", "solution_example_dual.jl"))
 function default_tests()
     return OrderedDict(
         # Extension exceptions, before any extensions are triggered
-        :notrigger => OrderedDict(
-            :ext_exceptions => true,
-        ),
+        :notrigger => OrderedDict(:ext_exceptions => true),
 
         # Meta / quality tests
-        :meta => OrderedDict(
-            :aqua     => true,
-            :CTModels => true,
-        ),
+        :meta => OrderedDict(:aqua => true, :CTModels => true),
 
         # Tests in test/ocp
         :ocp => OrderedDict(
-            :times           => true,
+            :times => true,
             :time_dependence => true,
-            :state           => true,
-            :control         => true,
-            :variable        => true,
-            :dynamics        => true,
-            :objective       => true,
-            :constraints     => true,
-            :definition      => true,
-            :model           => true,
-            :ocp             => true,
-            :dual_model      => true,
-            :print           => true,
-            :solution        => true,
+            :state => true,
+            :control => true,
+            :variable => true,
+            :dynamics => true,
+            :objective => true,
+            :constraints => true,
+            :definition => true,
+            :model => true,
+            :ocp => true,
+            :dual_model => true,
+            :print => true,
+            :solution => true,
         ),
 
         # Core utilities and type-level tests in test/core
         :core => OrderedDict(
-            :utils               => true,
-            :default             => true,
-            :types               => true,
-            :ocp_components      => true,
-            :ocp_model_types     => true,
-            :ocp_solution_types  => true,
-            :nlp_types           => true,
+            :utils => true,
+            :default => true,
+            :types => true,
+            :ocp_components => true,
+            :ocp_model_types => true,
+            :ocp_solution_types => true,
+            :nlp_types => true,
             :initial_guess_types => true,
         ),
 
         # Tests in test/nlp
         :nlp => OrderedDict(
-            :problem_core    => true,
-            :options_schema  => true,
-            :nlp_backends    => true,
+            :problem_core => true,
+            :options_schema => true,
+            :nlp_backends => true,
             :discretized_ocp => true,
-            :model_api       => true,
+            :model_api => true,
         ),
 
         # Tests in test/init
-        :init => OrderedDict(
-            :initial_guess => true,
-        ),
+        :init => OrderedDict(:initial_guess => true),
 
         # IO-related tests in test/io
-        :io => OrderedDict(
-            :export_import => true,
-        ),
+        :io => OrderedDict(:export_import => true),
 
         # Plot-related tests in test/plot
-        :plot => OrderedDict(
-            :plot => true,
-        ),
+        :plot => OrderedDict(:plot => true),
     )
 end
 
 const TEST_SELECTIONS = isempty(ARGS) ? Symbol[] : Symbol.(ARGS)
 
 const TEST_GROUP_INFO = Dict(
-    :notrigger => (title="Extension exceptions",             subdir="io"),
-    :meta      => (title="Meta / quality",                   subdir="meta"),
-    :ocp       => (title="OCP continuous-time layer",        subdir="ocp"),
-    :core      => (title="Core utilities and types",         subdir="core"),
-    :nlp       => (title="NLP / backends / discretized OCP", subdir="nlp"),
-    :init      => (title="Initial guess",                    subdir="init"),
-    :io        => (title="IO / export / import",             subdir="io"),
-    :plot      => (title="Plotting",                         subdir="plot"),
+    :notrigger => (title="Extension exceptions", subdir="io"),
+    :meta => (title="Meta / quality", subdir="meta"),
+    :ocp => (title="OCP continuous-time layer", subdir="ocp"),
+    :core => (title="Core utilities and types", subdir="core"),
+    :nlp => (title="NLP / backends / discretized OCP", subdir="nlp"),
+    :init => (title="Initial guess", subdir="init"),
+    :io => (title="IO / export / import", subdir="io"),
+    :plot => (title="Plotting", subdir="plot"),
 )
 
 function selected_tests()

@@ -12,9 +12,7 @@ CTModels._option_specs(::Type{CM_DummyToolNoSpecs}) = missing
 
 function CTModels._option_specs(::Type{CM_DummyToolWithSpecs})
     (
-        max_iter=CTModels.OptionSpec(;
-            type=Int, default=100, description="Max iterations"
-        ),
+        max_iter=CTModels.OptionSpec(; type=Int, default=100, description="Max iterations"),
         tol=CTModels.OptionSpec(; type=Float64, default=1e-6, description="Tolerance"),
         verbose=CTModels.OptionSpec(; type=Bool, default=missing, description=missing),
     )
@@ -179,9 +177,7 @@ function test_options_schema()
         )
 
         # Unknown key with strict_keys = false should be accepted
-        CTModels._validate_option_kwargs(
-            (foo=1,), CM_DummyToolWithSpecs; strict_keys=false
-        )
+        CTModels._validate_option_kwargs((foo=1,), CM_DummyToolWithSpecs; strict_keys=false)
 
         # Unknown key with strict_keys = true should error with suggestions
         err_unknown = nothing

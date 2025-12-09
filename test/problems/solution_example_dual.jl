@@ -5,7 +5,6 @@ function solution_example_dual()
 
     # the model (explicit CTModels.PreModel construction)
     function OCP(t0, tf, x0)
-
         pre_ocp = CTModels.PreModel()
 
         # No variables
@@ -33,36 +32,18 @@ function solution_example_dual()
             return nothing
         end
         CTModels.constraint!(
-            pre_ocp,
-            :boundary;
-            f=f_initial,
-            lb=[0.0],
-            ub=[0.0],
-            label=:initial_con,
+            pre_ocp, :boundary; f=f_initial, lb=[0.0], ub=[0.0], label=:initial_con
         )
 
         # Control box constraint: 0 ≤ u(t) ≤ +Inf  (label: u_con)
-        CTModels.constraint!(
-            pre_ocp,
-            :control;
-            rg=1:1,
-            lb=[0.0],
-            ub=[Inf],
-            label=:u_con,
-        )
+        CTModels.constraint!(pre_ocp, :control; rg=1:1, lb=[0.0], ub=[Inf], label=:u_con)
 
         # Path constraint: -Inf ≤ x(t) + u(t) ≤ 0
         f_path1(r, t, x, u, v) = begin
             r[1] = x[1] + u[1]
             return nothing
         end
-        CTModels.constraint!(
-            pre_ocp,
-            :path;
-            f=f_path1,
-            lb=[-Inf],
-            ub=[0.0],
-        )
+        CTModels.constraint!(pre_ocp, :path; f=f_path1, lb=[-Inf], ub=[0.0])
 
         # Path constraint: [-3, 1] ≤ [x(t)+1, u(t)+1] ≤ [1, 2.5]  (label: 2)
         f_path2(r, t, x, u, v) = begin
@@ -71,12 +52,7 @@ function solution_example_dual()
             return nothing
         end
         CTModels.constraint!(
-            pre_ocp,
-            :path;
-            f=f_path2,
-            lb=[-3.0, 1.0],
-            ub=[1.0, 2.5],
-            label=:con2,
+            pre_ocp, :path; f=f_path2, lb=[-3.0, 1.0], ub=[1.0, 2.5], label=:con2
         )
 
         # Keep a DSL-style definition expression for printing only

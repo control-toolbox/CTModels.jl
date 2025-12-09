@@ -140,4 +140,3 @@ function test_ocp_model_types()
         Test.@test can_build(ocp)
     end
 end
-

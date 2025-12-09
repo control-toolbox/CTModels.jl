@@ -45,4 +45,3 @@ function test_CTModels()
         )
     end
 end
-

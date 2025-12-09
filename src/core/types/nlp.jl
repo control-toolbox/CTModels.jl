@@ -169,14 +169,10 @@ guess. The default implementation throws a
 `CTBase.NotImplemented` error.
 """
 function (modeler::AbstractOptimizationModeler)(
-    prob::AbstractOptimizationProblem,
-    initial_guess;
-    kwargs...,
+    prob::AbstractOptimizationProblem, initial_guess; kwargs...
 )
     throw(
-        CTBase.NotImplemented(
-            "model-building call not implemented for $(typeof(modeler))",
-        ),
+        CTBase.NotImplemented("model-building call not implemented for $(typeof(modeler))")
     )
 end
 
@@ -198,7 +194,7 @@ function (modeler::AbstractOptimizationModeler)(
 )
     throw(
         CTBase.NotImplemented(
-            "solution-building call not implemented for $(typeof(modeler))",
+            "solution-building call not implemented for $(typeof(modeler))"
         ),
     )
 end
@@ -278,13 +274,10 @@ convert NLP execution statistics into an appropriate representation. The
 default implementation throws a `CTBase.NotImplemented` error.
 """
 function (builder::AbstractOCPSolutionBuilder)(
-    nlp_solution::SolverCore.AbstractExecutionStats;
-    kwargs...,
+    nlp_solution::SolverCore.AbstractExecutionStats; kwargs...
 )
     throw(
-        CTBase.NotImplemented(
-            "OCP solution builder not implemented for $(typeof(builder))",
-        ),
+        CTBase.NotImplemented("OCP solution builder not implemented for $(typeof(builder))")
     )
 end
 
