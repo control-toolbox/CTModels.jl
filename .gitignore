@@ -26,6 +26,10 @@ docs/site/
 # environment.
 Manifest.toml
 
+# Test outputs
+test/solution.jld2
+test/solution.json
+
 #
 reports/
 profiling/
