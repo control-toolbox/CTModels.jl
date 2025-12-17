@@ -16,8 +16,18 @@ Appends box constraint data to the provided vectors.
 # Notes
 - All input vectors (`rg`, `lb`, `ub`) must have the same length.
 - The function modifies the `inds`, `lbs`, `ubs`, and `labels` vectors in-place.
+- If a component index already exists in `inds`, a warning is emitted indicating that the
+  previous bound will be overwritten by the new constraint. The dual variable dimension
+  remains equal to the state/control/variable dimension, not the number of constraint declarations.
 """
 function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
+    # Check for duplicate indices and emit warning
+    for idx in rg
+        if idx in inds
+            @warn "Overwriting bound for component $idx (label: $label). Previous value will be discarded. " *
+                  "Note: dual variable dimension equals the state/control/variable dimension, not the number of constraints."
+        end
+    end
     append!(inds, rg)
     append!(lbs, lb)
     append!(ubs, ub)
@@ -25,6 +35,7 @@ function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
         push!(labels, label)
     end
 end
+
 
 """
 $(TYPEDSIGNATURES)

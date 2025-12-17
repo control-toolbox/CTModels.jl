@@ -31,7 +31,15 @@ Build a solution from the optimal control problem, the time grid, the state, con
 
 - `sol::Solution`: the optimal control solution.
 
+# Notes
+
+The dimensions of box constraint dual variables (`state_constraints_*_dual`, `control_constraints_*_dual`, 
+`variable_constraints_*_dual`) correspond to the **state/control/variable dimension**, not the number of 
+constraint declarations. If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` 
+and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is emitted during model construction.
+
 """
+
 function build_solution(
     ocp::Model,
     T::Vector{Float64},
