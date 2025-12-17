@@ -303,3 +303,63 @@ Check if the final time is free.
 function has_free_final_time(times::TimesModel)::Bool
     return !has_fixed_final_time(times)
 end
+
+# ------------------------------------------------------------------------------ #
+# ALIASES (for naming consistency)
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Alias for [`has_fixed_initial_time`](@ref). Check if the initial time is fixed.
+
+# Example
+```julia-repl
+julia> is_initial_time_fixed(times)  # equivalent to has_fixed_initial_time(times)
+```
+
+See also: [`has_fixed_initial_time`](@ref), [`is_initial_time_free`](@ref).
+"""
+const is_initial_time_fixed = has_fixed_initial_time
+
+"""
+$(TYPEDSIGNATURES)
+
+Alias for [`has_free_initial_time`](@ref). Check if the initial time is free.
+
+# Example
+```julia-repl
+julia> is_initial_time_free(times)  # equivalent to has_free_initial_time(times)
+```
+
+See also: [`has_free_initial_time`](@ref), [`is_initial_time_fixed`](@ref).
+"""
+const is_initial_time_free = has_free_initial_time
+
+"""
+$(TYPEDSIGNATURES)
+
+Alias for [`has_fixed_final_time`](@ref). Check if the final time is fixed.
+
+# Example
+```julia-repl
+julia> is_final_time_fixed(times)  # equivalent to has_fixed_final_time(times)
+```
+
+See also: [`has_fixed_final_time`](@ref), [`is_final_time_free`](@ref).
+"""
+const is_final_time_fixed = has_fixed_final_time
+
+"""
+$(TYPEDSIGNATURES)
+
+Alias for [`has_free_final_time`](@ref). Check if the final time is free.
+
+# Example
+```julia-repl
+julia> is_final_time_free(times)  # equivalent to has_free_final_time(times)
+```
+
+See also: [`has_free_final_time`](@ref), [`is_final_time_fixed`](@ref).
+"""
+const is_final_time_free = has_free_final_time

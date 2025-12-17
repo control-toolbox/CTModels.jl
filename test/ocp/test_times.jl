@@ -130,4 +130,44 @@ function test_times()
         @test CTModels.has_fixed_final_time(times_free)
         @test !CTModels.has_free_final_time(times_free)
     end
+
+    # ============================================================================
+    # Test naming consistency aliases (issue #169)
+    # ============================================================================
+    Test.@testset "times: is_* naming aliases" verbose=VERBOSE showtiming=SHOWTIMING begin
+        # Fixed times
+        t0 = CTModels.FixedTimeModel(0.0, "t0")
+        tf = CTModels.FixedTimeModel(1.0, "tf")
+        times_fixed = CTModels.TimesModel(t0, tf, "t")
+
+        # Test that is_* aliases return the same values as has_* functions
+        @test CTModels.is_initial_time_fixed(times_fixed) == CTModels.has_fixed_initial_time(times_fixed)
+        @test CTModels.is_initial_time_free(times_fixed) == CTModels.has_free_initial_time(times_fixed)
+        @test CTModels.is_final_time_fixed(times_fixed) == CTModels.has_fixed_final_time(times_fixed)
+        @test CTModels.is_final_time_free(times_fixed) == CTModels.has_free_final_time(times_fixed)
+
+        # Verify actual values for fixed times
+        @test CTModels.is_initial_time_fixed(times_fixed) == true
+        @test CTModels.is_initial_time_free(times_fixed) == false
+        @test CTModels.is_final_time_fixed(times_fixed) == true
+        @test CTModels.is_final_time_free(times_fixed) == false
+
+        # Free initial time
+        t0_free = CTModels.FreeTimeModel(1, "v1")
+        times_free_t0 = CTModels.TimesModel(t0_free, tf, "t")
+
+        @test CTModels.is_initial_time_fixed(times_free_t0) == false
+        @test CTModels.is_initial_time_free(times_free_t0) == true
+        @test CTModels.is_final_time_fixed(times_free_t0) == true
+        @test CTModels.is_final_time_free(times_free_t0) == false
+
+        # Free final time
+        tf_free = CTModels.FreeTimeModel(2, "v2")
+        times_free_tf = CTModels.TimesModel(t0, tf_free, "t")
+
+        @test CTModels.is_initial_time_fixed(times_free_tf) == true
+        @test CTModels.is_initial_time_free(times_free_tf) == false
+        @test CTModels.is_final_time_fixed(times_free_tf) == false
+        @test CTModels.is_final_time_free(times_free_tf) == true
+    end
 end

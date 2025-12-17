@@ -113,4 +113,36 @@ function test_objective()
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
     @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :min)
+
+    # ========================================================================
+    # Test naming consistency aliases (issue #169)
+    # ========================================================================
+
+    Test.@testset "cost aliases" verbose = VERBOSE showtiming = SHOWTIMING begin
+        # Functions
+        mayer(x0, xf, v) = x0 .+ xf .+ v
+        lagrange(t, x, u, v) = t .+ x .+ u .+ v
+
+        # MayerObjectiveModel
+        obj_mayer = CTModels.MayerObjectiveModel(mayer, :min)
+        @test CTModels.is_mayer_cost_defined(obj_mayer) == CTModels.has_mayer_cost(obj_mayer)
+        @test CTModels.is_lagrange_cost_defined(obj_mayer) == CTModels.has_lagrange_cost(obj_mayer)
+        @test CTModels.is_mayer_cost_defined(obj_mayer) === true
+        @test CTModels.is_lagrange_cost_defined(obj_mayer) === false
+
+        # LagrangeObjectiveModel
+        obj_lagrange = CTModels.LagrangeObjectiveModel(lagrange, :max)
+        @test CTModels.is_mayer_cost_defined(obj_lagrange) == CTModels.has_mayer_cost(obj_lagrange)
+        @test CTModels.is_lagrange_cost_defined(obj_lagrange) == CTModels.has_lagrange_cost(obj_lagrange)
+        @test CTModels.is_mayer_cost_defined(obj_lagrange) === false
+        @test CTModels.is_lagrange_cost_defined(obj_lagrange) === true
+
+        # BolzaObjectiveModel
+        obj_bolza = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
+        @test CTModels.is_mayer_cost_defined(obj_bolza) == CTModels.has_mayer_cost(obj_bolza)
+        @test CTModels.is_lagrange_cost_defined(obj_bolza) == CTModels.has_lagrange_cost(obj_bolza)
+        @test CTModels.is_mayer_cost_defined(obj_bolza) === true
+        @test CTModels.is_lagrange_cost_defined(obj_bolza) === true
+    end
 end
+
