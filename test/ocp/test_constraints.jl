@@ -136,4 +136,70 @@ function test_constraints()
     # test with :variable constraint and range
     CTModels.constraint!(ocp_set, :variable; rg=1:1, lb=[1], ub=[1], label=:variable_rg)
     @test ocp_set.constraints[:variable_rg] == (:variable, 1:1, [1], [1])
+
+    # -----------------------------------------------------------------------
+    # Test duplicate constraint warning (Issue #105)
+    # When multiple constraints are declared on the same component index,
+    # a warning should be emitted during model build.
+    # Applies to: state, control, and variable constraints.
+    # -----------------------------------------------------------------------
+    @testset "duplicate constraint warning" begin
+        # --- State constraints ---
+        @testset "state" begin
+            ocp_dup = CTModels.PreModel()
+            CTModels.time!(ocp_dup; t0=0.0, tf=1.0)
+            CTModels.state!(ocp_dup, 2)
+            CTModels.control!(ocp_dup, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[1], u[1]]
+            CTModels.dynamics!(ocp_dup, dynamics!)
+            CTModels.objective!(ocp_dup, :min; mayer=(x0, xf, v) -> xf[1])
+            CTModels.definition!(ocp_dup, quote end)
+            CTModels.time_dependence!(ocp_dup; autonomous=false)
+
+            # Add constraints on state component 1
+            CTModels.constraint!(ocp_dup, :state; rg=1:1, lb=[0.0], ub=[1.0], label=:s1)
+            CTModels.constraint!(ocp_dup, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2)
+
+            @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+        end
+
+        # --- Control constraints ---
+        @testset "control" begin
+            ocp_dup = CTModels.PreModel()
+            CTModels.time!(ocp_dup; t0=0.0, tf=1.0)
+            CTModels.state!(ocp_dup, 2)
+            CTModels.control!(ocp_dup, 2)  # 2 controls to allow duplicate on component 1
+            dynamics!(r, t, x, u, v) = r .= [x[1], u[1]]
+            CTModels.dynamics!(ocp_dup, dynamics!)
+            CTModels.objective!(ocp_dup, :min; mayer=(x0, xf, v) -> xf[1])
+            CTModels.definition!(ocp_dup, quote end)
+            CTModels.time_dependence!(ocp_dup; autonomous=false)
+
+            # Add constraints on control component 1
+            CTModels.constraint!(ocp_dup, :control; rg=1:1, lb=[0.0], ub=[1.0], label=:c1)
+            CTModels.constraint!(ocp_dup, :control; rg=1:1, lb=[0.5], ub=[1.5], label=:c2)
+
+            @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+        end
+
+        # --- Variable constraints ---
+        @testset "variable" begin
+            ocp_dup = CTModels.PreModel()
+            CTModels.time!(ocp_dup; t0=0.0, tf=1.0)
+            CTModels.state!(ocp_dup, 2)
+            CTModels.control!(ocp_dup, 1)
+            CTModels.variable!(ocp_dup, 2)  # 2 variables to allow duplicate on component 1
+            dynamics!(r, t, x, u, v) = r .= [x[1], u[1]]
+            CTModels.dynamics!(ocp_dup, dynamics!)
+            CTModels.objective!(ocp_dup, :min; mayer=(x0, xf, v) -> xf[1])
+            CTModels.definition!(ocp_dup, quote end)
+            CTModels.time_dependence!(ocp_dup; autonomous=false)
+
+            # Add constraints on variable component 1
+            CTModels.constraint!(ocp_dup, :variable; rg=1:1, lb=[0.0], ub=[1.0], label=:v1)
+            CTModels.constraint!(ocp_dup, :variable; rg=1:1, lb=[0.5], ub=[1.5], label=:v2)
+
+            @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+        end
+    end
 end
