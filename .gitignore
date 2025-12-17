@@ -30,3 +30,4 @@ Manifest.toml
 reports/
 profiling/
 tmp/
+.agent/
