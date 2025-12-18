@@ -83,11 +83,8 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels => src(
-                    "ocp/model.jl",
-                    "ocp/definition.jl",
-                    "ocp/time_dependence.jl",
-                ),
+                CTModels =>
+                    src("ocp/model.jl", "ocp/definition.jl", "ocp/time_dependence.jl"),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=false,
