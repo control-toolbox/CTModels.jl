@@ -25,7 +25,7 @@ function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
     for idx in rg
         if idx in inds
             @warn "Overwriting bound for component $idx (label: $label). Previous value will be discarded. " *
-                  "Note: dual variable dimension equals the state/control/variable dimension, not the number of constraints."
+                "Note: dual variable dimension equals the state/control/variable dimension, not the number of constraints."
         end
     end
     append!(inds, rg)
@@ -35,7 +35,6 @@ function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
         push!(labels, label)
     end
 end
-
 
 """
 $(TYPEDSIGNATURES)

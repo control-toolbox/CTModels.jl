@@ -141,10 +141,14 @@ function test_times()
         times_fixed = CTModels.TimesModel(t0, tf, "t")
 
         # Test that is_* aliases return the same values as has_* functions
-        @test CTModels.is_initial_time_fixed(times_fixed) == CTModels.has_fixed_initial_time(times_fixed)
-        @test CTModels.is_initial_time_free(times_fixed) == CTModels.has_free_initial_time(times_fixed)
-        @test CTModels.is_final_time_fixed(times_fixed) == CTModels.has_fixed_final_time(times_fixed)
-        @test CTModels.is_final_time_free(times_fixed) == CTModels.has_free_final_time(times_fixed)
+        @test CTModels.is_initial_time_fixed(times_fixed) ==
+            CTModels.has_fixed_initial_time(times_fixed)
+        @test CTModels.is_initial_time_free(times_fixed) ==
+            CTModels.has_free_initial_time(times_fixed)
+        @test CTModels.is_final_time_fixed(times_fixed) ==
+            CTModels.has_fixed_final_time(times_fixed)
+        @test CTModels.is_final_time_free(times_fixed) ==
+            CTModels.has_free_final_time(times_fixed)
 
         # Verify actual values for fixed times
         @test CTModels.is_initial_time_fixed(times_fixed) == true

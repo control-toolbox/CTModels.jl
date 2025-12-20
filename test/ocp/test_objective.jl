@@ -125,24 +125,29 @@ function test_objective()
 
         # MayerObjectiveModel
         obj_mayer = CTModels.MayerObjectiveModel(mayer, :min)
-        @test CTModels.is_mayer_cost_defined(obj_mayer) == CTModels.has_mayer_cost(obj_mayer)
-        @test CTModels.is_lagrange_cost_defined(obj_mayer) == CTModels.has_lagrange_cost(obj_mayer)
+        @test CTModels.is_mayer_cost_defined(obj_mayer) ==
+            CTModels.has_mayer_cost(obj_mayer)
+        @test CTModels.is_lagrange_cost_defined(obj_mayer) ==
+            CTModels.has_lagrange_cost(obj_mayer)
         @test CTModels.is_mayer_cost_defined(obj_mayer) === true
         @test CTModels.is_lagrange_cost_defined(obj_mayer) === false
 
         # LagrangeObjectiveModel
         obj_lagrange = CTModels.LagrangeObjectiveModel(lagrange, :max)
-        @test CTModels.is_mayer_cost_defined(obj_lagrange) == CTModels.has_mayer_cost(obj_lagrange)
-        @test CTModels.is_lagrange_cost_defined(obj_lagrange) == CTModels.has_lagrange_cost(obj_lagrange)
+        @test CTModels.is_mayer_cost_defined(obj_lagrange) ==
+            CTModels.has_mayer_cost(obj_lagrange)
+        @test CTModels.is_lagrange_cost_defined(obj_lagrange) ==
+            CTModels.has_lagrange_cost(obj_lagrange)
         @test CTModels.is_mayer_cost_defined(obj_lagrange) === false
         @test CTModels.is_lagrange_cost_defined(obj_lagrange) === true
 
         # BolzaObjectiveModel
         obj_bolza = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
-        @test CTModels.is_mayer_cost_defined(obj_bolza) == CTModels.has_mayer_cost(obj_bolza)
-        @test CTModels.is_lagrange_cost_defined(obj_bolza) == CTModels.has_lagrange_cost(obj_bolza)
+        @test CTModels.is_mayer_cost_defined(obj_bolza) ==
+            CTModels.has_mayer_cost(obj_bolza)
+        @test CTModels.is_lagrange_cost_defined(obj_bolza) ==
+            CTModels.has_lagrange_cost(obj_bolza)
         @test CTModels.is_mayer_cost_defined(obj_bolza) === true
         @test CTModels.is_lagrange_cost_defined(obj_bolza) === true
     end
 end
-

@@ -5,7 +5,8 @@ function test_time_dependence()
     # Unit tests – time_dependence! and is_autonomous
     # ========================================================================
 
-    Test.@testset "time_dependence! basic behavior" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "time_dependence! basic behavior" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         ocp = CTModels.PreModel()
 
         # Initially not set
@@ -52,5 +53,4 @@ function test_time_dependence()
         Test.@test CTModels.is_autonomous(pre_autonomous) === true
         Test.@test CTModels.is_autonomous(pre_nonautonomous) === false
     end
-
 end
