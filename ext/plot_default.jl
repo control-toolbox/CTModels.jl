@@ -91,8 +91,8 @@ julia> size = __size_plot(sol, model, :components, :split; ...)
 ```
 """
 function __size_plot(
-    sol::CTModels.Solution,
-    model::Union{CTModels.Model,Nothing},
+    sol::CTModels.AbstractSolution,
+    model::Union{CTModels.AbstractModel,Nothing},
     control::Symbol,
     layout::Symbol,
     description::Symbol...;

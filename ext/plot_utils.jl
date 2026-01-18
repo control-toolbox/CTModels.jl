@@ -63,7 +63,7 @@ julia> do_plot(sol, :state, :control, :path; state_style=NamedTuple(), control_s
 ```
 """
 function do_plot(
-    sol::CTModels.Solution,
+    sol::CTModels.AbstractSolution,
     description::Symbol...;
     state_style::Union{NamedTuple,Symbol},
     control_style::Union{NamedTuple,Symbol},
@@ -74,7 +74,11 @@ function do_plot(
     do_plot_state = :state ∈ description && state_style != :none
     do_plot_costate = :costate ∈ description && costate_style != :none
     do_plot_control = :control ∈ description && control_style != :none
-    do_plot_path = :path ∈ description && path_style != :none
+    ocp = CTModels.model(sol)
+    do_plot_path =
+        :path ∈ description &&
+        path_style != :none &&
+        CTModels.dim_path_constraints_nl(ocp) > 0
     do_plot_dual =
         :dual ∈ description &&
         dual_style != :none &&

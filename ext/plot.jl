@@ -371,8 +371,8 @@ function __initial_plot(
             nblines = n + l
             h = round(n / nblines; digits=2)
             lay = Matrix{Any}(undef, 2, 1)
-            lay[1, 1] = (label = :a, width = :auto, height = h)
-            lay[2, 1] = (label = :b, blank = false)
+            lay[1, 1] = (label=:a, width=:auto, height=h)
+            lay[2, 1] = (label=:b, blank=false)
             root = PlotNode(lay, [node_xp, node_u])
         elseif !(node_xp isa EmptyPlot)
             root = node_xp
@@ -416,8 +416,8 @@ function __initial_plot(
                 nblines += nc
                 h = round(nc / nblines; digits=2)
                 lay = Matrix{Any}(undef, 2, 1)
-                lay[1, 1] = (label = :a, blank = false)
-                lay[2, 1] = (label = :b, width = :auto, height = h)
+                lay[1, 1] = (label=:a, blank=false)
+                lay[2, 1] = (label=:b, width=:auto, height=h)
                 root = PlotNode(lay, [root, node_cocp])
             end
         end
