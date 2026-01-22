@@ -140,5 +140,49 @@ A typical pattern is to:
    `AbstractOptimizationProblem` implementation via the
    `get_*_solution_builder` interface.
 
+## Extracting solver information
+
+The [`extract_solver_infos`](@ref CTModels.extract_solver_infos) function provides a standardized way to extract convergence information from NLP solver execution statistics. It returns a 6-element tuple that can be used to construct solver metadata for optimal control solutions.
+
+### Purpose and design
+
+This function bridges the gap between different NLP solver backends (Ipopt, MadNLP, etc.) and the [`SolverInfos`](@ref CTModels.SolverInfos) struct used in CTModels solutions. It handles:
+
+- Extracting objective values, iteration counts, and constraint violations
+- Converting solver-specific status codes to standardized symbols
+- Determining success/failure based on termination status
+- Handling solver-specific behavior (e.g., objective sign for MadNLP)
+
+### Generic method
+
+The generic method works with any `SolverCore.AbstractExecutionStats`:
+
+```julia
+obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+```
+
+Returns:
+
+- `objective::Float64`: Final objective value
+- `iterations::Int`: Number of iterations
+- `constraints_violation::Float64`: Maximum constraint violation
+- `message::String`: Solver identifier (e.g., "Ipopt/generic")
+- `status::Symbol`: Termination status (e.g., `:first_order`)
+- `successful::Bool`: Whether convergence was successful
+
+### MadNLP extension
+
+A specialized method is provided via the `CTModelsMadNLP` extension for MadNLP solvers. This handles:
+
+- Objective sign correction based on minimization/maximization
+- MadNLP-specific status codes (`:SOLVE_SUCCEEDED`, `:SOLVED_TO_ACCEPTABLE_LEVEL`)
+- Returns `"MadNLP"` as the solver message
+
+The extension is automatically loaded when MadNLP is available.
+
+### Relationship with SolverInfos
+
+The tuple returned by `extract_solver_infos` is designed to populate the [`SolverInfos`](@ref CTModels.SolverInfos) struct. Note that the tuple includes the objective value as its first element, but this is stored separately in the `Solution` object rather than in `SolverInfos`.
+
 See also the documentation pages on optimization problems and modelers for
 how these components fit together.

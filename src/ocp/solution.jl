@@ -222,6 +222,7 @@ function build_solution(
         variable_constraints_lb_dual,
         variable_constraints_ub_dual,
     )
+
     solver_infos = SolverInfos(
         iterations, status, message, successful, constraints_violation, infos
     )
