@@ -7,22 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1-beta] - 2026-01-22
+
 ### Added
+
 - New `extract_solver_infos` function to extract convergence information from NLP solver execution statistics
 - MadNLP extension (`CTModelsMadNLP`) for MadNLP-specific solver information extraction
 
 ### Changed
+
 - Widened CTBase compatibility to support versions 0.16 and 0.17
 
 ## [0.7.0-beta] - 2026-01-22
 
 ### Changed
+
 - Breaking change migration: CTModels 0.6.10 → 0.7.0-beta
 - Widened CTBase compatibility from 0.17 to 0.16, 0.17
 
 ## [0.7.0] - 2026-01-18
 
 ### Changed
+
 - Version bump to 0.7.0
 
 ---
