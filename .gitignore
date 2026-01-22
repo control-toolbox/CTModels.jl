@@ -31,7 +31,7 @@ test/solution.jld2
 test/solution.json
 
 #
-reports/
+#reports/
 profiling/
 tmp/
 .agent/
