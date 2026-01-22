@@ -238,12 +238,12 @@ end
 
 ---
 
-### Module 3: **Actions**
+### Module 3: **Orchestration**
 
 **Responsabilité** : Pattern générique pour les actions avec stratégies
 
 ```julia
-module Actions
+module Orchestration
 
 using ..Options
 using ..Strategies
@@ -446,6 +446,6 @@ CTModels/
 
 1. Valider l'architecture à 3 modules
 2. Spécifier le contrat du module Options
-3. Spécifier le contrat du module Actions
+3. Spécifier le contrat du module Orchestration
 4. Mettre à jour solve_simplified.jl avec la nouvelle architecture
 5. Créer des exemples pour chaque mode
