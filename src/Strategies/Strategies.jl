@@ -23,7 +23,6 @@ using ..CTModels.Options
 include(joinpath(@__DIR__, "contract", "abstract_strategy.jl"))
 include(joinpath(@__DIR__, "contract", "strategy_registry.jl"))
 include(joinpath(@__DIR__, "contract", "metadata.jl"))
-include(joinpath(@__DIR__, "contract", "option_specification.jl"))
 include(joinpath(@__DIR__, "contract", "strategy_options.jl"))
 
 include(joinpath(@__DIR__, "api", "builders.jl"))

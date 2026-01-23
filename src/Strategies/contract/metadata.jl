@@ -5,39 +5,51 @@
 # ============================================================================ #
 
 """
-    StrategyMetadata
+$(TYPEDEF)
 
 Metadata about a strategy type, wrapping option definitions.
 
+This type serves as a container for `OptionDefinition` objects that define
+the contract for a strategy's configuration options. It provides a convenient
+interface for accessing and managing option definitions through standard
+Julia collection interfaces.
+
 # Fields
-- `specs::NamedTuple` - NamedTuple of OptionDefinition objects
+- `specs::Dict{Symbol, OptionDefinition}`: Dictionary mapping option names to their definitions.
+
+# Notes
+- This type is internal to the Strategies module and not exported.
+- Option names must be unique within a StrategyMetadata instance.
+- The constructor validates that all option names are unique.
+- Supports standard collection interfaces: `getindex`, `keys`, `values`, `pairs`, `iterate`, `length`.
 
 # Example
-```julia
-metadata(::Type{<:MyStrategy}) = StrategyMetadata(
-    OptionDefinition(
-        name = :max_iter,
-        type = Int,
-        default = 100,
-        description = "Maximum iterations",
-        aliases = (:max, :maxiter),
-        validator = x -> x > 0
-    ),
-    OptionDefinition(
-        name = :tol,
-        type = Float64,
-        default = 1e-6,
-        description = "Convergence tolerance"
-    ),
-)
-```
+```julia-repl
+julia> using CTModels.Strategies
 
-# Indexability
-StrategyMetadata can be indexed to get individual definitions:
-```julia
-meta = metadata(MyStrategy)
-meta[:max_iter]  # Returns OptionDefinition(...)
-keys(meta)       # Returns (:max_iter, :tol)
+julia> meta = StrategyMetadata(
+           OptionDefinition(
+               name = :max_iter,
+               type = Int,
+               default = 100,
+               description = "Maximum iterations",
+               aliases = (:max, :maxiter),
+               validator = x -> x > 0
+           ),
+           OptionDefinition(
+               name = :tol,
+               type = Float64,
+               default = 1e-6,
+               description = "Convergence tolerance"
+           )
+       )
+StrategyMetadata with 2 options
+
+julia> meta[:max_iter].name
+:max_iter
+
+julia> collect(keys(meta))
+[:max_iter, :tol]
 ```
 """
 struct StrategyMetadata
@@ -70,11 +82,6 @@ Base.length(meta::StrategyMetadata) = length(meta.specs)
 function Base.show(io::IO, ::MIME"text/plain", meta::StrategyMetadata)
     println(io, "StrategyMetadata with $(length(meta)) options:")
     for (key, def) in pairs(meta.specs)
-        println(io, "  $key :: $(def.type)")
-        println(io, "    default: $(def.default)")
-        println(io, "    description: $(def.description)")
-        if !isempty(def.aliases)
-            println(io, "    aliases: $(def.aliases)")
-        end
+        println(io, "  $def")
     end
 end

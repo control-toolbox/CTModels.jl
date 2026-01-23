@@ -142,5 +142,58 @@ function test_option_definition()
             )
             Test.@test def.validator === nothing
         end
+        
+        # ========================================================================
+        # Display functionality
+        # ========================================================================
+        
+        Test.@testset "Display" begin
+            # Test with minimal OptionDefinition
+            def_min = CTModels.Options.OptionDefinition(
+                name = :test,
+                type = Int,
+                default = 42,
+                description = "Test option"
+            )
+            
+            # Test with full OptionDefinition
+            def_full = CTModels.Options.OptionDefinition(
+                name = :max_iter,
+                type = Int,
+                default = 100,
+                description = "Maximum iterations",
+                aliases = (:max, :maxiter),
+                validator = x -> x > 0
+            )
+            
+            # Test default display format (custom format)
+            io_min = IOBuffer()
+            println(io_min, def_min)
+            output_min = String(take!(io_min))
+            
+            io_full = IOBuffer()
+            println(io_full, def_full)
+            output_full = String(take!(io_full))
+            
+            # Check that custom display contains expected elements
+            Test.@test occursin("test :: Int64", output_min)
+            Test.@test occursin("  default: 42", output_min)
+            Test.@test occursin("  description: Test option", output_min)
+            
+            Test.@test occursin("max_iter (max, maxiter) :: Int64", output_full)
+            Test.@test occursin("  default: 100", output_full)
+            Test.@test occursin("  description: Maximum iterations", output_full)
+            
+            # Test that all fields are present in output
+            Test.@test occursin("test", output_min)
+            Test.@test occursin("Int64", output_min)
+            Test.@test occursin("42", output_min)
+            Test.@test occursin("Test option", output_min)
+            
+            Test.@test occursin("max_iter", output_full)
+            Test.@test occursin("Int64", output_full)
+            Test.@test occursin("100", output_full)
+            Test.@test occursin("Maximum iterations", output_full)
+        end
     end
 end

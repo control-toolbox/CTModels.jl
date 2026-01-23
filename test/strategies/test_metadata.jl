@@ -123,5 +123,42 @@ function test_metadata()
             end
             Test.@test count == 2
         end
+        
+        # ========================================================================
+        # Display functionality
+        # ========================================================================
+        
+        Test.@testset "Display" begin
+            meta = CTModels.Strategies.StrategyMetadata(
+                CTModels.Options.OptionDefinition(
+                    name = :max_iter,
+                    type = Int,
+                    default = 100,
+                    description = "Maximum iterations",
+                    aliases = (:max, :maxiter),
+                    validator = x -> x > 0
+                ),
+                CTModels.Options.OptionDefinition(
+                    name = :tol,
+                    type = Float64,
+                    default = 1e-6,
+                    description = "Convergence tolerance"
+                )
+            )
+            
+            # Test that show method produces expected output format
+            io = IOBuffer()
+            Base.show(io, MIME"text/plain"(), meta)
+            output = String(take!(io))
+            
+            # Check that output contains expected elements
+            Test.@test occursin("StrategyMetadata with 2 options:", output)
+            Test.@test occursin("max_iter (max, maxiter) :: Int64", output)
+            Test.@test occursin("tol :: Float64", output)
+            Test.@test occursin("default: 100", output)
+            Test.@test occursin("default: 1.0e-6", output)
+            Test.@test occursin("description: Maximum iterations", output)
+            Test.@test occursin("description: Convergence tolerance", output)
+        end
     end
 end
