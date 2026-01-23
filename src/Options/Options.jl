@@ -19,9 +19,9 @@ using DocStringExtensions
 # Include submodules
 # ==============================================================================
 
-include("contract/option_value.jl")
-include("contract/option_schema.jl")
-include("api/extraction.jl")
+include(joinpath(@__DIR__, "option_value.jl"))
+include(joinpath(@__DIR__, "option_schema.jl"))
+include(joinpath(@__DIR__, "extraction.jl"))
 
 # ==============================================================================
 # Public API
