@@ -23,10 +23,10 @@ Concrete subtypes `T <: AbstractOCPTool` are expected to:
   [`_option_specs`](@ref CTModels._option_specs), returning a `NamedTuple` of
   [`OptionSpec`](@ref) values.
 - typically define a keyword-only constructor
-  `T(; kwargs...)` implemented using [`_build_ocp_tool_options`](@ref), so
+  `T(; kwargs...)` implemented using the new option system (see `Options/`), so
   that user-supplied keywords are validated and merged with tool defaults.
 
-Most helper functions in the options schema (see `nlp/options_schema.jl`)
+Most helper functions in the options system (see `Options/option_definition.jl`)
 operate generically on any subtype that satisfies this contract.
 """
 abstract type AbstractOCPTool end

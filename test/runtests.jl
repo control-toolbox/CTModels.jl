@@ -89,6 +89,7 @@ CTBase.run_tests(;
         "ocp/test_*",
         "options/test_*",
         "plot/test_*",
+        "strategies/test_*",
     ),
     filename_builder=name -> Symbol(:test_, name),
     funcname_builder=name -> Symbol(:test_, name),

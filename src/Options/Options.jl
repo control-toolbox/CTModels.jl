@@ -21,12 +21,13 @@ using DocStringExtensions
 
 include(joinpath(@__DIR__, "option_value.jl"))
 include(joinpath(@__DIR__, "option_schema.jl"))
+include(joinpath(@__DIR__, "option_definition.jl"))
 include(joinpath(@__DIR__, "extraction.jl"))
 
 # ==============================================================================
 # Public API
 # ==============================================================================
 
-export OptionValue, OptionSchema, extract_option, extract_options
+export OptionValue, OptionSchema, OptionDefinition, extract_option, extract_options
 
 end # module Options
