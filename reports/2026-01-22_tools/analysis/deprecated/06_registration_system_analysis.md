@@ -1,18 +1,41 @@
 # Registration System - Deep Analysis
 
 **Date**: 2026-01-22  
-**Status**: Analysis - **SUPERSEDED by 07_registration_final_design.md**
+**Status**: ❌ **SUPERSEDED** - See [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
+
+---
+
+## ⚠️ TL;DR - DOCUMENT OBSOLÈTE
+
+**Ce document est OBSOLÈTE - Analyse initiale qui a conduit au design final.**
+
+**Chaîne d'évolution** :
+
+1. ❌ Document 06 (ce document) - Analyse initiale
+2. ❌ Document 07 - Design hybride avec registre global
+3. ✅ **Document 11** - Design final avec registre explicite
+
+**Pourquoi obsolète ?**
+
+- Analyse basée sur l'approche avec registre global
+- Propose un macro `@register_strategies` qui n'a pas été retenu
+- Remplacé par l'approche à registre explicite (plus simple)
+
+**Voir directement** : [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
+
+---
 
 > [!IMPORTANT]
 > This document contains the initial analysis of the registration system.
-> The **final design** is documented in `07_registration_final_design.md` which describes
-> the validated **hybrid approach** where OptimalControl.jl creates the registry.
+> The **final design** is documented in [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
+> which describes the **explicit registry** approach (not the hybrid approach mentioned here).
 
 ---
 
 ## Executive Summary
 
 The registration system currently requires **significant boilerplate** in each package (CTModels, CTDirect, CTSolvers). This analysis examines:
+
 1. What each registration function does
 2. How OptimalControl.jl uses them
 3. Opportunities for automation and simplification
@@ -59,11 +82,13 @@ end
 ```
 
 **Same pattern in CTSolvers** (lines 39-58 of backends_types.jl):
+
 - `solver_symbols()`
 - `_solver_type_from_symbol(sym)`
 - `build_solver_from_symbol(sym; kwargs...)`
 
 **Same pattern in CTDirect** (presumably):
+
 - `discretizer_symbols()`
 - `_discretizer_type_from_symbol(sym)`
 - `build_discretizer_from_symbol(sym; kwargs...)`
@@ -96,6 +121,7 @@ keys = CTModels.options_keys(disc_type)
 **Purpose**: Determine which options belong to which strategy for automatic routing.
 
 **Example**: If user writes `solve(ocp, :collocation, :adnlp, :ipopt; grid_size=100, max_iter=1000)`:
+
 - `grid_size` → belongs to discretizer only → auto-route to discretizer
 - `max_iter` → belongs to solver only → auto-route to solver
 - If an option belongs to multiple → require disambiguation: `backend=(value, :modeler)`
@@ -128,6 +154,7 @@ solver_pkg = CTModels.tool_package_name(solver)
 ### 3.1 `REGISTERED_MODELERS` Constant
 
 **Current**:
+
 ```julia
 const REGISTERED_MODELERS = (ADNLPModeler, ExaModeler)
 ```
@@ -137,6 +164,7 @@ const REGISTERED_MODELERS = (ADNLPModeler, ExaModeler)
 **Question**: Can we auto-discover this from the type hierarchy?
 
 **Answer**: **Partially**. We could use `subtypes(AbstractOptimizationModeler)`, BUT:
+
 - ❌ Requires all types to be defined before registration
 - ❌ Doesn't work across packages (CTDirect can't see CTSolvers types)
 - ❌ Includes abstract intermediate types
@@ -149,6 +177,7 @@ const REGISTERED_MODELERS = (ADNLPModeler, ExaModeler)
 ### 3.2 `modeler_symbols()` Function
 
 **Current**:
+
 ```julia
 modeler_symbols() = Tuple(get_symbol(T) for T in REGISTERED_MODELERS)
 ```
@@ -166,6 +195,7 @@ modeler_symbols() = Tuple(get_symbol(T) for T in REGISTERED_MODELERS)
 ### 3.3 `_modeler_type_from_symbol(sym)` Function
 
 **Current**:
+
 ```julia
 function _modeler_type_from_symbol(sym::Symbol)
     for T in REGISTERED_MODELERS
@@ -205,6 +235,7 @@ _modeler_type_from_symbol(sym) = Strategies.type_from_symbol(REGISTERED_MODELERS
 ### 3.4 `build_modeler_from_symbol(sym; kwargs...)` Function
 
 **Current**:
+
 ```julia
 function build_modeler_from_symbol(sym::Symbol; kwargs...)
     T = _modeler_type_from_symbol(sym)
@@ -271,6 +302,7 @@ end
 ```
 
 **Benefits**:
+
 - ✅ Generic, reusable across all packages
 - ✅ Consistent error messages
 - ✅ Less code duplication
@@ -307,6 +339,7 @@ end
 ```
 
 **Benefits**:
+
 - ✅ **Reduces boilerplate by ~80%**
 - ✅ Consistent naming across packages
 - ✅ Less error-prone
@@ -339,6 +372,7 @@ end
 ```
 
 **Benefits**:
+
 - ✅ Catches errors at compile time
 - ✅ Prevents runtime confusion
 
@@ -349,6 +383,7 @@ end
 **Question**: Should we use `id` instead of `symbol` for clarity?
 
 **Analysis**:
+
 - **Pro `id`**: More general, clearer intent (identifier)
 - **Pro `symbol`**: Julia convention, already used everywhere
 - **Current usage**: `:adnlp`, `:ipopt` are literally Julia `Symbol`s
@@ -362,6 +397,7 @@ end
 **Question**: Should OptimalControl.jl maintain a central registry of all families?
 
 **Current approach**: Each package exports its own functions:
+
 - `CTDirect.discretizer_symbols()`
 - `CTModels.modeler_symbols()`
 - `CTSolvers.solver_symbols()`
@@ -378,6 +414,7 @@ const STRATEGY_FAMILIES = (
 ```
 
 **Analysis**:
+
 - ❌ Creates tight coupling
 - ❌ OptimalControl must know about all packages
 - ❌ Harder to extend with new packages
@@ -401,6 +438,7 @@ end
 ```
 
 **Problems**:
+
 1. **Includes abstract types**: `subtypes(AbstractOptimizationModeler)` might include intermediate abstract types
 2. **Cross-package**: CTDirect can't see CTSolvers types
 3. **Compilation order**: Types must be defined before discovery
@@ -500,16 +538,19 @@ The macro generates the same API, so **OptimalControl.jl doesn't change**.
 ### 9.2 Migration Path
 
 **Phase 1**: Implement in Strategies module
+
 - Add generic helpers
 - Add `@register_strategies` macro
 - Test with CTModels
 
 **Phase 2**: Migrate packages
+
 - CTModels: Replace boilerplate with macro
 - CTDirect: Replace boilerplate with macro
 - CTSolvers: Replace boilerplate with macro
 
 **Phase 3**: Verify
+
 - All tests pass
 - OptimalControl.jl works unchanged
 

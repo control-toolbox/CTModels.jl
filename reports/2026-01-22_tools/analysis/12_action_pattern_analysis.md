@@ -1,7 +1,30 @@
 # Action Pattern Analysis - Strategy vs Action Options
 
 **Date**: 2026-01-22  
-**Status**: Architecture Analysis - Open Questions
+**Status**: Architecture Analysis - Questions Résolues
+
+---
+
+## TL;DR
+
+**Questions clés analysées** :
+
+1. ✅ Signature de `_solve()` : Options d'action en kwargs (résolu)
+2. ✅ Routing : Séparation action/stratégies (résolu dans doc 13)
+3. ✅ Aliases : Module Options générique (résolu dans doc 13)
+4. ✅ Construction de description : Nécessaire pour compatibilité
+
+**Architecture finale** : 3 modules (Options → Strategies → Orchestration)
+
+**Concepts abandonnés** :
+
+- ❌ `AbstractAction` : Trop générique, chaque action gère ses propres modes
+- ❌ `dispatch_action()` générique : Impossible à cause des signatures différentes
+
+**Voir aussi** :
+
+- [13_module_dependencies_architecture.md](../reference/13_module_dependencies_architecture.md) - Architecture finale
+- [14_action_genericity_analysis.md](14_action_genericity_analysis.md) - Pourquoi le dispatch générique est abandonné
 
 ---
 
@@ -12,6 +35,7 @@
 **Question**: Devrait-on avoir `initial_guess` et `display` comme options de l'action plutôt que comme arguments positionnels ?
 
 **Actuel** :
+
 ```julia
 function _solve(
     ocp, initial_guess, discretizer, modeler, solver; display=true
@@ -19,6 +43,7 @@ function _solve(
 ```
 
 **Proposé** :
+
 ```julia
 function _solve(
     ocp, discretizer, modeler, solver; 
@@ -30,11 +55,13 @@ function _solve(
 **Analyse** :
 
 ✅ **Pour le changement** :
+
 - Plus cohérent : les stratégies sont des arguments positionnels, les options sont nommées
 - Pattern clair : `action(object, strategies...; action_options...)`
 - `initial_guess` est optionnel, donc plus naturel en kwarg
 
 ❌ **Contre le changement** :
+
 - `initial_guess` est conceptuellement important, pas juste une "option"
 - Actuellement très visible en tant qu'argument positionnel
 
@@ -49,6 +76,7 @@ function _solve(
 **Analyse du code actuel** :
 
 Dans `_parse_kwargs()` (lignes 218-226) :
+
 ```julia
 function _parse_kwargs(kwargs::NamedTuple)
     initial_guess, kwargs1 = _take_kwarg(kwargs, _SOLVE_INITIAL_GUESS_ALIASES, ...)
@@ -62,6 +90,7 @@ end
 ```
 
 **Ce qui se passe** :
+
 1. On extrait d'abord les **options d'action** : `initial_guess`, `display`
 2. On extrait les **stratégies explicites** : `discretizer`, `modeler`, `solver`
 3. Tout le reste va dans `other_kwargs` pour être routé
@@ -69,6 +98,7 @@ end
 **Problème identifié** : ❌ **Non, ce n'est pas complet !**
 
 Dans `solve.jl` (lignes 416-446), il y a une validation supplémentaire :
+
 ```julia
 function _ensure_no_ambiguous_description_kwargs(method::Tuple, kwargs::NamedTuple)
     # ...
@@ -95,6 +125,7 @@ end
 ```
 
 **Ce qui manque dans `solve_simplified.jl`** :
+
 - ❌ Pas de validation que les options d'action ne sont pas routées aux stratégies
 - ❌ Pas de gestion des conflits entre options d'action et options de stratégies
 
@@ -107,6 +138,7 @@ end
 **Question**: Les aliases (`:initial_guess`, `:init`, `:i`) devraient-ils être dans le module Strategies ?
 
 **Actuel** (dans solve.jl) :
+
 ```julia
 const _SOLVE_INITIAL_GUESS_ALIASES = (:initial_guess, :init, :i)
 const _SOLVE_DISCRETIZER_ALIASES = (:discretizer, :d)
@@ -116,10 +148,12 @@ const _SOLVE_MODELER_ALIASES = (:modeler, :modeller, :m)
 **Analyse** :
 
 ✅ **Pour déplacer dans Strategies** :
+
 - Concept générique : toute action peut avoir des aliases
 - Réutilisable pour d'autres actions
 
 ❌ **Contre déplacer dans Strategies** :
+
 - Spécifique à chaque action (`:i` pour initial_guess est spécifique à solve)
 - Pas lié aux stratégies elles-mêmes
 
@@ -132,6 +166,7 @@ const _SOLVE_MODELER_ALIASES = (:modeler, :modeller, :m)
 **Question**: Est-on obligé de construire une description depuis les composants en mode explicite ?
 
 **Code actuel** (lignes 316-321) :
+
 ```julia
 # Otherwise, build partial description and complete it
 partial_desc = _build_description_from_components(
@@ -145,10 +180,12 @@ discretizer = parsed.discretizer !== nothing ? parsed.discretizer :
 ```
 
 **Pourquoi on fait ça** :
+
 - Si l'utilisateur fournit seulement `discretizer=CollocationDiscretizer()`, on doit compléter avec un modeler et solver par défaut
 - Pour choisir les bons par défaut, on utilise `CTBase.complete()` qui trouve une méthode compatible
 
 **Alternative plus simple** :
+
 ```julia
 # Just use first available method as default
 method = AVAILABLE_METHODS[1]  # (:collocation, :adnlp, :ipopt)
@@ -158,6 +195,7 @@ discretizer = parsed.discretizer !== nothing ? parsed.discretizer :
 ```
 
 **Problème avec l'alternative** :
+
 - ❌ Pas de garantie de compatibilité
 - ❌ Si user fournit `modeler=ExaModeler()`, on pourrait choisir une méthode incompatible
 
@@ -166,6 +204,8 @@ discretizer = parsed.discretizer !== nothing ? parsed.discretizer :
 ---
 
 ## Proposition : Architecture à 3 Modules
+
+> **Note** : Cette architecture a été validée et documentée dans [13_module_dependencies_architecture.md](../reference/13_module_dependencies_architecture.md)
 
 ### Module 1: **Options**
 
@@ -240,7 +280,17 @@ end
 
 ### Module 3: **Orchestration**
 
-**Responsabilité** : Pattern générique pour les actions avec stratégies
+**Responsabilité** : Orchestration des actions, routing, construction de stratégies
+
+> **⚠️ Concepts Abandonnés** : Les concepts `AbstractAction` et `dispatch_action()` générique ont été **abandonnés** après analyse approfondie.
+>
+> **Raison** : Comme expliqué dans [14_action_genericity_analysis.md](14_action_genericity_analysis.md), le dispatch multi-modes ne peut pas être complètement générique car :
+>
+> - Les signatures des modes diffèrent entre actions
+> - Julia ne permet pas de dispatch sur le nombre d'arguments de manière générique
+> - Chaque action doit gérer manuellement ses propres modes
+
+**Architecture finale** :
 
 ```julia
 module Orchestration
@@ -248,62 +298,52 @@ module Orchestration
 using ..Options
 using ..Strategies
 
-abstract type AbstractAction end
+# Pas d'AbstractAction - chaque action gère ses propres modes
 
-# Action contract
-struct ActionSignature
-    name::Symbol
-    object_type::Type
-    strategy_families::NamedTuple  # family_name => Type
-    action_options::Vector{OptionSchema}
-    modes::Tuple{Vararg{Symbol}}  # (:standard, :description, :explicit)
+# Outils génériques pour le routing
+function route_all_options(
+    kwargs::NamedTuple,
+    registry::StrategyRegistry
+)::Tuple{NamedTuple, NamedTuple}
+    # Sépare options d'action et options de stratégies
+    # ...
 end
 
-"""
-Generic action dispatcher supporting 3 modes:
-
-1. **Standard**: `action(object, strategies...; action_options...)`
-2. **Description**: `action(object, description...; strategy_options..., action_options...)`
-3. **Explicit**: `action(object; strategies..., action_options...)`
-"""
-function dispatch_action(
-    signature::ActionSignature,
+function extract_action_options(
+    kwargs::NamedTuple,
     registry::StrategyRegistry,
-    args...;
-    kwargs...
-)
-    # Detect mode
-    mode = detect_mode(signature, args, kwargs)
-    
-    if mode === :standard
-        return dispatch_standard(signature, args, kwargs)
-    elseif mode === :description
-        return dispatch_description(signature, registry, args, kwargs)
-    elseif mode === :explicit
-        return dispatch_explicit(signature, registry, args, kwargs)
-    end
+    action_option_schemas::Vector{OptionSchema}
+)::NamedTuple
+    # Extrait et valide les options d'action
+    # ...
 end
 
-function dispatch_description(signature, registry, args, kwargs)
-    object = args[1]
-    description = args[2:end]
-    
-    # 1. Extract action options
-    action_opts, remaining = extract_action_options(signature.action_options, kwargs)
-    
-    # 2. Route strategy options
-    method = complete_description(description, registry)
-    routed = route_options(method, signature.strategy_families, remaining, registry)
-    
-    # 3. Build strategies
-    strategies = build_strategies(method, signature.strategy_families, routed, registry)
-    
-    # 4. Call core action
-    return call_action(signature, object, strategies, action_opts)
+function build_strategies_from_method(
+    description::Tuple{Vararg{Symbol}},
+    kwargs::NamedTuple,
+    registry::StrategyRegistry
+)::Vector{AbstractStrategy}
+    # Construit les stratégies depuis une description
+    # ...
 end
 
 end
 ```
+
+**Utilisation** : Chaque action (solve, describe, etc.) utilise ces outils mais gère son propre dispatch :
+
+```julia
+# Chaque action gère manuellement ses modes
+function solve(ocp, description...; kwargs...)
+    if has_explicit_strategies(kwargs)
+        return _solve_explicit_mode(...)
+    else
+        return _solve_description_mode(...)
+    end
+end
+```
+
+Voir [solve_ideal.jl](../solve_ideal.jl) pour l'exemple complet.
 
 ---
 
@@ -314,11 +354,13 @@ end
 **Syntaxe** : `action(object, strategy1, strategy2, ...; action_options...)`
 
 **Exemple** :
+
 ```julia
 solve(ocp, discretizer, modeler, solver; initial_guess=ig, display=true)
 ```
 
 **Caractéristiques** :
+
 - Stratégies déjà construites
 - Seulement options d'action en kwargs
 - Pas de routing nécessaire
@@ -330,6 +372,7 @@ solve(ocp, discretizer, modeler, solver; initial_guess=ig, display=true)
 **Syntaxe** : `action(object, description...; strategy_options..., action_options...)`
 
 **Exemple** :
+
 ```julia
 solve(ocp, :collocation, :adnlp, :ipopt; 
     grid_size=100,           # Strategy option (discretizer)
@@ -341,6 +384,7 @@ solve(ocp, :collocation, :adnlp, :ipopt;
 ```
 
 **Caractéristiques** :
+
 - Description partielle ou complète
 - Mix d'options de stratégies et d'action
 - **Routing nécessaire** pour séparer les options
@@ -352,6 +396,7 @@ solve(ocp, :collocation, :adnlp, :ipopt;
 **Syntaxe** : `action(object; strategy1=..., strategy2=..., action_options...)`
 
 **Exemple** :
+
 ```julia
 solve(ocp; 
     discretizer=CollocationDiscretizer(grid_size=100),
@@ -363,6 +408,7 @@ solve(ocp;
 ```
 
 **Caractéristiques** :
+
 - Stratégies fournies explicitement (instances ou nothing)
 - Seulement options d'action en kwargs (pas d'options de stratégies)
 - Stratégies manquantes complétées avec défauts
@@ -374,6 +420,7 @@ solve(ocp;
 ### Q1: Signature de `_solve()`
 
 **Réponse** : ✅ Changer pour :
+
 ```julia
 function _solve(
     ocp, discretizer, modeler, solver; 
@@ -393,6 +440,7 @@ function _solve(
 3. Valider qu'il n'y a pas de conflit
 
 **Code corrigé** :
+
 ```julia
 function _solve_from_description(ocp, method, parsed)
     # parsed.other_kwargs contient SEULEMENT les options de stratégies
@@ -419,7 +467,9 @@ end
 
 ---
 
-## Architecture Finale Proposée
+## Architecture Finale Validée
+
+> **Voir** : [13_module_dependencies_architecture.md](../reference/13_module_dependencies_architecture.md) pour l'architecture complète
 
 ```
 CTModels/
@@ -427,25 +477,33 @@ CTModels/
 │   ├── options/
 │   │   ├── option_value.jl
 │   │   ├── option_schema.jl
-│   │   └── option_extraction.jl
+│   │   └── extraction.jl
 │   ├── strategies/
 │   │   ├── abstract_strategy.jl
-│   │   ├── strategy_contract.jl
-│   │   ├── strategy_registry.jl
-│   │   └── strategy_builder.jl
-│   └── actions/
-│       ├── abstract_action.jl
-│       ├── action_signature.jl
-│       ├── action_dispatcher.jl
-│       └── mode_detection.jl
+│   │   ├── metadata.jl
+│   │   ├── registry.jl
+│   │   └── builders.jl
+│   └── orchestration/
+│       ├── routing.jl
+│       └── method_builders.jl
 ```
+
+**Note** : Pas de module `actions/` générique - chaque action (solve, describe, etc.) gère ses propres modes manuellement.
 
 ---
 
-## Prochaines Étapes
+## Statut des Questions
 
-1. Valider l'architecture à 3 modules
-2. Spécifier le contrat du module Options
-3. Spécifier le contrat du module Orchestration
-4. Mettre à jour solve_simplified.jl avec la nouvelle architecture
-5. Créer des exemples pour chaque mode
+| Question | Statut | Résolution |
+|----------|--------|------------|
+| Q1: Signature `_solve()` | ✅ Résolu | Options d'action en kwargs |
+| Q2: Routing | ✅ Résolu | Séparation dans Orchestration (doc 13) |
+| Q3: Aliases | ✅ Résolu | Module Options générique (doc 13) |
+| Q4: Construction description | ✅ Résolu | Nécessaire pour compatibilité |
+
+## Documents Liés
+
+- [13_module_dependencies_architecture.md](../reference/13_module_dependencies_architecture.md) - Architecture finale des 3 modules
+- [14_action_genericity_analysis.md](14_action_genericity_analysis.md) - Analyse de la généricité des actions
+- [11_explicit_registry_architecture.md](../reference/11_explicit_registry_architecture.md) - Architecture du registre explicite
+- [solve_ideal.jl](../solve_ideal.jl) - Exemple complet avec les 3 modes

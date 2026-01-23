@@ -9,6 +9,24 @@
 
 **Peut-on vraiment faire un dispatch multi-mode générique pour les actions ?**
 
+## TL;DR
+
+**Réponse** : **Non**. Orchestration fournit des **outils** (routing, extraction), pas un dispatch magique.
+
+**Ce qui est générique** :
+
+- ✅ `route_all_options()` - routing des options
+- ✅ `extract_action_options()` - extraction des options d'action  
+- ✅ `build_strategies_from_method()` - construction des stratégies
+
+**Ce qui ne l'est pas** :
+
+- ❌ Détection de mode (spécifique à chaque action)
+- ❌ Dispatch entre modes (manuel)
+- ❌ Logique métier de l'action
+
+**Approche finale** : Hybrid - outils génériques dans Orchestration, dispatch manuel dans chaque action.
+
 ---
 
 ## Analyse de solve_ideal.jl
@@ -93,11 +111,13 @@ end
 ```
 
 **Avantages** :
+
 - ✅ Flexible
 - ✅ Clair pour chaque action spécifique
 - ✅ Pas de magie
 
 **Inconvénients** :
+
 - ❌ Code répétitif entre actions
 - ❌ Pas de réutilisation
 
@@ -125,10 +145,12 @@ end
 ```
 
 **Avantages** :
+
 - ✅ Mode Standard est propre (dispatch Julia natif)
 - ✅ Mode 2/3 restent flexibles
 
 **Inconvénients** :
+
 - ⚠️ Toujours du code manuel pour Mode 2/3
 
 ---
@@ -149,11 +171,13 @@ solve_with_strategies(ocp; discretizer=..., modeler=..., action_options...)
 ```
 
 **Avantages** :
+
 - ✅ Très clair
 - ✅ Pas d'ambiguïté
 - ✅ Chaque fonction a une responsabilité unique
 
 **Inconvénients** :
+
 - ❌ Perd l'API unifiée `solve()`
 - ❌ Utilisateur doit choisir la bonne fonction
 
@@ -187,11 +211,13 @@ end
 ```
 
 **Avantages** :
+
 - ✅ Réutilisable
 - ✅ Déclaratif
 - ✅ Moins de boilerplate
 
 **Inconvénients** :
+
 - ❌ Magie (moins transparent)
 - ❌ Complexité de la macro
 - ⚠️ Toujours du dispatch manuel pour Mode 2/3
@@ -220,6 +246,7 @@ end
 **Le dispatch entre modes** :
 
 Chaque action doit implémenter :
+
 ```julia
 function solve(ocp, description...; kwargs...)
     # Détection de mode (spécifique à solve)
@@ -232,6 +259,7 @@ end
 ```
 
 **Pourquoi** : La détection de mode dépend de :
+
 - Quels kwargs indiquent le mode explicit (`:discretizer`, `:modeler`, `:solver` pour solve)
 - Quelles sont les stratégies de cette action
 - Logique métier spécifique
@@ -312,11 +340,13 @@ end
 **Non, pas vraiment.**
 
 **Ce qui est générique** :
+
 - ✅ Routing des options (`route_all_options`)
 - ✅ Construction des stratégies (`build_strategies_from_method`)
 - ✅ Extraction des options d'action (`extract_action_options`)
 
 **Ce qui ne l'est pas** :
+
 - ❌ Dispatch entre modes (dépend de chaque action)
 - ❌ Détection de mode (spécifique aux kwargs de chaque action)
 - ❌ Logique métier de l'action
@@ -324,6 +354,7 @@ end
 ### Conclusion
 
 **Le module Orchestration fournit des outils génériques**, mais chaque action doit :
+
 1. Implémenter ses propres fonctions de mode
 2. Détecter le mode manuellement
 3. Appeler les outils génériques pour le routing
@@ -335,7 +366,16 @@ end
 ## Mise à Jour de solve_ideal.jl
 
 Il faut clarifier que `solve_ideal.jl` montre :
+
 - ✅ Comment **utiliser** les outils génériques d'Orchestration
 - ❌ Mais **pas** un dispatch automatique magique
 
 Le dispatch reste **manuel** et **spécifique** à solve.
+
+---
+
+## Voir Aussi
+
+- **[../reference/solve_ideal.jl](../reference/solve_ideal.jl)** - Implémentation de l'approche hybrid
+- **[../reference/13_module_dependencies_architecture.md](../reference/13_module_dependencies_architecture.md)** - Architecture du module Orchestration
+- **[12_action_pattern_analysis.md](12_action_pattern_analysis.md)** - Analyse du pattern action (contexte)

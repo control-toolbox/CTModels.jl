@@ -1,7 +1,57 @@
 # Strategies Module - Complete Contract Specification
 
 **Date**: 2026-01-22  
-**Status**: Final - Complete Contract Definition
+**Status**: ✅ **REFERENCE** - Final Contract Definition
+
+---
+
+## TL;DR
+
+**Ce document définit le contrat** que chaque stratégie doit implémenter. Il sépare clairement le **Type-Level Contract** (métadonnées statiques) du **Instance-Level Contract** (état configuré).
+
+**Méthodes requises** :
+
+- ✅ `symbol(::Type{<:MyStrategy})` - ID unique (ex: `:adnlp`)
+- ✅ `metadata(::Type{<:MyStrategy})` - Retourne un `StrategyMetadata`
+- ✅ `options(strategy)` - Retourne un `StrategyOptions`
+- ✅ `MyStrategy(; kwargs...)` - Constructeur obligatoire (via `build_strategy_options`)
+
+**Concepts clés** :
+
+- **Aliases** : Noms alternatifs pour les options (ex: `init` pour `initial_guess`)
+- **Validators** : Fonctions de validation (ex: `x -> x > 0`)
+
+**Voir aussi** :
+
+- [abstract_strategy.jl](code/Strategies/contract/abstract_strategy.jl) - Contrat de base
+- [metadata.jl](code/Strategies/contract/metadata.jl) - `StrategyMetadata`
+- [option_specification.jl](code/Strategies/contract/option_specification.jl) - `OptionSpecification`
+
+---
+
+## Core Principle: Type vs Instance Separation
+
+The Strategies contract is split into two clear levels to separate static descriptions from active configuration.
+
+### Type-Level Contract (Static Metadata)
+
+This level contains information that is common to all instances of a strategy type.
+
+**Why on the type?**
+
+- **Optimstration** : Permet l'introspection et la validation sans créer d'instances.
+- **Routing** : Utilisé par `OptimalControl.jl` pour décider quelle stratégie utiliser à partir d'un symbole.
+- **Dispatch** : Aligné avec le système de dispatch de Julia où le type porte la sémantique.
+
+### Instance-Level Contract (Configured State)
+
+This level contains the effective configuration of a specific strategy instance.
+
+**Why on the instance?**
+
+- **Dynamisme** : Un utilisateur peut créer deux instances de la même stratégie avec des réglages différents.
+- **Provenance** : Chaque instance suit l'origine de ses options (`:user` vs `:default`).
+- **Encapsulation** : L'état configuré appartient à l'objet qui va l'exécuter.
 
 ---
 
@@ -20,11 +70,13 @@ Every strategy **must** implement the following contract to work with the Strate
 **Purpose**: Returns the unique identifier for the strategy type.
 
 **Requirements**:
+
 - Must return a `Symbol` (e.g., `:adnlp`, `:ipopt`)
 - Must be **unique within the strategy's family**
 - Should be short and memorable
 
 **Example**:
+
 ```julia
 symbol(::Type{<:ADNLPModeler}) = :adnlp
 ```
@@ -36,21 +88,30 @@ symbol(::Type{<:ADNLPModeler}) = :adnlp
 **Purpose**: Returns the option specifications for the strategy.
 
 **Requirements**:
+
 - Must return a `StrategyMetadata` wrapping a `NamedTuple` of `OptionSpecification`
 - Can return empty metadata: `StrategyMetadata(NamedTuple())`
 
 **Example**:
+
 ```julia
 metadata(::Type{<:ADNLPModeler}) = StrategyMetadata((
     backend = OptionSpecification(
         type = Symbol,
         default = :optimized,
-        description = "AD backend used by ADNLPModels"
+        description = "AD backend used by ADNLPModels",
+        aliases = (:alg, :method)  # Aliases for better UX
     ),
     show_time = OptionSpecification(
         type = Bool,
         default = false,
         description = "Whether to show timing information"
+    ),
+    grid_size = OptionSpecification(
+        type = Int,
+        default = 100,
+        description = "Grid size for discretization",
+        validator = x -> x > 0  # Custom validator
     ),
 ))
 ```
@@ -66,6 +127,7 @@ metadata(::Type{<:ADNLPModeler}) = StrategyMetadata((
 **Default**: Returns `missing`
 
 **Example**:
+
 ```julia
 package_name(::Type{<:ADNLPModeler}) = "ADNLPModels"
 ```
@@ -81,29 +143,80 @@ package_name(::Type{<:ADNLPModeler}) = "ADNLPModels"
 **Purpose**: Returns the configured options for the strategy instance.
 
 **Requirements**:
+
 - Either have an `options::StrategyOptions` field (recommended)
 - Or implement a custom `options()` getter
 
 **Default implementation**: Accesses `.options` field
 
-**Example (field-based)**:
+---
+
+## Flexible Implementation
+
+Users have two options for the instance-level contract:
+
+**Option A: Standard field-based** (recommended):
+
 ```julia
 struct MyStrategy <: AbstractStrategy
     options::StrategyOptions
 end
 
-# Uses default implementation of options()
+# options() uses default implementation that accesses the .options field
 ```
 
-**Example (custom getter)**:
+**Option B: Custom getter**:
+
 ```julia
 struct MyStrategy <: AbstractStrategy
     config::Dict  # Custom internal structure
 end
 
+# Override getter to convert internal state to StrategyOptions on the fly
 function options(strategy::MyStrategy)
-    # Convert custom structure to StrategyOptions
-    return StrategyOptions(...)
+    return StrategyOptions(NamedTuple(strategy.config), ...)
+end
+```
+
+---
+
+## Tool Families
+
+The design supports hierarchical tool families to organize registration:
+
+```julia
+# 1. Define the family
+abstract type AbstractOptimizationModeler <: AbstractStrategy end
+
+# 2. Define family members
+struct ADNLPModeler <: AbstractOptimizationModeler
+    options::StrategyOptions
+end
+
+struct ExaModeler <: AbstractOptimizationModeler
+    options::StrategyOptions
+end
+
+# 3. Each implements the contract independently
+symbol(::Type{<:ADNLPModeler}) = :adnlp
+symbol(::Type{<:ExaModeler}) = :exa
+```
+
+---
+
+## Error Handling
+
+All required methods have default implementations in `Strategies` that throw `CTBase.NotImplemented` with helpful messages when not overridden.
+
+For example, the default implementation of `options()` is:
+
+```julia
+function options(tool::T) where {T<:AbstractStrategy}
+    if hasfield(T, :options)
+        return getfield(tool, :options)
+    else
+        throw(CTBase.NotImplemented("Strategy $T must either have an `options::StrategyOptions` field or implement options(::$T)"))
+    end
 end
 ```
 
@@ -118,11 +231,13 @@ end
 **Purpose**: Keyword-only constructor for building strategy instances.
 
 **Requirements**:
+
 - **Must** accept keyword arguments
 - **Must** use `build_strategy_options()` to validate and merge options
 - **Must** return an instance of the strategy
 
 **Standard pattern**:
+
 ```julia
 function MyStrategy(; kwargs...)
     options = build_strategy_options(MyStrategy; kwargs...)
@@ -131,6 +246,7 @@ end
 ```
 
 **Why required**: The registration system uses this constructor to build strategies from IDs:
+
 ```julia
 # This is what build_strategy() does internally:
 T = type_from_id(:adnlp, AbstractOptimizationModeler)
@@ -184,22 +300,28 @@ end
 Once a strategy implements the contract, it can be:
 
 ### 1. Used directly
+
 ```julia
 strategy = MyStrategy(max_iter=200, tol=1e-8)
 ```
 
 ### 2. Registered in a family
+
 ```julia
-# In OptimalControl.jl
-register_family!(AbstractMyStrategyFamily, (MyStrategy, OtherStrategy))
+# In OptimalControl.jl - Create registry with explicit registration
+registry = create_registry(
+    AbstractMyStrategyFamily => (MyStrategy, OtherStrategy)
+)
 ```
 
 ### 3. Built from ID
+
 ```julia
-strategy = build_strategy(:mystrategy, AbstractMyStrategyFamily; max_iter=200)
+strategy = build_strategy(:mystrategy, AbstractMyStrategyFamily, registry; max_iter=200)
 ```
 
 ### 4. Introspected
+
 ```julia
 symbol(strategy)                    # => :mystrategy
 metadata(strategy)                  # => StrategyMetadata (auto-displays)
@@ -223,6 +345,7 @@ using CTModels.Strategies: validate_strategy_contract
 ```
 
 This checks:
+
 - ✅ `symbol()` is implemented
 - ✅ `metadata()` is implemented
 - ✅ Constructor `MyStrategy(; kwargs...)` exists and works
@@ -253,6 +376,7 @@ For a strategy to be fully compliant:
 ## Migration from Old Contract
 
 ### Old (AbstractOCPTool)
+
 ```julia
 struct MyTool <: AbstractOCPTool
     options_values::NamedTuple
@@ -270,6 +394,7 @@ end
 ```
 
 ### New (AbstractStrategy)
+
 ```julia
 struct MyStrategy <: AbstractStrategy
     options::StrategyOptions  # ← Unified structure
@@ -286,6 +411,7 @@ end
 ```
 
 **Key changes**:
+
 1. `options_values` + `options_sources` → `options::StrategyOptions`
 2. `get_symbol` → `symbol`
 3. `_option_specs` → `metadata` (returns `StrategyMetadata`)

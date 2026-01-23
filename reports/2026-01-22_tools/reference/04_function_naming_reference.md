@@ -1,7 +1,36 @@
 # Strategies Function Naming Reference
 
 **Date**: 2026-01-22  
-**Status**: Working Document - Updated with metadata types
+**Status**: ✅ **REFERENCE** - Complete function naming guide
+
+---
+
+## TL;DR
+
+**Ce document est la référence complète** pour tous les noms de fonctions du module Strategies.
+
+**Types principaux** :
+
+- `OptionSpecification` - Spécification d'une option (type, default, description, aliases, validator)
+- `StrategyMetadata` - Wrap `NamedTuple` d'`OptionSpecification`
+- `StrategyOptions` - Wrap values + sources (:user/:default)
+
+**Conventions de nommage** :
+
+- ❌ Pas de préfixe `get_`
+- ✅ Ordre cohérent : `(strategy, key)`
+- ✅ Singulier/Pluriel : `option_X(key)` vs `option_Xs()`
+- ✅ Affichage automatique via `Base.show`
+
+**Implémentation** : Voir [code/Strategies/](code/Strategies/)
+
+- Contract: [contract/](code/Strategies/contract/) - Ce que users doivent implémenter
+- API: [api/](code/Strategies/api/) - Ce que le système fournit
+
+**Voir aussi** :
+
+- [05_design_decisions_summary.md](05_design_decisions_summary.md) - Décisions de design
+- [08_complete_contract_specification.md](08_complete_contract_specification.md) - Spécification du contrat
 
 ---
 
@@ -12,6 +41,7 @@
 **Description**: Wraps a `NamedTuple` of `OptionSpecification` describing all possible options for a tool type.
 
 **Structure**:
+
 ```julia
 struct StrategyMetadata
     specs::NamedTuple{Names, <:Tuple{Vararg{OptionSpecification}}}
@@ -26,6 +56,7 @@ Base.iterate(tm::StrategyMetadata, state...) = iterate(tm.specs, state...)
 ```
 
 **Display** (automatic via `Base.show`):
+
 ```julia
 function Base.show(io::IO, ::MIME"text/plain", tm::StrategyMetadata)
     println(io, "Tool Metadata:")
@@ -43,6 +74,7 @@ end
 ```
 
 **Usage**:
+
 ```julia
 meta = metadata(ADNLPModeler)
 # Automatic display:
@@ -63,6 +95,7 @@ meta[:show_time]  # Returns OptionSpecification(...)
 **Description**: Contains the effective option values and their provenance for a tool instance.
 
 **Structure**:
+
 ```julia
 struct StrategyOptions
     values::NamedTuple
@@ -78,6 +111,7 @@ Base.iterate(to::StrategyOptions, state...) = iterate(to.values, state...)
 ```
 
 **Display** (automatic via `Base.show`):
+
 ```julia
 function Base.show(io::IO, ::MIME"text/plain", to::StrategyOptions)
     println(io, "Configured Options:")
@@ -91,6 +125,7 @@ end
 ```
 
 **Usage**:
+
 ```julia
 tool = ADNLPModeler(backend=:sparse)
 opts = options(tool)
@@ -142,10 +177,12 @@ option_default(tool, key)            # Convenience → option_default(typeof(too
 ### Key Insight: Two Function Families
 
 **Family A** - Metadata about ONE option (requires `key`):
+
 - Pattern: `option_X(tool_or_type, key::Symbol)`
 - Examples: `option_type`, `option_description`, `option_default`
 
 **Family B** - Metadata about ALL options (no `key`):
+
 - Pattern: `option_Xs(tool_or_type)` (plural)
 - Examples: `option_names`, `option_defaults`
 
@@ -162,6 +199,7 @@ Functions that tool developers **must** implement.
 **Description**: Returns the unique symbol identifying the tool type (`:adnlp`, `:ipopt`, etc.)
 
 **Signatures**:
+
 ```julia
 symbol(::Type{<:AbstractStrategy}) -> Symbol  # REQUIRED to implement
 symbol(tool::AbstractStrategy) -> Symbol      # Convenience → symbol(typeof(tool))
@@ -180,6 +218,7 @@ symbol(tool::AbstractStrategy) -> Symbol      # Convenience → symbol(typeof(to
 **Description**: Returns a `StrategyMetadata` wrapping a `NamedTuple` of `OptionSpecification` describing all possible options
 
 **Signatures**:
+
 ```julia
 metadata(::Type{<:AbstractStrategy}) -> StrategyMetadata  # REQUIRED to implement
 metadata(tool::AbstractStrategy) -> StrategyMetadata      # Convenience
@@ -194,6 +233,7 @@ metadata(tool::AbstractStrategy) -> StrategyMetadata      # Convenience
 **Display**: Automatic via `Base.show(::StrategyMetadata)` - no need for `show_metadata()`
 
 **Example**:
+
 ```julia
 meta = metadata(ADNLPModeler)
 # Auto-displays:
@@ -215,6 +255,7 @@ meta[:show_time].default   # Returns: false
 **Description**: Returns the Julia package name associated with the tool (for display purposes)
 
 **Signatures**:
+
 ```julia
 package_name(::Type{<:AbstractStrategy}) -> Union{String, Missing}  # OPTIONAL to implement
 package_name(tool::AbstractStrategy) -> Union{String, Missing}      # Convenience
@@ -235,6 +276,7 @@ package_name(tool::AbstractStrategy) -> Union{String, Missing}      # Convenienc
 **Description**: Returns the `StrategyOptions` struct containing values and sources
 
 **Signatures**:
+
 ```julia
 options(tool::AbstractStrategy) -> StrategyOptions  # REQUIRED (field or getter)
 ```
@@ -248,6 +290,7 @@ options(tool::AbstractStrategy) -> StrategyOptions  # REQUIRED (field or getter)
 **Display**: Automatic via `Base.show(::StrategyOptions)` - no need for `show_options()`
 
 **Example**:
+
 ```julia
 tool = ADNLPModeler(backend=:sparse)
 opts = options(tool)
@@ -271,6 +314,7 @@ Functions for discovering what a tool can do.
 **Description**: Returns a tuple of all option names
 
 **Signatures**:
+
 ```julia
 option_names(::Type{<:AbstractStrategy}) -> Tuple{Vararg{Symbol}}
 option_names(tool::AbstractStrategy) -> Tuple{Vararg{Symbol}}
@@ -289,6 +333,7 @@ option_names(tool::AbstractStrategy) -> Tuple{Vararg{Symbol}}
 **Description**: Returns the Julia type expected for a specific option
 
 **Signatures**:
+
 ```julia
 option_type(::Type{<:AbstractStrategy}, key::Symbol) -> Type
 option_type(tool::AbstractStrategy, key::Symbol) -> Type
@@ -307,6 +352,7 @@ option_type(tool::AbstractStrategy, key::Symbol) -> Type
 **Description**: Returns the textual description of an option
 
 **Signatures**:
+
 ```julia
 option_description(::Type{<:AbstractStrategy}, key::Symbol) -> Union{String, Missing}
 option_description(tool::AbstractStrategy, key::Symbol) -> Union{String, Missing}
@@ -325,6 +371,7 @@ option_description(tool::AbstractStrategy, key::Symbol) -> Union{String, Missing
 **Description**: Returns the default value for a specific option
 
 **Signatures**:
+
 ```julia
 option_default(::Type{<:AbstractStrategy}, key::Symbol) -> Any
 option_default(tool::AbstractStrategy, key::Symbol) -> Any
@@ -345,6 +392,7 @@ option_default(tool::AbstractStrategy, key::Symbol) -> Any
 **Description**: Returns a `NamedTuple` of ALL default values (only options with non-missing defaults)
 
 **Signatures**:
+
 ```julia
 option_defaults(::Type{<:AbstractStrategy}) -> NamedTuple
 option_defaults(tool::AbstractStrategy) -> NamedTuple
@@ -369,6 +417,7 @@ Functions used by solver engines and constructors.
 **Description**: Validates user kwargs, merges with defaults, tracks provenance, returns `StrategyOptions`
 
 **Signatures**:
+
 ```julia
 build_strategy_options(::Type{<:AbstractStrategy}; strict_keys::Bool=true, kwargs...) -> StrategyOptions
 ```
@@ -386,6 +435,7 @@ build_strategy_options(::Type{<:AbstractStrategy}; strict_keys::Bool=true, kwarg
 **Description**: Returns the configured value of an option on an instance
 
 **Signatures**:
+
 ```julia
 option_value(tool::AbstractStrategy, key::Symbol) -> Any
 ```
@@ -405,6 +455,7 @@ option_value(tool::AbstractStrategy, key::Symbol) -> Any
 **Description**: Returns `:ct_default` or `:user` indicating where the value came from
 
 **Signatures**:
+
 ```julia
 option_source(tool::AbstractStrategy, key::Symbol) -> Symbol
 ```
@@ -426,6 +477,7 @@ Helper functions for internal use.
 **Description**: Checks that kwargs respect metadata (types, known keys)
 
 **Signatures**:
+
 ```julia
 validate_options(user_nt::NamedTuple, ::Type{<:AbstractStrategy}; strict_keys::Bool) -> Nothing
 ```
@@ -443,6 +495,7 @@ validate_options(user_nt::NamedTuple, ::Type{<:AbstractStrategy}; strict_keys::B
 **Description**: Filters a `NamedTuple` by excluding specified keys
 
 **Signatures**:
+
 ```julia
 filter_options(nt::NamedTuple, exclude) -> NamedTuple
 ```
@@ -460,6 +513,7 @@ filter_options(nt::NamedTuple, exclude) -> NamedTuple
 **Description**: Suggests similar option names for an unknown key (Levenshtein distance)
 
 **Signatures**:
+
 ```julia
 suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3) -> Vector{Symbol}
 ```
@@ -498,14 +552,17 @@ suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3)
 ## Key Changes Summary
 
 ### New Types
+
 - ✅ `StrategyMetadata` - wraps metadata NamedTuple, indexable, auto-displays
 - ✅ `StrategyOptions` - already exists, make indexable, add auto-display
 
 ### To Remove
+
 - ❌ `get_option_default(tool, key)` - inconsistent wrapper
 - ❌ `show_options()` - replaced by automatic `Base.show(::StrategyMetadata)`
 
 ### To Rename (11 functions)
+
 - `get_symbol` → `symbol`
 - `_option_specs` → `metadata`
 - `tool_package_name` → `package_name`
@@ -520,6 +577,7 @@ suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3)
 - `_suggest_option_keys` → `suggest_options`
 
 ### Already Correct (3 functions)
+
 - ✅ `option_type`
 - ✅ `option_description`
 - ✅ `option_default`
@@ -531,6 +589,7 @@ suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3)
 ### Why `StrategyMetadata` instead of just `NamedTuple`?
 
 **Benefits**:
+
 1. **Type safety** - Clear distinction between metadata and other NamedTuples
 2. **Automatic display** - Can override `Base.show` for nice formatting
 3. **Indexable** - Can make it behave like a NamedTuple with `Base.getindex`
@@ -539,6 +598,7 @@ suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3)
 ### Why `metadata` instead of `specifications`?
 
 **Reasons**:
+
 - Shorter and clearer
 - "Metadata" is a common term in programming
 - Avoids confusion with "specs" (could mean specifications or spectral)
@@ -549,12 +609,14 @@ suggest_options(key::Symbol, ::Type{<:AbstractStrategy}; max_suggestions::Int=3)
 **Julia idiom**: Types display themselves automatically in the REPL
 
 **Benefits**:
+
 - No need for `show_metadata()` or `show_options()` functions
 - Consistent with Julia ecosystem
 - Users can still customize display if needed
 - Works automatically in notebooks, REPL, logging
 
 **Example**:
+
 ```julia
 # Just typing the variable shows it
 meta = metadata(ADNLPModeler)
@@ -583,6 +645,7 @@ opts.values[:backend]    # Verbose
 ## Migration Notes
 
 All renamed functions will need updates in:
+
 - `src/ocptools/` (new module)
 - `src/nlp/nlp_backends.jl` (ADNLPModeler, ExaModeler)
 - `test/nlp/test_options_schema.jl` (test suite)
@@ -591,5 +654,6 @@ All renamed functions will need updates in:
 - OptimalControl.jl (usage)
 
 New types to implement:
+
 - `StrategyMetadata` with `Base.show`, `Base.getindex`, etc.
 - Update `StrategyOptions` to add `Base.show`, `Base.getindex`, etc.

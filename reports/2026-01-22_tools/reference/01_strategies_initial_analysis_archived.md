@@ -1,8 +1,21 @@
 # Strategies Restructuring Analysis
 
 **Date**: 2026-01-22  
-**Author**: Analysis for CTModels refactoring  
-**Status**: Draft - Ideas and Planning
+**Status**: 📜 **HISTORICAL / ARCHIVED ANALYSIS**
+
+---
+
+## TL;DR
+
+**Ce document est l'analyse initiale** qui a servi de point de départ à la restructuration du module `Strategies`.
+
+**Attention** : Les propositions techniques de la section 3 sont **obsolètes**. Pour les spécifications finales et l'implémentation de référence, consultez les documents suivants :
+
+1. **[08_complete_contract_specification.md](../reference/08_complete_contract_specification.md)** - Spécification finale du contrat.
+2. **[04_function_naming_reference.md](../reference/04_function_naming_reference.md)** - Référence complète de nommage.
+3. **[05_design_decisions_summary.md](../reference/05_design_decisions_summary.md)** - Résumé des décisions de design validées.
+4. **[11_explicit_registry_architecture.md](../reference/11_explicit_registry_architecture.md)** - Architecture finale du registre.
+5. **[code/Strategies/](../reference/code/Strategies/)** - Implémentation de référence (annexes).
 
 ---
 
@@ -23,6 +36,7 @@ An `AbstractStrategy` is a **configurable component** in the optimal control sol
 3. **Solvers** (in CTSolvers.jl): `IpoptSolver`, `MadNLPSolver`, `KnitroSolver`, `MadNCLSolver`
 
 Each tool:
+
 - Has **configurable options** (e.g., `grid_size`, `backend`, `max_iter`)
 - Stores **option values** and their **provenance** (user-supplied vs. default)
 - Can be **introspected** (list options, get descriptions, validate types)
@@ -33,12 +47,14 @@ Each tool:
 **Location**: All in [`src/nlp/options_schema.jl`](file:///Users/ocots/Research/logiciels/dev/control-toolbox/CTModels.jl/src/nlp/options_schema.jl) (581 lines)
 
 **Core types**:
+
 - `AbstractStrategy` - abstract base type
 - `OptionSpec` - metadata for a single option (type, default, description)
 
 **Interface contract** (what tools must implement):
 
 **Type-level contract** (static metadata):
+
 ```julia
 # REQUIRED: Symbolic identifier
 symbol(::Type{<:MyTool}) = :mytool
@@ -53,6 +69,7 @@ package_name(::Type{<:MyTool}) = "MyPackage"
 ```
 
 **Instance-level contract** (configured state):
+
 ```julia
 struct MyTool <: AbstractStrategy
     options::StrategyOptions  # Contains values + sources
@@ -66,6 +83,7 @@ MyTool(; kwargs...) = MyTool(build_strategy_options(MyTool; kwargs...))
 ```
 
 **API provided**:
+
 - **Type-level introspection**: `symbol()`, `metadata()`, `package_name()`
 - **Option metadata**: `options_keys()`, `option_type()`, `option_description()`, `option_default()`, `default_options()`
 - **Instance access**: `options()`, `get_option_value()`, `get_option_source()`, `get_option_default()`
@@ -75,6 +93,7 @@ MyTool(; kwargs...) = MyTool(build_strategy_options(MyTool; kwargs...))
 - **Validation**: `validate_tool_contract()` - for debugging and testing
 
 **Registration system**:
+
 ```julia
 # In nlp_backends.jl
 const REGISTERED_MODELERS = (ADNLPModeler, ExaModeler)
@@ -115,13 +134,16 @@ solver = CTSolvers.build_solver_from_symbol(:ipopt; max_iter=1000)
 ```
 
 **Option routing** handles ambiguity:
+
 - If `grid_size` only belongs to discretizer → automatic routing
 - If `backend` belongs to both modeler and solver → user must disambiguate:
+
   ```julia
   solve(ocp, :collocation, :exa, :ipopt; backend=(:cpu, :modeler))
   ```
 
 **Display output** shows all options with provenance:
+
 ```
 ▫ This is CTSolvers version v0.x running with: collocation, adnlp, ipopt.
 
@@ -145,6 +167,7 @@ solver = CTSolvers.build_solver_from_symbol(:ipopt; max_iter=1000)
 ### 2.1 Monolithic File Structure
 
 All 581 lines in one file makes it hard to:
+
 - Navigate and understand different concerns
 - Maintain and extend functionality
 - Separate public API from internal utilities
@@ -152,6 +175,7 @@ All 581 lines in one file makes it hard to:
 ### 2.2 Registration Boilerplate
 
 Each package (CTModels, CTDirect, CTSolvers) must:
+
 1. Define `REGISTERED_TOOLS` constant
 2. Implement `tool_symbols()` function
 3. Implement `_tool_type_from_symbol()` with error handling
@@ -164,6 +188,7 @@ This is repetitive and error-prone.
 **Before understanding OptimalControl.jl usage**, the registration system seemed unnecessary. **Now it's clear**: it enables the elegant description-based API that users love.
 
 However, the **implementation could be cleaner**:
+
 - Could use a macro to generate registration boilerplate
 - Could provide base implementations in Strategies module
 - Could auto-generate symbol lists from type hierarchy
@@ -171,6 +196,7 @@ However, the **implementation could be cleaner**:
 ### 2.4 Scattered Documentation
 
 The interface contract is documented in:
+
 - Type docstring in [`core/types/nlp.jl`](file:///Users/ocots/Research/logiciels/dev/control-toolbox/CTModels.jl/src/core/types/nlp.jl)
 - Function docstrings in `options_schema.jl`
 - Comments in implementation files
@@ -199,6 +225,7 @@ src/ocptools/
 ```
 
 **Estimated line counts**:
+
 - `types.jl`: ~70 lines (AbstractStrategy, OptionSpec, StrategyOptions + constructors)
 - `interface.jl`: ~80 lines (type/instance contract methods with CTBase.NotImplemented defaults)
 - `options_api.jl`: ~150 lines (public introspection API)
@@ -297,20 +324,24 @@ end
 ### 3.4 Enhanced Features (Ideas for Future)
 
 **Option validation enhancements**:
+
 - Custom validators: `OptionSpec(type=Int, validator=x -> x > 0)`
 - Dependent options: `OptionSpec(requires=[:other_option])`
 - Mutually exclusive options
 
 **Serialization**:
+
 - Save/load tool configurations to TOML/JSON
 - Useful for reproducible research
 
 **Option presets**:
+
 ```julia
 modeler = ADNLPModeler(preset=:fast)  # Loads predefined option set
 ```
 
 **Better error messages**:
+
 - Show option documentation in error messages
 - Suggest similar option names across all tools (not just current tool)
 
@@ -321,6 +352,7 @@ modeler = ADNLPModeler(preset=:fast)  # Loads predefined option set
 ### 4.1 Breaking Changes Allowed
 
 Since we can break compatibility:
+
 1. Move `AbstractStrategy` from `core/types/nlp.jl` to `ocptools/types.jl`
 2. Change import paths: `CTModels.AbstractStrategy` → `CTModels.Strategies.AbstractStrategy`
 3. Rename internal functions for clarity (e.g., `_option_specs` → `option_specs` if we want it public)
@@ -328,21 +360,25 @@ Since we can break compatibility:
 ### 4.2 Phased Approach
 
 **Phase 1**: Create new module structure
+
 - Implement `Strategies` sub-module
 - Keep old code in `options_schema.jl` temporarily
 - Re-export from old locations for compatibility
 
 **Phase 2**: Migrate CTModels tools
+
 - Update `ADNLPModeler` and `ExaModeler`
 - Update tests
 - Remove old code
 
 **Phase 3**: Update dependent packages
+
 - CTDirect.jl (discretizers)
 - CTSolvers.jl (solvers)
 - OptimalControl.jl (usage)
 
 **Phase 4**: Cleanup
+
 - Remove compatibility shims
 - Update all documentation
 - Announce breaking changes
@@ -350,6 +386,7 @@ Since we can break compatibility:
 ### 4.3 Testing Strategy
 
 **Unit tests** for each file:
+
 - `test/ocptools/test_types.jl`
 - `test/ocptools/test_interface.jl`
 - `test/ocptools/test_options_api.jl`
@@ -357,11 +394,13 @@ Since we can break compatibility:
 - `test/ocptools/test_registration.jl`
 
 **Integration tests**:
+
 - Test with actual tools (ADNLPModeler, ExaModeler)
 - Test registration macros
 - Test option routing in OptimalControl.jl scenarios
 
 **Regression tests**:
+
 - Ensure all existing functionality still works
 - Compare outputs with old implementation
 
@@ -420,9 +459,11 @@ Since we can break compatibility:
 ## Appendix: Code Size Comparison
 
 **Current** (monolithic):
+
 - `options_schema.jl`: 581 lines
 
 **Proposed** (modular):
+
 - `types.jl`: ~50 lines
 - `interface.jl`: ~40 lines
 - `options_api.jl`: ~150 lines
@@ -433,6 +474,7 @@ Since we can break compatibility:
 - **Documentation**: `README.md` (~200 lines)
 
 **Benefits**:
+
 - Similar code size, but **better organized**
 - **Easier to navigate** and understand
 - **Clearer separation** of concerns

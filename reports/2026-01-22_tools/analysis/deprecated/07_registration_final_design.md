@@ -1,13 +1,40 @@
 # Registration System - Final Design (Hybrid Approach)
 
 **Date**: 2026-01-22  
-**Status**: **SUPERSEDED** - See 11_explicit_registry_architecture.md
+**Status**: ❌ **SUPERSEDED** - See [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
+
+---
+
+## ⚠️ TL;DR - DOCUMENT OBSOLÈTE
+
+**Ce document est OBSOLÈTE et a été remplacé par l'approche à registre explicite.**
+
+**Pourquoi obsolète ?**
+
+- ❌ Utilise un registre global mutable (`GLOBAL_REGISTRY`)
+- ❌ État global difficile à tester
+- ❌ Pas thread-safe
+- ❌ Dépendances implicites
+
+**Remplacé par** : [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
+
+**Nouvelle approche** :
+
+- ✅ Registre explicite (passé en paramètre)
+- ✅ Pas d'état global
+- ✅ Meilleure testabilité
+- ✅ Thread-safe
+- ✅ Dépendances explicites
+
+**Fonction** : `register_family!()` → `create_registry()`
+
+---
 
 > [!IMPORTANT]
 > This document describes the **hybrid approach with global registry**.
 >
 > **This has been superseded** by the **explicit registry** approach documented in:
-> `11_explicit_registry_architecture.md`
+> [11_explicit_registry_architecture.md](../../reference/11_explicit_registry_architecture.md)
 >
 > The explicit registry approach was chosen for:
 >

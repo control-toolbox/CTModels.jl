@@ -47,9 +47,9 @@ const OCP_REGISTRY = Strategies.create_registry(
 # ============================================================================
 
 const STRATEGY_FAMILIES = (
-    discretizer = CTDirect.AbstractOptimalControlDiscretizer,
-    modeler = CTModels.AbstractOptimizationModeler,
-    solver = CTSolvers.AbstractOptimizationSolver,
+    discretizer=CTDirect.AbstractOptimalControlDiscretizer,
+    modeler=CTModels.AbstractOptimizationModeler,
+    solver=CTSolvers.AbstractOptimizationSolver,
 )
 
 # ============================================================================
@@ -202,12 +202,15 @@ function _solve_description_mode(
     method = CTBase.complete(description...; descriptions=available_methods())
 
     # Route ALL options (action + strategies) using Orchestration module
+    # Supports disambiguation: backend = (:sparse, :adnlp)
+    # Supports multi-strategy: backend = ((:sparse, :adnlp), (:cpu, :ipopt))
     routed = Orchestration.route_all_options(
         method,
         STRATEGY_FAMILIES,
         SOLVE_ACTION_OPTIONS,
         kwargs,
-        OCP_REGISTRY
+        OCP_REGISTRY;
+        source_mode=:description  # User-facing mode with helpful errors
     )
 
     # Build strategies
@@ -297,13 +300,13 @@ function _solve_explicit_mode(
     method = CTBase.complete(partial_desc...; descriptions=available_methods())
 
     discretizer = discretizer !== nothing ? discretizer :
-        Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.discretizer, OCP_REGISTRY)
+                  Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.discretizer, OCP_REGISTRY)
 
     modeler = modeler !== nothing ? modeler :
-        Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.modeler, OCP_REGISTRY)
+              Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.modeler, OCP_REGISTRY)
 
     solver = solver !== nothing ? solver :
-        Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.solver, OCP_REGISTRY)
+             Strategies.build_strategy_from_method(method, STRATEGY_FAMILIES.solver, OCP_REGISTRY)
 
     return _solve(
         ocp,
