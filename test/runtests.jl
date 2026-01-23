@@ -87,6 +87,7 @@ CTBase.run_tests(;
         "meta/test_*",
         "nlp/test_*",
         "ocp/test_*",
+        "options/test_*",
         "plot/test_*",
     ),
     filename_builder=name -> Symbol(:test_, name),
