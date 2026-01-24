@@ -62,29 +62,24 @@ julia> all_names(def)
 
 See also: [`all_names`](@ref), [`extract_option`](@ref), [`extract_options`](@ref)
 """
-struct OptionDefinition
+struct OptionDefinition{T}
     name::Symbol
-    type::Type
-    default::Any
+    type::Type{T}
+    default::T
     description::String
     aliases::Tuple{Vararg{Symbol}}
     validator::Union{Function, Nothing}
     
-    function OptionDefinition(;
+    function OptionDefinition{T}(;
         name::Symbol,
-        type::Type,
-        default,
+        type::Type{T},
+        default::T,
         description::String,
         aliases::Tuple{Vararg{Symbol}} = (),
         validator::Union{Function, Nothing} = nothing
-    )
-        # Validate default value type
-        if default !== nothing && !isa(default, type)
-            throw(CTBase.IncorrectArgument("Default value $default is not of type $type"))
-        end
-        
+    ) where T
         # Validate with custom validator if provided
-        if validator !== nothing && default !== nothing
+        if validator !== nothing
             try
                 validator(default)
             catch e
@@ -93,8 +88,50 @@ struct OptionDefinition
             end
         end
         
-        new(name, type, default, description, aliases, validator)
+        new{T}(name, type, default, description, aliases, validator)
     end
+end
+
+# Convenience constructor that infers T from default value
+function OptionDefinition(;
+    name::Symbol,
+    type::Type,
+    default,
+    description::String,
+    aliases::Tuple{Vararg{Symbol}} = (),
+    validator::Union{Function, Nothing} = nothing
+)
+    # Handle nothing default specially
+    if default === nothing
+        return OptionDefinition{Any}(;
+            name=name,
+            type=Any,
+            default=nothing,
+            description=description,
+            aliases=aliases,
+            validator=validator
+        )
+    end
+    
+    # Infer T from default value
+    T = typeof(default)
+    
+    # Check type compatibility
+    if !isa(default, type)
+        throw(CTBase.IncorrectArgument(
+            "Default value $default (type $T) does not match declared type $type"
+        ))
+    end
+    
+    # Create with inferred type
+    return OptionDefinition{T}(;
+        name=name,
+        type=type,
+        default=default,
+        description=description,
+        aliases=aliases,
+        validator=validator
+    )
 end
 
 # Get all names (primary + aliases) for extraction

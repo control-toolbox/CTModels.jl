@@ -130,7 +130,7 @@ julia> extracted[:tol]
 1.0e-6 (default)
 ```
 """
-function extract_options(kwargs::NamedTuple, defs::Vector{OptionDefinition})
+function extract_options(kwargs::NamedTuple, defs::Vector{<:OptionDefinition})
     extracted = Dict{Symbol, OptionValue}()
     remaining = kwargs
     

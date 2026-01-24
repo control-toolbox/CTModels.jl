@@ -146,6 +146,78 @@ function test_option_definition()
         end
         
         # ========================================================================
+        # Type stability tests
+        # ========================================================================
+        
+        Test.@testset "Type stability" begin
+            # Test that OptionDefinition is parameterized correctly
+            def_int = CTModels.Options.OptionDefinition(
+                name = :test_int,
+                type = Int,
+                default = 42,
+                description = "Test"
+            )
+            Test.@test def_int isa CTModels.Options.OptionDefinition{Int64}
+            
+            def_float = CTModels.Options.OptionDefinition(
+                name = :test_float,
+                type = Float64,
+                default = 3.14,
+                description = "Test"
+            )
+            Test.@test def_float isa CTModels.Options.OptionDefinition{Float64}
+            
+            def_string = CTModels.Options.OptionDefinition(
+                name = :test_string,
+                type = String,
+                default = "hello",
+                description = "Test"
+            )
+            Test.@test def_string isa CTModels.Options.OptionDefinition{String}
+            
+            # Test type-stable access to default field via function
+            function get_default(def::CTModels.Options.OptionDefinition{T}) where T
+                return def.default
+            end
+            
+            Test.@inferred get_default(def_int)
+            Test.@test typeof(def_int.default) === Int64
+            Test.@test get_default(def_int) === 42
+            
+            Test.@inferred get_default(def_float)
+            Test.@test typeof(def_float.default) === Float64
+            Test.@test get_default(def_float) === 3.14
+            
+            Test.@inferred get_default(def_string)
+            Test.@test typeof(def_string.default) === String
+            Test.@test get_default(def_string) === "hello"
+            
+            # Test heterogeneous collections (Vector{OptionDefinition{<:Any}})
+            defs = CTModels.Options.OptionDefinition[def_int, def_float, def_string]
+            Test.@test length(defs) == 3
+            Test.@test defs[1] isa CTModels.Options.OptionDefinition{Int64}
+            Test.@test defs[2] isa CTModels.Options.OptionDefinition{Float64}
+            Test.@test defs[3] isa CTModels.Options.OptionDefinition{String}
+            
+            # Test that accessing defaults in a loop maintains type information
+            function sum_int_defaults(defs::Vector{<:CTModels.Options.OptionDefinition})
+                total = 0
+                for def in defs
+                    if def isa CTModels.Options.OptionDefinition{Int}
+                        total += def.default  # Type-stable within branch
+                    end
+                end
+                return total
+            end
+            
+            int_defs = [
+                CTModels.Options.OptionDefinition(name=Symbol("opt$i"), type=Int, default=i, description="test")
+                for i in 1:5
+            ]
+            Test.@test sum_int_defaults(int_defs) == 15
+        end
+        
+        # ========================================================================
         # Display functionality
         # ========================================================================
         

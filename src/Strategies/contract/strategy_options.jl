@@ -59,16 +59,16 @@ julia> for (name, value) in opts
 
 See also: [`OptionValue`](@ref), [`source`](@ref), [`is_user`](@ref), [`is_default`](@ref), [`is_computed`](@ref)
 """
-struct StrategyOptions
-    options::NamedTuple
+struct StrategyOptions{NT <: NamedTuple}
+    options::NT
     
-    function StrategyOptions(options::NamedTuple)
+    function StrategyOptions(options::NT) where NT <: NamedTuple
         for (key, val) in pairs(options)
             if !(val isa Options.OptionValue)
                 error("All options must be OptionValue, got $(typeof(val)) for key :$key")
             end
         end
-        new(options)
+        new{NT}(options)
     end
     
     StrategyOptions(; kwargs...) = StrategyOptions((; kwargs...))
@@ -90,15 +90,46 @@ Get the value of an option (without source information).
 # Returns
 - The unwrapped option value
 
+# Notes
+This method is type-unstable due to dynamic key lookup. For type-stable access,
+use the `get(::Val{key})` method or direct field access.
+
 # Example
 ```julia-repl
-julia> opts[:max_iter]
+julia> opts[:max_iter]  # Type-unstable
+200
+
+julia> get(opts, Val(:max_iter))  # Type-stable
 200
 ```
 
-See also: [`Base.getproperty`](@ref), [`source`](@ref)
+See also: [`Base.getproperty`](@ref), [`source`](@ref), [`get(::StrategyOptions, ::Val)`](@ref)
 """
 Base.getindex(opts::StrategyOptions, key::Symbol) = opts.options[key].value
+
+"""
+$(TYPEDSIGNATURES)
+
+Type-stable access to option value using Val.
+
+# Arguments
+- `opts::StrategyOptions`: Strategy options
+- `::Val{key}`: Compile-time key
+
+# Returns
+- The unwrapped option value with exact type inference
+
+# Example
+```julia-repl
+julia> get(opts, Val(:max_iter))
+200
+```
+
+See also: [`Base.getindex`](@ref), [`Base.getproperty`](@ref)
+"""
+function Base.get(opts::StrategyOptions{NT}, ::Val{key}) where {NT <: NamedTuple, key}
+    return getfield(opts, :options)[key].value
+end
 
 """
 $(TYPEDSIGNATURES)
