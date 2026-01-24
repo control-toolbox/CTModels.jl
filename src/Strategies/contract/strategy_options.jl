@@ -65,7 +65,7 @@ struct StrategyOptions{NT <: NamedTuple}
     function StrategyOptions(options::NT) where NT <: NamedTuple
         for (key, val) in pairs(options)
             if !(val isa Options.OptionValue)
-                error("All options must be OptionValue, got $(typeof(val)) for key :$key")
+                throw(CTBase.IncorrectArgument("All options must be OptionValue, got $(typeof(val)) for key :$key"))
             end
         end
         new{NT}(options)

@@ -142,7 +142,7 @@ struct StrategyMetadata{NT <: NamedTuple}
         names = [def.name for def in defs]
         if length(names) != length(unique(names))
             duplicates = [n for n in names if count(==(n), names) > 1]
-            error("Duplicate option name(s): $(unique(duplicates))")
+            throw(CTBase.IncorrectArgument("Duplicate option name(s): $(unique(duplicates))"))
         end
         
         # Convert to NamedTuple using names as keys

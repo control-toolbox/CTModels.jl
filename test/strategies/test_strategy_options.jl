@@ -29,7 +29,7 @@ function test_strategy_options()
             
             Test.@testset "Validation - OptionValue required" begin
                 # Should error if not OptionValue
-                Test.@test_throws ErrorException CTModels.Strategies.StrategyOptions(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.StrategyOptions(
                     max_iter = 200  # Not an OptionValue
                 )
             end

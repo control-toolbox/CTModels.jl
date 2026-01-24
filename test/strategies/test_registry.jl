@@ -89,20 +89,20 @@ function test_registry_api()
             
             Test.@testset "create_registry - validation: duplicate IDs" begin
                 # Create a duplicate ID by reusing TestStrategyA
-                Test.@test_throws ErrorException CTModels.Strategies.create_registry(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA, TestStrategyA)
                 )
             end
             
             Test.@testset "create_registry - validation: wrong type hierarchy" begin
                 # WrongTypeStrategy is not a subtype of AbstractTestFamily
-                Test.@test_throws ErrorException CTModels.Strategies.create_registry(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA, WrongTypeStrategy)
                 )
             end
             
             Test.@testset "create_registry - validation: duplicate family" begin
-                Test.@test_throws ErrorException CTModels.Strategies.create_registry(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA,),
                     AbstractTestFamily => (TestStrategyB,)
                 )
@@ -138,7 +138,7 @@ function test_registry_api()
                 registry = CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA,)
                 )
-                Test.@test_throws ErrorException CTModels.Strategies.strategy_ids(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.strategy_ids(
                     AbstractOtherFamily, registry
                 )
             end
@@ -159,7 +159,7 @@ function test_registry_api()
                 registry = CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA,)
                 )
-                Test.@test_throws ErrorException CTModels.Strategies.type_from_id(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.type_from_id(
                     :nonexistent, AbstractTestFamily, registry
                 )
             end
@@ -168,7 +168,7 @@ function test_registry_api()
                 registry = CTModels.Strategies.create_registry(
                     AbstractTestFamily => (TestStrategyA,)
                 )
-                Test.@test_throws ErrorException CTModels.Strategies.type_from_id(
+                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.type_from_id(
                     :strategy_a, AbstractOtherFamily, registry
                 )
             end

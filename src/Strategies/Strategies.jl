@@ -52,9 +52,9 @@ export option_names, option_type, option_description, option_default, option_def
 export option_value, option_source
 export is_user, is_default, is_computed
 
-# Builder functions (to be implemented)
-# export build_strategy, build_strategy_from_method
-# export extract_id_from_method, option_names_from_method
+# Builder functions
+export build_strategy, build_strategy_from_method
+export extract_id_from_method, option_names_from_method
 
 # Configuration functions (to be implemented)
 # export build_strategy_options

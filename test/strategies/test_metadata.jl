@@ -59,7 +59,7 @@ function test_metadata()
         # ========================================================================
         
         Test.@testset "Duplicate detection" begin
-            Test.@test_throws ErrorException CTModels.Strategies.StrategyMetadata(
+            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.StrategyMetadata(
                 CTModels.Options.OptionDefinition(
                     name = :max_iter,
                     type = Int,
