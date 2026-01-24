@@ -200,7 +200,7 @@ pages = [
 **Content**: Complete step-by-step tutorial
 
 **Structure**:
-```markdown
+````markdown
 # Tutorial: Creating Your First Strategy
 
 ## Introduction
@@ -276,7 +276,7 @@ Strategies.option_value(solver2, :max_iter)
 - Adding more options
 - Creating a strategy family
 - Advanced features
-```
+````
 
 ---
 
@@ -285,7 +285,7 @@ Strategies.option_value(solver2, :max_iter)
 **Content**: Advanced tutorial for families
 
 **Structure**:
-```markdown
+````markdown
 # Tutorial: Creating a Strategy Family
 
 ## Introduction
@@ -352,7 +352,7 @@ Strategies.registered_strategies(AbstractOptimizationSolver, SOLVER_REGISTRY)
 ## Next Steps
 - Integration with Orchestration
 - Advanced registry features
-```
+````
 
 ---
 
@@ -365,6 +365,7 @@ Strategies.registered_strategies(AbstractOptimizationSolver, SOLVER_REGISTRY)
 **New Title**: "Implementing Strategies (New Architecture)"
 
 **New Content**:
+
 1. **Overview** of new architecture
 2. **Quick comparison** with legacy `AbstractOCPTool`
 3. **Redirect** to new `strategies.md` page
@@ -372,7 +373,8 @@ Strategies.registered_strategies(AbstractOptimizationSolver, SOLVER_REGISTRY)
 5. **Deprecation notice** for old interface
 
 **Migration Guide Section**:
-```markdown
+
+````markdown
 ## Migration from AbstractOCPTool
 
 ### Old Interface (Deprecated)
@@ -402,7 +404,7 @@ Strategies.metadata(::Type{<:MyStrategy}) = StrategyMetadata(...)
 - `OptionSpec` → `OptionDefinition`
 - `get_symbol()` → `id()`
 - `_build_ocp_tool_options()` → `build_strategy_options()`
-```
+````
 
 ---
 
@@ -503,6 +505,7 @@ CTBase.automatic_reference_documentation(;
 **Current**: Documents `ADNLPModeler`, `ExaModeler` with old interface
 
 **Required Updates**:
+
 - 🔄 Update to show new `AbstractStrategy` interface
 - ➕ Add examples with `StrategyOptions`
 - ➕ Show registry integration
@@ -558,7 +561,8 @@ CTBase.automatic_reference_documentation(;
 **Required Changes**:
 
 1. **Update "What CTModels provides" section**:
-```markdown
+
+````markdown
 ## What CTModels provides
 
 At a high level, CTModels is responsible for:
@@ -573,10 +577,11 @@ At a high level, CTModels is responsible for:
   - **Orchestration**: Routing and coordination of strategies
 - **Connecting to NLP backends**: ...
 - **Providing utilities**: ...
-```
+````
 
 2. **Add new "Strategy Architecture" section**:
-```markdown
+
+````markdown
 ## Strategy Architecture
 
 CTModels provides a modern, type-stable architecture for configurable components:
@@ -601,7 +606,7 @@ more maintainable design. See the **Interfaces → Strategies** section for deta
 
 - **I want to migrate from AbstractOCPTool to AbstractStrategy**  
   Read **Interfaces → Strategies → Migration Guide** for step-by-step instructions.
-```
+````
 
 ---
 
@@ -610,6 +615,7 @@ more maintainable design. See the **Interfaces → Strategies** section for deta
 **File**: `docs/make.jl`
 
 **New Structure**:
+
 ```julia
 pages = [
     "Introduction" => "index.md",
@@ -647,13 +653,15 @@ pages = [
 ### 3.1 Code Examples
 
 **Requirements**:
+
 - ✅ **Complete**: All examples must be runnable as-is
 - ✅ **Tested**: Use `@example` blocks that execute during build
 - ✅ **Explained**: Step-by-step breakdown after each code block
 - ✅ **Progressive**: Start simple, add complexity gradually
 
 **Template**:
-```markdown
+
+````markdown
 ## Example: Creating a Simple Strategy
 
 Here's a complete, working example:
@@ -707,7 +715,7 @@ s2 = MyStrategy(tolerance=1e-8)
 # Inspect options
 Strategies.options(s2)
 ```
-```
+````
 
 ---
 
@@ -751,7 +759,7 @@ Strategies.options(s2)
 - ✅ Cross-reference related functions
 
 **Example**:
-```julia
+````julia
 """
     id(::Type{<:AbstractStrategy}) -> Symbol
     id(strategy::AbstractStrategy) -> Symbol
@@ -781,7 +789,7 @@ julia> Strategies.id(modeler)
 - [`validate_strategy_contract`](@ref): Validate strategy implementation
 """
 function id end
-```
+````
 
 ---
 
