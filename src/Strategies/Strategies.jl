@@ -62,7 +62,7 @@ export build_strategy_options, resolve_alias
 # Utility functions
 export filter_options, suggest_options
 
-# Validation functions (to be implemented)
-# export validate_strategy_contract
+# Validation functions
+export validate_strategy_contract
 
 end # module Strategies
