@@ -274,7 +274,7 @@ See also: [`option_value`](@ref), [`is_user`](@ref), [`is_default`](@ref)
 """
 function option_source(strategy::AbstractStrategy, key::Symbol)
     opts = options(strategy)
-    return Options.source(opts.options[key])
+    return opts.options[key].source
 end
 
 """

@@ -54,7 +54,7 @@ This function validates the registry structure and ensures:
 - No duplicate family definitions
 
 # Arguments
-- `pairs::Pair{Type{<:AbstractStrategy}, <:Tuple}...`: Pairs of family type => tuple of strategy types
+- `pairs...`: Pairs of family type => tuple of strategy types
 
 # Returns
 - `StrategyRegistry`: Validated registry ready for use
@@ -86,8 +86,19 @@ julia> strategy_ids(AbstractOptimizationModeler, registry)
 
 See also: [`StrategyRegistry`](@ref), [`strategy_ids`](@ref), [`type_from_id`](@ref)
 """
-function create_registry(pairs::Pair{Type{<:AbstractStrategy}, <:Tuple}...)
+function create_registry(pairs::Pair...)
     families = Dict{Type{<:AbstractStrategy}, Vector{Type}}()
+    
+    # Validate that all pairs have the correct structure
+    for pair in pairs
+        family, strategies = pair
+        if !(family isa DataType && family <: AbstractStrategy)
+            error("Family must be a subtype of AbstractStrategy, got: $family")
+        end
+        if !(strategies isa Tuple)
+            error("Strategies must be provided as a Tuple, got: $(typeof(strategies))")
+        end
+    end
     
     for (family, strategies) in pairs
         # Check for duplicate family
