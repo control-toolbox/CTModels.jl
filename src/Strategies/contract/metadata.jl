@@ -30,13 +30,16 @@ This metadata is used by:
 - **Construction**: Build `StrategyOptions` with `build_strategy_options`
 
 # Fields
-- `specs::Dict{Symbol, OptionDefinition}`: Dictionary mapping option names to their definitions
+- `specs::NamedTuple`: NamedTuple mapping option names to their definitions (type-stable)
+
+# Type Parameter
+- `NT <: NamedTuple`: The concrete NamedTuple type holding the option definitions
 
 # Constructor
 
 The constructor accepts a variable number of `OptionDefinition` arguments and
-automatically builds the internal dictionary, validating that all option names
-are unique.
+automatically builds the internal NamedTuple, validating that all option names
+are unique. The type parameter is inferred automatically.
 
 # Collection Interface
 
@@ -131,21 +134,23 @@ StrategyOptions(max_iter=200, tol=1.0e-8)
 
 See also: [`OptionDefinition`](@ref), [`AbstractStrategy`](@ref), [`build_strategy_options`](@ref)
 """
-struct StrategyMetadata
-    specs::Dict{Symbol, OptionDefinition}
+struct StrategyMetadata{NT <: NamedTuple}
+    specs::NT
     
     function StrategyMetadata(defs::OptionDefinition...)
-        # Convert to Dict using names
-        specs_dict = Dict{Symbol, OptionDefinition}()
-        
-        for def in defs
-            if haskey(specs_dict, def.name)
-                error("Duplicate option name: $(def.name)")
-            end
-            specs_dict[def.name] = def
+        # Check for duplicate names
+        names = [def.name for def in defs]
+        if length(names) != length(unique(names))
+            duplicates = [n for n in names if count(==(n), names) > 1]
+            error("Duplicate option name(s): $(unique(duplicates))")
         end
         
-        new(specs_dict)
+        # Convert to NamedTuple using names as keys
+        names_tuple = Tuple(def.name for def in defs)
+        specs_nt = NamedTuple{names_tuple}(defs)
+        NT = typeof(specs_nt)
+        
+        new{NT}(specs_nt)
     end
 end
 
@@ -160,18 +165,20 @@ Access an option definition by name.
 
 # Arguments
 - `meta::StrategyMetadata`: Strategy metadata
-- `key::Symbol`: Option name
+- `key::Symbol`: Option name to retrieve
 
 # Returns
-- `OptionDefinition`: The option definition for the given name
+- `OptionDefinition`: The option definition for the specified name
 
 # Throws
-- `KeyError`: If the option name does not exist
+- `FieldError`: If the option name is not defined
 
 # Example
 ```julia-repl
 julia> meta[:max_iter]
-max_iter (max, maxiter) :: Int64
+OptionDefinition{Int64}
+  name: max_iter
+  type: Int64
   default: 100
   description: Maximum iterations
 
@@ -279,7 +286,7 @@ tol: Convergence tolerance
 
 See also: [`Base.pairs`](@ref), [`Base.keys`](@ref)
 """
-Base.iterate(meta::StrategyMetadata, state...) = iterate(meta.specs, state...)
+Base.iterate(meta::StrategyMetadata, state...) = iterate(pairs(meta.specs), state...)
 
 """
 $(TYPEDSIGNATURES)

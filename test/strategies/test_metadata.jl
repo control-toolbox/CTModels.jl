@@ -160,5 +160,72 @@ function test_metadata()
             Test.@test occursin("description: Maximum iterations", output)
             Test.@test occursin("description: Convergence tolerance", output)
         end
+        
+        # ========================================================================
+        # Type stability tests
+        # ========================================================================
+        
+        Test.@testset "Type stability" begin
+            # Create metadata with different types
+            meta = CTModels.Strategies.StrategyMetadata(
+                CTModels.Options.OptionDefinition(
+                    name = :max_iter,
+                    type = Int,
+                    default = 100,
+                    description = "Maximum iterations"
+                ),
+                CTModels.Options.OptionDefinition(
+                    name = :tol,
+                    type = Float64,
+                    default = 1e-6,
+                    description = "Tolerance"
+                )
+            )
+            
+            # Test that StrategyMetadata is parameterized correctly
+            Test.@test meta isa CTModels.Strategies.StrategyMetadata{<:NamedTuple}
+            
+            # Verify that the NamedTuple preserves concrete types
+            Test.@test meta.specs.max_iter isa CTModels.Options.OptionDefinition{Int64}
+            Test.@test meta.specs.tol isa CTModels.Options.OptionDefinition{Float64}
+            
+            # Test direct access to specs (type-stable)
+            function get_max_iter_spec(m::CTModels.Strategies.StrategyMetadata)
+                return m.specs.max_iter
+            end
+            function get_tol_spec(m::CTModels.Strategies.StrategyMetadata)
+                return m.specs.tol
+            end
+            
+            Test.@inferred get_max_iter_spec(meta)
+            Test.@test get_max_iter_spec(meta).default === 100
+            
+            Test.@inferred get_tol_spec(meta)
+            Test.@test get_tol_spec(meta).default === 1e-6
+            
+            # Note: Dynamic access via Symbol (meta[:key]) cannot be type-stable
+            # This is expected and acceptable since metadata access happens at construction time
+            Test.@test meta[:max_iter] isa CTModels.Options.OptionDefinition{Int64}
+            Test.@test meta[:tol] isa CTModels.Options.OptionDefinition{Float64}
+            
+            # Test type-stable iteration with type narrowing
+            function sum_int_defaults(m::CTModels.Strategies.StrategyMetadata)
+                total = 0
+                for (key, def) in m
+                    if def isa CTModels.Options.OptionDefinition{Int}
+                        total += def.default  # Type-stable within branch
+                    end
+                end
+                return total
+            end
+            
+            Test.@inferred sum_int_defaults(meta)
+            Test.@test sum_int_defaults(meta) == 100
+            
+            # Test that values() preserves types
+            vals = collect(values(meta))
+            Test.@test vals[1] isa CTModels.Options.OptionDefinition{Int64}
+            Test.@test vals[2] isa CTModels.Options.OptionDefinition{Float64}
+        end
     end
 end

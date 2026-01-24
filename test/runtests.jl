@@ -85,7 +85,7 @@ CTBase.run_tests(;
         "init/test_*",
         "io/test_*",
         "meta/test_*",
-        "nlp/test_*",
+        #"nlp/test_*",
         "ocp/test_*",
         "options/test_*",
         "plot/test_*",

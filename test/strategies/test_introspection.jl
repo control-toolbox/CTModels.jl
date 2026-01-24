@@ -83,7 +83,7 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_type(IntrospectionTestStrategy, :backend) === Symbol
                 
                 # Unknown option
-                Test.@test_throws KeyError CTModels.Strategies.option_type(
+                Test.@test_throws FieldError CTModels.Strategies.option_type(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
@@ -97,7 +97,7 @@ function test_introspection()
                 Test.@test desc2 == "Convergence tolerance"
                 
                 # Unknown option
-                Test.@test_throws KeyError CTModels.Strategies.option_description(
+                Test.@test_throws FieldError CTModels.Strategies.option_description(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
@@ -108,7 +108,7 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_default(IntrospectionTestStrategy, :backend) == :cpu
                 
                 # Unknown option
-                Test.@test_throws KeyError CTModels.Strategies.option_default(
+                Test.@test_throws FieldError CTModels.Strategies.option_default(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
