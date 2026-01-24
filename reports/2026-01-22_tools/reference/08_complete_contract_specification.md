@@ -65,7 +65,7 @@ Every strategy **must** implement the following contract to work with the Strate
 
 ### Required Methods
 
-#### 1. `symbol(::Type{<:MyStrategy}) -> Symbol`
+#### 1. `id(::Type{<:MyStrategy}) -> Symbol`
 
 **Purpose**: Returns the unique identifier for the strategy type.
 
@@ -78,7 +78,7 @@ Every strategy **must** implement the following contract to work with the Strate
 **Example**:
 
 ```julia
-symbol(::Type{<:ADNLPModeler}) = :adnlp
+id(::Type{<:ADNLPModeler}) = :adnlp
 ```
 
 ---
@@ -266,7 +266,7 @@ struct MyStrategy <: AbstractStrategy
 end
 
 # 2. Type-level contract (REQUIRED)
-symbol(::Type{<:MyStrategy}) = :mystrategy
+id(::Type{<:MyStrategy}) = :mystrategy
 
 metadata(::Type{<:MyStrategy}) = StrategyMetadata((
     max_iter = OptionSpecification(
@@ -292,6 +292,12 @@ end
 
 # That's it! The strategy is now fully compliant.
 ```
+
+---
+
+## Note on Naming Change
+
+**Historical note**: This method was previously named `symbol()` but was renamed to `id()` in January 2026 for better clarity. The name `id` more accurately reflects its role as a unique identifier for routing and registry lookup, rather than referring to the Julia `Symbol` type.
 
 ---
 

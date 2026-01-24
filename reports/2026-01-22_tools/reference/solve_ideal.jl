@@ -295,7 +295,7 @@ function _solve_explicit_mode(
 
     # Otherwise, complete with defaults
     partial_desc = Tuple(
-        Strategies.symbol(s) for s in (discretizer, modeler, solver) if s !== nothing
+        Strategies.id(typeof(s)) for s in (discretizer, modeler, solver) if s !== nothing
     )
     method = CTBase.complete(partial_desc...; descriptions=available_methods())
 

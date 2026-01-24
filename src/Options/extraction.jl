@@ -17,6 +17,8 @@ returns the default value with `:default` source.
 
 # Notes
 - If a validator is provided in the definition, it will be called on the extracted value.
+- Validators should follow the pattern `x -> condition || throw(ArgumentError("message"))`.
+- If validation fails, the original exception is rethrown after logging context with `@error`.
 - Type mismatches generate warnings but do not prevent extraction.
 - The function removes the found option from the returned kwargs.
 
@@ -55,17 +57,10 @@ function extract_option(kwargs::NamedTuple, def::OptionDefinition)
             # Validate if validator provided
             if def.validator !== nothing
                 try
-                    result = def.validator(value)
-                    # Validators should return true or throw an error
-                    if result !== true && !isa(result, Nothing)
-                        throw(CTBase.IncorrectArgument("Validation failed for option $(def.name)"))
-                    end
+                    def.validator(value)
                 catch e
-                    if isa(e, CTBase.IncorrectArgument)
-                        rethrow(e)
-                    else
-                        throw(CTBase.IncorrectArgument("Validation failed for option $(def.name): $(e isa Exception ? e.msg : string(e))"))
-                    end
+                    @error "Validation failed for option $(def.name) with value $value" exception=(e, catch_backtrace())
+                    rethrow()
                 end
             end
             
@@ -105,6 +100,12 @@ options from the kwargs.
 - The extraction order follows the order of definitions in the vector.
 - Each definition's primary name is used as the dictionary key.
 - Options not found in kwargs use their definition default values.
+- Validation is performed for each option using `extract_option`.
+
+# Throws
+- Any exception raised by validators in the definitions
+
+See also: [`extract_option`](@ref), [`OptionDefinition`](@ref), [`OptionValue`](@ref)
 
 # Example
 ```julia-repl
@@ -160,6 +161,12 @@ of a Dict for convenience when the definition structure is known at compile time
 - The extraction order follows the order of definitions in the NamedTuple.
 - Each definition's primary name is used as the key in the returned NamedTuple.
 - Options not found in kwargs use their definition default values.
+- Validation is performed for each option using `extract_option`.
+
+# Throws
+- Any exception raised by validators in the definitions
+
+See also: [`extract_option`](@ref), [`OptionDefinition`](@ref), [`OptionValue`](@ref)
 
 # Example
 ```julia-repl

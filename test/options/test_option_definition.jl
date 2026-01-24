@@ -92,14 +92,16 @@ function test_option_definition()
                 validator = x -> x > 0
             )
             
-            # Invalid validator with invalid default
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Options.OptionDefinition(
-                name = :test,
-                type = Int,
-                default = -5,
-                description = "Test",
-                validator = x -> x > 0 || error("Must be positive")
-            )
+            # Invalid validator with invalid default (redirect stderr to hide @error logs)
+            Test.@test_throws ErrorException redirect_stderr(devnull) do
+                CTModels.Options.OptionDefinition(
+                    name = :test,
+                    type = Int,
+                    default = -5,
+                    description = "Test",
+                    validator = x -> x > 0 || error("Must be positive")
+                )
+            end
         end
         
         # ========================================================================

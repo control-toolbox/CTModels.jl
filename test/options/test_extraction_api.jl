@@ -12,14 +12,14 @@ using CTModels.Options
 # Helper types and functions (top-level for precompilation stability)
 # ============================================================================
 
-# Simple validator for testing (returns true for valid values)
-positive_validator(x::Int) = x > 0
+# Simple validator for testing
+positive_validator(x::Int) = x > 0 || throw(ArgumentError("$x must be positive"))
 
-# Range validator for testing (returns true for valid values)
-range_validator(x::Int) = 1 <= x <= 100
+# Range validator for testing
+range_validator(x::Int) = (1 <= x <= 100) || throw(ArgumentError("$x must be between 1 and 100"))
 
-# String validator for testing (returns true for valid values)
-nonempty_validator(s::String) = !isempty(s)
+# String validator for testing
+nonempty_validator(s::String) = !isempty(s) || throw(ArgumentError("String must not be empty"))
 
 # ============================================================================
 # Test entry point
@@ -35,10 +35,15 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     
     Test.@testset "extract_option - Basic functionality" begin
         # Test with exact name match
-        schema = OptionSchema(:grid_size, Int, 100)
+        def = OptionDefinition(
+            name = :grid_size,
+            type = Int,
+            default = 100,
+            description = "Grid size"
+        )
         kwargs = (grid_size=200, tol=1e-6)
         
-        opt_value, remaining = extract_option(kwargs, schema)
+        opt_value, remaining = extract_option(kwargs, def)
         
         Test.@test opt_value.value == 200
         Test.@test opt_value.source == :user
@@ -47,10 +52,16 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     
     Test.@testset "extract_option - Alias resolution" begin
         # Test with alias
-        schema = OptionSchema(:grid_size, Int, 100, (:n, :size))
+        def = OptionDefinition(
+            name = :grid_size,
+            type = Int,
+            default = 100,
+            description = "Grid size",
+            aliases = (:n, :size)
+        )
         kwargs = (n=200, tol=1e-6)
         
-        opt_value, remaining = extract_option(kwargs, schema)
+        opt_value, remaining = extract_option(kwargs, def)
         
         Test.@test opt_value.value == 200
         Test.@test opt_value.source == :user
@@ -58,7 +69,7 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
         
         # Test with different alias
         kwargs = (size=300, max_iter=1000)
-        opt_value, remaining = extract_option(kwargs, schema)
+        opt_value, remaining = extract_option(kwargs, def)
         
         Test.@test opt_value.value == 300
         Test.@test opt_value.source == :user
@@ -67,10 +78,15 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     
     Test.@testset "extract_option - Default values" begin
         # Test when option not found
-        schema = OptionSchema(:grid_size, Int, 100)
+        def = OptionDefinition(
+            name = :grid_size,
+            type = Int,
+            default = 100,
+            description = "Grid size"
+        )
         kwargs = (tol=1e-6, max_iter=1000)
         
-        opt_value, remaining = extract_option(kwargs, schema)
+        opt_value, remaining = extract_option(kwargs, def)
         
         Test.@test opt_value.value == 100
         Test.@test opt_value.source == :default
@@ -79,26 +95,41 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     
     Test.@testset "extract_option - Validation" begin
         # Test with successful validation
-        schema = OptionSchema(:grid_size, Int, 100, (), x -> x > 0 ? true : error("Value must be positive"))
+        def = OptionDefinition(
+            name = :grid_size,
+            type = Int,
+            default = 100,
+            description = "Grid size",
+            validator = x -> x > 0 || throw(ArgumentError("$x must be positive"))
+        )
         kwargs = (grid_size=200,)
         
-        opt_value, remaining = extract_option(kwargs, schema)
+        opt_value, remaining = extract_option(kwargs, def)
         
         Test.@test opt_value.value == 200
         Test.@test opt_value.source == :user
         
-        # Test with failed validation
+        # Test with failed validation (redirect stderr to hide @error logs)
         kwargs = (grid_size=-5,)
-        Test.@test_throws CTBase.IncorrectArgument extract_option(kwargs, schema)
+        Test.@test_throws ArgumentError redirect_stderr(devnull) do
+            extract_option(kwargs, def)
+        end
     end
     
     Test.@testset "extract_option - Type checking" begin
         # Test type mismatch (should warn but still extract)
-        schema = OptionSchema(:grid_size, Int, 100)
+        def = OptionDefinition(
+            name = :grid_size,
+            type = Int,
+            default = 100,
+            description = "Grid size"
+        )
         kwargs = (grid_size="200",)  # String instead of Int
         
-        # This should generate a warning but still work
-        opt_value, remaining = extract_option(kwargs, schema)
+        # This should generate a warning but still work (redirect stderr to hide warning)
+        opt_value, remaining = redirect_stderr(devnull) do
+            extract_option(kwargs, def)
+        end
         
         Test.@test opt_value.value == "200"
         Test.@test opt_value.source == :user
@@ -106,14 +137,14 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     end
     
     Test.@testset "extract_options - Vector version" begin
-        schemas = [
-            OptionSchema(:grid_size, Int, 100),
-            OptionSchema(:tol, Float64, 1e-6),
-            OptionSchema(:max_iter, Int, 1000)
+        defs = [
+            OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size"),
+            OptionDefinition(name = :tol, type = Float64, default = 1e-6, description = "Tolerance"),
+            OptionDefinition(name = :max_iter, type = Int, default = 1000, description = "Max iterations")
         ]
         kwargs = (grid_size=200, tol=1e-8, other_option="ignored")
         
-        extracted, remaining = extract_options(kwargs, schemas)
+        extracted, remaining = extract_options(kwargs, defs)
         
         Test.@test extracted[:grid_size].value == 200
         Test.@test extracted[:grid_size].source == :user
@@ -125,13 +156,13 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     end
     
     Test.@testset "extract_options - NamedTuple version" begin
-        schemas = (
-            grid_size = OptionSchema(:grid_size, Int, 100),
-            tol = OptionSchema(:tol, Float64, 1e-6)
+        defs = (
+            grid_size = OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size"),
+            tol = OptionDefinition(name = :tol, type = Float64, default = 1e-6, description = "Tolerance")
         )
         kwargs = (grid_size=200, tol=1e-8, max_iter=1000)
         
-        extracted, remaining = extract_options(kwargs, schemas)
+        extracted, remaining = extract_options(kwargs, defs)
         
         Test.@test extracted.grid_size.value == 200
         Test.@test extracted.grid_size.source == :user
@@ -141,14 +172,14 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     end
     
     Test.@testset "extract_options - Complex scenario with aliases" begin
-        schemas = [
-            OptionSchema(:grid_size, Int, 100, (:n, :size), positive_validator),
-            OptionSchema(:tolerance, Float64, 1e-6, (:tol,)),
-            OptionSchema(:max_iterations, Int, 1000, (:max_iter, :iterations))
+        defs = [
+            OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size", aliases = (:n, :size), validator = positive_validator),
+            OptionDefinition(name = :tolerance, type = Float64, default = 1e-6, description = "Tolerance", aliases = (:tol,)),
+            OptionDefinition(name = :max_iterations, type = Int, default = 1000, description = "Max iterations", aliases = (:max_iter, :iterations))
         ]
         kwargs = (n=50, tol=1e-8, iterations=500, unused="value")
         
-        extracted, remaining = extract_options(kwargs, schemas)
+        extracted, remaining = extract_options(kwargs, defs)
         
         Test.@test extracted[:grid_size].value == 50
         Test.@test extracted[:grid_size].source == :user
@@ -162,34 +193,51 @@ Test.@testset "Extraction API" verbose=VERBOSE showtiming=SHOWTIMING begin
     Test.@testset "Performance - Type stability" begin
         # Skip type stability tests for now due to implementation complexity
         # Focus on functional correctness instead
-        schema = OptionSchema(:test, Int, 42)
+        def = OptionDefinition(name = :test, type = Int, default = 42, description = "Test")
         kwargs = (test=100,)
         
-        result = extract_option(kwargs, schema)
+        result = extract_option(kwargs, def)
         Test.@test result[1] isa CTModels.Options.OptionValue
         Test.@test result[2] isa NamedTuple
         
-        schemas = [schema]
-        result = extract_options(kwargs, schemas)
+        defs = [def]
+        result = extract_options(kwargs, defs)
         Test.@test result[1] isa Dict{Symbol, CTModels.Options.OptionValue}
         Test.@test result[2] isa NamedTuple
     end
     
     Test.@testset "Error handling" begin
-        schema = OptionSchema(:test, Int, 42, (), x -> error("Validation failed"))
+        # Validator that accepts default but rejects other values
+        def = OptionDefinition(
+            name = :test, 
+            type = Int, 
+            default = 42, 
+            description = "Test", 
+            validator = x -> x == 42 || throw(ArgumentError("$x must be 42"))
+        )
         kwargs = (test=100,)
         
-        # Test validation error propagation
-        Test.@test_throws CTBase.IncorrectArgument extract_option(kwargs, schema)
+        # Test validation error propagation (redirect stderr to hide @error logs)
+        Test.@test_throws ArgumentError redirect_stderr(devnull) do
+            extract_option(kwargs, def)
+        end
         
-        # Test with multiple schemas, one fails
-        schemas = [
-            OptionSchema(:good, Int, 42),
-            OptionSchema(:bad, Int, 42, (), x -> error("Bad option"))
+        # Test with multiple definitions, one fails
+        defs = [
+            OptionDefinition(name = :good, type = Int, default = 42, description = "Good"),
+            OptionDefinition(
+                name = :bad, 
+                type = Int, 
+                default = 42, 
+                description = "Bad", 
+                validator = x -> x == 42 || throw(ArgumentError("$x must be 42"))
+            )
         ]
         kwargs = (good=100, bad=200)
         
-        Test.@test_throws CTBase.IncorrectArgument extract_options(kwargs, schemas)
+        Test.@test_throws ArgumentError redirect_stderr(devnull) do
+            extract_options(kwargs, defs)
+        end
     end
     
 end # UNIT TESTS
@@ -200,18 +248,18 @@ end # UNIT TESTS
 
 Test.@testset "Extraction API Integration" verbose=VERBOSE showtiming=SHOWTIMING begin
     
-    Test.@testset "Integration with OptionValue and OptionSchema" begin
+    Test.@testset "Integration with OptionValue and OptionDefinition" begin
         # Test complete workflow
-        schemas = (
-            size = OptionSchema(:grid_size, Int, 100, (:n, :size), positive_validator),
-            tolerance = OptionSchema(:tolerance, Float64, 1e-6, (:tol,)),
-            verbose = OptionSchema(:verbose, Bool, false)
+        defs = (
+            size = OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size", aliases = (:n, :size), validator = positive_validator),
+            tolerance = OptionDefinition(name = :tolerance, type = Float64, default = 1e-6, description = "Tolerance", aliases = (:tol,)),
+            verbose = OptionDefinition(name = :verbose, type = Bool, default = false, description = "Verbose")
         )
         
         # Test with mixed aliases and validation
         kwargs = (n=50, tol=1e-8, verbose=true, extra="ignored")
         
-        extracted, remaining = extract_options(kwargs, schemas)
+        extracted, remaining = extract_options(kwargs, defs)
         
         # Verify all options extracted correctly
         Test.@test extracted.size.value == 50
@@ -233,13 +281,13 @@ Test.@testset "Extraction API Integration" verbose=VERBOSE showtiming=SHOWTIMING
     
     Test.@testset "Realistic tool configuration scenario" begin
         # Simulate a realistic tool configuration with simpler validators
-        tool_schemas = [
-            OptionSchema(:grid_size, Int, 100, (:n, :size)),
-            OptionSchema(:tolerance, Float64, 1e-6, (:tol,)),
-            OptionSchema(:max_iterations, Int, 1000, (:max_iter, :iterations)),
-            OptionSchema(:solver, String, "ipopt", (:algorithm,)),
-            OptionSchema(:verbose, Bool, false),
-            OptionSchema(:output_file, String, nothing, (:out, :output))
+        tool_defs = [
+            OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size", aliases = (:n, :size)),
+            OptionDefinition(name = :tolerance, type = Float64, default = 1e-6, description = "Tolerance", aliases = (:tol,)),
+            OptionDefinition(name = :max_iterations, type = Int, default = 1000, description = "Max iterations", aliases = (:max_iter, :iterations)),
+            OptionDefinition(name = :solver, type = String, default = "ipopt", description = "Solver", aliases = (:algorithm,)),
+            OptionDefinition(name = :verbose, type = Bool, default = false, description = "Verbose"),
+            OptionDefinition(name = :output_file, type = String, default = nothing, description = "Output file", aliases = (:out, :output))
         ]
         
         # Test configuration with various options
@@ -253,7 +301,7 @@ Test.@testset "Extraction API Integration" verbose=VERBOSE showtiming=SHOWTIMING
             debug_mode=true  # Extra option not in schemas
         )
         
-        extracted, remaining = extract_options(config, tool_schemas)
+        extracted, remaining = extract_options(config, tool_defs)
         
         # Verify extraction
         Test.@test extracted[:grid_size].value == 200
@@ -274,27 +322,27 @@ Test.@testset "Extraction API Integration" verbose=VERBOSE showtiming=SHOWTIMING
     
     Test.@testset "Edge cases and boundary conditions" begin
         # Test with empty kwargs
-        schema = OptionSchema(:test, Int, 42)
+        def = OptionDefinition(name = :test, type = Int, default = 42, description = "Test")
         empty_kwargs = NamedTuple()
         
-        opt_value, remaining = extract_option(empty_kwargs, schema)
+        opt_value, remaining = extract_option(empty_kwargs, def)
         Test.@test opt_value.value == 42
         Test.@test opt_value.source == :default
         Test.@test remaining == NamedTuple()
         
-        # Test with empty schemas
-        empty_schemas = OptionSchema[]
+        # Test with empty definitions
+        empty_defs = OptionDefinition[]
         kwargs = (a=1, b=2)
         
-        extracted, remaining = extract_options(kwargs, empty_schemas)
+        extracted, remaining = extract_options(kwargs, empty_defs)
         Test.@test isempty(extracted)
         Test.@test remaining == kwargs
         
         # Test with nothing default
-        schema_no_default = OptionSchema(:optional, String, nothing)
+        def_no_default = OptionDefinition(name = :optional, type = String, default = nothing, description = "Optional")
         kwargs_no_match = (other="value",)
         
-        opt_value, remaining = extract_option(kwargs_no_match, schema_no_default)
+        opt_value, remaining = extract_option(kwargs_no_match, def_no_default)
         Test.@test opt_value.value === nothing
         Test.@test opt_value.source == :default
     end
