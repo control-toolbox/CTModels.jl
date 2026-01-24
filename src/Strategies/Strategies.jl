@@ -21,14 +21,13 @@ using ..CTModels.Options
 # ==============================================================================
 
 include(joinpath(@__DIR__, "contract", "abstract_strategy.jl"))
-include(joinpath(@__DIR__, "contract", "strategy_registry.jl"))
 include(joinpath(@__DIR__, "contract", "metadata.jl"))
 include(joinpath(@__DIR__, "contract", "strategy_options.jl"))
 
+include(joinpath(@__DIR__, "api", "registry.jl"))
+include(joinpath(@__DIR__, "api", "introspection.jl"))
 include(joinpath(@__DIR__, "api", "builders.jl"))
 include(joinpath(@__DIR__, "api", "configuration.jl"))
-include(joinpath(@__DIR__, "api", "introspection.jl"))
-include(joinpath(@__DIR__, "api", "registry.jl"))
 include(joinpath(@__DIR__, "api", "utilities.jl"))
 include(joinpath(@__DIR__, "api", "validation.jl"))
 
@@ -36,12 +35,31 @@ include(joinpath(@__DIR__, "api", "validation.jl"))
 # Public API
 # ==============================================================================
 
-export AbstractStrategy, StrategyRegistry, 
-       build_strategy, build_strategy_from_id,
-       configure_strategy, introspect_strategy,
-       register_strategy!, lookup_strategy,
-       validate_strategy, validate_strategy_contract,
-       strategy_metadata, strategy_options,
-       strategy_utilities
+# Core types
+export AbstractStrategy, StrategyRegistry, StrategyMetadata, StrategyOptions
+
+# Type-level contract methods
+export id, metadata
+
+# Instance-level contract methods
+export options
+
+# Registry functions
+export create_registry, strategy_ids, type_from_id
+
+# Introspection functions
+export option_names, option_type, option_description, option_default, option_defaults
+export option_value, option_source
+export is_user, is_default, is_computed
+
+# Builder functions (to be implemented)
+# export build_strategy, build_strategy_from_method
+# export extract_id_from_method, option_names_from_method
+
+# Configuration functions (to be implemented)
+# export build_strategy_options
+
+# Validation functions (to be implemented)
+# export validate_strategy_contract
 
 end # module Strategies
