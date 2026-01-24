@@ -56,8 +56,11 @@ export is_user, is_default, is_computed
 export build_strategy, build_strategy_from_method
 export extract_id_from_method, option_names_from_method
 
-# Configuration functions (to be implemented)
-# export build_strategy_options
+# Configuration functions
+export build_strategy_options, resolve_alias
+
+# Utility functions
+export filter_options, suggest_options
 
 # Validation functions (to be implemented)
 # export validate_strategy_contract

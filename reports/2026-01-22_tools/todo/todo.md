@@ -48,16 +48,16 @@ This analysis is based on a systematic comparison between the existing source co
 
 ### 🟡 Module 2: `Strategies`
 
-**Status**: **~70% Complete + Type-Stable Core**  
+**Status**: **~80% Complete + Type-Stable Core**  
 **Location**: [src/Strategies/](../../../src/Strategies/)
 
 | Component | Status | Gap |
 | :--- | :---: | :--- |
 | [Contract Types](../../../src/Strategies/contract/) | ✅ **Type-stable** | Parametric `StrategyMetadata{NT}` and `StrategyOptions{NT}` (98 tests + 18 stability tests). |
-| [Registry System](../../../src/Strategies/api/registry.jl) | ✅ | Explicit registry passing and type-from-id lookup. |
+| [Registry System](../../../src/Strategies/api/registry.jl) | ✅ **Type-stable** | Explicit registry passing and type-from-id lookup with CTBase exceptions. |
 | [Introspection API](../../../src/Strategies/api/introspection.jl) | ✅ **Validated** | Querying names, types, and defaults (70 tests, compatible with new structures). |
-| [Builders](../../../src/Strategies/api/builders.jl) | 🚧 | Missing `build_strategy` and `extract_id_from_method`. |
-| [Configuration](../../../src/Strategies/api/configuration.jl) | 🚧 | Missing `build_strategy_options` (alias resolution/validation). |
+| [Builders](../../../src/Strategies/api/builders.jl) | ✅ **Type-stable** | Complete builder suite with method tuple support (39 tests + CTBase exceptions). |
+| [Configuration](../../../src/Strategies/api/configuration.jl) | ✅ **Type-stable** | Complete `build_strategy_options` with alias resolution/validation (47 tests + CTBase exceptions). |
 | [Validation](../../../src/Strategies/api/validation.jl) | ❌ | Missing `validate_strategy_contract`. |
 
 #### Recent Type Stability Improvements
@@ -86,8 +86,9 @@ This analysis is based on a systematic comparison between the existing source co
 
 ### 🏁 Phase 1: Functional Core Completion
 
-1. **Implement Strategy Pipeline**: Complete `build_strategy_options` and `builders.jl` to allow creating validated strategy instances.
+1. **Implement Strategy Pipeline**: ✅ **COMPLETED** - Complete `builders.jl` with method tuple support and CTBase exceptions.
 2. **Port Reference Code**: Move [routing.jl](../reference/code/Orchestration/api/routing.jl) and others to `src/Orchestration`.
+3. **Implement Configuration**: ✅ **COMPLETED** - Complete `build_strategy_options` with alias resolution/validation and utilities (99 tests total).
 
 ### 🔗 Phase 2: System Integration
 
