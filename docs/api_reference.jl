@@ -65,6 +65,170 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             filename="types",
         ),
         # ───────────────────────────────────────────────────────────────────
+        # Options Module - Public API
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="options",
+            primary_modules=[
+                CTModels => src(
+                    "Options/Options.jl",
+                    "Options/option_value.jl",
+                    "Options/option_definition.jl",
+                    "Options/extraction.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title="Options - Public API",
+            title_in_menu="Options (Public)",
+            filename="options_public",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Options Module - Internal API
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="options",
+            primary_modules=[
+                CTModels => src(
+                    "Options/Options.jl",
+                    "Options/option_value.jl",
+                    "Options/option_definition.jl",
+                    "Options/extraction.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title="Options - Internal API",
+            title_in_menu="Options (Internal)",
+            filename="options_internal",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Strategies Module - Contract (Public)
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="strategies",
+            primary_modules=[
+                CTModels => src(
+                    "Strategies/Strategies.jl",
+                    "Strategies/contract/abstract_strategy.jl",
+                    "Strategies/contract/metadata.jl",
+                    "Strategies/contract/strategy_options.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title="Strategies - Contract (Public)",
+            title_in_menu="Strategies Contract (Public)",
+            filename="strategies_contract_public",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Strategies Module - Contract (Internal)
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="strategies",
+            primary_modules=[
+                CTModels => src(
+                    "Strategies/Strategies.jl",
+                    "Strategies/contract/abstract_strategy.jl",
+                    "Strategies/contract/metadata.jl",
+                    "Strategies/contract/strategy_options.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title="Strategies - Contract (Internal)",
+            title_in_menu="Strategies Contract (Internal)",
+            filename="strategies_contract_internal",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Strategies Module - API (Public)
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="strategies",
+            primary_modules=[
+                CTModels => src(
+                    "Strategies/api/builders.jl",
+                    "Strategies/api/configuration.jl",
+                    "Strategies/api/introspection.jl",
+                    "Strategies/api/registry.jl",
+                    "Strategies/api/utilities.jl",
+                    "Strategies/api/validation.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title="Strategies - API (Public)",
+            title_in_menu="Strategies API (Public)",
+            filename="strategies_api_public",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Strategies Module - API (Internal)
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="strategies",
+            primary_modules=[
+                CTModels => src(
+                    "Strategies/api/builders.jl",
+                    "Strategies/api/configuration.jl",
+                    "Strategies/api/introspection.jl",
+                    "Strategies/api/registry.jl",
+                    "Strategies/api/utilities.jl",
+                    "Strategies/api/validation.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title="Strategies - API (Internal)",
+            title_in_menu="Strategies API (Internal)",
+            filename="strategies_api_internal",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Orchestration Module - Public API
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="orchestration",
+            primary_modules=[
+                CTModels => src(
+                    "Orchestration/Orchestration.jl",
+                    "Orchestration/routing.jl",
+                    "Orchestration/disambiguation.jl",
+                    "Orchestration/method_builders.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title="Orchestration - Public API",
+            title_in_menu="Orchestration (Public)",
+            filename="orchestration_public",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Orchestration Module - Internal API
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory="orchestration",
+            primary_modules=[
+                CTModels => src(
+                    "Orchestration/Orchestration.jl",
+                    "Orchestration/routing.jl",
+                    "Orchestration/disambiguation.jl",
+                    "Orchestration/method_builders.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title="Orchestration - Internal API",
+            title_in_menu="Orchestration (Internal)",
+            filename="orchestration_internal",
+        ),
+        # ───────────────────────────────────────────────────────────────────
         # Core: Default & Utils
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;

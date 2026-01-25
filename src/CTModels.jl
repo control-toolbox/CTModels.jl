@@ -27,6 +27,16 @@ using ExaModels
 using KernelAbstractions
 using NLPModels
 
+# Modules
+include("Options/Options.jl")
+using .Options
+
+include("Strategies/Strategies.jl")
+using .Strategies
+
+include("Orchestration/Orchestration.jl")
+using .Orchestration
+
 # aliases
 
 """
@@ -259,7 +269,7 @@ Type alias for [`AbstractSolution`](@ref).
 Provides compatibility with CTSolvers naming conventions.
 """
 const AbstractOptimalControlSolution = CTModels.AbstractSolution
-include(joinpath(@__DIR__, "nlp", "options_schema.jl"))
+
 include(joinpath(@__DIR__, "nlp", "problem_core.jl"))
 include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))
 include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))

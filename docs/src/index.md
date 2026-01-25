@@ -65,10 +65,23 @@ At a high level, CTModels is responsible for:
 - **Managing time grids and dimensions** through convenient type aliases.
 - **Structuring constraints** (path, boundary, box constraints on state, control, and variables).
 - **Connecting to NLP backends** (ADNLPModels, ExaModels, etc.) via modelers and builders.
+- **Strategy architecture** (NEW):
+  - **Options**: Generic option handling with aliases and validation
+  - **Strategies**: Configurable components (modelers, solvers, discretizers)
 - **Providing utilities** for initial guesses, export/import, and plotting of solutions.
 
 Most of the public API is organized in a way that closely mirrors the mathematical
 objects you manipulate when formulating an optimal control problem.
+
+## Strategy Architecture
+
+CTModels provides a modern, type-stable architecture for configurable components:
+
+- **Options Module**: Low-level option extraction, validation, and alias resolution.
+- **Strategies Module**: Strategy contract, metadata, registry, and builders.
+
+This architecture replaces the legacy `AbstractOCPTool` interface with a cleaner,
+more maintainable design. See the **Developer Guide → Interfaces → Strategies** section for details.
 
 ## Time grids and basic aliases
 
@@ -192,27 +205,34 @@ functions and types.
 
 ## I am X, I want to do Y → read…
 
-- **I use OptimalControl.jl and I just want to understand what CTModels does in the background**  
-  Read this introduction page, then skim through the **Interfaces** section to see how
-  problems, modelers, and builders fit together.
+### User Guide
 
 - **I want to formulate a new optimal control / optimization problem**  
-  Read **Interfaces → Optimization Problems**, then **API Reference → Model / Times / Dynamics / Objective / Constraints**
+  Read **User Guide → Optimization Problems**, then **API Reference → Model / Times / Dynamics / Objective / Constraints**
   for details about fields and conventions.
-
-- **I want to connect a new NLP backend or tweak an existing backend**  
-  Read **Interfaces → Optimization Modelers** and the **API Reference → NLP Backends** section.
-
 - **I want to build good initial guesses for my problems**  
-  Read **Interfaces → Solution Builders** for the overall philosophy, then **API Reference → Initial Guess**
+  Read **User Guide → Solution Builders** for the overall philosophy, then **API Reference → Initial Guess**
   for the `pre_initial_guess` and `initial_guess` functions.
-
 - **I want to save / reload solutions (for example for numerical experiments)**  
   Read **API Reference → Extensions (JSON & JLD)** and the pages associated with the `CTModelsJSON` and `CTModelsJLD` modules.
-
 - **I want to plot solution trajectories nicely**  
   Read **API Reference → Extensions (Plot Extension)**, and look at the examples using `Plots.plot(sol)` and `Plots.plot!(sol)`.
+- **I use OptimalControl.jl and I just want to understand what CTModels does in the background**  
+  Read this introduction page, then skim through the **User Guide** section to see how
+  problems, modelers, and builders fit together.
 
+### Developer Guide
+
+- **I want to create a new strategy (modeler, solver, discretizer)**  
+  Read **Developer Guide → Tutorials → Creating a Strategy**, then **Developer Guide → Interfaces → Strategies**
+  for the complete contract specification.
+- **I want to create a family of related strategies**  
+  Read **Developer Guide → Tutorials → Creating a Strategy Family**, then **Developer Guide → Interfaces → Strategy Families**
+  for registry integration and best practices.
+- **I want to migrate from AbstractOCPTool to AbstractStrategy**  
+  Read **Developer Guide → Interfaces → Strategies → Migration Guide** for step-by-step instructions.
+- **I want to connect a new NLP backend or tweak an existing backend**  
+  Read **Developer Guide → Interfaces → Optimization Modelers** (updated) and the **API Reference → NLP Backends** section.
 - **I want to contribute to the core of CTModels (types, constraints, dual variables, etc.)**  
   Start with **API Reference → Types**, then **Solution & Dual** and **Constraints** to understand the internal structures
   before modifying or adding new fields.
