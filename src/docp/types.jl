@@ -8,7 +8,7 @@
 # Date: 2026-01-25
 
 """
-    AbstractBuilder
+AbstractBuilder
 
 Abstract base type for all builders in the DOCP system.
 
@@ -18,7 +18,7 @@ that work with discretized optimal control problems.
 abstract type AbstractBuilder end
 
 """
-    AbstractModelBuilder
+AbstractModelBuilder
 
 Abstract base type for builders that construct NLP back-end models from
 an AbstractOptimizationProblem.
@@ -28,20 +28,22 @@ expected to be callable objects that encapsulate the logic for building a model
 for a specific NLP back-end.
 
 # Example
-```julia
-struct MyModelBuilder <: AbstractModelBuilder
-    f::Function
-end
+```julia-repl
+julia> struct MyModelBuilder <: AbstractModelBuilder
+           f::Function
+       end
 
-# Usage
-builder = MyModelBuilder(problem -> build_nlp_model(problem))
-nlp_model = builder(problem, initial_guess)
+julia> builder = MyModelBuilder(problem -> build_nlp_model(problem))
+MyModelBuilder(...)
+
+julia> nlp_model = builder(problem, initial_guess)
+ADNLPModel(...)
 ```
 """
 abstract type AbstractModelBuilder <: AbstractBuilder end
 
 """
-    ADNLPModelBuilder
+$(TYPEDEF)
 
 Builder for constructing ADNLPModels-based NLP models from an 
 AbstractOptimizationProblem.
@@ -50,9 +52,12 @@ AbstractOptimizationProblem.
 - `f::T`: A callable that builds the ADNLPModel when invoked.
 
 # Example
-```julia
-builder = ADNLPModelBuilder(problem -> ADNLPModel(...))
-nlp_model = builder(problem, initial_guess)
+```julia-repl
+julia> builder = ADNLPModelBuilder(problem -> ADNLPModel(...))
+ADNLPModelBuilder(...)
+
+julia> nlp_model = builder(problem, initial_guess)
+ADNLPModel(...)
 ```
 """
 struct ADNLPModelBuilder{T<:Function} <: AbstractModelBuilder
@@ -60,7 +65,7 @@ struct ADNLPModelBuilder{T<:Function} <: AbstractModelBuilder
 end
 
 """
-    ExaModelBuilder
+$(TYPEDEF)
 
 Builder for constructing ExaModels-based NLP models from an 
 AbstractOptimizationProblem.
@@ -69,9 +74,12 @@ AbstractOptimizationProblem.
 - `f::T`: A callable that builds the ExaModel when invoked.
 
 # Example
-```julia
-builder = ExaModelBuilder((T, problem, x; kwargs...) -> ExaModel(...))
-nlp_model = builder(Float32, problem, initial_guess)
+```julia-repl
+julia> builder = ExaModelBuilder((T, problem, x; kwargs...) -> ExaModel(...))
+ExaModelBuilder(...)
+
+julia> nlp_model = builder(Float32, problem, initial_guess)
+ExaModel{Float32}(...)
 ```
 """
 struct ExaModelBuilder{T<:Function} <: AbstractModelBuilder
@@ -79,7 +87,7 @@ struct ExaModelBuilder{T<:Function} <: AbstractModelBuilder
 end
 
 """
-    AbstractSolutionBuilder
+AbstractSolutionBuilder
 
 Abstract base type for builders that transform NLP solutions into other
 representations (for example, solutions of an optimal control problem).
@@ -91,7 +99,7 @@ AbstractOCPSolutionBuilder and related concrete types.
 abstract type AbstractSolutionBuilder <: AbstractBuilder end
 
 """
-    AbstractOCPSolutionBuilder
+AbstractOCPSolutionBuilder
 
 Abstract base type for builders that transform NLP solutions into OCP solutions.
 
@@ -101,7 +109,7 @@ for specific solution types.
 abstract type AbstractOCPSolutionBuilder <: AbstractSolutionBuilder end
 
 """
-    ADNLPSolutionBuilder
+$(TYPEDEF)
 
 Builder for constructing OCP solutions from ADNLP solver results.
 
@@ -109,9 +117,12 @@ Builder for constructing OCP solutions from ADNLP solver results.
 - `f::T`: A callable that builds the solution when invoked.
 
 # Example
-```julia
-builder = ADNLPSolutionBuilder(stats -> build_ocp_solution(stats))
-solution = builder(stats)
+```julia-repl
+julia> builder = ADNLPSolutionBuilder(stats -> build_ocp_solution(stats))
+ADNLPSolutionBuilder(...)
+
+julia> solution = builder(stats)
+OCPSolution(...)
 ```
 """
 struct ADNLPSolutionBuilder{T<:Function} <: AbstractOCPSolutionBuilder
@@ -119,7 +130,7 @@ struct ADNLPSolutionBuilder{T<:Function} <: AbstractOCPSolutionBuilder
 end
 
 """
-    ExaSolutionBuilder
+$(TYPEDEF)
 
 Builder for constructing OCP solutions from ExaModels solver results.
 
@@ -127,9 +138,12 @@ Builder for constructing OCP solutions from ExaModels solver results.
 - `f::T`: A callable that builds the solution when invoked.
 
 # Example
-```julia
-builder = ExaSolutionBuilder(stats -> build_ocp_solution(stats))
-solution = builder(stats)
+```julia-repl
+julia> builder = ExaSolutionBuilder(stats -> build_ocp_solution(stats))
+ExaSolutionBuilder(...)
+
+julia> solution = builder(stats)
+OCPSolution(...)
 ```
 """
 struct ExaSolutionBuilder{T<:Function} <: AbstractOCPSolutionBuilder
@@ -137,7 +151,7 @@ struct ExaSolutionBuilder{T<:Function} <: AbstractOCPSolutionBuilder
 end
 
 """
-    AbstractOptimizationProblem
+AbstractOptimizationProblem
 
 Abstract base type for optimization problems built on optimal control
 problems.
@@ -149,7 +163,7 @@ know how to construct and interpret NLP back-end models and solutions.
 abstract type AbstractOptimizationProblem end
 
 """
-    OCPBackendBuilders{TM<:AbstractModelBuilder,TS<:AbstractOCPSolutionBuilder}
+$(TYPEDEF)
 
 Container for model and solution builders for a specific NLP backend.
 
@@ -158,11 +172,12 @@ Container for model and solution builders for a specific NLP backend.
 - `solution::TS`: The solution builder for this backend
 
 # Example
-```julia
-builders = OCPBackendBuilders(
-    ADNLPModelBuilder(problem -> ADNLPModel(...)),
-    ADNLPSolutionBuilder(stats -> build_ocp_solution(stats))
-)
+```julia-repl
+julia> builders = OCPBackendBuilders(
+           ADNLPModelBuilder(problem -> ADNLPModel(...)),
+           ADNLPSolutionBuilder(stats -> build_ocp_solution(stats))
+       )
+OCPBackendBuilders{ADNLPModelBuilder, ADNLPSolutionBuilder}(...)
 ```
 """
 struct OCPBackendBuilders{TM<:AbstractModelBuilder,TS<:AbstractOCPSolutionBuilder}
@@ -171,7 +186,7 @@ struct OCPBackendBuilders{TM<:AbstractModelBuilder,TS<:AbstractOCPSolutionBuilde
 end
 
 """
-    DiscretizedOptimalControlProblem
+$(TYPEDEF)
 
 Discretized optimal control problem ready for NLP solving.
 
@@ -185,8 +200,9 @@ multiple NLP backends (e.g., ADNLPModels and ExaModels).
 
 # Example
 
-```julia
+```julia-repl
 julia> docp = DiscretizedOptimalControlProblem(ocp, backend_builders)
+DiscretizedOptimalControlProblem{...}(...)
 ```
 """
 struct DiscretizedOptimalControlProblem{TO<:AbstractOptimizationProblem,TB<:NamedTuple} <: 

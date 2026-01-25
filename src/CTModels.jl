@@ -28,13 +28,13 @@ using KernelAbstractions
 using NLPModels
 
 # Modules
-include("Options/Options.jl")
+include(joinpath(@__DIR__, "Options", "Options.jl"))
 using .Options
 
-include("Strategies/Strategies.jl")
+include(joinpath(@__DIR__, "Strategies", "Strategies.jl"))
 using .Strategies
 
-include("Orchestration/Orchestration.jl")
+include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
 
 # New Modelers module (replaces legacy AbstractOCPTool system)
@@ -53,7 +53,7 @@ using .DOCP
 
 # 1. Type aliases (Dimension, ctNumber, Time, etc.) and export/import types
 #    These are the most basic types with no dependencies
-include("types/types.jl")
+include(joinpath(@__DIR__, "types", "types.jl"))
 
 # 2. OCP defaults (functions returning default values)
 #    Depends on: type aliases (uses Dimension, ctVector, etc.)
