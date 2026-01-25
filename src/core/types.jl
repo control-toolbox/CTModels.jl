@@ -1,5 +1,0 @@
-include(joinpath(@__DIR__, "types", "ocp_components.jl"))
-include(joinpath(@__DIR__, "types", "ocp_model.jl"))
-include(joinpath(@__DIR__, "types", "ocp_solution.jl"))
-include(joinpath(@__DIR__, "types", "nlp.jl"))
-include(joinpath(@__DIR__, "types", "initial_guess.jl"))

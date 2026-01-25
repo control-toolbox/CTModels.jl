@@ -37,225 +37,45 @@ using .Strategies
 include("Orchestration/Orchestration.jl")
 using .Orchestration
 
-# aliases
+# ============================================================================ #
+# TYPES AND FOUNDATIONS
+# ============================================================================ #
+# Load fundamental types first as they have no dependencies and are used
+# everywhere in the codebase.
 
-"""
-Type alias for a dimension. This is used to define the dimension of the state space, 
-the costate space, the control space, etc.
+# 1. Type aliases (Dimension, ctNumber, Time, etc.) and export/import types
+#    These are the most basic types with no dependencies
+include("types/types.jl")
 
-```@example
-julia> const Dimension = Integer
-```
-"""
-const Dimension = Int
+# 2. OCP defaults (functions returning default values)
+#    Depends on: type aliases (uses Dimension, ctVector, etc.)
+include(joinpath(@__DIR__, "ocp", "defaults.jl"))
 
-"""
-Type alias for a real number.
+# 3. Utility functions (interpolation, matrix operations, macros)
+#    Depends on: type aliases (uses ctNumber, etc.)
+#    Must be loaded before OCP types because @ensure macro is used in OCP types
+include(joinpath(@__DIR__, "utils", "utils.jl"))
 
-```@example
-julia> const ctNumber = Real
-```
-"""
-const ctNumber = Real
+# 4. OCP type definitions (components, model, solution)
+#    Depends on: type aliases, defaults, and utils (@ensure macro)
+include(joinpath(@__DIR__, "ocp", "types", "components.jl"))
+include(joinpath(@__DIR__, "ocp", "types", "model.jl"))
+include(joinpath(@__DIR__, "ocp", "types", "solution.jl"))
 
-"""
-Type alias for a time.
+# 5. NLP types (backends, builders, modelers)
+#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
+include(joinpath(@__DIR__, "nlp", "types.jl"))
 
-```@example
-julia> const Time = ctNumber
-```
+# 6. Export/import functions (require OCP types)
+#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
+include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
 
-See also: [`ctNumber`](@ref), [`Times`](@ref CTModels.Times), [`TimesDisc`](@ref).
-"""
-const Time = ctNumber
+# ============================================================================ #
+# COMPATIBILITY ALIASES
+# ============================================================================ #
+# Aliases for CTSolvers compatibility
+# Depends on: OCP types
 
-"""
-Type alias for a vector of real numbers.
-
-```@example
-julia> const ctVector = AbstractVector{<:ctNumber}
-```
-
-See also: [`ctNumber`](@ref).
-"""
-const ctVector = AbstractVector{<:ctNumber}
-
-"""
-Type alias for a vector of times.
-
-```@example
-julia> const Times = AbstractVector{<:Time}
-```
-
-See also: [`Time`](@ref), [`TimesDisc`](@ref).
-"""
-const Times = AbstractVector{<:Time}
-
-"""
-Type alias for a grid of times. This is used to define a discretization of time interval given to solvers.
-
-```@example
-julia> const TimesDisc = Union{Times, StepRangeLen}
-```
-
-See also: [`Time`](@ref), [`Times`](@ref CTModels.Times).
-"""
-const TimesDisc = Union{Times,StepRangeLen}
-
-"""
-Type alias for a dictionary of constraints. This is used to store constraints before building the model.
-
-```@example
-julia> const TimesDisc = Union{Times, StepRangeLen}
-```
-
-See also: [`ConstraintsModel`](@ref), [`PreModel`](@ref) and [`Model`](@ref CTModels.Model).
-"""
-const ConstraintsDictType = OrderedDict{
-    Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
-}
-
-#
-include(joinpath(@__DIR__, "core", "default.jl"))
-
-#
-include(joinpath(@__DIR__, "core", "utils.jl"))
-include(joinpath(@__DIR__, "core", "types.jl"))
-
-# export / import
-"""
-$(TYPEDEF)
-
-Abstract type for export/import functions, used to choose between JSON or JLD extensions.
-"""
-abstract type AbstractTag end
-
-"""
-$(TYPEDEF)
-
-JLD tag for export/import functions.
-"""
-struct JLD2Tag <: AbstractTag end
-
-"""
-$(TYPEDEF)
-
-JSON tag for export/import functions.
-"""
-struct JSON3Tag <: AbstractTag end
-
-# -----------------------------
-# to be extended
-function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(CTBase.ExtensionError(:Plots))
-end
-
-function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
-    throw(CTBase.ExtensionError(:JLD2))
-end
-
-function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
-    throw(CTBase.ExtensionError(:JLD2))
-end
-
-function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
-    throw(CTBase.ExtensionError(:JSON3))
-end
-
-function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
-    throw(CTBase.ExtensionError(:JSON3))
-end
-
-"""
-    export_ocp_solution(sol; format=:JLD, filename="solution")
-
-Export an optimal control solution to a file.
-
-# Arguments
-- `sol::AbstractSolution`: The solution to export.
-
-# Keyword Arguments
-- `format::Symbol=:JLD`: Export format, either `:JLD` or `:JSON`.
-- `filename::String="solution"`: Base filename (extension added automatically).
-
-# Notes
-Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
-
-See also: [`import_ocp_solution`](@ref)
-"""
-function export_ocp_solution(
-    sol::AbstractSolution;
-    format::Symbol=__format(),
-    filename::String=__filename_export_import(),
-)
-    if format == :JLD
-        return export_ocp_solution(JLD2Tag(), sol; filename=filename)
-    elseif format == :JSON
-        return export_ocp_solution(JSON3Tag(), sol; filename=filename)
-    else
-        throw(
-            CTBase.IncorrectArgument(
-                "unknown format (should be :JLD or :JSON): " * string(format)
-            ),
-        )
-    end
-end
-
-"""
-    import_ocp_solution(ocp; format=:JLD, filename="solution")
-
-Import an optimal control solution from a file.
-
-# Arguments
-- `ocp::AbstractModel`: The model associated with the solution.
-
-# Keyword Arguments
-- `format::Symbol=:JLD`: Import format, either `:JLD` or `:JSON`.
-- `filename::String="solution"`: Base filename (extension added automatically).
-
-# Returns
-- `Solution`: The imported solution.
-
-# Notes
-Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
-
-See also: [`export_ocp_solution`](@ref)
-"""
-function import_ocp_solution(
-    ocp::AbstractModel;
-    format::Symbol=__format(),
-    filename::String=__filename_export_import(),
-)
-    if format == :JLD
-        return import_ocp_solution(JLD2Tag(), ocp; filename=filename)
-    elseif format == :JSON
-        return import_ocp_solution(JSON3Tag(), ocp; filename=filename)
-    else
-        throw(
-            CTBase.IncorrectArgument(
-                "unknown format (should be :JLD or :JSON): " * string(format)
-            ),
-        )
-    end
-end
-
-#
-#include("init.jl")
-include(joinpath(@__DIR__, "ocp", "dual_model.jl"))
-include(joinpath(@__DIR__, "ocp", "state.jl"))
-include(joinpath(@__DIR__, "ocp", "control.jl"))
-include(joinpath(@__DIR__, "ocp", "variable.jl"))
-include(joinpath(@__DIR__, "ocp", "times.jl"))
-include(joinpath(@__DIR__, "ocp", "dynamics.jl"))
-include(joinpath(@__DIR__, "ocp", "objective.jl"))
-include(joinpath(@__DIR__, "ocp", "constraints.jl"))
-include(joinpath(@__DIR__, "ocp", "time_dependence.jl"))
-include(joinpath(@__DIR__, "ocp", "definition.jl"))
-include(joinpath(@__DIR__, "ocp", "print.jl"))
-include(joinpath(@__DIR__, "ocp", "model.jl"))
-include(joinpath(@__DIR__, "ocp", "solution.jl"))
-
-# new from CTSolvers
 """
 Type alias for [`AbstractModel`](@ref).
 
@@ -270,11 +90,25 @@ Provides compatibility with CTSolvers naming conventions.
 """
 const AbstractOptimalControlSolution = CTModels.AbstractSolution
 
+# ============================================================================ #
+# IMPLEMENTATIONS
+# ============================================================================ #
+# Load implementations after all types are defined
+
+# 6. OCP implementations (dynamics, constraints, model building, etc.)
+#    Depends on: all OCP types
+include(joinpath(@__DIR__, "ocp", "ocp.jl"))
+
+# 7. NLP implementations (problem core, backends, discretization)
+#    Depends on: OCP and NLP types
 include(joinpath(@__DIR__, "nlp", "problem_core.jl"))
 include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))
 include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))
 include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))
 include(joinpath(@__DIR__, "nlp", "model_api.jl"))
+# 8. Initialization (types and functions for initial guesses)
+#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
+include(joinpath(@__DIR__, "init", "types.jl"))
 include(joinpath(@__DIR__, "init", "initial_guess.jl"))
 
 end

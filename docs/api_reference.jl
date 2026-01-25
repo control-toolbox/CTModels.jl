@@ -43,26 +43,42 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             filename="ctmodels",
         ),
         # ───────────────────────────────────────────────────────────────────
-        # Core: Types
+        # Core: OCP Types
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
                 CTModels => src(
-                    "core/types.jl",
-                    "core/types/ocp_model.jl",
-                    "core/types/ocp_components.jl",
-                    "core/types/ocp_solution.jl",
-                    "core/types/initial_guess.jl",
-                    "core/types/nlp.jl",
+                    "ocp/types/components.jl",
+                    "ocp/types/model.jl",
+                    "ocp/types/solution.jl",
                 ),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=false,
             private=true,
-            title="Types",
-            title_in_menu="Types",
-            filename="types",
+            title="OCP Types",
+            title_in_menu="OCP Types",
+            filename="ocp_types",
+        ),
+        # ───────────────────────────────────────────────────────────────────
+        # Base Types & Export/Import
+        # ───────────────────────────────────────────────────────────────────
+        CTBase.automatic_reference_documentation(;
+            subdirectory=".",
+            primary_modules=[
+                CTModels => src(
+                    "types/aliases.jl",
+                    "types/export_import.jl",
+                    "types/export_import_functions.jl",
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title="Base Types & Export/Import",
+            title_in_menu="Base Types & Export/Import",
+            filename="base_types_export_import",
         ),
         # ───────────────────────────────────────────────────────────────────
         # Options Module - Public API
@@ -229,17 +245,25 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             filename="orchestration_internal",
         ),
         # ───────────────────────────────────────────────────────────────────
-        # Core: Default & Utils
+        # Defaults & Utils
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTModels => src("core/default.jl", "core/utils.jl")],
+            primary_modules=[
+                CTModels => src(
+                    "ocp/defaults.jl",
+                    "utils/interpolation.jl",
+                    "utils/matrix_utils.jl",
+                    "utils/function_utils.jl",
+                    "utils/macros.jl",
+                ),
+            ],
             exclude=EXCLUDE_SYMBOLS,
             public=false,
             private=true,
-            title="Default & Utils",
-            title_in_menu="Default & Utils",
-            filename="default_utils",
+            title="Defaults & Utils",
+            title_in_menu="Defaults & Utils",
+            filename="defaults_utils",
         ),
         # ───────────────────────────────────────────────────────────────────
         # OCP: Model (model, definition, time_dependence)
