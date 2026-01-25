@@ -44,7 +44,7 @@ CTModels.Strategies.metadata(::Type{<:WrongTypeStrategy}) = CTModels.Strategies.
 # Test function
 # ============================================================================
 
-function test_registry_api()
+function test_registry()
     Test.@testset "Strategy Registry API" verbose=VERBOSE showtiming=SHOWTIMING begin
         
         # ========================================================================
