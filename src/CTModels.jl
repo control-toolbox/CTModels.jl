@@ -38,8 +38,12 @@ include("Orchestration/Orchestration.jl")
 using .Orchestration
 
 # New Modelers module (replaces legacy AbstractOCPTool system)
-include("Modelers/Modelers.jl")
+include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
 using .Modelers
+
+# Include DOCP module
+include(joinpath(@__DIR__, "docp", "docp.jl"))
+using .DOCP
 
 # ============================================================================ #
 # TYPES AND FOUNDATIONS
