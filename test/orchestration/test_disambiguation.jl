@@ -169,7 +169,7 @@ function test_disambiguation()
         
         @testset "Integration: Disambiguation workflow" begin
             # Build both maps
-            strat_map = build_strategy_to_family_map(
+            strategy_map = build_strategy_to_family_map(
                 TEST_METHOD, TEST_FAMILIES, TEST_REGISTRY
             )
             option_map = build_option_ownership_map(
@@ -186,7 +186,7 @@ function test_disambiguation()
             @test strategy_id == :adnlp
             
             # Verify routing would work
-            family = strat_map[strategy_id]
+            family = strategy_map[strategy_id]
             @test family == :modeler
             
             # Verify option ownership
