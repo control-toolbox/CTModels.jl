@@ -64,13 +64,45 @@ with_api_reference(src_dir, ext_dir) do api_pages
         checkdocs=:none,
         pages=[
             "Introduction" => "index.md",
-            "Interfaces" => [
-                "OCP Tools" => "interfaces/ocp_tools.md",
-                "Optimization Problems" => "interfaces/optimization_problems.md",
-                "Optimization Modelers" => "interfaces/optimization_modelers.md",
-                "Solution Builders" => "interfaces/ocp_solution_builders.md",
+            "User Guide" => [
+                "Defining Problems" => "interfaces/optimization_problems.md",
+                "Building Solutions" => "interfaces/ocp_solution_builders.md",
             ],
-            "API Reference" => api_pages,
+            "Developer Guide" => [
+                "Tutorials" => [
+                    "Creating a Strategy" => "tutorials/creating_a_strategy.md",
+                    "Creating a Strategy Family" => "tutorials/creating_a_strategy_family.md",
+                ],
+                "Interfaces" => [
+                    "Strategies" => "interfaces/strategies.md",
+                    "Strategy Families" => "interfaces/strategy_families.md",
+                    "Orchestration & Routing" => "interfaces/orchestration.md",
+                    "Optimization Modelers" => "interfaces/optimization_modelers.md",
+                ],
+                "Examples" => [
+                    "Simple Strategy" => "examples/simple_strategy.md",
+                    "Strategy with Options" => "examples/strategy_with_options.md",
+                    "Strategy Family" => "examples/strategy_family.md",
+                    "Option Routing" => "examples/routing_example.md",
+                    "Integration Example" => "examples/integration_example.md",
+                    "Migration Example" => "examples/migration_example.md",
+                ],
+            ],
+            "API Reference" => [
+                "Public API" => [
+                    "Options" => "options/options_public.md",
+                    "Strategies (Contract)" => "strategies/strategies_contract_public.md",
+                    "Strategies (API)" => "strategies/strategies_api_public.md",
+                    "Orchestration" => "orchestration/orchestration_public.md",
+                ],
+                "Internal API" => [
+                    "Options (Internal)" => "options/options_internal.md",
+                    "Strategies Contract (Internal)" => "strategies/strategies_contract_internal.md",
+                    "Strategies API (Internal)" => "strategies/strategies_api_internal.md",
+                    "Orchestration (Internal)" => "orchestration/orchestration_internal.md",
+                ],
+                "Core & OCP" => api_pages,
+            ],
         ],
     )
 end

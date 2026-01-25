@@ -1,5 +1,6 @@
 [deps]
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
+CTModels = "34c4fa32-2049-4079-8329-de33c2a22e2d"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
