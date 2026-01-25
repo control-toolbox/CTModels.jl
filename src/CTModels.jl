@@ -37,6 +37,10 @@ using .Strategies
 include("Orchestration/Orchestration.jl")
 using .Orchestration
 
+# New Modelers module (replaces legacy AbstractOCPTool system)
+include("Modelers/Modelers.jl")
+using .Modelers
+
 # ============================================================================ #
 # TYPES AND FOUNDATIONS
 # ============================================================================ #

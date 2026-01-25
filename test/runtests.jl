@@ -14,8 +14,8 @@
 #
 # ### Run a specific test group
 #
-#   julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["ocp"])'
-#   julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["constraints", "dynamics"])'
+#   julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["ocp/*"])'
+#   julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["ocp/test_constraints", "ocp/test_dynamics"])'
 #
 # ### Run all tests (including those not enabled by default)
 #
@@ -91,6 +91,8 @@ CTBase.run_tests(;
         "options/test_*",
         "strategies/test_*",
         "orchestration/test_*",
+        "modelers/test_*",
+        "docp/test_*",
     ),
     filename_builder=name -> Symbol(:test_, name),
     funcname_builder=name -> Symbol(:test_, name),

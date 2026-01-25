@@ -1,0 +1,29 @@
+# Modelers Module
+# 
+# This module provides strategy-based modelers for converting discretized optimal 
+# control problems to NLP backend models using the new AbstractStrategy contract.
+#
+# Author: CTModels Development Team
+# Date: 2026-01-25
+
+module Modelers
+
+using CTBase: CTBase
+using DocStringExtensions
+using SolverCore
+using ADNLPModels
+using ExaModels
+using ..CTModels.Options
+using ..CTModels.Strategies
+
+# Include submodules
+include(joinpath(@__DIR__, "abstract_modeler.jl"))
+include(joinpath(@__DIR__, "adnlp_modeler.jl"))
+include(joinpath(@__DIR__, "exa_modeler.jl"))
+include(joinpath(@__DIR__, "utilities.jl"))
+
+# Public API
+export AbstractModeler
+export ADNLPModelerStrategy, ExaModelerStrategy
+
+end # module Modelers
