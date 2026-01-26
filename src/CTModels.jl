@@ -118,7 +118,7 @@ include(joinpath(@__DIR__, "ocp", "ocp.jl"))
 # include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))  # LEGACY - Replaced by Modelers module
 include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))
 # include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))  # LEGACY - Replaced by DOCP.contract_impl
-include(joinpath(@__DIR__, "nlp", "model_api.jl"))
+# include(joinpath(@__DIR__, "nlp", "model_api.jl"))  # LEGACY - Split into Optimization.model_api and DOCP.model_api
 # 8. Initialization (types and functions for initial guesses)
 #    Depends on: OCP types (uses AbstractModel, AbstractSolution)
 include(joinpath(@__DIR__, "init", "types.jl"))

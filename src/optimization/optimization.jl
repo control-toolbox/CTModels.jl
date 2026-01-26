@@ -15,6 +15,7 @@ using DocStringExtensions
 include(joinpath(@__DIR__, "abstract_types.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
+include(joinpath(@__DIR__, "model_api.jl"))
 
 # Public API - Abstract types
 export AbstractOptimizationProblem
@@ -28,5 +29,8 @@ export ADNLPSolutionBuilder, ExaSolutionBuilder
 # Public API - Contract functions
 export get_adnlp_model_builder, get_exa_model_builder
 export get_adnlp_solution_builder, get_exa_solution_builder
+
+# Public API - Model building functions
+export build_model, build_solution
 
 end # module Optimization
