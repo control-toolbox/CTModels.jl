@@ -151,9 +151,11 @@ function test_optimization()
                 calls = Ref(0)
                 function test_exa_builder(::Type{T}, x; backend=nothing) where T
                     calls[] += 1
+                    # Simple ExaModel without complex syntax
+                    n = length(x)
                     c = ExaModels.ExaCore(T; backend=backend)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     return ExaModels.ExaModel(c)
                 end
                 
@@ -222,9 +224,10 @@ function test_optimization()
             # Create builders
             adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
             exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                n = length(x)
                 c = ExaModels.ExaCore(T)
-                ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                 ExaModels.ExaModel(c)
             end)
             adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (obj=s.objective,))
@@ -268,9 +271,10 @@ function test_optimization()
             # Setup
             adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
             exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                n = length(x)
                 c = ExaModels.ExaCore(T)
-                ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                 ExaModels.ExaModel(c)
             end)
             adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (obj=s.objective, status=s.status))

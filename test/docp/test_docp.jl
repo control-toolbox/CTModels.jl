@@ -11,12 +11,19 @@ This file tests the complete DOCP module including:
 using Test
 using CTModels
 using CTModels.DOCP
-using CTModels.Optimization
 using CTBase
 using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+
+# Import from Optimization module to avoid name conflicts
+import CTModels.Optimization
+import CTModels.Optimization: AbstractOptimizationProblem, AbstractBuilder
+import CTModels.Optimization: AbstractModelBuilder, AbstractSolutionBuilder, AbstractOCPSolutionBuilder
+import CTModels.Optimization: get_adnlp_model_builder, get_exa_model_builder
+import CTModels.Optimization: get_adnlp_solution_builder, get_exa_solution_builder
+import CTModels.Optimization: build_model, build_solution
 
 # ============================================================================
 # FAKE TYPES FOR TESTING (TOP-LEVEL)
@@ -80,15 +87,16 @@ function test_docp()
         @testset "DiscretizedOptimalControlProblem Type" begin
             @testset "Construction" begin
                 # Create builders
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-                exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective,))
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective,))
                 
                 # Create fake OCP
                 ocp = FakeOCP("test_ocp")
@@ -113,25 +121,26 @@ function test_docp()
             
             @testset "Type parameters" begin
                 ocp = FakeOCP("test")
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-                exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective,))
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective,))
                 
                 docp = DiscretizedOptimalControlProblem(
                     ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
                 )
                 
                 @test typeof(docp.optimal_control_problem) == FakeOCP
-                @test typeof(docp.adnlp_model_builder) <: ADNLPModelBuilder
-                @test typeof(docp.exa_model_builder) <: ExaModelBuilder
-                @test typeof(docp.adnlp_solution_builder) <: ADNLPSolutionBuilder
-                @test typeof(docp.exa_solution_builder) <: ExaSolutionBuilder
+                @test typeof(docp.adnlp_model_builder) <: Optimization.ADNLPModelBuilder
+                @test typeof(docp.exa_model_builder) <: Optimization.ExaModelBuilder
+                @test typeof(docp.adnlp_solution_builder) <: Optimization.ADNLPSolutionBuilder
+                @test typeof(docp.exa_solution_builder) <: Optimization.ExaSolutionBuilder
             end
         end
 
@@ -142,15 +151,16 @@ function test_docp()
         @testset "Contract Implementation" begin
             # Setup
             ocp = FakeOCP("test_ocp")
-            adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-            exa_builder = ExaModelBuilder((T, x) -> begin
+            adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+            exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                n = length(x)
                 c = ExaModels.ExaCore(T)
-                ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                 ExaModels.ExaModel(c)
             end)
-            adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-            exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective,))
+            adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+            exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective,))
             
             docp = DiscretizedOptimalControlProblem(
                 ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
@@ -159,25 +169,25 @@ function test_docp()
             @testset "get_adnlp_model_builder" begin
                 builder = get_adnlp_model_builder(docp)
                 @test builder === adnlp_builder
-                @test builder isa ADNLPModelBuilder
+                @test builder isa Optimization.ADNLPModelBuilder
             end
             
             @testset "get_exa_model_builder" begin
                 builder = get_exa_model_builder(docp)
                 @test builder === exa_builder
-                @test builder isa ExaModelBuilder
+                @test builder isa Optimization.ExaModelBuilder
             end
             
             @testset "get_adnlp_solution_builder" begin
                 builder = get_adnlp_solution_builder(docp)
                 @test builder === adnlp_sol_builder
-                @test builder isa ADNLPSolutionBuilder
+                @test builder isa Optimization.ADNLPSolutionBuilder
             end
             
             @testset "get_exa_solution_builder" begin
                 builder = get_exa_solution_builder(docp)
                 @test builder === exa_sol_builder
-                @test builder isa ExaSolutionBuilder
+                @test builder isa Optimization.ExaSolutionBuilder
             end
         end
 
@@ -188,15 +198,16 @@ function test_docp()
         @testset "Accessors" begin
             @testset "ocp_model" begin
                 ocp = FakeOCP("my_ocp")
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-                exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective,))
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective,))
                 
                 docp = DiscretizedOptimalControlProblem(
                     ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
@@ -215,15 +226,16 @@ function test_docp()
         @testset "Building Functions" begin
             # Setup
             ocp = FakeOCP("test_ocp")
-            adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-            exa_builder = ExaModelBuilder((T, x) -> begin
+            adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+            exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                n = length(x)
                 c = ExaModels.ExaCore(T)
-                ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                 ExaModels.ExaModel(c)
             end)
-            adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective, status=s.status))
-            exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective, iter=s.iter))
+            adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective, status=s.status))
+            exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective, iter=s.iter))
             
             docp = DiscretizedOptimalControlProblem(
                 ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
@@ -279,20 +291,21 @@ function test_docp()
                 ocp = FakeOCP("integration_test_ocp")
                 
                 # Create builders
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (
                     objective=s.objective,
                     iterations=s.iter,
                     status=s.status,
                     success=(s.status == :first_order || s.status == :acceptable)
                 ))
-                exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective, iter=s.iter))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective, iter=s.iter))
                 
                 # Create DOCP
                 docp = DiscretizedOptimalControlProblem(
@@ -325,15 +338,16 @@ function test_docp()
                 ocp = FakeOCP("integration_test_exa")
                 
                 # Create builders
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-                exa_sol_builder = ExaSolutionBuilder(s -> (
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (
                     objective=s.objective,
                     iterations=s.iter,
                     status=s.status
@@ -368,15 +382,16 @@ function test_docp()
                 ocp = FakeOCP("base_type_test")
                 
                 # Create builders
-                adnlp_builder = ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
-                exa_builder = ExaModelBuilder((T, x) -> begin
+                adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
+                exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
+                    n = length(x)
                     c = ExaModels.ExaCore(T)
-                    ExaModels.variable(c, 1 <= x[i=1:length(x)] <= 3, start=x[i])
-                    ExaModels.objective(c, sum(x[i]^2 for i=1:length(x)))
+                    ExaModels.variable(c, x_var[i=1:n], start=x[i])
+                    ExaModels.objective(c, sum(x_var[i]^2 for i=1:n))
                     ExaModels.ExaModel(c)
                 end)
-                adnlp_sol_builder = ADNLPSolutionBuilder(s -> (objective=s.objective,))
-                exa_sol_builder = ExaSolutionBuilder(s -> (objective=s.objective,))
+                adnlp_sol_builder = Optimization.ADNLPSolutionBuilder(s -> (objective=s.objective,))
+                exa_sol_builder = Optimization.ExaSolutionBuilder(s -> (objective=s.objective,))
                 
                 docp = DiscretizedOptimalControlProblem(
                     ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
