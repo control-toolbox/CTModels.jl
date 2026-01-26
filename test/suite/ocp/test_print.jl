@@ -1,3 +1,9 @@
+module TestOCPPrint
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_print()
     # TODO: add tests for src/ocp/print.jl.
 
@@ -78,3 +84,7 @@ function test_print()
         Test.@test occursin("optimal control problem is of the form:", s)
     end
 end
+
+end # module
+
+test_print() = TestOCPPrint.test_print()

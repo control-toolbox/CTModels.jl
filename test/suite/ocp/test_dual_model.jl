@@ -1,3 +1,9 @@
+module TestOCPDualModel
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_dual_model()
     # TODO: add tests for src/ocp/dual_model.jl.
 
@@ -27,3 +33,7 @@ function test_dual_model()
         Test.@test CTModels.variable_constraints_ub_dual(dual) === vc_ub
     end
 end
+
+end # module
+
+test_dual_model() = TestOCPDualModel.test_dual_model()

@@ -1,65 +1,75 @@
+module TestOCPVariable
+
+using Test
+using CTBase
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_variable()
+    Test.@testset "OCP Variable" verbose = VERBOSE showtiming = SHOWTIMING begin
+        # VariableModel
 
-    #
+        # some checks
+        ocp = CTModels.PreModel()
+        @test ocp.variable isa CTModels.EmptyVariableModel
+        @test !CTModels.__is_variable_set(ocp)
+        CTModels.variable!(ocp, 1)
+        @test CTModels.__is_variable_set(ocp)
 
-    # VariableModel
+        # variable!
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 0)
+        @test CTModels.dimension(ocp.variable) == 0
+        @test CTModels.name(ocp.variable) == ""
+        @test CTModels.components(ocp.variable) == String[]
 
-    # some checks
-    ocp = CTModels.PreModel()
-    @test ocp.variable isa CTModels.EmptyVariableModel
-    @test !CTModels.__is_variable_set(ocp)
-    CTModels.variable!(ocp, 1)
-    @test CTModels.__is_variable_set(ocp)
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 1)
+        @test CTModels.dimension(ocp.variable) == 1
+        @test CTModels.name(ocp.variable) == "v"
+        @test CTModels.components(ocp.variable) == ["v"]
 
-    # variable!
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 0)
-    @test CTModels.dimension(ocp.variable) == 0
-    @test CTModels.name(ocp.variable) == ""
-    @test CTModels.components(ocp.variable) == String[]
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 1, "w")
+        @test CTModels.dimension(ocp.variable) == 1
+        @test CTModels.name(ocp.variable) == "w"
+        @test CTModels.components(ocp.variable) == ["w"]
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 1)
-    @test CTModels.dimension(ocp.variable) == 1
-    @test CTModels.name(ocp.variable) == "v"
-    @test CTModels.components(ocp.variable) == ["v"]
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 2)
+        @test CTModels.dimension(ocp.variable) == 2
+        @test CTModels.name(ocp.variable) == "v"
+        @test CTModels.components(ocp.variable) == ["v₁", "v₂"]
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 1, "w")
-    @test CTModels.dimension(ocp.variable) == 1
-    @test CTModels.name(ocp.variable) == "w"
-    @test CTModels.components(ocp.variable) == ["w"]
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 2, :w)
+        @test CTModels.dimension(ocp.variable) == 2
+        @test CTModels.name(ocp.variable) == "w"
+        @test CTModels.components(ocp.variable) == ["w₁", "w₂"]
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 2)
-    @test CTModels.dimension(ocp.variable) == 2
-    @test CTModels.name(ocp.variable) == "v"
-    @test CTModels.components(ocp.variable) == ["v₁", "v₂"]
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 2, "w", ["a", "b"])
+        @test CTModels.dimension(ocp.variable) == 2
+        @test CTModels.name(ocp.variable) == "w"
+        @test CTModels.components(ocp.variable) == ["a", "b"]
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 2, :w)
-    @test CTModels.dimension(ocp.variable) == 2
-    @test CTModels.name(ocp.variable) == "w"
-    @test CTModels.components(ocp.variable) == ["w₁", "w₂"]
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 2, "w", [:a, :b])
+        @test CTModels.dimension(ocp.variable) == 2
+        @test CTModels.name(ocp.variable) == "w"
+        @test CTModels.components(ocp.variable) == ["a", "b"]
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 2, "w", ["a", "b"])
-    @test CTModels.dimension(ocp.variable) == 2
-    @test CTModels.name(ocp.variable) == "w"
-    @test CTModels.components(ocp.variable) == ["a", "b"]
+        # set twice
+        ocp = CTModels.PreModel()
+        CTModels.variable!(ocp, 1)
+        @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
 
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 2, "w", [:a, :b])
-    @test CTModels.dimension(ocp.variable) == 2
-    @test CTModels.name(ocp.variable) == "w"
-    @test CTModels.components(ocp.variable) == ["a", "b"]
-
-    # set twice
-    ocp = CTModels.PreModel()
-    CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
-
-    # wrong number of components
-    ocp = CTModels.PreModel()
-    @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
+        # wrong number of components
+        ocp = CTModels.PreModel()
+        @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
+    end
 end
+
+end # module
+
+test_variable() = TestOCPVariable.test_variable()

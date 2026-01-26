@@ -1,3 +1,10 @@
+module TestOCPComponents
+
+using Test
+using CTBase
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_ocp_components()
     # TODO: add tests for src/core/types/ocp_components.jl.
 
@@ -62,3 +69,7 @@ function test_ocp_components()
         Test.@test constraints.variable_box == ()
     end
 end
+
+end # module
+
+test_ocp_components() = TestOCPComponents.test_ocp_components()

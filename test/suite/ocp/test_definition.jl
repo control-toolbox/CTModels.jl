@@ -1,3 +1,9 @@
+module TestOCPDefinition
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_definition()
     # TODO: add tests for src/ocp/definition.jl.
 
@@ -50,3 +56,7 @@ function test_definition()
         Test.@test CTModels.definition(model) === expr
     end
 end
+
+end # module
+
+test_definition() = TestOCPDefinition.test_definition()

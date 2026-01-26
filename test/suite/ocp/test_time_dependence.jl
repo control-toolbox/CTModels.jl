@@ -1,3 +1,10 @@
+module TestOCPTimeDependence
+
+using Test
+using CTBase
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_time_dependence()
     # TODO: add tests for src/ocp/time_dependence.jl.
 
@@ -54,3 +61,7 @@ function test_time_dependence()
         Test.@test CTModels.is_autonomous(pre_nonautonomous) === false
     end
 end
+
+end # module
+
+test_time_dependence() = TestOCPTimeDependence.test_time_dependence()

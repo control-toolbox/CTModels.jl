@@ -1,3 +1,10 @@
+module TestOCPDefaults
+
+using Test
+using CTBase
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_defaults()
     # TODO: add tests for src/core/default.jl (default options, etc.).
 
@@ -53,3 +60,7 @@ function test_defaults()
         Test.@test CTModels.__filename_export_import() == "solution"
     end
 end
+
+end # module
+
+test_defaults() = TestOCPDefaults.test_defaults()

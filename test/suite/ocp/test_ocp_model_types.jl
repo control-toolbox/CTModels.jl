@@ -1,3 +1,9 @@
+module TestOCPModelTypes
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_ocp_model_types()
     # TODO: add tests for src/core/types/ocp_model.jl.
 
@@ -140,3 +146,7 @@ function test_ocp_model_types()
         Test.@test can_build(ocp)
     end
 end
+
+end # module
+
+test_ocp_model_types() = TestOCPModelTypes.test_ocp_model_types()
