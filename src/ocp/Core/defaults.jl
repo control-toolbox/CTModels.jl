@@ -98,14 +98,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the storage of elements in a matrix.
-The default value is `1`.
-"""
-__matrix_dimension_storage() = 1
-
-"""
-$(TYPEDSIGNATURES)
-
 Return the default filename (without extension) for exporting and importing solutions.
 
 The default value is `"solution"`.

@@ -1,6 +1,16 @@
 """
 $(TYPEDSIGNATURES)
 
+Return the default value for matrix dimension storage.
+
+Used to set the default value of the storage of elements in a matrix.
+The default value is `1`.
+"""
+__matrix_dimension_storage() = 1
+
+"""
+$(TYPEDSIGNATURES)
+
 Transform a matrix into a vector of vectors along the specified dimension.
 
 Each row or column of the matrix `A` is extracted and stored as an individual vector, depending on `dim`.

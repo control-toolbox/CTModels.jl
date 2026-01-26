@@ -65,11 +65,25 @@ include("Building/dual_model.jl")
 include("Building/model.jl")
 include("Building/solution.jl")
 
-# Export main API
+# Export main API - Types
 export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
+export FixedTimeModel, FreeTimeModel, TimesModel
+export StateModel, ControlModel, VariableModel
+export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
+
+# Export main API - Construction functions
 export state!, control!, variable!
 export time!, dynamics!, objective!, constraint!
-export build_model, build_solution
+export build_model, build_solution, build
+export definition!, time_dependence!
+
+# Export main API - Accessors
+export constraint, name, dimension, components
+export initial_time, final_time, time_name
+export criterion, has_mayer_cost, has_lagrange_cost
+export is_mayer_cost_defined, is_lagrange_cost_defined
+export has_fixed_initial_time, has_free_initial_time
+export has_fixed_final_time, has_free_final_time
 
 end

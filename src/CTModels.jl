@@ -22,10 +22,10 @@ using MacroTools: striplines
 using RecipesBase: plot, plot!, RecipesBase
 using OrderedCollections: OrderedDict
 using SolverCore
-using ADNLPModels
-using ExaModels
-using KernelAbstractions
-using NLPModels
+using ADNLPModels: ADNLPModels
+using ExaModels: ExaModels
+using KernelAbstractions: KernelAbstractions
+using NLPModels: NLPModels
 
 # Modules
 include(joinpath(@__DIR__, "Options", "Options.jl"))
