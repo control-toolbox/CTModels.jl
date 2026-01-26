@@ -61,8 +61,7 @@ using .DOCP
 include(joinpath(@__DIR__, "types", "types.jl"))
 
 # 2. OCP defaults (functions returning default values)
-#    Depends on: type aliases (uses Dimension, ctVector, etc.)
-include(joinpath(@__DIR__, "ocp", "defaults.jl"))
+#    Note: Now included in OCP module (Core/defaults.jl)
 
 # 3. Utils module (interpolation, matrix operations, macros)
 #    Depends on: CTBase (for ctNumber)
@@ -73,10 +72,13 @@ using .Utils
 import .Utils: @ensure
 
 # 5. OCP type definitions (components, model, solution)
-#    Depends on: type aliases, defaults, and utils (@ensure macro)
-include(joinpath(@__DIR__, "ocp", "types", "components.jl"))
-include(joinpath(@__DIR__, "ocp", "types", "model.jl"))
-include(joinpath(@__DIR__, "ocp", "types", "solution.jl"))
+#    Note: Now included in OCP module (Types/ directory)
+
+# 6. OCP module (optimal control problem core)
+#    Depends on: all foundational types, Utils
+#    Note: Replaces all individual ocp/ includes with organized module
+include(joinpath(@__DIR__, "OCP", "OCP.jl"))
+using .OCP
 
 # ============================================================================ #
 # COMPATIBILITY ALIASES
@@ -103,23 +105,6 @@ const AbstractOptimalControlSolution = CTModels.AbstractSolution
 # ============================================================================ #
 # Load implementations after all types are defined
 
-# 6. OCP implementations (dynamics, constraints, model building, etc.)
-#    Depends on: all OCP types
-#    Note: print.jl will be moved to Display module
-include(joinpath(@__DIR__, "ocp", "dual_model.jl"))
-include(joinpath(@__DIR__, "ocp", "state.jl"))
-include(joinpath(@__DIR__, "ocp", "control.jl"))
-include(joinpath(@__DIR__, "ocp", "variable.jl"))
-include(joinpath(@__DIR__, "ocp", "times.jl"))
-include(joinpath(@__DIR__, "ocp", "dynamics.jl"))
-include(joinpath(@__DIR__, "ocp", "objective.jl"))
-include(joinpath(@__DIR__, "ocp", "constraints.jl"))
-include(joinpath(@__DIR__, "ocp", "time_dependence.jl"))
-include(joinpath(@__DIR__, "ocp", "definition.jl"))
-# print.jl moved to Display module
-include(joinpath(@__DIR__, "ocp", "model.jl"))
-include(joinpath(@__DIR__, "ocp", "solution.jl"))
-
 # 7. Display module (formatting and printing)
 #    Depends on: OCP types (Model, Solution)
 include(joinpath(@__DIR__, "Display", "Display.jl"))
@@ -132,6 +117,7 @@ using .Serialization
 
 # 9. InitialGuess module
 #    Depends on: OCP types, Utils (ctinterpolate, matrix2vec)
+#    Must be loaded after OCP to extend state/control/variable functions
 include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
 using .InitialGuess
 

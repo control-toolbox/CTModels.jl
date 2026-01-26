@@ -31,7 +31,8 @@ import ..AbstractOptimalControlProblem, ..AbstractSolution
 import ..state_dimension, ..control_dimension, ..variable_dimension
 
 # Import functions to extend with new methods
-import ..state, ..control, ..variable
+# Note: These are now in OCP module, not directly in parent
+import ..OCP: state, control, variable
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec
