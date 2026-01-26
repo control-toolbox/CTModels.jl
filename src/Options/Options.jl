@@ -27,6 +27,6 @@ include(joinpath(@__DIR__, "extraction.jl"))
 # Public API
 # ==============================================================================
 
-export OptionValue, OptionDefinition, extract_option, extract_options
+export OptionValue, OptionDefinition, extract_option, extract_options, extract_raw_options
 
 end # module Options

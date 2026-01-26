@@ -206,3 +206,43 @@ function extract_options(kwargs::NamedTuple, defs::NamedTuple)
     extracted = NamedTuple(extracted_pairs)
     return extracted, remaining
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Extract raw option values from a NamedTuple of options, unwrapping OptionValue wrappers
+and filtering out `nothing` values.
+
+This utility function is useful when passing options to external builders or functions
+that expect plain keyword arguments without OptionValue wrappers or undefined options.
+
+# Arguments
+- `options::NamedTuple`: NamedTuple containing option values (may be wrapped in OptionValue)
+
+# Returns
+- `NamedTuple`: NamedTuple with unwrapped values, excluding any `nothing` values
+
+# Example
+```julia-repl
+julia> using CTModels.Options
+
+julia> opts = (backend = OptionValue(:optimized, :user), 
+               show_time = OptionValue(false, :default),
+               minimize = OptionValue(nothing, :default))
+
+julia> extract_raw_options(opts)
+(backend = :optimized, show_time = false)
+```
+
+See also: [`OptionValue`](@ref), [`extract_options`](@ref)
+"""
+function extract_raw_options(options::NamedTuple)
+    raw_opts_dict = Dict{Symbol, Any}()
+    for (k, v) in pairs(options)
+        val = v isa OptionValue ? v.value : v
+        if val !== nothing
+            raw_opts_dict[k] = val
+        end
+    end
+    return NamedTuple(raw_opts_dict)
+end
