@@ -1,0 +1,44 @@
+"""
+    InitialGuess
+
+Initial guess module for CTModels.
+
+This module provides types and functions for constructing and managing initial
+guesses for optimal control problems. Initial guesses help warm-start numerical
+solvers by providing starting trajectories for state, control, and variables.
+
+# Public API
+
+The following functions are exported and accessible as `CTModels.function_name()`:
+
+- [`initial_guess`](@ref): Construct a validated initial guess
+- [`pre_initial_guess`](@ref): Create a pre-initialization object
+
+# Types
+
+- [`OptimalControlInitialGuess`](@ref): Validated initial guess with callable trajectories
+- [`OptimalControlPreInit`](@ref): Pre-initialization container for raw data
+
+See also: [`CTModels`](@ref)
+"""
+module InitialGuess
+
+using DocStringExtensions
+using CTBase
+
+# Import types and utilities from parent module
+import ..AbstractOptimalControlProblem
+import ..ctinterpolate, ..matrix2vec
+
+# Load types first
+include("types.jl")
+
+# Load implementation
+include("initial_guess.jl")
+
+# Export public API
+export initial_guess, pre_initial_guess
+export OptimalControlInitialGuess, OptimalControlPreInit
+export AbstractOptimalControlInitialGuess, AbstractOptimalControlPreInit
+
+end
