@@ -77,28 +77,9 @@ import .Utils: @ensure
 # 6. OCP module (optimal control problem core)
 #    Depends on: all foundational types, Utils
 #    Note: Replaces all individual ocp/ includes with organized module
+#    Note: Compatibility aliases (AbstractOptimalControlProblem, etc.) are now in OCP
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
-
-# ============================================================================ #
-# COMPATIBILITY ALIASES
-# ============================================================================ #
-# Aliases for CTSolvers compatibility
-# Depends on: OCP types
-
-"""
-Type alias for [`AbstractModel`](@ref).
-
-Provides compatibility with CTSolvers naming conventions.
-"""
-const AbstractOptimalControlProblem = CTModels.AbstractModel
-
-"""
-Type alias for [`AbstractSolution`](@ref).
-
-Provides compatibility with CTSolvers naming conventions.
-"""
-const AbstractOptimalControlSolution = CTModels.AbstractSolution
 
 # ============================================================================ #
 # IMPLEMENTATIONS

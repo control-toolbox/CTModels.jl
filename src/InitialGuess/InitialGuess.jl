@@ -26,10 +26,9 @@ module InitialGuess
 using DocStringExtensions
 using CTBase
 
-# Import types from OCP module
+# Import types and aliases from OCP module
 import ..OCP: AbstractModel, AbstractSolution
-# Create local aliases for compatibility
-const AbstractOptimalControlProblem = AbstractModel
+import ..OCP: AbstractOptimalControlProblem, AbstractOptimalControlSolution
 
 # Import functions from OCP module
 import ..OCP: state, control, variable

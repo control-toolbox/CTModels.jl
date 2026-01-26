@@ -85,4 +85,22 @@ export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
 
+# Compatibility aliases for CTSolvers
+"""
+Type alias for [`AbstractModel`](@ref).
+
+Provides compatibility with CTSolvers naming conventions.
+"""
+const AbstractOptimalControlProblem = AbstractModel
+
+"""
+Type alias for [`AbstractSolution`](@ref).
+
+Provides compatibility with CTSolvers naming conventions.
+"""
+const AbstractOptimalControlSolution = AbstractSolution
+
+# Export aliases
+export AbstractOptimalControlProblem, AbstractOptimalControlSolution
+
 end
