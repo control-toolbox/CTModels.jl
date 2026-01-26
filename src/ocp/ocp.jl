@@ -33,9 +33,10 @@ using CTBase
 using MLStyle: @match
 using MacroTools
 using Parameters
+using OrderedCollections: OrderedDict
 
-# Import types from parent module
-import ..ctNumber, ..ctVector, ..Times, ..TimesDisc, ..Dimension, ..Time, ..ConstraintsDictType
+# Define type aliases (moved from src/types/aliases.jl)
+include("aliases.jl")
 
 # Import macro from Utils module
 import ..Utils: @ensure
@@ -63,6 +64,9 @@ include("Building/definition.jl")
 include("Building/dual_model.jl")
 include("Building/model.jl")
 include("Building/solution.jl")
+
+# Export type aliases
+export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictType
 
 # Export main API - Types
 export Model, PreModel, AbstractModel

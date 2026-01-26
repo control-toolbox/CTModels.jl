@@ -12,20 +12,8 @@ $(EXPORTS)
 module CTModels
 
 # imports
-# using Base
-# using CTBase: CTBase
 using DocStringExtensions
-# using Interpolations
-# using MLStyle
-# using Parameters # @with_kw: to have default values in struct
-# using MacroTools: striplines
-# using RecipesBase: plot, plot!, RecipesBase
 using OrderedCollections: OrderedDict
-# using SolverCore
-# using ADNLPModels: ADNLPModels
-# using ExaModels: ExaModels
-# using KernelAbstractions: KernelAbstractions
-# using NLPModels: NLPModels
 
 # Modules
 include(joinpath(@__DIR__, "Options", "Options.jl"))
@@ -57,8 +45,8 @@ using .DOCP
 # everywhere in the codebase.
 
 # 1. Type aliases (Dimension, ctNumber, Time, etc.) and export/import types
-#    These are the most basic types with no dependencies
-include(joinpath(@__DIR__, "types", "types.jl"))
+#    Note: Moved to OCP module (aliases.jl) and Serialization module (types.jl)
+#    No longer needed here as they are loaded with their respective modules
 
 # 2. OCP defaults (functions returning default values)
 #    Note: Now included in OCP module (Core/defaults.jl)

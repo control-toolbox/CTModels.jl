@@ -34,12 +34,15 @@ using CTBase
 
 # Import types from parent module
 import ..AbstractModel, ..AbstractSolution, ..Solution
-import ..JLD2Tag, ..JSON3Tag
+
+# Define export/import tag types
+include("types.jl")
 
 # Include serialization functions
 include("export_import.jl")
 
 # Export public API
 export export_ocp_solution, import_ocp_solution
+export JLD2Tag, JSON3Tag
 
 end
