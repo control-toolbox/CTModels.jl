@@ -36,7 +36,6 @@ using Parameters
 
 # Import types from parent module
 import ..ctNumber, ..ctVector, ..Times, ..TimesDisc, ..Dimension, ..Time, ..ConstraintsDictType
-import ..AbstractOptimalControlProblem, ..AbstractOptimalControlSolution
 
 # Import macro from Utils module
 import ..Utils: @ensure

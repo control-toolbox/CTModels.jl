@@ -26,13 +26,15 @@ module InitialGuess
 using DocStringExtensions
 using CTBase
 
-# Import types from parent module
-import ..AbstractOptimalControlProblem, ..AbstractSolution
-import ..state_dimension, ..control_dimension, ..variable_dimension
+# Import types from OCP module
+import ..OCP: AbstractModel, AbstractSolution
+# Create local aliases for compatibility
+const AbstractOptimalControlProblem = AbstractModel
 
-# Import functions to extend with new methods
-# Note: These are now in OCP module, not directly in parent
+# Import functions from OCP module
 import ..OCP: state, control, variable
+import ..OCP: state_dimension, control_dimension, variable_dimension
+import ..OCP: state_name, control_name, variable_name
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec

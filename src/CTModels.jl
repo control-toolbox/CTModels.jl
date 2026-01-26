@@ -12,20 +12,20 @@ $(EXPORTS)
 module CTModels
 
 # imports
-using Base
-using CTBase: CTBase
+# using Base
+# using CTBase: CTBase
 using DocStringExtensions
-using Interpolations
-using MLStyle
-using Parameters # @with_kw: to have default values in struct
-using MacroTools: striplines
-using RecipesBase: plot, plot!, RecipesBase
+# using Interpolations
+# using MLStyle
+# using Parameters # @with_kw: to have default values in struct
+# using MacroTools: striplines
+# using RecipesBase: plot, plot!, RecipesBase
 using OrderedCollections: OrderedDict
-using SolverCore
-using ADNLPModels: ADNLPModels
-using ExaModels: ExaModels
-using KernelAbstractions: KernelAbstractions
-using NLPModels: NLPModels
+# using SolverCore
+# using ADNLPModels: ADNLPModels
+# using ExaModels: ExaModels
+# using KernelAbstractions: KernelAbstractions
+# using NLPModels: NLPModels
 
 # Modules
 include(joinpath(@__DIR__, "Options", "Options.jl"))
