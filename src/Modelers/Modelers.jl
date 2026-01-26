@@ -15,7 +15,9 @@ using ADNLPModels
 using ExaModels
 using ..CTModels.Options
 using ..CTModels.Strategies
-using ..CTModels.Optimization: AbstractOptimizationProblem
+using ..CTModels.Optimization: AbstractOptimizationProblem,
+    get_adnlp_model_builder, get_exa_model_builder,
+    get_adnlp_solution_builder, get_exa_solution_builder
 
 # Include submodules
 include(joinpath(@__DIR__, "abstract_modeler.jl"))

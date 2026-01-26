@@ -106,8 +106,13 @@ function (modeler::ExaModeler{BaseType})(
     # Get the appropriate builder for this problem type
     builder = get_exa_model_builder(prob)
     
+    # Extract raw values from OptionValue wrappers
+    raw_opts = NamedTuple{keys(opts.options)}(
+        Tuple(v isa Options.OptionValue ? v.value : v for v in values(opts.options))
+    )
+    
     # Build the ExaModel passing BaseType and all options generically
-    return builder(BaseType, initial_guess; opts.options...)
+    return builder(BaseType, initial_guess; raw_opts...)
 end
 
 # Solution building interface
