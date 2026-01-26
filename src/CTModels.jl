@@ -116,29 +116,23 @@ include(joinpath(@__DIR__, "ocp", "objective.jl"))
 include(joinpath(@__DIR__, "ocp", "constraints.jl"))
 include(joinpath(@__DIR__, "ocp", "time_dependence.jl"))
 include(joinpath(@__DIR__, "ocp", "definition.jl"))
-include(joinpath(@__DIR__, "ocp", "print.jl"))  # TODO: Will be moved to Display module
+# print.jl moved to Display module
 include(joinpath(@__DIR__, "ocp", "model.jl"))
 include(joinpath(@__DIR__, "ocp", "solution.jl"))
 
 # 7. Display module (formatting and printing)
 #    Depends on: OCP types (Model, Solution)
-#    Note: Currently using ocp/print.jl, will transition to Display module
-# include(joinpath(@__DIR__, "Display", "Display.jl"))
-# using .Display
+include(joinpath(@__DIR__, "Display", "Display.jl"))
+using .Display
 
 # 8. Serialization module (import/export)
 #    Depends on: OCP types (AbstractModel, AbstractSolution)
-#    Note: Currently using types/export_import_functions.jl
-include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
-# include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
-# using .Serialization
+include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
+using .Serialization
 
 # 9. InitialGuess module
 #    Depends on: OCP types, Utils (ctinterpolate, matrix2vec)
-#    Note: Currently using init/, will transition to InitialGuess module
-include(joinpath(@__DIR__, "InitialGuess", "types.jl"))
-include(joinpath(@__DIR__, "InitialGuess", "initial_guess.jl"))
-# include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
-# using .InitialGuess
+include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
+using .InitialGuess
 
 end

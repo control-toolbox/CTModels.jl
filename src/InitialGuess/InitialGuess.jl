@@ -27,7 +27,8 @@ using DocStringExtensions
 using CTBase
 
 # Import types from parent module
-import ..AbstractOptimalControlProblem
+import ..AbstractOptimalControlProblem, ..AbstractSolution
+import ..state_dimension, ..control_dimension, ..variable_dimension
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec
@@ -39,7 +40,7 @@ include("types.jl")
 include("initial_guess.jl")
 
 # Export public API
-export initial_guess, pre_initial_guess
+export initial_guess, pre_initial_guess, build_initial_guess
 export OptimalControlInitialGuess, OptimalControlPreInit
 export AbstractOptimalControlInitialGuess, AbstractOptimalControlPreInit
 

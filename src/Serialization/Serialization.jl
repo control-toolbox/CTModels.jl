@@ -31,6 +31,7 @@ module Serialization
 
 using DocStringExtensions
 using CTBase
+using RecipesBase
 
 # Import types from parent module
 import ..AbstractModel, ..AbstractSolution, ..Solution
