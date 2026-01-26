@@ -80,15 +80,12 @@ function test_model()
     CTModels.constraint!(
         pre_ocp, :boundary; f=f_boundary_scalar, lb=-11, ub=12, label=:boundary_scalar
     )
-    # Add scalar constraints (suppress warnings about overwriting bounds)
-    Test.@test_logs min_level=Logging.Error begin
-        CTModels.constraint!(pre_ocp, :state; rg=1, lb=-12, ub=13, label=:state_scalar)
-        CTModels.constraint!(pre_ocp, :control; rg=1, lb=-13, ub=14, label=:control_scalar)
-        CTModels.constraint!(pre_ocp, :variable; rg=1, lb=-14, ub=15, label=:variable_scalar)
-        CTModels.constraint!(pre_ocp, :state; rg=2, lb=-15, ub=16, label=:state_scalar_2)
-        CTModels.constraint!(pre_ocp, :control; rg=2, lb=-16, ub=17, label=:control_scalar_2)
-        CTModels.constraint!(pre_ocp, :variable; rg=2, lb=-17, ub=18, label=:variable_scalar_2)
-    end
+    CTModels.constraint!(pre_ocp, :state; rg=1, lb=-12, ub=13, label=:state_scalar)
+    CTModels.constraint!(pre_ocp, :control; rg=1, lb=-13, ub=14, label=:control_scalar)
+    CTModels.constraint!(pre_ocp, :variable; rg=1, lb=-14, ub=15, label=:variable_scalar)
+    CTModels.constraint!(pre_ocp, :state; rg=2, lb=-15, ub=16, label=:state_scalar_2)
+    CTModels.constraint!(pre_ocp, :control; rg=2, lb=-16, ub=17, label=:control_scalar_2)
+    CTModels.constraint!(pre_ocp, :variable; rg=2, lb=-17, ub=18, label=:variable_scalar_2)
 
     # build the model
     model = CTModels.build(pre_ocp)

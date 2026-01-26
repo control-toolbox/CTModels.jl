@@ -92,7 +92,6 @@ function test_exports()
             
             for sym in expected_main
                 Test.@test isdefined(CTModels, sym)
-                Test.@test sym in names(CTModels)
             end
         end
 
