@@ -1,3 +1,13 @@
+"""
+    test_constraints()
+
+Test constraint handling in OCP models.
+
+# Note
+Some tests in this file intentionally generate warnings to verify that the system
+correctly warns users about overwriting bounds. If you see warnings like
+"Overwriting bound for component X", they are expected and part of the test assertions.
+"""
 function test_constraints()
     ∅ = Vector{Float64}()
 
@@ -142,6 +152,10 @@ function test_constraints()
     # When multiple constraints are declared on the same component index,
     # a warning should be emitted during model build.
     # Applies to: state, control, and variable constraints.
+    #
+    # NOTE: The warnings displayed during these tests are INTENTIONAL and EXPECTED.
+    # They verify that the system correctly warns users about overwriting bounds.
+    # These warnings are part of the test assertions using @test_warn.
     # -----------------------------------------------------------------------
     @testset "duplicate constraint warning" begin
         # --- State constraints ---

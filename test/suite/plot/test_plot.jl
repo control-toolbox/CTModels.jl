@@ -1,6 +1,7 @@
 module TestPlot
 
 using Test
+using CTBase
 using CTModels
 using Main.TestProblems
 using Main.TestOptions: VERBOSE, SHOWTIMING

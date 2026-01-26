@@ -1,12 +1,4 @@
-"""
-Tests for DOCP module
-
-This file tests the complete DOCP module including:
-- DiscretizedOptimalControlProblem type
-- Contract implementation (get_*_builder functions)
-- Accessors (ocp_model)
-- Building functions (nlp_model, ocp_solution)
-"""
+module TestDOCP
 
 using Test
 using CTModels
@@ -16,6 +8,7 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # Import from Optimization module to avoid name conflicts
 import CTModels.Optimization
@@ -78,14 +71,14 @@ end
 # ============================================================================
 
 function test_docp()
-    @testset "DOCP Module" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "DOCP Module" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - DiscretizedOptimalControlProblem Type
         # ====================================================================
         
-        @testset "DiscretizedOptimalControlProblem Type" begin
-            @testset "Construction" begin
+        Test.@testset "DiscretizedOptimalControlProblem Type" begin
+            Test.@testset "Construction" begin
                 # Create builders
                 adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
                 exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
@@ -111,16 +104,16 @@ function test_docp()
                     exa_sol_builder
                 )
                 
-                @test docp isa DiscretizedOptimalControlProblem
-                @test docp isa AbstractOptimizationProblem
-                @test docp.optimal_control_problem === ocp
-                @test docp.adnlp_model_builder === adnlp_builder
-                @test docp.exa_model_builder === exa_builder
-                @test docp.adnlp_solution_builder === adnlp_sol_builder
-                @test docp.exa_solution_builder === exa_sol_builder
+                Test.@test docp isa DiscretizedOptimalControlProblem
+                Test.@test docp isa AbstractOptimizationProblem
+                Test.@test docp.optimal_control_problem === ocp
+                Test.@test docp.adnlp_model_builder === adnlp_builder
+                Test.@test docp.exa_model_builder === exa_builder
+                Test.@test docp.adnlp_solution_builder === adnlp_sol_builder
+                Test.@test docp.exa_solution_builder === exa_sol_builder
             end
             
-            @testset "Type parameters" begin
+            Test.@testset "Type parameters" begin
                 ocp = FakeOCP("test")
                 adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
                 exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
@@ -138,11 +131,11 @@ function test_docp()
                     ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
                 )
                 
-                @test typeof(docp.optimal_control_problem) == FakeOCP
-                @test typeof(docp.adnlp_model_builder) <: Optimization.ADNLPModelBuilder
-                @test typeof(docp.exa_model_builder) <: Optimization.ExaModelBuilder
-                @test typeof(docp.adnlp_solution_builder) <: Optimization.ADNLPSolutionBuilder
-                @test typeof(docp.exa_solution_builder) <: Optimization.ExaSolutionBuilder
+                Test.@test typeof(docp.optimal_control_problem) == FakeOCP
+                Test.@test typeof(docp.adnlp_model_builder) <: Optimization.ADNLPModelBuilder
+                Test.@test typeof(docp.exa_model_builder) <: Optimization.ExaModelBuilder
+                Test.@test typeof(docp.adnlp_solution_builder) <: Optimization.ADNLPSolutionBuilder
+                Test.@test typeof(docp.exa_solution_builder) <: Optimization.ExaSolutionBuilder
             end
         end
 
@@ -150,7 +143,7 @@ function test_docp()
         # UNIT TESTS - Contract Implementation
         # ====================================================================
         
-        @testset "Contract Implementation" begin
+        Test.@testset "Contract Implementation" begin
             # Setup
             ocp = FakeOCP("test_ocp")
             adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
@@ -168,28 +161,28 @@ function test_docp()
                 ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
             )
             
-            @testset "get_adnlp_model_builder" begin
+            Test.@testset "get_adnlp_model_builder" begin
                 builder = get_adnlp_model_builder(docp)
-                @test builder === adnlp_builder
-                @test builder isa Optimization.ADNLPModelBuilder
+                Test.@test builder === adnlp_builder
+                Test.@test builder isa Optimization.ADNLPModelBuilder
             end
             
-            @testset "get_exa_model_builder" begin
+            Test.@testset "get_exa_model_builder" begin
                 builder = get_exa_model_builder(docp)
-                @test builder === exa_builder
-                @test builder isa Optimization.ExaModelBuilder
+                Test.@test builder === exa_builder
+                Test.@test builder isa Optimization.ExaModelBuilder
             end
             
-            @testset "get_adnlp_solution_builder" begin
+            Test.@testset "get_adnlp_solution_builder" begin
                 builder = get_adnlp_solution_builder(docp)
-                @test builder === adnlp_sol_builder
-                @test builder isa Optimization.ADNLPSolutionBuilder
+                Test.@test builder === adnlp_sol_builder
+                Test.@test builder isa Optimization.ADNLPSolutionBuilder
             end
             
-            @testset "get_exa_solution_builder" begin
+            Test.@testset "get_exa_solution_builder" begin
                 builder = get_exa_solution_builder(docp)
-                @test builder === exa_sol_builder
-                @test builder isa Optimization.ExaSolutionBuilder
+                Test.@test builder === exa_sol_builder
+                Test.@test builder isa Optimization.ExaSolutionBuilder
             end
         end
 
@@ -197,8 +190,8 @@ function test_docp()
         # UNIT TESTS - Accessors
         # ====================================================================
         
-        @testset "Accessors" begin
-            @testset "ocp_model" begin
+        Test.@testset "Accessors" begin
+            Test.@testset "ocp_model" begin
                 ocp = FakeOCP("my_ocp")
                 adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
                 exa_builder = Optimization.ExaModelBuilder((T, x) -> begin
@@ -217,8 +210,8 @@ function test_docp()
                 )
                 
                 retrieved_ocp = ocp_model(docp)
-                @test retrieved_ocp === ocp
-                @test retrieved_ocp.name == "my_ocp"
+                Test.@test retrieved_ocp === ocp
+                Test.@test retrieved_ocp.name == "my_ocp"
             end
         end
 
@@ -226,7 +219,7 @@ function test_docp()
         # UNIT TESTS - Building Functions
         # ====================================================================
         
-        @testset "Building Functions" begin
+        Test.@testset "Building Functions" begin
             # Setup
             ocp = FakeOCP("test_ocp")
             adnlp_builder = Optimization.ADNLPModelBuilder(x -> ADNLPModel(z -> sum(z.^2), x))
@@ -244,43 +237,43 @@ function test_docp()
                 ocp, adnlp_builder, exa_builder, adnlp_sol_builder, exa_sol_builder
             )
             
-            @testset "nlp_model with ADNLP" begin
+            Test.@testset "nlp_model with ADNLP" begin
                 modeler = FakeModelerDOCP(:adnlp)
                 x0 = [1.0, 2.0]
                 
                 nlp = nlp_model(docp, x0, modeler)
-                @test nlp isa NLPModels.AbstractNLPModel
-                @test nlp isa ADNLPModels.ADNLPModel
-                @test nlp.meta.x0 == x0
-                @test NLPModels.obj(nlp, x0) ≈ 5.0
+                Test.@test nlp isa NLPModels.AbstractNLPModel
+                Test.@test nlp isa ADNLPModels.ADNLPModel
+                Test.@test nlp.meta.x0 == x0
+                Test.@test NLPModels.obj(nlp, x0) ≈ 5.0
             end
             
-            @testset "nlp_model with Exa" begin
+            Test.@testset "nlp_model with Exa" begin
                 modeler = FakeModelerDOCP(:exa)
                 x0 = [1.0, 2.0]
                 
                 nlp = nlp_model(docp, x0, modeler)
-                @test nlp isa NLPModels.AbstractNLPModel
-                @test nlp isa ExaModels.ExaModel{Float64}
-                @test NLPModels.obj(nlp, x0) ≈ 5.0
+                Test.@test nlp isa NLPModels.AbstractNLPModel
+                Test.@test nlp isa ExaModels.ExaModel{Float64}
+                Test.@test NLPModels.obj(nlp, x0) ≈ 5.0
             end
             
-            @testset "ocp_solution with ADNLP" begin
+            Test.@testset "ocp_solution with ADNLP" begin
                 modeler = FakeModelerDOCP(:adnlp)
                 stats = MockExecutionStats(1.23, 10, 1e-6, :first_order)
                 
                 sol = ocp_solution(docp, stats, modeler)
-                @test sol.objective ≈ 1.23
-                @test sol.status == :first_order
+                Test.@test sol.objective ≈ 1.23
+                Test.@test sol.status == :first_order
             end
             
-            @testset "ocp_solution with Exa" begin
+            Test.@testset "ocp_solution with Exa" begin
                 modeler = FakeModelerDOCP(:exa)
                 stats = MockExecutionStats(2.34, 15, 1e-5, :acceptable)
                 
                 sol = ocp_solution(docp, stats, modeler)
-                @test sol.objective ≈ 2.34
-                @test sol.iter == 15
+                Test.@test sol.objective ≈ 2.34
+                Test.@test sol.iter == 15
             end
         end
 
@@ -288,8 +281,8 @@ function test_docp()
         # INTEGRATION TESTS
         # ====================================================================
         
-        @testset "Integration Tests" begin
-            @testset "Complete DOCP workflow - ADNLP" begin
+        Test.@testset "Integration Tests" begin
+            Test.@testset "Complete DOCP workflow - ADNLP" begin
                 # Create OCP
                 ocp = FakeOCP("integration_test_ocp")
                 
@@ -317,27 +310,27 @@ function test_docp()
                 )
                 
                 # Verify OCP retrieval
-                @test ocp_model(docp) === ocp
+                Test.@test ocp_model(docp) === ocp
                 
                 # Build NLP model
                 modeler = FakeModelerDOCP(:adnlp)
                 x0 = [1.0, 2.0, 3.0]
                 nlp = nlp_model(docp, x0, modeler)
                 
-                @test nlp isa ADNLPModels.ADNLPModel
-                @test NLPModels.obj(nlp, x0) ≈ 14.0
+                Test.@test nlp isa ADNLPModels.ADNLPModel
+                Test.@test NLPModels.obj(nlp, x0) ≈ 14.0
                 
                 # Build solution
                 stats = MockExecutionStats(14.0, 20, 1e-8, :first_order)
                 sol = ocp_solution(docp, stats, modeler)
                 
-                @test sol.objective ≈ 14.0
-                @test sol.iterations == 20
-                @test sol.status == :first_order
-                @test sol.success == true
+                Test.@test sol.objective ≈ 14.0
+                Test.@test sol.iterations == 20
+                Test.@test sol.status == :first_order
+                Test.@test sol.success == true
             end
             
-            @testset "Complete DOCP workflow - Exa" begin
+            Test.@testset "Complete DOCP workflow - Exa" begin
                 # Create OCP
                 ocp = FakeOCP("integration_test_exa")
                 
@@ -364,26 +357,26 @@ function test_docp()
                 )
                 
                 # Verify OCP retrieval
-                @test ocp_model(docp) === ocp
+                Test.@test ocp_model(docp) === ocp
                 
                 # Build NLP model
                 modeler = FakeModelerDOCP(:exa)
                 x0 = [1.0, 2.0, 3.0]
                 nlp = nlp_model(docp, x0, modeler)
                 
-                @test nlp isa ExaModels.ExaModel{Float64}
-                @test NLPModels.obj(nlp, x0) ≈ 14.0
+                Test.@test nlp isa ExaModels.ExaModel{Float64}
+                Test.@test NLPModels.obj(nlp, x0) ≈ 14.0
                 
                 # Build solution
                 stats = MockExecutionStats(14.0, 25, 1e-7, :acceptable)
                 sol = ocp_solution(docp, stats, modeler)
                 
-                @test sol.objective ≈ 14.0
-                @test sol.iterations == 25
-                @test sol.status == :acceptable
+                Test.@test sol.objective ≈ 14.0
+                Test.@test sol.iterations == 25
+                Test.@test sol.status == :acceptable
             end
             
-            @testset "DOCP with different base types" begin
+            Test.@testset "DOCP with different base types" begin
                 ocp = FakeOCP("base_type_test")
                 
                 # Create builders
@@ -407,14 +400,18 @@ function test_docp()
                 builder64 = get_exa_model_builder(docp)
                 x0_64 = [1.0, 2.0]
                 nlp64 = builder64(Float64, x0_64)
-                @test nlp64 isa ExaModels.ExaModel{Float64}
+                Test.@test nlp64 isa ExaModels.ExaModel{Float64}
                 
                 # Test with Float32
                 builder32 = get_exa_model_builder(docp)
                 x0_32 = Float32[1.0, 2.0]
                 nlp32 = builder32(Float32, x0_32)
-                @test nlp32 isa ExaModels.ExaModel{Float32}
+                Test.@test nlp32 isa ExaModels.ExaModel{Float32}
             end
         end
     end
 end
+
+end # module
+
+test_docp() = TestDOCP.test_docp()
