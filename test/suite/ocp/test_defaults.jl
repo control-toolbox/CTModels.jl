@@ -1,4 +1,4 @@
-function test_default()
+function test_defaults()
     # TODO: add tests for src/core/default.jl (default options, etc.).
 
     Test.@testset "constraints and format defaults" verbose=VERBOSE showtiming=SHOWTIMING begin
