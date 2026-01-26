@@ -23,7 +23,7 @@ import ..CTModels.Optimization: get_adnlp_solution_builder, get_exa_solution_bui
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "contract_impl.jl"))
 include(joinpath(@__DIR__, "accessors.jl"))
-include(joinpath(@__DIR__, "model_api.jl"))
+include(joinpath(@__DIR__, "building.jl"))
 
 # Public API
 export DiscretizedOptimalControlProblem

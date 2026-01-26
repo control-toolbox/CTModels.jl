@@ -75,10 +75,6 @@ include(joinpath(@__DIR__, "ocp", "types", "components.jl"))
 include(joinpath(@__DIR__, "ocp", "types", "model.jl"))
 include(joinpath(@__DIR__, "ocp", "types", "solution.jl"))
 
-# 5. NLP types (backends, builders, modelers)
-#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
-# include(joinpath(@__DIR__, "nlp", "types.jl"))  # LEGACY - Replaced by Optimization module
-
 # # 6. Export/import functions (require OCP types)
 # #    Depends on: OCP types (uses AbstractModel, AbstractSolution)
 # include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
@@ -116,12 +112,8 @@ include(joinpath(@__DIR__, "ocp", "ocp.jl"))
 #    Depends on: OCP and NLP types
 # include(joinpath(@__DIR__, "nlp", "problem_core.jl"))  # LEGACY - Replaced by Optimization.contract
 # include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))  # LEGACY - Replaced by Modelers module
-include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))
+# include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))  # LEGACY - Moved to Optimization.solver_info
 # include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))  # LEGACY - Replaced by DOCP.contract_impl
-# include(joinpath(@__DIR__, "nlp", "model_api.jl"))  # LEGACY - Split into Optimization.model_api and DOCP.model_api
-# 8. Initialization (types and functions for initial guesses)
-#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
-include(joinpath(@__DIR__, "init", "types.jl"))
-include(joinpath(@__DIR__, "init", "initial_guess.jl"))
+# include(joinpath(@__DIR__, "nlp", "model_api.jl"))  # LEGACY - Split into Optimization.building and DOCP.building
 
 end

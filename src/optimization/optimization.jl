@@ -10,12 +10,15 @@ module Optimization
 
 using CTBase: CTBase
 using DocStringExtensions
+using NLPModels
+using SolverCore
 
 # Include submodules
 include(joinpath(@__DIR__, "abstract_types.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
-include(joinpath(@__DIR__, "model_api.jl"))
+include(joinpath(@__DIR__, "building.jl"))
+include(joinpath(@__DIR__, "solver_info.jl"))
 
 # Public API - Abstract types
 export AbstractOptimizationProblem
@@ -32,5 +35,8 @@ export get_adnlp_solution_builder, get_exa_solution_builder
 
 # Public API - Model building functions
 export build_model, build_solution
+
+# Public API - Solver utilities
+export extract_solver_infos
 
 end # module Optimization

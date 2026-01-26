@@ -1,6 +1,10 @@
-"""
-Module for extracting solver information from NLP execution statistics.
-"""
+# Solver Information Extraction
+#
+# Utilities for extracting solver information from NLP execution statistics.
+# These functions work with standard NLP solver outputs.
+#
+# Author: CTModels Development Team
+# Date: 2026-01-26
 
 """
 $(TYPEDSIGNATURES)
