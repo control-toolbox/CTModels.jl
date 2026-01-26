@@ -1,12 +1,11 @@
-# ============================================================================
-# Tests for Orchestration method builder wrappers
-# ============================================================================
+module TestOrchestrationMethodBuilders
 
 using Test
 using CTModels.Orchestration
 using CTModels.Strategies
 using CTModels.Options
 using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test fixtures (minimal strategy setup)
@@ -80,13 +79,13 @@ const BUILDER_METHOD = (:collocation, :adnlp)
 # ============================================================================
 
 function test_method_builders()
-    @testset "Orchestration Method Builders" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration Method Builders" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         # ====================================================================
         # build_strategy_from_method - Wrapper Tests
         # ====================================================================
         
-        @testset "build_strategy_from_method" begin
+        Test.@testset "build_strategy_from_method" begin
             # Build with default options
             discretizer = Orchestration.build_strategy_from_method(
                 BUILDER_METHOD,
@@ -94,8 +93,8 @@ function test_method_builders()
                 BUILDER_REGISTRY
             )
             
-            @test discretizer isa BuilderCollocation
-            @test Strategies.option_value(discretizer, :grid_size) == 100
+            Test.@test discretizer isa BuilderCollocation
+            Test.@test Strategies.option_value(discretizer, :grid_size) == 100
             
             # Build with custom options
             discretizer2 = Orchestration.build_strategy_from_method(
@@ -105,8 +104,8 @@ function test_method_builders()
                 grid_size = 200
             )
             
-            @test discretizer2 isa BuilderCollocation
-            @test Strategies.option_value(discretizer2, :grid_size) == 200
+            Test.@test discretizer2 isa BuilderCollocation
+            Test.@test Strategies.option_value(discretizer2, :grid_size) == 200
             
             # Build modeler
             modeler = Orchestration.build_strategy_from_method(
@@ -117,16 +116,16 @@ function test_method_builders()
                 show_time = true
             )
             
-            @test modeler isa BuilderADNLP
-            @test Strategies.option_value(modeler, :backend) === :sparse
-            @test Strategies.option_value(modeler, :show_time) === true
+            Test.@test modeler isa BuilderADNLP
+            Test.@test Strategies.option_value(modeler, :backend) === :sparse
+            Test.@test Strategies.option_value(modeler, :show_time) === true
         end
         
         # ====================================================================
         # option_names_from_method - Wrapper Tests
         # ====================================================================
         
-        @testset "option_names_from_method" begin
+        Test.@testset "option_names_from_method" begin
             # Get option names for discretizer
             names = Orchestration.option_names_from_method(
                 BUILDER_METHOD,
@@ -134,9 +133,9 @@ function test_method_builders()
                 BUILDER_REGISTRY
             )
             
-            @test names isa Tuple
-            @test :grid_size in names
-            @test length(names) == 1
+            Test.@test names isa Tuple
+            Test.@test :grid_size in names
+            Test.@test length(names) == 1
             
             # Get option names for modeler
             names2 = Orchestration.option_names_from_method(
@@ -145,17 +144,17 @@ function test_method_builders()
                 BUILDER_REGISTRY
             )
             
-            @test names2 isa Tuple
-            @test :backend in names2
-            @test :show_time in names2
-            @test length(names2) == 2
+            Test.@test names2 isa Tuple
+            Test.@test :backend in names2
+            Test.@test :show_time in names2
+            Test.@test length(names2) == 2
         end
         
         # ====================================================================
         # Integration: Build and inspect
         # ====================================================================
         
-        @testset "Integration: Build and inspect workflow" begin
+        Test.@testset "Integration: Build and inspect workflow" begin
             # 1. Get option names
             discretizer_opts = Orchestration.option_names_from_method(
                 BUILDER_METHOD,
@@ -168,8 +167,8 @@ function test_method_builders()
                 BUILDER_REGISTRY
             )
             
-            @test :grid_size in discretizer_opts
-            @test :backend in modeler_opts
+            Test.@test :grid_size in discretizer_opts
+            Test.@test :backend in modeler_opts
             
             # 2. Build strategies with those options
             discretizer = Orchestration.build_strategy_from_method(
@@ -186,10 +185,14 @@ function test_method_builders()
             )
             
             # 3. Verify strategies were built correctly
-            @test discretizer isa BuilderCollocation
-            @test modeler isa BuilderADNLP
-            @test Strategies.option_value(discretizer, :grid_size) == 150
-            @test Strategies.option_value(modeler, :backend) === :sparse
+            Test.@test discretizer isa BuilderCollocation
+            Test.@test modeler isa BuilderADNLP
+            Test.@test Strategies.option_value(discretizer, :grid_size) == 150
+            Test.@test Strategies.option_value(modeler, :backend) === :sparse
         end
     end
 end
+
+end # module
+
+test_method_builders() = TestOrchestrationMethodBuilders.test_method_builders()

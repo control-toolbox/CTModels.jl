@@ -1,3 +1,11 @@
+module TestOptionsOptionDefinition
+
+using Test
+using CTModels
+using CTBase
+using CTModels.Options
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_option_definition()
     Test.@testset "OptionDefinition" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -7,7 +15,7 @@ function test_option_definition()
         
         Test.@testset "Basic construction" begin
             # Minimal constructor
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :test_option,
                 type = Int,
                 default = 42,
@@ -27,7 +35,7 @@ function test_option_definition()
         
         Test.@testset "Full construction" begin
             validator = x -> x > 0
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :max_iter,
                 type = Int,
                 default = 100,
@@ -48,7 +56,7 @@ function test_option_definition()
         # ========================================================================
         
         Test.@testset "Minimal construction" begin
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :test,
                 type = String,
                 default = "default",
@@ -68,7 +76,7 @@ function test_option_definition()
         
         Test.@testset "Validation" begin
             # Valid default value type
-            Test.@test_nowarn CTModels.Options.OptionDefinition(
+            Test.@test_nowarn Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = 42,
@@ -76,7 +84,7 @@ function test_option_definition()
             )
             
             # Invalid default value type
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Options.OptionDefinition(
+            Test.@test_throws CTBase.IncorrectArgument Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = "not an int",
@@ -84,7 +92,7 @@ function test_option_definition()
             )
             
             # Valid validator with valid default
-            Test.@test_nowarn CTModels.Options.OptionDefinition(
+            Test.@test_nowarn Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = 42,
@@ -94,7 +102,7 @@ function test_option_definition()
             
             # Invalid validator with invalid default (redirect stderr to hide @error logs)
             Test.@test_throws ErrorException redirect_stderr(devnull) do
-                CTModels.Options.OptionDefinition(
+                Options.OptionDefinition(
                     name = :test,
                     type = Int,
                     default = -5,
@@ -109,14 +117,14 @@ function test_option_definition()
         # ========================================================================
         
         Test.@testset "all_names function" begin
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :max_iter,
                 type = Int,
                 default = 100,
                 description = "Test",
                 aliases = (:max, :maxiter)
             )
-            names = CTModels.Options.all_names(def)
+            names = Options.all_names(def)
             Test.@test names == (:max_iter, :max, :maxiter)
         end
         
@@ -126,7 +134,7 @@ function test_option_definition()
         
         Test.@testset "Edge cases" begin
             # nothing default (allowed)
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :test,
                 type = Any,
                 default = nothing,
@@ -135,7 +143,7 @@ function test_option_definition()
             Test.@test def.default === nothing
             
             # nothing validator (allowed)
-            def = CTModels.Options.OptionDefinition(
+            def = Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = 42,
@@ -151,32 +159,32 @@ function test_option_definition()
         
         Test.@testset "Type stability" begin
             # Test that OptionDefinition is parameterized correctly
-            def_int = CTModels.Options.OptionDefinition(
+            def_int = Options.OptionDefinition(
                 name = :test_int,
                 type = Int,
                 default = 42,
                 description = "Test"
             )
-            Test.@test def_int isa CTModels.Options.OptionDefinition{Int64}
+            Test.@test def_int isa Options.OptionDefinition{Int64}
             
-            def_float = CTModels.Options.OptionDefinition(
+            def_float = Options.OptionDefinition(
                 name = :test_float,
                 type = Float64,
                 default = 3.14,
                 description = "Test"
             )
-            Test.@test def_float isa CTModels.Options.OptionDefinition{Float64}
+            Test.@test def_float isa Options.OptionDefinition{Float64}
             
-            def_string = CTModels.Options.OptionDefinition(
+            def_string = Options.OptionDefinition(
                 name = :test_string,
                 type = String,
                 default = "hello",
                 description = "Test"
             )
-            Test.@test def_string isa CTModels.Options.OptionDefinition{String}
+            Test.@test def_string isa Options.OptionDefinition{String}
             
             # Test type-stable access to default field via function
-            function get_default(def::CTModels.Options.OptionDefinition{T}) where T
+            function get_default(def::Options.OptionDefinition{T}) where T
                 return def.default
             end
             
@@ -193,17 +201,17 @@ function test_option_definition()
             Test.@test get_default(def_string) === "hello"
             
             # Test heterogeneous collections (Vector{OptionDefinition{<:Any}})
-            defs = CTModels.Options.OptionDefinition[def_int, def_float, def_string]
+            defs = Options.OptionDefinition[def_int, def_float, def_string]
             Test.@test length(defs) == 3
-            Test.@test defs[1] isa CTModels.Options.OptionDefinition{Int64}
-            Test.@test defs[2] isa CTModels.Options.OptionDefinition{Float64}
-            Test.@test defs[3] isa CTModels.Options.OptionDefinition{String}
+            Test.@test defs[1] isa Options.OptionDefinition{Int64}
+            Test.@test defs[2] isa Options.OptionDefinition{Float64}
+            Test.@test defs[3] isa Options.OptionDefinition{String}
             
             # Test that accessing defaults in a loop maintains type information
-            function sum_int_defaults(defs::Vector{<:CTModels.Options.OptionDefinition})
+            function sum_int_defaults(defs::Vector{<:Options.OptionDefinition})
                 total = 0
                 for def in defs
-                    if def isa CTModels.Options.OptionDefinition{Int}
+                    if def isa Options.OptionDefinition{Int}
                         total += def.default  # Type-stable within branch
                     end
                 end
@@ -211,7 +219,7 @@ function test_option_definition()
             end
             
             int_defs = [
-                CTModels.Options.OptionDefinition(name=Symbol("opt$i"), type=Int, default=i, description="test")
+                Options.OptionDefinition(name=Symbol("opt$i"), type=Int, default=i, description="test")
                 for i in 1:5
             ]
             Test.@test sum_int_defaults(int_defs) == 15
@@ -223,7 +231,7 @@ function test_option_definition()
         
         Test.@testset "Display" begin
             # Test with minimal OptionDefinition
-            def_min = CTModels.Options.OptionDefinition(
+            def_min = Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = 42,
@@ -231,7 +239,7 @@ function test_option_definition()
             )
             
             # Test with full OptionDefinition
-            def_full = CTModels.Options.OptionDefinition(
+            def_full = Options.OptionDefinition(
                 name = :max_iter,
                 type = Int,
                 default = 100,
@@ -257,17 +265,10 @@ function test_option_definition()
             Test.@test occursin("max_iter (max, maxiter) :: Int64", output_full)
             Test.@test occursin("  default: 100", output_full)
             Test.@test occursin("  description: Maximum iterations", output_full)
-            
-            # Test that all fields are present in output
-            Test.@test occursin("test", output_min)
-            Test.@test occursin("Int64", output_min)
-            Test.@test occursin("42", output_min)
-            Test.@test occursin("Test option", output_min)
-            
-            Test.@test occursin("max_iter", output_full)
-            Test.@test occursin("Int64", output_full)
-            Test.@test occursin("100", output_full)
-            Test.@test occursin("Maximum iterations", output_full)
         end
     end
 end
+
+end # module
+
+test_option_definition() = TestOptionsOptionDefinition.test_option_definition()

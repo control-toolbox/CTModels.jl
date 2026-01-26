@@ -1,12 +1,11 @@
-# ============================================================================
-# Unit tests for Orchestration disambiguation helpers
-# ============================================================================
+module TestOrchestrationDisambiguation
 
 using Test
 using CTModels.Orchestration
 using CTModels.Strategies
 using CTModels.Options
 using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test fixtures (minimal strategy setup)
@@ -67,131 +66,134 @@ const TEST_FAMILIES = (
 # ============================================================================
 
 function test_disambiguation()
-    @testset "Orchestration Disambiguation" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration Disambiguation" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         # ====================================================================
         # extract_strategy_ids - Unit Tests
         # ====================================================================
         
-        @testset "extract_strategy_ids" begin
+        Test.@testset "extract_strategy_ids" begin
             # No disambiguation - plain value
-            @test extract_strategy_ids(:sparse, TEST_METHOD) === nothing
-            @test extract_strategy_ids(100, TEST_METHOD) === nothing
-            @test extract_strategy_ids("string", TEST_METHOD) === nothing
+            Test.@test Orchestration.extract_strategy_ids(:sparse, TEST_METHOD) === nothing
+            Test.@test Orchestration.extract_strategy_ids(100, TEST_METHOD) === nothing
+            Test.@test Orchestration.extract_strategy_ids("string", TEST_METHOD) === nothing
             
             # Single strategy disambiguation
-            result = extract_strategy_ids((:sparse, :adnlp), TEST_METHOD)
-            @test result isa Vector{Tuple{Any, Symbol}}
-            @test length(result) == 1
-            @test result[1] == (:sparse, :adnlp)
+            result = Orchestration.extract_strategy_ids((:sparse, :adnlp), TEST_METHOD)
+            Test.@test result isa Vector{Tuple{Any,Symbol}}
+            Test.@test length(result) == 1
+            Test.@test result[1] == (:sparse, :adnlp)
             
             # Multi-strategy disambiguation
-            result = extract_strategy_ids(
+            result = Orchestration.extract_strategy_ids(
                 ((:sparse, :adnlp), (:cpu, :ipopt)),
                 TEST_METHOD
             )
-            @test result isa Vector{Tuple{Any, Symbol}}
-            @test length(result) == 2
-            @test result[1] == (:sparse, :adnlp)
-            @test result[2] == (:cpu, :ipopt)
+            Test.@test result isa Vector{Tuple{Any,Symbol}}
+            Test.@test length(result) == 2
+            Test.@test result[1] == (:sparse, :adnlp)
+            Test.@test result[2] == (:cpu, :ipopt)
             
             # Invalid strategy ID in single disambiguation
-            @test_throws CTBase.IncorrectArgument extract_strategy_ids(
+            Test.@test_throws CTBase.IncorrectArgument Orchestration.extract_strategy_ids(
                 (:sparse, :unknown),
                 TEST_METHOD
             )
             
             # Invalid strategy ID in multi disambiguation
-            @test_throws CTBase.IncorrectArgument extract_strategy_ids(
+            Test.@test_throws CTBase.IncorrectArgument Orchestration.extract_strategy_ids(
                 ((:sparse, :adnlp), (:cpu, :unknown)),
                 TEST_METHOD
             )
             
             # Mixed valid/invalid tuples - should return nothing
-            # (second element is not a (value, :id) tuple)
-            result = extract_strategy_ids(
+            result = Orchestration.extract_strategy_ids(
                 ((:sparse, :adnlp), :plain_value),
                 TEST_METHOD
             )
-            @test result === nothing
+            Test.@test result === nothing
             
-            # Another mixed case - first element valid, second not a tuple
-            result2 = extract_strategy_ids(
+            # Another mixed case
+            result2 = Orchestration.extract_strategy_ids(
                 ((:sparse, :adnlp), 100),
                 TEST_METHOD
             )
-            @test result2 === nothing
+            Test.@test result2 === nothing
             
             # Empty tuple
-            @test extract_strategy_ids((), TEST_METHOD) === nothing
+            Test.@test Orchestration.extract_strategy_ids((), TEST_METHOD) === nothing
         end
         
         # ====================================================================
         # build_strategy_to_family_map - Unit Tests
         # ====================================================================
         
-        @testset "build_strategy_to_family_map" begin
-            map = build_strategy_to_family_map(
+        Test.@testset "build_strategy_to_family_map" begin
+            map = Orchestration.build_strategy_to_family_map(
                 TEST_METHOD, TEST_FAMILIES, TEST_REGISTRY
             )
             
-            @test map isa Dict{Symbol, Symbol}
-            @test length(map) == 3
-            @test map[:collocation] == :discretizer
-            @test map[:adnlp] == :modeler
-            @test map[:ipopt] == :solver
+            Test.@test map isa Dict{Symbol,Symbol}
+            Test.@test length(map) == 3
+            Test.@test map[:collocation] == :discretizer
+            Test.@test map[:adnlp] == :modeler
+            Test.@test map[:ipopt] == :solver
         end
         
         # ====================================================================
         # build_option_ownership_map - Unit Tests
         # ====================================================================
         
-        @testset "build_option_ownership_map" begin
-            map = build_option_ownership_map(
+        Test.@testset "build_option_ownership_map" begin
+            map = Orchestration.build_option_ownership_map(
                 TEST_METHOD, TEST_FAMILIES, TEST_REGISTRY
             )
             
-            @test map isa Dict{Symbol, Set{Symbol}}
+            Test.@test map isa Dict{Symbol,Set{Symbol}}
             
             # max_iter only in solver
-            @test haskey(map, :max_iter)
-            @test map[:max_iter] == Set([:solver])
+            Test.@test haskey(map, :max_iter)
+            Test.@test map[:max_iter] == Set([:solver])
             
             # backend in both modeler and solver (ambiguous!)
-            @test haskey(map, :backend)
-            @test map[:backend] == Set([:modeler, :solver])
-            @test length(map[:backend]) == 2
+            Test.@test haskey(map, :backend)
+            Test.@test map[:backend] == Set([:modeler, :solver])
+            Test.@test length(map[:backend]) == 2
         end
         
         # ====================================================================
         # Integration test
         # ====================================================================
         
-        @testset "Integration: Disambiguation workflow" begin
+        Test.@testset "Integration: Disambiguation workflow" begin
             # Build both maps
-            strategy_map = build_strategy_to_family_map(
+            strategy_map = Orchestration.build_strategy_to_family_map(
                 TEST_METHOD, TEST_FAMILIES, TEST_REGISTRY
             )
-            option_map = build_option_ownership_map(
+            option_map = Orchestration.build_option_ownership_map(
                 TEST_METHOD, TEST_FAMILIES, TEST_REGISTRY
             )
             
             # Simulate disambiguation detection
-            disamb = extract_strategy_ids((:sparse, :adnlp), TEST_METHOD)
-            @test disamb !== nothing
-            @test length(disamb) == 1
+            disamb = Orchestration.extract_strategy_ids((:sparse, :adnlp), TEST_METHOD)
+            Test.@test disamb !== nothing
+            Test.@test length(disamb) == 1
             
             value, strategy_id = disamb[1]
-            @test value == :sparse
-            @test strategy_id == :adnlp
+            Test.@test value == :sparse
+            Test.@test strategy_id == :adnlp
             
             # Verify routing would work
             family = strategy_map[strategy_id]
-            @test family == :modeler
+            Test.@test family == :modeler
             
             # Verify option ownership
-            @test :backend in keys(option_map)
-            @test family in option_map[:backend]
+            Test.@test :backend in keys(option_map)
+            Test.@test family in option_map[:backend]
         end
     end
 end
+
+end # module
+
+test_disambiguation() = TestOrchestrationDisambiguation.test_disambiguation()

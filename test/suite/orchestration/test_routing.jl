@@ -1,15 +1,14 @@
-# ============================================================================
-# Integration tests for Orchestration route_all_options
-# ============================================================================
+module TestOrchestrationRouting
 
 using Test
 using CTModels.Orchestration
 using CTModels.Strategies
 using CTModels.Options
 using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
-# Test fixtures (reuse from test_disambiguation for consistency)
+# Test fixtures
 # ============================================================================
 
 abstract type RoutingTestDiscretizer <: Strategies.AbstractStrategy end
@@ -89,20 +88,20 @@ const ROUTING_ACTION_DEFS = [
 # ============================================================================
 
 function test_routing()
-    @testset "Orchestration Routing" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration Routing" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         # ====================================================================
         # Auto-routing (unambiguous options)
         # ====================================================================
         
-        @testset "Auto-routing unambiguous options" begin
+        Test.@testset "Auto-routing unambiguous options" begin
             kwargs = (
                 grid_size = 200,
                 max_iter = 2000,
                 display = false
             )
             
-            routed = route_all_options(
+            routed = Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -111,33 +110,33 @@ function test_routing()
             )
             
             # Check action options (Dict of OptionValue wrappers)
-            @test haskey(routed.action, :display)
-            @test routed.action[:display].value === false
-            @test routed.action[:display].source === :user
+            Test.@test haskey(routed.action, :display)
+            Test.@test routed.action[:display].value === false
+            Test.@test routed.action[:display].source === :user
             
             # Check strategy options (raw NamedTuples)
-            @test haskey(routed.strategies, :discretizer)
-            @test haskey(routed.strategies, :modeler)
-            @test haskey(routed.strategies, :solver)
+            Test.@test haskey(routed.strategies, :discretizer)
+            Test.@test haskey(routed.strategies, :modeler)
+            Test.@test haskey(routed.strategies, :solver)
             
             # Access raw values from NamedTuples
-            @test haskey(routed.strategies.discretizer, :grid_size)
-            @test routed.strategies.discretizer[:grid_size] == 200
-            @test haskey(routed.strategies.solver, :max_iter)
-            @test routed.strategies.solver[:max_iter] == 2000
+            Test.@test haskey(routed.strategies.discretizer, :grid_size)
+            Test.@test routed.strategies.discretizer[:grid_size] == 200
+            Test.@test haskey(routed.strategies.solver, :max_iter)
+            Test.@test routed.strategies.solver[:max_iter] == 2000
         end
         
         # ====================================================================
         # Single strategy disambiguation
         # ====================================================================
         
-        @testset "Single strategy disambiguation" begin
+        Test.@testset "Single strategy disambiguation" begin
             kwargs = (
                 backend = (:sparse, :adnlp),
                 display = true
             )
             
-            routed = route_all_options(
+            routed = Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -146,21 +145,21 @@ function test_routing()
             )
             
             # backend should be routed to modeler only
-            @test haskey(routed.strategies.modeler, :backend)
-            @test routed.strategies.modeler[:backend] === :sparse
-            @test !haskey(routed.strategies.solver, :backend)
+            Test.@test haskey(routed.strategies.modeler, :backend)
+            Test.@test routed.strategies.modeler[:backend] === :sparse
+            Test.@test !haskey(routed.strategies.solver, :backend)
         end
         
         # ====================================================================
         # Multi-strategy disambiguation
         # ====================================================================
         
-        @testset "Multi-strategy disambiguation" begin
+        Test.@testset "Multi-strategy disambiguation" begin
             kwargs = (
                 backend = ((:sparse, :adnlp), (:cpu, :ipopt)),
             )
             
-            routed = route_all_options(
+            routed = Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -169,20 +168,20 @@ function test_routing()
             )
             
             # backend should be routed to both
-            @test haskey(routed.strategies.modeler, :backend)
-            @test routed.strategies.modeler[:backend] === :sparse
-            @test haskey(routed.strategies.solver, :backend)
-            @test routed.strategies.solver[:backend] === :cpu
+            Test.@test haskey(routed.strategies.modeler, :backend)
+            Test.@test routed.strategies.modeler[:backend] === :sparse
+            Test.@test haskey(routed.strategies.solver, :backend)
+            Test.@test routed.strategies.solver[:backend] === :cpu
         end
         
         # ====================================================================
         # Error: Unknown option
         # ====================================================================
         
-        @testset "Error on unknown option" begin
+        Test.@testset "Error on unknown option" begin
             kwargs = (unknown_option = 123,)
             
-            @test_throws CTBase.IncorrectArgument route_all_options(
+            Test.@test_throws CTBase.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -195,10 +194,10 @@ function test_routing()
         # Error: Ambiguous option without disambiguation
         # ====================================================================
         
-        @testset "Error on ambiguous option" begin
+        Test.@testset "Error on ambiguous option" begin
             kwargs = (backend = :sparse,)  # No disambiguation
             
-            @test_throws CTBase.IncorrectArgument route_all_options(
+            Test.@test_throws CTBase.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -211,11 +210,11 @@ function test_routing()
         # Error: Invalid disambiguation target
         # ====================================================================
         
-        @testset "Error on invalid disambiguation" begin
+        Test.@testset "Error on invalid disambiguation" begin
             # Try to route max_iter to modeler (wrong family)
             kwargs = (max_iter = (1000, :adnlp),)
             
-            @test_throws CTBase.IncorrectArgument route_all_options(
+            Test.@test_throws CTBase.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -228,7 +227,7 @@ function test_routing()
         # Integration: Mixed routing
         # ====================================================================
         
-        @testset "Integration: Mixed routing" begin
+        Test.@testset "Integration: Mixed routing" begin
             kwargs = (
                 grid_size = 150,
                 backend = ((:sparse, :adnlp), (:gpu, :ipopt)),
@@ -237,7 +236,7 @@ function test_routing()
                 initial_guess = :warm
             )
             
-            routed = route_all_options(
+            routed = Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -246,14 +245,18 @@ function test_routing()
             )
             
             # Action options (Dict of OptionValue wrappers)
-            @test routed.action[:display].value === false
-            @test routed.action[:initial_guess].value === :warm
+            Test.@test routed.action[:display].value === false
+            Test.@test routed.action[:initial_guess].value === :warm
             
             # Strategy options (raw NamedTuples)
-            @test routed.strategies.discretizer[:grid_size] == 150
-            @test routed.strategies.modeler[:backend] === :sparse
-            @test routed.strategies.solver[:backend] === :gpu
-            @test routed.strategies.solver[:max_iter] == 500
+            Test.@test routed.strategies.discretizer[:grid_size] == 150
+            Test.@test routed.strategies.modeler[:backend] === :sparse
+            Test.@test routed.strategies.solver[:backend] === :gpu
+            Test.@test routed.strategies.solver[:max_iter] == 500
         end
     end
 end
+
+end # module
+
+test_routing() = TestOrchestrationRouting.test_routing()

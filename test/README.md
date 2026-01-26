@@ -108,7 +108,8 @@ All helper methods, mocks, and structs must be defined at the **top-level** of t
 
 - **Unit vs. Integration:** Clearly separate unit tests (testing single functions/components in isolation) from integration tests (testing the interaction between components).
 - **Mocks and Fakes:** Use mock objects or fake implementations to isolate the code under test.
-- **Exports:** Even if a function is exported, it is often better to **qualify the method call** (e.g., `CTModels.solve(...)`) to be explicit about what is being tested. Alternatively, have a specific test dedicated to verifying that exports work as expected.
+- **Qualification of methods**: always **qualify the method call** even if a method is exported (e.g., `CTModels.solve(...)`). This makes it explicit what is being tested and avoids any ambiguity.
+- **Verification of exports**: dedicated tests should be added to verify that methods are correctly exported when necessary (e.g., using `isdefined(CTModels, :...)`).
 
 ### Directory Structure
 
