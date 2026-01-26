@@ -1,3 +1,11 @@
+module TestInitialGuess
+
+using Test
+using CTModels
+using CTBase
+using Main.TestProblems
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 # Unit tests for CTModels initial guess construction and validation.
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
 struct DummyOCP1DVar <: CTModels.AbstractModel end
@@ -526,3 +534,7 @@ function test_initial_guess()
         )
     end
 end
+
+end # module
+
+test_initial_guess() = TestInitialGuess.test_initial_guess()

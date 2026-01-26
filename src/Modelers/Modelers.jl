@@ -13,6 +13,7 @@ using DocStringExtensions
 using SolverCore
 using ADNLPModels
 using ExaModels
+using KernelAbstractions
 using ..CTModels.Options
 using ..CTModels.Strategies
 using ..CTModels.Optimization: AbstractOptimizationProblem,

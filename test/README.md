@@ -72,10 +72,11 @@ julia --project=@. -e 'using Pkg; Pkg.test("CTModels"; coverage=true); include("
 **Example (`test/suite/ocp/test_dynamics.jl`):**
 
 ```julia
-module TestDynamics # Optional but good for namespace isolation
+module TestDynamics # namespace isolation
 
 using Test
 using CTModels
+using Main.TestProblems # Access shared test helpers
 
 # Define structs at top-level (crucial!)
 struct MyDummyModel end
@@ -87,6 +88,9 @@ function test_dynamics()
 end
 
 end # module
+
+# CRITICAL: Redefine the function in the outer scope so TestRunner can find it
+test_dynamics() = TestDynamics.test_dynamics()
 ```
 
 ### Registering the Test

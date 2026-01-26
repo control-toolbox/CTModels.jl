@@ -71,7 +71,7 @@ function Strategies.metadata(::Type{<:ExaModeler})
         ),
         Strategies.OptionDefinition(;
             name=:backend,
-            type=Any,
+            type=Union{Nothing, KernelAbstractions.Backend},
             default=__exa_model_backend(),
             description="Execution backend for ExaModels (CPU, GPU, etc.)"
         )

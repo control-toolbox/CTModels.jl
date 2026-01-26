@@ -21,20 +21,15 @@ using MadNLP  # Trigger CTModelsMadNLP extension
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 
 # Controls nested testset output formatting (used by individual test files)
+module TestOptions
 const VERBOSE = true
 const SHOWTIMING = true
+end
+using .TestOptions: VERBOSE, SHOWTIMING
 
 # Include shared test problems via TestProblems module
 include(joinpath("problems", "TestProblems.jl"))
 using .TestProblems
-
-# include(joinpath("problems", "solution_example.jl"))
-# include(joinpath("problems", "problems_definition.jl"))
-# include(joinpath("problems", "rosenbrock.jl"))
-# include(joinpath("problems", "max1minusx2.jl"))
-# include(joinpath("problems", "elec.jl"))
-# include(joinpath("problems", "beam.jl"))
-# include(joinpath("problems", "solution_example_dual.jl"))
 
 # Run tests using the TestRunner extension
 CTBase.run_tests(;

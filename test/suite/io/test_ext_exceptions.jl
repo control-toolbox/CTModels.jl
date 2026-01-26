@@ -1,3 +1,11 @@
+module TestExtExceptions
+
+using Test
+using CTModels
+using CTBase
+using Main.TestProblems
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 # Dummy tags for testing stubs - these won't be overridden by extensions
 # because extensions only override for JLD2Tag and JSON3Tag specifically
 struct DummyJLD2Tag <: CTModels.AbstractTag end
@@ -12,11 +20,11 @@ function test_ext_exceptions()
     # ============================================================================
     # Test IncorrectArgument for unknown format
     # ============================================================================
-    @testset "IncorrectArgument for unknown format" begin
-        @test_throws CTBase.IncorrectArgument CTModels.export_ocp_solution(
+    Test.@testset "IncorrectArgument for unknown format" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@test_throws CTBase.IncorrectArgument CTModels.export_ocp_solution(
             sol; format=:dummy
         )
-        @test_throws CTBase.IncorrectArgument CTModels.import_ocp_solution(
+        Test.@test_throws CTBase.IncorrectArgument CTModels.import_ocp_solution(
             ocp; format=:dummy
         )
     end
@@ -27,23 +35,23 @@ function test_ext_exceptions()
     # once extensions are loaded. To test the stub mechanism, we define dummy
     # tag types that will call the stub fallback.
     # ============================================================================
-    @testset "Stub dispatch for export_ocp_solution" begin
+    Test.@testset "Stub dispatch for export_ocp_solution" verbose = VERBOSE showtiming = SHOWTIMING begin
         # Test that calling with our dummy tag triggers ExtensionError
         # Note: The actual stubs are defined for JLD2Tag/JSON3Tag, 
         # but method dispatch should fail for unknown tag types
-        @test_throws MethodError CTModels.export_ocp_solution(
+        Test.@test_throws MethodError CTModels.export_ocp_solution(
             DummyJLD2Tag(), sol; filename="test"
         )
-        @test_throws MethodError CTModels.export_ocp_solution(
+        Test.@test_throws MethodError CTModels.export_ocp_solution(
             DummyJSON3Tag(), sol; filename="test"
         )
     end
 
-    @testset "Stub dispatch for import_ocp_solution" begin
-        @test_throws MethodError CTModels.import_ocp_solution(
+    Test.@testset "Stub dispatch for import_ocp_solution" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@test_throws MethodError CTModels.import_ocp_solution(
             DummyJLD2Tag(), ocp; filename="test"
         )
-        @test_throws MethodError CTModels.import_ocp_solution(
+        Test.@test_throws MethodError CTModels.import_ocp_solution(
             DummyJSON3Tag(), ocp; filename="test"
         )
     end
@@ -54,16 +62,20 @@ function test_ext_exceptions()
     # If Plots is not loaded, the stub throws ExtensionError
     # If Plots is loaded, it works. We test the method signature errors.
     # ============================================================================
-    @testset "Plot method signature errors" begin
+    Test.@testset "Plot method signature errors" verbose = VERBOSE showtiming = SHOWTIMING begin
         # Test that calling plot with wrong argument types throws MethodError
-        @test_throws MethodError CTModels.plot(sol, 1)  # Wrong type for description
+        Test.@test_throws MethodError CTModels.plot(sol, 1)  # Wrong type for description
     end
 
     # ============================================================================
     # Test method signature errors
     # ============================================================================
-    @testset "Method signature errors" begin
-        @test_throws MethodError CTModels.export_ocp_solution()
-        @test_throws MethodError CTModels.import_ocp_solution()
+    Test.@testset "Method signature errors" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@test_throws MethodError CTModels.export_ocp_solution()
+        Test.@test_throws MethodError CTModels.import_ocp_solution()
     end
 end
+
+end # module
+
+test_ext_exceptions() = TestExtExceptions.test_ext_exceptions()

@@ -1,3 +1,9 @@
+module TestInitialGuessTypes
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_initial_guess_types()
     # TODO: add tests for src/core/types/initial_guess.jl.
 
@@ -60,3 +66,7 @@ function test_initial_guess_types()
         Test.@test v == variable_val
     end
 end
+
+end # module
+
+test_initial_guess_types() = TestInitialGuessTypes.test_initial_guess_types()
