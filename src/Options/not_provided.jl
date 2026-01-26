@@ -66,3 +66,35 @@ const NotProvided = NotProvidedType()
 
 # Pretty printing
 Base.show(io::IO, ::NotProvidedType) = print(io, "NotProvided")
+
+"""
+    NotStoredType
+
+Internal sentinel type used by the option extraction system to signal that an option
+should not be stored in the instance.
+
+This is returned by [`extract_option`](@ref) when an option has `NotProvided` as its
+default and was not provided by the user.
+
+# Note
+This type is internal to the Options module and should not be used directly by users.
+Use [`NotProvided`](@ref) instead.
+
+See also: [`NotProvided`](@ref), [`extract_option`](@ref)
+"""
+struct NotStoredType end
+
+"""
+    NotStored
+
+Internal singleton instance of [`NotStoredType`](@ref).
+
+Used internally by the option extraction system to signal that an option should not
+be stored. This is distinct from `nothing` which is a valid option value.
+
+See also: [`NotProvided`](@ref), [`extract_option`](@ref)
+"""
+const NotStored = NotStoredType()
+
+# Pretty printing
+Base.show(io::IO, ::NotStoredType) = print(io, "NotStored")

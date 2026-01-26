@@ -24,14 +24,17 @@ const TestRunner = Base.get_extension(CTBase, :TestRunner)
 const VERBOSE = true
 const SHOWTIMING = true
 
-# Include shared test problems
-include(joinpath("problems", "solution_example.jl"))
-include(joinpath("problems", "problems_definition.jl"))
-include(joinpath("problems", "rosenbrock.jl"))
-include(joinpath("problems", "max1minusx2.jl"))
-include(joinpath("problems", "elec.jl"))
-include(joinpath("problems", "beam.jl"))
-include(joinpath("problems", "solution_example_dual.jl"))
+# Include shared test problems via TestProblems module
+include(joinpath("problems", "TestProblems.jl"))
+using .TestProblems
+
+# include(joinpath("problems", "solution_example.jl"))
+# include(joinpath("problems", "problems_definition.jl"))
+# include(joinpath("problems", "rosenbrock.jl"))
+# include(joinpath("problems", "max1minusx2.jl"))
+# include(joinpath("problems", "elec.jl"))
+# include(joinpath("problems", "beam.jl"))
+# include(joinpath("problems", "solution_example_dual.jl"))
 
 # Run tests using the TestRunner extension
 CTBase.run_tests(;

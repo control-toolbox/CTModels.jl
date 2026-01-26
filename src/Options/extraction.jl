@@ -82,11 +82,11 @@ function extract_option(kwargs::NamedTuple, def::OptionDefinition)
     
     # Not found - check if default is NotProvided
     if def.default isa NotProvidedType
-        # No default and not provided by user - return nothing to signal "don't store"
-        return nothing, kwargs
+        # No default and not provided by user - return NotStored to signal "don't store"
+        return NotStored, kwargs
     end
     
-    # Not found, return default
+    # Not found, return default (including nothing if that's the default)
     return OptionValue(def.default, :default), kwargs
 end
 
@@ -146,8 +146,8 @@ function extract_options(kwargs::NamedTuple, defs::Vector{<:OptionDefinition})
     
     for def in defs
         opt_value, remaining = extract_option(remaining, def)
-        # Only store if not nothing (NotProvided options that weren't provided return nothing)
-        if opt_value !== nothing
+        # Only store if not NotStored (NotProvided options that weren't provided return NotStored)
+        if !(opt_value isa NotStoredType)
             extracted[def.name] = opt_value
         end
     end
@@ -209,8 +209,8 @@ function extract_options(kwargs::NamedTuple, defs::NamedTuple)
     
     for (key, def) in pairs(defs)
         opt_value, remaining = extract_option(remaining, def)
-        # Only store if not nothing (NotProvided options that weren't provided return nothing)
-        if opt_value !== nothing
+        # Only store if not NotStored (NotProvided options that weren't provided return NotStored)
+        if !(opt_value isa NotStoredType)
             push!(extracted_pairs, key => opt_value)
         end
     end

@@ -1,9 +1,4 @@
-"""
-Tests for Optimization module with real problems (Rosenbrock)
-
-This file tests the Optimization module with actual optimization problems
-to ensure the builders work correctly with real-world scenarios.
-"""
+module TestRealProblems
 
 using Test
 using CTModels
@@ -12,6 +7,8 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+
+using Main.TestProblems
 
 # Import from Optimization module
 import CTModels.Optimization
@@ -23,14 +20,17 @@ import CTModels.Optimization: get_adnlp_model_builder, get_exa_model_builder
 # ============================================================================
 
 function test_real_problems()
-    @testset "Optimization with Real Problems" verbose = VERBOSE showtiming = SHOWTIMING begin
+    # Need access to globals from TestProblems if they are used inside standard functions
+    # For now, Rosenbrock is exported by TestProblems.
+
+    @testset "Optimization with Real Problems" begin # verbose = VERBOSE showtiming = SHOWTIMING 
 
         # ====================================================================
         # TESTS WITH ROSENBROCK PROBLEM
         # ====================================================================
         
         @testset "Rosenbrock Problem" begin
-            # Load Rosenbrock problem
+            # Load Rosenbrock problem from TestProblems module
             ros = Rosenbrock()
             
             @testset "ADNLPModelBuilder with Rosenbrock" begin
@@ -152,3 +152,7 @@ function test_real_problems()
         end
     end
 end
+
+end # module
+
+test_real_problems() = TestRealProblems.test_real_problems()
