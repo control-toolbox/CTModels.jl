@@ -71,10 +71,15 @@ function (modeler::ADNLPModeler)(
     # Get the appropriate builder for this problem type
     builder = get_adnlp_model_builder(prob)
     
-    # Extract raw values from OptionValue wrappers
-    raw_opts = NamedTuple{keys(opts.options)}(
-        Tuple(v isa Options.OptionValue ? v.value : v for v in values(opts.options))
-    )
+    # Extract raw values from OptionValue wrappers and filter out nothing values
+    raw_opts_dict = Dict{Symbol, Any}()
+    for (k, v) in pairs(opts.options)
+        val = v isa Options.OptionValue ? v.value : v
+        if val !== nothing
+            raw_opts_dict[k] = val
+        end
+    end
+    raw_opts = NamedTuple(raw_opts_dict)
     
     # Build the ADNLP model passing all options generically
     return builder(initial_guess; raw_opts...)

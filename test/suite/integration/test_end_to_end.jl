@@ -159,22 +159,45 @@ function test_end_to_end()
             ros = Rosenbrock()
             prob = ros.prob
             
-            @testset "ADNLPModeler with options" begin
-                # Test with show_time option (backend is optional and defaults work)
-                modeler = CTModels.ADNLPModeler(show_time=false)
+            @testset "ADNLPModeler - Simple" begin
+                # Test without options (defaults)
+                modeler = CTModels.ADNLPModeler()
                 nlp = modeler(prob, ros.init)
                 
                 @test nlp isa ADNLPModels.ADNLPModel
                 obj = NLPModels.obj(nlp, ros.init)
                 @test obj ≈ rosenbrock_objective(ros.init)
-                
-                # Test with show_time=true
-                modeler2 = CTModels.ADNLPModeler(show_time=true)
-                nlp2 = modeler2(prob, ros.init)
-                @test nlp2 isa ADNLPModels.ADNLPModel
             end
             
-            @testset "ExaModeler with options" begin
+            @testset "ADNLPModeler - With Options" begin
+                # Test with show_time option
+                modeler = CTModels.ADNLPModeler(show_time=false)
+                nlp = modeler(prob, ros.init)
+                @test nlp isa ADNLPModels.ADNLPModel
+                
+                # Test with different backends (all valid ADNLPModels backends)
+                for backend in [:optimized, :generic, :default]
+                    modeler_backend = CTModels.ADNLPModeler(backend=backend, show_time=false)
+                    nlp_backend = modeler_backend(prob, ros.init)
+                    
+                    @test nlp_backend isa ADNLPModels.ADNLPModel
+                    obj = NLPModels.obj(nlp_backend, ros.init)
+                    @test obj ≈ rosenbrock_objective(ros.init) rtol=1e-10
+                end
+            end
+            
+            @testset "ExaModeler - Simple" begin
+                # Test without options (defaults)
+                modeler = CTModels.ExaModeler(base_type=Float64)
+                nlp = modeler(prob, ros.init)
+                
+                @test nlp isa ExaModels.ExaModel{Float64}
+                obj = NLPModels.obj(nlp, ros.init)
+                @test obj ≈ rosenbrock_objective(ros.init)
+            end
+            
+            @testset "ExaModeler - With Options" begin
+                # Test with multiple options
                 modeler = CTModels.ExaModeler(
                     base_type=Float64,
                     minimize=true,
@@ -183,7 +206,7 @@ function test_end_to_end()
                 nlp = modeler(prob, ros.init)
                 
                 @test nlp isa ExaModels.ExaModel{Float64}
-                obj = NLPModels.obj(nlp, Float64.(ros.init))
+                obj = NLPModels.obj(nlp, ros.init)
                 @test obj ≈ rosenbrock_objective(ros.init)
             end
         end
