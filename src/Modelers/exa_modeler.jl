@@ -1,20 +1,17 @@
-# Exa Modeler Strategy
+# Exa Modeler
 #
-# Implementation of ExaModelerStrategy using the new AbstractStrategy contract.
-# This strategy converts discretized optimal control problems to ExaModels.
+# Implementation of ExaModeler using the AbstractStrategy contract.
+# This modeler converts discretized optimal control problems to ExaModels.
 #
 # Author: CTModels Development Team
 # Date: 2026-01-25
 
-# Note: AbstractOptimizationProblem will be available as CTModels.AbstractOptimalControlProblem
-# when the module is used in the parent context
-
 """
-    ExaModelerStrategy{BaseType<:AbstractFloat}
+    ExaModeler{BaseType<:AbstractFloat}
 
-Strategy for building ExaModels from discretized optimal control problems.
+Modeler for building ExaModels from discretized optimal control problems.
 
-This strategy uses the ExaModels.jl package to create NLP models with
+This modeler uses the ExaModels.jl package to create NLP models with
 support for various execution backends (CPU, GPU) and floating-point types.
 
 # Type Parameters
@@ -22,50 +19,50 @@ support for various execution backends (CPU, GPU) and floating-point types.
 
 # Options
 - `base_type::Type{<:AbstractFloat}`: Floating-point type (default: `Float64`)
-- `minimize::Bool`: Whether to minimize (default: `missing` from problem)
+- `minimize::Union{Bool, Nothing}`: Whether to minimize (default: `nothing` from problem)
 - `backend`: Execution backend (default: `nothing` for CPU)
 
 # Example
 ```julia
-modeler = ExaModelerStrategy{Float32}(backend=CUDABackend())
+modeler = ExaModeler{Float32}(backend=CUDABackend())
 nlp_model = modeler(problem, initial_guess)
 ```
 """
-struct ExaModelerStrategy{BaseType<:AbstractFloat} <: AbstractModeler
+struct ExaModeler{BaseType<:AbstractFloat} <: AbstractOptimizationModeler
     options::Strategies.StrategyOptions
 end
 
 # Strategy identification
-Strategies.id(::Type{<:ExaModelerStrategy}) = :exa
+Strategies.id(::Type{<:ExaModeler}) = :exa
 
 # Strategy metadata with option definitions
-function Strategies.metadata(::Type{<:ExaModelerStrategy})
+function Strategies.metadata(::Type{<:ExaModeler})
     return Strategies.StrategyMetadata(
-        Options.OptionDefinition(;
+        Strategies.OptionDefinition(;
             name=:base_type,
             type=DataType,
             default=Float64,
             description="Base floating-point type used by ExaModels"
         ),
-        Options.OptionDefinition(;
-                name=:minimize,
-                type=Union{Bool, Nothing},
-                default=nothing,
-                description="Whether to minimize (true) or maximize (false) the objective"
-            ),
-        Options.OptionDefinition(;
-                name=:backend,
-                type=Any,
-                default=nothing,
-                description="Execution backend for ExaModels (CPU, GPU, etc.)"
-            )
+        Strategies.OptionDefinition(;
+            name=:minimize,
+            type=Union{Bool, Nothing},
+            default=nothing,
+            description="Whether to minimize (true) or maximize (false) the objective"
+        ),
+        Strategies.OptionDefinition(;
+            name=:backend,
+            type=Any,
+            default=nothing,
+            description="Execution backend for ExaModels (CPU, GPU, etc.)"
+        )
     )
 end
 
 # Constructor with type parameter handling
-function ExaModelerStrategy(; kwargs...)
+function ExaModeler(; kwargs...)
     opts = Strategies.build_strategy_options(
-        ExaModelerStrategy; kwargs...
+        ExaModeler; kwargs...
     )
     
     # Extract base_type to set as type parameter
@@ -75,49 +72,47 @@ function ExaModelerStrategy(; kwargs...)
     filtered_opts_nt = Strategies.filter_options(opts.options, (:base_type,))
     filtered_opts = Strategies.StrategyOptions(filtered_opts_nt)
     
-    return ExaModelerStrategy{BaseType}(filtered_opts)
+    return ExaModeler{BaseType}(filtered_opts)
 end
 
 # Convenience constructor with explicit type
-function ExaModelerStrategy{BaseType}(; kwargs...) where {BaseType<:AbstractFloat}
+function ExaModeler{BaseType}(; kwargs...) where {BaseType<:AbstractFloat}
     # Set base_type in kwargs if not provided
     if !haskey(kwargs, :base_type)
         kwargs = (kwargs..., base_type=BaseType)
     end
     
     opts = Strategies.build_strategy_options(
-        ExaModelerStrategy{BaseType}; kwargs...
+        ExaModeler{BaseType}; kwargs...
     )
     
     # Filter out base_type from stored options
     filtered_opts_nt = Strategies.filter_options(opts.options, (:base_type,))
     filtered_opts = Strategies.StrategyOptions(filtered_opts_nt)
     
-    return ExaModelerStrategy{BaseType}(filtered_opts)
+    return ExaModeler{BaseType}(filtered_opts)
 end
 
 # Access to strategy options
-Strategies.options(m::ExaModelerStrategy) = m.options
+Strategies.options(m::ExaModeler) = m.options
 
 # Model building interface
-function (modeler::ExaModelerStrategy{BaseType})(
-    prob,
+function (modeler::ExaModeler{BaseType})(
+    prob::AbstractOptimizationProblem,
     initial_guess
 )::ExaModels.ExaModel{BaseType} where {BaseType}
     opts = Strategies.options(modeler)
-    backend = opts[:backend]
-    minimize = opts[:minimize]
     
     # Get the appropriate builder for this problem type
     builder = get_exa_model_builder(prob)
     
-    # Build the ExaModel with extracted options and type parameter
-    return builder(BaseType, initial_guess; backend=backend, minimize=minimize)
+    # Build the ExaModel passing BaseType and all options generically
+    return builder(BaseType, initial_guess; opts.options...)
 end
 
 # Solution building interface
-function (modeler::ExaModelerStrategy)(
-    prob,
+function (modeler::ExaModeler)(
+    prob::AbstractOptimizationProblem,
     nlp_solution::SolverCore.AbstractExecutionStats
 )
     # Get the appropriate solution builder for this problem type

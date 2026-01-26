@@ -1,46 +1,10 @@
 # DOCP Types
 #
-# This module defines the core types for Discretized Optimal Control Problems (DOCP)
-# and their associated builders. These types are migrated from the legacy
-# AbstractOCPTool system to work with the new strategy-based architecture.
+# This module defines concrete types for Discretized Optimal Control Problems (DOCP)
+# and their associated builders. Abstract types are imported from the Optimization module.
 #
 # Author: CTModels Development Team
-# Date: 2026-01-25
-
-"""
-AbstractBuilder
-
-Abstract base type for all builders in the DOCP system.
-
-This provides a common interface for model builders and solution builders
-that work with discretized optimal control problems.
-"""
-abstract type AbstractBuilder end
-
-"""
-AbstractModelBuilder
-
-Abstract base type for builders that construct NLP back-end models from
-an AbstractOptimizationProblem.
-
-Concrete subtypes (for example ADNLPModelBuilder and ExaModelBuilder) are 
-expected to be callable objects that encapsulate the logic for building a model 
-for a specific NLP back-end.
-
-# Example
-```julia-repl
-julia> struct MyModelBuilder <: AbstractModelBuilder
-           f::Function
-       end
-
-julia> builder = MyModelBuilder(problem -> build_nlp_model(problem))
-MyModelBuilder(...)
-
-julia> nlp_model = builder(problem, initial_guess)
-ADNLPModel(...)
-```
-"""
-abstract type AbstractModelBuilder <: AbstractBuilder end
+# Date: 2026-01-26
 
 """
 $(TYPEDEF)
@@ -86,27 +50,6 @@ struct ExaModelBuilder{T<:Function} <: AbstractModelBuilder
     f::T
 end
 
-"""
-AbstractSolutionBuilder
-
-Abstract base type for builders that transform NLP solutions into other
-representations (for example, solutions of an optimal control problem).
-
-Subtypes are expected to be callable, but the abstract type does not fix
-the argument types. More specific contracts are documented on
-AbstractOCPSolutionBuilder and related concrete types.
-"""
-abstract type AbstractSolutionBuilder <: AbstractBuilder end
-
-"""
-AbstractOCPSolutionBuilder
-
-Abstract base type for builders that transform NLP solutions into OCP solutions.
-
-Concrete implementations should define the exact call signature and behavior
-for specific solution types.
-"""
-abstract type AbstractOCPSolutionBuilder <: AbstractSolutionBuilder end
 
 """
 $(TYPEDEF)
@@ -150,17 +93,6 @@ struct ExaSolutionBuilder{T<:Function} <: AbstractOCPSolutionBuilder
     f::T
 end
 
-"""
-AbstractOptimizationProblem
-
-Abstract base type for optimization problems built on optimal control
-problems.
-
-Subtypes of AbstractOptimizationProblem are typically paired with
-AbstractModelBuilder and AbstractSolutionBuilder implementations that 
-know how to construct and interpret NLP back-end models and solutions.
-"""
-abstract type AbstractOptimizationProblem end
 
 """
 $(TYPEDEF)

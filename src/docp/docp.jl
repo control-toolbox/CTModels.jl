@@ -5,25 +5,25 @@
 # associated model and solution builders.
 #
 # Author: CTModels Development Team
-# Date: 2026-01-25
+# Date: 2026-01-26
 
 module DOCP
 
 using CTBase: CTBase
 using DocStringExtensions
+using ..CTModels.Optimization: AbstractOptimizationProblem
+using ..CTModels.Optimization: AbstractBuilder, AbstractModelBuilder, AbstractSolutionBuilder
+using ..CTModels.Optimization: AbstractOCPSolutionBuilder
 
 # Include submodules
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
 include(joinpath(@__DIR__, "constructors.jl"))
 
-# Public API
+# Public API - concrete DOCP types
 export DiscretizedOptimalControlProblem, OCPBackendBuilders
-export AbstractBuilder, AbstractModelBuilder, AbstractSolutionBuilder
-export AbstractOCPSolutionBuilder
 export ADNLPModelBuilder, ExaModelBuilder
 export ADNLPSolutionBuilder, ExaSolutionBuilder
-export AbstractOptimizationProblem
 export get_adnlp_model_builder, get_exa_model_builder
 export get_adnlp_solution_builder, get_exa_solution_builder
 export create_adnlp_model_builder, create_exa_model_builder

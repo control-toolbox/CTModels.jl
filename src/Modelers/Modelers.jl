@@ -15,6 +15,7 @@ using ADNLPModels
 using ExaModels
 using ..CTModels.Options
 using ..CTModels.Strategies
+using ..CTModels.Optimization: AbstractOptimizationProblem
 
 # Include submodules
 include(joinpath(@__DIR__, "abstract_modeler.jl"))
@@ -23,7 +24,7 @@ include(joinpath(@__DIR__, "exa_modeler.jl"))
 include(joinpath(@__DIR__, "utilities.jl"))
 
 # Public API
-export AbstractModeler
-export ADNLPModelerStrategy, ExaModelerStrategy
+export AbstractOptimizationModeler
+export ADNLPModeler, ExaModeler
 
 end # module Modelers

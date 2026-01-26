@@ -37,11 +37,16 @@ using .Strategies
 include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
 
-# New Modelers module (replaces legacy AbstractOCPTool system)
+# Optimization module provides general optimization types (AbstractOptimizationProblem, builders)
+include(joinpath(@__DIR__, "optimization", "optimization.jl"))
+using .Optimization
+
+# Modelers module uses AbstractOptimizationProblem from Optimization (general)
 include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
 using .Modelers
 
-# Include DOCP module
+# DOCP module provides concrete DOCP types (DiscretizedOptimalControlProblem)
+# Loaded after Modelers since Modelers only need the general AbstractOptimizationProblem
 include(joinpath(@__DIR__, "docp", "docp.jl"))
 using .DOCP
 

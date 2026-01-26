@@ -5,11 +5,8 @@
 # Author: CTModels Development Team
 # Date: 2026-01-25
 
-# Note: AbstractOptimizationProblem will be available as CTModels.AbstractOptimalControlProblem
-# when the module is used in the parent context
-
 """
-    validate_initial_guess(initial_guess, expected_size)
+$(TYPEDSIGNATURES)
 
 Validate that the initial guess has the expected dimensions.
 
@@ -18,11 +15,11 @@ Validate that the initial guess has the expected dimensions.
 - `expected_size`: Expected size tuple
 
 # Throws
-- `ArgumentError` if dimensions don't match
+- `CTBase.IncorrectArgument`: If dimensions don't match
 """
 function validate_initial_guess(initial_guess, expected_size)
     if size(initial_guess) != expected_size
-        throw(ArgumentError(
+        throw(CTBase.IncorrectArgument(
             "Initial guess size $(size(initial_guess)) doesn't match expected size $expected_size"
         ))
     end
@@ -30,19 +27,17 @@ function validate_initial_guess(initial_guess, expected_size)
 end
 
 """
-    extract_modeler_options(modeler::AbstractModeler)
+$(TYPEDSIGNATURES)
 
 Extract options from a modeler strategy in a convenient format.
 
 # Arguments
-- `modeler`: The modeler strategy instance
+- `modeler::AbstractOptimizationModeler`: The modeler strategy instance
 
 # Returns
-- `NamedTuple` of option values
+- `NamedTuple`: Named tuple of option values
 """
-function extract_modeler_options(modeler::AbstractModeler)
+function extract_modeler_options(modeler::AbstractOptimizationModeler)
     opts = Strategies.options(modeler)
-    return NamedTuple{Strategies.option_names(opts)}(
-        Strategies.option_value(opts, name) for name in Strategies.option_names(opts)
-    )
+    return opts.options
 end

@@ -1,20 +1,17 @@
-# ADNLP Modeler Strategy
+# ADNLP Modeler
 #
-# Implementation of ADNLPModelerStrategy using the new AbstractStrategy contract.
-# This strategy converts discretized optimal control problems to ADNLPModels.
+# Implementation of ADNLPModeler using the AbstractStrategy contract.
+# This modeler converts discretized optimal control problems to ADNLPModels.
 #
 # Author: CTModels Development Team
 # Date: 2026-01-25
 
-# Note: AbstractOptimizationProblem will be available as CTModels.AbstractOptimalControlProblem
-# when the module is used in the parent context
-
 """
-    ADNLPModelerStrategy
+    ADNLPModeler
 
-Strategy for building ADNLPModels from discretized optimal control problems.
+Modeler for building ADNLPModels from discretized optimal control problems.
 
-This strategy uses the ADNLPModels.jl package to create NLP models with
+This modeler uses the ADNLPModels.jl package to create NLP models with
 automatic differentiation support. It provides configurable options for
 timing information and AD backend selection.
 
@@ -24,27 +21,27 @@ timing information and AD backend selection.
 
 # Example
 ```julia
-modeler = ADNLPModelerStrategy(show_time=true, backend=:forwarddiff)
+modeler = ADNLPModeler(show_time=true, backend=:forwarddiff)
 nlp_model = modeler(problem, initial_guess)
 ```
 """
-struct ADNLPModelerStrategy <: AbstractModeler
+struct ADNLPModeler <: AbstractOptimizationModeler
     options::Strategies.StrategyOptions
 end
 
 # Strategy identification
-Strategies.id(::Type{<:ADNLPModelerStrategy}) = :adnlp
+Strategies.id(::Type{<:ADNLPModeler}) = :adnlp
 
 # Strategy metadata with option definitions
-function Strategies.metadata(::Type{<:ADNLPModelerStrategy})
+function Strategies.metadata(::Type{<:ADNLPModeler})
     return Strategies.StrategyMetadata(
-        Options.OptionDefinition(;
+        Strategies.OptionDefinition(;
             name=:show_time,
             type=Bool,
             default=false,
             description="Whether to show timing information while building the ADNLP model"
         ),
-        Options.OptionDefinition(;
+        Strategies.OptionDefinition(;
             name=:backend,
             type=Symbol,
             default=:optimized,
@@ -54,35 +51,33 @@ function Strategies.metadata(::Type{<:ADNLPModelerStrategy})
 end
 
 # Constructor with option validation
-function ADNLPModelerStrategy(; kwargs...)
+function ADNLPModeler(; kwargs...)
     opts = Strategies.build_strategy_options(
-        ADNLPModelerStrategy; kwargs...
+        ADNLPModeler; kwargs...
     )
-    return ADNLPModelerStrategy(opts)
+    return ADNLPModeler(opts)
 end
 
 # Access to strategy options
-Strategies.options(m::ADNLPModelerStrategy) = m.options
+Strategies.options(m::ADNLPModeler) = m.options
 
 # Model building interface
-function (modeler::ADNLPModelerStrategy)(
-    prob,
+function (modeler::ADNLPModeler)(
+    prob::AbstractOptimizationProblem,
     initial_guess
 )::ADNLPModels.ADNLPModel
     opts = Strategies.options(modeler)
-    show_time = opts[:show_time]
-    backend = opts[:backend]
     
     # Get the appropriate builder for this problem type
     builder = get_adnlp_model_builder(prob)
     
-    # Build the ADNLP model with extracted options
-    return builder(initial_guess; show_time=show_time, backend=backend)
+    # Build the ADNLP model passing all options generically
+    return builder(initial_guess; opts.options...)
 end
 
 # Solution building interface
-function (modeler::ADNLPModelerStrategy)(
-    prob,
+function (modeler::ADNLPModeler)(
+    prob::AbstractOptimizationProblem,
     nlp_solution::SolverCore.AbstractExecutionStats
 )
     # Get the appropriate solution builder for this problem type
