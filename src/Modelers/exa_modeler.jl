@@ -6,6 +6,25 @@
 # Author: CTModels Development Team
 # Date: 2026-01-25
 
+# Default option values
+"""
+$(TYPEDSIGNATURES)
+
+Return the default floating-point type for [`ExaModeler`](@ref).
+
+Default is `Float64`.
+"""
+__exa_model_base_type() = Float64
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default execution backend for [`ExaModeler`](@ref).
+
+Default is `nothing` (CPU).
+"""
+__exa_model_backend() = nothing
+
 """
     ExaModeler{BaseType<:AbstractFloat}
 
@@ -41,7 +60,7 @@ function Strategies.metadata(::Type{<:ExaModeler})
         Strategies.OptionDefinition(;
             name=:base_type,
             type=DataType,
-            default=Float64,
+            default=__exa_model_base_type(),
             description="Base floating-point type used by ExaModels"
         ),
         Strategies.OptionDefinition(;
@@ -53,7 +72,7 @@ function Strategies.metadata(::Type{<:ExaModeler})
         Strategies.OptionDefinition(;
             name=:backend,
             type=Any,
-            default=nothing,
+            default=__exa_model_backend(),
             description="Execution backend for ExaModels (CPU, GPU, etc.)"
         )
     )

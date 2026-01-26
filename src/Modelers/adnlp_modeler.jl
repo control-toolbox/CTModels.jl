@@ -6,6 +6,25 @@
 # Author: CTModels Development Team
 # Date: 2026-01-25
 
+# Default option values
+"""
+$(TYPEDSIGNATURES)
+
+Return the default value for the `show_time` option of [`ADNLPModeler`](@ref).
+
+Default is `false`.
+"""
+__adnlp_model_show_time() = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default automatic differentiation backend for [`ADNLPModeler`](@ref).
+
+Default is `:optimized`.
+"""
+__adnlp_model_backend() = :optimized
+
 """
     ADNLPModeler
 
@@ -38,13 +57,13 @@ function Strategies.metadata(::Type{<:ADNLPModeler})
         Strategies.OptionDefinition(;
             name=:show_time,
             type=Bool,
-            default=false,
+            default=__adnlp_model_show_time(),
             description="Whether to show timing information while building the ADNLP model"
         ),
         Strategies.OptionDefinition(;
             name=:backend,
             type=Symbol,
-            default=:optimized,
+            default=__adnlp_model_backend(),
             description="Automatic differentiation backend used by ADNLPModels"
         )
     )
