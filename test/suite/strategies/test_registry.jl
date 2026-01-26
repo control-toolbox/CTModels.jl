@@ -1,7 +1,11 @@
-# Tests for strategy registry API
+module TestStrategiesRegistry
 
+using Test
+using CTModels
 using CTModels.Strategies
 using CTModels.Options
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Fake strategy types for testing (must be at module top-level)
@@ -44,8 +48,13 @@ CTModels.Strategies.metadata(::Type{<:WrongTypeStrategy}) = CTModels.Strategies.
 # Test function
 # ============================================================================
 
+"""
+    test_registry()
+
+Tests for strategy registry API.
+"""
 function test_registry()
-    Test.@testset "Strategy Registry API" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Registry" verbose=VERBOSE showtiming=SHOWTIMING begin
         
         # ========================================================================
         # UNIT TESTS
@@ -250,3 +259,7 @@ function test_registry()
         end
     end
 end
+
+end # module
+
+test_registry() = TestStrategiesRegistry.test_registry()

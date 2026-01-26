@@ -1,6 +1,10 @@
-# Tests for strategy utilities
+module TestStrategiesUtilities
 
+using Test
+using CTModels
+using CTModels.Strategies
 using CTModels.Options: OptionDefinition
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test strategy for suggestions
@@ -43,6 +47,11 @@ CTModels.Strategies.options(s::TestUtilStrategy) = s.options
 # Test function
 # ============================================================================
 
+"""
+    test_utilities()
+
+Tests for strategy utilities.
+"""
 function test_utilities()
     Test.@testset "Strategy Utilities" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -202,3 +211,7 @@ function test_utilities()
         end
     end
 end
+
+end # module
+
+test_utilities() = TestStrategiesUtilities.test_utilities()

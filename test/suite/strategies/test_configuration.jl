@@ -1,6 +1,10 @@
-# Tests for strategy configuration
+module TestStrategiesConfiguration
 
+using Test
+using CTModels
+using CTModels.Strategies
 using CTModels.Options: OptionDefinition, OptionValue
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test strategies with metadata
@@ -64,6 +68,11 @@ CTModels.Strategies.options(s::Union{TestStrategyA, TestStrategyB}) = s.options
 # Test function
 # ============================================================================
 
+"""
+    test_configuration()
+
+Tests for strategy configuration.
+"""
 function test_configuration()
     Test.@testset "Strategy Configuration" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -226,3 +235,7 @@ function test_configuration()
         end
     end
 end
+
+end # module
+
+test_configuration() = TestStrategiesConfiguration.test_configuration()

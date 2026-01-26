@@ -1,7 +1,10 @@
-# Tests for strategy introspection utilities
+module TestStrategiesIntrospection
 
+using Test
+using CTModels
 using CTModels.Strategies
 using CTModels.Options
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Fake strategy types for testing (must be at module top-level)
@@ -50,6 +53,11 @@ CTModels.Strategies.metadata(::Type{<:EmptyOptionsStrategy}) = CTModels.Strategi
 # Test function
 # ============================================================================
 
+"""
+    test_introspection()
+
+Tests for strategy introspection utilities.
+"""
 function test_introspection()
     Test.@testset "Strategy Introspection" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -308,3 +316,7 @@ function test_introspection()
         end
     end
 end
+
+end # module
+
+test_introspection() = TestStrategiesIntrospection.test_introspection()

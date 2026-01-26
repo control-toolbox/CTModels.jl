@@ -1,5 +1,17 @@
-# Tests for strategy metadata functionality
+module TestStrategiesMetadata
 
+using Test
+using CTModels
+using CTModels.Strategies
+using CTModels.Options
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
+"""
+    test_metadata()
+
+Tests for strategy metadata functionality.
+"""
 function test_metadata()
     Test.@testset "StrategyMetadata" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -229,3 +241,7 @@ function test_metadata()
         end
     end
 end
+
+end # module
+
+test_metadata() = TestStrategiesMetadata.test_metadata()

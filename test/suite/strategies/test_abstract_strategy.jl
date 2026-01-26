@@ -1,7 +1,11 @@
-# Tests for abstract strategy contract
+module TestStrategiesAbstractStrategy
 
+using Test
+using CTModels
 using CTModels.Strategies
 using CTModels.Options
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Fake strategy types for testing (must be at module top-level)
@@ -49,6 +53,11 @@ struct UnimplementedStrategy <: CTModels.Strategies.AbstractStrategy end
 # Test function
 # ============================================================================
 
+"""
+    test_abstract_strategy()
+
+Tests for abstract strategy contract.
+"""
 function test_abstract_strategy()
     Test.@testset "Abstract Strategy" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -162,3 +171,7 @@ function test_abstract_strategy()
         end
     end
 end
+
+end # module
+
+test_abstract_strategy() = TestStrategiesAbstractStrategy.test_abstract_strategy()

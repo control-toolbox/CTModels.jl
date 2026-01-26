@@ -1,12 +1,21 @@
-# Tests for strategy-specific options handling
+module TestStrategiesStrategyOptions
 
+using Test
+using CTModels
 using CTModels.Strategies
 using CTModels.Options
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test function
 # ============================================================================
 
+"""
+    test_strategy_options()
+
+Tests for strategy-specific options handling.
+"""
 function test_strategy_options()
     Test.@testset "Strategy Options" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -239,3 +248,7 @@ function test_strategy_options()
         end
     end
 end
+
+end # module
+
+test_strategy_options() = TestStrategiesStrategyOptions.test_strategy_options()

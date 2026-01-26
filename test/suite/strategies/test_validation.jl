@@ -1,6 +1,11 @@
-# Tests for strategy validation API
+module TestStrategiesValidation
 
+using Test
+using CTModels
+using CTModels.Strategies
 using CTModels.Options: OptionDefinition
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Valid test strategies
@@ -327,6 +332,11 @@ CTModels.Strategies.options(s::NoOptionsStrategy) = s.options
 # Test function
 # ============================================================================
 
+"""
+    test_validation()
+
+Tests for strategy validation API.
+"""
 function test_validation()
     Test.@testset "Strategy Validation" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -549,3 +559,7 @@ function test_validation()
         end
     end
 end
+
+end # module
+
+test_validation() = TestStrategiesValidation.test_validation()

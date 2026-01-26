@@ -1,7 +1,11 @@
-# Tests for strategy builders
+module TestStrategiesBuilders
 
+using Test
+using CTModels
 using CTModels.Strategies
 using CTModels.Options
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
 # Test strategy types (reuse from test_abstract_strategy.jl)
@@ -120,6 +124,11 @@ end
 # Test function
 # ============================================================================
 
+"""
+    test_builders()
+
+Tests for strategy builders.
+"""
 function test_builders()
     Test.@testset "Strategy Builders" verbose=VERBOSE showtiming=SHOWTIMING begin
         
@@ -286,3 +295,7 @@ function test_builders()
         end
     end
 end
+
+end # module
+
+test_builders() = TestStrategiesBuilders.test_builders()
