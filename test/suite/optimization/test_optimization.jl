@@ -1,13 +1,4 @@
-"""
-Tests for Optimization module
-
-This file tests the complete Optimization module including:
-- Abstract types (AbstractOptimizationProblem, AbstractBuilder, etc.)
-- Concrete builder types (ADNLPModelBuilder, ExaModelBuilder, etc.)
-- Contract interface (get_*_builder functions)
-- Building functions (build_model, build_solution)
-- Solver utilities (extract_solver_infos)
-"""
+module TestOptimization
 
 using Test
 using CTModels
@@ -16,6 +7,7 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # Import from Optimization module to avoid name conflicts
 import CTModels.Optimization
@@ -91,8 +83,20 @@ end
 # TEST FUNCTION
 # ============================================================================
 
+"""
+    test_optimization()
+
+Tests for Optimization module.
+
+This function tests the complete Optimization module including:
+- Abstract types (AbstractOptimizationProblem, AbstractBuilder, etc.)
+- Concrete builder types (ADNLPModelBuilder, ExaModelBuilder, etc.)
+- Contract interface (get_*_builder functions)
+- Building functions (build_model, build_solution)
+- Solver utilities (extract_solver_infos)
+"""
 function test_optimization()
-    @testset "Optimization Module" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Optimization Module" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Types
@@ -449,3 +453,7 @@ function test_optimization()
         end
     end
 end
+
+end # module
+
+test_optimization() = TestOptimization.test_optimization()

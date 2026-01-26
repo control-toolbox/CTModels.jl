@@ -1,9 +1,4 @@
-"""
-Tests for error cases and edge cases in Optimization module
-
-This file tests error handling, NotImplemented errors, and edge cases
-to ensure the module fails gracefully with clear error messages.
-"""
+module TestOptimizationErrorCases
 
 using Test
 using CTModels
@@ -12,6 +7,7 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # Import from Optimization module
 import CTModels.Optimization
@@ -65,8 +61,16 @@ end
 # TEST FUNCTION
 # ============================================================================
 
+"""
+    test_error_cases()
+
+Tests for error cases and edge cases in Optimization module.
+
+This function tests error handling, NotImplemented errors, and edge cases
+to ensure the module fails gracefully with clear error messages.
+"""
 function test_error_cases()
-    @testset "Error Cases and Edge Cases" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Error Cases and Edge Cases" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
         # CONTRACT NOT IMPLEMENTED ERRORS
@@ -265,3 +269,7 @@ function test_error_cases()
         end
     end
 end
+
+end # module
+
+test_error_cases() = TestOptimizationErrorCases.test_error_cases()
