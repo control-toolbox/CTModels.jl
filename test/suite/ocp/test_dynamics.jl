@@ -1,3 +1,10 @@
+module TestOCPDynamics
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_partial_dynamics()
 
     # Sample full dynamics function for comparison
@@ -291,3 +298,7 @@ function test_dynamics()
     test_full_dynamics()
     test_partial_dynamics()
 end
+
+end # module
+
+test_dynamics() = TestOCPDynamics.test_dynamics()

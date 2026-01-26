@@ -1,3 +1,10 @@
+module TestOCPObjective
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_objective()
 
     # is concretetype    
@@ -151,3 +158,7 @@ function test_objective()
         @test CTModels.is_lagrange_cost_defined(obj_bolza) === true
     end
 end
+
+end # module
+
+test_objective() = TestOCPObjective.test_objective()

@@ -1,3 +1,10 @@
+module TestOCPConstraints
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 """
     test_constraints()
 
@@ -217,3 +224,7 @@ function test_constraints()
         end
     end
 end
+
+end # module
+
+test_constraints() = TestOCPConstraints.test_constraints()

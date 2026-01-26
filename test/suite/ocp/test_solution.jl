@@ -1,3 +1,9 @@
+module TestOCPSolution
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_solution()
 
     # create an ocp
@@ -266,3 +272,7 @@ function test_solution()
         @test CTModels.dual(sol_, ocp, :variable_rg) == [1.0, 2.0] - (-[1.0, 2.0])
     end
 end
+
+end # module
+
+test_solution() = TestOCPSolution.test_solution()

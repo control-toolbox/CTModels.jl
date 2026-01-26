@@ -1,3 +1,10 @@
+module TestOCPTimes
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 struct FakeTimeVector{T} <: AbstractVector{T}
     data::Vector{T}
 end
@@ -175,3 +182,7 @@ function test_times()
         @test CTModels.is_final_time_free(times_free_tf) == true
     end
 end
+
+end # module
+
+test_times() = TestOCPTimes.test_times()

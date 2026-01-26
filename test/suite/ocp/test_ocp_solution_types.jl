@@ -1,3 +1,9 @@
+module TestOCPSolutionTypes
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_ocp_solution_types()
     # TODO: add tests for src/core/types/ocp_solution.jl.
 
@@ -211,3 +217,7 @@ function test_ocp_solution_types()
         Test.@test summary.objective == 42.0
     end
 end
+
+end # module
+
+test_ocp_solution_types() = TestOCPSolutionTypes.test_ocp_solution_types()

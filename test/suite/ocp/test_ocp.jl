@@ -1,3 +1,10 @@
+module TestOCP
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_ocp()
 
     #
@@ -399,3 +406,7 @@ function test_ocp()
     io = IOBuffer()
     show(io, MIME"text/plain"(), ocp)
 end
+
+end # module
+
+test_ocp() = TestOCP.test_ocp()

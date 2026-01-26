@@ -1,3 +1,10 @@
+module TestOCPModel
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_model()
 
     # create a pre-model
@@ -194,3 +201,7 @@ function test_model()
     io = IOBuffer()
     show(io, MIME"text/plain"(), pre_ocp)
 end
+
+end # module
+
+test_model() = TestOCPModel.test_model()
