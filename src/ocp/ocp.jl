@@ -74,6 +74,9 @@ export Solution, AbstractSolution
 export FixedTimeModel, FreeTimeModel, TimesModel
 export StateModel, ControlModel, VariableModel
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
+export DualModel, AbstractDualModel
+export SolverInfos, AbstractSolverInfos
+export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
 
 # Export main API - Construction functions
 export state!, control!, variable!
@@ -88,6 +91,10 @@ export criterion, has_mayer_cost, has_lagrange_cost
 export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
+export state_dimension, control_dimension, variable_dimension
+export state_name, control_name, variable_name
+export state_components, control_components, variable_components
+export state, control, variable
 
 # Compatibility aliases for CTSolvers
 """

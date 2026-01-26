@@ -34,6 +34,7 @@ import ..OCP: AbstractOptimalControlProblem, AbstractOptimalControlSolution
 import ..OCP: state, control, variable
 import ..OCP: state_dimension, control_dimension, variable_dimension
 import ..OCP: state_name, control_name, variable_name
+import ..OCP: state_components, control_components, variable_components
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec
