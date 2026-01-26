@@ -100,7 +100,7 @@ Strategies.options(m::ExaModeler) = m.options
 function (modeler::ExaModeler{BaseType})(
     prob::AbstractOptimizationProblem,
     initial_guess
-)::ExaModels.ExaModel{BaseType} where {BaseType}
+)::ExaModels.ExaModel{BaseType} where {BaseType<:AbstractFloat}
     opts = Strategies.options(modeler)
     
     # Get the appropriate builder for this problem type
@@ -116,10 +116,10 @@ function (modeler::ExaModeler{BaseType})(
 end
 
 # Solution building interface
-function (modeler::ExaModeler)(
+function (modeler::ExaModeler{BaseType})(
     prob::AbstractOptimizationProblem,
     nlp_solution::SolverCore.AbstractExecutionStats
-)
+) where {BaseType<:AbstractFloat}
     # Get the appropriate solution builder for this problem type
     builder = get_exa_solution_builder(prob)
     return builder(nlp_solution)
