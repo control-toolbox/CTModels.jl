@@ -69,7 +69,11 @@ include(joinpath(@__DIR__, "ocp", "defaults.jl"))
 #    Must be loaded before OCP types because @ensure macro is used in OCP types
 include(joinpath(@__DIR__, "utils", "utils.jl"))
 
-# 4. OCP type definitions (components, model, solution)
+# 4. Initial guess types
+#    Depends on: type aliases
+include(joinpath(@__DIR__, "init", "types.jl"))
+
+# 5. OCP type definitions (components, model, solution)
 #    Depends on: type aliases, defaults, and utils (@ensure macro)
 include(joinpath(@__DIR__, "ocp", "types", "components.jl"))
 include(joinpath(@__DIR__, "ocp", "types", "model.jl"))
@@ -107,5 +111,9 @@ const AbstractOptimalControlSolution = CTModels.AbstractSolution
 # 6. OCP implementations (dynamics, constraints, model building, etc.)
 #    Depends on: all OCP types
 include(joinpath(@__DIR__, "ocp", "ocp.jl"))
+
+# 7. Initial guess implementations
+#    Depends on: OCP types (uses AbstractOptimalControlProblem)
+include(joinpath(@__DIR__, "init", "initial_guess.jl"))
 
 end
