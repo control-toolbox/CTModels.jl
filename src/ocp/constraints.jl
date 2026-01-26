@@ -736,6 +736,6 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
         )
     end
 
-    # return an exception if the label is not found
-    return CTBase.IncorrectArgument("Label $label not found in the model.")
+    # throw an exception if the label is not found
+    throw(CTBase.IncorrectArgument("Label $label not found in the model."))
 end

@@ -68,7 +68,7 @@ See also: [`all_names`](@ref), [`extract_option`](@ref), [`extract_options`](@re
 """
 struct OptionDefinition{T}
     name::Symbol
-    type::Type{T}
+    type::Type  # Not parameterized to allow NotProvided with any declared type
     default::T
     description::String
     aliases::Tuple{Vararg{Symbol}}
@@ -76,14 +76,14 @@ struct OptionDefinition{T}
     
     function OptionDefinition{T}(;
         name::Symbol,
-        type::Type{T},
+        type::Type,
         default::T,
         description::String,
         aliases::Tuple{Vararg{Symbol}} = (),
         validator::Union{Function, Nothing} = nothing
     ) where T
-        # Validate with custom validator if provided
-        if validator !== nothing
+        # Validate with custom validator if provided (skip for NotProvided)
+        if validator !== nothing && !(default isa NotProvidedType)
             try
                 validator(default)
             catch e
@@ -111,6 +111,18 @@ function OptionDefinition(;
             name=name,
             type=Any,
             default=nothing,
+            description=description,
+            aliases=aliases,
+            validator=validator
+        )
+    end
+    
+    # Handle NotProvided default specially - it's always valid regardless of declared type
+    if default isa NotProvidedType
+        return OptionDefinition{NotProvidedType}(;
+            name=name,
+            type=type,
+            default=default,
             description=description,
             aliases=aliases,
             validator=validator

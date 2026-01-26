@@ -80,7 +80,13 @@ function extract_option(kwargs::NamedTuple, def::OptionDefinition)
         end
     end
     
-    # Not found, return default
+    # Not found - check if default is NotProvided
+    if def.default isa NotProvidedType
+        # No default and not provided by user - return NotStored to signal "don't store"
+        return NotStored, kwargs
+    end
+    
+    # Not found, return default (including nothing if that's the default)
     return OptionValue(def.default, :default), kwargs
 end
 
@@ -140,7 +146,10 @@ function extract_options(kwargs::NamedTuple, defs::Vector{<:OptionDefinition})
     
     for def in defs
         opt_value, remaining = extract_option(remaining, def)
-        extracted[def.name] = opt_value
+        # Only store if not NotStored (NotProvided options that weren't provided return NotStored)
+        if !(opt_value isa NotStoredType)
+            extracted[def.name] = opt_value
+        end
     end
     
     return extracted, remaining
@@ -200,9 +209,57 @@ function extract_options(kwargs::NamedTuple, defs::NamedTuple)
     
     for (key, def) in pairs(defs)
         opt_value, remaining = extract_option(remaining, def)
-        push!(extracted_pairs, key => opt_value)
+        # Only store if not NotStored (NotProvided options that weren't provided return NotStored)
+        if !(opt_value isa NotStoredType)
+            push!(extracted_pairs, key => opt_value)
+        end
     end
     
     extracted = NamedTuple(extracted_pairs)
     return extracted, remaining
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Extract raw option values from a NamedTuple of options, unwrapping OptionValue wrappers
+and filtering out `NotProvided` values.
+
+This utility function is useful when passing options to external builders or functions
+that expect plain keyword arguments without OptionValue wrappers or undefined options.
+
+Options with `NotProvided` values are excluded from the result, allowing external
+builders to use their own defaults. Options with explicit `nothing` values are included.
+
+# Arguments
+- `options::NamedTuple`: NamedTuple containing option values (may be wrapped in OptionValue)
+
+# Returns
+- `NamedTuple`: NamedTuple with unwrapped values, excluding any `NotProvided` values
+
+# Example
+```julia-repl
+julia> using CTModels.Options
+
+julia> opts = (backend = OptionValue(:optimized, :user), 
+               show_time = OptionValue(false, :default),
+               minimize = OptionValue(nothing, :default),
+               optional = OptionValue(NotProvided, :default))
+
+julia> extract_raw_options(opts)
+(backend = :optimized, show_time = false, minimize = nothing)
+```
+
+See also: [`OptionValue`](@ref), [`extract_options`](@ref), [`NotProvided`](@ref)
+"""
+function extract_raw_options(options::NamedTuple)
+    raw_opts_dict = Dict{Symbol, Any}()
+    for (k, v) in pairs(options)
+        val = v isa OptionValue ? v.value : v
+        # Filter out NotProvided values, but keep nothing values
+        if !(val isa NotProvidedType)
+            raw_opts_dict[k] = val
+        end
+    end
+    return NamedTuple(raw_opts_dict)
 end

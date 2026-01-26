@@ -28,14 +28,27 @@ using KernelAbstractions
 using NLPModels
 
 # Modules
-include("Options/Options.jl")
+include(joinpath(@__DIR__, "Options", "Options.jl"))
 using .Options
 
-include("Strategies/Strategies.jl")
+include(joinpath(@__DIR__, "Strategies", "Strategies.jl"))
 using .Strategies
 
-include("Orchestration/Orchestration.jl")
+include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
+
+# Optimization module provides general optimization types (AbstractOptimizationProblem, builders)
+include(joinpath(@__DIR__, "Optimization", "Optimization.jl"))
+using .Optimization
+
+# Modelers module uses AbstractOptimizationProblem from Optimization (general)
+include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
+using .Modelers
+
+# DOCP module provides concrete DOCP types (DiscretizedOptimalControlProblem)
+# Loaded after Modelers since Modelers only need the general AbstractOptimizationProblem
+include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
+using .DOCP
 
 # ============================================================================ #
 # TYPES AND FOUNDATIONS
@@ -45,7 +58,7 @@ using .Orchestration
 
 # 1. Type aliases (Dimension, ctNumber, Time, etc.) and export/import types
 #    These are the most basic types with no dependencies
-include("types/types.jl")
+include(joinpath(@__DIR__, "types", "types.jl"))
 
 # 2. OCP defaults (functions returning default values)
 #    Depends on: type aliases (uses Dimension, ctVector, etc.)
@@ -56,18 +69,18 @@ include(joinpath(@__DIR__, "ocp", "defaults.jl"))
 #    Must be loaded before OCP types because @ensure macro is used in OCP types
 include(joinpath(@__DIR__, "utils", "utils.jl"))
 
-# 4. OCP type definitions (components, model, solution)
+# 4. Initial guess types
+#    Depends on: type aliases
+include(joinpath(@__DIR__, "init", "types.jl"))
+
+# 5. OCP type definitions (components, model, solution)
 #    Depends on: type aliases, defaults, and utils (@ensure macro)
 include(joinpath(@__DIR__, "ocp", "types", "components.jl"))
 include(joinpath(@__DIR__, "ocp", "types", "model.jl"))
 include(joinpath(@__DIR__, "ocp", "types", "solution.jl"))
 
-# 5. NLP types (backends, builders, modelers)
-#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
-include(joinpath(@__DIR__, "nlp", "types.jl"))
-
-# 6. Export/import functions (require OCP types)
-#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
+# # 6. Export/import functions (require OCP types)
+# #    Depends on: OCP types (uses AbstractModel, AbstractSolution)
 include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
 
 # ============================================================================ #
@@ -99,16 +112,8 @@ const AbstractOptimalControlSolution = CTModels.AbstractSolution
 #    Depends on: all OCP types
 include(joinpath(@__DIR__, "ocp", "ocp.jl"))
 
-# 7. NLP implementations (problem core, backends, discretization)
-#    Depends on: OCP and NLP types
-include(joinpath(@__DIR__, "nlp", "problem_core.jl"))
-include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))
-include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))
-include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))
-include(joinpath(@__DIR__, "nlp", "model_api.jl"))
-# 8. Initialization (types and functions for initial guesses)
-#    Depends on: OCP types (uses AbstractModel, AbstractSolution)
-include(joinpath(@__DIR__, "init", "types.jl"))
+# 7. Initial guess implementations
+#    Depends on: OCP types (uses AbstractOptimalControlProblem)
 include(joinpath(@__DIR__, "init", "initial_guess.jl"))
 
 end

@@ -2,14 +2,9 @@
 # CTModels Coverage Post-Processing
 # ==============================================================================
 #
-# This script processes coverage files generated during test runs with
-# coverage enabled. It uses CTBase.postprocess_coverage to generate:
-#   - coverage/lcov.info      — LCOV format for CI integration
-#   - coverage/cov_report.md  — Human-readable summary with uncovered lines
-#   - coverage/cov/           — Archived .cov files
+# See test/README.md for details.
 #
-# ## Usage
-#
+# Usage:
 #   julia --project=@. -e 'using Pkg; Pkg.test("CTModels"; coverage=true); include("test/coverage.jl")'
 #
 # ==============================================================================
