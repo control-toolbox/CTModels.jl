@@ -1,11 +1,7 @@
 # Export/import functions (require AbstractSolution and AbstractModel types)
 
 # -----------------------------
-# to be extended
-function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(CTBase.ExtensionError(:Plots))
-end
-
+# to be extended by extensions
 function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
     throw(CTBase.ExtensionError(:JLD2))
 end
