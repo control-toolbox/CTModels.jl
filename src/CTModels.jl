@@ -1,21 +1,99 @@
 """
-[`CTModels`](@ref) module.
+    CTModels
 
-Lists all the imported modules and packages:
+Control Toolbox Models (CTModels) - A Julia package for optimal control problems.
 
-$(IMPORTS)
+This module provides a comprehensive framework for defining, building, and solving
+optimal control problems with a modular architecture that separates concerns and
+facilitates extensibility.
 
-List of all the exported names:
+# Architecture Overview
 
-$(EXPORTS)
+CTModels is organized into specialized modules, each with clear responsibilities:
+
+## Core Modules
+
+- **OCP**: Optimal Control Problem core
+  - Types: `Model`, `PreModel`, `Solution`, `AbstractModel`, `AbstractSolution`
+  - Components: state, control, dynamics, objective, constraints
+  - Builders: model construction and solution building
+  - Type aliases: `Dimension`, `ctNumber`, `Time`, `Times`, `TimesDisc`, `ConstraintsDictType`
+
+- **Utils**: General utilities
+  - Interpolation: `ctinterpolate`
+  - Matrix operations: `matrix2vec`
+  - Macros: `@ensure` for validation
+
+- **Display**: Formatting and visualization
+  - Text display via `Base.show` extensions
+  - Plotting stubs via `RecipesBase.plot`
+
+- **Serialization**: Import/export functionality
+  - `export_ocp_solution`, `import_ocp_solution`
+  - Format tags: `JLD2Tag`, `JSON3Tag`
+
+- **InitialGuess**: Initial guess management
+  - `initial_guess`, `build_initial_guess`, `validate_initial_guess`
+  - Types: `OptimalControlInitialGuess`, `OptimalControlPreInit`
+
+## Supporting Modules
+
+- **Options**: Configuration and options management
+- **Strategies**: Strategy patterns for optimization
+- **Orchestration**: High-level orchestration and coordination
+- **Optimization**: General optimization types and builders
+- **Modelers**: Modeler implementations (ADNLPModeler, ExaModeler)
+- **DOCP**: Discretized Optimal Control Problem types
+
+# Loading Order
+
+Modules are loaded in dependency order to ensure all types and functions are available
+when needed:
+
+1. **Foundational types** → **Utils** → **OCP** → **Display/Serialization/InitialGuess**
+2. **Supporting modules** → **Optimization** → **Modelers** → **DOCP**
+
+# Public API
+
+All exported functions and types are accessible via `CTModels.function_name()`.
+The modular architecture ensures that:
+
+- Types are defined where they belong
+- Dependencies are explicit and minimal
+- Extensions can target specific modules
+- The public API remains stable and clean
+
+# Examples
+
+```julia
+using CTModels
+
+# Create an optimal control problem
+ocp = CTModels.PreModel()
+CTModels.time!(ocp; t0=0.0, tf=1.0)
+CTModels.state!(ocp, 2)
+CTModels.control!(ocp, 1)
+CTModels.dynamics!(ocp, (r, t, x, u) -> r .= [x[2], u[1]])
+
+# Build the model
+model = CTModels.build(ocp)
+
+# Create initial guess
+guess = CTModels.initial_guess(ocp; state=t -> [t, t^2], control=t -> [t])
+
+# Export solution
+CTModels.export_ocp_solution(solution, JLD2Tag(); filename="solution.jld2")
+```
+
+See also: [`CTBase`](@ref) for the underlying control toolbox framework.
 """
 module CTModels
 
-# imports
-using DocStringExtensions
-using OrderedCollections: OrderedDict
+# ============================================================================ #
+# MODULE LOADING
+# ============================================================================ #
 
-# Modules
+# Configuration and strategy modules (no dependencies)
 include(joinpath(@__DIR__, "Options", "Options.jl"))
 using .Options
 
@@ -25,69 +103,50 @@ using .Strategies
 include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
 
-# Optimization module provides general optimization types (AbstractOptimizationProblem, builders)
+# Optimization framework (general types)
 include(joinpath(@__DIR__, "Optimization", "Optimization.jl"))
 using .Optimization
 
-# Modelers module uses AbstractOptimizationProblem from Optimization (general)
+# Modeler implementations (depend on Optimization)
 include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
 using .Modelers
 
-# DOCP module provides concrete DOCP types (DiscretizedOptimalControlProblem)
-# Loaded after Modelers since Modelers only need the general AbstractOptimizationProblem
+# Discretized OCP types (depend on Modelers)
 include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
 using .DOCP
 
 # ============================================================================ #
-# TYPES AND FOUNDATIONS
+# FOUNDATIONAL TYPES AND UTILITIES
 # ============================================================================ #
-# Load fundamental types first as they have no dependencies and are used
-# everywhere in the codebase.
 
-# 1. Type aliases (Dimension, ctNumber, Time, etc.) and export/import types
-#    Note: Moved to OCP module (aliases.jl) and Serialization module (types.jl)
-#    No longer needed here as they are loaded with their respective modules
-
-# 2. OCP defaults (functions returning default values)
-#    Note: Now included in OCP module (Core/defaults.jl)
-
-# 3. Utils module (interpolation, matrix operations, macros)
-#    Depends on: CTBase (for ctNumber)
-#    Must be loaded before OCP types because @ensure macro is used in OCP types
+# Utils module - must load before OCP (uses @ensure macro)
 include(joinpath(@__DIR__, "Utils", "Utils.jl"))
 using .Utils
-# Import @ensure macro for use in OCP types
 import .Utils: @ensure
 
-# 5. OCP type definitions (components, model, solution)
-#    Note: Now included in OCP module (Types/ directory)
-
-# 6. OCP module (optimal control problem core)
-#    Depends on: all foundational types, Utils
-#    Note: Replaces all individual ocp/ includes with organized module
-#    Note: Compatibility aliases (AbstractOptimalControlProblem, etc.) are now in OCP
+# OCP module - core optimal control problem functionality
+# Contains type aliases, types, components, builders, and compatibility aliases
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
 
 # ============================================================================ #
-# IMPLEMENTATIONS
+# IMPLEMENTATION MODULES
 # ============================================================================ #
-# Load implementations after all types are defined
 
-# 7. Display module (formatting and printing)
-#    Depends on: OCP types (Model, Solution)
+# Display and visualization
 include(joinpath(@__DIR__, "Display", "Display.jl"))
 using .Display
 
-# 8. Serialization module (import/export)
-#    Depends on: OCP types (AbstractModel, AbstractSolution)
+# Serialization (import/export)
 include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
 using .Serialization
 
-# 9. InitialGuess module
-#    Depends on: OCP types, Utils (ctinterpolate, matrix2vec)
-#    Must be loaded after OCP to extend state/control/variable functions
+# Initial guess management
 include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
 using .InitialGuess
+
+# ============================================================================ #
+# END OF MODULE
+# ============================================================================ #
 
 end
