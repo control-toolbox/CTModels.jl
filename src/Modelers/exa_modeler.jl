@@ -66,7 +66,7 @@ function Strategies.metadata(::Type{<:ExaModeler})
         Strategies.OptionDefinition(;
             name=:minimize,
             type=Union{Bool, Nothing},
-            default=nothing,
+            default=Options.NotProvided,
             description="Whether to minimize (true) or maximize (false) the objective"
         ),
         Strategies.OptionDefinition(;
