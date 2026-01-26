@@ -1,5 +1,11 @@
+module TestAqua
+
+using Test
+using CTModels
+using Aqua
+
 function test_aqua()
-    @testset "Aqua.jl" begin
+    Test.@testset "Aqua.jl" begin
         Aqua.test_all(
             CTModels;
             ambiguities=false,
@@ -11,3 +17,7 @@ function test_aqua()
         Aqua.test_ambiguities(CTModels)
     end
 end
+
+end # module
+
+test_aqua() = TestAqua.test_aqua()

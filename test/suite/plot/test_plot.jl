@@ -1,3 +1,9 @@
+module TestPlot
+
+using Test
+using CTModels
+using Main.TestProblems
+using Main.TestOptions: VERBOSE, SHOWTIMING
 using Plots
 
 struct FakeModelDoPlot{N} <: CTModels.AbstractModel end
@@ -504,3 +510,7 @@ function test_plot()
         Test.@test_throws CTBase.IncorrectArgument plot!(plt, sol_pc; layout=:wrong_choice)
     end
 end
+
+end # module
+
+test_plot() = TestPlot.test_plot()

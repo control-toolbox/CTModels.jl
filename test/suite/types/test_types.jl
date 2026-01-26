@@ -1,3 +1,9 @@
+module TestTypes
+
+using Test
+using CTModels
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 function test_types()
     # TODO: add tests for src/core/types.jl (type includes and basic consistency).
 
@@ -31,3 +37,7 @@ function test_types()
         Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit
     end
 end
+
+end # module
+
+test_types() = TestTypes.test_types()

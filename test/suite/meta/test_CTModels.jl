@@ -1,3 +1,10 @@
+module TestCTModelsTop
+
+using Test
+using CTModels
+using CTBase
+using Main.TestOptions: VERBOSE, SHOWTIMING
+
 struct CTMDummySol <: CTModels.AbstractSolution end
 struct CTMDummyModelTop <: CTModels.AbstractModel end
 
@@ -45,3 +52,7 @@ function test_CTModels()
         )
     end
 end
+
+end # module
+
+test_CTModels() = TestCTModelsTop.test_CTModels()
