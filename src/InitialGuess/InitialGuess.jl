@@ -26,9 +26,11 @@ module InitialGuess
 using DocStringExtensions
 using CTBase
 
-# Import types and utilities from parent module
+# Import types from parent module
 import ..AbstractOptimalControlProblem
-import ..ctinterpolate, ..matrix2vec
+
+# Import utilities from Utils module
+import ..Utils: ctinterpolate, matrix2vec
 
 # Load types first
 include("types.jl")

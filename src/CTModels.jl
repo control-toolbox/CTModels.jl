@@ -67,7 +67,7 @@ include(joinpath(@__DIR__, "ocp", "defaults.jl"))
 # 3. Utils module (interpolation, matrix operations, macros)
 #    Depends on: CTBase (for ctNumber)
 #    Must be loaded before OCP types because @ensure macro is used in OCP types
-include(joinpath(@__DIR__, "utils", "utils.jl"))
+include(joinpath(@__DIR__, "Utils", "Utils.jl"))
 using .Utils
 # Import @ensure macro for use in OCP types
 import .Utils: @ensure
