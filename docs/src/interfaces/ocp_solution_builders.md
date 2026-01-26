@@ -158,7 +158,7 @@ This function bridges the gap between different NLP solver backends (Ipopt, MadN
 The generic method works with any `SolverCore.AbstractExecutionStats`:
 
 ```julia
-obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, minimize)
 ```
 
 Returns:

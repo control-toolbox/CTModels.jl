@@ -34,7 +34,7 @@ function test_extract_solver_infos()
             @testset "first_order status (success)" begin
                 nlp_solution = MockExecutionStats(1.23, 15, 1.0e-6, :first_order)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 1.23
                 @test iter == 15
@@ -47,7 +47,7 @@ function test_extract_solver_infos()
             @testset "acceptable status (success)" begin
                 nlp_solution = MockExecutionStats(2.34, 20, 1.0e-5, :acceptable)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 2.34
                 @test iter == 20
@@ -60,7 +60,7 @@ function test_extract_solver_infos()
             @testset "failure status - max_iter" begin
                 nlp_solution = MockExecutionStats(3.45, 100, 1.0e-3, :max_iter)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 3.45
                 @test iter == 100
@@ -73,7 +73,7 @@ function test_extract_solver_infos()
             @testset "failure status - infeasible" begin
                 nlp_solution = MockExecutionStats(4.56, 50, 1.0, :infeasible)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 4.56
                 @test iter == 50
@@ -86,7 +86,7 @@ function test_extract_solver_infos()
             @testset "failure status - unknown" begin
                 nlp_solution = MockExecutionStats(5.67, 10, 0.5, :unknown)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 5.67
                 @test iter == 10
@@ -102,7 +102,7 @@ function test_extract_solver_infos()
             @testset "zero values" begin
                 nlp_solution = MockExecutionStats(0.0, 0, 0.0, :first_order)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj == 0.0
                 @test iter == 0
@@ -113,7 +113,7 @@ function test_extract_solver_infos()
             @testset "negative objective" begin
                 nlp_solution = MockExecutionStats(-10.5, 25, 1.0e-8, :first_order)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ -10.5
                 @test iter == 25
@@ -124,7 +124,7 @@ function test_extract_solver_infos()
             @testset "large values" begin
                 nlp_solution = MockExecutionStats(1e10, 1000, 1e-10, :acceptable)
                 nlp = create_mock_nlp(true)
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, nlp)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(nlp_solution, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 1e10
                 @test iter == 1000
@@ -150,7 +150,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0e-6
                 base_stats.status = MadNLP.SOLVE_SUCCEEDED
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_min)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_min))
                 
                 @test obj ≈ 1.23
                 @test iter == 15
@@ -166,7 +166,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0e-7
                 base_stats.status = MadNLP.SOLVE_SUCCEEDED
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_max)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_max))
                 
                 @test obj ≈ -1.23
                 @test iter == 20
@@ -182,7 +182,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0e-5
                 base_stats.status = MadNLP.SOLVED_TO_ACCEPTABLE_LEVEL
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_min)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_min))
                 
                 @test obj ≈ 2.34
                 @test iter == 30
@@ -198,7 +198,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0e-3
                 base_stats.status = MadNLP.MAXIMUM_ITERATIONS_EXCEEDED
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_min)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_min))
                 
                 @test obj ≈ 3.45
                 @test iter == 100
@@ -214,7 +214,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0
                 base_stats.status = MadNLP.INFEASIBLE_PROBLEM_DETECTED
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_min)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_min))
                 
                 @test obj ≈ 4.56
                 @test iter == 50
@@ -230,7 +230,7 @@ function test_extract_solver_infos()
                 base_stats.primal_feas = 1.0e-8
                 base_stats.status = MadNLP.SOLVE_SUCCEEDED
                 
-                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, nlp_max)
+                obj, iter, viol, msg, stat, success = CTModels.extract_solver_infos(base_stats, NLPModels.get_minimize(nlp_max))
                 
                 @test obj ≈ 5.67
                 @test iter == 25

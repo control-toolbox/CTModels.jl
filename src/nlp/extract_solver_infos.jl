@@ -38,7 +38,7 @@ returns `(objective, ...)` first, but the struct doesn't have an `objective` fie
 julia> using CTModels, SolverCore, NLPModels
 
 julia> # After solving an NLP problem with a solver
-julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, nlp)
+julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, minimize)
 (1.23, 15, 1.0e-6, "Ipopt/generic", :first_order, true)
 ```
 
@@ -46,7 +46,7 @@ See also: [`SolverInfos`](@ref)
 """
 function extract_solver_infos(
     nlp_solution::SolverCore.AbstractExecutionStats,
-    ::NLPModels.AbstractNLPModel
+    ::Bool, # whether the problem is a minimization problem or not
 )
     objective = nlp_solution.objective
     iterations = nlp_solution.iter

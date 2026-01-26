@@ -42,16 +42,16 @@ A 6-element tuple `(objective, iterations, constraints_violation, message, statu
 julia> using CTModels, MadNLP, NLPModels
 
 julia> # After solving with MadNLP
-julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, nlp)
+julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, minimize)
 (1.23, 15, 1.0e-6, "MadNLP", :SOLVE_SUCCEEDED, true)
 ```
 """
 function CTModels.extract_solver_infos(
     nlp_solution::MadNLP.MadNLPExecutionStats,
-    nlp::NLPModels.AbstractNLPModel
+    minimize::Bool, # whether the problem is a minimization problem or not
 )
     # Get minimization flag and adjust objective sign accordingly
-    minimize = NLPModels.get_minimize(nlp)
+    # minimize = NLPModels.get_minimize(nlp)
     objective = minimize ? nlp_solution.objective : -nlp_solution.objective
 
     # Extract standard fields
