@@ -111,8 +111,8 @@ function test_exa_modeler()
         # Test base_type is filtered from stored options
         opts_nt = CTModels.Strategies.options(modeler_type).options
         @test !haskey(opts_nt, :base_type)  # base_type is in the type parameter
-        @test haskey(opts_nt, :minimize)
-        @test haskey(opts_nt, :backend)
+        @test !haskey(opts_nt, :minimize)  # minimize has NotProvided default, not stored if not provided
+        @test haskey(opts_nt, :backend)  # backend has nothing default, always stored
     end
 end
 
