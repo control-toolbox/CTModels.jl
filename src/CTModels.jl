@@ -38,7 +38,7 @@ include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
 
 # Optimization module provides general optimization types (AbstractOptimizationProblem, builders)
-include(joinpath(@__DIR__, "optimization", "optimization.jl"))
+include(joinpath(@__DIR__, "Optimization", "Optimization.jl"))
 using .Optimization
 
 # Modelers module uses AbstractOptimizationProblem from Optimization (general)
@@ -47,7 +47,7 @@ using .Modelers
 
 # DOCP module provides concrete DOCP types (DiscretizedOptimalControlProblem)
 # Loaded after Modelers since Modelers only need the general AbstractOptimizationProblem
-include(joinpath(@__DIR__, "docp", "docp.jl"))
+include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
 using .DOCP
 
 # ============================================================================ #
@@ -77,7 +77,7 @@ include(joinpath(@__DIR__, "ocp", "types", "solution.jl"))
 
 # # 6. Export/import functions (require OCP types)
 # #    Depends on: OCP types (uses AbstractModel, AbstractSolution)
-# include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
+include(joinpath(@__DIR__, "types", "export_import_functions.jl"))
 
 # ============================================================================ #
 # COMPATIBILITY ALIASES
@@ -107,13 +107,5 @@ const AbstractOptimalControlSolution = CTModels.AbstractSolution
 # 6. OCP implementations (dynamics, constraints, model building, etc.)
 #    Depends on: all OCP types
 include(joinpath(@__DIR__, "ocp", "ocp.jl"))
-
-# 7. NLP implementations (problem core, backends, discretization)
-#    Depends on: OCP and NLP types
-# include(joinpath(@__DIR__, "nlp", "problem_core.jl"))  # LEGACY - Replaced by Optimization.contract
-# include(joinpath(@__DIR__, "nlp", "nlp_backends.jl"))  # LEGACY - Replaced by Modelers module
-# include(joinpath(@__DIR__, "nlp", "extract_solver_infos.jl"))  # LEGACY - Moved to Optimization.solver_info
-# include(joinpath(@__DIR__, "nlp", "discretized_ocp.jl"))  # LEGACY - Replaced by DOCP.contract_impl
-# include(joinpath(@__DIR__, "nlp", "model_api.jl"))  # LEGACY - Split into Optimization.building and DOCP.building
 
 end
