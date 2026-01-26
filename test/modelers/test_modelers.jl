@@ -132,15 +132,6 @@ function test_modelers_integration()
         opts = CTModels.Strategies.options(modeler)
         @test haskey(opts, :show_time)
         @test haskey(opts, :backend)
-        
-        # Test utility functions
-        @test isdefined(CTModels.Modelers, :validate_initial_guess)
-        @test isdefined(CTModels.Modelers, :extract_modeler_options)
-        
-        # Test extract_modeler_options
-        extracted = CTModels.Modelers.extract_modeler_options(modeler)
-        @test extracted isa NamedTuple
-        @test extracted.show_time == true
     end
 end
 
@@ -151,14 +142,6 @@ Test error handling and edge cases.
 """
 function test_modelers_error_handling()
     @testset "Modelers Error Handling" begin
-        # Test validate_initial_guess with correct size
-        @test_nowarn CTModels.Modelers.validate_initial_guess([1.0, 2.0], (2,))
-        
-        # Test validate_initial_guess with incorrect size
-        @test_throws CTBase.IncorrectArgument CTModels.Modelers.validate_initial_guess(
-            [1.0, 2.0], (3,)
-        )
-        
         # Test that abstract methods throw NotImplemented
         abstract_modeler = CTModels.AbstractOptimizationModeler
         # Note: Cannot instantiate abstract type, so we test the interface exists

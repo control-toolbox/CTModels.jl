@@ -93,6 +93,7 @@ CTBase.run_tests(;
         "orchestration/test_*",
         "modelers/test_*",
         "docp/test_*",
+        "optimization/test_*",
     ),
     filename_builder=name -> Symbol(:test_, name),
     funcname_builder=name -> Symbol(:test_, name),

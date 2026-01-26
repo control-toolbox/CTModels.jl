@@ -21,7 +21,6 @@ using ..CTModels.Optimization: AbstractOptimizationProblem
 include(joinpath(@__DIR__, "abstract_modeler.jl"))
 include(joinpath(@__DIR__, "adnlp_modeler.jl"))
 include(joinpath(@__DIR__, "exa_modeler.jl"))
-include(joinpath(@__DIR__, "utilities.jl"))
 
 # Public API
 export AbstractOptimizationModeler

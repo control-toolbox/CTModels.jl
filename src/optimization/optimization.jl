@@ -1,7 +1,7 @@
 # Optimization Module
 #
-# This module provides general optimization problem types and builder interfaces
-# that are independent of specific optimal control problem implementations.
+# This module provides general optimization problem types, builder interfaces,
+# and the contract that optimization problems must implement.
 #
 # Author: CTModels Development Team
 # Date: 2026-01-26
@@ -14,10 +14,19 @@ using DocStringExtensions
 # Include submodules
 include(joinpath(@__DIR__, "abstract_types.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
+include(joinpath(@__DIR__, "contract.jl"))
 
-# Public API
+# Public API - Abstract types
 export AbstractOptimizationProblem
 export AbstractBuilder, AbstractModelBuilder, AbstractSolutionBuilder
 export AbstractOCPSolutionBuilder
+
+# Public API - Concrete builder types
+export ADNLPModelBuilder, ExaModelBuilder
+export ADNLPSolutionBuilder, ExaSolutionBuilder
+
+# Public API - Contract functions
+export get_adnlp_model_builder, get_exa_model_builder
+export get_adnlp_solution_builder, get_exa_solution_builder
 
 end # module Optimization
