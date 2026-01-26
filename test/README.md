@@ -29,13 +29,13 @@ You can run specific test files or groups using the `test_args` argument. The ar
 **Run all tests in the `ocp` directory:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["ocp/*"])'
+julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/ocp/*"])'
 ```
 
 **Run specific test files:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["ocp/test_constraints", "ocp/test_dynamics"])'
+julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/ocp/test_constraints", "suite/ocp/test_dynamics"])'
 ```
 
 ### Running All Tests (Including Optional/Long Tests)
@@ -69,7 +69,7 @@ julia --project=@. -e 'using Pkg; Pkg.test("CTModels"; coverage=true); include("
 - **File Name:** Must follow the pattern `test_<name>.jl` (e.g., `test_dynamics.jl`).
 - **Entry Function:** The file **MUST** contain a function named `test_<name>()` (matching the filename) that serves as the entry point.
 
-**Example (`test/ocp/test_dynamics.jl`):**
+**Example (`test/suite/ocp/test_dynamics.jl`):**
 
 ```julia
 module TestDynamics # Optional but good for namespace isolation
@@ -91,7 +91,7 @@ end # module
 
 ### Registering the Test
 
-Add your new test file pattern to the `available_tests` tuple in `test/runtests.jl` if necessary (e.g., if you added a new subdirectory).
+All test files in `test/suite/*/` are automatically discovered by the pattern `"suite/*/test_*"` in `test/runtests.jl`. Simply place your test file in the appropriate subdirectory under `test/suite/`.
 
 ## 4. Best Practices & Rules
 
@@ -108,10 +108,19 @@ All helper methods, mocks, and structs must be defined at the **top-level** of t
 
 ### Directory Structure
 
-Place your test file in the appropriate subdirectory based on functionality:
+All test files are organized under `test/suite/`. Place your test file in the appropriate subdirectory based on functionality:
 
-- `core/`: Core utilities and types.
-- `ocp/`: Optimal Control Problem definitions and layers.
-- `nlp/`: NLP interfaces.
-- `strategies/`, `options/`, `orchestration/`: New architecture components.
-- ...and others as listed in `test/runtests.jl`.
+- `suite/docp/`: DOCP (Discretized Optimal Control Problem) module tests
+- `suite/init/`: Initial guess and initialization tests
+- `suite/integration/`: End-to-end integration tests
+- `suite/io/`: Import/Export functionality tests
+- `suite/meta/`: Meta tests (Aqua.jl quality checks, etc.)
+- `suite/modelers/`: Modelers (ADNLPModeler, ExaModeler) tests
+- `suite/ocp/`: Optimal Control Problem definitions and components
+- `suite/optimization/`: Optimization module (builders, contracts, etc.)
+- `suite/options/`: Options system tests
+- `suite/orchestration/`: Orchestration layer tests
+- `suite/plot/`: Plotting functionality tests
+- `suite/strategies/`: Strategies framework tests
+- `suite/types/`: Core type definitions tests
+- `suite/utils/`: Utility functions tests
