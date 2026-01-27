@@ -91,17 +91,23 @@ export build_model, build_solution, build
 export definition!, time_dependence!
 
 # Export main API - Accessors
-export constraint, name, dimension, components
-export initial_time, final_time, time_name, time_grid
+export constraint, constraints, name, dimension, components
+export initial_time, final_time, time_name, time_grid, times
+export initial_time_name, final_time_name
 export criterion, has_mayer_cost, has_lagrange_cost
 export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
+export is_autonomous
 export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
 export state, control, variable, costate, objective
-export iterations, status, message, success
+export dynamics, mayer, lagrange
+export definition, dual
+export iterations, status, message, success, successful
+export constraints_violation, infos
+export get_build_examodel
 
 # Compatibility aliases for CTSolvers
 """
