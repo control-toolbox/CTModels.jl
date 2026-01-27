@@ -35,6 +35,9 @@ import ..OCP: state, control, variable
 import ..OCP: state_dimension, control_dimension, variable_dimension
 import ..OCP: state_name, control_name, variable_name
 import ..OCP: state_components, control_components, variable_components
+import ..OCP: initial_time, final_time, time_name, time_grid
+import ..OCP: has_fixed_initial_time, has_fixed_final_time
+import ..OCP: has_free_initial_time, has_free_final_time
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec

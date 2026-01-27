@@ -78,7 +78,7 @@ export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictTyp
 export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
 export FixedTimeModel, FreeTimeModel, TimesModel
-export StateModel, ControlModel, VariableModel
+export StateModel, ControlModel, VariableModel, EmptyVariableModel
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
@@ -99,6 +99,8 @@ export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
 export is_autonomous
+export is_initial_time_fixed, is_initial_time_free
+export is_final_time_fixed, is_final_time_free
 export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
@@ -113,6 +115,7 @@ export path_constraints_dual, boundary_constraints_dual
 export state_constraints_lb_dual, state_constraints_ub_dual
 export control_constraints_lb_dual, control_constraints_ub_dual
 export variable_constraints_lb_dual, variable_constraints_ub_dual
+
 
 # Compatibility aliases for CTSolvers
 """
