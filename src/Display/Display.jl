@@ -43,6 +43,8 @@ function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs.
     throw(CTBase.ExtensionError(:Plots))
 end
 
+# Note: plot is not exported from Display, it will be imported and exported from CTModels
+
 # Note: Base.show methods are automatically exported by Julia
 # No explicit export needed for Base.show extensions
 

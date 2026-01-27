@@ -35,6 +35,9 @@ using CTBase
 # Import types from parent module
 import ..AbstractModel, ..AbstractSolution, ..Solution
 
+# Import default functions from OCP
+import ..OCP: __format, __filename_export_import
+
 # Define export/import tag types
 include("types.jl")
 

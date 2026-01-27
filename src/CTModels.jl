@@ -137,6 +137,10 @@ using .OCP
 include(joinpath(@__DIR__, "Display", "Display.jl"))
 using .Display
 
+# Import and export plot from RecipesBase for public API
+import RecipesBase: RecipesBase, plot
+export plot
+
 # Serialization (import/export)
 include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
 using .Serialization
