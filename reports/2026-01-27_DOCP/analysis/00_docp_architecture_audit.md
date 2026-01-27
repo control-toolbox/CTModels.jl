@@ -835,14 +835,200 @@ Migration path:
 4. Update CTDirect to use new API
 5. Remove deprecated code in next major version
 
-### Long-term Vision
+### Long-term Vision: Unified Extensible Architecture
 
-For a truly extensible system:
+The long-term vision synthesizes the best elements from all proposed alternatives into a coherent, extensible architecture. This "**Alternative F**" represents the ideal target state combining:
 
-1. **Extract discretization data** into its own type (not closures)
-2. **Backend registration** at CTModels level (not hardcoded)
-3. **Lazy builder construction** for memory efficiency
-4. **Optional caching** for repeated use cases
+| Component | Source | Benefit |
+|-----------|--------|---------|
+| **DiscretizationData** | Alt C, D, E | Explicit, inspectable data |
+| **Builder Registry** | Alt B | Extensibility via NamedTuple |
+| **Strategies.id lookup** | Current (`ADNLPModeler`) | Automatic backend selection |
+| **Lazy construction** | Alt D | Memory efficiency |
+| **Optional caching** | Alt E | Performance for repeated use |
+
+#### Core Architecture
+
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| DiscretizationData : "contains shared data"
+    DOCP ||--|| BuilderRegistry : "has backends by id"
+    
+    BuilderRegistry ||--o{ BackendEntry : "stores"
+    BackendEntry ||--|| BackendId : "keyed by"
+    BackendEntry ||--o| BuilderPair : "cached (optional)"
+    BackendEntry ||--|| BuilderFactory : "lazily creates"
+    
+    AbstractModeler ||--|| BackendId : "has id()"
+    AbstractModeler ||--|| DOCP : "queries"
+    
+    BuilderFactory ||--|| BuilderPair : "produces"
+    BuilderPair ||--|| ModelBuilder : "has"
+    BuilderPair ||--|| SolutionBuilder : "has"
+    
+    ModelBuilder ||--|| NLPModel : "creates"
+    SolutionBuilder ||--|| OptimalControlSolution : "reconstructs"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        DiscretizationData data
+        BuilderRegistry registry
+    }
+    DiscretizationData {
+        Symbol scheme
+        Int grid_size
+        Vector time_grid
+        Bounds bounds
+        Flags flags
+        Any precomputed_matrices
+    }
+    BackendEntry {
+        Symbol id
+        Union_Nothing_BuilderPair cached
+        BuilderFactory factory
+    }
+    BuilderPair {
+        ModelBuilder model
+        SolutionBuilder solution
+    }
+```
+
+#### Key Design Principles
+
+1. **Separation of Concerns**
+   - `DiscretizationData`: Pure data, no closures. Inspectable, serializable.
+   - `BuilderFactory`: Logic for constructing builders from data.
+   - `BuilderPair`: Paired model + solution builders (cannot mismatch).
+
+2. **Extensibility via Registration**
+   - New backends are added by defining:
+     1. A `BuilderFactory` method for the backend
+     2. A `Strategies.id` for the corresponding modeler
+   - No modification to `DOCP` struct is required.
+
+3. **Lazy Construction with Optional Caching**
+   - Builders are created on first use (memory-efficient).
+   - Cache is optional and populated when `get_builder` is called.
+   - Cache can be bypassed for fresh construction.
+
+4. **Type-Safe Lookup via `Strategies.id`**
+   - Modeler type automatically selects the correct backend.
+   - No Symbol literals in user code.
+
+#### Implementation Sketch
+
+```julia
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. DiscretizationData: All precomputed values, no closures
+# ─────────────────────────────────────────────────────────────────────────────
+struct DiscretizationData{S, G, B, F}
+    scheme::S
+    grid_size::Int
+    time_grid::G
+    bounds::B
+    flags::F
+    # Additional precomputed data...
+end
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. BuilderPair: Paired model + solution builders
+# ─────────────────────────────────────────────────────────────────────────────
+struct BuilderPair{M, S}
+    model::M
+    solution::S
+end
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. BackendEntry: Lazy factory + optional cache
+# ─────────────────────────────────────────────────────────────────────────────
+mutable struct BackendEntry{F}
+    factory::F                       # (OCP, Data) -> BuilderPair
+    cached::Union{Nothing, BuilderPair}
+end
+BackendEntry(factory) = BackendEntry(factory, nothing)
+
+function get_builders(entry::BackendEntry, ocp, data; use_cache::Bool=true)
+    if use_cache && entry.cached !== nothing
+        return entry.cached
+    end
+    pair = entry.factory(ocp, data)
+    if use_cache
+        entry.cached = pair
+    end
+    return pair
+end
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. DOCP: Unified structure
+# ─────────────────────────────────────────────────────────────────────────────
+struct DiscretizedOptimalControlProblem{TO, DD, R<:NamedTuple} <: AbstractOptimizationProblem
+    optimal_control_problem::TO
+    discretization_data::DD
+    registry::R  # NamedTuple{(:adnlp, :exa, ...), <:Tuple{BackendEntry, ...}}
+end
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Generic API: Uses Strategies.id for automatic lookup
+# ─────────────────────────────────────────────────────────────────────────────
+function get_model_builder(prob::DiscretizedOptimalControlProblem, modeler::AbstractOptimizationModeler)
+    id = Strategies.id(typeof(modeler))
+    entry = prob.registry[id]
+    pair = get_builders(entry, prob.optimal_control_problem, prob.discretization_data)
+    return pair.model
+end
+
+function get_solution_builder(prob::DiscretizedOptimalControlProblem, modeler::AbstractOptimizationModeler)
+    id = Strategies.id(typeof(modeler))
+    entry = prob.registry[id]
+    pair = get_builders(entry, prob.optimal_control_problem, prob.discretization_data)
+    return pair.solution
+end
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. CTDirect Extension: Register ADNLP backend
+# ─────────────────────────────────────────────────────────────────────────────
+function adnlp_factory(ocp, data::DiscretizationData)
+    model_builder = ADNLPModelBuilder(...) # Uses data, not closures
+    solution_builder = ADNLPSolutionBuilder(...)
+    return BuilderPair(model_builder, solution_builder)
+end
+
+# Usage in discretizer
+function (disc::Collocation)(ocp::AbstractOptimalControlProblem)
+    data = DiscretizationData(...)  # Precompute once
+    registry = (
+        adnlp = BackendEntry(adnlp_factory),
+        exa = BackendEntry(exa_factory),
+    )
+    return DiscretizedOptimalControlProblem(ocp, data, registry)
+end
+```
+
+#### Migration Strategy
+
+| Phase | Action | Breaking Change |
+|-------|--------|-----------------|
+| **Phase 1** | Add `DiscretizationData` type alongside current closures | None |
+| **Phase 2** | Implement `BuilderRegistry` with wrapper for old API | None |
+| **Phase 3** | Deprecate direct `adnlp_model_builder` field access | Deprecation warning |
+| **Phase 4** | CTDirect produces `DiscretizationData` + factories | CTDirect update |
+| **Phase 5** | Remove deprecated fields, switch to registry-only | Major version bump |
+
+#### Benefits Summary
+
+| Criterion | Current | Long-term Target |
+|-----------|---------|------------------|
+| **Extensibility** | ❌ Requires struct change | ✅ Add factory + id only |
+| **Type Stability** | ⚠️ OK | ✅ Full via NamedTuple |
+| **Inspectability** | ❌ Opaque closures | ✅ Explicit data |
+| **Memory Efficiency** | ⚠️ All builders upfront | ✅ Lazy construction |
+| **Builder Pairing** | ❌ Independent fields | ✅ BuilderPair enforced |
+| **Caching** | ❌ None | ✅ Optional |
+
 
 ---
 
