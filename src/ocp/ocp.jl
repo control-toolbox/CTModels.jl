@@ -34,6 +34,7 @@ using MLStyle: @match
 using MacroTools
 using Parameters
 using OrderedCollections: OrderedDict
+import Base: time
 
 # Define type aliases (moved from src/types/aliases.jl)
 include("aliases.jl")
