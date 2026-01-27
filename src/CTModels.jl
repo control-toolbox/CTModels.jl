@@ -111,10 +111,6 @@ using .Optimization
 include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
 using .Modelers
 
-# Discretized OCP types (depend on Modelers)
-include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
-using .DOCP
-
 # ============================================================================ #
 # FOUNDATIONAL TYPES AND UTILITIES
 # ============================================================================ #
@@ -128,6 +124,10 @@ import .Utils: @ensure
 # Contains type aliases, types, components, builders, and compatibility aliases
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
+
+# Discretized OCP types (depend on OCP and Modelers)
+include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
+using .DOCP
 
 # ============================================================================ #
 # IMPLEMENTATION MODULES

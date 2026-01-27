@@ -25,7 +25,7 @@ import CTModels.Optimization: build_model, build_solution
 """
 Fake OCP for testing DOCP construction.
 """
-struct FakeOCP
+struct FakeOCP <: CTModels.AbstractOptimalControlProblem
     name::String
 end
 

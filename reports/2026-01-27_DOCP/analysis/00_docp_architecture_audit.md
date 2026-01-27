@@ -42,22 +42,48 @@ This audit analyzes the current DOCP (Discretized Optimal Control Problem) archi
 
 ```mermaid
 flowchart TD
+    %% High-level
     OCP["OCP<br/>AbstractOptimalControlProblem"] 
-    DISC["Discretizer<br/>AbstractOptimalControlDiscretizer"]
-    DOCP["DOCP<br/>DiscretizedOptimalControlProblem"]
-    MOD["Modeler<br/>ADNLPModeler | ExaModeler"]
-    NLP["NLP<br/>ADNLPModel | ExaModel"]
-    SOLV["Solver<br/>AbstractOptimizationSolver"]
     SOL["Solution<br/>OptimalControlSolution"]
 
+    %% Intermediate
+    DISC["Discretizer<br/>AbstractOptimalControlDiscretizer"]
+    SOLV["Solver<br/>AbstractOptimizationSolver"]
+
+    %% Low-level
+    DOCP["DOCP<br/>DiscretizedOptimalControlProblem"]
+    NLP["NLP<br/>ADNLPModel | ExaModel"]
+    
+    %% Bottom / Core
+    MOD["Modeler<br/>ADNLPModeler | ExaModeler"]
+
+    %% Down path
     OCP  --> DISC
     DISC --> DOCP
     DOCP --> MOD
+
+    %% Up path
     MOD  --> NLP
     NLP  --> SOLV
     SOLV --> SOL
 
+    %% Cross-reference
     DOCP -.->|"contains builders"| MOD
+
+    %% Layout hints
+    subgraph "High Level"
+        OCP
+        SOL
+    end
+    subgraph "Intermediate Level"
+        DISC
+        SOLV
+    end
+    subgraph "Optimization Level"
+        DOCP
+        NLP
+        MOD
+    end
 ```
 
 ### Current DOCP Structure

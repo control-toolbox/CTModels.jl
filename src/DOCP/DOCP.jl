@@ -16,6 +16,7 @@ using ..CTModels.Optimization: AbstractOptimizationProblem
 using ..CTModels.Optimization: AbstractBuilder, AbstractModelBuilder, AbstractSolutionBuilder
 using ..CTModels.Optimization: AbstractOCPSolutionBuilder
 using ..CTModels.Optimization: build_model, build_solution
+using ..CTModels.OCP: AbstractOptimalControlProblem
 import ..CTModels.Optimization: get_adnlp_model_builder, get_exa_model_builder
 import ..CTModels.Optimization: get_adnlp_solution_builder, get_exa_solution_builder
 
