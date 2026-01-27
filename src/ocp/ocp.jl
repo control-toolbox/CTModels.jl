@@ -91,6 +91,8 @@ export state!, control!, variable!
 export time!, dynamics!, objective!, constraint!
 export build_model, build_solution, build
 export definition!, time_dependence!
+# Constraint utilities
+export append_box_constraints!
 
 # Export main API - Accessors
 export constraint, constraints, name, dimension, components
@@ -106,6 +108,11 @@ export is_final_time_fixed, is_final_time_free
 export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
+# Constraint accessors
+export path_constraints_nl, boundary_constraints_nl
+export state_constraints_box, control_constraints_box, variable_constraints_box
+export dim_path_constraints_nl, dim_boundary_constraints_nl
+export dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
 export state, control, variable, costate, objective
 export dynamics, mayer, lagrange
 export definition, dual
