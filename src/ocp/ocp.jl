@@ -44,8 +44,8 @@ import ..Utils: @ensure
 # Import build_solution from Optimization to overload it
 import ..Optimization: build_solution
 
-# Import matrix2vec and ctinterpolate from Utils for solution building
-import ..Utils: matrix2vec, ctinterpolate
+# Import matrix2vec, ctinterpolate and to_out_of_place from Utils for solution building
+import ..Utils: matrix2vec, ctinterpolate, to_out_of_place
 
 # Load types first (no dependencies)
 include("Types/components.jl")
@@ -77,12 +77,14 @@ export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictTyp
 # Export main API - Types
 export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
-export FixedTimeModel, FreeTimeModel, TimesModel
+export FixedTimeModel, FreeTimeModel, TimesModel, AbstractTimeModel
 export StateModel, ControlModel, VariableModel, EmptyVariableModel
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
+export Autonomous, NonAutonomous
+export ConstraintsModel
 
 # Export main API - Construction functions
 export state!, control!, variable!
@@ -110,6 +112,7 @@ export definition, dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
+export is_empty, is_empty_time_grid
 # Dual constraints accessors
 export path_constraints_dual, boundary_constraints_dual
 export state_constraints_lb_dual, state_constraints_ub_dual

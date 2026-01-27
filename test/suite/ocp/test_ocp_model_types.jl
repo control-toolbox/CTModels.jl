@@ -55,26 +55,26 @@ function test_ocp_model_types()
             typeof(build_examodel),
         }
 
-        Test.@test CTModels.__is_times_set(ocp)
-        Test.@test CTModels.__is_state_set(ocp)
-        Test.@test CTModels.__is_control_set(ocp)
-        Test.@test CTModels.__is_variable_set(ocp)
-        Test.@test CTModels.__is_dynamics_set(ocp)
-        Test.@test CTModels.__is_objective_set(ocp)
-        Test.@test CTModels.__is_definition_set(ocp)
+        Test.@test CTModels.OCP.__is_times_set(ocp)
+        Test.@test CTModels.OCP.__is_state_set(ocp)
+        Test.@test CTModels.OCP.__is_control_set(ocp)
+        Test.@test CTModels.OCP.__is_variable_set(ocp)
+        Test.@test CTModels.OCP.__is_dynamics_set(ocp)
+        Test.@test CTModels.OCP.__is_objective_set(ocp)
+        Test.@test CTModels.OCP.__is_definition_set(ocp)
     end
 
     Test.@testset "__is_* predicates on PreModel" verbose=VERBOSE showtiming=SHOWTIMING begin
         ocp = CTModels.PreModel()
 
         # Fresh PreModel should be empty
-        Test.@test CTModels.__is_empty(ocp)
-        Test.@test !CTModels.__is_times_set(ocp)
-        Test.@test !CTModels.__is_state_set(ocp)
-        Test.@test !CTModels.__is_control_set(ocp)
-        Test.@test !CTModels.__is_dynamics_set(ocp)
-        Test.@test !CTModels.__is_objective_set(ocp)
-        Test.@test !CTModels.__is_definition_set(ocp)
+        Test.@test CTModels.OCP.__is_empty(ocp)
+        Test.@test !CTModels.OCP.__is_times_set(ocp)
+        Test.@test !CTModels.OCP.__is_state_set(ocp)
+        Test.@test !CTModels.OCP.__is_control_set(ocp)
+        Test.@test !CTModels.OCP.__is_dynamics_set(ocp)
+        Test.@test !CTModels.OCP.__is_objective_set(ocp)
+        Test.@test !CTModels.OCP.__is_definition_set(ocp)
 
         times = CTModels.TimesModel(
             CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(1.0, "t_f"), "t"
@@ -93,23 +93,23 @@ function test_ocp_model_types()
         ocp.objective = objective
         ocp.autonomous = true
 
-        Test.@test CTModels.__is_times_set(ocp)
-        Test.@test CTModels.__is_state_set(ocp)
-        Test.@test CTModels.__is_control_set(ocp)
-        Test.@test CTModels.__is_variable_set(ocp)
-        Test.@test CTModels.__is_dynamics_set(ocp)
-        Test.@test CTModels.__is_objective_set(ocp)
-        Test.@test CTModels.__is_autonomous_set(ocp)
+        Test.@test CTModels.OCP.__is_times_set(ocp)
+        Test.@test CTModels.OCP.__is_state_set(ocp)
+        Test.@test CTModels.OCP.__is_control_set(ocp)
+        Test.@test CTModels.OCP.__is_variable_set(ocp)
+        Test.@test CTModels.OCP.__is_dynamics_set(ocp)
+        Test.@test CTModels.OCP.__is_objective_set(ocp)
+        Test.@test CTModels.OCP.__is_autonomous_set(ocp)
 
         # At this stage the model is consistent but not yet complete
-        Test.@test CTModels.__is_consistent(ocp)
-        Test.@test !CTModels.__is_complete(ocp)
+        Test.@test CTModels.OCP.__is_consistent(ocp)
+        Test.@test !CTModels.OCP.__is_complete(ocp)
 
         ocp.definition = quote end
 
-        Test.@test CTModels.__is_definition_set(ocp)
-        Test.@test CTModels.__is_complete(ocp)
-        Test.@test !CTModels.__is_empty(ocp)
+        Test.@test CTModels.OCP.__is_definition_set(ocp)
+        Test.@test CTModels.OCP.__is_complete(ocp)
+        Test.@test !CTModels.OCP.__is_empty(ocp)
     end
 
     # ========================================================================
@@ -118,7 +118,7 @@ function test_ocp_model_types()
 
     Test.@testset "fake PreModel buildability" verbose=VERBOSE showtiming=SHOWTIMING begin
         function can_build(ocp_local)
-            return CTModels.__is_complete(ocp_local)
+            return CTModels.OCP.__is_complete(ocp_local)
         end
 
         empty_ocp = CTModels.PreModel()

@@ -29,10 +29,14 @@ using DocStringExtensions
 using CTBase
 using MLStyle
 using RecipesBase
+using MacroTools: striplines
 
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module
 import ..Model, ..PreModel, ..Solution, ..AbstractSolution
+
+# Import internal helpers from OCP for display
+import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent, state_dimension, control_dimension, dimension
 
 # Include display functions
 include("print.jl")

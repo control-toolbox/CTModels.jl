@@ -12,9 +12,9 @@ function test_variable()
         # some checks
         ocp = CTModels.PreModel()
         @test ocp.variable isa CTModels.EmptyVariableModel
-        @test !CTModels.__is_variable_set(ocp)
+        @test !CTModels.OCP.__is_variable_set(ocp)
         CTModels.variable!(ocp, 1)
-        @test CTModels.__is_variable_set(ocp)
+        @test CTModels.OCP.__is_variable_set(ocp)
 
         # variable!
         ocp = CTModels.PreModel()
