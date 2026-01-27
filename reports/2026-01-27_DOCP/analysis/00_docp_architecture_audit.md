@@ -1135,15 +1135,15 @@ sequenceDiagram
     ADNLPModeler->>DOCP: get_model_builder(prob, modeler)
     DOCP->>Registry: registry[:adnlp].model
     Registry-->>ADNLPModeler: ADNLPModelBuilder
-    ADNLPModeler->>Builder: builder(x0; opts...)
+    ADNLPModeler->>Builder: builder(x0, opts)
     Builder-->>User: ADNLPModel
 
     User->>ExaModeler: modeler(prob, x0)
     ExaModeler->>DOCP: get_model_builder(prob, modeler)
     DOCP->>Registry: registry[:exa].model
     Registry-->>ExaModeler: ExaModelBuilder
-    ExaModeler->>Builder: builder(Float32, x0; opts...)
-    Builder-->>User: ExaModel{Float32}
+    ExaModeler->>Builder: builder(Float32, x0, opts)
+    Builder-->>User: ExaModel_Float32
 ```
 
 #### Migration Strategy
