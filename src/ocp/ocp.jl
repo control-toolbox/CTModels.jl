@@ -42,7 +42,7 @@ include("aliases.jl")
 import ..Utils: @ensure
 
 # Import build_solution from Optimization to overload it
-import ..Optimization: build_solution
+import ..Optimization: build_solution, build_model
 
 # Import matrix2vec, ctinterpolate and to_out_of_place from Utils for solution building
 import ..Utils: matrix2vec, ctinterpolate, to_out_of_place
@@ -89,7 +89,7 @@ export ConstraintsModel
 # Export main API - Construction functions
 export state!, control!, variable!
 export time!, dynamics!, objective!, constraint!
-export build_model, build_solution, build
+export build_solution, build, build_model
 export definition!, time_dependence!
 # Constraint utilities
 export append_box_constraints!
@@ -120,6 +120,7 @@ export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
 export is_empty, is_empty_time_grid
+export model, index, time
 # Dual constraints accessors
 export path_constraints_dual, boundary_constraints_dual
 export state_constraints_lb_dual, state_constraints_ub_dual

@@ -327,6 +327,10 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     return model
 end
 
+function build_model(pre_ocp::PreModel; build_examodel=nothing)::Model
+    return build(pre_ocp; build_examodel=build_examodel)
+end
+
 # ------------------------------------------------------------------------------ #
 # Getters
 # ------------------------------------------------------------------------------ #
