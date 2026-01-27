@@ -436,6 +436,31 @@ end
 - ❌ Requires CTDirect to export many methods
 - ⚠️ May need to cache discretization data elsewhere
 
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| Discretizer : "references"
+    
+    Discretizer ||--o{ ADNLPModel : "builds via dispatch"
+    Discretizer ||--o{ ExaModel : "builds via dispatch"
+    
+    ADNLPModeler ||--|| Discretizer : "dispatches on"
+    Solver ||--|| ADNLPModel : "solves"
+    Solver ||--|| NLPSolution : "returns"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        Discretizer discretizer
+    }
+    Discretizer {
+        Symbol method
+        Any options
+    }
+```
+
 ---
 
 ### Alternative B: Registry-based Builder Selection
@@ -478,6 +503,37 @@ end
 - ⚠️ Modeler must pass backend ID
 - ⚠️ Slightly more complex contract
 - ⚠️ Runtime check if backend exists
+
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| BuilderRegistry : "contains"
+    
+    BuilderRegistry ||--o{ BackendPair : "stores"
+    BackendPair ||--|| ModelBuilder : "has"
+    BackendPair ||--|| SolutionBuilder : "has"
+    
+    ADNLPModeler ||--|| BuilderRegistry : "queries by :adnlp"
+    ModelBuilder ||--|| ADNLPModel : "produces"
+    SolutionBuilder ||--|| OptimalControlSolution : "reconstructs"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        NamedTuple builders
+    }
+    BuilderRegistry {
+        BackendPair adnlp
+        BackendPair exa
+        BackendPair any_new_backend
+    }
+    BackendPair {
+        ModelBuilder model
+        SolutionBuilder solution
+    }
+```
 
 ---
 
@@ -524,6 +580,45 @@ end
 - ⚠️ CTDirect must produce both backends upfront
 - ⚠️ Linear search in backends tuple (minor)
 
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| DiscretizationData : "contains"
+    DOCP ||--o{ AbstractNLPBackend : "stores tuple of"
+    
+    AbstractNLPBackend ||--|| ADNLPBackend : "subtype"
+    AbstractNLPBackend ||--|| ExaBackend : "subtype"
+    
+    ADNLPBackend ||--|| ModelBuilder : "has"
+    ADNLPBackend ||--|| SolutionBuilder : "has"
+    
+    ADNLPModeler ||--|| ADNLPBackend : "finds by type"
+    ModelBuilder ||--|| ADNLPModel : "produces"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        DiscretizationData discretization_data
+        Tuple backends
+    }
+    DiscretizationData {
+        Symbol scheme
+        Int grid_size
+        Vector time_grid
+        Bounds bounds
+    }
+    ADNLPBackend {
+        ModelBuilder model_builder
+        SolutionBuilder solution_builder
+    }
+    ExaBackend {
+        ModelBuilder model_builder
+        SolutionBuilder solution_builder
+    }
+```
+
 ---
 
 ### Alternative D: Lazy Builder Construction
@@ -560,6 +655,40 @@ end
 - ❌ Builder constructed each time (if factory is heavy)
 - ⚠️ Requires trait/dispatch mechanism
 - ⚠️ May need caching layer
+
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| DiscretizationData : "contains"
+    
+    ADNLPModeler ||..|| BuilderFactory : "calls"
+    BuilderFactory ||--|| ModelBuilder : "creates on-demand"
+    
+    ModelBuilder ||--|| DiscretizationData : "uses"
+    ModelBuilder ||--|| ADNLPModel : "produces"
+    
+    Solver ||--|| ADNLPModel : "solves"
+    SolutionFactory ||--|| OptimalControlSolution : "reconstructs"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        DiscretizationData discretization_data
+    }
+    DiscretizationData {
+        Symbol scheme
+        Int grid_size
+        Vector time_grid
+        Bounds bounds
+        Flags flags
+    }
+    BuilderFactory {
+        Function make_model_builder
+        Function make_solution_builder
+    }
+```
 
 ---
 
@@ -609,6 +738,44 @@ end
 - ⚠️ More complex access pattern
 - ⚠️ Mutable cache if used
 - ⚠️ Two ways to access (cached vs fresh)
+
+```mermaid
+erDiagram
+    OCP ||--|| DOCP : "discretized into"
+    DOCP ||--|| DiscretizationData : "contains"
+    DOCP ||--o| BuilderCache : "optionally has"
+    
+    BuilderCache ||--o{ CachedBuilder : "stores"
+    
+    ADNLPModeler ||--|| DOCP : "queries"
+    DOCP ||..|| BuilderFactory : "calls if not cached"
+    BuilderFactory ||--|| ModelBuilder : "creates"
+    
+    ModelBuilder ||--|| ADNLPModel : "produces"
+    CachedBuilder ||--|| ModelBuilder : "wraps"
+
+    OCP {
+        AbstractOptimalControlProblem type
+    }
+    DOCP {
+        OCP optimal_control_problem
+        DiscretizationData discretization_data
+        Union_Nothing_NamedTuple builder_cache
+    }
+    DiscretizationData {
+        Symbol scheme
+        Int grid_size
+        Vector time_grid
+        Bounds bounds
+        Flags flags
+    }
+    BuilderCache {
+        ModelBuilder adnlp_model
+        SolutionBuilder adnlp_solution
+        ModelBuilder exa_model
+        SolutionBuilder exa_solution
+    }
+```
 
 ---
 
