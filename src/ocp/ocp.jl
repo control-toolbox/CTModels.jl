@@ -100,7 +100,7 @@ export has_fixed_final_time, has_free_final_time
 export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
-export state, control, variable, costate
+export state, control, variable, costate, objective
 
 # Compatibility aliases for CTSolvers
 """
