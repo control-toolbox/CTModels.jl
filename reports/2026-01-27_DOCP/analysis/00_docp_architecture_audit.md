@@ -1008,6 +1008,144 @@ function (disc::Collocation)(ocp::AbstractOptimalControlProblem)
 end
 ```
 
+#### Handling Different Builder Signatures
+
+A key design challenge is that different backends have **different call signatures**:
+
+| Builder | Current Signature | Reason |
+|---------|-------------------|--------|
+| `ADNLPModelBuilder` | `builder(initial_guess; kwargs...)` | Standard call |
+| `ExaModelBuilder` | `builder(BaseType, initial_guess; kwargs...)` | Requires type parameter for GPU/precision |
+
+**Current Implementation**: The modeler knows the builder signature:
+
+```julia
+# ADNLPModeler: Simple signature
+function (modeler::ADNLPModeler)(prob, initial_guess)
+    builder = get_adnlp_model_builder(prob)
+    raw_opts = Options.extract_raw_options(opts.options)
+    return builder(initial_guess; raw_opts...)  # No BaseType
+end
+
+# ExaModeler{BaseType}: Needs to pass BaseType
+function (modeler::ExaModeler{BaseType})(prob, initial_guess) where {BaseType}
+    builder = get_exa_model_builder(prob)
+    raw_opts = Options.extract_raw_options(opts.options)
+    return builder(BaseType, initial_guess; raw_opts...)  # BaseType first arg
+end
+```
+
+**Long-term Solution**: The modeler remains responsible for knowing how to invoke its builder. The key insight is that:
+
+1. **Builders are backend-specific** - their signature is fixed for each backend type
+2. **Modelers are the experts** - they know how to call their paired builder
+3. **The registry only stores/retrieves** - it doesn't invoke builders directly
+
+Here's the complete modeler implementation for both backends:
+
+```julia
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. Modeler Implementations: Backend-specific invocation
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─── ADNLPModeler ─────────────────────────────────────────────────────────────
+struct ADNLPModeler <: AbstractOptimizationModeler
+    options::Strategies.StrategyOptions
+end
+
+Strategies.id(::Type{<:ADNLPModeler}) = :adnlp
+
+function (modeler::ADNLPModeler)(
+    prob::DiscretizedOptimalControlProblem,
+    initial_guess
+)::ADNLPModels.ADNLPModel
+    opts = Strategies.options(modeler)
+    
+    # Get builder from registry using modeler's id
+    builder = get_model_builder(prob, modeler)  # Uses Strategies.id(:adnlp)
+    
+    # Extract raw options
+    raw_opts = Options.extract_raw_options(opts.options)
+    
+    # ADNLPModelBuilder signature: (initial_guess; kwargs...)
+    return builder(initial_guess; raw_opts...)
+end
+
+function (modeler::ADNLPModeler)(
+    prob::DiscretizedOptimalControlProblem,
+    nlp_solution::SolverCore.AbstractExecutionStats
+)
+    builder = get_solution_builder(prob, modeler)
+    return builder(nlp_solution)
+end
+
+# ─── ExaModeler{BaseType} ─────────────────────────────────────────────────────
+struct ExaModeler{BaseType<:AbstractFloat} <: AbstractOptimizationModeler
+    options::Strategies.StrategyOptions
+end
+
+Strategies.id(::Type{<:ExaModeler}) = :exa
+
+function (modeler::ExaModeler{BaseType})(
+    prob::DiscretizedOptimalControlProblem,
+    initial_guess
+)::ExaModels.ExaModel{BaseType} where {BaseType<:AbstractFloat}
+    opts = Strategies.options(modeler)
+    
+    # Get builder from registry using modeler's id
+    builder = get_model_builder(prob, modeler)  # Uses Strategies.id(:exa)
+    
+    # Extract raw options
+    raw_opts = Options.extract_raw_options(opts.options)
+    
+    # ExaModelBuilder signature: (BaseType, initial_guess; kwargs...)
+    # The modeler knows it must pass BaseType as first argument
+    return builder(BaseType, initial_guess; raw_opts...)
+end
+
+function (modeler::ExaModeler{BaseType})(
+    prob::DiscretizedOptimalControlProblem,
+    nlp_solution::SolverCore.AbstractExecutionStats
+) where {BaseType}
+    builder = get_solution_builder(prob, modeler)
+    return builder(nlp_solution)
+end
+```
+
+**Key Design Decisions**:
+
+1. **No Unified Builder Interface**: We don't force all builders to have the same signature. This would require awkward workarounds for ExaModeler's `BaseType`.
+
+2. **Modeler Owns Invocation Logic**: Each modeler knows exactly how to call its builder. This is cleaner than trying to abstract away the differences.
+
+3. **Registry is Signature-Agnostic**: The registry just stores and retrieves builders. It doesn't care about their call signatures.
+
+4. **Type Safety via NamedTuple Keys**: The `Strategies.id` mechanism ensures the correct builder is retrieved for each modeler type.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ADNLPModeler
+    participant ExaModeler
+    participant DOCP
+    participant Registry
+    participant Builder
+
+    User->>ADNLPModeler: modeler(prob, x0)
+    ADNLPModeler->>DOCP: get_model_builder(prob, modeler)
+    DOCP->>Registry: registry[:adnlp].model
+    Registry-->>ADNLPModeler: ADNLPModelBuilder
+    ADNLPModeler->>Builder: builder(x0; opts...)
+    Builder-->>User: ADNLPModel
+
+    User->>ExaModeler: modeler(prob, x0)
+    ExaModeler->>DOCP: get_model_builder(prob, modeler)
+    DOCP->>Registry: registry[:exa].model
+    Registry-->>ExaModeler: ExaModelBuilder
+    ExaModeler->>Builder: builder(Float32, x0; opts...)
+    Builder-->>User: ExaModel{Float32}
+```
+
 #### Migration Strategy
 
 | Phase | Action | Breaking Change |
