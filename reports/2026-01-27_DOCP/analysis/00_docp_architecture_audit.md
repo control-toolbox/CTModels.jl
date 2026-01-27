@@ -487,9 +487,10 @@ docp = DiscretizedOptimalControlProblem(
     # Easy to add more: jump = (model=..., solution=...)
 )
 
-# Generic contract
-function get_model_builder(prob::DiscretizedOptimalControlProblem, backend::Symbol)
-    return prob.builders[backend].model
+# Generic contract using Modeler ID (Strategies.id)
+function get_model_builder(prob::DiscretizedOptimalControlProblem, modeler::AbstractOptimizationModeler)
+    backend_id = Strategies.id(typeof(modeler)) # e.g., :adnlp
+    return prob.builders[backend_id].model
 end
 ```
 
@@ -498,11 +499,12 @@ end
 - ✅ Type-stable via NamedTuple
 - ✅ Natural model/solution pairing
 - ✅ Maintains pre-computation
+- ✅ **Smooth integration**: Automatic builder lookup via `Strategies.id(typeof(modeler))`
 
 **Disadvantages**:
-- ⚠️ Modeler must pass backend ID
 - ⚠️ Slightly more complex contract
-- ⚠️ Runtime check if backend exists
+- ⚠️ Runtime check if backend exists in the registry
+- 🟡 Modeler must define an `id` (already the case for ADNLPModeler)
 
 ```mermaid
 erDiagram
