@@ -40,51 +40,21 @@ This audit analyzes the current DOCP (Discretized Optimal Control Problem) archi
 
 ### Pipeline Overview
 
-```mermaid
-flowchart TD
-    %% Left branch (Down)
-    OCP["OCP<br/>AbstractOptimalControlProblem"]
-    DISC["Discretizer<br/>AbstractOptimalControlDiscretizer"]
-    DOCP["DOCP<br/>AbstractOptimalControlProblem"]
-
-    %% Bottom (Horizontal-ish)
-    MOD["Modeler<br/>ADNLPModeler | ExaModeler"]
-    NLP["NLP<br/>ADNLPModel | ExaModel"]
-
-    %% Right branch (Up)
-    SOLV["Solver<br/>AbstractOptimizationSolver"]
-    SOL["Solution<br/>OptimalControlSolution"]
-
-    %% Connections
-    OCP --> DISC --> DOCP
-    DOCP --> MOD --> NLP
-    NLP --> SOLV --> SOL
-
-    %% Cross-reference
-    DOCP -.->|"contains builders"| MOD
-
-    %% Layout hints
-    subgraph Down ["Downscale"]
-        direction TB
-        OCP
-        DISC
-        DOCP
-    end
-    
-    subgraph Bottom ["Backend Transition"]
-        direction LR
-        MOD
-        NLP
-    end
-
-    subgraph Up ["Upscale"]
-        direction BT
-        SOLV
-        SOL
-    end
-    
-    %% Adjust positions for U-shape
-    Down --- Bottom --- Up
+```
+OCP                                                           Solution
+ │                                                                 ▲
+ │ AbstractOptimalControlProblem                                  │
+ ▼                                                                 │
+Discretizer                                                     Solver
+ │                                                                 ▲
+ │ AbstractOptimalControlDiscretizer        AbstractOptimizationSolver
+ ▼                                                                 │
+DOCP ────────────► Modeler ────────────► NLP ─────────────────────┘
+      (contains        │                  │
+       builders)       │                  │
+                       ▼                  ▼
+              ADNLPModeler          ADNLPModel
+              ExaModeler            ExaModel
 ```
 
 ### Current DOCP Structure
