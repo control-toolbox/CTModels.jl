@@ -108,6 +108,11 @@ export definition, dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
+# Dual constraints accessors
+export path_constraints_dual, boundary_constraints_dual
+export state_constraints_lb_dual, state_constraints_ub_dual
+export control_constraints_lb_dual, control_constraints_ub_dual
+export variable_constraints_lb_dual, variable_constraints_ub_dual
 
 # Compatibility aliases for CTSolvers
 """

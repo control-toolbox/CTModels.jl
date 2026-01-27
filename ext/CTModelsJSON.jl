@@ -6,6 +6,16 @@ using DocStringExtensions
 using JSON3
 
 # ============================================================================
+# Private helper: broadcast with Nothing fallback
+# ============================================================================
+
+"""
+Apply a function over a grid (broadcast), or return nothing if input is nothing.
+"""
+_apply_over_grid(f::Function, grid) = f.(grid)
+_apply_over_grid(::Nothing, grid) = nothing
+
+# ============================================================================
 # Helper functions for serializing/deserializing infos Dict{Symbol,Any}
 # ============================================================================
 
@@ -112,10 +122,10 @@ function CTModels.export_ocp_solution(
 
     blob = Dict(
         "time_grid" => CTModels.time_grid(sol),
-        "state" => CTModels.discretize(CTModels.state(sol), T),
-        "control" => CTModels.discretize(CTModels.control(sol), T),
+        "state" => _apply_over_grid(CTModels.state(sol), T),
+        "control" => _apply_over_grid(CTModels.control(sol), T),
         "variable" => CTModels.variable(sol),
-        "costate" => CTModels.discretize(CTModels.costate(sol), T),
+        "costate" => _apply_over_grid(CTModels.costate(sol), T),
         "objective" => CTModels.objective(sol),
         "iterations" => CTModels.iterations(sol),
         "constraints_violation" => CTModels.constraints_violation(sol),
@@ -123,15 +133,15 @@ function CTModels.export_ocp_solution(
         "status" => CTModels.status(sol),
         "successful" => CTModels.successful(sol),
         "path_constraints_dual" =>
-            CTModels.discretize(CTModels.path_constraints_dual(sol), T),
+            _apply_over_grid(CTModels.path_constraints_dual(sol), T),
         "state_constraints_lb_dual" =>
-            CTModels.discretize(CTModels.state_constraints_lb_dual(sol), T),
+            _apply_over_grid(CTModels.state_constraints_lb_dual(sol), T),
         "state_constraints_ub_dual" =>
-            CTModels.discretize(CTModels.state_constraints_ub_dual(sol), T),
+            _apply_over_grid(CTModels.state_constraints_ub_dual(sol), T),
         "control_constraints_lb_dual" =>
-            CTModels.discretize(CTModels.control_constraints_lb_dual(sol), T),
+            _apply_over_grid(CTModels.control_constraints_lb_dual(sol), T),
         "control_constraints_ub_dual" =>
-            CTModels.discretize(CTModels.control_constraints_ub_dual(sol), T),
+            _apply_over_grid(CTModels.control_constraints_ub_dual(sol), T),
         "boundary_constraints_dual" => CTModels.boundary_constraints_dual(sol),       # ctVector or Nothing
         "variable_constraints_lb_dual" => CTModels.variable_constraints_lb_dual(sol),    # ctVector or Nothing
         "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing

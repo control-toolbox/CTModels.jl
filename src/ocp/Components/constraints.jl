@@ -296,19 +296,6 @@ Return an ordinal range unchanged.
 """
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
 
-"""
-    discretize(constraint::Function, grid::Vector{T}) -> Vector where {T<:ctNumber}
-
-Discretise a constraint function over a time grid.
-"""
-discretize(constraint::Function, grid::Vector{T}) where {T<:ctNumber} = constraint.(grid)
-
-"""
-    discretize(::Nothing, grid::Vector{T}) -> Nothing where {T<:ctNumber}
-
-Return `nothing` when discretising a missing constraint.
-"""
-discretize(::Nothing, grid::Vector{T}) where {T<:ctNumber} = nothing
 
 # ------------------------------------------------------------------------------ #
 # GETTERS
