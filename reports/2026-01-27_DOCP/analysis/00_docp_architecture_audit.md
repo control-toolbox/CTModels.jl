@@ -41,7 +41,7 @@ This audit analyzes the current DOCP (Discretized Optimal Control Problem) archi
 ### Pipeline Overview
 
 ```mermaid
-flowchart LR
+flowchart TD
     OCP["OCP<br/>AbstractOptimalControlProblem"] 
     DISC["Discretizer<br/>AbstractOptimalControlDiscretizer"]
     DOCP["DOCP<br/>DiscretizedOptimalControlProblem"]
@@ -50,7 +50,13 @@ flowchart LR
     SOLV["Solver<br/>AbstractOptimizationSolver"]
     SOL["Solution<br/>OptimalControlSolution"]
 
-    OCP --> DISC --> DOCP --> MOD --> NLP --> SOLV --> SOL
+    OCP  --> DISC
+    DISC --> DOCP
+    DOCP --> MOD
+    MOD  --> NLP
+    NLP  --> SOLV
+    SOLV --> SOL
+
     DOCP -.->|"contains builders"| MOD
 ```
 
