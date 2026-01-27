@@ -101,6 +101,7 @@ export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
 export state, control, variable, costate, objective
+export iterations, status, message, success
 
 # Compatibility aliases for CTSolvers
 """
