@@ -13,7 +13,7 @@ Print an expression with indentation.
 - `l::Int`: The indentation level (number of spaces).
 """
 function __print(e::Expr, io::IO, l::Int)
-    @match e begin
+    MLStyle.@match e begin
         :(($a, $b)) => println(io, " "^l, a, ", ", b)
         _ => println(io, " "^l, e)
     end
@@ -37,8 +37,8 @@ function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     @assert hasproperty(definition(ocp), :head)
     printstyled(io, "Abstract definition:\n\n"; bold=true)
     tab = 4
-    code = striplines(definition(ocp))
-    @match code.head begin
+    code = MacroTools.striplines(definition(ocp))
+    MLStyle.@match code.head begin
         :block => [__print(code.args[i], io, tab) for i in eachindex(code.args)]
         _ => __print(code, io, tab)
     end

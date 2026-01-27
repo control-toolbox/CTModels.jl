@@ -26,15 +26,15 @@ See also: [`CTModels`](@ref)
 module Display
 
 using DocStringExtensions
-using CTBase
-using MLStyle
+using CTBase: CTBase
+using MLStyle: MLStyle
 using Base: Base
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
 
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module
-import ..Model, ..PreModel, ..Solution, ..AbstractSolution
+import ..OCP: Model, PreModel, Solution, AbstractSolution
 
 # Import internal helpers from OCP for display
 import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent

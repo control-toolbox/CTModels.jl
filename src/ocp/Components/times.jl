@@ -72,7 +72,7 @@ function time!(
 
     time_name = time_name isa String ? time_name : string(time_name)
 
-    (initial_time, final_time) = @match (t0, ind0, tf, indf) begin
+    (initial_time, final_time) = MLStyle.@match (t0, ind0, tf, indf) begin
         (::Time, ::Nothing, ::Time, ::Nothing) => (
             FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
             FixedTimeModel(tf, tf isa Int ? string(tf) : string(round(tf; digits=2))),

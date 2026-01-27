@@ -91,7 +91,7 @@ function __constraint!(
     )
 
     # add the constraint
-    @match (rg, f, lb, ub) begin
+    MLStyle.@match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type == :state
                 rg = 1:n

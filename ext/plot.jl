@@ -79,7 +79,7 @@ function __plot_time!(
 )
 
     # t_label depends if time is normalize or not
-    t_label = @match time begin
+    t_label = MLStyle.@match time begin
         :default => t_label
         :normalize => t_label == "" ? "" : t_label * " (normalized)"
         :normalise => t_label == "" ? "" : t_label * " (normalised)"
@@ -217,7 +217,7 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     end
     #
     kwargs_plot = depth == 0 ? kwargs : ()
-    ps = @match node.layout begin
+    ps = MLStyle.@match node.layout begin
         :row => plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
         :column =>
             plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
@@ -274,7 +274,7 @@ function __initial_plot(
 
     if layout == :group
         plots = Vector{Plots.Plot}()
-        @match control begin
+        MLStyle.@match control begin
             :components => begin
                 do_plot_state && push!(plots, Plots.plot()) # state
                 do_plot_costate && push!(plots, Plots.plot()) # costate
@@ -327,7 +327,7 @@ function __initial_plot(
         # create the control plots
         if do_plot_control
             l = m
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     for i in 1:m
                         push!(control_plots, PlotLeaf())
@@ -577,7 +577,7 @@ function __plot!(
 
         # control
         if do_plot_control
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     __plot_time!(
                         p[icur],
@@ -758,7 +758,7 @@ function __plot!(
 
             # control trajectory
             l = m
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     for i in 1:m
                         title = i==1 ? "control" : ""
@@ -1422,16 +1422,16 @@ function __get_data_plot(
         throw(CTBase.IncorrectArgument("The time grid is empty"))
     end
 
-    vv, ii = @match xx begin
+    vv, ii = MLStyle.@match xx begin
         ::Symbol => (xx, 1)
         _ => xx
     end
 
     T = CTModels.time_grid(sol)
     m = size(T, 1)
-    return @match vv begin
+    return MLStyle.@match vv begin
         :time => begin
-            @match time begin
+            MLStyle.@match time begin
                 :default => T
                 :normalize => (T .- T[1]) ./ (T[end] - T[1])
                 :normalise => (T .- T[1]) ./ (T[end] - T[1])

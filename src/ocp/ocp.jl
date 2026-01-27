@@ -30,7 +30,7 @@ module OCP
 
 using DocStringExtensions
 using CTBase
-using MLStyle: @match
+using MLStyle: MLStyle
 using MacroTools
 using Parameters
 using OrderedCollections: OrderedDict
