@@ -41,6 +41,12 @@ include("aliases.jl")
 # Import macro from Utils module
 import ..Utils: @ensure
 
+# Import build_solution from Optimization to overload it
+import ..Optimization: build_solution
+
+# Import matrix2vec and ctinterpolate from Utils for solution building
+import ..Utils: matrix2vec, ctinterpolate
+
 # Load types first (no dependencies)
 include("Types/components.jl")
 include("Types/model.jl")

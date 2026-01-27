@@ -43,6 +43,6 @@ include("export_import.jl")
 
 # Export public API
 export export_ocp_solution, import_ocp_solution
-export JLD2Tag, JSON3Tag
+export JLD2Tag, JSON3Tag, AbstractTag
 
 end
