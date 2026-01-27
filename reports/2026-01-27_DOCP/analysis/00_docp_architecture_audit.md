@@ -63,20 +63,23 @@ This diagram illustrates how the `DOCP` struct acts as a container for backend-s
 
 ```mermaid
 erDiagram
-    OCP ||--o{ DOCP : "discretized into"
+    OCP ||--|| DOCP : "discretized into"
     DOCP ||--|| ADNLPModelBuilder : "contains"
     DOCP ||--|| ExaModelBuilder : "contains"
     DOCP ||--|| ADNLPSolutionBuilder : "contains"
     DOCP ||--|| ExaSolutionBuilder : "contains"
     
-    ADNLPModeler ||--|| ADNLPModelBuilder : "invokes"
-    ADNLPModeler ||--|| ADNLPModel : "builds"
+    ADNLPModeler ||--|| ADNLPModelBuilder : "uses"
+    ADNLPModelBuilder ||--|| ADNLPModel : "produces"
     
-    ADNLPModel ||--|| ADNLPSolutionBuilder : "solution used by"
+    Solver ||--|| ADNLPModel : "solves"
+    Solver ||--|| NLPSolution : "returns"
+    
+    ADNLPSolutionBuilder ||--|| NLPSolution : "consumes"
     ADNLPSolutionBuilder ||--|| OptimalControlSolution : "reconstructs"
 
     OCP {
-        AbstractOptimalControlProblem original_problem
+        AbstractOptimalControlProblem type
     }
     DOCP {
         OCP optimal_control_problem
@@ -88,7 +91,13 @@ erDiagram
     ADNLPModelBuilder {
         Function closure
     }
+    ExaModelBuilder {
+        Function closure
+    }
     ADNLPSolutionBuilder {
+        Function closure
+    }
+    ExaSolutionBuilder {
         Function closure
     }
 ```
@@ -102,6 +111,20 @@ struct DiscretizedOptimalControlProblem{TO, TAMB, TEMB, TASB, TESB} <: AbstractO
     exa_model_builder::TEMB       # ExaModelBuilder
     adnlp_solution_builder::TASB  # ADNLPSolutionBuilder
     exa_solution_builder::TESB    # ExaSolutionBuilder
+end
+```
+
+### Builder Pattern
+
+The builders are callable wrappers around closures:
+
+```julia
+struct ADNLPModelBuilder{T<:Function} <: AbstractModelBuilder
+    f::T  # Closure capturing discretization context
+end
+
+function (builder::ADNLPModelBuilder)(initial_guess; kwargs...)
+    return builder.f(initial_guess; kwargs...)
 end
 ```
 
