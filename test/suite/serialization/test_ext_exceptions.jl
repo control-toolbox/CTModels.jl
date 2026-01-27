@@ -60,11 +60,12 @@ function test_ext_exceptions()
     # Test plot stub with a dummy solution type
     # RecipesBase.plot is extended by CTModelsPlots for AbstractSolution
     # If Plots is not loaded, the stub throws ExtensionError
-    # If Plots is loaded, it works. We test the method signature errors.
+    # If Plots is loaded, it tries to convert the type and throws ErrorException
     # ============================================================================
     Test.@testset "Plot method signature errors" verbose = VERBOSE showtiming = SHOWTIMING begin
-        # Test that calling plot with wrong argument types throws MethodError
-        Test.@test_throws MethodError CTModels.plot(sol, 1)  # Wrong type for description
+        # Test that calling plot with a dummy AbstractSolution subtype uses the stub
+        # The stub should throw ExtensionError since Plots extension only handles CTModels.Solution
+        Test.@test_throws CTBase.ExtensionError CTModels.plot(DummyAbstractSolution())
     end
 
     # ============================================================================
