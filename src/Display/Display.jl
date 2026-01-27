@@ -28,15 +28,24 @@ module Display
 using DocStringExtensions
 using CTBase
 using MLStyle
-using RecipesBase
-using MacroTools: striplines
+using Base: Base
+using RecipesBase: RecipesBase
+using MacroTools: MacroTools
 
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module
 import ..Model, ..PreModel, ..Solution, ..AbstractSolution
 
 # Import internal helpers from OCP for display
-import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent, state_dimension, control_dimension, variable_dimension, time_name, initial_time_name, final_time_name, dimension, name, state_name, control_name, variable_name, components, state_components, control_components, variable_components, is_autonomous, has_lagrange_cost, has_mayer_cost, dim_path_constraints_nl, dim_boundary_constraints_nl, dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box, build
+import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent
+import ..OCP: state_dimension, control_dimension, variable_dimension
+import ..OCP: time_name, initial_time_name, final_time_name
+import ..OCP: dimension, name, state_name, control_name, variable_name
+import ..OCP: components, state_components, control_components, variable_components
+import ..OCP: is_autonomous, has_lagrange_cost, has_mayer_cost
+import ..OCP: dim_path_constraints_nl, dim_boundary_constraints_nl
+import ..OCP: dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
+import ..OCP: build
 
 # Include display functions
 include("print.jl")
