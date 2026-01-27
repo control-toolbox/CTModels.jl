@@ -36,7 +36,7 @@ using MacroTools: striplines
 import ..Model, ..PreModel, ..Solution, ..AbstractSolution
 
 # Import internal helpers from OCP for display
-import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent, state_dimension, control_dimension, variable_dimension, time_name, initial_time_name, final_time_name, dimension, name, state_name, control_name, variable_name, components, state_components, control_components, variable_components
+import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent, state_dimension, control_dimension, variable_dimension, time_name, initial_time_name, final_time_name, dimension, name, state_name, control_name, variable_name, components, state_components, control_components, variable_components, is_autonomous, has_lagrange_cost, has_mayer_cost, dim_path_constraints_nl, dim_boundary_constraints_nl, dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box, build
 
 # Include display functions
 include("print.jl")
