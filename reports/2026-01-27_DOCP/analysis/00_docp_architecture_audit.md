@@ -57,7 +57,43 @@ DOCP ────────────► Modeler ─────────
               ExaModeler            ExaModel
 ```
 
-### Current DOCP Structure
+### Current DOCP Structure & Relationships
+
+This diagram illustrates how the `DOCP` struct acts as a container for backend-specific builders, maintaining the link back to the original `OCP`.
+
+```mermaid
+erDiagram
+    OCP ||--o{ DOCP : "discretized into"
+    DOCP ||--|| ADNLPModelBuilder : "contains"
+    DOCP ||--|| ExaModelBuilder : "contains"
+    DOCP ||--|| ADNLPSolutionBuilder : "contains"
+    DOCP ||--|| ExaSolutionBuilder : "contains"
+    
+    ADNLPModeler ||--|| ADNLPModelBuilder : "invokes"
+    ADNLPModeler ||--|| ADNLPModel : "builds"
+    
+    ADNLPModel ||--|| ADNLPSolutionBuilder : "solution used by"
+    ADNLPSolutionBuilder ||--|| OptimalControlSolution : "reconstructs"
+
+    OCP {
+        AbstractOptimalControlProblem original_problem
+    }
+    DOCP {
+        OCP optimal_control_problem
+        ADNLPModelBuilder adnlp_model_builder
+        ExaModelBuilder exa_model_builder
+        ADNLPSolutionBuilder adnlp_solution_builder
+        ExaSolutionBuilder exa_solution_builder
+    }
+    ADNLPModelBuilder {
+        Function closure
+    }
+    ADNLPSolutionBuilder {
+        Function closure
+    }
+```
+
+#### Code Detail: `DiscretizedOptimalControlProblem`
 
 ```julia
 struct DiscretizedOptimalControlProblem{TO, TAMB, TEMB, TASB, TESB} <: AbstractOptimizationProblem
@@ -66,20 +102,6 @@ struct DiscretizedOptimalControlProblem{TO, TAMB, TEMB, TASB, TESB} <: AbstractO
     exa_model_builder::TEMB       # ExaModelBuilder
     adnlp_solution_builder::TASB  # ADNLPSolutionBuilder
     exa_solution_builder::TESB    # ExaSolutionBuilder
-end
-```
-
-### Builder Pattern
-
-The builders are callable wrappers around closures:
-
-```julia
-struct ADNLPModelBuilder{T<:Function} <: AbstractModelBuilder
-    f::T  # Closure capturing discretization context
-end
-
-function (builder::ADNLPModelBuilder)(initial_guess; kwargs...)
-    return builder.f(initial_guess; kwargs...)
 end
 ```
 
