@@ -6,7 +6,7 @@ Set the objective of the optimal control problem.
 # Arguments
 
 - `ocp::PreModel`: the optimal control problem.
-- `criterion::Symbol`: the type of criterion. Either :min or :max. Default is :min.
+- `criterion::Symbol`: the type of criterion. Either :min, :max, :MIN, or :MAX (case-insensitive). Default is :min.
 - `mayer::Union{Function, Nothing}`: the Mayer function (inplace). Default is nothing.
 - `lagrange::Union{Function, Nothing}`: the Lagrange function (inplace). Default is nothing.
 
@@ -27,6 +27,15 @@ julia> function lagrange(t, x, u, v)
        end
 julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If state has not been set
+- `CTBase.UnauthorizedCall`: If control has not been set
+- `CTBase.UnauthorizedCall`: If times has not been set
+- `CTBase.UnauthorizedCall`: If objective has already been set
+- `CTBase.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
+- `CTBase.IncorrectArgument`: If neither mayer nor lagrange function is provided
 """
 function objective!(
     ocp::PreModel,
@@ -51,6 +60,15 @@ function objective!(
         "the objective has already been set."
     )
 
+    # NEW: Validate criterion (case-insensitive)
+    @ensure criterion ∈ (:min, :max, :MIN, :MAX) CTBase.IncorrectArgument(
+        "criterion must be either :min, :max, :MIN, or :MAX, got :$criterion"
+    )
+
+    # Normalize criterion to lowercase for consistency
+    normalized_criterion = criterion in (:MIN, :MAX) ? 
+        (criterion == :MIN ? :min : :max) : criterion
+
     # checks: at least one of the two functions must be given
     @ensure !(isnothing(mayer) && isnothing(lagrange)) CTBase.IncorrectArgument(
         "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function.",
@@ -58,11 +76,11 @@ function objective!(
 
     # set the objective
     if !isnothing(mayer) && isnothing(lagrange)
-        ocp.objective = MayerObjectiveModel(mayer, criterion)
+        ocp.objective = MayerObjectiveModel(mayer, normalized_criterion)
     elseif isnothing(mayer) && !isnothing(lagrange)
-        ocp.objective = LagrangeObjectiveModel(lagrange, criterion)
+        ocp.objective = LagrangeObjectiveModel(lagrange, normalized_criterion)
     else
-        ocp.objective = BolzaObjectiveModel(mayer, lagrange, criterion)
+        ocp.objective = BolzaObjectiveModel(mayer, lagrange, normalized_criterion)
     end
 
     return nothing

@@ -90,6 +90,14 @@ function __constraint!(
         ),
     )
 
+    # NEW: Validate lb ≤ ub element-wise
+    @ensure(
+        all(lb .<= ub),
+        CTBase.IncorrectArgument(
+            "the lower bound `lb` must be less than or equal to the upper bound `ub` element-wise. Found violations where lb > ub."
+        ),
+    )
+
     # add the constraint
     MLStyle.@match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
@@ -205,6 +213,18 @@ Add a constraint to a pre-model. See [__constraint!](@ref) for more details.
 julia> ocp = PreModel()
 julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_constraint)
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If state has not been set
+- `CTBase.UnauthorizedCall`: If control has not been set
+- `CTBase.UnauthorizedCall`: If times has not been set
+- `CTBase.UnauthorizedCall`: If variable has not been set (when type=:variable)
+- `CTBase.UnauthorizedCall`: If constraint with same label already exists
+- `CTBase.UnauthorizedCall`: If both lb and ub are nothing
+- `CTBase.IncorrectArgument`: If lb and ub have different lengths
+- `CTBase.IncorrectArgument`: If lb > ub element-wise
+- `CTBase.IncorrectArgument`: If dimensions don't match expected sizes
 """
 function constraint!(
     ocp::PreModel,

@@ -223,6 +223,52 @@ function test_constraints()
             @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
         end
     end
+
+    # NEW: lb ≤ ub validation tests
+    @testset "constraints! - Bounds validation" begin
+        # lb > ub for state constraints
+        @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+            ocp_set, :state, lb=[1.0, 2.0], ub=[0.5, 1.0], label=:invalid_state
+        )
+        
+        # lb > ub for control constraints
+        @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+            ocp_set, :control, lb=[2.0], ub=[1.0], label=:invalid_control
+        )
+        
+        # lb > ub for variable constraints
+        @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+            ocp_set, :variable, lb=[1.5], ub=[0.5], label=:invalid_variable
+        )
+        
+        # lb > ub for boundary constraints
+        f_boundary(r, x0, xf, v) = r .= x0 .+ v
+        @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+            ocp_set, :boundary; f=f_boundary, lb=[1.0, 2.0], ub=[0.5, 1.0], label=:invalid_boundary
+        )
+        
+        # lb > ub for path constraints
+        f_path(r, t, x, u, v) = r .= x .+ u .+ v
+        @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+            ocp_set, :path; f=f_path, lb=[2.0], ub=[1.0], label=:invalid_path
+        )
+        
+        # Valid bounds (lb ≤ ub)
+        @test_nowarn CTModels.constraint!(
+            ocp_set, :state, lb=[0.0, 1.0], ub=[1.0, 2.0], label=:valid_state
+        )
+        @test_nowarn CTModels.constraint!(
+            ocp_set, :control, lb=[0.0], ub=[1.0], label=:valid_control
+        )
+        @test_nowarn CTModels.constraint!(
+            ocp_set, :variable, lb=[-1.0], ub=[1.0], label=:valid_variable
+        )
+        
+        # Edge case: lb == ub (equality constraints)
+        @test_nowarn CTModels.constraint!(
+            ocp_set, :state, lb=[0.5, 1.5], ub=[0.5, 1.5], label=:equality_state
+        )
+    end
 end
 
 end # module
