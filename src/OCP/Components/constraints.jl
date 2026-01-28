@@ -85,16 +85,24 @@ function __constraint!(
     # lb and ub must have the same length
     @ensure(
         length(lb) == length(ub),
-        CTBase.IncorrectArgument(
-            "the lower bound `lb` and the upper bound `ub` must have the same length."
+        Exceptions.IncorrectArgument(
+            "Bounds length mismatch",
+            got="lb length=$(length(lb)), ub length=$(length(ub))",
+            expected="lb and ub must have same length",
+            suggestion="Ensure lower and upper bounds have equal dimensions",
+            context="constraint! bounds validation"
         ),
     )
 
     # NEW: Validate lb ≤ ub element-wise
     @ensure(
         all(lb .<= ub),
-        CTBase.IncorrectArgument(
-            "the lower bound `lb` must be less than or equal to the upper bound `ub` element-wise. Found violations where lb > ub."
+        Exceptions.IncorrectArgument(
+            "Invalid bounds order",
+            got="some lb > ub violations",
+            expected="lb ≤ ub element-wise",
+            suggestion="Ensure each lower bound is ≤ corresponding upper bound",
+            context="constraint! bounds order validation"
         ),
     )
 
@@ -112,48 +120,75 @@ function __constraint!(
                 txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
             else
                 throw(
-                    CTBase.IncorrectArgument(
-                        "the following type of constraint is not valid: " *
-                        String(type) *
-                        ". Please choose in [ :control, :state, :variable ] or check the arguments of the constraint! method.",
+                    Exceptions.IncorrectArgument(
+                        "Invalid constraint type",
+                        got="type=$type",
+                        expected=":control, :state, or :variable",
+                        suggestion="Choose a valid constraint type or check constraint! method arguments",
+                        context="constraint! type validation",
                     ),
                 )
             end
-            @ensure(length(rg) == length(lb), CTBase.IncorrectArgument(txt))
+            @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
+                "Bounds dimension mismatch",
+                got="range length=$(length(rg)), bounds length=$(length(lb))",
+                expected="range and bounds must have same dimension",
+                suggestion="Ensure range and bounds vectors have equal length",
+                context="constraint! dimension validation"
+            ))
             __constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
-            txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
-            @ensure(length(rg) == length(lb), CTBase.IncorrectArgument(txt))
+            @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
+                "Range-bounds dimension mismatch",
+                got="range length=$(length(rg)), bounds length=$(length(lb))",
+                expected="range and bounds must have same dimension",
+                suggestion="Ensure range and bounds vectors have equal length",
+                context="constraint! range-bounds validation"
+            ))
             # check if the range is valid
             if type == :state
                 @ensure(
                     all(1 .≤ rg .≤ n),
-                    CTBase.IncorrectArgument(
-                        "the range of the state constraint must be contained in 1:$n"
+                    Exceptions.IncorrectArgument(
+                        "State constraint range out of bounds",
+                        got="range=$rg",
+                        expected="indices in range 1:$n",
+                        suggestion="Ensure all state indices are within state dimension",
+                        context="constraint! state range validation"
                     ),
                 )
             elseif type == :control
                 @ensure(
                     all(1 .≤ rg .≤ m),
-                    CTBase.IncorrectArgument(
-                        "the range of the control constraint must be contained in 1:$m"
+                    Exceptions.IncorrectArgument(
+                        "Control constraint range out of bounds",
+                        got="range=$rg",
+                        expected="indices in range 1:$m",
+                        suggestion="Ensure all control indices are within control dimension",
+                        context="constraint! control range validation"
                     ),
                 )
             elseif type == :variable
                 @ensure(
                     all(1 .≤ rg .≤ q),
-                    CTBase.IncorrectArgument(
-                        "the range of the variable constraint must be contained in 1:$q"
+                    Exceptions.IncorrectArgument(
+                        "Variable constraint range out of bounds",
+                        got="range=$rg",
+                        expected="indices in range 1:$q",
+                        suggestion="Ensure all variable indices are within variable dimension",
+                        context="constraint! variable range validation"
                     ),
                 )
             else
                 throw(
-                    CTBase.IncorrectArgument(
-                        "the following type of constraint is not valid: " *
-                        String(type) *
-                        ". Please choose in [ :control, :state, :variable ] or check the arguments of the constraint! method.",
+                    Exceptions.IncorrectArgument(
+                        "Invalid constraint type",
+                        got="type=$type",
+                        expected=":control, :state, or :variable",
+                        suggestion="Choose a valid constraint type or check constraint! method arguments",
+                        context="constraint! type validation",
                     ),
                 )
             end
@@ -166,8 +201,12 @@ function __constraint!(
             if codim_f !== nothing
                 @ensure(
                     length(lb) == codim_f,
-                    CTBase.IncorrectArgument(
-                        "The length of `lb` and `ub` must match codim_f = $codim_f."
+                    Exceptions.IncorrectArgument(
+                        "Function bounds dimension mismatch",
+                        got="bounds length=$(length(lb))",
+                        expected="bounds length=codim_f=$codim_f",
+                        suggestion="Ensure bounds length matches function output dimension",
+                        context="constraint! function bounds validation"
                     )
                 )
             end
@@ -177,10 +216,12 @@ function __constraint!(
                 ocp_constraints[label] = (type, f, lb, ub)
             else
                 throw(
-                    CTBase.IncorrectArgument(
-                        "the following type of constraint is not valid: " *
-                        String(type) *
-                        ". Please choose in [ :boundary, :path ] or check the arguments of the constraint! method.",
+                    Exceptions.IncorrectArgument(
+                        "Invalid constraint type",
+                        got="type=$type",
+                        expected=":boundary or :path",
+                        suggestion="Choose a valid constraint type for function-based constraints",
+                        context="constraint! function type validation"
                     ),
                 )
             end
@@ -228,9 +269,9 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 - `CTBase.UnauthorizedCall`: If variable has not been set (when type=:variable)
 - `CTBase.UnauthorizedCall`: If constraint with same label already exists
 - `CTBase.UnauthorizedCall`: If both lb and ub are nothing
-- `CTBase.IncorrectArgument`: If lb and ub have different lengths
-- `CTBase.IncorrectArgument`: If lb > ub element-wise
-- `CTBase.IncorrectArgument`: If dimensions don't match expected sizes
+- `Exceptions.IncorrectArgument`: If lb and ub have different lengths
+- `Exceptions.IncorrectArgument`: If lb > ub element-wise
+- `Exceptions.IncorrectArgument`: If dimensions don't match expected sizes
 """
 function constraint!(
     ocp::PreModel,
