@@ -1,71 +1,76 @@
-# ------------------------------------------------------------------------------
-# Variable Initial Guess Tests
-# ------------------------------------------------------------------------------
+module TestInitialGuessVariable
+
 using Test
 using CTModels
-using CTModels.InitialGuess
+using CTModels.Exceptions
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
-@testset "Variable Initial Guess" verbose = true begin
-    
-    @testset "initial_variable with Scalar" begin
-        # 1D variable - should work
-        ocp_1d = CTModels.PreModel()
-        CTModels.variable!(ocp_1d, 1, "v")
+# Dummy OCPs for testing
+struct DummyOCPNoVar <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCPNoVar) = 1
+CTModels.control_dimension(::DummyOCPNoVar) = 1
+CTModels.variable_dimension(::DummyOCPNoVar) = 0
+
+struct DummyOCP1DVar <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCP1DVar) = 1
+CTModels.control_dimension(::DummyOCP1DVar) = 1
+CTModels.variable_dimension(::DummyOCP1DVar) = 1
+
+struct DummyOCP2DVar <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCP2DVar) = 1
+CTModels.control_dimension(::DummyOCP2DVar) = 1
+CTModels.variable_dimension(::DummyOCP2DVar) = 2
+
+function test_initial_guess_variable()
+    Test.@testset "Variable Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
         
-        result = initial_variable(ocp_1d, 0.5)
-        @test result == 0.5
+        Test.@testset "initial_variable with Scalar" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp_1d = DummyOCP1DVar()
+            
+            result = CTModels.initial_variable(ocp_1d, 0.5)
+            Test.@test result == 0.5
+            
+            ocp_2d = DummyOCP2DVar()
+            result_2d = CTModels.initial_variable(ocp_2d, 0.5)
+            Test.@test result_2d == 0.5
+            
+            ocp_no_var = DummyOCPNoVar()
+            Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp_no_var, 0.5)
+        end
         
-        # 2D variable - should work
-        ocp_2d = CTModels.PreModel()
-        CTModels.variable!(ocp_2d, 2, "v", ["v₁", "v₂"])
+        Test.@testset "initial_variable with Vector" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2DVar()
+            
+            result = CTModels.initial_variable(ocp, [0.0, 1.0])
+            Test.@test result == [0.0, 1.0]
+            
+            Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp, [0.0])
+        end
         
-        result_2d = initial_variable(ocp_2d, 0.5)
-        @test result_2d == 0.5
+        Test.@testset "initial_variable with Nothing" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp_no_var = DummyOCPNoVar()
+            result = CTModels.initial_variable(ocp_no_var, nothing)
+            Test.@test result == Float64[]
+            
+            ocp_1d = DummyOCP1DVar()
+            result_1d = CTModels.initial_variable(ocp_1d, nothing)
+            Test.@test result_1d == 0.1
+            
+            ocp_2d = DummyOCP2DVar()
+            result_2d = CTModels.initial_variable(ocp_2d, nothing)
+            Test.@test result_2d == [0.1, 0.1]
+        end
         
-        # No variable dimension - should throw error
-        ocp_no_var = CTModels.PreModel()
-        
-        @test_throws CTModels.Exceptions.IncorrectArgument initial_variable(ocp_no_var, 0.5)
-    end
-    
-    @testset "initial_variable with Vector" begin
-        ocp = CTModels.PreModel()
-        CTModels.variable!(ocp, 2, "v", ["v₁", "v₂"])
-        
-        # Correct dimension
-        result = initial_variable(ocp, [0.0, 1.0])
-        @test result == [0.0, 1.0]
-        
-        # Wrong dimension
-        @test_throws CTModels.Exceptions.IncorrectArgument initial_variable(ocp, [0.0])
-    end
-    
-    @testset "initial_variable with Nothing" begin
-        # No variable dimension
-        ocp_no_var = CTModels.PreModel()
-        result = initial_variable(ocp_no_var, nothing)
-        @test result == Float64[]
-        
-        # 1D variable
-        ocp_1d = CTModels.PreModel()
-        CTModels.variable!(ocp_1d, 1, "v")
-        result_1d = initial_variable(ocp_1d, nothing)
-        @test result_1d == 0.1
-        
-        # 2D variable
-        ocp_2d = CTModels.PreModel()
-        CTModels.variable!(ocp_2d, 2, "v", ["v₁", "v₂"])
-        result_2d = initial_variable(ocp_2d, nothing)
-        @test result_2d == [0.1, 0.1]
-    end
-    
-    @testset "variable accessor" begin
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-        CTModels.variable!(ocp, 2, "v", ["v₁", "v₂"])
-        
-        init = initial_guess(ocp; variable=[0.0, 1.0])
-        
-        @test variable(init) == [0.0, 1.0]
+        Test.@testset "variable accessor" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2DVar()
+            
+            init = CTModels.initial_guess(ocp; variable=[0.0, 1.0])
+            
+            Test.@test CTModels.variable(init) == [0.0, 1.0]
+        end
     end
 end
+
+end # module
+
+test_initial_guess_variable() = TestInitialGuessVariable.test_initial_guess_variable()

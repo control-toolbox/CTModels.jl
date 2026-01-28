@@ -70,6 +70,27 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Handle time-grid control initialization with (time, data) tuple.
+
+Interpolates the provided data over the time grid to create a callable function.
+"""
+function initial_control(ocp::AbstractOptimalControlProblem, control::Tuple)
+    length(control) == 2 || throw(Exceptions.IncorrectArgument(
+        "Time-grid control initialization must be a 2-tuple (time, data)",
+        got="$(length(control))-tuple",
+        expected="2-tuple (time, data)",
+        suggestion="Use control=(time, data) format",
+        context="initial_control with time-grid tuple"
+    ))
+    
+    T, data = control
+    time = _format_time_grid(T)
+    return _build_time_dependent_init(ocp, :control, data, time)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the control trajectory from an initial guess.
 """
 control(init::AbstractOptimalControlInitialGuess) = init.control

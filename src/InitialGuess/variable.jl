@@ -74,6 +74,27 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Handle time-grid variable initialization with (time, data) tuple.
+
+Interpolates the provided data over the time grid to create a callable function.
+"""
+function initial_variable(ocp::AbstractOptimalControlProblem, variable::Tuple)
+    length(variable) == 2 || throw(Exceptions.IncorrectArgument(
+        "Time-grid variable initialization must be a 2-tuple (time, data)",
+        got="$(length(variable))-tuple",
+        expected="2-tuple (time, data)",
+        suggestion="Use variable=(time, data) format",
+        context="initial_variable with time-grid tuple"
+    ))
+    
+    T, data = variable
+    time = _format_time_grid(T)
+    return _build_time_dependent_init(ocp, :variable, data, time)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the variable value from an initial guess.
 """
 variable(init::AbstractOptimalControlInitialGuess) = init.variable

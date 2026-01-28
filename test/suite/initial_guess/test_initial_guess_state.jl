@@ -1,75 +1,77 @@
-# ------------------------------------------------------------------------------
-# State Initial Guess Tests
-# ------------------------------------------------------------------------------
+module TestInitialGuessState
+
 using Test
 using CTModels
-using CTModels.InitialGuess
+using CTModels.Exceptions
+using Main.TestOptions: VERBOSE, SHOWTIMING
 
-@testset "State Initial Guess" verbose = true begin
-    
-    @testset "initial_state with Function" begin
-        ocp = CTModels.PreModel()
-        CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
+# Dummy OCPs for testing
+struct DummyOCP1D <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCP1D) = 1
+CTModels.control_dimension(::DummyOCP1D) = 1
+CTModels.variable_dimension(::DummyOCP1D) = 0
+
+struct DummyOCP2D <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCP2D) = 2
+CTModels.control_dimension(::DummyOCP2D) = 1
+CTModels.variable_dimension(::DummyOCP2D) = 0
+
+function test_initial_guess_state()
+    Test.@testset "State Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
         
-        f = t -> [t, t^2]
-        result = initial_state(ocp, f)
-        @test result === f
-    end
-    
-    @testset "initial_state with Scalar" begin
-        # 1D state - should work
-        ocp_1d = CTModels.PreModel()
-        CTModels.state!(ocp_1d, 1, "x")
+        Test.@testset "initial_state with Function" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2D()
+            
+            f = t -> [t, t^2]
+            result = CTModels.initial_state(ocp, f)
+            Test.@test result === f
+        end
         
-        result = initial_state(ocp_1d, 0.5)
-        @test result isa Function
-        @test result(0.0) == 0.5
+        Test.@testset "initial_state with Scalar" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp_1d = DummyOCP1D()
+            
+            result = CTModels.initial_state(ocp_1d, 0.5)
+            Test.@test result isa Function
+            Test.@test result(0.0) == 0.5
+            
+            ocp_2d = DummyOCP2D()
+            Test.@test_throws IncorrectArgument CTModels.initial_state(ocp_2d, 0.5)
+        end
         
-        # 2D state - should throw error
-        ocp_2d = CTModels.PreModel()
-        CTModels.state!(ocp_2d, 2, "x", ["x₁", "x₂"])
+        Test.@testset "initial_state with Vector" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2D()
+            
+            result = CTModels.initial_state(ocp, [0.0, 1.0])
+            Test.@test result isa Function
+            Test.@test result(0.0) == [0.0, 1.0]
+            
+            Test.@test_throws IncorrectArgument CTModels.initial_state(ocp, [0.0])
+        end
         
-        @test_throws CTModels.Exceptions.IncorrectArgument initial_state(ocp_2d, 0.5)
-    end
-    
-    @testset "initial_state with Vector" begin
-        ocp = CTModels.PreModel()
-        CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
+        Test.@testset "initial_state with Nothing" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2D()
+            
+            result = CTModels.initial_state(ocp, nothing)
+            Test.@test result isa Function
+            Test.@test result(0.0) == [0.1, 0.1]
+            
+            ocp_1d = DummyOCP1D()
+            result_1d = CTModels.initial_state(ocp_1d, nothing)
+            Test.@test result_1d isa Function
+            Test.@test result_1d(0.0) == 0.1
+        end
         
-        # Correct dimension
-        result = initial_state(ocp, [0.0, 1.0])
-        @test result isa Function
-        @test result(0.0) == [0.0, 1.0]
-        
-        # Wrong dimension
-        @test_throws CTModels.Exceptions.IncorrectArgument initial_state(ocp, [0.0])
-    end
-    
-    @testset "initial_state with Nothing" begin
-        ocp = CTModels.PreModel()
-        CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
-        
-        result = initial_state(ocp, nothing)
-        @test result isa Function
-        @test result(0.0) == [0.1, 0.1]
-        
-        # 1D state
-        ocp_1d = CTModels.PreModel()
-        CTModels.state!(ocp_1d, 1, "x")
-        
-        result_1d = initial_state(ocp_1d, nothing)
-        @test result_1d isa Function
-        @test result_1d(0.0) == 0.1
-    end
-    
-    @testset "state accessor" begin
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-        CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
-        
-        init = initial_guess(ocp; state=t -> [0.0, 1.0])
-        
-        @test state(init) isa Function
-        @test state(init)(0.5) == [0.0, 1.0]
+        Test.@testset "state accessor" verbose=VERBOSE showtiming=SHOWTIMING begin
+            ocp = DummyOCP2D()
+            
+            init = CTModels.initial_guess(ocp; state=t -> [0.0, 1.0])
+            
+            Test.@test CTModels.state(init) isa Function
+            Test.@test CTModels.state(init)(0.5) == [0.0, 1.0]
+        end
     end
 end
+
+end # module
+
+test_initial_guess_state() = TestInitialGuessState.test_initial_guess_state()
