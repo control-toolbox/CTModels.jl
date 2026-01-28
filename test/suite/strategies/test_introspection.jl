@@ -90,8 +90,8 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_type(IntrospectionTestStrategy, :tol) === Float64
                 Test.@test CTModels.Strategies.option_type(IntrospectionTestStrategy, :backend) === Symbol
                 
-                # Unknown option
-                Test.@test_throws ErrorException CTModels.Strategies.option_type(
+                # Unknown option (FieldError in Julia 1.11+, ErrorException in 1.10)
+                Test.@test_throws Exception CTModels.Strategies.option_type(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
@@ -104,8 +104,8 @@ function test_introspection()
                 desc2 = CTModels.Strategies.option_description(IntrospectionTestStrategy, :tol)
                 Test.@test desc2 == "Convergence tolerance"
                 
-                # Unknown option
-                Test.@test_throws ErrorException CTModels.Strategies.option_description(
+                # Unknown option (FieldError in Julia 1.11+, ErrorException in 1.10)
+                Test.@test_throws Exception CTModels.Strategies.option_description(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
@@ -115,8 +115,8 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_default(IntrospectionTestStrategy, :tol) == 1e-6
                 Test.@test CTModels.Strategies.option_default(IntrospectionTestStrategy, :backend) == :cpu
                 
-                # Unknown option
-                Test.@test_throws ErrorException CTModels.Strategies.option_default(
+                # Unknown option (FieldError in Julia 1.11+, ErrorException in 1.10)
+                Test.@test_throws Exception CTModels.Strategies.option_default(
                     IntrospectionTestStrategy, :nonexistent
                 )
             end
@@ -151,8 +151,8 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_value(strategy, :tol) == 1e-8
                 Test.@test CTModels.Strategies.option_value(strategy, :backend) == :gpu
                 
-                # Unknown option (NamedTuple throws ErrorException in Julia 1.10, FieldError in 1.11+)
-                Test.@test_throws ErrorException CTModels.Strategies.option_value(strategy, :nonexistent)
+                # Unknown option (NamedTuple throws FieldError in Julia 1.11+, ErrorException in 1.10)
+                Test.@test_throws Exception CTModels.Strategies.option_value(strategy, :nonexistent)
             end
             
             Test.@testset "option_source - instance-level" begin
@@ -167,8 +167,8 @@ function test_introspection()
                 Test.@test CTModels.Strategies.option_source(strategy, :tol) === :default
                 Test.@test CTModels.Strategies.option_source(strategy, :backend) === :computed
                 
-                # Unknown option (NamedTuple throws ErrorException in Julia 1.10, FieldError in 1.11+)
-                Test.@test_throws ErrorException CTModels.Strategies.option_source(strategy, :nonexistent)
+                # Unknown option (NamedTuple throws FieldError in Julia 1.11+, ErrorException in 1.10)
+                Test.@test_throws Exception CTModels.Strategies.option_source(strategy, :nonexistent)
             end
             
             Test.@testset "is_user - instance-level" begin
