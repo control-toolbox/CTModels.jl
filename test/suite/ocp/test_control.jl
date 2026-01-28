@@ -12,9 +12,9 @@ function test_control()
         # some checks
         ocp = CTModels.PreModel()
         @test isnothing(ocp.control)
-        @test !CTModels.__is_control_set(ocp)
+        @test !CTModels.OCP.__is_control_set(ocp)
         CTModels.control!(ocp, 1)
-        @test CTModels.__is_control_set(ocp)
+        @test CTModels.OCP.__is_control_set(ocp)
 
         # control!
         ocp = CTModels.PreModel()

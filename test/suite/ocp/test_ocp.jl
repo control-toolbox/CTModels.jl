@@ -52,33 +52,33 @@ function test_ocp()
 
     # path constraint
     f_path_a(r, t, x, u, v) = r .= x .+ u .+ v .+ t
-    CTModels.__constraint!(
+    CTModels.OCP.__constraint!(
         pre_constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2]
     )
     f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-    CTModels.__constraint!(pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
+    CTModels.OCP.__constraint!(pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
 
     # boundary constraint
     f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
-    CTModels.__constraint!(
+    CTModels.OCP.__constraint!(
         pre_constraints, :boundary, n, m, q; f=f_boundary_a, lb=[0, 1], ub=[1, 2]
     )
     f_boundary_b(r, x0, xf, v) = r .= x0[1] - 1.0 + v[1] * (xf[1] - x0[1])
-    CTModels.__constraint!(
+    CTModels.OCP.__constraint!(
         pre_constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3]
     )
 
     # state box constraint
-    CTModels.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.__constraint!(pre_constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # control box constraint
-    CTModels.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.__constraint!(pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # variable box constraint
-    CTModels.__constraint!(pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
-    CTModels.__constraint!(pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
+    CTModels.OCP.__constraint!(pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
+    CTModels.OCP.__constraint!(pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
 
     # build constraints
     constraints = CTModels.build(pre_constraints)

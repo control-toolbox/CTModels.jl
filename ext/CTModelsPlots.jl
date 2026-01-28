@@ -2,7 +2,7 @@ module CTModelsPlots
 
 #
 using DocStringExtensions
-using MLStyle # pattern matching
+using MLStyle: MLStyle
 
 #
 using CTBase

@@ -138,7 +138,7 @@ function __size_plot(
     else
         n = CTModels.state_dimension(sol)
         m = CTModels.control_dimension(sol)
-        l = @match control begin
+        l = MLStyle.@match control begin
             :components => m
             :norm => 1
             :all => m + 1

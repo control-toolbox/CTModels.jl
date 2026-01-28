@@ -17,11 +17,11 @@ function test_time_dependence()
         ocp = CTModels.PreModel()
 
         # Initially not set
-        Test.@test !CTModels.__is_autonomous_set(ocp)
+        Test.@test !CTModels.OCP.__is_autonomous_set(ocp)
 
         # Set once
         CTModels.time_dependence!(ocp; autonomous=true)
-        Test.@test CTModels.__is_autonomous_set(ocp)
+        Test.@test CTModels.OCP.__is_autonomous_set(ocp)
         Test.@test CTModels.is_autonomous(ocp) === true
 
         # Second call must fail

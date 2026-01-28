@@ -32,9 +32,9 @@ function test_times()
     # some checks
     ocp = CTModels.PreModel()
     @test isnothing(ocp.times)
-    @test !CTModels.__is_times_set(ocp)
+    @test !CTModels.OCP.__is_times_set(ocp)
     CTModels.time!(ocp; t0=0.0, tf=10.0, time_name="s")
-    @test CTModels.__is_times_set(ocp)
+    @test CTModels.OCP.__is_times_set(ocp)
     @test CTModels.time_name(ocp.times) == "s"
 
     # time!

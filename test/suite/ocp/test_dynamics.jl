@@ -61,7 +61,7 @@ function test_partial_dynamics()
     @test r_partial == r_full
 
     # Evaluate after building
-    f_from_parts! = CTModels.__build_dynamics_from_parts(ocp1.dynamics)
+    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp1.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     @test r_partial == r_full
@@ -84,7 +84,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     @test r_partial == r_full
 
-    f_from_parts! = CTModels.__build_dynamics_from_parts(ocp2.dynamics)
+    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp2.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     @test r_partial == r_full
@@ -106,7 +106,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     @test r_partial == r_full
 
-    f_from_parts! = CTModels.__build_dynamics_from_parts(ocp3.dynamics)
+    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp3.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     @test r_partial == r_full
@@ -128,7 +128,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     @test r_partial == r_full
 
-    f_from_parts! = CTModels.__build_dynamics_from_parts(ocp3.dynamics)
+    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp4.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     @test r_partial == r_full

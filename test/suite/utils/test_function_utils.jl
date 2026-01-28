@@ -23,8 +23,8 @@ function test_function_utils()
                 return r
             end
             
-            # Convert to out-of-place
-            f = CTModels.to_out_of_place(f!, 2)
+            # Convert to out-of-place (private function from Utils module)
+            f = CTModels.Utils.to_out_of_place(f!, 2)
             
             # Test the converted function
             result = f(π/4)
@@ -42,7 +42,7 @@ function test_function_utils()
             end
             
             # Convert to out-of-place with n=1
-            g = CTModels.to_out_of_place(g!, 1)
+            g = CTModels.Utils.to_out_of_place(g!, 1)
             
             # Should return a scalar, not a vector
             result = g(3.0)
@@ -59,7 +59,7 @@ function test_function_utils()
             end
             
             # Convert to out-of-place
-            h = CTModels.to_out_of_place(h!, 2)
+            h = CTModels.Utils.to_out_of_place(h!, 2)
             
             # Test with default kwargs
             result1 = h(2.0)
@@ -81,7 +81,7 @@ function test_function_utils()
             end
             
             # Convert to out-of-place
-            k = CTModels.to_out_of_place(k!, 2)
+            k = CTModels.Utils.to_out_of_place(k!, 2)
             
             # Test with multiple arguments
             result = k(3.0, 4.0)
@@ -98,7 +98,7 @@ function test_function_utils()
             end
             
             # Convert with Int type
-            m = CTModels.to_out_of_place(m!, 2; T=Int)
+            m = CTModels.Utils.to_out_of_place(m!, 2; T=Int)
             
             result = m(5)
             Test.@test result isa Vector{Int}
@@ -108,7 +108,7 @@ function test_function_utils()
         
         Test.@testset "to_out_of_place - nothing input" begin
             # Test that nothing input returns nothing
-            result = CTModels.to_out_of_place(nothing, 2)
+            result = CTModels.Utils.to_out_of_place(nothing, 2)
             Test.@test result === nothing
         end
         
@@ -121,7 +121,7 @@ function test_function_utils()
                 return r
             end
             
-            big = CTModels.to_out_of_place(big!, 5)
+            big = CTModels.Utils.to_out_of_place(big!, 5)
             
             result = big(2.0)
             Test.@test length(result) == 5
