@@ -11,17 +11,17 @@ function test_name_conflicts_integration()
             # Test state vs control conflict
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 1, "x")
-            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "x")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.control!(ocp, 1, "x")
             
             # Test control vs variable conflict
             ocp2 = CTModels.PreModel()
             CTModels.control!(ocp2, 1, "u")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp2, 1, "u")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp2, 1, "u")
             
             # Test state vs time conflict
             ocp3 = CTModels.PreModel()
             CTModels.state!(ocp3, 1, "x")
-            @test_throws CTBase.IncorrectArgument CTModels.time!(ocp3, t0=0, tf=1, time_name="x")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp3, t0=0, tf=1, time_name="x")
         end
         
         @testset "Valid complete workflow" begin
@@ -69,7 +69,7 @@ function test_name_conflicts_integration()
             CTModels.control!(ocp, 1, "u")
             CTModels.variable!(ocp, 1, "v")
             
-            @test_throws CTBase.IncorrectArgument CTModels.constraint!(ocp, :state, lb=[1, 2], ub=[0, 1])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(ocp, :state, lb=[1, 2], ub=[0, 1])
             @test_nowarn CTModels.constraint!(ocp, :state, lb=[0, 1], ub=[1, 2])
         end
         
@@ -112,7 +112,7 @@ function test_name_conflicts_integration()
             ocp2 = CTModels.PreModel()
             CTModels.time!(ocp2, t0=0, tf=1, time_name="t")
             CTModels.state!(ocp2, 1, "α")
-            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp2, 1, "α")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.control!(ocp2, 1, "α")
         end
         
         @testset "Edge cases with bounds" begin
@@ -193,14 +193,14 @@ function test_name_conflicts_integration()
             
             # State component named "u" should conflict with control name "u"
             CTModels.state!(ocp, 3, "x", ["x₁", "u", "x₃"])
-            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "u")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.control!(ocp, 1, "u")
             
             # Test with fresh ocp: control component named "v" should conflict with variable name "v"
             ocp2 = CTModels.PreModel()
             CTModels.time!(ocp2, t0=0, tf=1, time_name="t")
             CTModels.state!(ocp2, 2, "x", ["x₁", "x₂"])
             CTModels.control!(ocp2, 2, "w", ["w₁", "v"])
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp2, 1, "v")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp2, 1, "v")
         end
         
         @testset "Empty variable edge cases" begin
@@ -224,8 +224,8 @@ function test_name_conflicts_integration()
         @testset "Time bounds validation" begin
             # Test t0 < tf validation
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=10, tf=5, time_name="t")
-            @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=5, tf=5, time_name="t")  # Equal not allowed
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=10, tf=5, time_name="t")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=5, tf=5, time_name="t")  # Equal not allowed
             @test_nowarn CTModels.time!(ocp, t0=0, tf=10, time_name="t")  # Valid
         end
     end
