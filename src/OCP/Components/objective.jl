@@ -34,8 +34,8 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 - `CTBase.UnauthorizedCall`: If control has not been set
 - `CTBase.UnauthorizedCall`: If times has not been set
 - `CTBase.UnauthorizedCall`: If objective has already been set
-- `CTBase.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
-- `CTBase.IncorrectArgument`: If neither mayer nor lagrange function is provided
+- `Exceptions.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
+- `Exceptions.IncorrectArgument`: If neither mayer nor lagrange function is provided
 """
 function objective!(
     ocp::PreModel,
@@ -61,8 +61,12 @@ function objective!(
     )
 
     # NEW: Validate criterion (case-insensitive)
-    @ensure criterion ∈ (:min, :max, :MIN, :MAX) CTBase.IncorrectArgument(
-        "criterion must be either :min, :max, :MIN, or :MAX, got :$criterion"
+    @ensure criterion ∈ (:min, :max, :MIN, :MAX) Exceptions.IncorrectArgument(
+        "Invalid optimization criterion",
+        got=":$criterion",
+        expected=":min, :max, :MIN, or :MAX",
+        suggestion="Use objective!(ocp, :min, ...) for minimization or objective!(ocp, :max, ...) for maximization",
+        context="objective! criterion validation"
     )
 
     # Normalize criterion to lowercase for consistency
@@ -70,8 +74,12 @@ function objective!(
         (criterion == :MIN ? :min : :max) : criterion
 
     # checks: at least one of the two functions must be given
-    @ensure !(isnothing(mayer) && isnothing(lagrange)) CTBase.IncorrectArgument(
-        "at least one of the two functions must be given. Please provide a Mayer or a Lagrange function.",
+    @ensure !(isnothing(mayer) && isnothing(lagrange)) Exceptions.IncorrectArgument(
+        "Missing objective function",
+        got="neither mayer nor lagrange provided",
+        expected="at least one of mayer or lagrange function",
+        suggestion="Provide mayer=function for terminal cost, lagrange=function for running cost, or both for Bolza problem",
+        context="objective! function validation"
     )
 
     # set the objective

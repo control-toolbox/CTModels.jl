@@ -119,7 +119,7 @@ function test_objective()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :min)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :min)
 
     # NEW: Criterion validation tests
     @testset "objective! - Criterion validation" begin
@@ -129,9 +129,9 @@ function test_objective()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :invalid, mayer=mayer)
-        @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :optimize, mayer=mayer)
-        @test_throws CTBase.IncorrectArgument CTModels.objective!(ocp, :Minimize, mayer=mayer)  # not in accepted list
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :invalid, mayer=mayer)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :optimize, mayer=mayer)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :Minimize, mayer=mayer)  # not in accepted list
         
         # Valid criteria (lowercase)
         ocp2 = CTModels.PreModel()
