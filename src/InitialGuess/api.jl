@@ -129,7 +129,7 @@ Validate an initial guess for an optimal control problem.
 
 # Throws
 
-- `CTBase.IncorrectArgument` if dimensions do not match.
+- `Exceptions.IncorrectArgument` if dimensions do not match.
 """
 function validate_initial_guess(
     ocp::AbstractOptimalControlProblem, init::AbstractOptimalControlInitialGuess

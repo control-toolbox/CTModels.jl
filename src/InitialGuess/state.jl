@@ -13,7 +13,7 @@ $(TYPEDSIGNATURES)
 
 Convert a scalar state value to a constant function for 1D state problems.
 
-Throws `CTBase.IncorrectArgument` if the state dimension is not 1.
+Throws `Exceptions.IncorrectArgument` if the state dimension is not 1.
 """
 function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
     dim = state_dimension(ocp)
@@ -35,7 +35,7 @@ $(TYPEDSIGNATURES)
 
 Convert a state vector to a constant function.
 
-Throws `CTBase.IncorrectArgument` if the vector length does not match the state dimension.
+Throws `Exceptions.IncorrectArgument` if the vector length does not match the state dimension.
 """
 function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real})
     dim = state_dimension(ocp)

@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Return a scalar variable value for 1D variable problems.
 
-Throws `CTBase.IncorrectArgument` if the variable dimension is not 1.
+Throws `Exceptions.IncorrectArgument` if the variable dimension is not 1.
 """
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     dim = variable_dimension(ocp)
@@ -36,7 +36,7 @@ $(TYPEDSIGNATURES)
 
 Return a variable vector.
 
-Throws `CTBase.IncorrectArgument` if the vector length does not match the variable dimension.
+Throws `Exceptions.IncorrectArgument` if the vector length does not match the variable dimension.
 """
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<:Real})
     dim = variable_dimension(ocp)

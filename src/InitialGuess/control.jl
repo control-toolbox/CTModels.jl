@@ -13,7 +13,7 @@ $(TYPEDSIGNATURES)
 
 Convert a scalar control value to a constant function for 1D control problems.
 
-Throws `CTBase.IncorrectArgument` if the control dimension is not 1.
+Throws `Exceptions.IncorrectArgument` if the control dimension is not 1.
 """
 function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
     dim = control_dimension(ocp)
@@ -35,7 +35,7 @@ $(TYPEDSIGNATURES)
 
 Convert a control vector to a constant function.
 
-Throws `CTBase.IncorrectArgument` if the vector length does not match the control dimension.
+Throws `Exceptions.IncorrectArgument` if the vector length does not match the control dimension.
 """
 function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:Real})
     dim = control_dimension(ocp)
