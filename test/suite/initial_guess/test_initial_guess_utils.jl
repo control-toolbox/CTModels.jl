@@ -9,6 +9,14 @@ struct DummyOCP1D <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCP1D) = 1
 CTModels.control_dimension(::DummyOCP1D) = 1
 CTModels.variable_dimension(::DummyOCP1D) = 0
+CTModels.has_fixed_initial_time(::DummyOCP1D) = true
+CTModels.initial_time(::DummyOCP1D) = 0.0
+CTModels.state_name(::DummyOCP1D) = "x"
+CTModels.state_components(::DummyOCP1D) = ["x"]
+CTModels.control_name(::DummyOCP1D) = "u"
+CTModels.control_components(::DummyOCP1D) = ["u"]
+CTModels.variable_name(::DummyOCP1D) = "v"
+CTModels.variable_components(::DummyOCP1D) = String[]
 
 function test_initial_guess_utils()
     # ========================================================================
@@ -17,14 +25,6 @@ function test_initial_guess_utils()
 
     Test.@testset "time grid formatting (indirect test)" verbose=VERBOSE showtiming=SHOWTIMING begin
         ocp = DummyOCP1D()
-        CTModels.has_fixed_initial_time(::DummyOCP1D) = true
-        CTModels.initial_time(::DummyOCP1D) = 0.0
-        CTModels.state_name(::DummyOCP1D) = "x"
-        CTModels.state_components(::DummyOCP1D) = ["x"]
-        CTModels.control_name(::DummyOCP1D) = "u"
-        CTModels.control_components(::DummyOCP1D) = ["u"]
-        CTModels.variable_name(::DummyOCP1D) = "v"
-        CTModels.variable_components(::DummyOCP1D) = String[]
 
         # Test that time grid formatting works via build_initial_guess
         # (tests _format_time_grid indirectly)

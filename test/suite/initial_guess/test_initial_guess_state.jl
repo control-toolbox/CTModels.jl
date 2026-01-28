@@ -10,11 +10,15 @@ struct DummyOCP1D <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCP1D) = 1
 CTModels.control_dimension(::DummyOCP1D) = 1
 CTModels.variable_dimension(::DummyOCP1D) = 0
+CTModels.has_fixed_initial_time(::DummyOCP1D) = true
+CTModels.initial_time(::DummyOCP1D) = 0.0
 
 struct DummyOCP2D <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCP2D) = 2
 CTModels.control_dimension(::DummyOCP2D) = 1
 CTModels.variable_dimension(::DummyOCP2D) = 0
+CTModels.has_fixed_initial_time(::DummyOCP2D) = true
+CTModels.initial_time(::DummyOCP2D) = 0.0
 
 function test_initial_guess_state()
     Test.@testset "State Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin

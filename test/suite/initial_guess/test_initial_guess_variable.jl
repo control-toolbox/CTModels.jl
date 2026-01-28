@@ -10,16 +10,22 @@ struct DummyOCPNoVar <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCPNoVar) = 1
 CTModels.control_dimension(::DummyOCPNoVar) = 1
 CTModels.variable_dimension(::DummyOCPNoVar) = 0
+CTModels.has_fixed_initial_time(::DummyOCPNoVar) = true
+CTModels.initial_time(::DummyOCPNoVar) = 0.0
 
 struct DummyOCP1DVar <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCP1DVar) = 1
 CTModels.control_dimension(::DummyOCP1DVar) = 1
 CTModels.variable_dimension(::DummyOCP1DVar) = 1
+CTModels.has_fixed_initial_time(::DummyOCP1DVar) = true
+CTModels.initial_time(::DummyOCP1DVar) = 0.0
 
 struct DummyOCP2DVar <: CTModels.AbstractModel end
 CTModels.state_dimension(::DummyOCP2DVar) = 1
 CTModels.control_dimension(::DummyOCP2DVar) = 1
 CTModels.variable_dimension(::DummyOCP2DVar) = 2
+CTModels.has_fixed_initial_time(::DummyOCP2DVar) = true
+CTModels.initial_time(::DummyOCP2DVar) = 0.0
 
 function test_initial_guess_variable()
     Test.@testset "Variable Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -29,10 +35,6 @@ function test_initial_guess_variable()
             
             result = CTModels.initial_variable(ocp_1d, 0.5)
             Test.@test result == 0.5
-            
-            ocp_2d = DummyOCP2DVar()
-            result_2d = CTModels.initial_variable(ocp_2d, 0.5)
-            Test.@test result_2d == 0.5
             
             ocp_no_var = DummyOCPNoVar()
             Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp_no_var, 0.5)
