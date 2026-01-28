@@ -18,6 +18,19 @@ CTModels.control_components(::DummyOCP1D) = ["u"]
 CTModels.variable_name(::DummyOCP1D) = "v"
 CTModels.variable_components(::DummyOCP1D) = String[]
 
+struct DummyOCP2D <: CTModels.AbstractModel end
+CTModels.state_dimension(::DummyOCP2D) = 2
+CTModels.control_dimension(::DummyOCP2D) = 1
+CTModels.variable_dimension(::DummyOCP2D) = 0
+CTModels.has_fixed_initial_time(::DummyOCP2D) = true
+CTModels.initial_time(::DummyOCP2D) = 0.0
+CTModels.state_name(::DummyOCP2D) = "x"
+CTModels.state_components(::DummyOCP2D) = ["x1", "x2"]
+CTModels.control_name(::DummyOCP2D) = "u"
+CTModels.control_components(::DummyOCP2D) = ["u"]
+CTModels.variable_name(::DummyOCP2D) = "v"
+CTModels.variable_components(::DummyOCP2D) = String[]
+
 function test_initial_guess_utils()
     # ========================================================================
     # UNIT TESTS - Utility Functions
@@ -43,26 +56,11 @@ function test_initial_guess_utils()
     end
 
     Test.@testset "matrix data formatting (indirect test)" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # Test matrix to vector-of-vectors conversion via build_initial_guess
-        # (tests _format_init_data_for_grid indirectly)
-        struct DummyOCP2D <: CTModels.AbstractModel end
-        CTModels.state_dimension(::DummyOCP2D) = 2
-        CTModels.control_dimension(::DummyOCP2D) = 1
-        CTModels.variable_dimension(::DummyOCP2D) = 0
-        CTModels.has_fixed_initial_time(::DummyOCP2D) = true
-        CTModels.initial_time(::DummyOCP2D) = 0.0
-        CTModels.state_name(::DummyOCP2D) = "x"
-        CTModels.state_components(::DummyOCP2D) = ["x1", "x2"]
-        CTModels.control_name(::DummyOCP2D) = "u"
-        CTModels.control_components(::DummyOCP2D) = ["u"]
-        CTModels.variable_name(::DummyOCP2D) = "v"
-        CTModels.variable_components(::DummyOCP2D) = String[]
-
         ocp = DummyOCP2D()
 
-        # Matrix format: each row is a state sample
+        # Matrix format: each row is a time point, each column is a state component
         time = [0.0, 0.5, 1.0]
-        state_matrix = [0.0 0.5 1.0; 1.0 1.5 2.0]
+        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
         init_nt = (state=(time, state_matrix),)
         ig = CTModels.build_initial_guess(ocp, init_nt)
@@ -105,25 +103,11 @@ function test_initial_guess_utils()
     end
 
     Test.@testset "matrix data formatting in context" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # Test with 2D state
-        struct DummyOCP2D <: CTModels.AbstractModel end
-        CTModels.state_dimension(::DummyOCP2D) = 2
-        CTModels.control_dimension(::DummyOCP2D) = 1
-        CTModels.variable_dimension(::DummyOCP2D) = 0
-        CTModels.has_fixed_initial_time(::DummyOCP2D) = true
-        CTModels.initial_time(::DummyOCP2D) = 0.0
-        CTModels.state_name(::DummyOCP2D) = "x"
-        CTModels.state_components(::DummyOCP2D) = ["x1", "x2"]
-        CTModels.control_name(::DummyOCP2D) = "u"
-        CTModels.control_components(::DummyOCP2D) = ["u"]
-        CTModels.variable_name(::DummyOCP2D) = "v"
-        CTModels.variable_components(::DummyOCP2D) = String[]
-
         ocp = DummyOCP2D()
 
-        # Matrix format: each row is a state sample
+        # Matrix format: each row is a time point, each column is a state component
         time = [0.0, 0.5, 1.0]
-        state_matrix = [0.0 0.5 1.0; 1.0 1.5 2.0]  # 2 states x 3 time points
+        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
         init_nt = (state=(time, state_matrix),)
         ig = CTModels.build_initial_guess(ocp, init_nt)

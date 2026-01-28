@@ -82,8 +82,11 @@ function test_initial_guess_builders()
         ocp = DummyOCP2DNoVar()
 
         time = [0.0, 0.5, 1.0]
-        # Matrix: each row is a state component, each column is a time point
-        state_matrix = [0.0 0.5 1.0; 1.0 1.5 2.0]
+        # Matrix: each row is a time point, each column is a state component
+        # Row 1: t=0.0 -> [0.0, 1.0]
+        # Row 2: t=0.5 -> [0.5, 1.5]
+        # Row 3: t=1.0 -> [1.0, 2.0]
+        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
         init_nt = (state=(time, state_matrix),)
         ig = CTModels.build_initial_guess(ocp, init_nt)
@@ -120,7 +123,8 @@ function test_initial_guess_builders()
         # Verify interpolation
         x_fun = CTModels.state(ig)
         x1_val = x_fun(1.0)
-        Test.@test isapprox(x1_val, 1.0; atol=1e-12)
+        Test.@test x1_val isa AbstractVector
+        Test.@test isapprox(x1_val[1], 1.0; atol=1e-12)
     end
 
     Test.@testset "per-component state init without time" verbose=VERBOSE showtiming=SHOWTIMING begin
