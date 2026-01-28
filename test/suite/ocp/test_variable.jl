@@ -66,21 +66,21 @@ function test_variable()
 
         # wrong number of components
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
 
         # NEW: Internal name validation tests (only for q > 0)
         @testset "variable! - Internal name validation" begin
             # Empty name (q > 0)
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 1, "")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 1, "")
             
             # Empty component name (q > 0)
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["", "w"])
             
             # Name in components (multiple) - should fail
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["v", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["v", "w"])
             
             # Name == component (single) - should PASS (default behavior)
             ocp = CTModels.PreModel()
@@ -88,7 +88,7 @@ function test_variable()
             
             # Duplicate components (q > 0)
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["w", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["w", "w"])
             
             # Empty variable (q = 0) should not trigger name validation
             ocp = CTModels.PreModel()
@@ -100,37 +100,37 @@ function test_variable()
             # variable.name vs state.name
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 1, "x")  # Conflict!
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 1, "x")  # Conflict!
             
             # variable.name vs state.component
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 2, "x", ["v", "w"])
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 1, "v")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 1, "v")
             
             # variable.component vs state.name
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 1, "x")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["x", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["x", "w"])
             
             # variable.name vs control.name
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 1, "u")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 1, "u")
             
             # variable.component vs control.name
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["u", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["u", "w"])
             
             # variable.name vs time_name
             ocp = CTModels.PreModel()
             CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 1, "t")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 1, "t")
             
             # variable.component vs time_name
             ocp = CTModels.PreModel()
             CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-            @test_throws CTBase.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["t", "w"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "v", ["t", "w"])
             
             # Empty variable (q = 0) should not trigger inter-component conflicts
             ocp = CTModels.PreModel()

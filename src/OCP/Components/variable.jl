@@ -25,13 +25,13 @@ julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
 - `CTBase.UnauthorizedCall`: If variable has already been set
 - `CTBase.UnauthorizedCall`: If objective has already been set
 - `CTBase.UnauthorizedCall`: If dynamics has already been set
-- `CTBase.IncorrectArgument`: If number of component names ≠ q (when q > 0)
-- `CTBase.IncorrectArgument`: If name is empty (when q > 0)
-- `CTBase.IncorrectArgument`: If any component name is empty (when q > 0)
-- `CTBase.IncorrectArgument`: If name is one of the component names (when q > 0)
-- `CTBase.IncorrectArgument`: If component names contain duplicates (when q > 0)
-- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components (when q > 0)
-- `CTBase.IncorrectArgument`: If any component name conflicts with existing names (when q > 0)
+- `Exceptions.IncorrectArgument`: If number of component names ≠ q (when q > 0)
+- `Exceptions.IncorrectArgument`: If name is empty (when q > 0)
+- `Exceptions.IncorrectArgument`: If any component name is empty (when q > 0)
+- `Exceptions.IncorrectArgument`: If name is one of the component names (when q > 0)
+- `Exceptions.IncorrectArgument`: If component names contain duplicates (when q > 0)
+- `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components (when q > 0)
+- `Exceptions.IncorrectArgument`: If any component name conflicts with existing names (when q > 0)
 """
 function variable!(
     ocp::PreModel,
@@ -43,8 +43,12 @@ function variable!(
         "the variable has already been set."
     )
 
-    @ensure (q ≤ 0) || (size(components_names, 1) == q) CTBase.IncorrectArgument(
-        "the number of variable names must be equal to the variable dimension"
+    @ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
+        "Variable component names count mismatch",
+        got="$(size(components_names, 1)) component names",
+        expected="$q component names (matching variable dimension)",
+        suggestion="Provide exactly $q component names or omit to use auto-generated names",
+        context="variable! components validation"
     )
 
     @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
