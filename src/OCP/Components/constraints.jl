@@ -130,22 +130,22 @@ function __constraint!(
                 )
             end
             @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
-                "Bounds dimension mismatch",
+                "Bounds dimension mismatch with implicit range",
                 got="range length=$(length(rg)), bounds length=$(length(lb))",
                 expected="range and bounds must have same dimension",
-                suggestion="Ensure range and bounds vectors have equal length",
-                context="constraint! dimension validation"
+                suggestion="Ensure bounds length matches implicit range (type only)",
+                context="constraint! with type but no explicit range - validating bounds dimension"
             ))
             __constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
             @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
-                "Range-bounds dimension mismatch",
+                "Range-bounds dimension mismatch with explicit range",
                 got="range length=$(length(rg)), bounds length=$(length(lb))",
                 expected="range and bounds must have same dimension",
-                suggestion="Ensure range and bounds vectors have equal length",
-                context="constraint! range-bounds validation"
+                suggestion="Ensure bounds length matches explicit range parameter",
+                context="constraint! with explicit range parameter - validating range-bounds match"
             ))
             # check if the range is valid
             if type == :state

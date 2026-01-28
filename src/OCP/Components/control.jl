@@ -67,7 +67,7 @@ function control!(
         got="m=$m",
         expected="m > 0",
         suggestion="Provide a positive integer for the control dimension",
-        context="control! dimension validation"
+        context="control!(ocp, m=$m, name=\"$name\") - validating m parameter"
     )
     @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
         "Control component names count mismatch",

@@ -164,7 +164,7 @@ function __validate_name_uniqueness(
         "Empty $(component_label) name",
         got="empty string",
         expected="non-empty string",
-        suggestion="Provide a valid name for the $component_label",
+        suggestion="Use a non-empty string: name=\"x\" or name=:state",
         context="$(component_label)! name validation"
     )
     

@@ -149,7 +149,7 @@ function time!(
             got="invalid combination of t0, ind0, tf, indf",
             expected="valid pattern: (t0, tf), (t0, indf), (ind0, tf), or (ind0, indf)",
             suggestion="Check time! documentation for valid argument combinations",
-            context="time! argument pattern matching"
+            context="time!(ocp, t0/ind0=..., tf/indf=...) - validating argument combinations"
         ))
     end
 

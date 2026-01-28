@@ -79,7 +79,7 @@ function state!(
         got="n=$n",
         expected="n > 0",
         suggestion="Provide a positive integer for the state dimension",
-        context="state! dimension validation"
+        context="state!(ocp, n=$n, name=\"$name\") - validating n parameter"
     )
     @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
         "State component names count mismatch",

@@ -94,7 +94,7 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
                     "Dynamics index out of bounds",
                     got="index=$i",
                     expected="index in range [1, $(state_dimension(ocp))]",
-                    suggestion="Ensure all dynamics indices are within state dimension bounds",
+                    suggestion="Use indices in 1:$(state_dimension(ocp)), e.g., dynamics!(ocp, 1:2, f)",
                     context="dynamics! index validation"
                 ),
             )

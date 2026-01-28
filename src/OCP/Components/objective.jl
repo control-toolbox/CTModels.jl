@@ -66,7 +66,7 @@ function objective!(
         got=":$criterion",
         expected=":min, :max, :MIN, or :MAX",
         suggestion="Use objective!(ocp, :min, ...) for minimization or objective!(ocp, :max, ...) for maximization",
-        context="objective! criterion validation"
+        context="objective!(ocp, criterion=:$criterion, ...) - validating criterion parameter"
     )
 
     # Normalize criterion to lowercase for consistency
