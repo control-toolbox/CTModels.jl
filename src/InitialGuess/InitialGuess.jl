@@ -45,8 +45,14 @@ import ..Utils: ctinterpolate, matrix2vec
 # Load types first
 include("types.jl")
 
-# Load implementation
-include("initial_guess.jl")
+# Load implementation by component
+include("utils.jl")      # Utilitaires de base
+include("state.jl")      # Initialisation d'état
+include("control.jl")    # Initialisation de contrôle
+include("variable.jl")   # Initialisation de variable
+include("builders.jl")   # Constructeurs
+include("validation.jl") # Validation
+include("api.jl")        # API publique
 
 # Export public API
 export initial_guess, pre_initial_guess, build_initial_guess, validate_initial_guess

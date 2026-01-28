@@ -4,7 +4,7 @@ using Test
 using CTModels
 using CTBase
 
-function test_name_conflicts_integration_simple()
+function test_name_conflicts_integration()
     Test.@testset "Simple Name Conflicts Integration Tests" verbose = false showtiming = false begin
         
         @testset "Basic conflict detection" begin
@@ -233,4 +233,4 @@ end
 
 end # module
 
-test_name_conflicts_integration() = TestNameConflictsIntegrationSimple.test_name_conflicts_integration_simple()
+test_name_conflicts_integration() = TestNameConflictsIntegrationSimple.test_name_conflicts_integration()

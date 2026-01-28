@@ -116,9 +116,7 @@ struct IncorrectArgument <: CTModelsException
     suggestion::Union{String, Nothing}
     context::Union{String, Nothing}
     
-    # Constructors for compatibility and convenience
-    IncorrectArgument(msg::String) = new(msg, nothing, nothing, nothing, nothing)
-    
+    # Constructor for enriched exceptions
     IncorrectArgument(
         msg::String;
         got::Union{String, Nothing}=nothing,
@@ -163,8 +161,6 @@ struct UnauthorizedCall <: CTModelsException
     suggestion::Union{String, Nothing}
     context::Union{String, Nothing}
     
-    UnauthorizedCall(msg::String) = new(msg, nothing, nothing, nothing)
-    
     UnauthorizedCall(
         msg::String;
         reason::Union{String, Nothing}=nothing,
@@ -191,7 +187,6 @@ struct NotImplemented <: CTModelsException
     msg::String
     type_info::Union{String, Nothing}
     
-    NotImplemented(msg::String) = new(msg, nothing)
     NotImplemented(msg::String; type_info::Union{String, Nothing}=nothing) = new(msg, type_info)
 end
 
@@ -213,7 +208,6 @@ struct ParsingError <: CTModelsException
     msg::String
     location::Union{String, Nothing}
     
-    ParsingError(msg::String) = new(msg, nothing)
     ParsingError(msg::String; location::Union{String, Nothing}=nothing) = new(msg, location)
 end
 
