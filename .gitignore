@@ -34,4 +34,4 @@ test/solution.json
 profiling/
 tmp/
 .agent/
-#reports/
+reports/
