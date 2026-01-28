@@ -564,7 +564,12 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access.
 """
 function initial_time(ocp::AbstractModel)
-    throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot get initial time with this function",
+        reason="This model type does not support direct initial time access",
+        suggestion="Use initial_time(ocp) on a Model with FixedTimeModel or use initial_time(ocp, variable) for variable initial time",
+        context="initial_time on AbstractModel"
+    ))
 end
 
 """
@@ -573,7 +578,12 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access with variable.
 """
 function initial_time(ocp::AbstractModel, variable::AbstractVector)
-    throw(CTBase.UnauthorizedCall("You cannot get the initial time with this function."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot get initial time with this function",
+        reason="This model type does not support initial time access with variable",
+        suggestion="Ensure the model has variable initial time configured, or use initial_time(ocp) for fixed initial time",
+        context="initial_time with variable on AbstractModel"
+    ))
 end
 
 """
@@ -675,7 +685,12 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access.
 """
 function final_time(ocp::AbstractModel)
-    throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot get final time with this function",
+        reason="This model type does not support direct final time access",
+        suggestion="Use final_time(ocp) on a Model with FixedTimeModel or use final_time(ocp, variable) for variable final time",
+        context="final_time on AbstractModel"
+    ))
 end
 
 """
@@ -684,7 +699,12 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access with variable.
 """
 function final_time(ocp::AbstractModel, variable::AbstractVector)
-    throw(CTBase.UnauthorizedCall("You cannot get the final time with this function."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot get final time with this function",
+        reason="This model type does not support final time access with variable",
+        suggestion="Ensure the model has variable final time configured, or use final_time(ocp) for fixed final time",
+        context="final_time with variable on AbstractModel"
+    ))
 end
 
 """
@@ -817,7 +837,12 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Mayer cost on a model without one.
 """
 function mayer(ocp::AbstractModel)
-    throw(CTBase.UnauthorizedCall("This ocp has no Mayer objective."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot access Mayer cost",
+        reason="This OCP has no Mayer objective defined",
+        suggestion="Define a Mayer objective using objective!(ocp, :min/:max, mayer=...) before accessing it",
+        context="mayer accessor"
+    ))
 end
 
 """
@@ -878,7 +903,12 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Lagrange cost on a model without one.
 """
 function lagrange(ocp::AbstractModel)
-    throw(CTBase.UnauthorizedCall("This ocp has no Lagrange objective."))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot access Lagrange cost",
+        reason="This OCP has no Lagrange objective defined",
+        suggestion="Define a Lagrange objective using objective!(ocp, :min/:max, lagrange=...) before accessing it",
+        context="lagrange accessor"
+    ))
 end
 
 """
@@ -994,7 +1024,12 @@ function get_build_examodel(
         <:Nothing,
     },
 )
-    throw(CTBase.UnauthorizedCall("first parse with :exa backend"))
+    throw(CTModels.Exceptions.UnauthorizedCall(
+        "Cannot access dynamics",
+        reason="Model must be parsed with :exa backend first",
+        suggestion="Parse the OCP with backend=:exa before accessing dynamics",
+        context="dynamics accessor on unparsed model"
+    ))
 end
 
 # Constraints

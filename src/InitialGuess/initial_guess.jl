@@ -90,8 +90,13 @@ function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
     if dim == 1
         return t -> state
     else
-        msg = "Initial state dimension mismatch: got scalar for state dimension $dim"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial state dimension mismatch",
+            got="scalar value",
+            expected="vector of length $dim or function returning such vector",
+            suggestion="Use a vector: state=[x1, x2, ..., x$dim] or a function: state=t->[...]",
+            context="initial_state with scalar input"
+        ))
     end
 end
 
@@ -145,16 +150,15 @@ function _build_block_with_components(
                 [base_val]
             end
         else
-            if !(base_val isa AbstractVector) || length(base_val) != dim
-                msg = string(
-                    "Block-level ",
-                    role,
-                    " initial guess produced value of incompatible dimension: got ",
-                    (base_val isa AbstractVector ? length(base_val) : 1),
-                    " instead of ",
-                    dim,
-                )
-                throw(CTBase.IncorrectArgument(msg))
+            if (base_val isa AbstractVector && length(base_val) != dim) ||
+               (!(base_val isa AbstractVector) && dim != 1)
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Block-level $role initialization has incompatible dimension",
+                    got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
+                    expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
+                    suggestion="Ensure the $role function returns the correct dimension",
+                    context="block-level $role initialization"
+                ))
             end
             collect(base_val)
         end
@@ -163,30 +167,26 @@ function _build_block_with_components(
             val = fi(t)
             val_scalar = if val isa AbstractVector
                 if length(val) != 1
-                    msg = string(
-                        "Component-level ",
-                        role,
-                        " initial guess must be scalar or length-1 vector for index ",
-                        i,
-                        ".",
-                    )
-                    throw(CTBase.IncorrectArgument(msg))
+                    throw(CTModels.Exceptions.IncorrectArgument(
+                        "Component-level initialization must return scalar or length-1 vector",
+                        got="vector of length $(length(val)) for $role component $i",
+                        expected="scalar or length-1 vector",
+                        suggestion="Ensure the function for component $i returns a single value",
+                        context="component-level $role initialization"
+                    ))
                 end
                 val[1]
             else
                 val
             end
             if !(1 <= i <= dim)
-                msg = string(
-                    "Component index ",
-                    i,
-                    " out of bounds for ",
-                    role,
-                    " dimension ",
-                    dim,
-                    ".",
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Component index out of bounds",
+                    got="index $i for $role",
+                    expected="index between 1 and $dim",
+                    suggestion="Use a valid component index in range 1:$dim",
+                    context="component-level $role initialization"
+                ))
             end
             vec[i] = val_scalar
         end
@@ -227,14 +227,22 @@ function _build_component_function_without_time(data)
             c = data[1]
             return t -> c
         else
-            msg = "Component-level initialization without time must be scalar or length-1 vector."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Component-level initialization vector has invalid length",
+                got="vector of length $(length(data))",
+                expected="scalar or length-1 vector",
+                suggestion="Use a scalar value or a single-element vector for component initialization",
+                context="component-level initialization without time grid"
+            ))
         end
     else
-        msg = string(
-            "Unsupported component-level initialization type without time: ", typeof(data)
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Unsupported component-level initialization type",
+            got="$(typeof(data))",
+            expected="Function, Real, or Vector{<:Real}",
+            suggestion="Use a function, scalar, or vector for component initialization",
+            context="component-level initialization without time grid"
+        ))
     end
 end
 
@@ -258,20 +266,22 @@ function _build_component_function_with_time(data, time::AbstractVector)
             c = data[1]
             return t -> c
         else
-            msg = string(
-                "Component-level initialization time-grid mismatch: got ",
-                length(data),
-                " samples for ",
-                length(time),
-                "-point time grid.",
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Component-level initialization time-grid mismatch",
+                got="$(length(data)) data points",
+                expected="$(length(time)) points matching time grid, or 1 for constant",
+                suggestion="Provide data with $(length(time)) samples or use a single value for constant initialization",
+                context="component-level initialization with time grid"
+            ))
         end
     else
-        msg = string(
-            "Unsupported component-level initialization type with time grid: ", typeof(data)
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Unsupported component-level initialization type with time grid",
+            got="$(typeof(data))",
+            expected="Function, Real, or Vector{<:Real}",
+            suggestion="Use a function, scalar, or vector for component initialization with time grid",
+            context="component-level initialization with time grid"
+        ))
     end
 end
 
@@ -285,10 +295,13 @@ Throws `CTBase.IncorrectArgument` if the vector length does not match the state 
 function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real})
     dim = state_dimension(ocp)
     if length(state) != dim
-        msg = string(
-            "Initial state dimension mismatch: got ", length(state), " instead of ", dim
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial state dimension mismatch",
+            got="vector of length $(length(state))",
+            expected="vector of length $dim",
+            suggestion="Provide a state vector with $dim elements: state=[x1, x2, ..., x$dim]",
+            context="initial_state with vector input"
+        ))
     end
     return t -> state
 end
@@ -328,8 +341,13 @@ function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
     if dim == 1
         return t -> control
     else
-        msg = "Initial control dimension mismatch: got scalar for control dimension $dim"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial control dimension mismatch",
+            got="scalar value",
+            expected="vector of length $dim or function returning such vector",
+            suggestion="Use a vector: control=[u1, u2, ..., u$dim] or a function: control=t->[...]",
+            context="initial_control with scalar input"
+        ))
     end
 end
 
@@ -343,10 +361,13 @@ Throws `CTBase.IncorrectArgument` if the vector length does not match the contro
 function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:Real})
     dim = control_dimension(ocp)
     if length(control) != dim
-        msg = string(
-            "Initial control dimension mismatch: got ", length(control), " instead of ", dim
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial control dimension mismatch",
+            got="vector of length $(length(control))",
+            expected="vector of length $dim",
+            suggestion="Provide a control vector with $dim elements: control=[u1, u2, ..., u$dim]",
+            context="initial_control with vector input"
+        ))
     end
     return t -> control
 end
@@ -377,13 +398,23 @@ Throws `CTBase.IncorrectArgument` if the variable dimension is not 1.
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     dim = variable_dimension(ocp)
     if dim == 0
-        msg = "Initial variable dimension mismatch: got scalar for variable dimension 0"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial variable dimension mismatch",
+            got="scalar value",
+            expected="no variable (dimension 0)",
+            suggestion="Remove the variable argument or set variable=nothing",
+            context="initial_variable with scalar input for zero-dimensional variable"
+        ))
     elseif dim == 1
         return variable
     else
-        msg = "Initial variable dimension mismatch: got scalar for variable dimension $dim"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial variable dimension mismatch",
+            got="scalar value",
+            expected="vector of length $dim",
+            suggestion="Use a vector: variable=[v1, v2, ..., v$dim]",
+            context="initial_variable with scalar input"
+        ))
     end
 end
 
@@ -396,14 +427,15 @@ Throws `CTBase.IncorrectArgument` if the vector length does not match the variab
 """
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<:Real})
     dim = variable_dimension(ocp)
-    if length(variable) != dim
-        msg = string(
-            "Initial variable dimension mismatch: got ",
-            length(variable),
-            " instead of ",
-            dim,
-        )
-        throw(CTBase.IncorrectArgument(msg))
+    base_val = variable
+    if length(base_val) != dim
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Initial variable dimension mismatch",
+            got="vector of length $(length(base_val))",
+            expected="vector of length $dim",
+            suggestion="Provide a variable vector with $dim elements matching the variable dimension",
+            context="initial_variable component-level initialization"
+        ))
     end
     return variable
 end
@@ -517,18 +549,23 @@ function _validate_initial_guess(
     x0 = state(init)(tsample)
     if xdim == 1
         if !(x0 isa Real) && !(x0 isa AbstractVector && length(x0) == 1)
-            msg = "Initial state function must return a scalar or length-1 vector for state dimension 1."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial state function returns invalid type for 1D state",
+                got="$(typeof(x0))",
+                expected="Real or length-1 Vector",
+                suggestion="Ensure the state function returns a scalar or single-element vector",
+                context="state function validation"
+            ))
         end
     else
         if !(x0 isa AbstractVector) || length(x0) != xdim
-            msg = string(
-                "Initial state function returns value of incompatible dimension: got ",
-                (x0 isa AbstractVector ? length(x0) : 1),
-                " instead of ",
-                xdim,
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial state function returns incompatible dimension",
+                got="$(x0 isa AbstractVector ? "vector of length $(length(x0))" : "scalar")",
+                expected="vector of length $xdim",
+                suggestion="Ensure the state function returns a vector with $xdim elements",
+                context="state function validation"
+            ))
         end
     end
 
@@ -536,18 +573,23 @@ function _validate_initial_guess(
     u0 = control(init)(tsample)
     if udim == 1
         if !(u0 isa Real) && !(u0 isa AbstractVector && length(u0) == 1)
-            msg = "Initial control function must return a scalar or length-1 vector for control dimension 1."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial control function returns invalid type for 1D control",
+                got="$(typeof(u0))",
+                expected="Real or length-1 Vector",
+                suggestion="Ensure the control function returns a scalar or single-element vector",
+                context="control function validation"
+            ))
         end
     else
         if !(u0 isa AbstractVector) || length(u0) != udim
-            msg = string(
-                "Initial control function returns value of incompatible dimension: got ",
-                (u0 isa AbstractVector ? length(u0) : 1),
-                " instead of ",
-                udim,
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial control function returns incompatible dimension",
+                got="$(u0 isa AbstractVector ? "vector of length $(length(u0))" : "scalar")",
+                expected="vector of length $udim",
+                suggestion="Ensure the control function returns a vector with $udim elements",
+                context="control function validation"
+            ))
         end
     end
 
@@ -555,27 +597,42 @@ function _validate_initial_guess(
     if vdim == 0
         if v0 isa AbstractVector
             if length(v0) != 0
-                msg = "Initial variable has non-zero length for problem with no variable."
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Initial variable has non-zero length for problem with no variable",
+                    got="vector of length $(length(v0))",
+                    expected="no variable (dimension 0)",
+                    suggestion="Remove the variable argument or set variable=nothing",
+                    context="variable validation for zero-dimensional problem"
+                ))
             end
         elseif v0 isa Real
-            msg = "Initial variable is scalar for problem with no variable."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial variable is scalar for problem with no variable",
+                got="scalar value",
+                expected="no variable (dimension 0)",
+                suggestion="Remove the variable argument or set variable=nothing",
+                context="variable validation for zero-dimensional problem"
+            ))
         end
     elseif vdim == 1
         if !(v0 isa Real) && !(v0 isa AbstractVector && length(v0) == 1)
-            msg = "Initial variable must be a scalar or length-1 vector for variable dimension 1."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial variable has invalid type for 1D variable",
+                got="$(typeof(v0))",
+                expected="Real or length-1 Vector",
+                suggestion="Provide a scalar or single-element vector for the variable",
+                context="variable validation"
+            ))
         end
     else
         if !(v0 isa AbstractVector) || length(v0) != vdim
-            msg = string(
-                "Initial variable has incompatible dimension: got ",
-                (v0 isa AbstractVector ? length(v0) : 1),
-                " instead of ",
-                vdim,
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Initial variable has incompatible dimension",
+                got="$(v0 isa AbstractVector ? "vector of length $(length(v0))" : "scalar")",
+                expected="vector of length $vdim",
+                suggestion="Provide a variable vector with $vdim elements",
+                context="variable validation"
+            ))
         end
     end
 
@@ -623,8 +680,13 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
     elseif init_data isa NamedTuple
         return _initial_guess_from_namedtuple(ocp, init_data)
     else
-        msg = "Unsupported initial guess type: $(typeof(init_data))"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Unsupported initial guess type",
+            got="$(typeof(init_data))",
+            expected="nothing, OptimalControlInitialGuess, OptimalControlPreInit, Solution, or NamedTuple",
+            suggestion="Use one of the supported types for initial guess specification",
+            context="build_initial_guess"
+        ))
     end
 end
 
@@ -641,16 +703,31 @@ function _initial_guess_from_solution(
 )
     # Basic dimensional consistency checks
     if state_dimension(ocp) != state_dimension(sol.model)
-        msg = "Warm start: state dimension mismatch between ocp and solution."
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Warm start state dimension mismatch",
+            got="solution with state dimension $(state_dimension(sol.model))",
+            expected="state dimension $(state_dimension(ocp))",
+            suggestion="Ensure the solution comes from a problem with matching state dimension",
+            context="warm start from solution"
+        ))
     end
     if control_dimension(ocp) != control_dimension(sol.model)
-        msg = "Warm start: control dimension mismatch between ocp and solution."
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Warm start control dimension mismatch",
+            got="solution with control dimension $(control_dimension(sol.model))",
+            expected="control dimension $(control_dimension(ocp))",
+            suggestion="Ensure the solution comes from a problem with matching control dimension",
+            context="warm start from solution"
+        ))
     end
     if variable_dimension(ocp) != variable_dimension(sol.model)
-        msg = "Warm start: variable dimension mismatch between ocp and solution."
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Warm start variable dimension mismatch",
+            got="solution with variable dimension $(variable_dimension(sol.model))",
+            expected="variable dimension $(variable_dimension(ocp))",
+            suggestion="Ensure the solution comes from a problem with matching variable dimension",
+            context="warm start from solution"
+        ))
     end
 
     state_fun = state(sol)
@@ -699,99 +776,124 @@ function _initial_guess_from_namedtuple(
     # Parse keys and enforce uniqueness
     for (k, v) in pairs(init_data)
         if k == :time
-            msg = "Global :time in initial guess NamedTuple is not supported. Provide time grids per block or component as (time, data) tuples."
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Global :time key not supported in initial guess NamedTuple",
+                got=":time as global key",
+                expected="time grids per block or component as (time, data) tuples",
+                suggestion="Use (time_grid, data) tuples for each component or block instead of a global :time",
+                context="NamedTuple initial guess parsing"
+            ))
         elseif k == :variable || k == v_name_sym
             if variable_block_set || !isempty(variable_comp)
-                msg = "Variable initial guess specified both at block level and component level, or multiple block-level entries."
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Variable initial guess specified multiple times",
+                    got="variable at both block and component level, or multiple block entries",
+                    expected="variable specified once, either at block or component level",
+                    suggestion="Use either :variable (block) or component names, not both",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             variable_block = v
             variable_block_set = true
         elseif k == :state || k == s_name_sym
             if state_block_set || !isempty(state_comp)
-                msg = "State initial guess specified both at block level and component level, or multiple block-level entries."
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "State initial guess specified multiple times",
+                    got="state at both block and component level, or multiple block entries",
+                    expected="state specified once, either at block or component level",
+                    suggestion="Use either :state (block) or component names, not both",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             state_block = v
             state_block_set = true
         elseif k == :control || k == u_name_sym
             if control_block_set || !isempty(control_comp)
-                msg = "Control initial guess specified both at block level and component level, or multiple block-level entries."
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Control initial guess specified multiple times",
+                    got="control at both block and component level, or multiple block entries",
+                    expected="control specified once, either at block or component level",
+                    suggestion="Use either :control (block) or component names, not both",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             control_block = v
             control_block_set = true
         elseif haskey(s_comp_index, k)
             if state_block_set
-                msg = string(
-                    "Cannot mix state block (:state or ",
-                    s_name_sym,
-                    ") and state component ",
-                    k,
-                    " in the same initial guess.",
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Cannot mix state block and component specifications",
+                    got="both :state/$s_name_sym block and component :$k",
+                    expected="either block-level or component-level, not both",
+                    suggestion="Remove either the block-level :state or the component-level specifications",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             idx = s_comp_index[k]
             if haskey(state_comp, idx)
-                msg = string(
-                    "State component ", k, " specified more than once in initial guess."
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "State component specified multiple times",
+                    got="component :$k specified more than once",
+                    expected="each component specified at most once",
+                    suggestion="Remove duplicate specification of component :$k",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             state_comp[idx] = v
         elseif haskey(u_comp_index, k)
             if control_block_set
-                msg = string(
-                    "Cannot mix control block (:control or ",
-                    u_name_sym,
-                    ") and control component ",
-                    k,
-                    " in the same initial guess.",
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Cannot mix control block and component specifications",
+                    got="both :control/$u_name_sym block and component :$k",
+                    expected="either block-level or component-level, not both",
+                    suggestion="Remove either the block-level :control or the component-level specifications",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             idx = u_comp_index[k]
             if haskey(control_comp, idx)
-                msg = string(
-                    "Control component ", k, " specified more than once in initial guess."
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Control component specified multiple times",
+                    got="component :$k specified more than once",
+                    expected="each component specified at most once",
+                    suggestion="Remove duplicate specification of component :$k",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             control_comp[idx] = v
         elseif haskey(v_comp_index, k)
             if variable_block_set
-                msg = string(
-                    "Cannot mix variable block (:variable or ",
-                    v_name_sym,
-                    ") and variable component ",
-                    k,
-                    " in the same initial guess.",
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Cannot mix variable block and component specifications",
+                    got="both :variable/$v_name_sym block and component :$k",
+                    expected="either block-level or component-level, not both",
+                    suggestion="Remove either the block-level :variable or the component-level specifications",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             idx = v_comp_index[k]
             if haskey(variable_comp, idx)
-                msg = string(
-                    "Variable component ", k, " specified more than once in initial guess."
-                )
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Variable component specified multiple times",
+                    got="component :$k specified more than once",
+                    expected="each component specified at most once",
+                    suggestion="Remove duplicate specification of component :$k",
+                    context="NamedTuple initial guess parsing"
+                ))
             end
             variable_comp[idx] = v
         else
-            msg = string(
-                "Unknown key ",
-                k,
-                " in initial guess NamedTuple. Allowed keys are: time, state, control, variable, ",
-                s_name_sym,
-                ", ",
-                u_name_sym,
-                ", ",
-                v_name_sym,
-                ", and component names of state/control/variable.",
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            allowed_keys = [:state, :control, :variable, s_name_sym, u_name_sym, v_name_sym]
+            append!(allowed_keys, s_comp_syms)
+            append!(allowed_keys, u_comp_syms)
+            append!(allowed_keys, v_comp_syms)
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Unknown key in initial guess NamedTuple",
+                got=":$k",
+                expected="one of: $(join(allowed_keys, ", "))",
+                suggestion="Use valid keys for state, control, variable (block or component level)",
+                context="NamedTuple initial guess parsing"
+            ))
         end
     end
 
@@ -806,8 +908,13 @@ function _initial_guess_from_namedtuple(
         else
             vdim = variable_dimension(ocp)
             if vdim == 0
-                msg = "Variable components specified for problem with no variable."
-                throw(CTBase.IncorrectArgument(msg))
+                throw(CTModels.Exceptions.IncorrectArgument(
+                    "Variable components specified for problem with no variable",
+                    got="component-level variable specifications",
+                    expected="no variable (dimension 0)",
+                    suggestion="Remove variable component specifications or use block-level :variable=nothing",
+                    context="NamedTuple initial guess variable parsing"
+                ))
             else
                 # Start from default variable initialization and override components
                 base = initial_variable(ocp, nothing)
@@ -817,18 +924,25 @@ function _initial_guess_from_namedtuple(
                         data = variable_comp[1]
                         val = if data isa AbstractVector{<:Real}
                             if length(data) != 1
-                                msg = "Variable component initial guess must be scalar or length-1 vector for variable dimension 1."
-                                throw(CTBase.IncorrectArgument(msg))
+                                throw(CTModels.Exceptions.IncorrectArgument(
+                                    "Variable component has invalid length for 1D variable",
+                                    got="vector of length $(length(data))",
+                                    expected="scalar or length-1 vector",
+                                    suggestion="Use a scalar or single-element vector for 1D variable component",
+                                    context="variable component initialization"
+                                ))
                             end
                             data[1]
                         elseif data isa Real
                             data
                         else
-                            msg = string(
-                                "Unsupported variable component initialization type without time: ",
-                                typeof(data),
-                            )
-                            throw(CTBase.IncorrectArgument(msg))
+                            throw(CTModels.Exceptions.IncorrectArgument(
+                                "Unsupported variable component initialization type",
+                                got="$(typeof(data))",
+                                expected="Real or Vector{<:Real}",
+                                suggestion="Use a scalar or vector for variable component initialization",
+                                context="variable component initialization without time"
+                            ))
                         end
                         val
                     else
@@ -839,55 +953,58 @@ function _initial_guess_from_namedtuple(
                     # vdim > 1: base should be a vector of length vdim
                     vec = if base isa AbstractVector
                         if length(base) != vdim
-                            msg = string(
-                                "Default variable initialization has incompatible dimension: got ",
-                                length(base),
-                                " instead of ",
-                                vdim,
-                                ".",
-                            )
-                            throw(CTBase.IncorrectArgument(msg))
+                            throw(CTModels.Exceptions.IncorrectArgument(
+                                "Default variable initialization has incompatible dimension",
+                                got="vector of length $(length(base))",
+                                expected="vector of length $vdim",
+                                suggestion="This is an internal error. Please report this issue.",
+                                context="variable component initialization"
+                            ))
                         end
                         collect(base)
                     elseif base isa Real
                         fill(base, vdim)
                     else
-                        msg = string(
-                            "Unsupported default variable initialization type: ",
-                            typeof(base),
-                        )
-                        throw(CTBase.IncorrectArgument(msg))
+                        throw(CTModels.Exceptions.IncorrectArgument(
+                            "Unsupported default variable initialization type",
+                            got="$(typeof(base))",
+                            expected="Real or Vector",
+                            suggestion="This is an internal error. Please report this issue.",
+                            context="variable component initialization"
+                        ))
                     end
                     # Override provided components; missing ones keep default
                     for (i, data) in variable_comp
                         if !(1 <= i <= vdim)
-                            msg = string(
-                                "Variable component index ",
-                                i,
-                                " out of bounds for variable dimension ",
-                                vdim,
-                                ".",
-                            )
-                            throw(CTBase.IncorrectArgument(msg))
+                            throw(CTModels.Exceptions.IncorrectArgument(
+                                "Variable component index out of bounds",
+                                got="index $i",
+                                expected="index between 1 and $vdim",
+                                suggestion="Use a valid component index in range 1:$vdim",
+                                context="variable component initialization"
+                            ))
                         end
                         val_scalar = if data isa AbstractVector{<:Real}
                             if length(data) != 1
-                                msg = string(
-                                    "Variable component index ",
-                                    i,
-                                    " initial guess must be scalar or length-1 vector.",
-                                )
-                                throw(CTBase.IncorrectArgument(msg))
+                                throw(CTModels.Exceptions.IncorrectArgument(
+                                    "Variable component has invalid length",
+                                    got="vector of length $(length(data)) for component $i",
+                                    expected="scalar or length-1 vector",
+                                    suggestion="Use a scalar or single-element vector for variable component $i",
+                                    context="variable component initialization"
+                                ))
                             end
                             data[1]
                         elseif data isa Real
                             data
                         else
-                            msg = string(
-                                "Unsupported variable component initialization type without time: ",
-                                typeof(data),
-                            )
-                            throw(CTBase.IncorrectArgument(msg))
+                            throw(CTModels.Exceptions.IncorrectArgument(
+                                "Unsupported variable component initialization type",
+                                got="$(typeof(data))",
+                                expected="Real or Vector{<:Real}",
+                                suggestion="Use a scalar or vector for variable component initialization",
+                                context="variable component $i initialization without time"
+                            ))
                         end
                         vec[i] = val_scalar
                     end
@@ -926,12 +1043,13 @@ function _format_time_grid(time_data)
     elseif time_data isa AbstractArray
         return vec(time_data)
     else
-        msg = string(
-            "Invalid time grid type for initial guess: ",
-            typeof(time_data),
-            ". Expected a vector or array.",
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Invalid time grid type for initial guess",
+            got="$(typeof(time_data))",
+            expected="Vector or Array",
+            suggestion="Provide a vector or array for the time grid",
+            context="time grid formatting"
+        ))
     end
 end
 
@@ -981,38 +1099,33 @@ function _build_time_dependent_init(
         !isempty(data_fmt) &&
         (data_fmt[1] isa AbstractVector)
         if length(data_fmt) != length(time)
-            msg = string(
-                "Time-grid ",
-                role,
-                " initialization mismatch: got ",
-                length(data_fmt),
-                " samples for ",
-                length(time),
-                "-point time grid.",
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Time-grid $role initialization mismatch",
+                got="$(length(data_fmt)) samples",
+                expected="$(length(time)) samples matching time grid",
+                suggestion="Provide data with $(length(time)) samples for the $role initialization",
+                context="time-grid based $role initialization"
+            ))
         end
         itp = ctinterpolate(time, data_fmt)
         sample = itp(first(time))
         if !(sample isa AbstractVector) || length(sample) != dim
-            msg = string(
-                "Time-grid ",
-                role,
-                " initialization has incompatible dimension: got ",
-                (sample isa AbstractVector ? length(sample) : 1),
-                " instead of ",
-                dim,
-            )
-            throw(CTBase.IncorrectArgument(msg))
+            throw(CTModels.Exceptions.IncorrectArgument(
+                "Time-grid $role initialization has incompatible dimension",
+                got="$(sample isa AbstractVector ? "vector of length $(length(sample))" : "scalar")",
+                expected="vector of length $dim",
+                suggestion="Ensure each sample in the $role data has dimension $dim",
+                context="time-grid based $role initialization"
+            ))
         end
         return t -> itp(t)
     else
-        msg = string(
-            "Unsupported ",
-            role,
-            " initialization type for time-grid based initial guess: ",
-            typeof(data),
-        )
-        throw(CTBase.IncorrectArgument(msg))
+        throw(CTModels.Exceptions.IncorrectArgument(
+            "Unsupported $role initialization type for time-grid based initial guess",
+            got="$(typeof(data))",
+            expected="Function, Vector{<:Real}, or Vector{<:Vector}",
+            suggestion="Use a function, scalar vector, or vector-of-vectors for time-grid based initialization",
+            context="time-grid based $role initialization"
+        ))
     end
 end

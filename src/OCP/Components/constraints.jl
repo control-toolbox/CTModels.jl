@@ -186,7 +186,13 @@ function __constraint!(
             end
         end
 
-        _ => throw(CTBase.IncorrectArgument("Provided arguments are inconsistent."))
+        _ => throw(CTModels.Exceptions.IncorrectArgument(
+            "Inconsistent constraint arguments",
+            got="arguments that don't match any valid constraint pattern",
+            expected="valid combination of type, range, function, bounds, and label",
+            suggestion="Check constraint! documentation for valid argument combinations. Common patterns: constraint!(ocp, :state, rg, f, lb, ub) or constraint!(ocp, :boundary, f)",
+            context="constraint! argument validation"
+        ))
     end
     return nothing
 end
@@ -744,5 +750,11 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     end
 
     # throw an exception if the label is not found
-    throw(CTBase.IncorrectArgument("Label $label not found in the model."))
+    throw(CTModels.Exceptions.IncorrectArgument(
+        "Constraint label not found",
+        got="label :$label",
+        expected="existing constraint label in the model",
+        suggestion="Check available constraint labels or add a constraint with this label first",
+        context="constraint lookup by label"
+    ))
 end
