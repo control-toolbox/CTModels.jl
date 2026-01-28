@@ -18,7 +18,7 @@ function test_state()
 
         # state!
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 0)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 0)
 
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1)
@@ -63,21 +63,21 @@ function test_state()
 
         # wrong number of components
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "y", ["u"])
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "y", ["u"])
 
         # NEW: Internal name validation tests
         @testset "state! - Internal name validation" begin
             # Empty name
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 1, "")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 1, "")
             
             # Empty component name
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["", "y"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["", "y"])
             
             # Name in components (multiple components) - should fail
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["x", "y"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["x", "y"])
             
             # Name == component (single) - should PASS (default behavior)
             ocp = CTModels.PreModel()
@@ -85,7 +85,7 @@ function test_state()
             
             # Duplicate components
             ocp = CTModels.PreModel()
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["y", "y"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["y", "y"])
         end
 
         # NEW: Inter-component conflicts tests
@@ -93,32 +93,32 @@ function test_state()
             # state.name vs control.name
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 1, "u")  # Conflict!
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 1, "u")  # Conflict!
             
             # state.component vs control.name
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["u", "v"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["u", "v"])
             
             # state.name vs time_name
             ocp = CTModels.PreModel()
             CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 1, "t")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 1, "t")
             
             # state.component vs time_name
             ocp = CTModels.PreModel()
             CTModels.time!(ocp, t0=0, tf=1, time_name="t")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["t", "y"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["t", "y"])
             
             # state.name vs variable.name
             ocp = CTModels.PreModel()
             CTModels.variable!(ocp, 1, "v")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 1, "v")
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 1, "v")
             
             # state.component vs variable.name
             ocp = CTModels.PreModel()
             CTModels.variable!(ocp, 1, "v")
-            @test_throws CTBase.IncorrectArgument CTModels.state!(ocp, 2, "x", ["v", "y"])
+            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.state!(ocp, 2, "x", ["v", "y"])
         end
 
         # NEW: Type stability tests

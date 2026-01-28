@@ -56,14 +56,14 @@ julia> state_components(ocp)
 # Throws
 
 - `CTBase.UnauthorizedCall`: If state has already been set
-- `CTBase.IncorrectArgument`: If n ≤ 0
-- `CTBase.IncorrectArgument`: If number of component names ≠ n
-- `CTBase.IncorrectArgument`: If name is empty
-- `CTBase.IncorrectArgument`: If any component name is empty
-- `CTBase.IncorrectArgument`: If name is one of the component names
-- `CTBase.IncorrectArgument`: If component names contain duplicates
-- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components
-- `CTBase.IncorrectArgument`: If any component name conflicts with existing names
+- `Exceptions.IncorrectArgument`: If n ≤ 0
+- `Exceptions.IncorrectArgument`: If number of component names ≠ n
+- `Exceptions.IncorrectArgument`: If name is empty
+- `Exceptions.IncorrectArgument`: If any component name is empty
+- `Exceptions.IncorrectArgument`: If name is one of the component names
+- `Exceptions.IncorrectArgument`: If component names contain duplicates
+- `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
+- `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
 """
 function state!(
     ocp::PreModel,
@@ -74,9 +74,19 @@ function state!(
 
     # checks
     @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
-    @ensure n > 0 CTBase.IncorrectArgument("the state dimension must be greater than 0")
-    @ensure size(components_names, 1) == n CTBase.IncorrectArgument(
-        "the number of state names must be equal to the state dimension"
+    @ensure n > 0 Exceptions.IncorrectArgument(
+        "Invalid state dimension",
+        got="n=$n",
+        expected="n > 0",
+        suggestion="Provide a positive integer for the state dimension",
+        context="state! dimension validation"
+    )
+    @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
+        "State component names count mismatch",
+        got="$(size(components_names, 1)) component names",
+        expected="$n component names (matching state dimension)",
+        suggestion="Provide exactly $n component names or omit to use auto-generated names",
+        context="state! components validation"
     )
 
     # NEW: Comprehensive name validation
