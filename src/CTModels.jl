@@ -62,30 +62,6 @@ The modular architecture ensures that:
 - Dependencies are explicit and minimal
 - Extensions can target specific modules
 - The public API remains stable and clean
-
-# Examples
-
-```julia
-using CTModels
-
-# Create an optimal control problem
-ocp = CTModels.PreModel()
-CTModels.time!(ocp; t0=0.0, tf=1.0)
-CTModels.state!(ocp, 2)
-CTModels.control!(ocp, 1)
-CTModels.dynamics!(ocp, (r, t, x, u) -> r .= [x[2], u[1]])
-
-# Build the model
-model = CTModels.build(ocp)
-
-# Create initial guess
-guess = CTModels.initial_guess(ocp; state=t -> [t, t^2], control=t -> [t])
-
-# Export solution
-CTModels.export_ocp_solution(solution, JLD2Tag(); filename="solution.jld2")
-```
-
-See also: [`CTBase`](@ref) for the underlying control toolbox framework.
 """
 module CTModels
 
@@ -116,7 +92,7 @@ using .Modelers
 # ============================================================================ #
 
 # Exceptions module - enhanced error handling system
-include(joinpath(@__DIR__, "Exceptions", "module.jl"))
+include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
 using .Exceptions
 import .Exceptions: set_show_full_stacktrace!, get_show_full_stacktrace
 
