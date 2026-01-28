@@ -38,6 +38,18 @@ julia> control!(ocp, 2, "v", ["a", "b"])
 julia> control_components(ocp)
 ["a", "b"]
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If control has already been set
+- `CTBase.IncorrectArgument`: If m ≤ 0
+- `CTBase.IncorrectArgument`: If number of component names ≠ m
+- `CTBase.IncorrectArgument`: If name is empty
+- `CTBase.IncorrectArgument`: If any component name is empty
+- `CTBase.IncorrectArgument`: If name is one of the component names
+- `CTBase.IncorrectArgument`: If component names contain duplicates
+- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components
+- `CTBase.IncorrectArgument`: If any component name conflicts with existing names
 """
 function control!(
     ocp::PreModel,
@@ -54,6 +66,9 @@ function control!(
     @ensure size(components_names, 1) == m CTBase.IncorrectArgument(
         "the number of control names must be equal to the control dimension"
     )
+
+    # NEW: Comprehensive name validation
+    __validate_name_uniqueness(ocp, string(name), string.(components_names), :control)
 
     # set the control
     ocp.control = ControlModel(string(name), string.(components_names))

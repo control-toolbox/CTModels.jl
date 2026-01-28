@@ -27,6 +27,19 @@ julia> time!(ocp, t0=0, tf=1, time_name="s") # time_name is a String
 # or
 julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol  
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If time has already been set
+- `CTBase.UnauthorizedCall`: If variable must be set before (when t0 or tf is free)
+- `CTBase.IncorrectArgument`: If ind0 or indf is out of bounds
+- `CTBase.IncorrectArgument`: If both t0 and ind0 are provided
+- `CTBase.IncorrectArgument`: If neither t0 nor ind0 is provided
+- `CTBase.IncorrectArgument`: If both tf and indf are provided
+- `CTBase.IncorrectArgument`: If neither tf nor indf is provided
+- `CTBase.IncorrectArgument`: If time_name is empty
+- `CTBase.IncorrectArgument`: If time_name conflicts with existing names
+- `CTBase.IncorrectArgument`: If t0 ≥ tf (when both are fixed)
 """
 function time!(
     ocp::PreModel;
@@ -72,6 +85,16 @@ function time!(
 
     time_name = time_name isa String ? time_name : string(time_name)
 
+    # NEW: Validate time_name is not empty
+    @ensure !isempty(time_name) CTBase.IncorrectArgument(
+        "Time name cannot be empty"
+    )
+
+    # NEW: Validate time_name doesn't conflict with existing names
+    @ensure !__has_name_conflict(ocp, time_name, :time) CTBase.IncorrectArgument(
+        "The time name '$time_name' conflicts with existing names: $(__collect_used_names(ocp))"
+    )
+
     (initial_time, final_time) = MLStyle.@match (t0, ind0, tf, indf) begin
         (::Time, ::Nothing, ::Time, ::Nothing) => (
             FixedTimeModel(t0, t0 isa Int ? string(t0) : string(round(t0; digits=2))),
@@ -90,6 +113,15 @@ function time!(
             FreeTimeModel(indf, components(ocp.variable)[indf]),
         )
         _ => throw(CTBase.IncorrectArgument("Provided arguments are inconsistent."))
+    end
+
+    # NEW: Validate t0 < tf when both are fixed
+    if initial_time isa FixedTimeModel && final_time isa FixedTimeModel
+        t0_val = time(initial_time)
+        tf_val = time(final_time)
+        @ensure t0_val < tf_val CTBase.IncorrectArgument(
+            "Initial time t0=$t0_val must be less than final time tf=$tf_val"
+        )
     end
 
     ocp.times = TimesModel(initial_time, final_time, time_name)

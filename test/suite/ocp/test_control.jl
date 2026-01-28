@@ -63,6 +63,76 @@ function test_control()
         # wrong number of components
         ocp = CTModels.PreModel()
         @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "v", ["a"])
+
+        # NEW: Internal name validation tests
+        @testset "control! - Internal name validation" begin
+            # Empty name
+            ocp = CTModels.PreModel()
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "")
+            
+            # Empty component name
+            ocp = CTModels.PreModel()
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["", "v"])
+            
+            # Name in components (multiple) - should fail
+            ocp = CTModels.PreModel()
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["u", "v"])
+            
+            # Name == component (single) - should PASS (default behavior)
+            ocp = CTModels.PreModel()
+            @test_nowarn CTModels.control!(ocp, 1, "u", ["u"])
+            
+            # Duplicate components
+            ocp = CTModels.PreModel()
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["v", "v"])
+        end
+
+        # NEW: Inter-component conflicts tests
+        @testset "control! - Inter-component conflicts" begin
+            # control.name vs state.name
+            ocp = CTModels.PreModel()
+            CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "x")  # Conflict!
+            
+            # control.name vs state.component
+            ocp = CTModels.PreModel()
+            CTModels.state!(ocp, 2, "x", ["u", "v"])
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "u")
+            
+            # control.component vs state.name
+            ocp = CTModels.PreModel()
+            CTModels.state!(ocp, 1, "x")
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["x", "v"])
+            
+            # control.name vs time_name
+            ocp = CTModels.PreModel()
+            CTModels.time!(ocp, t0=0, tf=1, time_name="t")
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "t")
+            
+            # control.component vs time_name
+            ocp = CTModels.PreModel()
+            CTModels.time!(ocp, t0=0, tf=1, time_name="t")
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["t", "v"])
+            
+            # control.name vs variable.name
+            ocp = CTModels.PreModel()
+            CTModels.variable!(ocp, 1, "v")
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 1, "v")
+            
+            # control.component vs variable.name
+            ocp = CTModels.PreModel()
+            CTModels.variable!(ocp, 1, "v")
+            @test_throws CTBase.IncorrectArgument CTModels.control!(ocp, 2, "u", ["v", "w"])
+        end
+
+        # NEW: Type stability tests
+        @testset "control! - Type stability" begin
+            ocp = CTModels.PreModel()
+            CTModels.control!(ocp, 2, "u", ["u₁", "u₂"])
+            @inferred CTModels.name(ocp.control)
+            @inferred CTModels.components(ocp.control)
+            @inferred CTModels.dimension(ocp.control)
+        end
     end
 end
 

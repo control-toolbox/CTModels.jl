@@ -57,7 +57,10 @@ include("Types/solution.jl")
 include("Core/defaults.jl")
 include("Core/time_dependence.jl")
 
-# Load component functions (depend on types and core)
+# Load validation helpers (depend on types and core)
+include("Validation/name_validation.jl")
+
+# Load component functions (depend on types, core, and validation)
 include("Components/state.jl")
 include("Components/control.jl")
 include("Components/variable.jl")

@@ -19,6 +19,19 @@ This function registers a named variable (e.g. "state", "control", or other) to 
 julia> variable!(ocp, 1, "v")
 julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If variable has already been set
+- `CTBase.UnauthorizedCall`: If objective has already been set
+- `CTBase.UnauthorizedCall`: If dynamics has already been set
+- `CTBase.IncorrectArgument`: If number of component names ≠ q (when q > 0)
+- `CTBase.IncorrectArgument`: If name is empty (when q > 0)
+- `CTBase.IncorrectArgument`: If any component name is empty (when q > 0)
+- `CTBase.IncorrectArgument`: If name is one of the component names (when q > 0)
+- `CTBase.IncorrectArgument`: If component names contain duplicates (when q > 0)
+- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components (when q > 0)
+- `CTBase.IncorrectArgument`: If any component name conflicts with existing names (when q > 0)
 """
 function variable!(
     ocp::PreModel,
@@ -41,6 +54,11 @@ function variable!(
     @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall(
         "the dynamics must be set after the variable."
     )
+
+    # NEW: Comprehensive name validation (only if q > 0)
+    if q > 0
+        __validate_name_uniqueness(ocp, string(name), string.(components_names), :variable)
+    end
 
     ocp.variable = if q == 0
         EmptyVariableModel()

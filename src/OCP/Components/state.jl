@@ -52,6 +52,18 @@ julia> state_dimension(ocp)
 julia> state_components(ocp)
 ["u", "v"]
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If state has already been set
+- `CTBase.IncorrectArgument`: If n ≤ 0
+- `CTBase.IncorrectArgument`: If number of component names ≠ n
+- `CTBase.IncorrectArgument`: If name is empty
+- `CTBase.IncorrectArgument`: If any component name is empty
+- `CTBase.IncorrectArgument`: If name is one of the component names
+- `CTBase.IncorrectArgument`: If component names contain duplicates
+- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components
+- `CTBase.IncorrectArgument`: If any component name conflicts with existing names
 """
 function state!(
     ocp::PreModel,
@@ -66,6 +78,9 @@ function state!(
     @ensure size(components_names, 1) == n CTBase.IncorrectArgument(
         "the number of state names must be equal to the state dimension"
     )
+
+    # NEW: Comprehensive name validation
+    __validate_name_uniqueness(ocp, string(name), string.(components_names), :state)
 
     # set the state
     ocp.state = StateModel(string(name), string.(components_names))
