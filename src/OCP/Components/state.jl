@@ -75,18 +75,18 @@ function state!(
     # checks
     @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
     @ensure n > 0 Exceptions.IncorrectArgument(
-        "Invalid state dimension",
+        "Invalid dimension: must be positive",
         got="n=$n",
-        expected="n > 0",
-        suggestion="Provide a positive integer for the state dimension",
-        context="state!(ocp, n=$n, name=\"$name\") - validating n parameter"
+        expected="n > 0 (positive integer)",
+        suggestion="Use state!(ocp, n=3) with n > 0",
+        context="state!(ocp, n=$n, name=\"$name\") - validating dimension parameter"
     )
     @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
-        "State component names count mismatch",
-        got="$(size(components_names, 1)) component names",
-        expected="$n component names (matching state dimension)",
-        suggestion="Provide exactly $n component names or omit to use auto-generated names",
-        context="state! components validation"
+        "Component names count mismatch",
+        got="$(size(components_names, 1)) names for dimension $n",
+        expected="exactly $n component names",
+        suggestion="Use state!(ocp, n, name, [\"x1\", \"x2\", ..., \"x$n\"]) or omit for auto-generation",
+        context="state!(ocp, n=$n, components_names=[...]) - validating names count"
     )
 
     # NEW: Comprehensive name validation

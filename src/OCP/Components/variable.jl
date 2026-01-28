@@ -44,11 +44,11 @@ function variable!(
     )
 
     @ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
-        "Variable component names count mismatch",
-        got="$(size(components_names, 1)) component names",
-        expected="$q component names (matching variable dimension)",
-        suggestion="Provide exactly $q component names or omit to use auto-generated names",
-        context="variable! components validation"
+        "Component names count mismatch",
+        got="$(size(components_names, 1)) names for dimension $q",
+        expected="exactly $q component names",
+        suggestion="Use variable!(ocp, q, name, [\"v1\", \"v2\", ..., \"v$q\"]) or omit for auto-generation",
+        context="variable!(ocp, q=$q, components_names=[...]) - validating names count"
     )
 
     @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(

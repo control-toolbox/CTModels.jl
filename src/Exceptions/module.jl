@@ -50,6 +50,6 @@ module Exceptions
 using CTBase
 
 # Include the main exception definitions
-include("Exceptions.jl")
+include("exceptions.jl")
 
 end # module

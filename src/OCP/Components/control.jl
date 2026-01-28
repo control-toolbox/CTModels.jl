@@ -63,18 +63,18 @@ function control!(
         "the control has already been set."
     )
     @ensure m > 0 Exceptions.IncorrectArgument(
-        "Invalid control dimension",
+        "Invalid dimension: must be positive",
         got="m=$m",
-        expected="m > 0",
-        suggestion="Provide a positive integer for the control dimension",
-        context="control!(ocp, m=$m, name=\"$name\") - validating m parameter"
+        expected="m > 0 (positive integer)",
+        suggestion="Use control!(ocp, m=2) with m > 0",
+        context="control!(ocp, m=$m, name=\"$name\") - validating dimension parameter"
     )
     @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
-        "Control component names count mismatch",
-        got="$(size(components_names, 1)) component names",
-        expected="$m component names (matching control dimension)",
-        suggestion="Provide exactly $m component names or omit to use auto-generated names",
-        context="control! components validation"
+        "Component names count mismatch",
+        got="$(size(components_names, 1)) names for dimension $m",
+        expected="exactly $m component names",
+        suggestion="Use control!(ocp, m, name, [\"u1\", \"u2\", ..., \"u$m\"]) or omit for auto-generation",
+        context="control!(ocp, m=$m, components_names=[...]) - validating names count"
     )
 
     # NEW: Comprehensive name validation

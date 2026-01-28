@@ -86,11 +86,11 @@ function __constraint!(
     @ensure(
         length(lb) == length(ub),
         Exceptions.IncorrectArgument(
-            "Bounds length mismatch",
+            "Bounds dimension mismatch",
             got="lb length=$(length(lb)), ub length=$(length(ub))",
-            expected="lb and ub must have same length",
-            suggestion="Ensure lower and upper bounds have equal dimensions",
-            context="constraint! bounds validation"
+            expected="lb and ub with same length",
+            suggestion="Use constraint!(ocp, type, lb=[...], ub=[...]) with equal-length vectors",
+            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds dimensions"
         ),
     )
 
@@ -98,11 +98,11 @@ function __constraint!(
     @ensure(
         all(lb .<= ub),
         Exceptions.IncorrectArgument(
-            "Invalid bounds order",
-            got="some lb > ub violations",
-            expected="lb ≤ ub element-wise",
-            suggestion="Ensure each lower bound is ≤ corresponding upper bound",
-            context="constraint! bounds order validation"
+            "Invalid bounds: lower > upper",
+            got="some lb[i] > ub[i] violations",
+            expected="lb[i] ≤ ub[i] for all i",
+            suggestion="Check bounds values: lb=[$(lb[1]),...] ≤ ub=[$(ub[1]),...]",
+            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds order"
         ),
     )
 
@@ -152,33 +152,33 @@ function __constraint!(
                 @ensure(
                     all(1 .≤ rg .≤ n),
                     Exceptions.IncorrectArgument(
-                        "State constraint range out of bounds",
-                        got="range=$rg",
-                        expected="indices in range 1:$n",
-                        suggestion="Ensure all state indices are within state dimension",
-                        context="constraint! state range validation"
+                        "Constraint range out of bounds",
+                        got="range=$rg for state dimension $n",
+                        expected="all indices in 1:$n",
+                        suggestion="Use constraint!(ocp, :state, 1:$n, ...) or subset like 1:2",
+                        context="constraint!(ocp, type=:state, rg=$rg) - validating range bounds"
                     ),
                 )
             elseif type == :control
                 @ensure(
                     all(1 .≤ rg .≤ m),
                     Exceptions.IncorrectArgument(
-                        "Control constraint range out of bounds",
-                        got="range=$rg",
-                        expected="indices in range 1:$m",
-                        suggestion="Ensure all control indices are within control dimension",
-                        context="constraint! control range validation"
+                        "Constraint range out of bounds",
+                        got="range=$rg for control dimension $m",
+                        expected="all indices in 1:$m",
+                        suggestion="Use constraint!(ocp, :control, 1:$m, ...) or subset like 1:2",
+                        context="constraint!(ocp, type=:control, rg=$rg) - validating range bounds"
                     ),
                 )
             elseif type == :variable
                 @ensure(
                     all(1 .≤ rg .≤ q),
                     Exceptions.IncorrectArgument(
-                        "Variable constraint range out of bounds",
-                        got="range=$rg",
-                        expected="indices in range 1:$q",
-                        suggestion="Ensure all variable indices are within variable dimension",
-                        context="constraint! variable range validation"
+                        "Constraint range out of bounds",
+                        got="range=$rg for variable dimension $q",
+                        expected="all indices in 1:$q",
+                        suggestion="Use constraint!(ocp, :variable, 1:$q, ...) or subset like 1:2",
+                        context="constraint!(ocp, type=:variable, rg=$rg) - validating range bounds"
                     ),
                 )
             else
