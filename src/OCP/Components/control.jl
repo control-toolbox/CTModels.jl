@@ -42,14 +42,14 @@ julia> control_components(ocp)
 # Throws
 
 - `CTBase.UnauthorizedCall`: If control has already been set
-- `CTBase.IncorrectArgument`: If m ≤ 0
-- `CTBase.IncorrectArgument`: If number of component names ≠ m
-- `CTBase.IncorrectArgument`: If name is empty
-- `CTBase.IncorrectArgument`: If any component name is empty
-- `CTBase.IncorrectArgument`: If name is one of the component names
-- `CTBase.IncorrectArgument`: If component names contain duplicates
-- `CTBase.IncorrectArgument`: If name conflicts with existing names in other components
-- `CTBase.IncorrectArgument`: If any component name conflicts with existing names
+- `Exceptions.IncorrectArgument`: If m ≤ 0
+- `Exceptions.IncorrectArgument`: If number of component names ≠ m
+- `Exceptions.IncorrectArgument`: If name is empty
+- `Exceptions.IncorrectArgument`: If any component name is empty
+- `Exceptions.IncorrectArgument`: If name is one of the component names
+- `Exceptions.IncorrectArgument`: If component names contain duplicates
+- `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
+- `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
 """
 function control!(
     ocp::PreModel,
@@ -62,9 +62,19 @@ function control!(
     @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall(
         "the control has already been set."
     )
-    @ensure m > 0 CTBase.IncorrectArgument("the control dimension must be greater than 0")
-    @ensure size(components_names, 1) == m CTBase.IncorrectArgument(
-        "the number of control names must be equal to the control dimension"
+    @ensure m > 0 Exceptions.IncorrectArgument(
+        "Invalid control dimension",
+        got="m=$m",
+        expected="m > 0",
+        suggestion="Provide a positive integer for the control dimension",
+        context="control! dimension validation"
+    )
+    @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
+        "Control component names count mismatch",
+        got="$(size(components_names, 1)) component names",
+        expected="$m component names (matching control dimension)",
+        suggestion="Provide exactly $m component names or omit to use auto-generated names",
+        context="control! components validation"
     )
 
     # NEW: Comprehensive name validation

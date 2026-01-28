@@ -139,7 +139,7 @@ Performs comprehensive validation:
 
 # Throws
 
-- `CTBase.IncorrectArgument`: If any validation fails
+- `Exceptions.IncorrectArgument`: If any validation fails
 
 # Example
 
@@ -160,13 +160,21 @@ function __validate_name_uniqueness(
     component_label = String(component_type)
     
     # 1. Name is not empty
-    @ensure !isempty(name) CTBase.IncorrectArgument(
-        "The $component_label name cannot be empty"
+    @ensure !isempty(name) Exceptions.IncorrectArgument(
+        "Empty $(component_label) name",
+        got="empty string",
+        expected="non-empty string",
+        suggestion="Provide a valid name for the $component_label",
+        context="$(component_label)! name validation"
     )
     
     # 2. Components are not empty
-    @ensure all(!isempty(c) for c in components) CTBase.IncorrectArgument(
-        "Component names cannot be empty for $component_label"
+    @ensure all(!isempty(c) for c in components) Exceptions.IncorrectArgument(
+        "Empty component name in $(component_label)",
+        got="one or more empty component names",
+        expected="all non-empty component names",
+        suggestion="Ensure all component names are non-empty strings",
+        context="$(component_label)! component names validation"
     )
     
     # 3. Name not in components (internal conflict)
@@ -174,24 +182,40 @@ function __validate_name_uniqueness(
     if length(components) == 1 && components[1] == name
         # This is the default behavior for scalar components, allow it
     else
-        @ensure !(name ∈ components) CTBase.IncorrectArgument(
-            "The $component_label name '$name' cannot be one of the component names: $components"
+        @ensure !(name ∈ components) Exceptions.IncorrectArgument(
+            "$(component_label) name conflicts with component names",
+            got="name='$name' appears in components=$components",
+            expected="name different from all component names",
+            suggestion="Choose a different name or use auto-generated component names",
+            context="$(component_label)! name uniqueness validation"
         )
     end
     
     # 4. No duplicates in components
-    @ensure length(unique(components)) == length(components) CTBase.IncorrectArgument(
-        "Component names must be unique for $component_label. Found duplicates in: $components"
+    @ensure length(unique(components)) == length(components) Exceptions.IncorrectArgument(
+        "Duplicate component names in $(component_label)",
+        got="components=$components with duplicates",
+        expected="all unique component names",
+        suggestion="Ensure each component has a unique name",
+        context="$(component_label)! component uniqueness validation"
     )
     
     # 5. No conflicts with existing names (global uniqueness)
-    @ensure !__has_name_conflict(ocp, name, component_type) CTBase.IncorrectArgument(
-        "The $component_label name '$name' conflicts with existing names: $(__collect_used_names(ocp))"
+    @ensure !__has_name_conflict(ocp, name, component_type) Exceptions.IncorrectArgument(
+        "$(component_label) name conflicts with existing names",
+        got="name='$name'",
+        expected="unique name not in: $(__collect_used_names(ocp))",
+        suggestion="Choose a different name that doesn't conflict with existing components",
+        context="$(component_label)! global name validation"
     )
     
     for comp_name in components
-        @ensure !__has_name_conflict(ocp, comp_name, component_type) CTBase.IncorrectArgument(
-            "The $component_label component '$comp_name' conflicts with existing names: $(__collect_used_names(ocp))"
+        @ensure !__has_name_conflict(ocp, comp_name, component_type) Exceptions.IncorrectArgument(
+            "$(component_label) component name conflicts with existing names",
+            got="component='$comp_name'",
+            expected="unique name not in: $(__collect_used_names(ocp))",
+            suggestion="Choose different component names that don't conflict with existing components",
+            context="$(component_label)! component global validation"
         )
     end
 end
