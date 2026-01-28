@@ -126,7 +126,7 @@ function test_constraints()
     )
 
     # we cannot provide a function and a range
-    @test_throws CTBase.IncorrectArgument CTModels.constraint!(
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
         ocp_set, :variable, f=(x, y) -> x + y, rg=1:2, lb=[0, 1], ub=[1, 2]
     )
 
