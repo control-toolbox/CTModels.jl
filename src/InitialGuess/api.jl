@@ -112,7 +112,7 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
     elseif init_data isa NamedTuple
         return _initial_guess_from_namedtuple(ocp, init_data)
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Unsupported initial guess type",
             got="$(typeof(init_data))",
             expected="nothing, OptimalControlInitialGuess, OptimalControlPreInit, Solution, or NamedTuple",

@@ -20,7 +20,7 @@ function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
     if dim == 1
         return t -> control
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial control dimension mismatch",
             got="scalar value",
             expected="vector of length $dim or function returning such vector",
@@ -40,7 +40,7 @@ Throws `CTBase.IncorrectArgument` if the vector length does not match the contro
 function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:Real})
     dim = control_dimension(ocp)
     if length(control) != dim
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial control dimension mismatch",
             got="vector of length $(length(control))",
             expected="vector of length $dim",

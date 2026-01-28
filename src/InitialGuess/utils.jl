@@ -14,7 +14,7 @@ function _format_time_grid(time_data)
     elseif time_data isa AbstractArray
         return vec(time_data)
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Invalid time grid type for initial guess",
             got="$(typeof(time_data))",
             expected="Vector or Array",

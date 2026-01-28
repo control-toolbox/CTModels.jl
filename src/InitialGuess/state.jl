@@ -20,7 +20,7 @@ function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
     if dim == 1
         return t -> state
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial state dimension mismatch",
             got="scalar value",
             expected="vector of length $dim or function returning such vector",
@@ -40,7 +40,7 @@ Throws `CTBase.IncorrectArgument` if the vector length does not match the state 
 function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real})
     dim = state_dimension(ocp)
     if length(state) != dim
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial state dimension mismatch",
             got="vector of length $(length(state))",
             expected="vector of length $dim",

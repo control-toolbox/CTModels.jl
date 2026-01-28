@@ -2,7 +2,7 @@ module TestInitialGuessValidation
 
 using Test
 using CTModels
-using CTBase
+using CTModels.Exceptions
 using Main.TestProblems
 using Main.TestOptions: VERBOSE, SHOWTIMING
 

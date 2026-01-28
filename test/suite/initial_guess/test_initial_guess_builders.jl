@@ -2,7 +2,7 @@ module TestInitialGuessBuilders
 
 using Test
 using CTModels
-using CTBase
+using CTModels.Exceptions
 using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # Dummy OCPs for testing

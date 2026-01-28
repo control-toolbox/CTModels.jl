@@ -11,7 +11,7 @@ Throws `CTBase.IncorrectArgument` if the variable dimension is not 1.
 function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     dim = variable_dimension(ocp)
     if dim == 0
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial variable dimension mismatch",
             got="scalar value",
             expected="no variable (dimension 0)",
@@ -21,7 +21,7 @@ function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
     elseif dim == 1
         return variable
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial variable dimension mismatch",
             got="scalar value",
             expected="vector of length $dim",
@@ -42,7 +42,7 @@ function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<
     dim = variable_dimension(ocp)
     base_val = variable
     if length(base_val) != dim
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Initial variable dimension mismatch",
             got="vector of length $(length(base_val))",
             expected="vector of length $dim",

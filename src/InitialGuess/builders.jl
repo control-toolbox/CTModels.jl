@@ -53,7 +53,7 @@ function _build_block_with_components(
         else
             if (base_val isa AbstractVector && length(base_val) != dim) ||
                (!(base_val isa AbstractVector) && dim != 1)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Block-level $role initialization has incompatible dimension",
                     got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
                     expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
@@ -68,7 +68,7 @@ function _build_block_with_components(
             val = fi(t)
             val_scalar = if val isa AbstractVector
                 if length(val) != 1
-                    throw(CTModels.Exceptions.IncorrectArgument(
+                    throw(Exceptions.IncorrectArgument(
                         "Component-level initialization must return scalar or length-1 vector",
                         got="vector of length $(length(val)) for $role component $i",
                         expected="scalar or length-1 vector",
@@ -81,7 +81,7 @@ function _build_block_with_components(
                 val
             end
             if !(1 <= i <= dim)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Component index out of bounds",
                     got="index $i for $role",
                     expected="index between 1 and $dim",
@@ -128,7 +128,7 @@ function _build_component_function_without_time(data)
             c = data[1]
             return t -> c
         else
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Component-level initialization vector has invalid length",
                 got="vector of length $(length(data))",
                 expected="scalar or length-1 vector",
@@ -137,7 +137,7 @@ function _build_component_function_without_time(data)
             ))
         end
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Unsupported component-level initialization type",
             got="$(typeof(data))",
             expected="Function, Real, or Vector{<:Real}",
@@ -167,7 +167,7 @@ function _build_component_function_with_time(data, time::AbstractVector)
             c = data[1]
             return t -> c
         else
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Component-level initialization time-grid mismatch",
                 got="$(length(data)) data points",
                 expected="$(length(time)) points matching time grid, or 1 for constant",
@@ -176,7 +176,7 @@ function _build_component_function_with_time(data, time::AbstractVector)
             ))
         end
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Unsupported component-level initialization type with time grid",
             got="$(typeof(data))",
             expected="Function, Real, or Vector{<:Real}",
@@ -219,7 +219,7 @@ function _build_time_dependent_init(
         !isempty(data_fmt) &&
         (data_fmt[1] isa AbstractVector)
         if length(data_fmt) != length(time)
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Time-grid $role initialization mismatch",
                 got="$(length(data_fmt)) samples",
                 expected="$(length(time)) samples matching time grid",
@@ -230,7 +230,7 @@ function _build_time_dependent_init(
         itp = ctinterpolate(time, data_fmt)
         sample = itp(first(time))
         if !(sample isa AbstractVector) || length(sample) != dim
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Time-grid $role initialization has incompatible dimension",
                 got="$(sample isa AbstractVector ? "vector of length $(length(sample))" : "scalar")",
                 expected="vector of length $dim",
@@ -240,7 +240,7 @@ function _build_time_dependent_init(
         end
         return t -> itp(t)
     else
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Unsupported $role initialization type for time-grid based initial guess",
             got="$(typeof(data))",
             expected="Function, Vector{<:Real}, or Vector{<:Vector}",

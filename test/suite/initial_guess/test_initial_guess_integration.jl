@@ -2,7 +2,7 @@ module TestInitialGuessIntegration
 
 using Test
 using CTModels
-using CTBase
+using CTModels.Exceptions
 using Main.TestProblems
 using Main.TestOptions: VERBOSE, SHOWTIMING
 
@@ -16,7 +16,7 @@ function test_initial_guess_integration()
         ocp = beam_data.ocp
 
         # Test with NamedTuple on real problem
-        init_named = (state=[0.05, 0.1], control=0.1, variable=Float64[])
+        init_named = (state=[0.05, 0.1], control=[0.1], variable=Float64[])
         ig = CTModels.build_initial_guess(ocp, init_named)
         Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
         CTModels.validate_initial_guess(ocp, ig)
@@ -34,7 +34,7 @@ function test_initial_guess_integration()
         Test.@test u[1] ≈ 0.1
 
         # Test with incorrect state dimension (should throw)
-        bad_named = (state=[0.1, 0.2, 0.3], control=0.1, variable=Float64[])
+        bad_named = (state=[0.1, 0.2, 0.3], control=[0.1], variable=Float64[])
         Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
             ocp, bad_named
         )

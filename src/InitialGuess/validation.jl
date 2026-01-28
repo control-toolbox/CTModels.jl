@@ -29,7 +29,7 @@ function _validate_initial_guess(
     x0 = state(init)(tsample)
     if xdim == 1
         if !(x0 isa Real) && !(x0 isa AbstractVector && length(x0) == 1)
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial state function returns invalid type for 1D state",
                 got="$(typeof(x0))",
                 expected="Real or length-1 Vector",
@@ -39,7 +39,7 @@ function _validate_initial_guess(
         end
     else
         if !(x0 isa AbstractVector) || length(x0) != xdim
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial state function returns incompatible dimension",
                 got="$(x0 isa AbstractVector ? "vector of length $(length(x0))" : "scalar")",
                 expected="vector of length $xdim",
@@ -53,7 +53,7 @@ function _validate_initial_guess(
     u0 = control(init)(tsample)
     if udim == 1
         if !(u0 isa Real) && !(u0 isa AbstractVector && length(u0) == 1)
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial control function returns invalid type for 1D control",
                 got="$(typeof(u0))",
                 expected="Real or length-1 Vector",
@@ -63,7 +63,7 @@ function _validate_initial_guess(
         end
     else
         if !(u0 isa AbstractVector) || length(u0) != udim
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial control function returns incompatible dimension",
                 got="$(u0 isa AbstractVector ? "vector of length $(length(u0))" : "scalar")",
                 expected="vector of length $udim",
@@ -77,7 +77,7 @@ function _validate_initial_guess(
     if vdim == 0
         if v0 isa AbstractVector
             if length(v0) != 0
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Initial variable has non-zero length for problem with no variable",
                     got="vector of length $(length(v0))",
                     expected="no variable (dimension 0)",
@@ -86,7 +86,7 @@ function _validate_initial_guess(
                 ))
             end
         elseif v0 isa Real
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial variable is scalar for problem with no variable",
                 got="scalar value",
                 expected="no variable (dimension 0)",
@@ -96,7 +96,7 @@ function _validate_initial_guess(
         end
     elseif vdim == 1
         if !(v0 isa Real) && !(v0 isa AbstractVector && length(v0) == 1)
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial variable has invalid type for 1D variable",
                 got="$(typeof(v0))",
                 expected="Real or length-1 Vector",
@@ -106,7 +106,7 @@ function _validate_initial_guess(
         end
     else
         if !(v0 isa AbstractVector) || length(v0) != vdim
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Initial variable has incompatible dimension",
                 got="$(v0 isa AbstractVector ? "vector of length $(length(v0))" : "scalar")",
                 expected="vector of length $vdim",
@@ -132,7 +132,7 @@ function _initial_guess_from_solution(
 )
     # Basic dimensional consistency checks
     if state_dimension(ocp) != state_dimension(sol.model)
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Warm start state dimension mismatch",
             got="solution with state dimension $(state_dimension(sol.model))",
             expected="state dimension $(state_dimension(ocp))",
@@ -141,7 +141,7 @@ function _initial_guess_from_solution(
         ))
     end
     if control_dimension(ocp) != control_dimension(sol.model)
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Warm start control dimension mismatch",
             got="solution with control dimension $(control_dimension(sol.model))",
             expected="control dimension $(control_dimension(ocp))",
@@ -150,7 +150,7 @@ function _initial_guess_from_solution(
         ))
     end
     if variable_dimension(ocp) != variable_dimension(sol.model)
-        throw(CTModels.Exceptions.IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Warm start variable dimension mismatch",
             got="solution with variable dimension $(variable_dimension(sol.model))",
             expected="variable dimension $(variable_dimension(ocp))",
@@ -205,7 +205,7 @@ function _initial_guess_from_namedtuple(
     # Parse keys and enforce uniqueness
     for (k, v) in pairs(init_data)
         if k == :time
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Global :time key not supported in initial guess NamedTuple",
                 got=":time as global key",
                 expected="time grids per block or component as (time, data) tuples",
@@ -214,7 +214,7 @@ function _initial_guess_from_namedtuple(
             ))
         elseif k == :variable || k == v_name_sym
             if variable_block_set || !isempty(variable_comp)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Variable initial guess specified multiple times",
                     got="variable at both block and component level, or multiple block entries",
                     expected="variable specified once, either at block or component level",
@@ -226,7 +226,7 @@ function _initial_guess_from_namedtuple(
             variable_block_set = true
         elseif k == :state || k == s_name_sym
             if state_block_set || !isempty(state_comp)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "State initial guess specified multiple times",
                     got="state at both block and component level, or multiple block entries",
                     expected="state specified once, either at block or component level",
@@ -238,7 +238,7 @@ function _initial_guess_from_namedtuple(
             state_block_set = true
         elseif k == :control || k == u_name_sym
             if control_block_set || !isempty(control_comp)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Control initial guess specified multiple times",
                     got="control at both block and component level, or multiple block entries",
                     expected="control specified once, either at block or component level",
@@ -250,7 +250,7 @@ function _initial_guess_from_namedtuple(
             control_block_set = true
         elseif haskey(s_comp_index, k)
             if state_block_set
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Cannot mix state block and component specifications",
                     got="both :state/$s_name_sym block and component :$k",
                     expected="either block-level or component-level, not both",
@@ -260,7 +260,7 @@ function _initial_guess_from_namedtuple(
             end
             idx = s_comp_index[k]
             if haskey(state_comp, idx)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "State component specified multiple times",
                     got="component :$k specified more than once",
                     expected="each component specified at most once",
@@ -271,7 +271,7 @@ function _initial_guess_from_namedtuple(
             state_comp[idx] = v
         elseif haskey(u_comp_index, k)
             if control_block_set
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Cannot mix control block and component specifications",
                     got="both :control/$u_name_sym block and component :$k",
                     expected="either block-level or component-level, not both",
@@ -281,7 +281,7 @@ function _initial_guess_from_namedtuple(
             end
             idx = u_comp_index[k]
             if haskey(control_comp, idx)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Control component specified multiple times",
                     got="component :$k specified more than once",
                     expected="each component specified at most once",
@@ -292,7 +292,7 @@ function _initial_guess_from_namedtuple(
             control_comp[idx] = v
         elseif haskey(v_comp_index, k)
             if variable_block_set
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Cannot mix variable block and component specifications",
                     got="both :variable/$v_name_sym block and component :$k",
                     expected="either block-level or component-level, not both",
@@ -302,7 +302,7 @@ function _initial_guess_from_namedtuple(
             end
             idx = v_comp_index[k]
             if haskey(variable_comp, idx)
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Variable component specified multiple times",
                     got="component :$k specified more than once",
                     expected="each component specified at most once",
@@ -316,7 +316,7 @@ function _initial_guess_from_namedtuple(
             append!(allowed_keys, s_comp_syms)
             append!(allowed_keys, u_comp_syms)
             append!(allowed_keys, v_comp_syms)
-            throw(CTModels.Exceptions.IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Unknown key in initial guess NamedTuple",
                 got=":$k",
                 expected="one of: $(join(allowed_keys, ", "))",
@@ -337,7 +337,7 @@ function _initial_guess_from_namedtuple(
         else
             vdim = variable_dimension(ocp)
             if vdim == 0
-                throw(CTModels.Exceptions.IncorrectArgument(
+                throw(Exceptions.IncorrectArgument(
                     "Variable components specified for problem with no variable",
                     got="component-level variable specifications",
                     expected="no variable (dimension 0)",
@@ -353,7 +353,7 @@ function _initial_guess_from_namedtuple(
                         data = variable_comp[1]
                         val = if data isa AbstractVector{<:Real}
                             if length(data) != 1
-                                throw(CTModels.Exceptions.IncorrectArgument(
+                                throw(Exceptions.IncorrectArgument(
                                     "Variable component has invalid length for 1D variable",
                                     got="vector of length $(length(data))",
                                     expected="scalar or length-1 vector",
@@ -365,7 +365,7 @@ function _initial_guess_from_namedtuple(
                         elseif data isa Real
                             data
                         else
-                            throw(CTModels.Exceptions.IncorrectArgument(
+                            throw(Exceptions.IncorrectArgument(
                                 "Unsupported variable component initialization type",
                                 got="$(typeof(data))",
                                 expected="Real or Vector{<:Real}",
@@ -382,7 +382,7 @@ function _initial_guess_from_namedtuple(
                     # vdim > 1: base should be a vector of length vdim
                     vec = if base isa AbstractVector
                         if length(base) != vdim
-                            throw(CTModels.Exceptions.IncorrectArgument(
+                            throw(Exceptions.IncorrectArgument(
                                 "Default variable initialization has incompatible dimension",
                                 got="vector of length $(length(base))",
                                 expected="vector of length $vdim",
@@ -394,7 +394,7 @@ function _initial_guess_from_namedtuple(
                     elseif base isa Real
                         fill(base, vdim)
                     else
-                        throw(CTModels.Exceptions.IncorrectArgument(
+                        throw(Exceptions.IncorrectArgument(
                             "Unsupported default variable initialization type",
                             got="$(typeof(base))",
                             expected="Real or Vector",
@@ -405,7 +405,7 @@ function _initial_guess_from_namedtuple(
                     # Override provided components; missing ones keep default
                     for (i, data) in variable_comp
                         if !(1 <= i <= vdim)
-                            throw(CTModels.Exceptions.IncorrectArgument(
+                            throw(Exceptions.IncorrectArgument(
                                 "Variable component index out of bounds",
                                 got="index $i",
                                 expected="index between 1 and $vdim",
@@ -415,7 +415,7 @@ function _initial_guess_from_namedtuple(
                         end
                         val_scalar = if data isa AbstractVector{<:Real}
                             if length(data) != 1
-                                throw(CTModels.Exceptions.IncorrectArgument(
+                                throw(Exceptions.IncorrectArgument(
                                     "Variable component has invalid length",
                                     got="vector of length $(length(data)) for component $i",
                                     expected="scalar or length-1 vector",
@@ -427,7 +427,7 @@ function _initial_guess_from_namedtuple(
                         elseif data isa Real
                             data
                         else
-                            throw(CTModels.Exceptions.IncorrectArgument(
+                            throw(Exceptions.IncorrectArgument(
                                 "Unsupported variable component initialization type",
                                 got="$(typeof(data))",
                                 expected="Real or Vector{<:Real}",
