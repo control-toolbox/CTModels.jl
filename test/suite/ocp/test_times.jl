@@ -27,7 +27,7 @@ function test_times()
     time = CTModels.FreeTimeModel(1, "s")
     @test CTModels.index(time) == 1
     @test CTModels.name(time) == "s"
-    @test_throws CTBase.IncorrectArgument CTModels.time(time, Float64[])
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time(time, Float64[])
 
     # some checks
     ocp = CTModels.PreModel()
@@ -89,56 +89,56 @@ function test_times()
     # index must satisfy 1 <= index <= q
     ocp = CTModels.PreModel()
     CTModels.variable!(ocp, 2)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, ind0=0, tf=10.0)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, ind0=3, tf=10.0)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, indf=0)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, indf=3)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, ind0=0, indf=3)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, ind0=3, indf=3)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, ind0=0, tf=10.0)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, ind0=3, tf=10.0)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, indf=0)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, indf=3)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, ind0=0, indf=3)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, ind0=3, indf=3)
 
     # consistency of function arguments
     ocp = CTModels.PreModel()
     CTModels.variable!(ocp, 2)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, ind0=1)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, tf=10.0, indf=1)
-    @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0.0, tf=10.0, indf=1)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, ind0=1)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, tf=10.0, indf=1)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, tf=10.0, indf=1)
 
     # NEW: Name validation tests
     Test.@testset "times: Name validation" verbose=VERBOSE showtiming=SHOWTIMING begin
         # Empty time_name
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="")
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="")
         
         # time_name conflicts with state
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1, "x")
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x")
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x")
         
         # time_name conflicts with control
         ocp = CTModels.PreModel()
         CTModels.control!(ocp, 1, "u")
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="u")
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="u")
         
         # time_name conflicts with variable
         ocp = CTModels.PreModel()
         CTModels.variable!(ocp, 1, "v")
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="v")
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="v")
         
         # time_name conflicts with state component
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x₁")
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x₁")
     end
 
     # NEW: Temporal validation tests
     Test.@testset "times: Temporal validation" verbose=VERBOSE showtiming=SHOWTIMING begin
         # t0 > tf
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=0.0)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=0.0)
         
         # t0 = tf
         ocp = CTModels.PreModel()
-        @test_throws CTBase.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=1.0)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=1.0)
         
         # Valid: t0 < tf
         ocp = CTModels.PreModel()
@@ -156,7 +156,7 @@ function test_times()
         @test CTModels.time(ft, v_ok) == 3.0
 
         v_short = FakeTimeVector([1.0])
-        @test_throws CTBase.IncorrectArgument CTModels.time(ft, v_short)
+        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.time(ft, v_short)
     end
 
     Test.@testset "times: TimesModel names and flags" verbose=VERBOSE showtiming=SHOWTIMING begin
