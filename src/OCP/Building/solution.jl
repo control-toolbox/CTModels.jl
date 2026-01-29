@@ -111,6 +111,11 @@ function build_solution(
     end
 
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL here because Julia closures capture variable REFERENCES, not values
+    # Without deepcopy, modifications to external variables after solution creation would affect the solution
+    # Example: param_x = 1.0; X_func = t -> [param_x * t]; sol = build_solution(...); param_x = 999.0;
+    # Without deepcopy: sol.state(0.5) would return [499.5, 499.5] (uses new param_x)
+    # With deepcopy: sol.state(0.5) returns [0.5, 0.5] (uses original param_x value)
     fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
     fu = (dim_u == 1) ? deepcopy(t -> u(t)[1]) : deepcopy(t -> u(t))
     fp = (dim_x == 1) ? deepcopy(t -> p(t)[1]) : deepcopy(t -> p(t))
@@ -128,6 +133,9 @@ function build_solution(
         t -> ctinterpolate(T, V)(t)
     end
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL for dual constraint functions to ensure isolation
+    # Dual functions may capture external variables and must be independent from modifications
+    # Additionally, there's a known bug in dual_model.jl where vector indexing fails without deepcopy
     fpcd = if isnothing(path_constraints_dual)
         nothing
     else
@@ -146,6 +154,9 @@ function build_solution(
         t -> ctinterpolate(T, V)(t)
     end
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL for state constraint dual functions
+    # These functions capture external variables and must remain independent
+    # Also works around the dual_model.jl indexing bug
     fscbd = if isnothing(state_constraints_lb_dual)
         nothing
     else
@@ -163,6 +174,9 @@ function build_solution(
         t -> ctinterpolate(T, V)(t)
     end
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL for state constraint upper bound dual functions
+    # Ensures independence from external variable modifications
+    # Also works around the dual_model.jl indexing bug
     fscud = if isnothing(state_constraints_ub_dual)
         nothing
     else
@@ -180,6 +194,9 @@ function build_solution(
         t -> ctinterpolate(T, V)(t)
     end
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL for control constraint lower bound dual functions
+    # Prevents external variable modifications from affecting solution
+    # Also works around the dual_model.jl indexing bug
     fccbd = if isnothing(control_constraints_lb_dual)
         nothing
     else
@@ -197,6 +214,9 @@ function build_solution(
         t -> ctinterpolate(T, V)(t)
     end
     # force scalar output when dimension is 1
+    # NOTE: deepcopy is ESSENTIAL for control constraint upper bound dual functions
+    # Ensures solution independence from external variable modifications
+    # Also works around the dual_model.jl indexing bug
     fccud = if isnothing(control_constraints_ub_dual)
         nothing
     else
@@ -742,4 +762,85 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     if dim_boundary_constraints_nl(model(sol)) > 0
         println(io, "\n• Boundary duals: ", boundary_constraints_dual(sol))
     end
+end
+
+# ============================================================================== #
+# Serialization utilities
+# ============================================================================== #
+
+"""
+    _serialize_solution(sol::Solution, ocp::Model)::Dict{String, Any}
+
+Sérialise une solution en données discrètes pour export (JLD2, JSON, etc.).
+Utilise les getters publics pour accéder aux champs de la solution.
+
+Cette fonction extrait toutes les données d'une solution et les convertit en format
+sérialisable (matrices, vecteurs, scalaires). Les fonctions sont discrétisées sur
+la grille temporelle.
+
+# Arguments
+- `sol::Solution`: Solution à sérialiser
+- `ocp::Model`: Modèle OCP associé (pour obtenir les dimensions)
+
+# Returns
+- `Dict{String, Any}`: Dictionnaire contenant toutes les données discrètes :
+  - `"time_grid"`: Grille temporelle
+  - `"state"`, `"control"`, `"costate"`: Matrices discrétisées
+  - `"variable"`: Vecteur de variables
+  - `"objective"`: Valeur scalaire
+  - Fonctions duales discrétisées (peuvent être `nothing`)
+  - Duals de boundary et variable (vecteurs)
+  - Informations du solveur
+
+# Notes
+- Les fonctions sont discrétisées via `_discretize_function`
+- Les duals `nothing` sont préservés comme `nothing`
+- Compatible avec `build_solution` pour reconstruction
+
+# Example
+```julia
+sol = solve(ocp)
+data = CTModels._serialize_solution(sol, ocp)
+# Reconstruction
+sol_reconstructed = CTModels.build_solution(
+    ocp, data["time_grid"], data["state"], data["control"], 
+    data["variable"], data["costate"]; 
+    objective=data["objective"], ...
+)
+```
+"""
+function _serialize_solution(sol::Solution, ocp::Model)::Dict{String, Any}
+    # Utiliser les getters publics
+    T = time_grid(sol)
+    dim_x = state_dimension(ocp)
+    dim_u = control_dimension(ocp)
+    
+    # Discrétiser les fonctions principales
+    return Dict(
+        "time_grid" => T,
+        "state" => _discretize_function(state(sol), T, dim_x),
+        "control" => _discretize_function(control(sol), T, dim_u),
+        "costate" => _discretize_function(costate(sol), T, dim_x),
+        "variable" => variable(sol),
+        "objective" => objective(sol),
+        
+        # Discrétiser les fonctions duales (peuvent être nothing)
+        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T),
+        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T),
+        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T),
+        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T),
+        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T),
+        
+        # Duals de boundary et variable (vecteurs, pas fonctions)
+        "boundary_constraints_dual" => boundary_constraints_dual(sol),
+        "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
+        "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
+        
+        # Infos solver
+        "iterations" => iterations(sol),
+        "message" => message(sol),
+        "status" => status(sol),
+        "successful" => successful(sol),
+        "constraints_violation" => constraints_violation(sol),
+    )
 end
