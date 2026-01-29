@@ -941,6 +941,48 @@ function test_export_import()
         remove_if_exists("idempotence_jld_nd1.jld2")
         remove_if_exists("idempotence_jld_nd2.jld2")
     end
+
+    # ========================================================================
+    # Empirical investigation: stack() behavior
+    # ========================================================================
+    
+    Test.@testset "JSON stack() behavior investigation" verbose = VERBOSE showtiming = SHOWTIMING begin
+        # Empirical investigation: When does stack() return Vector vs Matrix?
+        # This validates the need for the conditional in _json_array_to_matrix
+        # 
+        # Findings:
+        # - Multi-dimensional trajectories (state, costate): stack() → Matrix
+        # - 1-dimensional trajectories (control in solution_example): stack() → Vector
+        # 
+        # This proves the refactoring with _json_array_to_matrix is correct and necessary.
+        
+        ocp, sol = solution_example()
+        
+        # Export to JSON
+        CTModels.export_ocp_solution(sol; filename="stack_investigation", format=:JSON)
+        
+        # Read and observe what stack() returns
+        json_string = read("stack_investigation.json", String)
+        blob = JSON3.read(json_string)
+        
+        # Test state (multi-dimensional: 2D in solution_example)
+        state_stacked = stack(blob["state"]; dims=1)
+        Test.@test state_stacked isa Matrix  # Multi-D → Matrix
+        
+        # Test control (1-dimensional in solution_example)
+        control_stacked = stack(blob["control"]; dims=1)
+        Test.@test control_stacked isa Vector  # 1D → Vector
+        
+        # Test costate (multi-dimensional: 2D)
+        costate_stacked = stack(blob["costate"]; dims=1)
+        Test.@test costate_stacked isa Matrix  # Multi-D → Matrix
+        
+        # Verify import works correctly (indirect test of _json_array_to_matrix)
+        sol_reloaded = CTModels.import_ocp_solution(ocp; filename="stack_investigation", format=:JSON)
+        Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol = 1e-8
+        
+        remove_if_exists("stack_investigation.json")
+    end
 end
 
 end # module
