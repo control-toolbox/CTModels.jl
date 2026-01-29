@@ -851,8 +851,9 @@ function test_export_import()
         Test.@test infos2[:nested][:a] == 1
         Test.@test infos2[:nested][:b] == "test"
         Test.@test infos2[:nested][:c] == [1.0, 2.0, 3.0]
-        # Symbol becomes string after JSON serialization
-        Test.@test infos2[:symbol_value] == "optimal"
+        # Symbol is now preserved with type metadata!
+        Test.@test infos2[:symbol_value] == :optimal
+        Test.@test infos2[:symbol_value] isa Symbol
 
         remove_if_exists("idempotence_json_ci1.json")
         remove_if_exists("idempotence_json_ci2.json")
