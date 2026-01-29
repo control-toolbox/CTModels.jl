@@ -22,63 +22,98 @@ _apply_over_grid(::Nothing, grid) = nothing
 """
 Convert Dict{Symbol,Any} to Dict{String,Any} for JSON serialization.
 Only serializes JSON-compatible types (numbers, strings, bools, arrays, dicts).
+Returns a tuple: (serialized_dict, symbol_keys) where symbol_keys tracks which values were Symbols.
 """
-function _serialize_infos(infos::Dict{Symbol,Any})::Dict{String,Any}
+function _serialize_infos(infos::Dict{Symbol,Any})::Tuple{Dict{String,Any},Vector{String}}
     result = Dict{String,Any}()
+    symbol_keys = String[]
     for (k, v) in infos
-        result[string(k)] = _serialize_value(v)
+        key_str = string(k)
+        serialized_value, nested_symbols = _serialize_value(v, key_str)
+        result[key_str] = serialized_value
+        append!(symbol_keys, nested_symbols)
     end
-    return result
+    return (result, symbol_keys)
 end
 
 """
 Serialize a single value to JSON-compatible format.
+Returns a tuple: (serialized_value, symbol_paths) where symbol_paths tracks Symbol locations.
 """
-function _serialize_value(v)
+function _serialize_value(v, path::String="")
     if v isa Number || v isa String || v isa Bool || isnothing(v)
-        return v
+        return (v, String[])
     elseif v isa Symbol
-        return string(v)
+        # Mark this path as containing a Symbol
+        return (string(v), [path])
     elseif v isa AbstractVector
-        return [_serialize_value(x) for x in v]
+        serialized = []
+        all_symbols = String[]
+        for (i, x) in enumerate(v)
+            val, syms = _serialize_value(x, "$(path)[$(i-1)]")
+            push!(serialized, val)
+            append!(all_symbols, syms)
+        end
+        return (serialized, all_symbols)
     elseif v isa AbstractDict
         result = Dict{String,Any}()
+        all_symbols = String[]
         for (dk, dv) in v
-            result[string(dk)] = _serialize_value(dv)
+            key_str = string(dk)
+            new_path = isempty(path) ? key_str : "$(path).$(key_str)"
+            val, syms = _serialize_value(dv, new_path)
+            result[key_str] = val
+            append!(all_symbols, syms)
         end
-        return result
+        return (result, all_symbols)
     else
         # For non-serializable types, convert to string representation
-        return string(v)
+        return (string(v), String[])
     end
 end
 
 """
 Convert Dict{String,Any} back to Dict{Symbol,Any} after JSON deserialization.
+Uses symbol_keys metadata to restore Symbol types where they were originally present.
 """
-function _deserialize_infos(blob)::Dict{Symbol,Any}
+function _deserialize_infos(
+    blob, symbol_keys::Vector{String}=String[]
+)::Dict{Symbol,Any}
     if isnothing(blob) || isempty(blob)
         return Dict{Symbol,Any}()
     end
     result = Dict{Symbol,Any}()
     for (k, v) in blob
-        result[Symbol(k)] = _deserialize_value(v)
+        result[Symbol(k)] = _deserialize_value(v, String(k), symbol_keys)
     end
     return result
 end
 
 """
 Deserialize a single value from JSON format.
+Uses symbol_keys to restore Symbol types at the correct paths.
 """
-function _deserialize_value(v)
-    if v isa Number || v isa String || v isa Bool || isnothing(v)
+function _deserialize_value(v, path::String, symbol_keys::Vector{String})
+    if v isa Number || v isa Bool || isnothing(v)
         return v
+    elseif v isa String
+        # Check if this path should be a Symbol
+        if path in symbol_keys
+            return Symbol(v)
+        else
+            return v
+        end
     elseif v isa AbstractVector
-        return [_deserialize_value(x) for x in v]
+        return [
+            _deserialize_value(x, "$(path)[$(i-1)]", symbol_keys) for
+            (i, x) in enumerate(v)
+        ]
     elseif v isa AbstractDict
         result = Dict{Symbol,Any}()
         for (dk, dv) in v
-            result[Symbol(dk)] = _deserialize_value(dv)
+            key_str = string(dk)
+            new_path = isempty(path) ? key_str : "$(path).$(key_str)"
+            result[Symbol(dk)] = _deserialize_value(dv, new_path, symbol_keys)
         end
         return result
     else
@@ -145,9 +180,12 @@ function CTModels.export_ocp_solution(
         "boundary_constraints_dual" => CTModels.boundary_constraints_dual(sol),       # ctVector or Nothing
         "variable_constraints_lb_dual" => CTModels.variable_constraints_lb_dual(sol),    # ctVector or Nothing
         "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing
-        # Additional solver infos (Dict{Symbol,Any} → Dict{String,Any} for JSON)
-        "infos" => _serialize_infos(CTModels.infos(sol)),
     )
+
+    # Serialize infos and get Symbol type metadata
+    infos_serialized, symbol_keys = _serialize_infos(CTModels.infos(sol))
+    blob["infos"] = infos_serialized
+    blob["infos_symbol_keys"] = symbol_keys
 
     open(filename * ".json", "w") do io
         JSON3.pretty(io, blob)
@@ -293,9 +331,11 @@ function CTModels.import_ocp_solution(
         variable_constraints_ub_dual = Vector{Float64}(blob["variable_constraints_ub_dual"])
     end
 
-    # get additional solver infos
+    # get additional solver infos with Symbol type restoration
+    symbol_keys_raw = get(blob, "infos_symbol_keys", String[])
+    symbol_keys = collect(String, symbol_keys_raw)  # Convert JSON3.Array/empty array to Vector{String}
     infos = if haskey(blob, "infos")
-        _deserialize_infos(blob["infos"])
+        _deserialize_infos(blob["infos"], symbol_keys)
     else
         Dict{Symbol,Any}()
     end

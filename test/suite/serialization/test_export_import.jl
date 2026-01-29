@@ -15,6 +15,236 @@ function remove_if_exists(filename::String)
     isfile(filename) && rm(filename)
 end
 
+"""
+Compare two trajectories (functions) at given time points.
+
+Returns true if the trajectories are approximately equal at all time points.
+"""
+function compare_trajectories(
+    f1::Function,
+    f2::Function,
+    times::Vector{Float64};
+    atol::Float64=1e-8,
+)::Bool
+    for t in times
+        v1 = f1(t)
+        v2 = f2(t)
+        if !isapprox(v1, v2; atol=atol)
+            return false
+        end
+    end
+    return true
+end
+
+"""
+Compare two infos dictionaries.
+
+Returns true if both dictionaries have the same keys and values.
+Note: Non-serializable types that were converted to strings will not match their originals.
+"""
+function compare_infos(
+    infos1::Dict{Symbol,Any}, infos2::Dict{Symbol,Any}; atol::Float64=1e-10
+)::Bool
+    # Check same keys
+    if Set(keys(infos1)) != Set(keys(infos2))
+        return false
+    end
+
+    # Compare values
+    for (k, v1) in infos1
+        v2 = infos2[k]
+
+        # Handle different types
+        if typeof(v1) != typeof(v2)
+            return false
+        end
+
+        if v1 isa Number && v2 isa Number
+            if !isapprox(v1, v2; atol=atol)
+                return false
+            end
+        elseif v1 isa AbstractVector && v2 isa AbstractVector
+            if length(v1) != length(v2)
+                return false
+            end
+            for (x1, x2) in zip(v1, v2)
+                if x1 isa Number && x2 isa Number
+                    if !isapprox(x1, x2; atol=atol)
+                        return false
+                    end
+                elseif x1 != x2
+                    return false
+                end
+            end
+        elseif v1 isa AbstractDict && v2 isa AbstractDict
+            # Recursive comparison for nested dicts
+            if !compare_infos(
+                Dict{Symbol,Any}(Symbol(k) => v for (k, v) in v1),
+                Dict{Symbol,Any}(Symbol(k) => v for (k, v) in v2);
+                atol=atol,
+            )
+                return false
+            end
+        elseif v1 != v2
+            return false
+        end
+    end
+
+    return true
+end
+
+"""
+Deep comparison of two Solution objects.
+
+Returns true if all fields are approximately equal within tolerances.
+"""
+function compare_solutions(
+    sol1::CTModels.Solution,
+    sol2::CTModels.Solution;
+    atol_numerical::Float64=1e-10,
+    atol_trajectories::Float64=1e-8,
+)::Bool
+    # Compare scalar fields
+    if !isapprox(CTModels.objective(sol1), CTModels.objective(sol2); atol=atol_numerical)
+        return false
+    end
+    if CTModels.iterations(sol1) != CTModels.iterations(sol2)
+        return false
+    end
+    if !isapprox(
+        CTModels.constraints_violation(sol1),
+        CTModels.constraints_violation(sol2);
+        atol=atol_numerical,
+    )
+        return false
+    end
+    if CTModels.message(sol1) != CTModels.message(sol2)
+        return false
+    end
+    if CTModels.status(sol1) != CTModels.status(sol2)
+        return false
+    end
+    if CTModels.successful(sol1) != CTModels.successful(sol2)
+        return false
+    end
+
+    # Compare time grid
+    T1 = CTModels.time_grid(sol1)
+    T2 = CTModels.time_grid(sol2)
+    if !isapprox(T1, T2; atol=atol_numerical)
+        return false
+    end
+
+    # Compare variable
+    v1 = CTModels.variable(sol1)
+    v2 = CTModels.variable(sol2)
+    if !isapprox(v1, v2; atol=atol_numerical)
+        return false
+    end
+
+    # Compare trajectories at time grid points
+    if !compare_trajectories(
+        CTModels.state(sol1), CTModels.state(sol2), T1; atol=atol_trajectories
+    )
+        return false
+    end
+    if !compare_trajectories(
+        CTModels.control(sol1), CTModels.control(sol2), T1; atol=atol_trajectories
+    )
+        return false
+    end
+    if !compare_trajectories(
+        CTModels.costate(sol1), CTModels.costate(sol2), T1; atol=atol_trajectories
+    )
+        return false
+    end
+
+    # Compare dual variables
+    pcd1 = CTModels.path_constraints_dual(sol1)
+    pcd2 = CTModels.path_constraints_dual(sol2)
+    if isnothing(pcd1) != isnothing(pcd2)
+        return false
+    end
+    if !isnothing(pcd1) &&
+       !compare_trajectories(pcd1, pcd2, T1; atol=atol_trajectories)
+        return false
+    end
+
+    sclbd1 = CTModels.state_constraints_lb_dual(sol1)
+    sclbd2 = CTModels.state_constraints_lb_dual(sol2)
+    if isnothing(sclbd1) != isnothing(sclbd2)
+        return false
+    end
+    if !isnothing(sclbd1) &&
+       !compare_trajectories(sclbd1, sclbd2, T1; atol=atol_trajectories)
+        return false
+    end
+
+    scubd1 = CTModels.state_constraints_ub_dual(sol1)
+    scubd2 = CTModels.state_constraints_ub_dual(sol2)
+    if isnothing(scubd1) != isnothing(scubd2)
+        return false
+    end
+    if !isnothing(scubd1) &&
+       !compare_trajectories(scubd1, scubd2, T1; atol=atol_trajectories)
+        return false
+    end
+
+    cclbd1 = CTModels.control_constraints_lb_dual(sol1)
+    cclbd2 = CTModels.control_constraints_lb_dual(sol2)
+    if isnothing(cclbd1) != isnothing(cclbd2)
+        return false
+    end
+    if !isnothing(cclbd1) &&
+       !compare_trajectories(cclbd1, cclbd2, T1; atol=atol_trajectories)
+        return false
+    end
+
+    ccubd1 = CTModels.control_constraints_ub_dual(sol1)
+    ccubd2 = CTModels.control_constraints_ub_dual(sol2)
+    if isnothing(ccubd1) != isnothing(ccubd2)
+        return false
+    end
+    if !isnothing(ccubd1) &&
+       !compare_trajectories(ccubd1, ccubd2, T1; atol=atol_trajectories)
+        return false
+    end
+
+    bcd1 = CTModels.boundary_constraints_dual(sol1)
+    bcd2 = CTModels.boundary_constraints_dual(sol2)
+    if isnothing(bcd1) != isnothing(bcd2)
+        return false
+    end
+    if !isnothing(bcd1) && !isapprox(bcd1, bcd2; atol=atol_numerical)
+        return false
+    end
+
+    vclbd1 = CTModels.variable_constraints_lb_dual(sol1)
+    vclbd2 = CTModels.variable_constraints_lb_dual(sol2)
+    if isnothing(vclbd1) != isnothing(vclbd2)
+        return false
+    end
+    if !isnothing(vclbd1) && !isapprox(vclbd1, vclbd2; atol=atol_numerical)
+        return false
+    end
+
+    vcubd1 = CTModels.variable_constraints_ub_dual(sol2)
+    vcubd2 = CTModels.variable_constraints_ub_dual(sol2)
+    if isnothing(vcubd1) != isnothing(vcubd2)
+        return false
+    end
+    if !isnothing(vcubd1) && !isapprox(vcubd1, vcubd2; atol=atol_numerical)
+        return false
+    end
+
+    # Compare infos
+    if !compare_infos(CTModels.infos(sol1), CTModels.infos(sol2); atol=atol_numerical)
+        return false
+    end
+
+    return true
+end
+
 # ============================================================================
 # MAIN TEST FUNCTION
 # ============================================================================
@@ -481,6 +711,235 @@ function test_export_import()
         Test.@test blob["infos"]["tolerance"] == 1e-6
 
         remove_if_exists("solution_with_infos.json")
+    end
+
+    # ========================================================================
+    # Idempotence tests – verify stability across multiple export/import cycles
+    # ========================================================================
+
+    Test.@testset "JSON idempotence: double cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example_dual()
+
+        # First cycle: sol0 → export → import → sol1
+        CTModels.export_ocp_solution(sol0; filename="idempotence_json_1", format=:JSON)
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_1", format=:JSON
+        )
+
+        # Second cycle: sol1 → export → import → sol2
+        CTModels.export_ocp_solution(sol1; filename="idempotence_json_2", format=:JSON)
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_2", format=:JSON
+        )
+
+        # Verify idempotence: sol1 ≈ sol2 (no further information loss)
+        Test.@test compare_solutions(sol1, sol2)
+
+        remove_if_exists("idempotence_json_1.json")
+        remove_if_exists("idempotence_json_2.json")
+    end
+
+    Test.@testset "JSON idempotence: triple cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example_dual()
+
+        # First cycle
+        CTModels.export_ocp_solution(sol0; filename="idempotence_json_t1", format=:JSON)
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_t1", format=:JSON
+        )
+
+        # Second cycle
+        CTModels.export_ocp_solution(sol1; filename="idempotence_json_t2", format=:JSON)
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_t2", format=:JSON
+        )
+
+        # Third cycle
+        CTModels.export_ocp_solution(sol2; filename="idempotence_json_t3", format=:JSON)
+        sol3 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_t3", format=:JSON
+        )
+
+        # Verify convergence: sol2 ≈ sol3
+        Test.@test compare_solutions(sol2, sol3)
+
+        remove_if_exists("idempotence_json_t1.json")
+        remove_if_exists("idempotence_json_t2.json")
+        remove_if_exists("idempotence_json_t3.json")
+    end
+
+    Test.@testset "JSON idempotence: double cycle (solution_example no duals)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example()
+
+        # First cycle
+        CTModels.export_ocp_solution(sol0; filename="idempotence_json_nd1", format=:JSON)
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_nd1", format=:JSON
+        )
+
+        # Second cycle
+        CTModels.export_ocp_solution(sol1; filename="idempotence_json_nd2", format=:JSON)
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_nd2", format=:JSON
+        )
+
+        # Verify idempotence
+        Test.@test compare_solutions(sol1, sol2)
+
+        remove_if_exists("idempotence_json_nd1.json")
+        remove_if_exists("idempotence_json_nd2.json")
+    end
+
+    Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol_base = solution_example()
+        T = CTModels.time_grid(sol_base)
+
+        # Build solution with complex infos
+        x = CTModels.state(sol_base)
+        u = CTModels.control(sol_base)
+        p = CTModels.costate(sol_base)
+        v = CTModels.variable(sol_base)
+
+        complex_infos = Dict{Symbol,Any}(
+            :solver_name => "TestSolver",
+            :tolerance => 1e-6,
+            :max_iterations => 1000,
+            :converged => true,
+            :residuals => [1e-3, 1e-5, 1e-8],
+            :nested => Dict{Symbol,Any}(:a => 1, :b => "test", :c => [1.0, 2.0, 3.0]),
+            :symbol_value => :optimal,
+        )
+
+        sol0 = CTModels.build_solution(
+            ocp,
+            Vector{Float64}(T),
+            x,
+            u,
+            isa(v, Number) ? [v] : v,
+            p;
+            objective=CTModels.objective(sol_base),
+            iterations=CTModels.iterations(sol_base),
+            constraints_violation=CTModels.constraints_violation(sol_base),
+            message=CTModels.message(sol_base),
+            status=CTModels.status(sol_base),
+            successful=CTModels.successful(sol_base),
+            infos=complex_infos,
+        )
+
+        # First cycle
+        CTModels.export_ocp_solution(sol0; filename="idempotence_json_ci1", format=:JSON)
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_ci1", format=:JSON
+        )
+
+        # Second cycle
+        CTModels.export_ocp_solution(sol1; filename="idempotence_json_ci2", format=:JSON)
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_json_ci2", format=:JSON
+        )
+
+        # Verify idempotence
+        Test.@test compare_solutions(sol1, sol2)
+
+        # Verify infos preservation
+        infos2 = CTModels.infos(sol2)
+        Test.@test infos2[:solver_name] == "TestSolver"
+        Test.@test infos2[:tolerance] == 1e-6
+        Test.@test infos2[:max_iterations] == 1000
+        Test.@test infos2[:converged] == true
+        Test.@test infos2[:residuals] == [1e-3, 1e-5, 1e-8]
+        Test.@test infos2[:nested][:a] == 1
+        Test.@test infos2[:nested][:b] == "test"
+        Test.@test infos2[:nested][:c] == [1.0, 2.0, 3.0]
+        # Symbol is now preserved with type metadata!
+        Test.@test infos2[:symbol_value] == :optimal
+        Test.@test infos2[:symbol_value] isa Symbol
+
+        remove_if_exists("idempotence_json_ci1.json")
+        remove_if_exists("idempotence_json_ci2.json")
+    end
+
+    Test.@testset "JLD2 idempotence: double cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example_dual()
+
+        # First cycle: sol0 → export → import → sol1
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
+        end
+        sol1 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_1", format=:JLD)
+
+        # Second cycle: sol1 → export → import → sol2
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_2", format=:JLD)
+        end
+        sol2 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_2", format=:JLD)
+
+        # Verify idempotence: sol1 ≈ sol2
+        Test.@test compare_solutions(sol1, sol2)
+
+        remove_if_exists("idempotence_jld_1.jld2")
+        remove_if_exists("idempotence_jld_2.jld2")
+    end
+
+    Test.@testset "JLD2 idempotence: triple cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example_dual()
+
+        # First cycle
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_t1", format=:JLD)
+        end
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_jld_t1", format=:JLD
+        )
+
+        # Second cycle
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_t2", format=:JLD)
+        end
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_jld_t2", format=:JLD
+        )
+
+        # Third cycle
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol2; filename="idempotence_jld_t3", format=:JLD)
+        end
+        sol3 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_jld_t3", format=:JLD
+        )
+
+        # Verify convergence: sol2 ≈ sol3
+        Test.@test compare_solutions(sol2, sol3)
+
+        remove_if_exists("idempotence_jld_t1.jld2")
+        remove_if_exists("idempotence_jld_t2.jld2")
+        remove_if_exists("idempotence_jld_t3.jld2")
+    end
+
+    Test.@testset "JLD2 idempotence: double cycle (solution_example no duals)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        ocp, sol0 = solution_example()
+
+        # First cycle
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_nd1", format=:JLD)
+        end
+        sol1 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_jld_nd1", format=:JLD
+        )
+
+        # Second cycle
+        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_nd2", format=:JLD)
+        end
+        sol2 = CTModels.import_ocp_solution(
+            ocp; filename="idempotence_jld_nd2", format=:JLD
+        )
+
+        # Verify idempotence
+        Test.@test compare_solutions(sol1, sol2)
+
+        remove_if_exists("idempotence_jld_nd1.jld2")
+        remove_if_exists("idempotence_jld_nd2.jld2")
     end
 end
 
