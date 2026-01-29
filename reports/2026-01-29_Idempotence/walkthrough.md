@@ -177,27 +177,71 @@ Based on analysis and user feedback, the following areas require investigation:
 
 ### 1. Function Serialization Strategy 🔍
 
-**Current Limitations**:
+**Current Architecture** (Clarified 2026-01-29):
 
-- JLD2 has issues with anonymous functions (warnings suppressed in tests)
-- `deepcopy` is used extensively in `build_solution` but rationale is unclear
-- Function → discretization → interpolation loses analytical precision
+The serialization already implements a **lossless round-trip** for interpolated functions:
 
-**Investigation Needed**:
+1. **`build_solution`** creates interpolated functions from discrete data:
 
-#### Bidirectional ctinterpolate
+   ```julia
+   # Lines 89-111 in src/OCP/Building/solution.jl
+   x = ctinterpolate(T[1:N], matrix2vec(X[:, 1:dim_x], 1))
+   u = ctinterpolate(T[1:M], matrix2vec(U[:, 1:dim_u], 1))
+   p = ctinterpolate(T[1:L], matrix2vec(P[:, 1:dim_x], 1))
+   ```
 
-Since solutions use `ctinterpolate` to create functions from discrete data:
+2. **Export** discretizes functions on the time grid:
 
-- **Explore inverse operation**: Create `ctdeinterpolate` to extract grid + values from interpolated functions
-- **Store metadata**: Include interpolation method, grid points in serialization
-- **Enable lossless round-trips**: Perfect reconstruction of interpolated functions
+   ```julia
+   # Lines 160-161 in ext/CTModelsJSON.jl
+   "state" => _apply_over_grid(CTModels.state(sol), T)
+   "control" => _apply_over_grid(CTModels.control(sol), T)
+   ```
 
-**Key Questions**:
+3. **Import** reconstructs by calling `build_solution` with discrete data:
 
-1. Can we distinguish between user-provided analytical functions and `ctinterpolate`-generated functions?
-2. Should we add function type tagging (e.g., `InterpolatedFunction` wrapper)?
-3. What metadata is needed for perfect reconstruction?
+   ```julia
+   # Lines 348-371 in ext/CTModelsJSON.jl
+   CTModels.build_solution(ocp, T, X, U, v, P; ...)
+   ```
+
+**Key Insight**:
+
+- `ctdeinterpolate` is **already implemented** as `_apply_over_grid`
+- It evaluates functions on specific grid portions (T[1:N], T[1:M], T[1:L])
+- Since `time_grid` is stored, we have all information to reconstruct perfectly
+- `ctinterpolate` uses linear interpolation with constant extrapolation
+
+**Remaining Issues**:
+
+1. **JLD2 anonymous function warnings**: Functions cannot be natively serialized
+2. **User-provided analytical functions**: Lost after first export (converted to interpolated)
+3. **No function type tagging**: Cannot distinguish analytical vs interpolated functions
+
+#### Proposed JLD2 Improvement
+
+**Current Problem**: JLD2 tries to serialize functions directly, causing warnings.
+
+**Solution**: Apply the same strategy as JSON:
+
+1. **Extract utility functions** from `build_solution` (lines 89-111):
+   - Create `_discretize_state(x::Function, T, dim_x)::Matrix{Float64}`
+   - Create `_discretize_control(u::Function, T, dim_u)::Matrix{Float64}`
+   - Create `_discretize_costate(p::Function, T, dim_x)::Matrix{Float64}`
+
+2. **Refactor `build_solution`** to use these utilities
+
+3. **Use in JLD2 serialization**:
+   - Store discrete data (grids + matrices) instead of functions
+   - Avoid code duplication with JSON
+   - Eliminate function serialization warnings
+
+**Benefits**:
+
+- **Code reuse**: Same discretization logic for JSON and JLD2
+- **No warnings**: JLD2 stores only data, not functions
+- **Lossless**: Perfect reconstruction via `build_solution`
+- **Maintainability**: Single source of truth for discretization
 
 #### deepcopy Usage Review
 
@@ -224,19 +268,31 @@ fp = (dim_x == 1) ? deepcopy(t -> p(t)[1]) : deepcopy(t -> p(t))
 
 ### 2. Action Items for Future PRs
 
-**High Priority**:
+**Phase 3: Deepcopy Optimization** (High Priority):
 
-- [ ] Investigate `deepcopy` necessity in `build_solution`
-- [ ] Design function metadata storage strategy
-- [ ] Prototype bidirectional `ctinterpolate`/`ctdeinterpolate`
+- [ ] Investigate `deepcopy` necessity in `build_solution` (lines 114-116)
+- [ ] Test behavior with/without `deepcopy`
+- [ ] Profile memory and performance impact
+- [ ] Document rationale or remove if unnecessary
 
-**Medium Priority**:
+**Phase 4: Function Serialization** (High Priority):
+
+- [x] ~~Investigate `isa Vector` checks in JSON deserialization~~ → **COMPLETED** (Phase 2)
+- [ ] Extract discretization utilities from `build_solution`:
+  - `_discretize_state(x::Function, T, dim_x)::Matrix{Float64}`
+  - `_discretize_control(u::Function, T, dim_u)::Matrix{Float64}`
+  - `_discretize_costate(p::Function, T, dim_x)::Matrix{Float64}`
+- [ ] Refactor `build_solution` to use extracted utilities
+- [ ] Update JLD2 to store discrete data instead of functions
+- [ ] Eliminate JLD2 function serialization warnings
+
+**Future Enhancements** (Medium Priority):
 
 - [ ] Add function type tagging to distinguish analytical vs interpolated
-- [ ] Improve JLD2 to handle functions without warnings
 - [ ] Document supported function types in user docs
+- [ ] Add examples showing idempotence in documentation
 
-**Low Priority**:
+**Long-term** (Low Priority):
 
 - [ ] Consider architecture improvements for v1.0
 - [ ] Add migration tools for existing serialized solutions

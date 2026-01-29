@@ -68,6 +68,7 @@ CTModels tests                              | 1721   1721  14.4s
 The analysis identified areas for future investigation:
 - Bidirectional `ctinterpolate`/`ctdeinterpolate` for lossless function serialization
 - Review of `deepcopy` usage in `build_solution` (rationale unclear)
+- Investigation of `isa Vector` checks in JSON deserialization (see [`reports/2026-01-29_Idempotence/analysis/02_vector_conversion_investigation.md`](file:///Users/ocots/Research/logiciels/dev/control-toolbox/CTModels.jl/reports/2026-01-29_Idempotence/analysis/02_vector_conversion_investigation.md))
 - Improved JLD2 handling of anonymous functions
 
 See analysis document for details.
