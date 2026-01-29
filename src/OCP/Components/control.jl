@@ -38,6 +38,18 @@ julia> control!(ocp, 2, "v", ["a", "b"])
 julia> control_components(ocp)
 ["a", "b"]
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If control has already been set
+- `Exceptions.IncorrectArgument`: If m ≤ 0
+- `Exceptions.IncorrectArgument`: If number of component names ≠ m
+- `Exceptions.IncorrectArgument`: If name is empty
+- `Exceptions.IncorrectArgument`: If any component name is empty
+- `Exceptions.IncorrectArgument`: If name is one of the component names
+- `Exceptions.IncorrectArgument`: If component names contain duplicates
+- `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
+- `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
 """
 function control!(
     ocp::PreModel,
@@ -50,10 +62,23 @@ function control!(
     @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall(
         "the control has already been set."
     )
-    @ensure m > 0 CTBase.IncorrectArgument("the control dimension must be greater than 0")
-    @ensure size(components_names, 1) == m CTBase.IncorrectArgument(
-        "the number of control names must be equal to the control dimension"
+    @ensure m > 0 Exceptions.IncorrectArgument(
+        "Invalid dimension: must be positive",
+        got="m=$m",
+        expected="m > 0 (positive integer)",
+        suggestion="Use control!(ocp, m=2) with m > 0",
+        context="control!(ocp, m=$m, name=\"$name\") - validating dimension parameter"
     )
+    @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
+        "Component names count mismatch",
+        got="$(size(components_names, 1)) names for dimension $m",
+        expected="exactly $m component names",
+        suggestion="Use control!(ocp, m, name, [\"u1\", \"u2\", ..., \"u$m\"]) or omit for auto-generation",
+        context="control!(ocp, m=$m, components_names=[...]) - validating names count"
+    )
+
+    # NEW: Comprehensive name validation
+    __validate_name_uniqueness(ocp, string(name), string.(components_names), :control)
 
     # set the control
     ocp.control = ControlModel(string(name), string.(components_names))

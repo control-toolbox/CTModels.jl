@@ -90,8 +90,12 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
     for i in rg
         if i < 1 || i > state_dimension(ocp)
             throw(
-                CTBase.IncorrectArgument(
-                    "index $i in the range is out of valid bounds [1, $(state_dimension(ocp))].",
+                Exceptions.IncorrectArgument(
+                    "Dynamics index out of bounds",
+                    got="index=$i",
+                    expected="index in range [1, $(state_dimension(ocp))]",
+                    suggestion="Use indices in 1:$(state_dimension(ocp)), e.g., dynamics!(ocp, 1:2, f)",
+                    context="dynamics! index validation"
                 ),
             )
         end

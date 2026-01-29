@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Defensive Validation System**: Comprehensive validation infrastructure for OCP components
+  - New `name_validation.jl` module with helper functions (`__collect_used_names`, `__has_name_conflict`, `__validate_name_uniqueness`)
+  - Global uniqueness validation for component names across state, control, variable, and time
+  - Inter-component name conflict detection (e.g., state component name vs control name)
+  - Special handling for scalar components (dim=1) where name == component is allowed
+  - Support for empty variables (q=0) without name conflicts
+
+- **Component Validations**: Enhanced input validation for all OCP components
+  - `state!`: Name uniqueness validation with inter-component conflict checks
+  - `control!`: Name uniqueness validation with inter-component conflict checks
+  - `variable!`: Name uniqueness validation with inter-component conflict checks (supports q=0)
+  - `time!`: Name uniqueness validation and `t0 < tf` bounds validation
+  - `objective!`: Case-insensitive criterion validation (accepts `:min`, `:max`, `:MIN`, `:MAX`)
+  - `constraint!`: Element-wise `lb ≤ ub` bounds validation for all constraint types
+
+- **Documentation**: Complete `# Throws` sections for all validated functions
+  - Clear documentation of `CTBase.IncorrectArgument` exceptions
+  - Clear documentation of `CTBase.UnauthorizedCall` exceptions
+  - Detailed error messages for validation failures
+
+- **Test Coverage**: Extensive test suites for validation logic
+  - 323 unit tests for component validations (100% pass rate)
+  - 53 integration tests covering complex scenarios (100% pass rate)
+  - Tests for high-dimensional systems (dim > 3)
+  - Tests for Unicode and special characters in names
+  - Tests for edge cases (infinity bounds, equality constraints, etc.)
+  - Tests for multiple constraint types combined
+  - Type stability tests with `@inferred` where applicable
+
+### Changed
+
+- **Objective Criterion**: Now accepts case-insensitive input (`:min`, `:max`, `:MIN`, `:MAX`)
+  - All criterion values are normalized to lowercase (`:min` or `:max`) for internal consistency
+  - Maintains backward compatibility with existing code
+
+### Fixed
+
+- Eliminated duplicate function definition warnings in `test_objective.jl`
+- Improved error messages for name conflicts to be more descriptive and actionable
+
 ## [0.7.1-beta] - 2026-01-22
 
 ### Added

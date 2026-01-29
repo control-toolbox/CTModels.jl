@@ -42,14 +42,24 @@ import ..OCP: has_free_initial_time, has_free_final_time
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec
 
+# Import exceptions
+import ..Exceptions
+
 # Load types first
 include("types.jl")
 
-# Load implementation
-include("initial_guess.jl")
+# Load implementation by component
+include("utils.jl")      # Utilitaires de base
+include("state.jl")      # Initialisation d'état
+include("control.jl")    # Initialisation de contrôle
+include("variable.jl")   # Initialisation de variable
+include("builders.jl")   # Constructeurs
+include("validation.jl") # Validation
+include("api.jl")        # API publique
 
 # Export public API
 export initial_guess, pre_initial_guess, build_initial_guess, validate_initial_guess
+export initial_state, initial_control, initial_variable
 export OptimalControlInitialGuess, OptimalControlPreInit
 export AbstractOptimalControlInitialGuess, AbstractOptimalControlPreInit
 

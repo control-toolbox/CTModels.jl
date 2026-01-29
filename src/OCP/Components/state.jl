@@ -52,6 +52,18 @@ julia> state_dimension(ocp)
 julia> state_components(ocp)
 ["u", "v"]
 ```
+
+# Throws
+
+- `CTBase.UnauthorizedCall`: If state has already been set
+- `Exceptions.IncorrectArgument`: If n ≤ 0
+- `Exceptions.IncorrectArgument`: If number of component names ≠ n
+- `Exceptions.IncorrectArgument`: If name is empty
+- `Exceptions.IncorrectArgument`: If any component name is empty
+- `Exceptions.IncorrectArgument`: If name is one of the component names
+- `Exceptions.IncorrectArgument`: If component names contain duplicates
+- `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
+- `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
 """
 function state!(
     ocp::PreModel,
@@ -62,10 +74,23 @@ function state!(
 
     # checks
     @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
-    @ensure n > 0 CTBase.IncorrectArgument("the state dimension must be greater than 0")
-    @ensure size(components_names, 1) == n CTBase.IncorrectArgument(
-        "the number of state names must be equal to the state dimension"
+    @ensure n > 0 Exceptions.IncorrectArgument(
+        "Invalid dimension: must be positive",
+        got="n=$n",
+        expected="n > 0 (positive integer)",
+        suggestion="Use state!(ocp, n=3) with n > 0",
+        context="state!(ocp, n=$n, name=\"$name\") - validating dimension parameter"
     )
+    @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
+        "Component names count mismatch",
+        got="$(size(components_names, 1)) names for dimension $n",
+        expected="exactly $n component names",
+        suggestion="Use state!(ocp, n, name, [\"x1\", \"x2\", ..., \"x$n\"]) or omit for auto-generation",
+        context="state!(ocp, n=$n, components_names=[...]) - validating names count"
+    )
+
+    # NEW: Comprehensive name validation
+    __validate_name_uniqueness(ocp, string(name), string.(components_names), :state)
 
     # set the state
     ocp.state = StateModel(string(name), string.(components_names))

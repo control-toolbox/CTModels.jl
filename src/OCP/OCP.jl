@@ -42,6 +42,9 @@ include("aliases.jl")
 # Import macro from Utils module
 import ..Utils: @ensure
 
+# Import Exceptions module for error handling
+import ..Exceptions
+
 # Import build_solution from Optimization to overload it
 import ..Optimization: build_solution, build_model
 
@@ -57,7 +60,10 @@ include("Types/solution.jl")
 include("Core/defaults.jl")
 include("Core/time_dependence.jl")
 
-# Load component functions (depend on types and core)
+# Load validation helpers (depend on types and core)
+include("Validation/name_validation.jl")
+
+# Load component functions (depend on types, core, and validation)
 include("Components/state.jl")
 include("Components/control.jl")
 include("Components/variable.jl")

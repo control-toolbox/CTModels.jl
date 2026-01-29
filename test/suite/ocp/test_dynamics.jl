@@ -148,9 +148,9 @@ function test_partial_dynamics()
     # 7. Error: add index out of range (< 1 or > n_states)
     ######
     ocp7 = deepcopy(ocp)
-    @test_throws CTBase.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
-    @test_throws CTBase.IncorrectArgument CTModels.dynamics!(ocp7, -1:-1, partial_dyn_1!)
-    @test_throws CTBase.IncorrectArgument CTModels.dynamics!(
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, -1:-1, partial_dyn_1!)
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp7, (n_states + 1):(n_states + 1), partial_dyn_1!
     )
 
@@ -158,7 +158,7 @@ function test_partial_dynamics()
     # 8. Error: add range with at least one index out of range
     ######
     ocp8 = deepcopy(ocp)
-    @test_throws CTBase.IncorrectArgument CTModels.dynamics!(
+    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp8, (n_states):(n_states + 1), partial_dyn_1!
     )
 
