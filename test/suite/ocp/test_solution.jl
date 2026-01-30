@@ -271,6 +271,94 @@ function test_solution()
         @test CTModels.dual(sol_, ocp, :control_rg)(1) == 3.0 - (-3.0)
         @test CTModels.dual(sol_, ocp, :variable_rg) == [1.0, 2.0] - (-[1.0, 2.0])
     end
+
+    # ========================================================================
+    # Closure independence tests (Phase 3: deepcopy removal validation)
+    # ========================================================================
+    @testset "Closure independence (deepcopy validation)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        # Test 1: Multiple solutions from same data should be independent
+        T1 = [0.0, 0.5, 1.0]
+        X1 = [0.0 0.0; 0.5 0.5; 1.0 1.0]
+        U1 = [1.0; 2.0; 3.0;;]
+        v1 = [10.0, 11.0]
+        P1 = [10.0 10.0; 11.0 11.0]
+        
+        sol1 = CTModels.build_solution(ocp, T1, X1, U1, v1, P1; kwargs...)
+        sol2 = CTModels.build_solution(ocp, T1, X1, U1, v1, P1; kwargs...)
+        
+        # Both solutions should produce identical results
+        @test CTModels.state(sol1)(0.5) == CTModels.state(sol2)(0.5)
+        @test CTModels.control(sol1)(0.5) == CTModels.control(sol2)(0.5)
+        @test CTModels.costate(sol1)(0.5) == CTModels.costate(sol2)(0.5)
+        
+        # Test 2: Solutions should remain independent after creation
+        # (modifying source data should not affect already-created solutions)
+        X2 = copy(X1)
+        sol3 = CTModels.build_solution(ocp, T1, X2, U1, v1, P1; kwargs...)
+        X2[2, 1] = 999.0  # Modify source after solution creation
+        
+        # Solution should still have original values
+        @test CTModels.state(sol3)(0.5) == [0.5, 0.5]  # Not affected by X2 modification
+        
+        # Test 3: Scalar extraction for 1D control (critical deepcopy case)
+        # The existing ocp has 1D control, which tests the scalar extraction path
+        sol3a = CTModels.build_solution(ocp, T1, X1, U1, v1, P1; kwargs...)
+        sol3b = CTModels.build_solution(ocp, T1, X1, U1, v1, P1; kwargs...)
+        
+        # Control is 1D, so should return scalar (not vector)
+        @test CTModels.control(sol3a)(0.5) isa Real  # Scalar output
+        @test CTModels.control(sol3a)(0.5) == CTModels.control(sol3b)(0.5)
+        
+        # State is 2D, so should return vector
+        @test CTModels.state(sol3a)(0.5) isa AbstractVector
+        @test length(CTModels.state(sol3a)(0.5)) == 2
+        
+        # Test 4: Function-based inputs with parameter modification
+        # This tests that closures properly capture values, not references
+        param_x = 1.0
+        param_u = 2.0
+        param_p = 10.0
+        
+        X_func = t -> [param_x * t, param_x * t]
+        U_func = t -> [param_u * t]
+        P_func = t -> [param_p + t, param_p + t]
+        
+        sol_func = CTModels.build_solution(ocp, T1, X_func, U_func, v1, P_func; kwargs...)
+        
+        # Verify initial values
+        @test CTModels.state(sol_func)(0.5) == [0.5, 0.5]
+        @test CTModels.control(sol_func)(0.5) == 1.0
+        @test CTModels.costate(sol_func)(0.5) == [10.5, 10.5]
+        
+        # Modify parameters AFTER solution creation
+        param_x = 999.0
+        param_u = 999.0
+        param_p = 999.0
+        
+        # Solution should still use original parameter values
+        # (closures capture the values at creation time)
+        @test CTModels.state(sol_func)(0.5) == [0.5, 0.5]  # NOT [499.5, 499.5]
+        @test CTModels.control(sol_func)(0.5) == 1.0  # NOT 499.5
+        @test CTModels.costate(sol_func)(0.5) == [10.5, 10.5]  # NOT [999.5, 999.5]
+        
+        # Test 5: Multiple evaluations should give consistent results
+        state_fun = CTModels.state(sol1)
+        results = [state_fun(0.5) for _ in 1:10]
+        @test all(r == results[1] for r in results)
+        
+        # Test 6: Verify closure independence across different time evaluations
+        # This ensures that the closure doesn't have unexpected side effects
+        t_values = [0.0, 0.25, 0.5, 0.75, 1.0]
+        state_results = [CTModels.state(sol1)(t) for t in t_values]
+        control_results = [CTModels.control(sol1)(t) for t in t_values]
+        
+        # Re-evaluate at same points - should get identical results
+        state_results_2 = [CTModels.state(sol1)(t) for t in t_values]
+        control_results_2 = [CTModels.control(sol1)(t) for t in t_values]
+        
+        @test all(state_results[i] == state_results_2[i] for i in 1:length(t_values))
+        @test all(control_results[i] == control_results_2[i] for i in 1:length(t_values))
+    end
 end
 
 end # module

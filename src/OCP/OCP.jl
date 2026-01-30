@@ -75,6 +75,7 @@ include("Components/constraints.jl")
 # Load builders (depend on types and components)
 include("Building/definition.jl")
 include("Building/dual_model.jl")
+include("Building/discretization_utils.jl")
 include("Building/model.jl")
 include("Building/solution.jl")
 

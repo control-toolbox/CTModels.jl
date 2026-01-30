@@ -197,6 +197,58 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Convert JSON3 array data to `Matrix{Float64}` for trajectory import.
+
+# Context
+
+When importing JSON data, `stack(blob[field]; dims=1)` returns different types
+depending on the dimensionality of the original trajectory:
+- **1D trajectories** (e.g., scalar control): `stack()` → `Vector{Float64}`
+- **Multi-D trajectories** (e.g., 2D state): `stack()` → `Matrix{Float64}`
+
+This function normalizes both cases to `Matrix{Float64}` as required by `build_solution`.
+
+# Arguments
+- `data`: Output from `stack(blob[field]; dims=1)`, either `Vector` or `Matrix`
+
+# Returns
+- `Matrix{Float64}`: Properly shaped matrix `(n_time_points, n_dim)` for `build_solution`
+
+# Implementation Details
+
+- **Vector case**: Converts `Vector{Float64}` of length `n` to `Matrix{Float64}(n, 1)`
+  using `reduce(hcat, data)'` to preserve time-series ordering
+- **Matrix case**: Direct conversion to `Matrix{Float64}`
+
+# Examples
+
+```julia
+# 1D control trajectory (101 time points)
+control_data = [5.99, 5.93, ..., -5.99]  # Vector{Float64}
+control_matrix = _json_array_to_matrix(control_data)
+# → Matrix{Float64}(101, 1)
+
+# 2D state trajectory (101 time points, 2 dimensions)
+state_data = [1.0 2.0; 1.1 2.1; ...]  # Matrix{Float64}(101, 2)
+state_matrix = _json_array_to_matrix(state_data)
+# → Matrix{Float64}(101, 2)
+```
+
+# See Also
+- Test coverage: `test/suite/serialization/test_export_import.jl` 
+  (testset "JSON stack() behavior investigation")
+"""
+function _json_array_to_matrix(data)::Matrix{Float64}
+    if data isa Vector
+        return Matrix{Float64}(reduce(hcat, data)')
+    else
+        return Matrix{Float64}(data)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Import an optimal control solution from a `.json` file exported with `export_ocp_solution`.
 
 This function reads the JSON contents and reconstructs a `CTModels.Solution` object,
@@ -228,91 +280,43 @@ function CTModels.import_ocp_solution(
     blob = JSON3.read(json_string)
 
     # get state
-    X = stack(blob["state"]; dims=1)
-    if X isa Vector # if X is a Vector, convert it to a Matrix
-        X = Matrix{Float64}(reduce(hcat, X)')
-    else
-        X = Matrix{Float64}(X)
-    end
+    X = _json_array_to_matrix(stack(blob["state"]; dims=1))
 
     # get control
-    U = stack(blob["control"]; dims=1)
-    if U isa Vector # if U is a Vector, convert it to a Matrix
-        U = Matrix{Float64}(reduce(hcat, U)')
-    else
-        U = Matrix{Float64}(U)
-    end
+    U = _json_array_to_matrix(stack(blob["control"]; dims=1))
 
     # get costate
-    P = stack(blob["costate"]; dims=1)
-    if P isa Vector # if P is a Vector, convert it to a Matrix
-        P = Matrix{Float64}(reduce(hcat, P)')
-    else
-        P = Matrix{Float64}(P)
-    end
+    P = _json_array_to_matrix(stack(blob["costate"]; dims=1))
 
     # get dual path constraints: convert to matrix
     path_constraints_dual = if isnothing(blob["path_constraints_dual"])
         nothing
     else
-        stack(blob["path_constraints_dual"]; dims=1)
-    end
-    if path_constraints_dual isa Vector # if path_constraints_dual is a Vector, convert it to a Matrix
-        path_constraints_dual = Matrix{Float64}(reduce(hcat, path_constraints_dual)')
-    elseif !isnothing(path_constraints_dual)
-        path_constraints_dual = Matrix{Float64}(path_constraints_dual)
+        _json_array_to_matrix(stack(blob["path_constraints_dual"]; dims=1))
     end
 
     # get state constraints (and dual): convert to matrix
     state_constraints_lb_dual = if isnothing(blob["state_constraints_lb_dual"])
         nothing
     else
-        stack(blob["state_constraints_lb_dual"]; dims=1)
-    end
-    if state_constraints_lb_dual isa Vector # if state_constraints_lb_dual is a Vector, convert it to a Matrix
-        state_constraints_lb_dual = Matrix{Float64}(
-            reduce(hcat, state_constraints_lb_dual)'
-        )
-    elseif !isnothing(state_constraints_lb_dual)
-        state_constraints_lb_dual = Matrix{Float64}(state_constraints_lb_dual)
+        _json_array_to_matrix(stack(blob["state_constraints_lb_dual"]; dims=1))
     end
     state_constraints_ub_dual = if isnothing(blob["state_constraints_ub_dual"])
         nothing
     else
-        stack(blob["state_constraints_ub_dual"]; dims=1)
-    end
-    if state_constraints_ub_dual isa Vector # if state_constraints_ub_dual is a Vector, convert it to a Matrix
-        state_constraints_ub_dual = Matrix{Float64}(
-            reduce(hcat, state_constraints_ub_dual)'
-        )
-    elseif !isnothing(state_constraints_ub_dual)
-        state_constraints_ub_dual = Matrix{Float64}(state_constraints_ub_dual)
+        _json_array_to_matrix(stack(blob["state_constraints_ub_dual"]; dims=1))
     end
 
     # get control constraints (and dual): convert to matrix
     control_constraints_lb_dual = if isnothing(blob["control_constraints_lb_dual"])
         nothing
     else
-        stack(blob["control_constraints_lb_dual"]; dims=1)
-    end
-    if control_constraints_lb_dual isa Vector # if control_constraints_lb_dual is a Vector, convert it to a Matrix
-        control_constraints_lb_dual = Matrix{Float64}(
-            reduce(hcat, control_constraints_lb_dual)'
-        )
-    elseif !isnothing(control_constraints_lb_dual)
-        control_constraints_lb_dual = Matrix{Float64}(control_constraints_lb_dual)
+        _json_array_to_matrix(stack(blob["control_constraints_lb_dual"]; dims=1))
     end
     control_constraints_ub_dual = if isnothing(blob["control_constraints_ub_dual"])
         nothing
     else
-        stack(blob["control_constraints_ub_dual"]; dims=1)
-    end
-    if control_constraints_ub_dual isa Vector # if control_constraints_ub_dual is a Vector, convert it to a Matrix
-        control_constraints_ub_dual = Matrix{Float64}(
-            reduce(hcat, control_constraints_ub_dual)'
-        )
-    elseif !isnothing(control_constraints_ub_dual)
-        control_constraints_ub_dual = Matrix{Float64}(control_constraints_ub_dual)
+        _json_array_to_matrix(stack(blob["control_constraints_ub_dual"]; dims=1))
     end
 
     # get dual of boundary constraints: no conversion needed
