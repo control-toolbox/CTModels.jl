@@ -288,10 +288,8 @@ function test_export_import()
     Test.@testset "JLD round-trip: solution_example" verbose=VERBOSE showtiming=SHOWTIMING begin
         ocp, sol = solution_example()
 
-        # Suppress JLD2 warnings about anonymous functions (expected behaviour)
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol; filename="solution_test") # default is :JLD
-        end
+        # Export solution (no more JLD2 warnings!)
+        CTModels.export_ocp_solution(sol; filename="solution_test") # default is :JLD
         sol_reloaded = CTModels.import_ocp_solution(
             ocp; filename="solution_test", format=:JLD
         )
@@ -863,15 +861,11 @@ function test_export_import()
         ocp, sol0 = solution_example_dual()
 
         # First cycle: sol0 → export → import → sol1
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
         sol1 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_1", format=:JLD)
 
         # Second cycle: sol1 → export → import → sol2
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_2", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol1; filename="idempotence_jld_2", format=:JLD)
         sol2 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_2", format=:JLD)
 
         # Verify idempotence: sol1 ≈ sol2
@@ -885,25 +879,19 @@ function test_export_import()
         ocp, sol0 = solution_example_dual()
 
         # First cycle
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_t1", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol0; filename="idempotence_jld_t1", format=:JLD)
         sol1 = CTModels.import_ocp_solution(
             ocp; filename="idempotence_jld_t1", format=:JLD
         )
 
         # Second cycle
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_t2", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol1; filename="idempotence_jld_t2", format=:JLD)
         sol2 = CTModels.import_ocp_solution(
             ocp; filename="idempotence_jld_t2", format=:JLD
         )
 
         # Third cycle
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol2; filename="idempotence_jld_t3", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol2; filename="idempotence_jld_t3", format=:JLD)
         sol3 = CTModels.import_ocp_solution(
             ocp; filename="idempotence_jld_t3", format=:JLD
         )
@@ -920,17 +908,13 @@ function test_export_import()
         ocp, sol0 = solution_example()
 
         # First cycle
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_nd1", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol0; filename="idempotence_jld_nd1", format=:JLD)
         sol1 = CTModels.import_ocp_solution(
             ocp; filename="idempotence_jld_nd1", format=:JLD
         )
 
         # Second cycle
-        Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_nd2", format=:JLD)
-        end
+        CTModels.export_ocp_solution(sol1; filename="idempotence_jld_nd2", format=:JLD)
         sol2 = CTModels.import_ocp_solution(
             ocp; filename="idempotence_jld_nd2", format=:JLD
         )

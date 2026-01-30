@@ -15,8 +15,9 @@ struct FakeSolutionDoPlot{N} <: CTModels.AbstractSolution
 end
 
 CTModels.dim_path_constraints_nl(::FakeModelDoPlot{N}) where {N} = N
-CTModels.model(sol::FakeSolutionDoPlot{N}) where {N} = sol.ocp
+CTModels.dim_path_constraints_nl(sol::FakeSolutionDoPlot{N}) where {N} = N
 CTModels.path_constraints_dual(sol::FakeSolutionDoPlot) = sol.pcd
+CTModels.model(sol::FakeSolutionDoPlot) = sol.ocp
 CTModels.state_dimension(::FakeSolutionDoPlot) = 2
 CTModels.control_dimension(::FakeSolutionDoPlot) = 1
 

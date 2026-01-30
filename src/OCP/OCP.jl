@@ -129,7 +129,8 @@ export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
 export is_empty, is_empty_time_grid
-export model, index, time
+export index, time
+export model
 # Dual constraints accessors
 export path_constraints_dual, boundary_constraints_dual
 export state_constraints_lb_dual, state_constraints_ub_dual

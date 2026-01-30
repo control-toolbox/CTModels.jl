@@ -98,11 +98,11 @@ function test_ocp_solution_types()
             state,
             control,
             variable,
+            model,
             costate_fun,
             objective_val,
             dual,
             infos,
-            model,
         )
 
         sol_empty = CTModels.Solution(
@@ -111,11 +111,11 @@ function test_ocp_solution_types()
             state,
             control,
             variable,
+            model,
             costate_fun,
             objective_val,
             dual,
             infos,
-            model,
         )
 
         # Type parameters should reflect the underlying component types
@@ -125,11 +125,11 @@ function test_ocp_solution_types()
             typeof(state),
             typeof(control),
             typeof(variable),
+            typeof(model),
             typeof(costate_fun),
             typeof(objective_val),
             typeof(dual),
             typeof(infos),
-            typeof(model),
         }
 
         Test.@test sol_empty isa CTModels.Solution{
@@ -138,11 +138,11 @@ function test_ocp_solution_types()
             typeof(state),
             typeof(control),
             typeof(variable),
+            typeof(model),
             typeof(costate_fun),
             typeof(objective_val),
             typeof(dual),
             typeof(infos),
-            typeof(model),
         }
 
         Test.@test !CTModels.is_empty_time_grid(sol_full)
@@ -195,11 +195,11 @@ function test_ocp_solution_types()
             state,
             control,
             variable,
+            model,
             costate_fun,
             objective_val,
             dual,
             infos,
-            model,
         )
 
         function extract_summary(sol_local)

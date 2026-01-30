@@ -73,7 +73,10 @@ function test_solution()
     sol = CTModels.build_solution(ocp, T, X, U, v, P; kwargs...)
 
     # call getters and check the values
-    @test CTModels.model(sol) isa CTModels.Model
+    @testset "model" begin
+        @test CTModels.model(sol) isa CTModels.Model
+        @test CTModels.model(sol) === ocp
+    end
     @testset "state" begin
         @test CTModels.state_dimension(sol) == 2
         @test CTModels.state_name(sol) == "y"
@@ -113,6 +116,16 @@ function test_solution()
         @test CTModels.initial_time_name(sol) == "0.0"
         @test CTModels.final_time_name(sol) == "1.0"
         @test CTModels.time_grid(sol) == [0.0, 0.5, 1.0]
+        @test CTModels.times(sol) isa CTModels.TimesModel
+        @test CTModels.initial_time(CTModels.times(sol)) == 0
+        @test CTModels.final_time(CTModels.times(sol)) == 1
+        # Test direct time getters on solution
+        @test CTModels.initial_time(sol) == 0
+        @test CTModels.final_time(sol) == 1
+        @test CTModels.has_fixed_initial_time(sol) == true
+        @test CTModels.has_free_initial_time(sol) == false
+        @test CTModels.has_fixed_final_time(sol) == true
+        @test CTModels.has_free_final_time(sol) == false
     end
     @testset "infos" begin
         @test CTModels.objective(sol) == 0.5
@@ -236,6 +249,48 @@ function test_solution()
             variable_constraints_ub_dual=variable_constraints_ub_dual,
         )
         @test CTModels.variable_constraints_ub_dual(sol_) == [1.0, 2.0]
+    end
+    @testset "dimension helpers" begin
+        # Test dim_path_constraints_nl
+        @test CTModels.dim_path_constraints_nl(sol) == 0  # no path constraints
+        path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
+        sol_pc = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual
+        )
+        @test CTModels.dim_path_constraints_nl(sol_pc) == 2  # 2 path constraints
+        
+        # Test dim_boundary_constraints_nl
+        @test CTModels.dim_boundary_constraints_nl(sol) == 0  # no boundary constraints
+        boundary_constraints_dual = [3.0, 2.0, 1.0]
+        sol_bc = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., boundary_constraints_dual=boundary_constraints_dual
+        )
+        @test CTModels.dim_boundary_constraints_nl(sol_bc) == 3  # 3 boundary constraints
+        
+        # Test dim_variable_constraints_box
+        @test CTModels.dim_variable_constraints_box(sol) == 0  # no variable constraints
+        variable_constraints_lb_dual = [1.0, 2.0]
+        sol_vc = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., variable_constraints_lb_dual=variable_constraints_lb_dual
+        )
+        @test CTModels.dim_variable_constraints_box(sol_vc) == 2  # 2 variable constraints
+        
+        # Test dim_state_constraints_box
+        @test CTModels.dim_state_constraints_box(sol) == 0  # no state constraints
+        state_constraints_lb_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
+        sol_sc = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., state_constraints_lb_dual=state_constraints_lb_dual
+        )
+        @test CTModels.dim_state_constraints_box(sol_sc) == 2  # 2 state constraints (dim_x = 2)
+        
+        # Test dim_control_constraints_box
+        @test CTModels.dim_control_constraints_box(sol) == 0  # no control constraints
+        control_constraints_lb_dual = zeros(3, 1)
+        control_constraints_lb_dual[:, 1] = [1.0, 2.0, 3.0]
+        sol_cc = CTModels.build_solution(
+            ocp, T, X, U, v, P; kwargs..., control_constraints_lb_dual=control_constraints_lb_dual
+        )
+        @test CTModels.dim_control_constraints_box(sol_cc) == 1  # 1 control constraint (dim_u = 1)
     end
     @testset "dual from label" begin
         path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]

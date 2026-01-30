@@ -35,14 +35,11 @@ julia> export_ocp_solution(JLD2Tag(), sol; filename="mysolution")
 function CTModels.export_ocp_solution(
     ::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String
 )
-    # Get the associated OCP model from the solution
-    ocp = CTModels.model(sol)
-    
     # Serialize solution to discrete data
-    data = CTModels.OCP._serialize_solution(sol, ocp)
+    data = CTModels.OCP._serialize_solution(sol)
     
-    # Save both the serialized data and the OCP model
-    jldsave(filename * ".jld2"; solution_data=data, ocp=ocp)
+    # Save only the serialized data (no more OCP model)
+    jldsave(filename * ".jld2"; solution_data=data)
     
     return nothing
 end
@@ -82,7 +79,6 @@ function CTModels.import_ocp_solution(
     # Load the saved data
     file_data = load(filename * ".jld2")
     data = file_data["solution_data"]
-    saved_ocp = file_data["ocp"]
     
     # Extract time grid - handle both TimeGridModel and raw Vector
     T = if data["time_grid"] isa CTModels.TimeGridModel
@@ -91,9 +87,9 @@ function CTModels.import_ocp_solution(
         data["time_grid"]
     end
     
-    # Reconstruct solution using build_solution
+    # Reconstruct solution using build_solution with provided ocp
     sol = CTModels.build_solution(
-        saved_ocp,
+        ocp,
         T,
         data["state"],
         data["control"],

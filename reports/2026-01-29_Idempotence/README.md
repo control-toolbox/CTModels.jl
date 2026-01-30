@@ -12,7 +12,7 @@ Ce répertoire contient l'ensemble de la documentation relative au projet d'amé
 
 1. ✅ **Phase 1** : Tests d'idempotence (Complétée)
 2. ✅ **Phase 2** : Réduction des warnings JLD2 pour les fonctions (Complétée)
-3. 🔍 **Phase 3** : Réduction des warnings JLD2 pour le champ `model` (En analyse)
+3. ✅ **Phase 3** : Suppression du champ `model` de `Solution` (Implémentée)
 
 ---
 
@@ -27,9 +27,10 @@ reports/2026-01-29_Idempotence/
 ├── analysis/                          # Analyses techniques détaillées
 │   ├── 01_serialization_idempotence_analysis.md
 │   ├── 02_vector_conversion_investigation.md
-│   ├── 03_ocp_field_analysis.md              # ⭐ Analyse du champ model
-│   ├── 04_plotting_metadata_investigation.md  # ⭐ Métadonnées pour plotting
-│   └── 05_bounds_metadata_analysis.md         # ⭐ Bornes de contraintes
+│   ├── 03_ocp_field_analysis.md              # Analyse initiale du champ model
+│   ├── 04_plotting_metadata_investigation.md  # Métadonnées pour plotting
+│   ├── 05_bounds_metadata_analysis.md         # Bornes de contraintes
+│   └── 06_simplified_solution.md              # ⭐ Solution implémentée
 │
 ├── reference/                         # Plans et spécifications
 │   └── 01_serialization_idempotence_plan.md
@@ -40,23 +41,27 @@ reports/2026-01-29_Idempotence/
 
 ---
 
-## Phase 3 : Optimisation du champ `model` dans `Solution`
+## Phase 3 : Suppression du champ `model` de `Solution`
 
 ### Contexte
 
-Le champ `model::ModelType` dans la structure `Solution` stocke une référence complète au problème OCP, incluant :
+Le champ `model::ModelType` dans la structure `Solution` stockait une référence complète au problème OCP, incluant :
 - Les fonctions (dynamique, contraintes, objectif)
 - Les structures complexes imbriquées
 - Des closures potentiellement non sérialisables
 
-Cela génère des **warnings lors de l'export JLD2**.
+Cela générait des **warnings lors de l'export JLD2**.
 
-### Objectif
+### Solution implémentée
 
-Remplacer le champ `model` par une structure `OCPMetadata` minimale et sérialisable contenant uniquement les métadonnées nécessaires pour :
-- Afficher une solution
-- Tracer une solution
-- Reconstruire une solution depuis des données discrètes
+Au lieu de créer une nouvelle struct `OCPMetadata`, nous avons découvert que **toutes les informations nécessaires sont déjà disponibles** dans les champs existants de `Solution` :
+- Les dimensions de base proviennent de `sol.state`, `sol.control`, `sol.variable`
+- Les dimensions de contraintes proviennent de `sol.dual`
+
+Nous avons donc :
+1. **Supprimé complètement** le champ `model` de `Solution`
+2. **Ajouté des surcharges** de `dim_boundary_constraints_nl`, `dim_path_constraints_nl`, `dim_variable_constraints_box` pour `Solution`
+3. **Adapté tous les usages** dans le codebase (serialization, plotting, display)
 
 ### Documents d'analyse (Phase 3)
 
@@ -255,24 +260,3 @@ state_dimension(sol::Solution) = state_dimension(sol.metadata)
 **Dernière révision** : 2026-01-30
 
 ---
-
-## Résumé exécutif
-
-### Problème
-
-Le champ `model::ModelType` dans `Solution` génère des warnings JLD2 car il contient des fonctions et structures complexes non sérialisables.
-
-### Solution
-
-Remplacer par `OCPMetadata` contenant uniquement 6 dimensions (48 bytes), suffisant pour affichage, plotting et reconstruction.
-
-### Impact
-
-- ✅ Pas de breaking change (Option C)
-- ✅ Élimine les warnings JLD2
-- ✅ Réduit la taille des fichiers sérialisés
-- ✅ Maintient toutes les fonctionnalités essentielles
-
-### Prochaine étape
-
-Implémenter Phase 2 : Créer `src/OCP/Types/metadata.jl` avec la structure `OCPMetadata`.

@@ -143,11 +143,11 @@ function build_solution(
         state,
         control,
         variable,
+        ocp,
         fp,
         objective,
         dual,
         solver_infos,
-        ocp,
     )
 end
 
@@ -202,11 +202,11 @@ function state(
         <:StateModelSolution{TS},
         <:AbstractControlModel,
         <:AbstractVariableModel,
+        <:AbstractModel,
         <:Function,
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::TS where {TS<:Function}
     return value(sol.state)
@@ -260,11 +260,11 @@ function control(
         <:AbstractStateModel,
         <:ControlModelSolution{TS},
         <:AbstractVariableModel,
+        <:AbstractModel,
         <:Function,
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::TS where {TS<:Function}
     return value(sol.control)
@@ -303,6 +303,66 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the dimension of the boundary constraints.
+
+"""
+function dim_boundary_constraints_nl(sol::Solution)::Dimension
+    bc_dual = boundary_constraints_dual(sol)
+    return bc_dual === nothing ? 0 : length(bc_dual)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the path constraints.
+
+"""
+function dim_path_constraints_nl(sol::Solution)::Dimension
+    pc_dual = path_constraints_dual(sol)
+    if pc_dual === nothing
+        return 0
+    else
+        t0 = initial_time(sol)
+        return length(pc_dual(t0))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the variable box constraints.
+
+"""
+function dim_variable_constraints_box(sol::Solution)::Dimension
+    vc_lb_dual = variable_constraints_lb_dual(sol)
+    return vc_lb_dual === nothing ? 0 : length(vc_lb_dual)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of box constraints on state.
+
+"""
+function dim_state_constraints_box(sol::Solution)::Dimension
+    sc_lb_dual = state_constraints_lb_dual(sol)
+    return sc_lb_dual === nothing ? 0 : state_dimension(sol)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of box constraints on control.
+
+"""
+function dim_control_constraints_box(sol::Solution)::Dimension
+    cc_lb_dual = control_constraints_lb_dual(sol)
+    return cc_lb_dual === nothing ? 0 : control_dimension(sol)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the variable or `nothing`.
 
 ```@example
@@ -316,11 +376,11 @@ function variable(
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:VariableModelSolution{TS},
+        <:AbstractModel,
         <:Function,
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::TS where {TS<:Union{ctNumber,ctVector}}
     return value(sol.variable)
@@ -344,11 +404,11 @@ function costate(
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
+        <:AbstractModel,
         Co,
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::Co where {Co<:Function}
     return sol.costate
@@ -384,6 +444,84 @@ function time_name(sol::Solution)::String
     return time_name(sol.times)
 end
 
+# Initial time
+"""
+$(TYPEDSIGNATURES)
+
+Return the initial time of the solution.
+"""
+function initial_time(sol::Solution)::Real
+    return initial_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the final time of the solution.
+"""
+function final_time(sol::Solution)::Real
+    return final_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is fixed.
+"""
+function has_fixed_initial_time(sol::Solution)::Bool
+    return has_fixed_initial_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the initial time is free.
+"""
+function has_free_initial_time(sol::Solution)::Bool
+    return has_free_initial_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is fixed.
+"""
+function has_fixed_final_time(sol::Solution)::Bool
+    return has_fixed_final_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check if the final time is free.
+"""
+function has_free_final_time(sol::Solution)::Bool
+    return has_free_final_time(sol.times)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the times model.
+
+"""
+function times(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        TM,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:AbstractModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::TM where {TM<:AbstractTimesModel}
+    return sol.times
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -397,11 +535,11 @@ function time_grid(
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
+        <:AbstractModel,
         <:Function,
         <:ctNumber,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::T where {T<:TimesDisc}
     return sol.time_grid.value
@@ -420,11 +558,11 @@ function objective(
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
+        <:AbstractModel,
         <:Function,
         O,
         <:AbstractDualModel,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::O where {O<:ctNumber}
     return sol.objective
@@ -493,6 +631,28 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the model of the optimal control problem.
+"""
+function model(
+    sol::Solution{
+        <:AbstractTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        M,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)::M where {M<:AbstractModel}
+    return sol.model
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the dual model containing all constraint multipliers.
 """
 function dual_model(
@@ -502,11 +662,11 @@ function dual_model(
         <:AbstractStateModel,
         <:AbstractControlModel,
         <:AbstractVariableModel,
+        <:AbstractModel,
         <:Function,
         <:ctNumber,
         DM,
         <:AbstractSolverInfos,
-        <:AbstractModel,
     },
 )::DM where {DM<:AbstractDualModel}
     return sol.dual
@@ -592,27 +752,6 @@ function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Return the optimal control problem model associated with the solution.
-"""
-function model(
-    sol::Solution{
-        <:AbstractTimeGridModel,
-        <:AbstractTimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:Function,
-        <:ctNumber,
-        <:AbstractDualModel,
-        <:AbstractSolverInfos,
-        TM,
-    },
-)::TM where {TM<:AbstractModel}
-    return sol.model
-end
 
 # --------------------------------------------------------------------------------------------------
 # print a solution
@@ -642,14 +781,14 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
             ") = ",
             variable(sol),
         )
-        if dim_variable_constraints_box(model(sol)) > 0
+        if dim_variable_constraints_box(sol) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
         end
     end
 
     # Boundary constraints duals
-    if dim_boundary_constraints_nl(model(sol)) > 0
+    if dim_boundary_constraints_nl(sol) > 0
         println(io, "\n• Boundary duals: ", boundary_constraints_dual(sol))
     end
 end
@@ -659,7 +798,7 @@ end
 # ============================================================================== #
 
 """
-    _serialize_solution(sol::Solution, ocp::Model)::Dict{String, Any}
+    _serialize_solution(sol::Solution)::Dict{String, Any}
 
 Sérialise une solution en données discrètes pour export (JLD2, JSON, etc.).
 Utilise les getters publics pour accéder aux champs de la solution.
@@ -670,7 +809,6 @@ la grille temporelle.
 
 # Arguments
 - `sol::Solution`: Solution à sérialiser
-- `ocp::Model`: Modèle OCP associé (pour obtenir les dimensions)
 
 # Returns
 - `Dict{String, Any}`: Dictionnaire contenant toutes les données discrètes :
@@ -690,7 +828,7 @@ la grille temporelle.
 # Example
 ```julia
 sol = solve(ocp)
-data = CTModels._serialize_solution(sol, ocp)
+data = CTModels._serialize_solution(sol)
 # Reconstruction
 sol_reconstructed = CTModels.build_solution(
     ocp, data["time_grid"], data["state"], data["control"], 
@@ -699,11 +837,11 @@ sol_reconstructed = CTModels.build_solution(
 )
 ```
 """
-function _serialize_solution(sol::Solution, ocp::Model)::Dict{String, Any}
+function _serialize_solution(sol::Solution)::Dict{String, Any}
     # Utiliser les getters publics
     T = time_grid(sol)
-    dim_x = state_dimension(ocp)
-    dim_u = control_dimension(ocp)
+    dim_x = state_dimension(sol)
+    dim_u = control_dimension(sol)
     
     # Discrétiser les fonctions principales
     return Dict(

@@ -181,8 +181,7 @@ $(TYPEDEF)
 Complete solution of an optimal control problem.
 
 Stores the optimal state, control, and costate trajectories, the optimisation
-variable value, objective value, dual variables, solver information, and a
-reference to the original model.
+variable value, objective value, dual variables, and solver information.
 
 # Fields
 
@@ -191,11 +190,11 @@ reference to the original model.
 - `state::StateModelType`: State trajectory `t -> x(t)` with metadata.
 - `control::ControlModelType`: Control trajectory `t -> u(t)` with metadata.
 - `variable::VariableModelType`: Optimisation variable value with metadata.
+- `model::ModelType`: Reference to the optimal control problem model.
 - `costate::CostateModelType`: Costate (adjoint) trajectory `t -> p(t)`.
 - `objective::ObjectiveValueType`: Optimal objective value.
 - `dual::DualModelType`: Dual variables for all constraints.
 - `solver_infos::SolverInfosType`: Solver statistics and status.
-- `model::ModelType`: Reference to the original optimal control problem.
 
 # Example
 
@@ -213,22 +212,22 @@ struct Solution{
     StateModelType<:AbstractStateModel,
     ControlModelType<:AbstractControlModel,
     VariableModelType<:AbstractVariableModel,
+    ModelType<:AbstractModel,
     CostateModelType<:Function,
     ObjectiveValueType<:ctNumber,
     DualModelType<:AbstractDualModel,
     SolverInfosType<:AbstractSolverInfos,
-    ModelType<:AbstractModel,
 } <: AbstractSolution
     time_grid::TimeGridModelType
     times::TimesModelType
     state::StateModelType
     control::ControlModelType
     variable::VariableModelType
+    model::ModelType
     costate::CostateModelType
     objective::ObjectiveValueType
     dual::DualModelType
     solver_infos::SolverInfosType
-    model::ModelType
 end
 
 """
