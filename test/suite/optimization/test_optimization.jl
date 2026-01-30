@@ -334,7 +334,7 @@ function test_optimization()
                 stats = MockExecutionStats(1.23, 15, 1.0e-6, :first_order)
                 nlp = ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 1.23
                 @test iter == 15
@@ -348,7 +348,7 @@ function test_optimization()
                 stats = MockExecutionStats(2.34, 20, 1.0e-5, :acceptable)
                 nlp = ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 2.34
                 @test iter == 20
@@ -362,7 +362,7 @@ function test_optimization()
                 stats = MockExecutionStats(3.45, 5, 1.0e-3, :max_iter)
                 nlp = ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 
                 @test obj ≈ 3.45
                 @test iter == 5
@@ -411,7 +411,7 @@ function test_optimization()
                 @test sol.status == :first_order
                 
                 # Extract solver info
-                obj, iter, viol, msg, status, success = extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 @test obj ≈ 5.0
                 @test success == true
             end

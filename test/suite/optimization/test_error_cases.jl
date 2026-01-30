@@ -209,7 +209,7 @@ function test_error_cases()
                 stats = EdgeCaseStats(0.0, 0, 0.0, :first_order)
                 nlp = ADNLPModels.ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 @test iter == 0
                 @test success == true
             end
@@ -218,7 +218,7 @@ function test_error_cases()
                 stats = EdgeCaseStats(1e100, 10, 1e-6, :first_order)
                 nlp = ADNLPModels.ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 @test obj ≈ 1e100
                 @test success == true
             end
@@ -227,7 +227,7 @@ function test_error_cases()
                 stats = EdgeCaseStats(1.0, 10, 1e-15, :first_order)
                 nlp = ADNLPModels.ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 @test viol ≈ 1e-15
                 @test success == true
             end
@@ -236,7 +236,7 @@ function test_error_cases()
                 stats = EdgeCaseStats(1.0, 10, 1e-6, :unknown_status)
                 nlp = ADNLPModels.ADNLPModel(x -> x[1]^2, [1.0])
                 
-                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, nlp)
+                obj, iter, viol, msg, status, success = Optimization.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
                 @test status == :unknown_status
                 @test success == false  # Not :first_order or :acceptable
             end

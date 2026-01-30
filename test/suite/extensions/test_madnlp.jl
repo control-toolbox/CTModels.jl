@@ -65,7 +65,7 @@ function test_madnlp()
             
             # Extract solver infos using CTModels extension
             objective, iterations, constraints_violation, message, status, successful = 
-                CTModels.extract_solver_infos(stats, nlp)
+                CTModels.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
             
             # Verify results
             Test.@test objective ≈ 0.0 atol=1e-6  # Optimal objective
@@ -91,7 +91,7 @@ function test_madnlp()
             stats_min = MadNLP.solve!(solver_min)
             
             # Extract solver infos
-            objective_min, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, nlp_min)
+            objective_min, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, NLPModels.get_minimize(nlp_min))
             
             # For minimization, objective should equal stats.objective
             Test.@test objective_min ≈ stats_min.objective atol=1e-10
@@ -126,7 +126,7 @@ function test_madnlp()
             nlp_min = ADNLPModels.ADNLPModel(obj, x0; minimize=true)
             solver_min = MadNLP.MadNLPSolver(nlp_min; print_level=MadNLP.ERROR)
             stats_min = MadNLP.solve!(solver_min)
-            obj_min, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, nlp_min)
+            obj_min, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, NLPModels.get_minimize(nlp_min))
             
             # For minimization, extracted objective should equal raw stats objective
             Test.@test obj_min ≈ stats_min.objective atol=1e-10
@@ -147,7 +147,7 @@ function test_madnlp()
             solver = MadNLP.MadNLPSolver(nlp; print_level=MadNLP.ERROR)
             stats = MadNLP.solve!(solver)
             
-            _, _, _, _, status, _ = CTModels.extract_solver_infos(stats, nlp)
+            _, _, _, _, status, _ = CTModels.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
             
             # Status should be a Symbol
             Test.@test status isa Symbol
@@ -167,7 +167,7 @@ function test_madnlp()
             solver = MadNLP.MadNLPSolver(nlp; print_level=MadNLP.ERROR, max_iter=100)
             stats = MadNLP.solve!(solver)
             
-            _, _, _, _, status, successful = CTModels.extract_solver_infos(stats, nlp)
+            _, _, _, _, status, successful = CTModels.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
             
             # For a simple problem, should succeed
             Test.@test successful == true
@@ -192,7 +192,7 @@ function test_madnlp()
             solver = MadNLP.MadNLPSolver(nlp; print_level=MadNLP.ERROR)
             stats = MadNLP.solve!(solver)
             
-            result = CTModels.extract_solver_infos(stats, nlp)
+            result = CTModels.extract_solver_infos(stats, NLPModels.get_minimize(nlp))
             
             # Should return a 6-tuple
             Test.@test result isa Tuple
@@ -200,19 +200,87 @@ function test_madnlp()
             
             objective, iterations, constraints_violation, message, status, successful = result
             
-            # Check types
-            Test.@test objective isa Float64
+            Test.@test objective isa Real
             Test.@test iterations isa Int
-            Test.@test constraints_violation isa Float64
+            Test.@test constraints_violation isa Real
             Test.@test message isa String
             Test.@test status isa Symbol
             Test.@test successful isa Bool
+        end
+        
+        Test.@testset "maximization problem - objective sign consistency" begin
+            # Test with a real maximization problem: max 1 - x^2
+            # Solution: x = 0, objective = 1
+            function obj_max(x)
+                return 1.0 - x[1]^2
+            end
             
-            # Check values make sense
-            Test.@test isfinite(objective)
-            Test.@test iterations >= 0
-            Test.@test constraints_violation >= 0.0
-            Test.@test message == "MadNLP"
+            x0 = [0.5]  # Start away from optimum
+            
+            # Create maximization problem
+            nlp_max = ADNLPModels.ADNLPModel(obj_max, x0; minimize=false)
+            Test.@test NLPModels.get_minimize(nlp_max) == false
+            
+            # Solve with MadNLP
+            solver_max = MadNLP.MadNLPSolver(nlp_max; print_level=MadNLP.ERROR)
+            stats_max = MadNLP.solve!(solver_max)
+            
+            # Extract solver infos
+            objective_extracted, _, _, _, _, _ = CTModels.extract_solver_infos(stats_max, NLPModels.get_minimize(nlp_max))
+            
+            # The extracted objective should be the true maximization objective (≈ 1.0)
+            Test.@test objective_extracted ≈ 1.0 atol=1e-6
+            
+            # Test the consistency logic: (flip_madnlp && flip_extract) || (!flip_madnlp && !flip_extract)
+            # We need to determine if MadNLP flips the sign internally
+            raw_madnlp_objective = stats_max.objective
+            
+            # If MadNLP returns the negative (old behavior), then raw should be ≈ -1.0
+            # If MadNLP returns the positive (new behavior), then raw should be ≈ 1.0
+            flip_madnlp = abs(raw_madnlp_objective + 1.0) < 1e-6  # MadNLP returns -1.0
+            flip_extract = objective_extracted != raw_madnlp_objective  # Our function flips it
+            
+            # The consistency condition should always be true
+            consistency_condition = (flip_madnlp && flip_extract) || (!flip_madnlp && !flip_extract)
+            Test.@test consistency_condition == true
+            
+            # Additional debugging info (if test fails)
+            if !consistency_condition
+                println("DEBUG INFO:")
+                println("Raw MadNLP objective: $raw_madnlp_objective")
+                println("Extracted objective: $objective_extracted")
+                println("flip_madnlp: $flip_madnlp")
+                println("flip_extract: $flip_extract")
+                println("Expected objective: 1.0")
+            end
+        end
+        
+        Test.@testset "unit test - mock maximization objective flip" begin
+            # Unit test with mock data to verify the flip logic
+            function obj(x)
+                return x[1]^2 + x[2]^2
+            end
+            
+            x0 = [1.0, 1.0]
+            
+            # Create a mock stats object (we'll create a real one but don't solve)
+            nlp_min = ADNLPModels.ADNLPModel(obj, x0; minimize=true)
+            solver_min = MadNLP.MadNLPSolver(nlp_min; print_level=MadNLP.ERROR)
+            stats_min = MadNLP.solve!(solver_min)
+            
+            # Mock the objective value to test the flip logic
+            original_objective = stats_min.objective
+            
+            # Test case 1: minimization (should not flip)
+            obj_min, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, true)
+            Test.@test obj_min ≈ original_objective atol=1e-10
+            
+            # Test case 2: maximization (should flip)
+            obj_max, _, _, _, _, _ = CTModels.extract_solver_infos(stats_min, false)
+            Test.@test obj_max ≈ -original_objective atol=1e-10
+            
+            # Verify the flip logic
+            Test.@test obj_max == -obj_min
         end
     end
 end

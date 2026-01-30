@@ -1,11 +1,3 @@
-# Solver Information Extraction
-#
-# Utilities for extracting solver information from NLP execution statistics.
-# These functions work with standard NLP solver outputs.
-#
-# Author: CTModels Development Team
-# Date: 2026-01-26
-
 """
 $(TYPEDSIGNATURES)
 
@@ -18,7 +10,7 @@ metadata for optimal control solutions.
 # Arguments
 
 - `nlp_solution::SolverCore.AbstractExecutionStats`: A solver execution statistics object.
-- `nlp::NLPModels.AbstractNLPModel`: The NLP model (unused in generic implementation).
+- `minimize::Bool`: Whether the problem is a minimization problem or not.
 
 # Returns
 
@@ -39,10 +31,10 @@ returns `(objective, ...)` first, but the struct doesn't have an `objective` fie
 # Example
 
 ```julia-repl
-julia> using CTModels, SolverCore, NLPModels
+julia> using CTModels, SolverCore
 
 julia> # After solving an NLP problem with a solver
-julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, nlp)
+julia> obj, iter, viol, msg, stat, success = extract_solver_infos(nlp_solution, minimize)
 (1.23, 15, 1.0e-6, "Ipopt/generic", :first_order, true)
 ```
 
@@ -50,7 +42,7 @@ See also: [`SolverInfos`](@ref)
 """
 function extract_solver_infos(
     nlp_solution::SolverCore.AbstractExecutionStats,
-    ::NLPModels.AbstractNLPModel
+    ::Bool, # whether the problem is a minimization problem or not
 )
     objective = nlp_solution.objective
     iterations = nlp_solution.iter
