@@ -85,147 +85,37 @@ function build_solution(
         T = LinRange(0, dim_NLP_steps, dim_NLP_steps + 1)
     end
 
-    # variables: remove additional state for lagrange objective
-    x = if TX <: Function
-        X
-    else
-        N = size(X, 1)
-        V = matrix2vec(X[:, 1:dim_x], 1)
-        ctinterpolate(T[1:N], V)
-    end
-    p = if TP <: Function
-        P
-    elseif length(T) == 2
-        t -> P[1, 1:dim_x]
-    else
-        L = size(P, 1)
-        V = matrix2vec(P[:, 1:dim_x], 1)
-        ctinterpolate(T[1:L], V)
-    end
-    u = if TU <: Function
-        U
-    else
-        M = size(U, 1)
-        V = matrix2vec(U[:, 1:dim_u], 1)
-        ctinterpolate(T[1:M], V)
-    end
-
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL here because Julia closures capture variable REFERENCES, not values
-    # Without deepcopy, modifications to external variables after solution creation would affect the solution
-    # Example: param_x = 1.0; X_func = t -> [param_x * t]; sol = build_solution(...); param_x = 999.0;
-    # Without deepcopy: sol.state(0.5) would return [499.5, 499.5] (uses new param_x)
-    # With deepcopy: sol.state(0.5) returns [0.5, 0.5] (uses original param_x value)
-    fx = (dim_x == 1) ? deepcopy(t -> x(t)[1]) : deepcopy(t -> x(t))
-    fu = (dim_u == 1) ? deepcopy(t -> u(t)[1]) : deepcopy(t -> u(t))
-    fp = (dim_x == 1) ? deepcopy(t -> p(t)[1]) : deepcopy(t -> p(t))
+    # Build interpolated functions for state, control, and costate
+    # Using unified API with validation and deepcopy+scalar wrapping
+    fx = build_interpolated_function(X, T, dim_x, TX; expected_dim=dim_x)
+    fu = build_interpolated_function(U, T, dim_u, TU; expected_dim=dim_u)
+    fp = build_interpolated_function(P, T, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x)
     var = (dim_v == 1) ? v[1] : v
 
-    # misc infos (use provided infos or empty dict)
+    # nonlinear constraints and dual variables (optional, can be nothing)
+    # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
+    fpcd = build_interpolated_function(
+        path_constraints_dual, T, dim_path_constraints_nl(ocp), TPCD;
+        allow_nothing=true
+    )
 
-    # nonlinear constraints and dual variables
-    path_constraints_dual_fun = if isnothing(path_constraints_dual)
-        nothing
-    elseif TPCD <: Function
-        path_constraints_dual
-    else
-        V = matrix2vec(path_constraints_dual, 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL for dual constraint functions to ensure isolation
-    # Dual functions may capture external variables and must be independent from modifications
-    # Additionally, there's a known bug in dual_model.jl where vector indexing fails without deepcopy
-    fpcd = if isnothing(path_constraints_dual)
-        nothing
-    else
-        if (dim_path_constraints_nl(ocp) == 1)
-            deepcopy(t -> path_constraints_dual_fun(t)[1])
-        else
-            deepcopy(t -> path_constraints_dual_fun(t))
-        end
-    end
-
-    # box constraints multipliers
-    state_constraints_lb_dual_fun = if isnothing(state_constraints_lb_dual)
-        nothing
-    else
-        V = matrix2vec(state_constraints_lb_dual[:, 1:dim_x], 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL for state constraint dual functions
-    # These functions capture external variables and must remain independent
-    # Also works around the dual_model.jl indexing bug
-    fscbd = if isnothing(state_constraints_lb_dual)
-        nothing
-    else
-        if (dim_x == 1)
-            deepcopy(t -> state_constraints_lb_dual_fun(t)[1])
-        else
-            deepcopy(t -> state_constraints_lb_dual_fun(t))
-        end
-    end
-
-    state_constraints_ub_dual_fun = if isnothing(state_constraints_ub_dual)
-        nothing
-    else
-        V = matrix2vec(state_constraints_ub_dual[:, 1:dim_x], 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL for state constraint upper bound dual functions
-    # Ensures independence from external variable modifications
-    # Also works around the dual_model.jl indexing bug
-    fscud = if isnothing(state_constraints_ub_dual)
-        nothing
-    else
-        if (dim_x == 1)
-            deepcopy(t -> state_constraints_ub_dual_fun(t)[1])
-        else
-            deepcopy(t -> state_constraints_ub_dual_fun(t))
-        end
-    end
-
-    control_constraints_lb_dual_fun = if isnothing(control_constraints_lb_dual)
-        nothing
-    else
-        V = matrix2vec(control_constraints_lb_dual[:, 1:dim_u], 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL for control constraint lower bound dual functions
-    # Prevents external variable modifications from affecting solution
-    # Also works around the dual_model.jl indexing bug
-    fccbd = if isnothing(control_constraints_lb_dual)
-        nothing
-    else
-        if (dim_u == 1)
-            deepcopy(t -> control_constraints_lb_dual_fun(t)[1])
-        else
-            deepcopy(t -> control_constraints_lb_dual_fun(t))
-        end
-    end
-
-    control_constraints_ub_dual_fun = if isnothing(control_constraints_ub_dual)
-        nothing
-    else
-        V = matrix2vec(control_constraints_ub_dual[:, 1:dim_u], 1)
-        t -> ctinterpolate(T, V)(t)
-    end
-    # force scalar output when dimension is 1
-    # NOTE: deepcopy is ESSENTIAL for control constraint upper bound dual functions
-    # Ensures solution independence from external variable modifications
-    # Also works around the dual_model.jl indexing bug
-    fccud = if isnothing(control_constraints_ub_dual)
-        nothing
-    else
-        if (dim_u == 1)
-            deepcopy(t -> control_constraints_ub_dual_fun(t)[1])
-        else
-            deepcopy(t -> control_constraints_ub_dual_fun(t))
-        end
-    end
+    # box constraints multipliers (optional, can be nothing)
+    fscbd = build_interpolated_function(
+        state_constraints_lb_dual, T, dim_x, Union{Matrix{Float64},Nothing};
+        allow_nothing=true
+    )
+    fscud = build_interpolated_function(
+        state_constraints_ub_dual, T, dim_x, Union{Matrix{Float64},Nothing};
+        allow_nothing=true
+    )
+    fccbd = build_interpolated_function(
+        control_constraints_lb_dual, T, dim_u, Union{Matrix{Float64},Nothing};
+        allow_nothing=true
+    )
+    fccud = build_interpolated_function(
+        control_constraints_ub_dual, T, dim_u, Union{Matrix{Float64},Nothing};
+        allow_nothing=true
+    )
 
     # build Models
     time_grid = TimeGridModel(T)

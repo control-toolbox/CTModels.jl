@@ -76,6 +76,7 @@ include("Components/constraints.jl")
 include("Building/definition.jl")
 include("Building/dual_model.jl")
 include("Building/discretization_utils.jl")
+include("Building/interpolation_helpers.jl")
 include("Building/model.jl")
 include("Building/solution.jl")
 
