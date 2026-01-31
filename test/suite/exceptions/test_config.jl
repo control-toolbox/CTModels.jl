@@ -3,12 +3,14 @@ module TestExceptionConfig
 using Test
 using CTModels
 using CTModels.Exceptions
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
 Tests for exception configuration (config.jl)
 """
 function test_exception_config()
-    @testset "Exception Configuration" verbose = true begin
+    @testset "Exception Configuration" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "Stacktrace Control - Default Value" begin
             # Test default value is false (user-friendly display)

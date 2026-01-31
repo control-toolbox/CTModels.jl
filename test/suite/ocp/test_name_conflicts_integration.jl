@@ -3,9 +3,11 @@ module TestNameConflictsIntegrationSimple
 using Test
 using CTModels
 using CTBase
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_name_conflicts_integration()
-    Test.@testset "Simple Name Conflicts Integration Tests" verbose = false showtiming = false begin
+    Test.@testset "Simple Name Conflicts Integration Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "Basic conflict detection" begin
             # Test state vs control conflict

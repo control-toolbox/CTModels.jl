@@ -4,7 +4,8 @@ using Test
 using CTModels
 using CTModels.Exceptions
 using Main.TestProblems
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
@@ -34,219 +35,221 @@ CTModels.variable_name(::DummyOCP1DVar) = "v"
 CTModels.variable_components(::DummyOCP1DVar) = ["v"]
 
 function test_initial_guess_api()
-    # ========================================================================
-    # UNIT TESTS - Public API Functions
-    # ========================================================================
+    Test.@testset "Testing initial guess API" verbose = VERBOSE showtiming = SHOWTIMING begin
 
-    Test.@testset "pre_initial_guess" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # Test with all arguments
-        state_data = t -> [t]
-        control_data = t -> [-t]
-        variable_data = 0.5
+        # ========================================================================
+        # UNIT TESTS - Public API Functions
+        # ========================================================================
 
-        pre = CTModels.pre_initial_guess(
-            state=state_data, control=control_data, variable=variable_data
-        )
+        Test.@testset "pre_initial_guess" begin
+            # Test with all arguments
+            state_data = t -> [t]
+            control_data = t -> [-t]
+            variable_data = 0.5
 
-        Test.@test pre isa CTModels.OptimalControlPreInit
-        Test.@test pre.state === state_data
-        Test.@test pre.control === control_data
-        Test.@test pre.variable === variable_data
+            pre = CTModels.pre_initial_guess(
+                state=state_data, control=control_data, variable=variable_data
+            )
 
-        # Test with no arguments (all nothing)
-        pre_empty = CTModels.pre_initial_guess()
-        Test.@test pre_empty isa CTModels.OptimalControlPreInit
-        Test.@test pre_empty.state === nothing
-        Test.@test pre_empty.control === nothing
-        Test.@test pre_empty.variable === nothing
+            Test.@test pre isa CTModels.OptimalControlPreInit
+            Test.@test pre.state === state_data
+            Test.@test pre.control === control_data
+            Test.@test pre.variable === variable_data
 
-        # Test with partial arguments
-        pre_partial = CTModels.pre_initial_guess(state=0.1)
-        Test.@test pre_partial.state === 0.1
-        Test.@test pre_partial.control === nothing
-        Test.@test pre_partial.variable === nothing
-    end
+            # Test with no arguments (all nothing)
+            pre_empty = CTModels.pre_initial_guess()
+            Test.@test pre_empty isa CTModels.OptimalControlPreInit
+            Test.@test pre_empty.state === nothing
+            Test.@test pre_empty.control === nothing
+            Test.@test pre_empty.variable === nothing
 
-    Test.@testset "initial_guess - basic construction" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            # Test with partial arguments
+            pre_partial = CTModels.pre_initial_guess(state=0.1)
+            Test.@test pre_partial.state === 0.1
+            Test.@test pre_partial.control === nothing
+            Test.@test pre_partial.variable === nothing
+        end
 
-        # Scalar initial guess consistent with dimension 1
-        init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
-        Test.@test init isa CTModels.AbstractOptimalControlInitialGuess
-        Test.@test init isa CTModels.OptimalControlInitialGuess
+        Test.@testset "initial_guess - basic construction" begin
+            ocp = DummyOCP1DNoVar()
 
-        # Verify state and control are functions
-        Test.@test CTModels.state(init) isa Function
-        Test.@test CTModels.control(init) isa Function
+            # Scalar initial guess consistent with dimension 1
+            init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
+            Test.@test init isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test init isa CTModels.OptimalControlInitialGuess
 
-        # Verify they return correct values
-        Test.@test CTModels.state(init)(0.5) ≈ 0.2
-        Test.@test CTModels.control(init)(0.5) ≈ -0.1
+            # Verify state and control are functions
+            Test.@test CTModels.state(init) isa Function
+            Test.@test CTModels.control(init) isa Function
 
-        # Variable should be empty vector for no-variable problem
-        Test.@test CTModels.variable(init) isa Vector{Float64}
-        Test.@test length(CTModels.variable(init)) == 0
-    end
+            # Verify they return correct values
+            Test.@test CTModels.state(init)(0.5) ≈ 0.2
+            Test.@test CTModels.control(init)(0.5) ≈ -0.1
 
-    Test.@testset "initial_guess - with variable" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DVar()
+            # Variable should be empty vector for no-variable problem
+            Test.@test CTModels.variable(init) isa Vector{Float64}
+            Test.@test length(CTModels.variable(init)) == 0
+        end
 
-        # Scalar variable consistent with dimension 1
-        init = CTModels.initial_guess(ocp; state=0.2, control=-0.1, variable=0.5)
-        Test.@test init isa CTModels.OptimalControlInitialGuess
+        Test.@testset "initial_guess - with variable" begin
+            ocp = DummyOCP1DVar()
 
-        # Verify variable
-        Test.@test CTModels.variable(init) ≈ 0.5
-    end
+            # Scalar variable consistent with dimension 1
+            init = CTModels.initial_guess(ocp; state=0.2, control=-0.1, variable=0.5)
+            Test.@test init isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "initial_guess - default values" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            # Verify variable
+            Test.@test CTModels.variable(init) ≈ 0.5
+        end
 
-        # No arguments - should use defaults
-        init = CTModels.initial_guess(ocp)
-        Test.@test init isa CTModels.OptimalControlInitialGuess
+        Test.@testset "initial_guess - default values" begin
+            ocp = DummyOCP1DNoVar()
 
-        # Defaults should be 0.1
-        Test.@test CTModels.state(init)(0.5) ≈ 0.1
-        Test.@test CTModels.control(init)(0.5) ≈ 0.1
-    end
+            # No arguments - should use defaults
+            init = CTModels.initial_guess(ocp)
+            Test.@test init isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "build_initial_guess - nothing input" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            # Defaults should be 0.1
+            Test.@test CTModels.state(init)(0.5) ≈ 0.1
+            Test.@test CTModels.control(init)(0.5) ≈ 0.1
+        end
 
-        # nothing should return default initial guess
-        ig_nothing = CTModels.build_initial_guess(ocp, nothing)
-        Test.@test ig_nothing isa CTModels.OptimalControlInitialGuess
+        Test.@testset "build_initial_guess - nothing input" begin
+            ocp = DummyOCP1DNoVar()
 
-        # () should also return default
-        ig_empty = CTModels.build_initial_guess(ocp, ())
-        Test.@test ig_empty isa CTModels.OptimalControlInitialGuess
-    end
+            # nothing should return default initial guess
+            ig_nothing = CTModels.build_initial_guess(ocp, nothing)
+            Test.@test ig_nothing isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "build_initial_guess - OptimalControlInitialGuess input" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            # () should also return default
+            ig_empty = CTModels.build_initial_guess(ocp, ())
+            Test.@test ig_empty isa CTModels.OptimalControlInitialGuess
+        end
 
-        # Create an initial guess
-        init = CTModels.initial_guess(ocp; state=0.5)
+        Test.@testset "build_initial_guess - OptimalControlInitialGuess input" begin
+            ocp = DummyOCP1DNoVar()
 
-        # Passing it to build_initial_guess should return it as-is
-        ig = CTModels.build_initial_guess(ocp, init)
-        Test.@test ig === init
-    end
+            # Create an initial guess
+            init = CTModels.initial_guess(ocp; state=0.5)
 
-    Test.@testset "build_initial_guess - OptimalControlPreInit input" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp1 = DummyOCP1DNoVar()
-        ocp2 = DummyOCP1DVar()
+            # Passing it to build_initial_guess should return it as-is
+            ig = CTModels.build_initial_guess(ocp, init)
+            Test.@test ig === init
+        end
 
-        # Create a PreInit
-        pre1 = CTModels.pre_initial_guess(state=0.2, control=-0.1)
-        ig1 = CTModels.build_initial_guess(ocp1, pre1)
-        Test.@test ig1 isa CTModels.OptimalControlInitialGuess
-        Test.@test CTModels.state(ig1)(0.5) ≈ 0.2
-        Test.@test CTModels.control(ig1)(0.5) ≈ -0.1
+        Test.@testset "build_initial_guess - OptimalControlPreInit input" begin
+            ocp1 = DummyOCP1DNoVar()
+            ocp2 = DummyOCP1DVar()
 
-        # With variable
-        pre2 = CTModels.pre_initial_guess(state=0.2, control=-0.1, variable=0.5)
-        ig2 = CTModels.build_initial_guess(ocp2, pre2)
-        Test.@test ig2 isa CTModels.OptimalControlInitialGuess
-        Test.@test CTModels.variable(ig2) ≈ 0.5
-    end
+            # Create a PreInit
+            pre1 = CTModels.pre_initial_guess(state=0.2, control=-0.1)
+            ig1 = CTModels.build_initial_guess(ocp1, pre1)
+            Test.@test ig1 isa CTModels.OptimalControlInitialGuess
+            Test.@test CTModels.state(ig1)(0.5) ≈ 0.2
+            Test.@test CTModels.control(ig1)(0.5) ≈ -0.1
 
-    Test.@testset "build_initial_guess - NamedTuple input" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # Use Beam problem from TestProblems
-        beam_data = Beam()
-        ocp = beam_data.ocp
+            # With variable
+            pre2 = CTModels.pre_initial_guess(state=0.2, control=-0.1, variable=0.5)
+            ig2 = CTModels.build_initial_guess(ocp2, pre2)
+            Test.@test ig2 isa CTModels.OptimalControlInitialGuess
+            Test.@test CTModels.variable(ig2) ≈ 0.5
+        end
 
-        # Build from NamedTuple
-        init_nt = (state=t -> [0.0, 0.0], control=t -> [1.0])
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "build_initial_guess - NamedTuple input" begin
+            # Use Beam problem from TestProblems
+            beam_data = Beam()
+            ocp = beam_data.ocp
 
-        # Verify state and control
-        x = CTModels.state(ig)(0.5)
-        Test.@test x isa AbstractVector
-        Test.@test length(x) == 2
-        Test.@test x[1] ≈ 0.0
-        Test.@test x[2] ≈ 0.0
+            # Build from NamedTuple
+            init_nt = (state=t -> [0.0, 0.0], control=t -> [1.0])
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        u = CTModels.control(ig)(0.5)
-        Test.@test u isa AbstractVector
-        Test.@test length(u) == 1
-        Test.@test u[1] ≈ 1.0
-    end
+            # Verify state and control
+            x = CTModels.state(ig)(0.5)
+            Test.@test x isa AbstractVector
+            Test.@test length(x) == 2
+            Test.@test x[1] ≈ 0.0
+            Test.@test x[2] ≈ 0.0
 
-    Test.@testset "build_initial_guess - unsupported type" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            u = CTModels.control(ig)(0.5)
+            Test.@test u isa AbstractVector
+            Test.@test length(u) == 1
+            Test.@test u[1] ≈ 1.0
+        end
 
-        # Unsupported type should throw
-        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
-            ocp, 42
-        )
-        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
-            ocp, "invalid"
-        )
-        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
-            ocp, [1, 2, 3]
-        )
-    end
+        Test.@testset "build_initial_guess - unsupported type" begin
+            ocp = DummyOCP1DNoVar()
 
-    Test.@testset "validate_initial_guess" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+            # Unsupported type should throw
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+                ocp, 42
+            )
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+                ocp, "invalid"
+            )
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+                ocp, [1, 2, 3]
+            )
+        end
 
-        # Valid initial guess should not throw
-        init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
-        result = CTModels.validate_initial_guess(ocp, init)
-        Test.@test result === init
+        Test.@testset "validate_initial_guess" begin
+            ocp = DummyOCP1DNoVar()
 
-        # For non-OptimalControlInitialGuess types, should return as-is
-        # (currently only OptimalControlInitialGuess is validated)
-    end
+            # Valid initial guess should not throw
+            init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
+            result = CTModels.validate_initial_guess(ocp, init)
+            Test.@test result === init
 
-    # ========================================================================
-    # INTEGRATION TESTS - API Workflow
-    # ========================================================================
+            # For non-OptimalControlInitialGuess types, should return as-is
+            # (currently only OptimalControlInitialGuess is validated)
+        end
 
-    Test.@testset "complete workflow: PreInit -> build -> validate" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DVar()
+        # ========================================================================
+        # INTEGRATION TESTS - API Workflow
+        # ========================================================================
 
-        # Step 1: Create PreInit
-        pre = CTModels.pre_initial_guess(state=0.3, control=-0.2, variable=0.7)
+        Test.@testset "complete workflow: PreInit -> build -> validate" begin
+            ocp = DummyOCP1DVar()
 
-        # Step 2: Build initial guess
-        ig = CTModels.build_initial_guess(ocp, pre)
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            # Step 1: Create PreInit
+            pre = CTModels.pre_initial_guess(state=0.3, control=-0.2, variable=0.7)
 
-        # Step 3: Validate
-        validated = CTModels.validate_initial_guess(ocp, ig)
-        Test.@test validated === ig
+            # Step 2: Build initial guess
+            ig = CTModels.build_initial_guess(ocp, pre)
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        # Verify values
-        Test.@test CTModels.state(ig)(0.5) ≈ 0.3
-        Test.@test CTModels.control(ig)(0.5) ≈ -0.2
-        Test.@test CTModels.variable(ig) ≈ 0.7
-    end
+            # Step 3: Validate
+            validated = CTModels.validate_initial_guess(ocp, ig)
+            Test.@test validated === ig
 
-    Test.@testset "complete workflow: NamedTuple -> build -> validate" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DVar()
+            # Verify values
+            Test.@test CTModels.state(ig)(0.5) ≈ 0.3
+            Test.@test CTModels.control(ig)(0.5) ≈ -0.2
+            Test.@test CTModels.variable(ig) ≈ 0.7
+        end
 
-        # Step 1: Create NamedTuple
-        init_nt = (state=0.3, control=-0.2, variable=0.7)
+        Test.@testset "complete workflow: NamedTuple -> build -> validate" begin
+            ocp = DummyOCP1DVar()
 
-        # Step 2: Build initial guess
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            # Step 1: Create NamedTuple
+            init_nt = (state=0.3, control=-0.2, variable=0.7)
 
-        # Step 3: Validate (already done in build, but can be called again)
-        validated = CTModels.validate_initial_guess(ocp, ig)
-        Test.@test validated === ig
+            # Step 2: Build initial guess
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        # Verify values
-        Test.@test CTModels.state(ig)(0.5) ≈ 0.3
-        Test.@test CTModels.control(ig)(0.5) ≈ -0.2
-        Test.@test CTModels.variable(ig) ≈ 0.7
+            # Step 3: Validate (already done in build, but can be called again)
+            validated = CTModels.validate_initial_guess(ocp, ig)
+            Test.@test validated === ig
+
+            # Verify values
+            Test.@test CTModels.state(ig)(0.5) ≈ 0.3
+            Test.@test CTModels.control(ig)(0.5) ≈ -0.2
+            Test.@test CTModels.variable(ig) ≈ 0.7
+        end
     end
 end
-
 end # module
 
 test_initial_guess_api() = TestInitialGuessAPI.test_initial_guess_api()

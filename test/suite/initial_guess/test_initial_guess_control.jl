@@ -3,7 +3,8 @@ module TestInitialGuessControl
 using Test
 using CTModels
 using CTModels.Exceptions
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1D <: CTModels.AbstractModel end
@@ -21,9 +22,9 @@ CTModels.has_fixed_initial_time(::DummyOCP2D) = true
 CTModels.initial_time(::DummyOCP2D) = 0.0
 
 function test_initial_guess_control()
-    Test.@testset "Control Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Control Initial Guess" verbose = VERBOSE showtiming = SHOWTIMING begin
         
-        Test.@testset "initial_control with Function" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_control with Function" begin
             ocp = DummyOCP1D()
             
             f = t -> sin(t)
@@ -31,7 +32,7 @@ function test_initial_guess_control()
             Test.@test result === f
         end
         
-        Test.@testset "initial_control with Scalar" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_control with Scalar" begin
             ocp_1d = DummyOCP1D()
             
             result = CTModels.initial_control(ocp_1d, 0.5)
@@ -42,7 +43,7 @@ function test_initial_guess_control()
             Test.@test_throws IncorrectArgument CTModels.initial_control(ocp_2d, 0.5)
         end
         
-        Test.@testset "initial_control with Vector" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_control with Vector" begin
             ocp = DummyOCP1D()
             
             result = CTModels.initial_control(ocp, [0.0])
@@ -52,7 +53,7 @@ function test_initial_guess_control()
             Test.@test_throws IncorrectArgument CTModels.initial_control(ocp, [0.0, 1.0])
         end
         
-        Test.@testset "initial_control with Nothing" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_control with Nothing" begin
             ocp = DummyOCP1D()
             
             result = CTModels.initial_control(ocp, nothing)
@@ -65,7 +66,7 @@ function test_initial_guess_control()
             Test.@test result_2d(0.0) == [0.1, 0.1]
         end
         
-        Test.@testset "control accessor" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "control accessor" begin
             ocp = DummyOCP1D()
             
             init = CTModels.initial_guess(ocp; control=t -> sin(t))

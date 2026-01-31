@@ -127,6 +127,94 @@ function Strategies.metadata(::Type{<:ADNLPModeler})
             default=__adnlp_model_minimize(),
             description="Optimization direction (true for minimization, false for maximization)",
             validator=validate_optimization_direction
+        ),
+        
+        # === Advanced Backend Overrides (expert users) ===
+        Strategies.OptionDefinition(;
+            name=:gradient_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for gradient computation (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:hprod_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Hessian-vector product (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jprod_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Jacobian-vector product (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jtprod_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for transpose Jacobian-vector product (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jacobian_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Jacobian matrix computation (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:hessian_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Hessian matrix computation (advanced users only)",
+            validator=validate_backend_override
+        ),
+        
+        # === Advanced Backend Overrides for NLS (expert users) ===
+        Strategies.OptionDefinition(;
+            name=:ghjvprod_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for g^T ∇²c(x)v computation (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:hprod_residual_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Hessian-vector product of residuals (NLS) (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jprod_residual_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Jacobian-vector product of residuals (NLS) (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jtprod_residual_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for transpose Jacobian-vector product of residuals (NLS) (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:jacobian_residual_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Jacobian matrix of residuals (NLS) (advanced users only)",
+            validator=validate_backend_override
+        ),
+        Strategies.OptionDefinition(;
+            name=:hessian_residual_backend,
+            type=Union{Nothing, Type},
+            default=nothing,
+            description="Override backend for Hessian matrix of residuals (NLS) (advanced users only)",
+            validator=validate_backend_override
         )
     )
 end

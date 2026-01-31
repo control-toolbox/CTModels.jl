@@ -3,7 +3,8 @@ module TestInitialGuessBuilders
 using Test
 using CTModels
 using CTModels.Exceptions
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
@@ -46,205 +47,209 @@ CTModels.variable_name(::DummyOCP1D2Control) = "v"
 CTModels.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
-    # ========================================================================
-    # UNIT TESTS - Builder Functions
-    # ========================================================================
 
-    Test.@testset "time-grid NamedTuple (per-block tuples)" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
+    Test.@testset "Testing initial guess builders" verbose = VERBOSE showtiming = SHOWTIMING begin
 
-        time = [0.0, 0.5, 1.0]
-        state_samples = [0.0, 0.5, 1.0]
-        control_samples = [1.0, 0.5, 0.0]
+        # ========================================================================
+        # UNIT TESTS - Builder Functions
+        # ========================================================================
 
-        init_nt = (state=(time, state_samples), control=(time, control_samples))
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+        Test.@testset "time-grid NamedTuple (per-block tuples)" begin
+            ocp = DummyOCP1DNoVar()
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            time = [0.0, 0.5, 1.0]
+            state_samples = [0.0, 0.5, 1.0]
+            control_samples = [1.0, 0.5, 0.0]
 
-        # Verify interpolation works
-        x_fun = CTModels.state(ig)
-        Test.@test x_fun(0.0) ≈ 0.0
-        Test.@test x_fun(0.5) ≈ 0.5
-        Test.@test x_fun(1.0) ≈ 1.0
+            init_nt = (state=(time, state_samples), control=(time, control_samples))
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-        u_fun = CTModels.control(ig)
-        Test.@test u_fun(0.0) ≈ 1.0
-        Test.@test u_fun(0.5) ≈ 0.5
-        Test.@test u_fun(1.0) ≈ 0.0
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        # Test interpolation between points
-        x_mid = x_fun(0.25)
-        Test.@test x_mid ≈ 0.25 atol = 1e-10
-    end
+            # Verify interpolation works
+            x_fun = CTModels.state(ig)
+            Test.@test x_fun(0.0) ≈ 0.0
+            Test.@test x_fun(0.5) ≈ 0.5
+            Test.@test x_fun(1.0) ≈ 1.0
 
-    Test.@testset "time-grid with 2D state matrix" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
+            u_fun = CTModels.control(ig)
+            Test.@test u_fun(0.0) ≈ 1.0
+            Test.@test u_fun(0.5) ≈ 0.5
+            Test.@test u_fun(1.0) ≈ 0.0
 
-        time = [0.0, 0.5, 1.0]
-        # Matrix: each row is a time point, each column is a state component
-        # Row 1: t=0.0 -> [0.0, 1.0]
-        # Row 2: t=0.5 -> [0.5, 1.5]
-        # Row 3: t=1.0 -> [1.0, 2.0]
-        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
+            # Test interpolation between points
+            x_mid = x_fun(0.25)
+            Test.@test x_mid ≈ 0.25 atol = 1e-10
+        end
 
-        init_nt = (state=(time, state_matrix),)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+        Test.@testset "time-grid with 2D state matrix" begin
+            ocp = DummyOCP2DNoVar()
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            time = [0.0, 0.5, 1.0]
+            # Matrix: each row is a time point, each column is a state component
+            # Row 1: t=0.0 -> [0.0, 1.0]
+            # Row 2: t=0.5 -> [0.5, 1.5]
+            # Row 3: t=1.0 -> [1.0, 2.0]
+            state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
-        # Verify state function
-        x_fun = CTModels.state(ig)
-        x0 = x_fun(0.0)
-        Test.@test x0 isa AbstractVector
-        Test.@test length(x0) == 2
-        Test.@test x0[1] ≈ 0.0
-        Test.@test x0[2] ≈ 1.0
+            init_nt = (state=(time, state_matrix),)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-        x1 = x_fun(1.0)
-        Test.@test x1[1] ≈ 1.0
-        Test.@test x1[2] ≈ 2.0
-    end
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "time-grid PreInit via tuples" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1DNoVar()
-        time = [0.0, 0.5, 1.0]
-        state_samples = [[0.0], [0.5], [1.0]]
-        control_samples = [[1.0], [0.5], [0.0]]
+            # Verify state function
+            x_fun = CTModels.state(ig)
+            x0 = x_fun(0.0)
+            Test.@test x0 isa AbstractVector
+            Test.@test length(x0) == 2
+            Test.@test x0[1] ≈ 0.0
+            Test.@test x0[2] ≈ 1.0
 
-        # Create PreInit with time-grid tuples
-        pre = CTModels.pre_initial_guess(
-            state=(time, state_samples), control=(time, control_samples)
-        )
+            x1 = x_fun(1.0)
+            Test.@test x1[1] ≈ 1.0
+            Test.@test x1[2] ≈ 2.0
+        end
 
-        ig = CTModels.build_initial_guess(ocp, pre)
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "time-grid PreInit via tuples" begin
+            ocp = DummyOCP1DNoVar()
+            time = [0.0, 0.5, 1.0]
+            state_samples = [[0.0], [0.5], [1.0]]
+            control_samples = [[1.0], [0.5], [0.0]]
 
-        # Verify interpolation
-        x_fun = CTModels.state(ig)
-        x1_val = x_fun(1.0)
-        Test.@test x1_val isa AbstractVector
-        Test.@test isapprox(x1_val[1], 1.0; atol=1e-12)
-    end
+            # Create PreInit with time-grid tuples
+            pre = CTModels.pre_initial_guess(
+                state=(time, state_samples), control=(time, control_samples)
+            )
 
-    Test.@testset "per-component state init without time" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
+            ig = CTModels.build_initial_guess(ocp, pre)
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        # Init only via components x1, x2
-        init_nt = (x1=0.0, x2=1.0)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+            # Verify interpolation
+            x_fun = CTModels.state(ig)
+            x1_val = x_fun(1.0)
+            Test.@test x1_val isa AbstractVector
+            Test.@test isapprox(x1_val[1], 1.0; atol=1e-12)
+        end
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "per-component state init without time" begin
+            ocp = DummyOCP2DNoVar()
 
-        x = CTModels.state(ig)(0.5)
-        Test.@test x isa AbstractVector
-        Test.@test length(x) == 2
-        Test.@test x[1] ≈ 0.0
-        Test.@test x[2] ≈ 1.0
-    end
+            # Init only via components x1, x2
+            init_nt = (x1=0.0, x2=1.0)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-    Test.@testset "per-component state init with time" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
-        time = [0.0, 1.0]
-        init_nt = (x1=(time, [0.0, 1.0]), x2=(time, [1.0, 2.0]))
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            x = CTModels.state(ig)(0.5)
+            Test.@test x isa AbstractVector
+            Test.@test length(x) == 2
+            Test.@test x[1] ≈ 0.0
+            Test.@test x[2] ≈ 1.0
+        end
 
-        x_fun = CTModels.state(ig)
-        x0 = x_fun(0.0)
-        Test.@test x0[1] ≈ 0.0
-        Test.@test x0[2] ≈ 1.0
+        Test.@testset "per-component state init with time" begin
+            ocp = DummyOCP2DNoVar()
+            time = [0.0, 1.0]
+            init_nt = (x1=(time, [0.0, 1.0]), x2=(time, [1.0, 2.0]))
 
-        x1 = x_fun(1.0)
-        Test.@test x1[1] ≈ 1.0
-        Test.@test x1[2] ≈ 2.0
-    end
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "per-component control init without time" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1D2Control()
+            x_fun = CTModels.state(ig)
+            x0 = x_fun(0.0)
+            Test.@test x0[1] ≈ 0.0
+            Test.@test x0[2] ≈ 1.0
 
-        init_nt = (u1=0.0, u2=1.0)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+            x1 = x_fun(1.0)
+            Test.@test x1[1] ≈ 1.0
+            Test.@test x1[2] ≈ 2.0
+        end
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "per-component control init without time" begin
+            ocp = DummyOCP1D2Control()
 
-        u = CTModels.control(ig)(0.5)
-        Test.@test u isa AbstractVector
-        Test.@test length(u) == 2
-        Test.@test u[1] ≈ 0.0
-        Test.@test u[2] ≈ 1.0
-    end
+            init_nt = (u1=0.0, u2=1.0)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-    Test.@testset "per-component control init with time" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1D2Control()
-        time = [0.0, 1.0]
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-        init_nt = (u1=(time, [0.0, 1.0]), u2=(time, [1.0, 2.0]))
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+            u = CTModels.control(ig)(0.5)
+            Test.@test u isa AbstractVector
+            Test.@test length(u) == 2
+            Test.@test u[1] ≈ 0.0
+            Test.@test u[2] ≈ 1.0
+        end
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "per-component control init with time" begin
+            ocp = DummyOCP1D2Control()
+            time = [0.0, 1.0]
 
-        u_fun = CTModels.control(ig)
-        u0 = u_fun(0.0)
-        Test.@test u0[1] ≈ 0.0
-        Test.@test u0[2] ≈ 1.0
+            init_nt = (u1=(time, [0.0, 1.0]), u2=(time, [1.0, 2.0]))
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-        u1 = u_fun(1.0)
-        Test.@test u1[1] ≈ 1.0
-        Test.@test u1[2] ≈ 2.0
-    end
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "mixed block and component specifications" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
+            u_fun = CTModels.control(ig)
+            u0 = u_fun(0.0)
+            Test.@test u0[1] ≈ 0.0
+            Test.@test u0[2] ≈ 1.0
 
-        # Specify x1 via component, x2 gets default
-        init_nt = (x1=0.5,)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+            u1 = u_fun(1.0)
+            Test.@test u1[1] ≈ 1.0
+            Test.@test u1[2] ≈ 2.0
+        end
 
-        x = CTModels.state(ig)(0.5)
-        Test.@test x[1] ≈ 0.5
-        Test.@test x[2] ≈ 0.1  # default value
-    end
+        Test.@testset "mixed block and component specifications" begin
+            ocp = DummyOCP2DNoVar()
 
-    # ========================================================================
-    # INTEGRATION TESTS - Complex Builder Scenarios
-    # ========================================================================
+            # Specify x1 via component, x2 gets default
+            init_nt = (x1=0.5,)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-    Test.@testset "complex time-grid with all components" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
+            x = CTModels.state(ig)(0.5)
+            Test.@test x[1] ≈ 0.5
+            Test.@test x[2] ≈ 0.1  # default value
+        end
 
-        time = [0.0, 0.5, 1.0]
-        x1_data = [0.0, 0.5, 1.0]
-        x2_data = [1.0, 1.5, 2.0]
-        u_data = [0.0, 0.5, 1.0]
+        # ========================================================================
+        # INTEGRATION TESTS - Complex Builder Scenarios
+        # ========================================================================
 
-        init_nt = (x1=(time, x1_data), x2=(time, x2_data), u=(time, u_data))
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+        Test.@testset "complex time-grid with all components" begin
+            ocp = DummyOCP2DNoVar()
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+            time = [0.0, 0.5, 1.0]
+            x1_data = [0.0, 0.5, 1.0]
+            x2_data = [1.0, 1.5, 2.0]
+            u_data = [0.0, 0.5, 1.0]
 
-        # Verify all components
-        x = CTModels.state(ig)(0.5)
-        Test.@test x[1] ≈ 0.5
-        Test.@test x[2] ≈ 1.5
+            init_nt = (x1=(time, x1_data), x2=(time, x2_data), u=(time, u_data))
+            ig = CTModels.build_initial_guess(ocp, init_nt)
 
-        u = CTModels.control(ig)(0.5)
-        Test.@test u ≈ 0.5
-    end
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-    Test.@testset "function-based component initialization" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2DNoVar()
+            # Verify all components
+            x = CTModels.state(ig)(0.5)
+            Test.@test x[1] ≈ 0.5
+            Test.@test x[2] ≈ 1.5
 
-        # Use functions for components
-        init_nt = (x1=t -> sin(t), x2=t -> cos(t))
-        ig = CTModels.build_initial_guess(ocp, init_nt)
+            u = CTModels.control(ig)(0.5)
+            Test.@test u ≈ 0.5
+        end
 
-        Test.@test ig isa CTModels.OptimalControlInitialGuess
+        Test.@testset "function-based component initialization" begin
+            ocp = DummyOCP2DNoVar()
 
-        x = CTModels.state(ig)(0.5)
-        Test.@test x[1] ≈ sin(0.5)
-        Test.@test x[2] ≈ cos(0.5)
+            # Use functions for components
+            init_nt = (x1=t -> sin(t), x2=t -> cos(t))
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+
+            Test.@test ig isa CTModels.OptimalControlInitialGuess
+
+            x = CTModels.state(ig)(0.5)
+            Test.@test x[1] ≈ sin(0.5)
+            Test.@test x[2] ≈ cos(0.5)
+        end
     end
 end
 

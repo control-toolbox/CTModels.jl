@@ -2,12 +2,14 @@ module TestExceptionTypes
 
 using Test
 using CTModels.Exceptions
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
 Tests for exception type definitions (types.jl)
 """
 function test_exception_types()
-    @testset "Exception Types" verbose = true begin
+    @testset "Exception Types" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "CTModelsException Hierarchy" begin
             # Test that all exceptions inherit from CTModelsException

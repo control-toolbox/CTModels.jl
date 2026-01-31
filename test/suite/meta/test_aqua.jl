@@ -3,9 +3,11 @@ module TestAqua
 using Test
 using CTModels
 using Aqua
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_aqua()
-    Test.@testset "Aqua.jl" begin
+    Test.@testset "Aqua.jl" verbose = VERBOSE showtiming = SHOWTIMING begin
         Aqua.test_all(
             CTModels;
             ambiguities=false,

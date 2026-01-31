@@ -243,13 +243,13 @@ end
 """
     validate_optimization_direction(minimize::Bool)
 
-Validate the optimization direction setting.
+Validate that the optimization direction is a boolean value.
 
 # Arguments
-- `minimize::Bool`: Whether to minimize (true) or maximize (false)
+- `minimize::Bool`: The optimization direction to validate
 
-# Returns
-- `Bool`: Validated optimization direction
+# Throws
+- `ArgumentError`: If the value is not a boolean
 
 # Examples
 ```julia
@@ -262,8 +262,42 @@ false
 """
 function validate_optimization_direction(minimize::Bool)
     if !isa(minimize, Bool)
-        throw(ArgumentError("minimize must be a boolean, got: $(typeof(minimize))"))
+        throw(ArgumentError("Optimization direction must be a boolean (true for minimization, false for maximization)"))
     end
-    
     return minimize
+end
+
+"""
+    validate_backend_override(backend)
+
+Validate that a backend override is either nothing or a valid type.
+
+# Arguments
+- `backend`: The backend type to validate (any type accepted)
+
+# Throws
+- `IncorrectArgument`: If the backend is not nothing or a valid type
+
+# Examples
+```julia
+julia> validate_backend_override(nothing)
+nothing
+
+julia> validate_backend_override(ForwardDiffADGradient)
+ForwardDiffADGradient
+
+julia> validate_backend_override("invalid")
+ERROR: IncorrectArgument: Backend override must be a Type or nothing
+```
+"""
+function validate_backend_override(backend)
+    if backend !== nothing && !isa(backend, Type)
+        throw(IncorrectArgument(
+            "Backend override must be a Type or nothing",
+            got=string(typeof(backend)),
+            expected="Type or nothing",
+            suggestion="Use nothing for default backend or provide a valid backend Type"
+        ))
+    end
+    return backend
 end

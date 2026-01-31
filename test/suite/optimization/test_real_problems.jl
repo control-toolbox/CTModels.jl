@@ -8,7 +8,8 @@ using SolverCore
 using ADNLPModels
 using ExaModels
 
-using Main.TestProblems
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import from Optimization module
 import CTModels.Optimization
@@ -20,10 +21,7 @@ import CTModels.Optimization: get_adnlp_model_builder, get_exa_model_builder
 # ============================================================================
 
 function test_real_problems()
-    # Need access to globals from TestProblems if they are used inside standard functions
-    # For now, Rosenbrock is exported by TestProblems.
-
-    @testset "Optimization with Real Problems" begin # verbose = VERBOSE showtiming = SHOWTIMING 
+    @testset "Optimization with Real Problems" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # TESTS WITH ROSENBROCK PROBLEM

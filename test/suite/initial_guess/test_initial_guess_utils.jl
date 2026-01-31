@@ -2,7 +2,8 @@ module TestInitialGuessUtils
 
 using Test
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Helper struct for testing
 struct DummyOCP1D <: CTModels.AbstractModel end
@@ -32,98 +33,101 @@ CTModels.variable_name(::DummyOCP2D) = "v"
 CTModels.variable_components(::DummyOCP2D) = String[]
 
 function test_initial_guess_utils()
-    # ========================================================================
-    # UNIT TESTS - Utility Functions
-    # ========================================================================
+    Test.@testset "Initial Guess Utils" verbose = VERBOSE showtiming = SHOWTIMING begin
 
-    Test.@testset "time grid formatting (indirect test)" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1D()
+        # ========================================================================
+        # UNIT TESTS - Utility Functions
+        # ========================================================================
 
-        # Test that time grid formatting works via build_initial_guess
-        # (tests _format_time_grid indirectly)
-        time_vec = [0.0, 0.5, 1.0]
-        state_data = [0.0, 0.5, 1.0]
+        Test.@testset "time grid formatting (indirect test)" begin
+            ocp = DummyOCP1D()
 
-        init_nt = (state=(time_vec, state_data),)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            # Test that time grid formatting works via build_initial_guess
+            # (tests _format_time_grid indirectly)
+            time_vec = [0.0, 0.5, 1.0]
+            state_data = [0.0, 0.5, 1.0]
 
-        # Verify the state function works (proves time grid was formatted correctly)
-        x_fun = CTModels.state(ig)
-        Test.@test x_fun(0.0) ≈ 0.0
-        Test.@test x_fun(0.5) ≈ 0.5
-        Test.@test x_fun(1.0) ≈ 1.0
-    end
+            init_nt = (state=(time_vec, state_data),)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
 
-    Test.@testset "matrix data formatting (indirect test)" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2D()
+            # Verify the state function works (proves time grid was formatted correctly)
+            x_fun = CTModels.state(ig)
+            Test.@test x_fun(0.0) ≈ 0.0
+            Test.@test x_fun(0.5) ≈ 0.5
+            Test.@test x_fun(1.0) ≈ 1.0
+        end
 
-        # Matrix format: each row is a time point, each column is a state component
-        time = [0.0, 0.5, 1.0]
-        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
+        Test.@testset "matrix data formatting (indirect test)" begin
+            ocp = DummyOCP2D()
 
-        init_nt = (state=(time, state_matrix),)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            # Matrix format: each row is a time point, each column is a state component
+            time = [0.0, 0.5, 1.0]
+            state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
-        # Verify the state function works (proves matrix was formatted correctly)
-        x_fun = CTModels.state(ig)
-        x0 = x_fun(0.0)
-        Test.@test x0 isa AbstractVector
-        Test.@test length(x0) == 2
-        Test.@test x0[1] ≈ 0.0
-        Test.@test x0[2] ≈ 1.0
+            init_nt = (state=(time, state_matrix),)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
 
-        x1 = x_fun(1.0)
-        Test.@test x1[1] ≈ 1.0
-        Test.@test x1[2] ≈ 2.0
-    end
+            # Verify the state function works (proves matrix was formatted correctly)
+            x_fun = CTModels.state(ig)
+            x0 = x_fun(0.0)
+            Test.@test x0 isa AbstractVector
+            Test.@test length(x0) == 2
+            Test.@test x0[1] ≈ 0.0
+            Test.@test x0[2] ≈ 1.0
 
-    # ========================================================================
-    # INTEGRATION TESTS - Utils with Builders
-    # ========================================================================
+            x1 = x_fun(1.0)
+            Test.@test x1[1] ≈ 1.0
+            Test.@test x1[2] ≈ 2.0
+        end
 
-    Test.@testset "time grid formatting in context" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP1D()
+        # ========================================================================
+        # INTEGRATION TESTS - Utils with Builders
+        # ========================================================================
 
-        # Test that time grid formatting works correctly when building initial guess
-        time_array = [0.0 0.5 1.0]  # Array format
-        state_data = [0.0, 0.5, 1.0]
+        Test.@testset "time grid formatting in context" begin
+            ocp = DummyOCP1D()
 
-        # This should work because _format_time_grid converts the array
-        init_nt = (state=(time_array, state_data),)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            # Test that time grid formatting works correctly when building initial guess
+            time_array = [0.0 0.5 1.0]  # Array format
+            state_data = [0.0, 0.5, 1.0]
 
-        # Verify the state function works
-        x_fun = CTModels.state(ig)
-        Test.@test x_fun(0.0) ≈ 0.0
-        Test.@test x_fun(0.5) ≈ 0.5
-        Test.@test x_fun(1.0) ≈ 1.0
-    end
+            # This should work because _format_time_grid converts the array
+            init_nt = (state=(time_array, state_data),)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
 
-    Test.@testset "matrix data formatting in context" verbose=VERBOSE showtiming=SHOWTIMING begin
-        ocp = DummyOCP2D()
+            # Verify the state function works
+            x_fun = CTModels.state(ig)
+            Test.@test x_fun(0.0) ≈ 0.0
+            Test.@test x_fun(0.5) ≈ 0.5
+            Test.@test x_fun(1.0) ≈ 1.0
+        end
 
-        # Matrix format: each row is a time point, each column is a state component
-        time = [0.0, 0.5, 1.0]
-        state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
+        Test.@testset "matrix data formatting in context" begin
+            ocp = DummyOCP2D()
 
-        init_nt = (state=(time, state_matrix),)
-        ig = CTModels.build_initial_guess(ocp, init_nt)
-        Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            # Matrix format: each row is a time point, each column is a state component
+            time = [0.0, 0.5, 1.0]
+            state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
-        # Verify the state function works
-        x_fun = CTModels.state(ig)
-        x0 = x_fun(0.0)
-        Test.@test x0 isa AbstractVector
-        Test.@test length(x0) == 2
-        Test.@test x0[1] ≈ 0.0
-        Test.@test x0[2] ≈ 1.0
+            init_nt = (state=(time, state_matrix),)
+            ig = CTModels.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
 
-        x1 = x_fun(1.0)
-        Test.@test x1[1] ≈ 1.0
-        Test.@test x1[2] ≈ 2.0
+            # Verify the state function works
+            x_fun = CTModels.state(ig)
+            x0 = x_fun(0.0)
+            Test.@test x0 isa AbstractVector
+            Test.@test length(x0) == 2
+            Test.@test x0[1] ≈ 0.0
+            Test.@test x0[2] ≈ 1.0
+
+            x1 = x_fun(1.0)
+            Test.@test x1[1] ≈ 1.0
+            Test.@test x1[2] ≈ 2.0
+        end
     end
 end
 

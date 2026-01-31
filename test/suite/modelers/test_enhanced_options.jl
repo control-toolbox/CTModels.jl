@@ -10,6 +10,8 @@ module TestEnhancedOptions
 
 using Test
 using CTModels
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import the specific types we need
 using ..CTModels: ADNLPModeler, ExaModeler
@@ -19,7 +21,7 @@ using ..CTModels.Strategies: options
 struct TestDummyModel end
 
 function test_enhanced_options()
-    @testset "Enhanced Modelers Options" begin
+    @testset "Enhanced Modelers Options" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         @testset "ADNLPModeler Enhanced Options" begin
             
@@ -189,6 +191,67 @@ function test_enhanced_options()
                 @test opts[:auto_detect_gpu] == true
                 @test opts[:gpu_preference] == :cuda
                 @test opts[:precision_mode] == :standard
+            end
+        end
+
+        @testset "Advanced Backend Overrides" begin
+            @testset "Backend Override Validation" begin
+                # Valid backend overrides should work
+                @test_nowarn ADNLPModeler(gradient_backend=nothing)
+                @test_nowarn ADNLPModeler(hprod_backend=nothing)
+                @test_nowarn ADNLPModeler(jprod_backend=nothing)
+                @test_nowarn ADNLPModeler(jtprod_backend=nothing)
+                @test_nowarn ADNLPModeler(jacobian_backend=nothing)
+                @test_nowarn ADNLPModeler(hessian_backend=nothing)
+
+                # NLS backend overrides should work
+                @test_nowarn ADNLPModeler(ghjvprod_backend=nothing)
+                @test_nowarn ADNLPModeler(hprod_residual_backend=nothing)
+                @test_nowarn ADNLPModeler(jprod_residual_backend=nothing)
+                @test_nowarn ADNLPModeler(jtprod_residual_backend=nothing)
+                @test_nowarn ADNLPModeler(jacobian_residual_backend=nothing)
+                @test_nowarn ADNLPModeler(hessian_residual_backend=nothing)
+
+                # Test that options are accessible
+                modeler = ADNLPModeler(
+                    gradient_backend=nothing,
+                    hprod_backend=nothing,
+                    ghjvprod_backend=nothing
+                )
+                opts = options(modeler).options
+                @test opts[:gradient_backend] === nothing
+                @test opts[:hprod_backend] === nothing
+                @test opts[:ghjvprod_backend] === nothing
+            end
+
+            @testset "Backend Override Type Validation" begin
+                # Invalid types should throw enriched exceptions
+                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(gradient_backend="invalid")
+                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(hprod_backend=123)
+                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(jprod_backend=:invalid)
+                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(ghjvprod_backend="invalid")
+            end
+
+            @testset "Combined Advanced Options" begin
+                # Test advanced options with basic options
+                modeler = ADNLPModeler(
+                    backend=:optimized,
+                    matrix_free=true,
+                    name="AdvancedTest",
+                    gradient_backend=nothing,
+                    hprod_backend=nothing,
+                    jacobian_backend=nothing,
+                    ghjvprod_backend=nothing
+                )
+
+                opts = options(modeler).options
+                @test opts[:backend] == :optimized
+                @test opts[:matrix_free] == true
+                @test opts[:name] == "AdvancedTest"
+                @test opts[:gradient_backend] === nothing
+                @test opts[:hprod_backend] === nothing
+                @test opts[:jacobian_backend] === nothing
+                @test opts[:ghjvprod_backend] === nothing
             end
         end
     end

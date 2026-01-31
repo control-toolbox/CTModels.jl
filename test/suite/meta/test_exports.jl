@@ -7,8 +7,8 @@ using CTModels.Strategies
 using CTModels.Orchestration
 
 # Default test options
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : false
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : false
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
     test_exports()

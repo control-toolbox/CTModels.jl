@@ -3,7 +3,8 @@ module TestInitialGuessState
 using Test
 using CTModels
 using CTModels.Exceptions
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1D <: CTModels.AbstractModel end
@@ -21,9 +22,9 @@ CTModels.has_fixed_initial_time(::DummyOCP2D) = true
 CTModels.initial_time(::DummyOCP2D) = 0.0
 
 function test_initial_guess_state()
-    Test.@testset "State Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "State Initial Guess" verbose = VERBOSE showtiming = SHOWTIMING begin
         
-        Test.@testset "initial_state with Function" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_state with Function" begin
             ocp = DummyOCP2D()
             
             f = t -> [t, t^2]
@@ -31,7 +32,7 @@ function test_initial_guess_state()
             Test.@test result === f
         end
         
-        Test.@testset "initial_state with Scalar" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_state with Scalar" begin
             ocp_1d = DummyOCP1D()
             
             result = CTModels.initial_state(ocp_1d, 0.5)
@@ -42,7 +43,7 @@ function test_initial_guess_state()
             Test.@test_throws IncorrectArgument CTModels.initial_state(ocp_2d, 0.5)
         end
         
-        Test.@testset "initial_state with Vector" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_state with Vector" begin
             ocp = DummyOCP2D()
             
             result = CTModels.initial_state(ocp, [0.0, 1.0])
@@ -52,7 +53,7 @@ function test_initial_guess_state()
             Test.@test_throws IncorrectArgument CTModels.initial_state(ocp, [0.0])
         end
         
-        Test.@testset "initial_state with Nothing" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_state with Nothing" begin
             ocp = DummyOCP2D()
             
             result = CTModels.initial_state(ocp, nothing)
@@ -65,7 +66,7 @@ function test_initial_guess_state()
             Test.@test result_1d(0.0) == 0.1
         end
         
-        Test.@testset "state accessor" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "state accessor" begin
             ocp = DummyOCP2D()
             
             init = CTModels.initial_guess(ocp; state=t -> [0.0, 1.0])

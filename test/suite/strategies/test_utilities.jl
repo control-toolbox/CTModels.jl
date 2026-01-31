@@ -4,7 +4,8 @@ using Test
 using CTModels
 using CTModels.Strategies
 using CTModels.Options: OptionDefinition
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # ============================================================================
 # Test strategy for suggestions

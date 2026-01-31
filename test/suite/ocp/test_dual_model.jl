@@ -2,7 +2,8 @@ module TestOCPDualModel
 
 using Test
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_dual_model()
     # TODO: add tests for src/ocp/dual_model.jl.

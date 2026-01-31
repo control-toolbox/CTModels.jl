@@ -3,7 +3,8 @@ module TestOCPDynamics
 using Test
 using CTModels
 using CTBase
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_partial_dynamics()
 
@@ -295,8 +296,14 @@ function test_full_dynamics()
 end
 
 function test_dynamics()
-    test_full_dynamics()
-    test_partial_dynamics()
+    @testset "Dynamics" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Full dynamics" begin
+            test_full_dynamics()
+        end
+        @testset "Partial dynamics" begin
+            test_partial_dynamics()
+        end
+    end
 end
 
 end # module

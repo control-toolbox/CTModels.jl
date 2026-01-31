@@ -6,7 +6,8 @@ using CTModels
 using ADNLPModels
 using ExaModels
 using SolverCore
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
     test_modelers_basic()

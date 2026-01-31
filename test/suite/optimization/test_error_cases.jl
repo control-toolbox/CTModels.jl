@@ -7,7 +7,8 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import from Optimization module
 import CTModels.Optimization

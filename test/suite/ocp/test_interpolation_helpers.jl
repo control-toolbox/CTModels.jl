@@ -4,9 +4,11 @@ using Test
 using CTModels
 using CTModels.OCP: build_interpolated_function, _interpolate_from_data, _wrap_scalar_and_deepcopy
 using CTModels.Exceptions: IncorrectArgument
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_interpolation_helpers()
-    @testset "Interpolation Helpers" verbose = true begin
+    @testset "Interpolation Helpers" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         # Test data setup
         T = [0.0, 0.5, 1.0]
