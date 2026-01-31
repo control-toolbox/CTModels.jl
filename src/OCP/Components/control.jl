@@ -41,7 +41,7 @@ julia> control_components(ocp)
 
 # Throws
 
-- `CTBase.UnauthorizedCall`: If control has already been set
+- `Exceptions.UnauthorizedCall`: If control has already been set
 - `Exceptions.IncorrectArgument`: If m ≤ 0
 - `Exceptions.IncorrectArgument`: If number of component names ≠ m
 - `Exceptions.IncorrectArgument`: If name is empty
@@ -59,8 +59,11 @@ function control!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks using @ensure
-    @ensure !__is_control_set(ocp) CTBase.UnauthorizedCall(
-        "the control has already been set."
+    @ensure !__is_control_set(ocp) Exceptions.UnauthorizedCall(
+        "Control already set",
+        reason="control has already been defined for this OCP",
+        suggestion="Create a new OCP instance or use the existing control definition",
+        context="control! function - duplicate definition check"
     )
     @ensure m > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",

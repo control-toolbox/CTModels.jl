@@ -266,10 +266,15 @@ $(TYPEDSIGNATURES)
 
 Return the state dimension of the [`PreModel`](@ref).
 
-Throws `CTBase.UnauthorizedCall` if state has not been set.
+Throws `Exceptions.UnauthorizedCall` if state has not been set.
 """
 function state_dimension(ocp::PreModel)::Dimension
-    @ensure(__is_state_set(ocp), CTBase.UnauthorizedCall("the state must be set."))
+    @ensure(__is_state_set(ocp), Exceptions.UnauthorizedCall(
+        "State must be set before accessing dimension",
+        reason="state has not been defined yet",
+        suggestion="Call state!(ocp, dimension) before accessing state_dimension",
+        context="state_dimension - state validation"
+    ))
     return length(ocp.state.components)
 end
 
@@ -286,7 +291,12 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
     elseif ocp.dynamics isa Function
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
-        @ensure(__is_state_set(ocp), CTBase.UnauthorizedCall("the state must be set."))
+        @ensure(__is_state_set(ocp), Exceptions.UnauthorizedCall(
+            "State must be set before checking dynamics completeness",
+            reason="state has not been defined yet",
+            suggestion="Call state!(ocp, dimension) before defining dynamics",
+            context="__is_dynamics_complete - state validation"
+        ))
         n = state_dimension(ocp)
         covered = falses(n)
         for (range, _) in ocp.dynamics
@@ -295,8 +305,12 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
                     covered[i] = true
                 else
                     throw(
-                        CTBase.UnauthorizedCall(
-                            "Dynamics index $i out of bounds for state of size $n."
+                        Exceptions.UnauthorizedCall(
+                            "Dynamics index out of bounds",
+                            got="dynamics index $i for state of size $n",
+                            expected="indices in range 1:$n",
+                            suggestion="Check dynamics indices match state dimension",
+                            context="__is_dynamics_complete - validating dynamics indices"
                         ),
                     )
                 end

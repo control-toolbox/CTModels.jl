@@ -56,14 +56,18 @@ Build an NLP model from a discretized optimal control problem and initial guess.
 - An NLP model compatible with the target backend (e.g., ADNLPModel, ExaModel)
 
 # Throws
-- `CTBase.NotImplemented`: If not implemented by concrete type
+
+- `Exceptions.NotImplemented`: If not implemented by concrete type
 """
 function (modeler::AbstractOptimizationModeler)(
     ::AbstractOptimizationProblem, 
     initial_guess
 )
-    throw(CTBase.NotImplemented(
-        "Model building not implemented for $(typeof(modeler))"
+    throw(Exceptions.NotImplemented(
+        "Model building not implemented",
+        type_info="Model building not implemented for $(typeof(modeler))",
+        suggestion="Implement the callable method for $(typeof(modeler)) to build NLP models",
+        context="AbstractOptimizationModeler - required method implementation"
     ))
 end
 
@@ -81,13 +85,17 @@ Build a solution object from a discretized optimal control problem and NLP solut
 - A solution object appropriate for the problem type
 
 # Throws
-- `CTBase.NotImplemented`: If not implemented by concrete type
+
+- `Exceptions.NotImplemented`: If not implemented by concrete type
 """
 function (modeler::AbstractOptimizationModeler)(
     ::AbstractOptimizationProblem,
     ::SolverCore.AbstractExecutionStats
 )
-    throw(CTBase.NotImplemented(
-        "Solution building not implemented for $(typeof(modeler))"
+    throw(Exceptions.NotImplemented(
+        "Solution building not implemented",
+        type_info="Solution building not implemented for $(typeof(modeler))",
+        suggestion="Implement the callable method for $(typeof(modeler)) to build solution objects",
+        context="AbstractOptimizationModeler - required method implementation"
     ))
 end

@@ -66,7 +66,21 @@ The modular architecture ensures that:
 module CTModels
 
 # ============================================================================ #
-# MODULE LOADING
+# FOUNDATIONAL TYPES AND UTILITIES
+# ============================================================================ #
+
+# Exceptions module - enhanced error handling system (must load first)
+include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
+using .Exceptions
+import .Exceptions: set_show_full_stacktrace!, get_show_full_stacktrace
+
+# Utils module - must load before OCP (uses @ensure macro)
+include(joinpath(@__DIR__, "Utils", "Utils.jl"))
+using .Utils
+import .Utils: @ensure
+
+# ============================================================================ #
+# CONFIGURATION AND STRATEGY MODULES
 # ============================================================================ #
 
 # Configuration and strategy modules (no dependencies)
@@ -86,20 +100,6 @@ using .Optimization
 # Modeler implementations (depend on Optimization)
 include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
 using .Modelers
-
-# ============================================================================ #
-# FOUNDATIONAL TYPES AND UTILITIES
-# ============================================================================ #
-
-# Exceptions module - enhanced error handling system
-include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
-using .Exceptions
-import .Exceptions: set_show_full_stacktrace!, get_show_full_stacktrace
-
-# Utils module - must load before OCP (uses @ensure macro)
-include(joinpath(@__DIR__, "Utils", "Utils.jl"))
-using .Utils
-import .Utils: @ensure
 
 # OCP module - core optimal control problem functionality
 # Contains type aliases, types, components, builders, and compatibility aliases

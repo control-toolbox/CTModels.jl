@@ -5,7 +5,9 @@ Throws the provided `exception` if `condition` is false.
 
 # Usage
 ```julia-repl
-julia> @ensure x > 0 CTBase.IncorrectArgument("x must be positive")
+julia> @ensure true Exceptions.IncorrectArgument("This won't throw")
+julia> @ensure false Exceptions.IncorrectArgument("This will throw")
+ERROR: IncorrectArgument("This will throw")
 ```
 
 # Arguments

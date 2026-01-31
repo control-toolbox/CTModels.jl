@@ -84,7 +84,7 @@ function test_option_definition()
             )
             
             # Invalid default value type
-            Test.@test_throws CTBase.IncorrectArgument Options.OptionDefinition(
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = "not an int",

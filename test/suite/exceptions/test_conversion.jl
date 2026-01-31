@@ -92,6 +92,88 @@ function test_exception_conversion()
             @test contains(ctbase_e2.var, "Suggestion: Fix it")
         end
         
+        @testset "NotImplemented - Simple Conversion" begin
+            e = NotImplemented("run! not implemented")
+            ctbase_e = to_ctbase(e)
+            
+            @test ctbase_e isa CTBase.NotImplemented
+            @test contains(ctbase_e.var, "run! not implemented")
+        end
+        
+        @testset "NotImplemented - Full Conversion" begin
+            e = NotImplemented(
+                "Method solve! not implemented",
+                type_info="MyStrategy",
+                context="solve call",
+                suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
+            )
+            
+            ctbase_e = to_ctbase(e)
+            
+            @test ctbase_e isa CTBase.NotImplemented
+            @test contains(ctbase_e.var, "Method solve! not implemented")
+            @test contains(ctbase_e.var, "type: MyStrategy")
+            @test contains(ctbase_e.var, "context: solve call")
+            @test contains(ctbase_e.var, "Suggestion: Import the relevant package")
+        end
+        
+        @testset "NotImplemented - Partial Fields" begin
+            # Only type_info field
+            e1 = NotImplemented("Error", type_info="MyType")
+            ctbase_e1 = to_ctbase(e1)
+            @test contains(ctbase_e1.var, "Error")
+            @test contains(ctbase_e1.var, "type: MyType")
+            
+            # Only context field
+            e2 = NotImplemented("Error", context="test context")
+            ctbase_e2 = to_ctbase(e2)
+            @test contains(ctbase_e2.var, "Error")
+            @test contains(ctbase_e2.var, "context: test context")
+            
+            # Only suggestion field
+            e3 = NotImplemented("Error", suggestion="Fix it")
+            ctbase_e3 = to_ctbase(e3)
+            @test contains(ctbase_e3.var, "Error")
+            @test contains(ctbase_e3.var, "Suggestion: Fix it")
+        end
+        
+        @testset "ParsingError - Simple Conversion" begin
+            e = ParsingError("Unexpected token")
+            ctbase_e = to_ctbase(e)
+            
+            @test ctbase_e isa CTBase.NotImplemented
+            @test contains(ctbase_e.var, "Unexpected token")
+        end
+        
+        @testset "ParsingError - Full Conversion" begin
+            e = ParsingError(
+                "Unexpected token 'end'",
+                location="line 42, column 15",
+                suggestion="Check syntax balance or remove extra 'end'"
+            )
+            
+            ctbase_e = to_ctbase(e)
+            
+            @test ctbase_e isa CTBase.NotImplemented
+            @test contains(ctbase_e.var, "Unexpected token 'end'")
+            @test contains(ctbase_e.var, "at: line 42, column 15")
+            @test contains(ctbase_e.var, "Suggestion: Check syntax balance")
+        end
+        
+        @testset "ParsingError - Partial Fields" begin
+            # Only location field
+            e1 = ParsingError("Error", location="line 10")
+            ctbase_e1 = to_ctbase(e1)
+            @test contains(ctbase_e1.var, "Error")
+            @test contains(ctbase_e1.var, "at: line 10")
+            
+            # Only suggestion field
+            e2 = ParsingError("Error", suggestion="Fix syntax")
+            ctbase_e2 = to_ctbase(e2)
+            @test contains(ctbase_e2.var, "Error")
+            @test contains(ctbase_e2.var, "Suggestion: Fix syntax")
+        end
+        
         @testset "Conversion - Preserves Information" begin
             # Test that all information is preserved in conversion
             e = IncorrectArgument(

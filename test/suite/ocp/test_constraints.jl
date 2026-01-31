@@ -30,35 +30,35 @@ function test_constraints()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # control not set
     ocp = CTModels.PreModel()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # times not set
     ocp = CTModels.PreModel()
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
     CTModels.variable!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
 
     # variable not set and try to add a :variable constraint
     ocp = CTModels.PreModel()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
     CTModels.state!(ocp, 1)
     CTModels.control!(ocp, 1)
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp, :variable)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :variable)
 
     # lb and ub cannot be both nothing
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(ocp_set, :state)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp_set, :state)
 
     # twice the same label for two constraints
     CTModels.constraint!(ocp_set, :state; lb=[0, 1], label=:cons)
-    @test_throws CTBase.UnauthorizedCall CTModels.constraint!(
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(
         ocp_set, :control, lb=[0, 1], label=:cons
     )
 

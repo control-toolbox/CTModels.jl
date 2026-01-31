@@ -38,7 +38,7 @@ function test_strategy_options()
             
             Test.@testset "Validation - OptionValue required" begin
                 # Should error if not OptionValue
-                Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.StrategyOptions(
+                Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.StrategyOptions(
                     max_iter = 200  # Not an OptionValue
                 )
             end
@@ -53,7 +53,7 @@ function test_strategy_options()
                 end
                 
                 # Invalid source throws in OptionValue constructor
-                Test.@test_throws CTBase.IncorrectArgument CTModels.Options.OptionValue(200, :invalid)
+                Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Options.OptionValue(200, :invalid)
             end
             
             Test.@testset "Value access" begin

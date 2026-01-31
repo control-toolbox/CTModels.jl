@@ -63,7 +63,8 @@ solve(ocp, :collocation, :adnlp, :ipopt;
 ```
 
 # Throws
-- `CTBase.IncorrectArgument`: If an option is unknown, ambiguous without
+
+- `Exceptions.IncorrectArgument`: If an option is unknown, ambiguous without
   disambiguation, or routed to the wrong strategy
 
 # Example
@@ -143,10 +144,12 @@ function route_all_options(
                     valid_strategies = [
                         id for (id, fam) in strategy_to_family if fam in owners
                     ]
-                    throw(CTBase.IncorrectArgument(
-                        "Option :$key cannot be routed to strategy " *
-                        ":$strategy_id. This option belongs to: " *
-                        "$valid_strategies"
+                    throw(Exceptions.IncorrectArgument(
+                        "Invalid option routing",
+                        got="option :$key to strategy :$strategy_id",
+                        expected="option to be routed to one of: $valid_strategies",
+                        suggestion="Check option ownership or use correct strategy identifier",
+                        context="route_options - validating strategy-specific option routing"
                     ))
                 end
             end
@@ -210,7 +213,13 @@ function _error_unknown_option(
         msg *= "  $family (:$id): $(join(option_names, ", "))\n"
     end
 
-    throw(CTBase.IncorrectArgument(msg))
+    throw(Exceptions.IncorrectArgument(
+        "Unknown option provided",
+        got="option :$key in method $method",
+        expected="valid option name for one of the strategies",
+        suggestion="Check available options above and use correct option name",
+        context="route_options - unknown option validation"
+    ))
 end
 
 function _error_ambiguous_option(
@@ -238,11 +247,21 @@ function _error_ambiguous_option(
                "  $key = (" *
                join(["($value, :$id)" for id in strategies], ", ") *
                ")"
-        throw(CTBase.IncorrectArgument(msg))
+        throw(Exceptions.IncorrectArgument(
+            "Ambiguous option requires disambiguation",
+            got="option :$key between strategies: $(join(strategies, ", "))",
+            expected="strategy-specific routing using (value, :strategy_id) syntax",
+            suggestion="Use disambiguation syntax like $key = ($value, :$id) to specify target strategy",
+            context="route_options - ambiguous option resolution"
+        ))
     else
         # Internal/developer error message
-        throw(CTBase.IncorrectArgument(
-            "Ambiguous option :$key in explicit mode between families: $owners"
+        throw(Exceptions.IncorrectArgument(
+            "Ambiguous option in explicit mode",
+            got="option :$key between families: $owners",
+            expected="unambiguous option routing in explicit mode",
+            suggestion="Use strategy-specific routing or switch to description mode for ambiguous options",
+            context="route_options - explicit mode ambiguity validation"
         ))
     end
 end

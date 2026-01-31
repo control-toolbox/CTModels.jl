@@ -78,13 +78,13 @@ function test_times()
     # set twice
     ocp = CTModels.PreModel()
     CTModels.time!(ocp; t0=0.0, tf=10.0)
-    @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, t0=0.0, tf=10.0)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time!(ocp, t0=0.0, tf=10.0)
 
     # if ind0 or indf is provided, the variable must be set
     ocp = CTModels.PreModel()
-    @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, ind0=1, tf=10.0)
-    @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, t0=0.0, indf=1)
-    @test_throws CTBase.UnauthorizedCall CTModels.time!(ocp, ind0=1, indf=2)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time!(ocp, ind0=1, tf=10.0)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time!(ocp, t0=0.0, indf=1)
+    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time!(ocp, ind0=1, indf=2)
 
     # index must satisfy 1 <= index <= q
     ocp = CTModels.PreModel()

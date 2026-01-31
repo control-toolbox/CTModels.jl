@@ -84,7 +84,7 @@ function __plot_time!(
         :normalize => t_label == "" ? "" : t_label * " (normalized)"
         :normalise => t_label == "" ? "" : t_label * " (normalised)"
         _ => throw(
-            CTBase.IncorrectArgument(
+            CTModels.Exceptions.IncorrectArgument(
                 "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
             ),
         )
@@ -305,7 +305,7 @@ function __initial_plot(
                 end
             end
             _ => throw(
-                CTBase.IncorrectArgument(
+                CTModels.Exceptions.IncorrectArgument(
                     "No such choice for control. Use :components, :norm or :all"
                 ),
             )
@@ -345,7 +345,7 @@ function __initial_plot(
                     l = m + 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    CTModels.Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -430,7 +430,7 @@ function __initial_plot(
         end
 
     else
-        throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))
+        throw(CTModels.Exceptions.IncorrectArgument("No such choice for layout. Use :group or :split"))
     end
 end
 
@@ -653,7 +653,7 @@ function __plot!(
                     icur += 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    CTModels.Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -848,7 +848,7 @@ function __plot!(
                     icur += 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    CTModels.Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -978,7 +978,7 @@ function __plot!(
             end
         end
     else
-        throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))
+        throw(CTModels.Exceptions.IncorrectArgument("No such choice for layout. Use :group or :split"))
     end # end layout
 
     # plot vertical lines at the initial and final times if model is not nothing
@@ -1419,7 +1419,7 @@ function __get_data_plot(
 
     # if the time grid is empty then throw an error
     if CTModels.is_empty_time_grid(sol) == true
-        throw(CTBase.IncorrectArgument("The time grid is empty"))
+        throw(CTModels.Exceptions.IncorrectArgument("The time grid is empty"))
     end
 
     vv, ii = MLStyle.@match xx begin

@@ -22,7 +22,8 @@ the problem.
 - `AbstractModelBuilder`: A callable builder that constructs ADNLPModels
 
 # Throws
-- `CTBase.NotImplemented`: If the problem type does not support ADNLPModels backend
+
+- `Exceptions.NotImplemented`: If the problem type does not support ADNLPModels backend
 
 # Example
 ```julia-repl
@@ -34,8 +35,11 @@ ADNLPModel(...)
 ```
 """
 function get_adnlp_model_builder(prob::AbstractOptimizationProblem)
-    throw(CTBase.NotImplemented(
-        "get_adnlp_model_builder not implemented for $(typeof(prob))"
+    throw(Exceptions.NotImplemented(
+        "ADNLP model builder not implemented",
+        type_info="get_adnlp_model_builder not implemented for $(typeof(prob))",
+        suggestion="Implement get_adnlp_model_builder for $(typeof(prob)) to support ADNLPModels backend",
+        context="AbstractOptimizationProblem.get_adnlp_model_builder - required method implementation"
     ))
 end
 
@@ -55,7 +59,8 @@ the problem.
 - `AbstractModelBuilder`: A callable builder that constructs ExaModels
 
 # Throws
-- `CTBase.NotImplemented`: If the problem type does not support ExaModels backend
+
+- `Exceptions.NotImplemented`: If the problem type does not support ExaModels backend
 
 # Example
 ```julia-repl
@@ -67,8 +72,11 @@ ExaModel{Float64}(...)
 ```
 """
 function get_exa_model_builder(prob::AbstractOptimizationProblem)
-    throw(CTBase.NotImplemented(
-        "get_exa_model_builder not implemented for $(typeof(prob))"
+    throw(Exceptions.NotImplemented(
+        "ExaModel builder not implemented",
+        type_info="get_exa_model_builder not implemented for $(typeof(prob))",
+        suggestion="Implement get_exa_model_builder for $(typeof(prob)) to support ExaModels backend",
+        context="AbstractOptimizationProblem.get_exa_model_builder - required method implementation"
     ))
 end
 
@@ -88,7 +96,8 @@ into problem-specific solutions.
 - `AbstractSolutionBuilder`: A callable builder that constructs solutions from NLP results
 
 # Throws
-- `CTBase.NotImplemented`: If the problem type does not support ADNLPModels backend
+
+- `Exceptions.NotImplemented`: If the problem type does not support ADNLPModels backend
 
 # Example
 ```julia-repl
@@ -100,8 +109,11 @@ OptimalControlSolution(...)
 ```
 """
 function get_adnlp_solution_builder(prob::AbstractOptimizationProblem)
-    throw(CTBase.NotImplemented(
-        "get_adnlp_solution_builder not implemented for $(typeof(prob))"
+    throw(Exceptions.NotImplemented(
+        "ADNLP solution builder not implemented",
+        type_info="get_adnlp_solution_builder not implemented for $(typeof(prob))",
+        suggestion="Implement get_adnlp_solution_builder for $(typeof(prob)) to support ADNLPModels backend",
+        context="AbstractOptimizationProblem.get_adnlp_solution_builder - required method implementation"
     ))
 end
 
@@ -121,7 +133,8 @@ into problem-specific solutions.
 - `AbstractSolutionBuilder`: A callable builder that constructs solutions from NLP results
 
 # Throws
-- `CTBase.NotImplemented`: If the problem type does not support ExaModels backend
+
+- `Exceptions.NotImplemented`: If the problem type does not support ExaModels backend
 
 # Example
 ```julia-repl
@@ -133,7 +146,10 @@ OptimalControlSolution(...)
 ```
 """
 function get_exa_solution_builder(prob::AbstractOptimizationProblem)
-    throw(CTBase.NotImplemented(
-        "get_exa_solution_builder not implemented for $(typeof(prob))"
+    throw(Exceptions.NotImplemented(
+        "ExaSolution builder not implemented",
+        type_info="get_exa_solution_builder not implemented for $(typeof(prob))",
+        suggestion="Implement get_exa_solution_builder for $(typeof(prob)) to support ExaModels backend",
+        context="AbstractOptimizationProblem.get_exa_solution_builder - required method implementation"
     ))
 end

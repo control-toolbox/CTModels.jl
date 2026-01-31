@@ -30,10 +30,10 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 
 # Throws
 
-- `CTBase.UnauthorizedCall`: If state has not been set
-- `CTBase.UnauthorizedCall`: If control has not been set
-- `CTBase.UnauthorizedCall`: If times has not been set
-- `CTBase.UnauthorizedCall`: If objective has already been set
+- `Exceptions.UnauthorizedCall`: If state has not been set
+- `Exceptions.UnauthorizedCall`: If control has not been set
+- `Exceptions.UnauthorizedCall`: If times has not been set
+- `Exceptions.UnauthorizedCall`: If objective has already been set
 - `Exceptions.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
 - `Exceptions.IncorrectArgument`: If neither mayer nor lagrange function is provided
 """
@@ -45,19 +45,31 @@ function objective!(
 )::Nothing
 
     # checks: times, state, and control must be set before the objective
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
-        "the state must be set before the objective."
+    @ensure __is_state_set(ocp) Exceptions.UnauthorizedCall(
+        "State must be set before objective",
+        reason="state has not been defined yet",
+        suggestion="Call state!(ocp, dimension) before objective!(ocp, ...)",
+        context="objective! function - state validation"
     )
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
-        "the control must be set before the objective."
+    @ensure __is_control_set(ocp) Exceptions.UnauthorizedCall(
+        "Control must be set before objective",
+        reason="control has not been defined yet",
+        suggestion="Call control!(ocp, dimension) before objective!(ocp, ...)",
+        context="objective! function - control validation"
     )
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
-        "the times must be set before the objective."
+    @ensure __is_times_set(ocp) Exceptions.UnauthorizedCall(
+        "Times must be set before objective",
+        reason="time horizon has not been defined yet",
+        suggestion="Call time!(ocp, t0, tf) before objective!(ocp, ...)",
+        context="objective! function - times validation"
     )
 
     # checks: the objective must not already be set
-    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
-        "the objective has already been set."
+    @ensure !__is_objective_set(ocp) Exceptions.UnauthorizedCall(
+        "Objective already set",
+        reason="objective has already been defined for this OCP",
+        suggestion="Create a new OCP instance or use the existing objective definition",
+        context="objective! function - duplicate definition check"
     )
 
     # NEW: Validate criterion (case-insensitive)

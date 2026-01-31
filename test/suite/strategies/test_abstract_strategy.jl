@@ -112,12 +112,12 @@ function test_abstract_strategy()
             
             Test.@testset "Error handling" begin
                 # Test NotImplemented errors for unimplemented methods
-                Test.@test_throws CTBase.NotImplemented CTModels.Strategies.id(UnimplementedStrategy)
-                Test.@test_throws CTBase.NotImplemented CTModels.Strategies.metadata(UnimplementedStrategy)
+                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.id(UnimplementedStrategy)
+                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.metadata(UnimplementedStrategy)
                 
                 # Test options error for strategy without options field
                 incomplete_strategy = IncompleteStrategy()
-                Test.@test_throws CTBase.NotImplemented CTModels.Strategies.options(incomplete_strategy)
+                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.options(incomplete_strategy)
             end
         end
         

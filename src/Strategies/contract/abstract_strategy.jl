@@ -164,10 +164,16 @@ This ensures that any concrete strategy type must explicitly implement
 the `id` method to provide its unique identifier.
 
 # Throws
-- `CTBase.NotImplemented`: When the concrete type doesn't override this method
+
+- `Exceptions.NotImplemented`: When the concrete type doesn't override this method
 """
 function id(::Type{T}) where {T<:AbstractStrategy}
-    throw(CTBase.NotImplemented("id(::Type{<:$T}) must be implemented"))
+    throw(Exceptions.NotImplemented(
+        "Strategy ID method not implemented",
+        type_info="id(::Type{<:$T}) must be implemented",
+        suggestion="Implement id(::Type{<:$T}) to return a unique Symbol identifier",
+        context="AbstractStrategy.id - required method implementation"
+    ))
 end
 
 """
@@ -180,12 +186,15 @@ The error message reminds developers to return a `StrategyMetadata` wrapping
 a `Dict` of `OptionDefinition` objects.
 
 # Throws
-- `CTBase.NotImplemented`: When the concrete type doesn't override this method
+
+- `Exceptions.NotImplemented`: When the concrete type doesn't override this method
 """
 function metadata(::Type{T}) where {T<:AbstractStrategy}
-    throw(CTBase.NotImplemented(
-        "metadata(::Type{<:$T}) must be implemented. " *
-        "Return a StrategyMetadata wrapping a Dict of OptionDefinition."
+    throw(Exceptions.NotImplemented(
+        "Strategy metadata method not implemented",
+        type_info="metadata(::Type{<:$T}) must be implemented",
+        suggestion="Implement metadata(::Type{<:$T}) to return StrategyMetadata with OptionDefinitions",
+        context="AbstractStrategy.metadata - required method implementation"
     ))
 end
 
@@ -208,7 +217,8 @@ type must implement its own getter.
 - `StrategyOptions`: The configured options for the strategy
 
 # Throws
-- `CTBase.NotImplemented`: When the strategy has no `options` field and doesn't
+
+- `Exceptions.NotImplemented`: When the strategy has no `options` field and doesn't
   implement a custom `options()` method
 """
 function options(strategy::T) where {T<:AbstractStrategy}
@@ -217,9 +227,11 @@ function options(strategy::T) where {T<:AbstractStrategy}
         return getfield(strategy, :options)
     else
         # Fallback: require custom implementation for complex internal structures
-        throw(CTBase.NotImplemented(
-            "Strategy $T must either have an `options::StrategyOptions` field " *
-            "or implement options(::$T)"
+        throw(Exceptions.NotImplemented(
+            "Strategy options method not implemented",
+            type_info="Strategy $T must either have an options field or implement options(::$T)",
+            suggestion="Add options::StrategyOptions field to strategy type or implement custom options() method",
+            context="AbstractStrategy.options - required method implementation"
         ))
     end
 end

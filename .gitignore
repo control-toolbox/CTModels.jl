@@ -33,5 +33,6 @@ test/solution.json
 #
 profiling/
 tmp/
-.agent/
-#reports/
+# .agent/
+# .windsurf/
+#.reports/

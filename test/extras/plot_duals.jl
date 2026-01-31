@@ -1,4 +1,6 @@
 using Revise
+using Pkg
+Pkg.activate(@__DIR__)
 using CTModels
 using Plots
 import CTParser: CTParser, @def

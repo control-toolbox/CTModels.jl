@@ -20,8 +20,8 @@ Design guidelines follow `reference/16_development_standards_reference.md`:
 """
 module Orchestration
 
-using CTBase: CTBase
 using DocStringExtensions
+using ..CTModels.Exceptions
 using ..Options
 using ..Strategies
 

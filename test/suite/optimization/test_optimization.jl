@@ -114,10 +114,10 @@ function test_optimization()
             @testset "Contract interface - NotImplemented errors" begin
                 prob = MinimalProblem()
                 
-                @test_throws CTBase.NotImplemented get_adnlp_model_builder(prob)
-                @test_throws CTBase.NotImplemented get_exa_model_builder(prob)
-                @test_throws CTBase.NotImplemented get_adnlp_solution_builder(prob)
-                @test_throws CTBase.NotImplemented get_exa_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_adnlp_model_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_model_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_adnlp_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_solution_builder(prob)
             end
         end
 

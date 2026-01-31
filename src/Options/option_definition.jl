@@ -134,8 +134,12 @@ function OptionDefinition(;
     
     # Check type compatibility
     if !isa(default, type)
-        throw(CTBase.IncorrectArgument(
-            "Default value $default (type $T) does not match declared type $type"
+        throw(Exceptions.IncorrectArgument(
+            "Type mismatch in option definition",
+            got="default value $default of type $T",
+            expected="value of type $type",
+            suggestion="Ensure the default value matches the declared type, or adjust the type parameter",
+            context="OptionDefinition constructor - validating type compatibility"
         ))
     end
     

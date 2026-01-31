@@ -3,19 +3,19 @@
 # -----------------------------
 # to be extended by extensions
 function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
-    throw(CTBase.ExtensionError(:JLD2))
+    throw(CTModels.Exceptions.IncorrectArgument(:JLD2))
 end
 
 function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
-    throw(CTBase.ExtensionError(:JLD2))
+    throw(CTModels.Exceptions.IncorrectArgument(:JLD2))
 end
 
 function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
-    throw(CTBase.ExtensionError(:JSON))
+    throw(CTModels.Exceptions.IncorrectArgument(:JSON))
 end
 
 function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
-    throw(CTBase.ExtensionError(:JSON))
+    throw(CTModels.Exceptions.IncorrectArgument(:JSON))
 end
 
 """
@@ -46,8 +46,12 @@ function export_ocp_solution(
         return export_ocp_solution(JSON3Tag(), sol; filename=filename)
     else
         throw(
-            CTBase.IncorrectArgument(
-                "unknown format (should be :JLD or :JSON): " * string(format)
+            Exceptions.IncorrectArgument(
+                "Invalid export format specified",
+                got="format=$format",
+                expected=":JLD or :JSON",
+                suggestion="Use format=:JLD for binary files or format=:JSON for text files",
+                context="export_ocp_solution - validating export format"
             ),
         )
     end
@@ -84,8 +88,12 @@ function import_ocp_solution(
         return import_ocp_solution(JSON3Tag(), ocp; filename=filename)
     else
         throw(
-            CTBase.IncorrectArgument(
-                "unknown format (should be :JLD or :JSON): " * string(format)
+            Exceptions.IncorrectArgument(
+                "Invalid import format specified",
+                got="format=$format",
+                expected=":JLD or :JSON",
+                suggestion="Use format=:JLD for binary files or format=:JSON for text files",
+                context="import_ocp_solution - validating import format"
             ),
         )
     end

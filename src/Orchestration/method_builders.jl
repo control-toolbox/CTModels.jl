@@ -33,7 +33,8 @@ the given family, then constructs the strategy with the provided options.
 - Concrete strategy instance of the appropriate type
 
 # Throws
-- `CTBase.IncorrectArgument`: If the family is not found in the method or
+
+- `Exceptions.IncorrectArgument`: If the family is not found in the method or
   registry
 
 # Example
@@ -85,7 +86,8 @@ that combines ID extraction with option introspection.
 - `Tuple{Vararg{Symbol}}`: Tuple of option names for the identified strategy
 
 # Throws
-- `CTBase.IncorrectArgument`: If the family is not found in the method or
+
+- `Exceptions.IncorrectArgument`: If the family is not found in the method or
   registry
 
 # Example
