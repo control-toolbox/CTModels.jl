@@ -26,12 +26,41 @@ Default is `nothing` (CPU).
 __exa_model_backend() = nothing
 
 """
+$(TYPEDSIGNATURES)
+
+Return the default value for the `auto_detect_gpu` option of [`ExaModeler`](@ref).
+
+Default is `true`.
+"""
+__exa_model_auto_detect_gpu() = true
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default GPU backend preference for [`ExaModeler`](@ref).
+
+Default is `:cuda`.
+"""
+__exa_model_gpu_preference() = :cuda
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default precision mode for [`ExaModeler`](@ref).
+
+Default is `:standard`.
+"""
+__exa_model_precision_mode() = :standard
+
+"""
     ExaModeler{BaseType<:AbstractFloat}
 
 Modeler for building ExaModels from discretized optimal control problems.
 
 This modeler uses the ExaModels.jl package to create NLP models with
 support for various execution backends (CPU, GPU) and floating-point types.
+It provides automatic GPU detection, precision control, and performance
+optimization features.
 
 # Type Parameters
 - `BaseType`: Floating-point type for the model (default: `Float64`)
@@ -40,11 +69,22 @@ support for various execution backends (CPU, GPU) and floating-point types.
 - `base_type::Type{<:AbstractFloat}`: Floating-point type (default: `Float64`)
 - `minimize::Union{Bool, Nothing}`: Whether to minimize (default: `nothing` from problem)
 - `backend`: Execution backend (default: `nothing` for CPU)
+- `auto_detect_gpu::Bool`: Automatically detect and use available GPU backends (default: `true`)
+- `gpu_preference::Symbol`: Preferred GPU backend when multiple are available (default: `:cuda`)
+- `precision_mode::Symbol`: Precision mode for performance vs accuracy trade-off (default: `:standard`)
 
 # Example
 ```julia
+# Auto-detect GPU with optimal settings
+modeler = ExaModeler(
+    base_type=Float32,
+    auto_detect_gpu=true,
+    gpu_preference=:cuda,
+    precision_mode=:mixed
+)
+
+# Manual GPU selection
 modeler = ExaModeler{Float32}(backend=CUDABackend())
-nlp_model = modeler(problem, initial_guess)
 ```
 """
 struct ExaModeler{BaseType<:AbstractFloat} <: AbstractOptimizationModeler
@@ -57,23 +97,48 @@ Strategies.id(::Type{<:ExaModeler}) = :exa
 # Strategy metadata with option definitions
 function Strategies.metadata(::Type{<:ExaModeler})
     return Strategies.StrategyMetadata(
+        # === Existing Options (enhanced) ===
         Strategies.OptionDefinition(;
             name=:base_type,
             type=DataType,
             default=__exa_model_base_type(),
-            description="Base floating-point type used by ExaModels"
+            description="Base floating-point type used by ExaModels",
+            validator=validate_exa_base_type
         ),
         Strategies.OptionDefinition(;
             name=:minimize,
             type=Union{Bool, Nothing},
-            default=Options.NotProvided,
+            default=nothing,
             description="Whether to minimize (true) or maximize (false) the objective"
         ),
         Strategies.OptionDefinition(;
             name=:backend,
-            type=Union{Nothing, KernelAbstractions.Backend},
+            type=Union{Nothing, Any},  # More permissive for various backend types
             default=__exa_model_backend(),
             description="Execution backend for ExaModels (CPU, GPU, etc.)"
+        ),
+        
+        # === New Options ===
+        Strategies.OptionDefinition(;
+            name=:auto_detect_gpu,
+            type=Bool,
+            default=__exa_model_auto_detect_gpu(),
+            description="Automatically detect and use available GPU backends",
+            validator=v -> isa(v, Bool)
+        ),
+        Strategies.OptionDefinition(;
+            name=:gpu_preference,
+            type=Symbol,
+            default=__exa_model_gpu_preference(),
+            description="Preferred GPU backend when multiple are available",
+            validator=validate_gpu_preference
+        ),
+        Strategies.OptionDefinition(;
+            name=:precision_mode,
+            type=Symbol,
+            default=__exa_model_precision_mode(),
+            description="Precision mode for performance vs accuracy trade-off",
+            validator=validate_precision_mode
         )
     )
 end

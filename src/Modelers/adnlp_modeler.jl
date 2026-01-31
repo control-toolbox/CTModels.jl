@@ -26,21 +26,58 @@ Default is `:optimized`.
 __adnlp_model_backend() = :optimized
 
 """
+$(TYPEDSIGNATURES)
+
+Return the default value for the `matrix_free` option of [`ADNLPModeler`](@ref).
+
+Default is `false`.
+"""
+__adnlp_model_matrix_free() = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default value for the `name` option of [`ADNLPModeler`](@ref).
+
+Default is `"CTModels-ADNLP"`.
+"""
+__adnlp_model_name() = "CTModels-ADNLP"
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default value for the `minimize` option of [`ADNLPModeler`](@ref).
+
+Default is `true`.
+"""
+__adnlp_model_minimize() = true
+
+"""
     ADNLPModeler
 
 Modeler for building ADNLPModels from discretized optimal control problems.
 
 This modeler uses the ADNLPModels.jl package to create NLP models with
 automatic differentiation support. It provides configurable options for
-timing information and AD backend selection.
+timing information, AD backend selection, memory optimization, and model
+identification.
 
 # Options
 - `show_time::Bool`: Whether to show timing information (default: `false`)
 - `backend::Symbol`: AD backend to use (default: `:optimized`)
+- `matrix_free::Bool`: Enable matrix-free mode for memory efficiency (default: `false`)
+- `name::String`: Model name for identification (default: `"CTModels-ADNLP"`)
+- `minimize::Bool`: Optimization direction (default: `true`)
 
 # Example
 ```julia
-modeler = ADNLPModeler(show_time=true, backend=:forwarddiff)
+modeler = ADNLPModeler(
+    show_time=true, 
+    backend=:optimized,
+    matrix_free=true,
+    name="MyProblem",
+    minimize=true
+)
 nlp_model = modeler(problem, initial_guess)
 ```
 """
@@ -54,6 +91,7 @@ Strategies.id(::Type{<:ADNLPModeler}) = :adnlp
 # Strategy metadata with option definitions
 function Strategies.metadata(::Type{<:ADNLPModeler})
     return Strategies.StrategyMetadata(
+        # === Existing Options (unchanged) ===
         Strategies.OptionDefinition(;
             name=:show_time,
             type=Bool,
@@ -64,7 +102,31 @@ function Strategies.metadata(::Type{<:ADNLPModeler})
             name=:backend,
             type=Symbol,
             default=__adnlp_model_backend(),
-            description="Automatic differentiation backend used by ADNLPModels"
+            description="Automatic differentiation backend used by ADNLPModels",
+            validator=validate_adnlp_backend
+        ),
+        
+        # === New High-Priority Options ===
+        Strategies.OptionDefinition(;
+            name=:matrix_free,
+            type=Bool,
+            default=__adnlp_model_matrix_free(),
+            description="Enable matrix-free mode (avoids explicit Hessian/Jacobian matrices)",
+            validator=validate_matrix_free
+        ),
+        Strategies.OptionDefinition(;
+            name=:name,
+            type=String,
+            default=__adnlp_model_name(),
+            description="Name of the optimization model for identification",
+            validator=validate_model_name
+        ),
+        Strategies.OptionDefinition(;
+            name=:minimize,
+            type=Bool,
+            default=__adnlp_model_minimize(),
+            description="Optimization direction (true for minimization, false for maximization)",
+            validator=validate_optimization_direction
         )
     )
 end
