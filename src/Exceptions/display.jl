@@ -86,10 +86,25 @@ function format_user_friendly_error(io::IO, e::CTModelsException)
             println(io, "   ", e.type_info)
         end
 
+        if !isnothing(e.context)
+            println(io, "\n📂 Context:")
+            println(io, "   ", e.context)
+        end
+
+        if !isnothing(e.suggestion)
+            println(io, "\n💡 Suggestion:")
+            println(io, "   ", e.suggestion)
+        end
+
     elseif e isa ParsingError
         if !isnothing(e.location)
             println(io, "\n📍 Location:")
             println(io, "   ", e.location)
+        end
+
+        if !isnothing(e.suggestion)
+            println(io, "\n💡 Suggestion:")
+            println(io, "   ", e.suggestion)
         end
     end
 

@@ -65,16 +65,22 @@ function __constraint!(
     # checks: the constraint must not be set before
     @ensure(
         !(label ∈ keys(ocp_constraints)),
-        CTBase.UnauthorizedCall(
-            "the constraint named " * String(label) * " already exists."
+        Exceptions.UnauthorizedCall(
+            "Constraint already exists",
+            reason="constraint with label '$(label)' is already defined",
+            suggestion="Use a different label or remove the existing constraint first",
+            context="constraint! function - duplicate label validation"
         ),
     )
 
     # checks: lb and ub cannot be both nothing
     @ensure(
         !(isnothing(lb) && isnothing(ub)),
-        CTBase.UnauthorizedCall(
-            "The lower bound `lb` and the upper bound `ub` cannot be both nothing."
+        Exceptions.UnauthorizedCall(
+            "Both bounds cannot be nothing",
+            reason="constraint requires at least one bound (lower or upper)",
+            suggestion="Provide lb (lower bound), ub (upper bound), or both",
+            context="constraint! function - bounds validation"
         ),
     )
 
@@ -263,12 +269,12 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 
 # Throws
 
-- `CTBase.UnauthorizedCall`: If state has not been set
-- `CTBase.UnauthorizedCall`: If control has not been set
-- `CTBase.UnauthorizedCall`: If times has not been set
-- `CTBase.UnauthorizedCall`: If variable has not been set (when type=:variable)
-- `CTBase.UnauthorizedCall`: If constraint with same label already exists
-- `CTBase.UnauthorizedCall`: If both lb and ub are nothing
+- `Exceptions.UnauthorizedCall`: If state has not been set
+- `Exceptions.UnauthorizedCall`: If control has not been set
+- `Exceptions.UnauthorizedCall`: If times has not been set
+- `Exceptions.UnauthorizedCall`: If variable has not been set (when type=:variable)
+- `Exceptions.UnauthorizedCall`: If constraint with same label already exists
+- `Exceptions.UnauthorizedCall`: If both lb and ub are nothing
 - `Exceptions.IncorrectArgument`: If lb and ub have different lengths
 - `Exceptions.IncorrectArgument`: If lb > ub element-wise
 - `Exceptions.IncorrectArgument`: If dimensions don't match expected sizes
@@ -285,19 +291,31 @@ function constraint!(
 )
 
     # checks: times, state and control must be set before adding constraints
-    @ensure __is_state_set(ocp) CTBase.UnauthorizedCall(
-        "the state must be set before adding constraints."
+    @ensure __is_state_set(ocp) Exceptions.UnauthorizedCall(
+        "State must be set before adding constraints",
+        reason="state has not been defined yet",
+        suggestion="Call state!(ocp, dimension) before adding constraints",
+        context="constraint! function - state validation"
     )
-    @ensure __is_control_set(ocp) CTBase.UnauthorizedCall(
-        "the control must be set before adding constraints."
+    @ensure __is_control_set(ocp) Exceptions.UnauthorizedCall(
+        "Control must be set before adding constraints",
+        reason="control has not been defined yet",
+        suggestion="Call control!(ocp, dimension) before adding constraints",
+        context="constraint! function - control validation"
     )
-    @ensure __is_times_set(ocp) CTBase.UnauthorizedCall(
-        "the times must be set before adding constraints."
+    @ensure __is_times_set(ocp) Exceptions.UnauthorizedCall(
+        "Times must be set before adding constraints",
+        reason="time horizon has not been defined yet",
+        suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before adding constraints",
+        context="constraint! function - times validation"
     )
 
     # checks: variable must be set if using type=:variable
-    @ensure (type != :variable || __is_variable_set(ocp)) CTBase.UnauthorizedCall(
-        "the ocp has no variable, you cannot use constraint! function with type=:variable. If it is a mistake, please set the variable first.",
+    @ensure (type != :variable || __is_variable_set(ocp)) Exceptions.UnauthorizedCall(
+        "Variable must be set for type=:variable constraints",
+        reason="OCP has no variable defined but constraint type requires it",
+        suggestion="Call variable!(ocp, dimension) before adding variable constraints, or use a different constraint type",
+        context="constraint! function - variable type validation"
     )
 
     # dimensions

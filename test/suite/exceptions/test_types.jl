@@ -93,11 +93,27 @@ function test_exception_types()
             e = NotImplemented("run! not implemented")
             @test e.msg == "run! not implemented"
             @test isnothing(e.type_info)
+            @test isnothing(e.suggestion)
+            @test isnothing(e.context)
             
             # With type info
             e = NotImplemented("run! not implemented", type_info="MyAlgorithm")
             @test e.msg == "run! not implemented"
             @test e.type_info == "MyAlgorithm"
+            @test isnothing(e.suggestion)
+            @test isnothing(e.context)
+            
+            # With all fields (NEW)
+            e = NotImplemented(
+                "Method solve! not implemented",
+                type_info="MyStrategy",
+                context="solve call",
+                suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
+            )
+            @test e.msg == "Method solve! not implemented"
+            @test e.type_info == "MyStrategy"
+            @test e.context == "solve call"
+            @test e.suggestion == "Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
             
             # Test that it can be thrown
             @test_throws NotImplemented throw(NotImplemented("Test"))
@@ -108,11 +124,23 @@ function test_exception_types()
             e = ParsingError("Unexpected token")
             @test e.msg == "Unexpected token"
             @test isnothing(e.location)
+            @test isnothing(e.suggestion)
             
             # With location
             e = ParsingError("Unexpected token", location="line 42")
             @test e.msg == "Unexpected token"
             @test e.location == "line 42"
+            @test isnothing(e.suggestion)
+            
+            # With all fields (NEW)
+            e = ParsingError(
+                "Unexpected token 'end'",
+                location="line 42, column 15",
+                suggestion="Check syntax balance or remove extra 'end'"
+            )
+            @test e.msg == "Unexpected token 'end'"
+            @test e.location == "line 42, column 15"
+            @test e.suggestion == "Check syntax balance or remove extra 'end'"
             
             # Test that it can be thrown
             @test_throws ParsingError throw(ParsingError("Test"))

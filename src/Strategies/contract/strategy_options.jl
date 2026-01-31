@@ -65,7 +65,13 @@ struct StrategyOptions{NT <: NamedTuple}
     function StrategyOptions(options::NT) where NT <: NamedTuple
         for (key, val) in pairs(options)
             if !(val isa Options.OptionValue)
-                throw(CTBase.IncorrectArgument("All options must be OptionValue, got $(typeof(val)) for key :$key"))
+                throw(Exceptions.IncorrectArgument(
+                    "Invalid option value type",
+                    got="$(typeof(val)) for key :$key",
+                    expected="OptionValue for all strategy options",
+                    suggestion="Wrap your value with OptionValue(value, :user/:default/:computed) or use the StrategyOptions constructor",
+                    context="StrategyOptions constructor - validating option types"
+                ))
             end
         end
         new{NT}(options)

@@ -55,7 +55,7 @@ julia> state_components(ocp)
 
 # Throws
 
-- `CTBase.UnauthorizedCall`: If state has already been set
+- `Exceptions.UnauthorizedCall`: If state has already been set
 - `Exceptions.IncorrectArgument`: If n ≤ 0
 - `Exceptions.IncorrectArgument`: If number of component names ≠ n
 - `Exceptions.IncorrectArgument`: If name is empty
@@ -73,7 +73,12 @@ function state!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks
-    @ensure !__is_state_set(ocp) CTBase.UnauthorizedCall("the state has already been set.")
+    @ensure !__is_state_set(ocp) Exceptions.UnauthorizedCall(
+        "State already set",
+        reason="state has already been defined for this OCP",
+        suggestion="Create a new OCP instance or use the existing state definition",
+        context="state! function - duplicate definition check"
+    )
     @ensure n > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",
         got="n=$n",

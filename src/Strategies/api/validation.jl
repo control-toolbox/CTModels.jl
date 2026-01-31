@@ -35,8 +35,9 @@ If any check fails, the function throws an exception immediately without proceed
 - `Bool`: Returns `true` if all validation checks pass
 
 # Throws
-- `CTBase.IncorrectArgument`: When a method returns an incorrect type (e.g., `id` returns a String instead of Symbol)
-- `CTBase.NotImplemented`: When a required method is not implemented for the strategy type
+
+- `Exceptions.IncorrectArgument`: When a method returns an incorrect type (e.g., `id` returns a String instead of Symbol)
+- `Exceptions.NotImplemented`: When a required method is not implemented for the strategy type
 
 # Examples
 
@@ -49,13 +50,13 @@ true
 **Missing method:**
 ```julia-repl
 julia> validate_strategy_contract(IncompleteStrategy)
-ERROR: CTBase.NotImplemented: id(::Type{<:IncompleteStrategy}) must be implemented for all strategy types
+ERROR: Exceptions.NotImplemented: id(::Type{<:IncompleteStrategy}) must be implemented for all strategy types
 ```
 
 **Wrong return type:**
 ```julia-repl
 julia> validate_strategy_contract(BadStrategy)
-ERROR: CTBase.IncorrectArgument: id(::Type{<:BadStrategy}) must return a Symbol, got String
+ERROR: Exceptions.IncorrectArgument: id(::Type{<:BadStrategy}) must return a Symbol, got String
 ```
 
 # Notes
@@ -76,14 +77,21 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
     try
         strategy_id = id(strategy_type)
         if !isa(strategy_id, Symbol)
-            throw(CTBase.IncorrectArgument(
-                "id(::Type{<:$T}) must return a Symbol, got $(typeof(strategy_id))"
+            throw(Exceptions.IncorrectArgument(
+                "Invalid strategy ID type",
+                got="$(typeof(strategy_id)) for id(::Type{<:$T})",
+                expected="Symbol for strategy identifier",
+                suggestion="Ensure your id() method returns a Symbol, e.g., id(::Type{MyStrategy}) = :mystrategy",
+                context="validate_strategy_contract - checking id() method return type"
             ))
         end
     catch e
         if e isa MethodError
-            throw(CTBase.NotImplemented(
-                "id(::Type{<:$T}) must be implemented for all strategy types"
+            throw(Exceptions.NotImplemented(
+                "Strategy ID method not implemented",
+                type_info="$T",
+                context="validate_strategy_contract - checking id() method availability",
+                suggestion="Implement id(::Type{<:$T}) returning a Symbol for your strategy"
             ))
         else
             rethrow(e)
@@ -94,14 +102,21 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
     try
         meta = metadata(strategy_type)
         if !isa(meta, StrategyMetadata)
-            throw(CTBase.IncorrectArgument(
-                "metadata(::Type{<:$T}) must return a StrategyMetadata, got $(typeof(meta))"
+            throw(Exceptions.IncorrectArgument(
+                "Invalid metadata type",
+                got="$(typeof(meta)) for metadata(::Type{<:$T})",
+                expected="StrategyMetadata containing option definitions",
+                suggestion="Ensure your metadata() method returns a StrategyMetadata instance with OptionDefinition objects",
+                context="validate_strategy_contract - checking metadata() method return type"
             ))
         end
     catch e
         if e isa MethodError
-            throw(CTBase.NotImplemented(
-                "metadata(::Type{<:$T}) must be implemented for all strategy types"
+            throw(Exceptions.NotImplemented(
+                "Strategy metadata method not implemented",
+                type_info="$T",
+                context="validate_strategy_contract - checking metadata() method availability",
+                suggestion="Implement metadata(::Type{<:$T}) returning a StrategyMetadata for your strategy"
             ))
         else
             rethrow(e)
@@ -113,14 +128,21 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         # Try building options with defaults
         opts = build_strategy_options(strategy_type)
         if !isa(opts, StrategyOptions)
-            throw(CTBase.IncorrectArgument(
-                "build_strategy_options(::Type{<:$T}) must return a StrategyOptions, got $(typeof(opts))"
+            throw(Exceptions.IncorrectArgument(
+                "Invalid options builder type",
+                got="$(typeof(opts)) for build_strategy_options(::Type{<:$T})",
+                expected="StrategyOptions with validated option values",
+                suggestion="Ensure build_strategy_options() returns a StrategyOptions instance for your strategy",
+                context="validate_strategy_contract - checking build_strategy_options() method return type"
             ))
         end
     catch e
         if e isa MethodError
-            throw(CTBase.NotImplemented(
-                "build_strategy_options must be available for strategy type $T"
+            throw(Exceptions.NotImplemented(
+                "Strategy options builder not available",
+                type_info="$T",
+                context="validate_strategy_contract - checking build_strategy_options() method availability",
+                suggestion="Ensure build_strategy_options() is available for strategy type $T (usually provided by Options API)"
             ))
         else
             rethrow(e)
@@ -132,8 +154,11 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         strategy_type()
     catch e
         if e isa MethodError
-            throw(CTBase.NotImplemented(
-                "Default constructor $T(; kwargs...) must be implemented and use build_strategy_options"
+            throw(Exceptions.NotImplemented(
+                "Default constructor not implemented",
+                type_info="$T",
+                context="validate_strategy_contract - checking default constructor availability",
+                suggestion="Implement default constructor $T(; kwargs...) that uses build_strategy_options"
             ))
         else
             rethrow(e)
@@ -141,8 +166,12 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
     end
     
     if !isa(instance, T)
-        throw(CTBase.IncorrectArgument(
-            "Default constructor $T() must return an instance of $T, got $(typeof(instance))"
+        throw(Exceptions.IncorrectArgument(
+            "Invalid constructor return type",
+            got="$(typeof(instance)) for $T()",
+            expected="instance of type $T",
+            suggestion="Ensure your default constructor returns an instance of the strategy type",
+            context="validate_strategy_contract - checking default constructor return type"
         ))
     end
     
@@ -151,8 +180,11 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         options(instance)
     catch e
         if e isa MethodError
-            throw(CTBase.NotImplemented(
-                "options(:: $T) must be implemented for all strategy instances"
+            throw(Exceptions.NotImplemented(
+                "Instance options method not implemented",
+                type_info="$T",
+                context="validate_strategy_contract - checking options() method availability",
+                suggestion="Implement options(instance::T) returning the StrategyOptions for your strategy"
             ))
         else
             rethrow(e)
@@ -160,8 +192,12 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
     end
     
     if !isa(opts, StrategyOptions)
-        throw(CTBase.IncorrectArgument(
-            "options(:: $T) must return a StrategyOptions, got $(typeof(opts))"
+        throw(Exceptions.IncorrectArgument(
+            "Invalid instance options type",
+            got="$(typeof(opts)) for options(:: $T)",
+            expected="StrategyOptions containing the strategy's configuration",
+            suggestion="Ensure your options() method returns a StrategyOptions instance",
+            context="validate_strategy_contract - checking options() method return type"
         ))
     end
     
@@ -183,8 +219,12 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
             push!(msg_parts, "unexpected options: $(collect(extra_keys))")
         end
         
-        throw(CTBase.IncorrectArgument(
-            "Instance options do not match metadata for $T. " * join(msg_parts, ", ")
+        throw(Exceptions.IncorrectArgument(
+            "Instance options do not match metadata specification",
+            got="options mismatch for strategy $T: " * join(msg_parts, ", "),
+            expected="instance options keys to exactly match metadata specification keys",
+            suggestion="Ensure your constructor creates options that match your metadata specification exactly",
+            context="validate_strategy_contract - checking metadata-options consistency"
         ))
     end
     
@@ -217,16 +257,18 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
                 test_opts = options(test_instance)
                 
                 if test_opts[first_key] != test_value
-                    throw(CTBase.IncorrectArgument(
-                        "Constructor for $T does not properly use keyword arguments. " *
-                        "Expected $first_key=$test_value, got $(test_opts[first_key]). " *
-                        "Ensure the constructor uses build_strategy_options."
+                    throw(Exceptions.IncorrectArgument(
+                        "Constructor does not use keyword arguments properly",
+                        got="constructor result with $first_key=$(test_opts[first_key])",
+                        expected="constructor result with $first_key=$test_value",
+                        suggestion="Ensure constructor uses build_strategy_options and properly forwards keyword arguments",
+                        context="validate_strategy_contract - testing constructor behavior"
                     ))
                 end
             catch e
                 # If the test fails for any reason other than our check, 
                 # it might be a type constraint issue - allow it
-                if e isa CTBase.IncorrectArgument
+                if e isa Exceptions.IncorrectArgument
                     rethrow(e)
                 end
                 # Otherwise, skip this check (might be type constraints)

@@ -97,30 +97,60 @@ function create_registry(pairs::Pair...)
     for pair in pairs
         family, strategies = pair
         if !(family isa DataType && family <: AbstractStrategy)
-            throw(CTBase.IncorrectArgument("Family must be a subtype of AbstractStrategy, got: $family"))
+            throw(Exceptions.IncorrectArgument(
+                "Invalid strategy family type",
+                got="family=$family of type $(typeof(family))",
+                expected="DataType subtype of AbstractStrategy",
+                suggestion="Use a valid AbstractStrategy subtype as the family type",
+                context="StrategyRegistry constructor - validating family types"
+            ))
         end
         if !(strategies isa Tuple)
-            throw(CTBase.IncorrectArgument("Strategies must be provided as a Tuple, got: $(typeof(strategies))"))
+            throw(Exceptions.IncorrectArgument(
+                "Invalid strategies format",
+                got="strategies of type $(typeof(strategies))",
+                expected="Tuple of strategy types",
+                suggestion="Provide strategies as a tuple, e.g., (Strategy1, Strategy2)",
+                context="StrategyRegistry constructor - validating strategies format"
+            ))
         end
     end
     
     for (family, strategies) in pairs
         # Check for duplicate family
         if haskey(families, family)
-            throw(CTBase.IncorrectArgument("Duplicate family in registry: $family"))
+            throw(Exceptions.IncorrectArgument(
+                "Duplicate family registration",
+                got="family $family already registered",
+                expected="unique family types in registry",
+                suggestion="Remove duplicate family or use a different family type",
+                context="StrategyRegistry constructor - checking family uniqueness"
+            ))
         end
         
         # Validate uniqueness of IDs within this family
         ids = [id(T) for T in strategies]
         if length(ids) != length(unique(ids))
             duplicates = [i for i in ids if count(==(i), ids) > 1]
-            throw(CTBase.IncorrectArgument("Duplicate strategy IDs in family $family: $(unique(duplicates))"))
+            throw(Exceptions.IncorrectArgument(
+                "Duplicate strategy IDs detected",
+                got="duplicate IDs: $(unique(duplicates)) in family $family",
+                expected="unique strategy identifiers within each family",
+                suggestion="Ensure each strategy has a unique id() return value within the family",
+                context="StrategyRegistry constructor - validating ID uniqueness"
+            ))
         end
         
         # Validate all strategies are subtypes of family
         for T in strategies
             if !(T <: family)
-                throw(CTBase.IncorrectArgument("Strategy type $T is not a subtype of family $family"))
+                throw(Exceptions.IncorrectArgument(
+                    "Strategy type not compatible with family",
+                    got="strategy type $T",
+                    expected="subtype of family $family",
+                    suggestion="Ensure strategy type $T is properly defined as <: $family",
+                    context="StrategyRegistry constructor - validating strategy-family relationships"
+                ))
             end
         end
         
@@ -167,7 +197,13 @@ See also: [`type_from_id`](@ref), [`create_registry`](@ref)
 function strategy_ids(family::Type{<:AbstractStrategy}, registry::StrategyRegistry)
     if !haskey(registry.families, family)
         available_families = collect(keys(registry.families))
-        throw(CTBase.IncorrectArgument("Family $family not found in registry. Available families: $available_families"))
+        throw(Exceptions.IncorrectArgument(
+            "Strategy family not found in registry",
+            got="family $family",
+            expected="one of registered families: $available_families",
+            suggestion="Check available families or register the missing family first",
+            context="strategy_ids - looking up family in registry"
+        ))
     end
     strategies = registry.families[family]
     return Tuple(id(T) for T in strategies)
@@ -214,7 +250,13 @@ function type_from_id(
 )
     if !haskey(registry.families, family)
         available_families = collect(keys(registry.families))
-        throw(CTBase.IncorrectArgument("Family $family not found in registry. Available families: $available_families"))
+        throw(Exceptions.IncorrectArgument(
+            "Strategy family not found in registry",
+            got="family $family",
+            expected="one of registered families: $available_families",
+            suggestion="Check available families or register the missing family first",
+            context="type_from_id - looking up family in registry"
+        ))
     end
     
     for T in registry.families[family]
@@ -225,7 +267,13 @@ function type_from_id(
     
     # Not found - provide helpful error with available options
     available = strategy_ids(family, registry)
-    throw(CTBase.IncorrectArgument("Unknown strategy ID :$strategy_id for family $family. Available IDs: $available"))
+    throw(Exceptions.IncorrectArgument(
+        "Unknown strategy ID",
+        got=":$strategy_id for family $family",
+        expected="one of available IDs: $available",
+        suggestion="Check available strategy IDs or register the missing strategy",
+        context="type_from_id - looking up strategy ID in family"
+    ))
 end
 
 # Display

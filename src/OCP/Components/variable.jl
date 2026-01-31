@@ -22,9 +22,9 @@ julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
 
 # Throws
 
-- `CTBase.UnauthorizedCall`: If variable has already been set
-- `CTBase.UnauthorizedCall`: If objective has already been set
-- `CTBase.UnauthorizedCall`: If dynamics has already been set
+- `Exceptions.UnauthorizedCall`: If variable has already been set
+- `Exceptions.UnauthorizedCall`: If objective has already been set
+- `Exceptions.UnauthorizedCall`: If dynamics has already been set
 - `Exceptions.IncorrectArgument`: If number of component names ≠ q (when q > 0)
 - `Exceptions.IncorrectArgument`: If name is empty (when q > 0)
 - `Exceptions.IncorrectArgument`: If any component name is empty (when q > 0)
@@ -39,8 +39,11 @@ function variable!(
     name::T1=__variable_name(q),
     components_names::Vector{T2}=__variable_components(q, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
-    @ensure !__is_variable_set(ocp) CTBase.UnauthorizedCall(
-        "the variable has already been set."
+    @ensure !__is_variable_set(ocp) Exceptions.UnauthorizedCall(
+        "Variable already set",
+        reason="variable has already been defined for this OCP",
+        suggestion="Create a new OCP instance or use the existing variable definition",
+        context="variable! function - duplicate definition check"
     )
 
     @ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
@@ -51,12 +54,18 @@ function variable!(
         context="variable!(ocp, q=$q, components_names=[...]) - validating names count"
     )
 
-    @ensure !__is_objective_set(ocp) CTBase.UnauthorizedCall(
-        "the objective must be set after the variable."
+    @ensure !__is_objective_set(ocp) Exceptions.UnauthorizedCall(
+        "Variable must be set before objective",
+        reason="objective has already been defined but variable is not set yet",
+        suggestion="Call variable!(ocp, dimension) before objective!(ocp, ...)",
+        context="variable! function - objective ordering check"
     )
 
-    @ensure !__is_dynamics_set(ocp) CTBase.UnauthorizedCall(
-        "the dynamics must be set after the variable."
+    @ensure !__is_dynamics_set(ocp) Exceptions.UnauthorizedCall(
+        "Variable must be set before dynamics",
+        reason="dynamics have already been defined but variable is not set yet",
+        suggestion="Call variable!(ocp, dimension) before dynamics!(ocp, ...)",
+        context="variable! function - dynamics ordering check"
     )
 
     # NEW: Comprehensive name validation (only if q > 0)
