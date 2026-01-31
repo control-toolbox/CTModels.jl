@@ -7,6 +7,7 @@ using NLPModels
 using SolverCore
 using ADNLPModels
 using ExaModels
+using ..TestProblems
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true

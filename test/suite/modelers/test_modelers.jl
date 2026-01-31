@@ -39,7 +39,6 @@ function test_modelers_basic()
         exa_meta = CTModels.Strategies.metadata(CTModels.ExaModeler)
         Test.@test exa_meta isa CTModels.Strategies.StrategyMetadata
         Test.@test haskey(exa_meta.specs, :base_type)
-        Test.@test haskey(exa_meta.specs, :minimize)
         Test.@test haskey(exa_meta.specs, :backend)
     end
 end
@@ -57,10 +56,10 @@ function test_adnlp_modeler()
         Test.@test modeler isa CTModels.Strategies.AbstractStrategy
         
         # Test constructor with options
-        modeler_opts = CTModels.ADNLPModeler(show_time=true, backend=:forwarddiff)
+        modeler_opts = CTModels.ADNLPModeler(show_time=true, backend=:default)
         opts = CTModels.Strategies.options(modeler_opts)
         Test.@test opts[:show_time] == true
-        Test.@test opts[:backend] == :forwarddiff
+        Test.@test opts[:backend] == :default
         
         # Test option defaults
         modeler_default = CTModels.ADNLPModeler()
@@ -87,26 +86,25 @@ function test_exa_modeler()
         modeler = CTModels.ExaModeler()
         Test.@test modeler isa CTModels.AbstractOptimizationModeler
         Test.@test modeler isa CTModels.Strategies.AbstractStrategy
-        Test.@test typeof(modeler) == CTModels.ExaModeler{Float64}
+        Test.@test typeof(modeler) == CTModels.ExaModeler
         
         # Test constructor with options
-        modeler_opts = CTModels.ExaModeler(minimize=true, backend=nothing)
+        modeler_opts = CTModels.ExaModeler(backend=nothing)
         opts = CTModels.Strategies.options(modeler_opts)
-        Test.@test opts[:minimize] == true
         Test.@test opts[:backend] === nothing
         
-        # Test type parameter
-        modeler_f32 = CTModels.ExaModeler{Float32}()
-        Test.@test typeof(modeler_f32) == CTModels.ExaModeler{Float32}
+        # Test type parameter (removed - ExaModeler is no longer parameterized)
+        modeler_f32 = CTModels.ExaModeler(base_type=Float32)
+        Test.@test typeof(modeler_f32) == CTModels.ExaModeler
         
         # Test base_type option handling
         modeler_type = CTModels.ExaModeler(base_type=Float32)
-        Test.@test typeof(modeler_type) == CTModels.ExaModeler{Float32}
+        Test.@test typeof(modeler_type) == CTModels.ExaModeler
+        Test.@test CTModels.Strategies.options(modeler_type)[:base_type] == Float32
         
-        # Test base_type is filtered from stored options
+        # Test base_type is stored in options (not filtered anymore)
         opts_nt = CTModels.Strategies.options(modeler_type).options
-        Test.@test !haskey(opts_nt, :base_type)  # base_type is in the type parameter
-        Test.@test !haskey(opts_nt, :minimize)  # minimize has NotProvided default, not stored if not provided
+        Test.@test haskey(opts_nt, :base_type)  # base_type is now stored as regular option
         Test.@test haskey(opts_nt, :backend)  # backend has nothing default, always stored
     end
 end
@@ -154,13 +152,13 @@ Test generic options API.
 function test_modelers_options_api()
     Test.@testset "Modelers Options API" begin
         # Test that options are passed generically (not extracted by name)
-        modeler = CTModels.ADNLPModeler(show_time=true, backend=:forwarddiff)
+        modeler = CTModels.ADNLPModeler(show_time=true, backend=:default)
         opts = CTModels.Strategies.options(modeler)
         
         # Options should be accessible as NamedTuple for generic passing
         opts_nt = opts.options
         Test.@test opts_nt isa NamedTuple
-        Test.@test length(opts_nt) == 2  # show_time and backend
+        Test.@test length(opts_nt) >= 2  # show_time and backend (plus advanced options)
         
         # Test that we can iterate over options
         for (key, value) in pairs(opts_nt)

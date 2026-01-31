@@ -13,13 +13,13 @@ module TestProblems
     include("solution_example_dual.jl")
 
 # From problems_definition.jl
-    export OptimizationProblem, DummyProblem
+export OptimizationProblem, DummyProblem
 
 # From solution_example.jl
 export solution_example
 
 # From rosenbrock.jl
-    export Rosenbrock, rosenbrock_objective, rosenbrock_constraint
+export Rosenbrock, rosenbrock_objective, rosenbrock_constraint
 
 # From beam.jl
 export Beam

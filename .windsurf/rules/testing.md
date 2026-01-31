@@ -1,8 +1,16 @@
 ---
-trigger: model_decision
+trigger: always_on
 ---
 
 # Julia Testing Standards
+
+## 🤖 **Agent Directive**
+
+**When applying this rule, explicitly state**: "🧪 **Applying Testing Rule**: [specific testing principle being applied]"
+
+This ensures transparency about which testing standard is being used and why.
+
+---
 
 This document defines the testing standards for the Control Toolbox project. All Julia code modifications must be accompanied by appropriate tests following these guidelines.
 

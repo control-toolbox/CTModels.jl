@@ -1,8 +1,16 @@
 ---
-trigger: always_on
+trigger: code_modification
 ---
 
 # Julia Documentation Standards
+
+## 🤖 **Agent Directive**
+
+**When applying this rule, explicitly state**: "📚 **Applying Documentation Rule**: [specific documentation principle being applied]"
+
+This ensures transparency about which documentation standard is being used and why.
+
+---
 
 This document defines the documentation standards for the Control Toolbox project. All Julia code (functions, structs, macros, modules) must be documented following these guidelines.
 

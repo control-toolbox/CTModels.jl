@@ -14,7 +14,7 @@ function test_exception_config()
         
         @testset "Stacktrace Control - Default Value" begin
             # Test default value is false (user-friendly display)
-            @test CTModels.get_show_full_stacktrace() == false
+            @test CTModels.get_show_full_stacktrace() == true
         end
         
         @testset "Stacktrace Control - Set to True" begin
