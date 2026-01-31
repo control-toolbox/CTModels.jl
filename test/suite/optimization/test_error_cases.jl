@@ -80,19 +80,19 @@ function test_error_cases()
             prob = MinimalProblemForErrors()
             
             @testset "get_adnlp_model_builder - NotImplemented" begin
-                @test_throws CTBase.NotImplemented get_adnlp_model_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_adnlp_model_builder(prob)
             end
             
             @testset "get_exa_model_builder - NotImplemented" begin
-                @test_throws CTBase.NotImplemented get_exa_model_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_model_builder(prob)
             end
             
             @testset "get_adnlp_solution_builder - NotImplemented" begin
-                @test_throws CTBase.NotImplemented get_adnlp_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_adnlp_solution_builder(prob)
             end
             
             @testset "get_exa_solution_builder - NotImplemented" begin
-                @test_throws CTBase.NotImplemented get_exa_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_solution_builder(prob)
             end
         end
 
@@ -114,9 +114,9 @@ function test_error_cases()
             end
             
             @testset "Non-implemented builders throw NotImplemented" begin
-                @test_throws CTBase.NotImplemented get_exa_model_builder(prob)
-                @test_throws CTBase.NotImplemented get_adnlp_solution_builder(prob)
-                @test_throws CTBase.NotImplemented get_exa_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_model_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_adnlp_solution_builder(prob)
+                @test_throws CTModels.Exceptions.NotImplemented get_exa_solution_builder(prob)
             end
         end
 

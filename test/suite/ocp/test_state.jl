@@ -59,7 +59,7 @@ function test_state()
         # set twice
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1)
-        @test_throws CTBase.UnauthorizedCall CTModels.state!(ocp, 1)
+        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.state!(ocp, 1)
 
         # wrong number of components
         ocp = CTModels.PreModel()

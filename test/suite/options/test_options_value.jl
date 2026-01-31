@@ -35,9 +35,9 @@ function test_options_value()
         # Test OptionValue validation
         Test.@testset "OptionValue validation" begin
             # Test invalid sources
-            Test.@test_throws CTBase.IncorrectArgument Options.OptionValue(42, :invalid)
-            Test.@test_throws CTBase.IncorrectArgument Options.OptionValue(42, :wrong)
-            Test.@test_throws CTBase.IncorrectArgument Options.OptionValue(42, :DEFAULT)  # case sensitive
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :invalid)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :wrong)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :DEFAULT)  # case sensitive
         end
         
         # Test OptionValue display

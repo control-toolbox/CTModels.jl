@@ -25,7 +25,7 @@ function test_time_dependence()
         Test.@test CTModels.is_autonomous(ocp) === true
 
         # Second call must fail
-        Test.@test_throws CTBase.UnauthorizedCall CTModels.time_dependence!(
+        Test.@test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time_dependence!(
             ocp; autonomous=false
         )
     end

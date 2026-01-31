@@ -15,6 +15,7 @@ module Strategies
 using CTBase: CTBase
 using DocStringExtensions
 using ..CTModels.Options
+using ..CTModels.Exceptions
 
 # ==============================================================================
 # Include submodules

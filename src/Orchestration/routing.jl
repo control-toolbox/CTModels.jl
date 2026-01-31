@@ -63,7 +63,8 @@ solve(ocp, :collocation, :adnlp, :ipopt;
 ```
 
 # Throws
-- `CTBase.IncorrectArgument`: If an option is unknown, ambiguous without
+
+- `Exceptions.IncorrectArgument`: If an option is unknown, ambiguous without
   disambiguation, or routed to the wrong strategy
 
 # Example

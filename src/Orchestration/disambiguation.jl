@@ -41,7 +41,8 @@ value = ((:sparse, :adnlp), (:cpu, :ipopt))  # Route to both
 - `Vector{Tuple{Any, Symbol}}` of (value, strategy_id) pairs if disambiguated
 
 # Throws
-- `CTBase.IncorrectArgument`: If a strategy ID in the disambiguation syntax
+
+- `Exceptions.IncorrectArgument`: If a strategy ID in the disambiguation syntax
   is not present in the method tuple
 
 # Examples
@@ -74,8 +75,12 @@ function extract_strategy_ids(
         if id in method
             return [(value, id)]
         else
-            throw(CTBase.IncorrectArgument(
-                "Strategy ID :$id not in method $method. Available: $method"
+            throw(Exceptions.IncorrectArgument(
+                "Strategy ID not found in method tuple",
+                got="strategy ID :$id",
+                expected="one of available strategy IDs: $method",
+                suggestion="Use a valid strategy ID from your method tuple",
+                context="extract_strategy_ids - validating strategy ID in disambiguation"
             ))
         end
     end
@@ -100,8 +105,12 @@ function extract_strategy_ids(
                 if id in method
                     push!(results, (value, id))
                 else
-                    throw(CTBase.IncorrectArgument(
-                        "Strategy ID :$id not in method $method. Available: $method"
+                    throw(Exceptions.IncorrectArgument(
+                        "Strategy ID not found in method tuple",
+                        got="strategy ID :$id",
+                        expected="one of available strategy IDs: $method",
+                        suggestion="Use a valid strategy ID from your method tuple",
+                        context="extract_strategy_ids - validating multi-strategy disambiguation"
                     ))
                 end
             end

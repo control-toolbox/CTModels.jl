@@ -12,8 +12,8 @@ CTModels modules, making it reusable across the ecosystem.
 """
 module Options
 
-using CTBase: CTBase
 using DocStringExtensions
+using ..CTModels.Exceptions
 
 # ==============================================================================
 # Include submodules

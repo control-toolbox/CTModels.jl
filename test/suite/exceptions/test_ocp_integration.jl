@@ -4,6 +4,16 @@ using Test
 using CTModels
 using CTModels.Exceptions
 
+# Aliases for convenience
+const OCP = CTModels.PreModel
+const state! = CTModels.state!
+const control! = CTModels.control!
+const variable! = CTModels.variable!
+const times! = CTModels.time!
+const objective! = CTModels.objective!
+const dynamics! = CTModels.dynamics!
+const constraint! = CTModels.constraint!
+
 """
 Tests for exception integration in OCP components
 Tests that enriched exceptions are properly thrown in OCP workflows
@@ -221,15 +231,15 @@ function test_ocp_exception_integration()
             state!(ocp2, 2)
             control!(ocp2, 1)
             times!(ocp2, t0=0, tf=1)
-            constraint!(ocp2, :state, lb=[0], ub=[1], label=:test)
+            constraint!(ocp2, :state, lb=[0, 0], ub=[1, 1], label=:test)
             
             @test_throws Exceptions.UnauthorizedCall begin
-                constraint!(ocp2, :state, lb=[0], ub=[2], label=:test)
+                constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             end
             
             # Verify duplicate constraint exception
             try
-                constraint!(ocp2, :state, lb=[0], ub=[2], label=:test)
+                constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             catch e
                 @test e isa Exceptions.UnauthorizedCall
                 @test e.msg == "Constraint already exists"

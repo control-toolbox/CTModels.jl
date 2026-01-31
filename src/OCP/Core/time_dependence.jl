@@ -15,7 +15,7 @@ This function sets the `autonomous` field of the model to indicate whether the s
 explicitly depend on time. It can only be called once.
 
 # Errors
-Throws `CTBase.UnauthorizedCall` if the time dependence has already been set.
+Throws `Exceptions.UnauthorizedCall` if the time dependence has already been set.
 
 # Example
 ```julia-repl
@@ -24,8 +24,11 @@ julia> time_dependence!(ocp; autonomous=true)
 ```
 """
 function time_dependence!(ocp::PreModel; autonomous::Bool)::Nothing
-    @ensure !__is_autonomous_set(ocp) CTBase.UnauthorizedCall(
-        "the time dependence has already been set."
+    @ensure !__is_autonomous_set(ocp) Exceptions.UnauthorizedCall(
+        "Time dependence already set",
+        reason="time dependence has already been defined for this OCP",
+        suggestion="Create a new OCP instance or use the existing time dependence definition",
+        context="time_dependence! function - duplicate definition check"
     )
     ocp.autonomous = autonomous
     return nothing

@@ -62,7 +62,7 @@ function test_variable()
         # set twice
         ocp = CTModels.PreModel()
         CTModels.variable!(ocp, 1)
-        @test_throws CTBase.UnauthorizedCall CTModels.variable!(ocp, 1)
+        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.variable!(ocp, 1)
 
         # wrong number of components
         ocp = CTModels.PreModel()

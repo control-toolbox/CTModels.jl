@@ -145,7 +145,13 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
             )
         else
             throw(
-                CTBase.UnauthorizedCall("Unknown constraint type: $type for label $label.")
+                Exceptions.UnauthorizedCall(
+                    "Unknown constraint type",
+                    got="constraint type $type for label $label",
+                    expected="one of :state, :control, :variable, :boundary, :path",
+                    suggestion="Check constraint type or use valid constraint type",
+                    context="get_constraint_dual - validating constraint type"
+                )
             )
         end
     end
@@ -271,29 +277,53 @@ julia> model = build(pre_ocp)
 ```
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
-    @ensure __is_times_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the times must be set before building the model."
+    @ensure __is_times_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Times must be set before building model",
+        reason="time horizon has not been defined yet",
+        suggestion="Call times!(pre_ocp, t0, tf) or times!(pre_ocp, N) before building",
+        context="build function - times validation"
     )
-    @ensure __is_state_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the state must be set before building the model."
+    @ensure __is_state_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "State must be set before building model",
+        reason="state has not been defined yet",
+        suggestion="Call state!(pre_ocp, dimension) before building",
+        context="build function - state validation"
     )
-    @ensure __is_control_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the control must be set before building the model."
+    @ensure __is_control_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Control must be set before building model",
+        reason="control has not been defined yet",
+        suggestion="Call control!(pre_ocp, dimension) before building",
+        context="build function - control validation"
     )
-    @ensure __is_dynamics_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the dynamics must be set before building the model."
+    @ensure __is_dynamics_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Dynamics must be set before building model",
+        reason="dynamics have not been defined yet",
+        suggestion="Call dynamics!(pre_ocp, f) or partial_dynamics! before building",
+        context="build function - dynamics validation"
     )
-    @ensure __is_dynamics_complete(pre_ocp) CTBase.UnauthorizedCall(
-        "all the components of the dynamics must be set before building the model."
+    @ensure __is_dynamics_complete(pre_ocp) Exceptions.UnauthorizedCall(
+        "Dynamics must be complete before building model",
+        reason="not all state components are covered by dynamics",
+        suggestion="Complete dynamics definition with partial_dynamics! or use full dynamics!",
+        context="build function - dynamics completeness validation"
     )
-    @ensure __is_objective_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the objective must be set before building the model."
+    @ensure __is_objective_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Objective must be set before building model",
+        reason="objective has not been defined yet",
+        suggestion="Call objective!(pre_ocp, ...) before building",
+        context="build function - objective validation"
     )
-    @ensure __is_definition_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the definition must be set before building the model."
+    @ensure __is_definition_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Definition must be set before building model",
+        reason="definition has not been set yet",
+        suggestion="Call definition!(pre_ocp) before building",
+        context="build function - definition validation"
     )
-    @ensure __is_autonomous_set(pre_ocp) CTBase.UnauthorizedCall(
-        "the time dependence, autonomous=true or false, must be set before building the model.",
+    @ensure __is_autonomous_set(pre_ocp) Exceptions.UnauthorizedCall(
+        "Time dependence must be set before building model",
+        reason="autonomous status has not been defined yet",
+        suggestion="Call time_dependence!(pre_ocp, autonomous=true/false) before building",
+        context="build function - time dependence validation"
     )
 
     # extract components from PreModel

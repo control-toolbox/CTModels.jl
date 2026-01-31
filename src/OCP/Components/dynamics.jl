@@ -17,7 +17,7 @@ if any of the required fields (`state`, `control`, `times`) are not yet set, or 
 dynamics have already been set.
 
 # Errors
-Throws `CTBase.UnauthorizedCall` if called out of order or in an invalid state.
+Throws `Exceptions.UnauthorizedCall` if called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
     @ensure __is_state_set(ocp) Exceptions.UnauthorizedCall(
@@ -73,7 +73,7 @@ that the specified indices are not already covered and that the system is in a v
 configuration for adding partial dynamics.
 
 # Errors
-Throws `CTBase.UnauthorizedCall` if:
+Throws `Exceptions.UnauthorizedCall` if:
 - The state, control, or times are not yet set.
 - The dynamics are already defined completely.
 - Any index in `rg` overlaps with an existing dynamics range.

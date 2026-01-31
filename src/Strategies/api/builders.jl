@@ -94,13 +94,20 @@ function extract_id_from_method(
     if length(hits) == 1
         return hits[1]
     elseif isempty(hits)
-        throw(CTBase.IncorrectArgument(
-            "No ID for family $family found in method $method. Available: $allowed"
+        throw(Exceptions.IncorrectArgument(
+            "No strategy ID found for family in method",
+            got="family $family in method $method",
+            expected="family ID present in method tuple",
+            suggestion="Add the family ID to your method tuple, e.g., (:$family, ...)",
+            context="extract_id_from_method - validating method tuple contains family"
         ))
     else
-        throw(CTBase.IncorrectArgument(
-            "Multiple IDs $hits for family $family found in method $method. " *
-            "Each family should have exactly one ID in the method tuple."
+        throw(Exceptions.IncorrectArgument(
+            "Multiple strategy IDs found for family in method",
+            got="family $family appears $length(hits) times in method $method",
+            expected="exactly one ID per family in method tuple",
+            suggestion="Remove duplicate family IDs from method tuple, keep only one",
+            context="extract_id_from_method - validating unique family IDs"
         ))
     end
 end

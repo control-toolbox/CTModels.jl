@@ -25,12 +25,13 @@ See also: [`CTModels`](@ref)
 """
 module Display
 
-using DocStringExtensions
 using CTBase: CTBase
+using DocStringExtensions
 using MLStyle: MLStyle
 using Base: Base
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
+using ..Exceptions
 
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module
@@ -53,7 +54,13 @@ include("print.jl")
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
 function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(CTBase.ExtensionError(:Plots))
+    throw(Exceptions.IncorrectArgument(
+        "Plots extension not loaded",
+        got="plot call without Plots extension",
+        expected="Plots.jl to be loaded",
+        suggestion="Load Plots.jl with: using Plots",
+        context="RecipesBase.plot - extension availability check"
+    ))
 end
 
 # Note: plot is not exported from Display, it will be imported and exported from CTModels

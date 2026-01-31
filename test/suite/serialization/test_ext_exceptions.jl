@@ -21,10 +21,10 @@ function test_ext_exceptions()
     # Test IncorrectArgument for unknown format
     # ============================================================================
     Test.@testset "IncorrectArgument for unknown format" verbose = VERBOSE showtiming = SHOWTIMING begin
-        Test.@test_throws CTBase.IncorrectArgument CTModels.export_ocp_solution(
+        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.export_ocp_solution(
             sol; format=:dummy
         )
-        Test.@test_throws CTBase.IncorrectArgument CTModels.import_ocp_solution(
+        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.import_ocp_solution(
             ocp; format=:dummy
         )
     end
@@ -59,13 +59,13 @@ function test_ext_exceptions()
     # ============================================================================
     # Test plot stub with a dummy solution type
     # RecipesBase.plot is extended by CTModelsPlots for AbstractSolution
-    # If Plots is not loaded, the stub throws ExtensionError
+    # If Plots is not loaded, the stub throws IncorrectArgument
     # If Plots is loaded, it tries to convert the type and throws ErrorException
     # ============================================================================
     Test.@testset "Plot method signature errors" verbose = VERBOSE showtiming = SHOWTIMING begin
         # Test that calling plot with a dummy AbstractSolution subtype uses the stub
-        # The stub should throw ExtensionError since Plots extension only handles CTModels.Solution
-        Test.@test_throws CTBase.ExtensionError CTModels.plot(DummyAbstractSolution())
+        # The stub should throw IncorrectArgument since Plots extension is not loaded
+        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.plot(DummyAbstractSolution())
     end
 
     # ============================================================================

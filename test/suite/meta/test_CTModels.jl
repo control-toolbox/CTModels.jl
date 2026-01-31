@@ -44,10 +44,10 @@ function test_CTModels()
         ocp = CTMDummyModelTop()
 
         # Unknown format should trigger an IncorrectArgument without touching extensions.
-        Test.@test_throws CTBase.IncorrectArgument CTModels.export_ocp_solution(
+        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.export_ocp_solution(
             sol; format=:FOO
         )
-        Test.@test_throws CTBase.IncorrectArgument CTModels.import_ocp_solution(
+        Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.import_ocp_solution(
             ocp; format=:FOO
         )
     end

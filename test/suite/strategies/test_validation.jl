@@ -4,7 +4,7 @@ using Test
 using CTModels
 using CTModels.Strategies
 using CTModels.Options: OptionDefinition
-using CTBase
+using CTModels.Exceptions
 using Main.TestOptions: VERBOSE, SHOWTIMING
 
 # ============================================================================
@@ -368,16 +368,16 @@ function test_validation()
         
         Test.@testset "Invalid strategies - Missing methods" begin
             # Missing id method
-            Test.@test_throws CTBase.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingIdStrategy)
+            Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingIdStrategy)
             
             # Missing metadata method
-            Test.@test_throws CTBase.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingMetadataStrategy)
+            Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingMetadataStrategy)
             
             # Missing constructor
-            Test.@test_throws CTBase.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingConstructorStrategy)
+            Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingConstructorStrategy)
             
             # Missing options method
-            Test.@test_throws CTBase.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingOptionsStrategy)
+            Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.validate_strategy_contract(MissingOptionsStrategy)
         end
         
         # ====================================================================
@@ -386,13 +386,13 @@ function test_validation()
         
         Test.@testset "Invalid strategies - Wrong return types" begin
             # Wrong id return type (String instead of Symbol)
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongIdTypeStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongIdTypeStrategy)
             
             # Wrong metadata return type (String instead of StrategyMetadata)
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongMetadataTypeStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongMetadataTypeStrategy)
             
             # Wrong options return type (String instead of StrategyOptions)
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongOptionsTypeStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(WrongOptionsTypeStrategy)
         end
         
         # ====================================================================
@@ -405,8 +405,8 @@ function test_validation()
                 CTModels.Strategies.validate_strategy_contract(WrongIdTypeStrategy)
                 Test.@test false  # Should not reach here
             catch e
-                Test.@test e isa CTBase.IncorrectArgument
-                Test.@test occursin("must return a Symbol", string(e))
+                Test.@test e isa CTModels.Exceptions.IncorrectArgument
+                Test.@test occursin("Invalid strategy ID type", string(e))
                 Test.@test occursin("WrongIdTypeStrategy", string(e))
             end
             
@@ -414,8 +414,8 @@ function test_validation()
                 CTModels.Strategies.validate_strategy_contract(MissingIdStrategy)
                 Test.@test false  # Should not reach here
             catch e
-                Test.@test e isa CTBase.NotImplemented
-                Test.@test occursin("must be implemented", string(e))
+                Test.@test e isa CTModels.Exceptions.NotImplemented
+                Test.@test occursin("Strategy ID method not implemented", string(e))
                 Test.@test occursin("MissingIdStrategy", string(e))
             end
         end
@@ -432,8 +432,8 @@ function test_validation()
                 CTModels.Strategies.validate_strategy_contract(MissingIdStrategy)
                 Test.@test false  # Should not reach here
             catch e
-                Test.@test e isa CTBase.NotImplemented
-                Test.@test occursin("id", string(e))
+                Test.@test e isa CTModels.Exceptions.NotImplemented
+                Test.@test occursin("Strategy ID method not implemented", string(e))
             end
             
             # WrongIdTypeStrategy should fail at step 1 (id type check)
@@ -442,8 +442,8 @@ function test_validation()
                 CTModels.Strategies.validate_strategy_contract(WrongIdTypeStrategy)
                 Test.@test false  # Should not reach here
             catch e
-                Test.@test e isa CTBase.IncorrectArgument
-                Test.@test occursin("Symbol", string(e))
+                Test.@test e isa CTModels.Exceptions.IncorrectArgument
+                Test.@test occursin("Invalid strategy ID type", string(e))
             end
         end
         
@@ -492,26 +492,26 @@ function test_validation()
         Test.@testset "Metadata-Options consistency" begin
             # Strategy with mismatched options (missing key)
             # Should fail with missing options error
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(MissingKeyStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(MissingKeyStrategy)
             
             try
                 CTModels.Strategies.validate_strategy_contract(MissingKeyStrategy)
                 Test.@test false
             catch e
-                Test.@test e isa CTBase.IncorrectArgument
+                Test.@test e isa CTModels.Exceptions.IncorrectArgument
                 Test.@test occursin("missing options", string(e))
                 Test.@test occursin("param2", string(e))
             end
             
             # Strategy with extra options
             # Should fail with unexpected options error
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(ExtraKeyStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(ExtraKeyStrategy)
             
             try
                 CTModels.Strategies.validate_strategy_contract(ExtraKeyStrategy)
                 Test.@test false
             catch e
-                Test.@test e isa CTBase.IncorrectArgument
+                Test.@test e isa CTModels.Exceptions.IncorrectArgument
                 Test.@test occursin("unexpected options", string(e))
                 Test.@test occursin("extra", string(e))
             end
@@ -524,14 +524,14 @@ function test_validation()
         Test.@testset "Constructor behavior" begin
             # Strategy that ignores kwargs
             # Should fail because constructor doesn't use kwargs
-            Test.@test_throws CTBase.IncorrectArgument CTModels.Strategies.validate_strategy_contract(IgnoresKwargsStrategy)
+            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.validate_strategy_contract(IgnoresKwargsStrategy)
             
             try
                 CTModels.Strategies.validate_strategy_contract(IgnoresKwargsStrategy)
                 Test.@test false
             catch e
-                Test.@test e isa CTBase.IncorrectArgument
-                Test.@test occursin("does not properly use keyword arguments", string(e))
+                Test.@test e isa CTModels.Exceptions.IncorrectArgument
+                Test.@test occursin("Constructor does not use keyword arguments properly", string(e))
                 Test.@test occursin("build_strategy_options", string(e))
             end
             

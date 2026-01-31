@@ -16,6 +16,7 @@ using ExaModels
 using KernelAbstractions
 using ..CTModels.Options
 using ..CTModels.Strategies
+using ..CTModels.Exceptions
 using ..CTModels.Optimization: AbstractOptimizationProblem,
     get_adnlp_model_builder, get_exa_model_builder,
     get_adnlp_solution_builder, get_exa_solution_builder

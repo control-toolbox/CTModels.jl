@@ -29,9 +29,10 @@ The Options.extract_options function handles:
 - `StrategyOptions`: Validated options with provenance tracking
 
 # Throws
-- `CTBase.IncorrectArgument`: If an unknown option is provided
-- `CTBase.IncorrectArgument`: If type validation fails
-- `CTBase.IncorrectArgument`: If custom validation fails
+
+- `Exceptions.IncorrectArgument`: If an unknown option is provided
+- `Exceptions.IncorrectArgument`: If type validation fails
+- `Exceptions.IncorrectArgument`: If custom validation fails
 
 # Example
 ```julia-repl
