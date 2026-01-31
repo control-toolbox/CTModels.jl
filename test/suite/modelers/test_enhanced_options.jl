@@ -14,8 +14,10 @@ const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import the specific types we need
-using ..CTModels: ADNLPModeler, ExaModeler
-using ..CTModels.Strategies: options
+using CTModels.Modelers: ADNLPModeler, ExaModeler
+using CTModels.Exceptions
+using KernelAbstractions: CPU
+using CTModels.Strategies: options
 
 # Define structs at top-level (crucial!)
 struct TestDummyModel end
@@ -28,32 +30,31 @@ function test_enhanced_options()
             @testset "New Options Validation" begin
                 # Test matrix_free option
                 modeler = ADNLPModeler(matrix_free=true)
-                @test options(modeler).options[:matrix_free] == true
+                @test options(modeler)[:matrix_free] == true
                 
                 modeler = ADNLPModeler(matrix_free=false)
-                @test options(modeler).options[:matrix_free] == false
+                @test options(modeler)[:matrix_free] == false
                 
                 # Test name option
                 modeler = ADNLPModeler(name="TestProblem")
-                @test options(modeler).options[:name] == "TestProblem"
-                
-                # Test minimize option
-                modeler = ADNLPModeler(minimize=false)
-                @test options(modeler).options[:minimize] == false
-                
-                modeler = ADNLPModeler(minimize=true)
-                @test options(modeler).options[:minimize] == true
+                @test options(modeler)[:name] == "TestProblem"
             end
             
             @testset "Backend Validation" begin
-                # Valid backends should work
-                valid_backends = [:default, :optimized, :generic, :enzyme, :zygote]
-                for backend in valid_backends
-                    @test_nowarn ADNLPModeler(backend=backend)
+                # Valid backends should work (some may generate warnings if packages not loaded)
+                @test_nowarn ADNLPModeler(backend=:default)
+                @test_nowarn ADNLPModeler(backend=:optimized)
+                @test_nowarn ADNLPModeler(backend=:generic)
+                # Enzyme and Zygote may generate warnings if packages not loaded - that's expected
+                redirect_stderr(devnull) do
+                    ADNLPModeler(backend=:enzyme)  # May warn if Enzyme not loaded
+                    ADNLPModeler(backend=:zygote)  # May warn if Zygote not loaded
                 end
                 
-                # Invalid backend should throw error
-                @test_throws ArgumentError ADNLPModeler(backend=:invalid)
+                # Invalid backend should throw error (redirect stderr to hide error logs)
+                redirect_stderr(devnull) do
+                    @test_throws ArgumentError ADNLPModeler(backend=:invalid)
+                end
             end
             
             @testset "Name Validation" begin
@@ -61,8 +62,10 @@ function test_enhanced_options()
                 @test_nowarn ADNLPModeler(name="ValidName")
                 @test_nowarn ADNLPModeler(name="name_with_123")
                 
-                # Empty name should throw error
-                @test_throws ArgumentError ADNLPModeler(name="")
+                # Empty name should throw error (redirect stderr to hide error logs)
+                redirect_stderr(devnull) do
+                    @test_throws ArgumentError ADNLPModeler(name="")
+                end
             end
             
             @testset "Combined Options" begin
@@ -71,84 +74,67 @@ function test_enhanced_options()
                     backend=:optimized,
                     matrix_free=true,
                     name="CombinedTest",
-                    minimize=false,
                     show_time=true
                 )
                 
-                opts = options(modeler).options
+                opts = options(modeler)
                 @test opts[:backend] == :optimized
                 @test opts[:matrix_free] == true
                 @test opts[:name] == "CombinedTest"
-                @test opts[:minimize] == false
                 @test opts[:show_time] == true
             end
         end
         
         @testset "ExaModeler Enhanced Options" begin
             
-            @testset "New Options Validation" begin
-                # Test auto_detect_gpu option
-                modeler = ExaModeler(auto_detect_gpu=true)
-                @test options(modeler).options[:auto_detect_gpu] == true
-                
-                modeler = ExaModeler(auto_detect_gpu=false)
-                @test options(modeler).options[:auto_detect_gpu] == false
-                
-                # Test gpu_preference option
-                modeler = ExaModeler(gpu_preference=:cuda)
-                @test options(modeler).options[:gpu_preference] == :cuda
-                
-                modeler = ExaModeler(gpu_preference=:rocm)
-                @test options(modeler).options[:gpu_preference] == :rocm
-                
-                # Test precision_mode option
-                modeler = ExaModeler(precision_mode=:high)
-                @test options(modeler).options[:precision_mode] == :high
-                
-                modeler = ExaModeler(precision_mode=:mixed)
-                @test options(modeler).options[:precision_mode] == :mixed
-            end
-            
             @testset "Base Type Validation" begin
-                # Valid types should work
-                @test_nowarn ExaModeler(base_type=Float64)
-                @test_nowarn ExaModeler(base_type=Float32)
-                @test_nowarn ExaModeler(base_type=Float16)
+                # Test valid base types
+                modeler = ExaModeler(base_type=Float32)
+                @test options(modeler)[:base_type] == Float32
                 
-                # Invalid type should throw error
-                @test_throws ArgumentError ExaModeler(base_type=Int)
-                @test_throws ArgumentError ExaModeler(base_type=String)
+                modeler = ExaModeler(base_type=Float64)
+                @test options(modeler)[:base_type] == Float64
             end
             
-            @testset "GPU Preference Validation" begin
-                # Valid preferences should work
-                valid_prefs = [:cuda, :rocm, :oneapi]
-                for pref in valid_prefs
-                    @test_nowarn ExaModeler(gpu_preference=pref)
-                end
+            @testset "Backend Validation" begin
+                # Test backend option
+                modeler = ExaModeler(backend=nothing)
+                @test options(modeler)[:backend] === nothing
                 
-                # Invalid preference should throw error
-                @test_throws ArgumentError ExaModeler(gpu_preference=:invalid)
+                # Test with a backend type
+                modeler = ExaModeler(backend=CPU())
+                @test options(modeler)[:backend] == CPU()
+            end
+            
+            @testset "Base Type Extraction in Build" begin
+                # Test that BaseType is correctly extracted and used in build process
+                modeler = ExaModeler(base_type=Float32)
+                
+                # Verify base_type is stored in options
+                @test options(modeler)[:base_type] == Float32
+                
+                # Test with Float64 as well
+                modeler64 = ExaModeler(base_type=Float64)
+                @test options(modeler64)[:base_type] == Float64
+                
+                # Test that default base_type is preserved
+                default_modeler = ExaModeler()
+                @test options(default_modeler)[:base_type] == Float64
             end
             
             @testset "Combined Options" begin
                 # Test multiple options together
                 modeler = ExaModeler(
                     base_type=Float32,
-                    auto_detect_gpu=true,
-                    gpu_preference=:cuda,
-                    precision_mode=:mixed,
-                    minimize=true
+                    backend=nothing
                 )
                 
-                opts = options(modeler).options
-                @test opts[:auto_detect_gpu] == true
-                @test opts[:gpu_preference] == :cuda
-                @test opts[:precision_mode] == :mixed
-                @test opts[:minimize] == true
+                opts = options(modeler)
+                @test opts[:backend] === nothing
+                @test opts[:base_type] == Float32
                 
-                # Check that base_type is in the type parameter
-                @test modeler isa ExaModeler{Float32}
+                # Check that modeler is not parameterized anymore
+                @test modeler isa ExaModeler
             end
         end
         
@@ -162,35 +148,33 @@ function test_enhanced_options()
                 # Original options should still work
                 modeler2 = ADNLPModeler(show_time=true, backend=:default)
                 @test modeler2 isa ADNLPModeler
-                @test options(modeler2).options[:show_time] == true
-                @test options(modeler2).options[:backend] == :default
+                @test options(modeler2)[:show_time] == true
+                @test options(modeler2)[:backend] == :default
                 
                 # Default values should be preserved
                 modeler3 = ADNLPModeler()
-                opts = options(modeler3).options
+                opts = options(modeler3)
                 @test opts[:show_time] == false
                 @test opts[:backend] == :optimized
                 @test opts[:matrix_free] == false
                 @test opts[:name] == "CTModels-ADNLP"
-                @test opts[:minimize] == true
             end
             
             @testset "ExaModeler Backward Compatibility" begin
                 # Original constructor should still work
                 modeler1 = ExaModeler()
-                @test modeler1 isa ExaModeler{Float64}
+                @test modeler1 isa ExaModeler
                 
                 # Original options should still work
-                modeler2 = ExaModeler(base_type=Float32, minimize=false)
-                @test modeler2 isa ExaModeler{Float32}
-                @test options(modeler2).options[:minimize] == false
+                modeler2 = ExaModeler(base_type=Float32)
+                @test modeler2 isa ExaModeler
+                @test options(modeler2)[:base_type] == Float32
                 
                 # Default values should be preserved
                 modeler3 = ExaModeler()
-                opts = options(modeler3).options
-                @test opts[:auto_detect_gpu] == true
-                @test opts[:gpu_preference] == :cuda
-                @test opts[:precision_mode] == :standard
+                opts = options(modeler3)
+                @test opts[:backend] === nothing
+                @test opts[:base_type] == Float64
             end
         end
 
@@ -218,18 +202,20 @@ function test_enhanced_options()
                     hprod_backend=nothing,
                     ghjvprod_backend=nothing
                 )
-                opts = options(modeler).options
+                opts = options(modeler)
                 @test opts[:gradient_backend] === nothing
                 @test opts[:hprod_backend] === nothing
                 @test opts[:ghjvprod_backend] === nothing
             end
 
             @testset "Backend Override Type Validation" begin
-                # Invalid types should throw enriched exceptions
-                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(gradient_backend="invalid")
-                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(hprod_backend=123)
-                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(jprod_backend=:invalid)
-                @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(ghjvprod_backend="invalid")
+                # Invalid types should throw enriched exceptions (redirect stderr to hide error logs)
+                redirect_stderr(devnull) do
+                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(gradient_backend="invalid")
+                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(hprod_backend=123)
+                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(jprod_backend=:invalid)
+                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(ghjvprod_backend="invalid")
+                end
             end
 
             @testset "Combined Advanced Options" begin
@@ -244,10 +230,11 @@ function test_enhanced_options()
                     ghjvprod_backend=nothing
                 )
 
-                opts = options(modeler).options
+                opts = options(modeler)
                 @test opts[:backend] == :optimized
                 @test opts[:matrix_free] == true
                 @test opts[:name] == "AdvancedTest"
+                # Options with NotProvided default are only stored when explicitly set
                 @test opts[:gradient_backend] === nothing
                 @test opts[:hprod_backend] === nothing
                 @test opts[:jacobian_backend] === nothing

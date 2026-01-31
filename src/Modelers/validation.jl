@@ -83,12 +83,12 @@ function validate_exa_base_type(T::Type)
         ))
     end
     
-    # Performance recommendations
-    if T == Float32
-        @info "Float32 is recommended for GPU backends for better performance and memory usage"
-    elseif T == Float64
-        @info "Float64 provides higher precision but may be slower on GPU backends"
-    end
+    # # Performance recommendations
+    # if T == Float32
+    #     @info "Float32 is recommended for GPU backends for better performance and memory usage"
+    # elseif T == Float64
+    #     @info "Float64 provides higher precision but may be slower on GPU backends"
+    # end
     
     return T
 end

@@ -1,5 +1,5 @@
 ---
-trigger: code_modification
+trigger: model_decision
 ---
 
 # Julia Type Stability Standards
