@@ -3,12 +3,14 @@ module TestExceptionConversion
 using Test
 using CTModels.Exceptions
 using CTBase
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
 Tests for CTBase compatibility layer (conversion.jl)
 """
 function test_exception_conversion()
-    @testset "CTBase Conversion" verbose = true begin
+    @testset "CTBase Conversion" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "IncorrectArgument - Simple Conversion" begin
             e = IncorrectArgument("Invalid input")

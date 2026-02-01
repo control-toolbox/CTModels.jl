@@ -2,86 +2,90 @@ module TestOCPPrint
 
 using Test
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_print()
-    # TODO: add tests for src/ocp/print.jl.
 
-    # ========================================================================
-    # Unit/integration tests – printing PreModel
-    # ========================================================================
+    Test.@testset "Test print" verbose = VERBOSE showtiming = SHOWTIMING begin
 
-    Test.@testset "show(PreModel) prints abstract and mathematical definitions" verbose=VERBOSE showtiming=SHOWTIMING begin
-        pre = CTModels.PreModel()
+        # ========================================================================
+        # Unit/integration tests – printing PreModel
+        # ========================================================================
 
-        # Minimal consistent problem
-        CTModels.time!(pre; t0=0.0, tf=1.0)
-        CTModels.state!(pre, 1, "x", ["x"])
-        CTModels.control!(pre, 1, "u", ["u"])
-        CTModels.variable!(pre, 0)
+        Test.@testset "show(PreModel) prints abstract and mathematical definitions" begin
+            pre = CTModels.PreModel()
 
-        dyn!(r, t, x, u, v) = r .= 0
-        CTModels.dynamics!(pre, dyn!)
+            # Minimal consistent problem
+            CTModels.time!(pre; t0=0.0, tf=1.0)
+            CTModels.state!(pre, 1, "x", ["x"])
+            CTModels.control!(pre, 1, "u", ["u"])
+            CTModels.variable!(pre, 0)
 
-        mayer(x0, xf, v) = 0.0
-        lagrange(t, x, u, v) = 0.0
-        CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+            dyn!(r, t, x, u, v) = r .= 0
+            CTModels.dynamics!(pre, dyn!)
 
-        def_expr = quote
-            t ∈ [0, 1], time
-            x ∈ R, state
-            u ∈ R, control
-            ẋ(t) == u(t)
-            ∫(0.5u(t)^2) → min
+            mayer(x0, xf, v) = 0.0
+            lagrange(t, x, u, v) = 0.0
+            CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+
+            def_expr = quote
+                t ∈ [0, 1], time
+                x ∈ R, state
+                u ∈ R, control
+                ẋ(t) == u(t)
+                ∫(0.5u(t)^2) → min
+            end
+            CTModels.definition!(pre, def_expr)
+            CTModels.time_dependence!(pre; autonomous=false)
+
+            io = IOBuffer()
+            show(io, MIME"text/plain"(), pre)
+            s = String(take!(io))
+
+            Test.@test occursin("Abstract definition:", s)
+            Test.@test occursin("optimal control problem is of the form:", s)
         end
-        CTModels.definition!(pre, def_expr)
-        CTModels.time_dependence!(pre; autonomous=false)
 
-        io = IOBuffer()
-        show(io, MIME"text/plain"(), pre)
-        s = String(take!(io))
+        # ========================================================================
+        # Integration tests – printing Model
+        # ========================================================================
 
-        Test.@test occursin("Abstract definition:", s)
-        Test.@test occursin("optimal control problem is of the form:", s)
-    end
+        Test.@testset "show(Model) prints abstract and mathematical definitions" begin
+            pre = CTModels.PreModel()
 
-    # ========================================================================
-    # Integration tests – printing Model
-    # ========================================================================
+            CTModels.time!(pre; t0=0.0, tf=1.0)
+            CTModels.state!(pre, 1, "x", ["x"])
+            CTModels.control!(pre, 1, "u", ["u"])
+            CTModels.variable!(pre, 0)
 
-    Test.@testset "show(Model) prints abstract and mathematical definitions" verbose=VERBOSE showtiming=SHOWTIMING begin
-        pre = CTModels.PreModel()
+            dyn!(r, t, x, u, v) = r .= 0
+            CTModels.dynamics!(pre, dyn!)
 
-        CTModels.time!(pre; t0=0.0, tf=1.0)
-        CTModels.state!(pre, 1, "x", ["x"])
-        CTModels.control!(pre, 1, "u", ["u"])
-        CTModels.variable!(pre, 0)
+            mayer(x0, xf, v) = 0.0
+            lagrange(t, x, u, v) = 0.0
+            CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
 
-        dyn!(r, t, x, u, v) = r .= 0
-        CTModels.dynamics!(pre, dyn!)
+            def_expr = quote
+                t ∈ [0, 1], time
+                x ∈ R, state
+                u ∈ R, control
+                ẋ(t) == u(t)
+                ∫(0.5u(t)^2) → min
+            end
+            CTModels.definition!(pre, def_expr)
+            CTModels.time_dependence!(pre; autonomous=false)
 
-        mayer(x0, xf, v) = 0.0
-        lagrange(t, x, u, v) = 0.0
-        CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+            model = CTModels.build(pre)
 
-        def_expr = quote
-            t ∈ [0, 1], time
-            x ∈ R, state
-            u ∈ R, control
-            ẋ(t) == u(t)
-            ∫(0.5u(t)^2) → min
+            io = IOBuffer()
+            show(io, MIME"text/plain"(), model)
+            s = String(take!(io))
+
+            Test.@test occursin("Abstract definition:", s)
+            Test.@test occursin("optimal control problem is of the form:", s)
         end
-        CTModels.definition!(pre, def_expr)
-        CTModels.time_dependence!(pre; autonomous=false)
 
-        model = CTModels.build(pre)
-
-        io = IOBuffer()
-        show(io, MIME"text/plain"(), model)
-        s = String(take!(io))
-
-        Test.@test occursin("Abstract definition:", s)
-        Test.@test occursin("optimal control problem is of the form:", s)
     end
 end
 

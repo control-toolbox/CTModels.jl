@@ -3,7 +3,8 @@ module TestOCPVariable
 using Test
 using CTBase
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_variable()
     Test.@testset "OCP Variable" verbose = VERBOSE showtiming = SHOWTIMING begin

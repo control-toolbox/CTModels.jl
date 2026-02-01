@@ -4,7 +4,8 @@ using Test
 using CTBase
 using CTModels
 using CTModels.Options
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # ============================================================================
 # Helper types and functions

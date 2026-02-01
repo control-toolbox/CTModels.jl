@@ -2,39 +2,41 @@ module TestTypes
 
 using Test
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_types()
-    # TODO: add tests for src/core/types.jl (type includes and basic consistency).
+    Test.@testset "CTModels.jl type system" begin
 
-    Test.@testset "OCP model and solution core types" verbose=VERBOSE showtiming=SHOWTIMING begin
-        # Abstract/model hierarchy
-        Test.@test isabstracttype(CTModels.AbstractModel)
-        Test.@test CTModels.Model <: CTModels.AbstractModel
-        Test.@test CTModels.PreModel <: CTModels.AbstractModel
+        Test.@testset "OCP model and solution core types" begin
+            # Abstract/model hierarchy
+            Test.@test isabstracttype(CTModels.AbstractModel)
+            Test.@test CTModels.Model <: CTModels.AbstractModel
+            Test.@test CTModels.PreModel <: CTModels.AbstractModel
 
-        # Solution hierarchy
-        Test.@test isabstracttype(CTModels.AbstractSolution)
-        Test.@test CTModels.Solution <: CTModels.AbstractSolution
+            # Solution hierarchy
+            Test.@test isabstracttype(CTModels.AbstractSolution)
+            Test.@test CTModels.Solution <: CTModels.AbstractSolution
 
-        # Time grid and dual/infos hierarchy
-        Test.@test isabstracttype(CTModels.AbstractTimeGridModel)
-        Test.@test CTModels.TimeGridModel <: CTModels.AbstractTimeGridModel
+            # Time grid and dual/infos hierarchy
+            Test.@test isabstracttype(CTModels.AbstractTimeGridModel)
+            Test.@test CTModels.TimeGridModel <: CTModels.AbstractTimeGridModel
 
-        Test.@test isabstracttype(CTModels.AbstractDualModel)
-        Test.@test CTModels.DualModel <: CTModels.AbstractDualModel
+            Test.@test isabstracttype(CTModels.AbstractDualModel)
+            Test.@test CTModels.DualModel <: CTModels.AbstractDualModel
 
-        Test.@test isabstracttype(CTModels.AbstractSolverInfos)
-        Test.@test CTModels.SolverInfos <: CTModels.AbstractSolverInfos
-    end
+            Test.@test isabstracttype(CTModels.AbstractSolverInfos)
+            Test.@test CTModels.SolverInfos <: CTModels.AbstractSolverInfos
+        end
 
-    Test.@testset "Initial guess core types" verbose=VERBOSE showtiming=SHOWTIMING begin
-        Test.@test isabstracttype(CTModels.AbstractOptimalControlInitialGuess)
-        Test.@test CTModels.OptimalControlInitialGuess <:
-            CTModels.AbstractOptimalControlInitialGuess
+        Test.@testset "Initial guess core types" begin
+            Test.@test isabstracttype(CTModels.AbstractOptimalControlInitialGuess)
+            Test.@test CTModels.OptimalControlInitialGuess <:
+                       CTModels.AbstractOptimalControlInitialGuess
 
-        Test.@test isabstracttype(CTModels.AbstractOptimalControlPreInit)
-        Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit
+            Test.@test isabstracttype(CTModels.AbstractOptimalControlPreInit)
+            Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit
+        end
     end
 end
 

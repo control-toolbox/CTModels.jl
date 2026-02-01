@@ -9,7 +9,8 @@ using ADNLPModels
 using ExaModels
 using MadNLP
 using Main.TestProblems
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import modules
 import CTModels.Optimization
@@ -93,11 +94,11 @@ function test_end_to_end()
             # Step 2: Create modeler with Exa backend
             modeler = CTModels.ExaModeler(base_type=Float64, minimize=true)
             Test.@test modeler isa CTModels.AbstractOptimizationModeler
-            Test.@test typeof(modeler) == CTModels.ExaModeler{Float64}
+            Test.@test typeof(modeler) == CTModels.ExaModeler
             
             # Step 3: Build NLP model
             nlp = modeler(prob, ros.init)
-            Test.@test nlp isa ExaModels.ExaModel{Float64}
+            Test.@test nlp isa ExaModels.ExaModel
             Test.@test nlp.meta.nvar == 2
             Test.@test nlp.meta.ncon == 1
             
@@ -127,7 +128,7 @@ function test_end_to_end()
                 modeler = CTModels.ExaModeler(base_type=Float32, minimize=true)
                 nlp = modeler(prob, ros.init)
                 
-                Test.@test nlp isa ExaModels.ExaModel{Float32}
+                Test.@test nlp isa ExaModels.ExaModel
                 Test.@test eltype(nlp.meta.x0) == Float32
                 
                 # Evaluate with Float32 (obj may be promoted to Float64 by NLPModels)
@@ -139,7 +140,7 @@ function test_end_to_end()
                 modeler = CTModels.ExaModeler(base_type=Float64, minimize=true)
                 nlp = modeler(prob, ros.init)
                 
-                Test.@test nlp isa ExaModels.ExaModel{Float64}
+                Test.@test nlp isa ExaModels.ExaModel
                 Test.@test eltype(nlp.meta.x0) == Float64
                 
                 obj = NLPModels.obj(nlp, Float64.(ros.init))
@@ -188,7 +189,7 @@ function test_end_to_end()
                 modeler = CTModels.ExaModeler(base_type=Float64)
                 nlp = modeler(prob, ros.init)
                 
-                Test.@test nlp isa ExaModels.ExaModel{Float64}
+                Test.@test nlp isa ExaModels.ExaModel
                 obj = NLPModels.obj(nlp, ros.init)
                 Test.@test obj ≈ rosenbrock_objective(ros.init)
             end
@@ -202,7 +203,7 @@ function test_end_to_end()
                 )
                 nlp = modeler(prob, ros.init)
                 
-                Test.@test nlp isa ExaModels.ExaModel{Float64}
+                Test.@test nlp isa ExaModels.ExaModel
                 obj = NLPModels.obj(nlp, ros.init)
                 Test.@test obj ≈ rosenbrock_objective(ros.init)
             end

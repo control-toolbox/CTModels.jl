@@ -3,6 +3,8 @@ module TestExceptionOCPIntegration
 using Test
 using CTModels
 using CTModels.Exceptions
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Aliases for convenience
 const OCP = CTModels.PreModel
@@ -19,7 +21,7 @@ Tests for exception integration in OCP components
 Tests that enriched exceptions are properly thrown in OCP workflows
 """
 function test_ocp_exception_integration()
-    @testset "OCP Exception Integration" verbose = true begin
+    @testset "OCP Exception Integration" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "State! Exceptions" begin
             # Test duplicate state definition

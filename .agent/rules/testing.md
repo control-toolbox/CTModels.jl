@@ -1,8 +1,16 @@
 ---
-trigger: code_modification
+trigger: always_on
 ---
 
 # Julia Testing Standards
+
+## 🤖 **Agent Directive**
+
+**When applying this rule, explicitly state**: "🧪 **Applying Testing Rule**: [specific testing principle being applied]"
+
+This ensures transparency about which testing standard is being used and why.
+
+---
 
 This document defines the testing standards for the Control Toolbox project. All Julia code modifications must be accompanied by appropriate tests following these guidelines.
 
@@ -384,20 +392,80 @@ end
 
 ### Performance and Type Stability Tests
 
-For performance-critical code, add type stability tests:
+For performance-critical code, add type stability and allocation tests.
+
+**See also:** `.windsurf/rules/type-stability.md` for comprehensive type stability standards.
+
+#### Type Stability Tests
+
+Type stability is crucial for Julia performance. Test critical functions with `@inferred`:
 
 ```julia
-@testset "Performance" begin
-    @testset "Type stability" begin
-        ocp = create_test_ocp()
-        @test_nowarn @inferred CTModels.state_dimension(ocp)
-    end
+@testset "Type Stability" begin
+    ocp = create_test_ocp()
     
-    @testset "Allocation tests" begin
-        result = @allocated expensive_function(args...)
-        @test result < 1000  # bytes
-    end
+    # Test type stability of critical functions
+    @test_nowarn @inferred CTModels.state_dimension(ocp)
+    @test_nowarn @inferred CTModels.control_dimension(ocp)
+    @test_nowarn @inferred CTModels.variable_dimension(ocp)
+    
+    # Test with different input types
+    @test_nowarn @inferred process_constraint(ocp, :initial)
+    @test_nowarn @inferred process_constraint(ocp, :final)
 end
+```
+
+**Important:** `@inferred` only works on **function calls**, not direct field access:
+
+```julia
+# ❌ WRONG: @inferred on field access
+@inferred ocp.state_dimension  # ERROR!
+
+# ✅ CORRECT: Wrap in a function
+function get_state_dim(ocp)
+    return ocp.state_dimension
+end
+@inferred get_state_dim(ocp)  # ✅ Works
+```
+
+#### Allocation Tests
+
+Test that performance-critical operations don't allocate unnecessarily:
+
+```julia
+@testset "Allocations" begin
+    ocp = create_test_ocp()
+    
+    # Test allocation-free operations
+    allocs = @allocated CTModels.state_dimension(ocp)
+    @test allocs == 0
+    
+    # Test bounded allocations
+    allocs = @allocated CTModels.build_model(ocp)
+    @test allocs < 1000  # bytes
+end
+```
+
+#### When to Test Type Stability
+
+**Must test:**
+- Inner loops and hot paths
+- Numerical computations
+- Solver internals
+- Performance-critical API functions
+
+**Optional:**
+- One-time setup code
+- User-facing convenience functions
+- Error handling paths
+
+#### Debugging Type Instabilities
+
+If `@inferred` fails, use `@code_warntype` to debug:
+
+```julia
+julia> @code_warntype CTModels.problematic_function(args...)
+# Look for red "Any" or yellow warnings
 ```
 
 ## Verification Before Code Changes

@@ -2,7 +2,8 @@ module TestOptionsNotProvided
 
 using Test
 using CTModels.Options
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
     test_not_provided()

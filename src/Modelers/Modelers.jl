@@ -23,6 +23,7 @@ using ..CTModels.Optimization: AbstractOptimizationProblem,
 
 # Include submodules
 include(joinpath(@__DIR__, "abstract_modeler.jl"))
+include(joinpath(@__DIR__, "validation.jl"))
 include(joinpath(@__DIR__, "adnlp_modeler.jl"))
 include(joinpath(@__DIR__, "exa_modeler.jl"))
 

@@ -3,7 +3,8 @@ module TestInitialGuessVariable
 using Test
 using CTModels
 using CTModels.Exceptions
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCPNoVar <: CTModels.AbstractModel end
@@ -28,9 +29,9 @@ CTModels.has_fixed_initial_time(::DummyOCP2DVar) = true
 CTModels.initial_time(::DummyOCP2DVar) = 0.0
 
 function test_initial_guess_variable()
-    Test.@testset "Variable Initial Guess" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Variable Initial Guess" verbose = VERBOSE showtiming = SHOWTIMING begin
         
-        Test.@testset "initial_variable with Scalar" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_variable with Scalar" begin
             ocp_1d = DummyOCP1DVar()
             
             result = CTModels.initial_variable(ocp_1d, 0.5)
@@ -40,7 +41,7 @@ function test_initial_guess_variable()
             Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp_no_var, 0.5)
         end
         
-        Test.@testset "initial_variable with Vector" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_variable with Vector" begin
             ocp = DummyOCP2DVar()
             
             result = CTModels.initial_variable(ocp, [0.0, 1.0])
@@ -49,7 +50,7 @@ function test_initial_guess_variable()
             Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp, [0.0])
         end
         
-        Test.@testset "initial_variable with Nothing" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "initial_variable with Nothing" begin
             ocp_no_var = DummyOCPNoVar()
             result = CTModels.initial_variable(ocp_no_var, nothing)
             Test.@test result == Float64[]
@@ -63,7 +64,7 @@ function test_initial_guess_variable()
             Test.@test result_2d == [0.1, 0.1]
         end
         
-        Test.@testset "variable accessor" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "variable accessor" begin
             ocp = DummyOCP2DVar()
             
             init = CTModels.initial_guess(ocp; variable=[0.0, 1.0])

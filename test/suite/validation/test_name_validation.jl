@@ -5,8 +5,8 @@ using CTBase
 using CTModels
 
 # Get test options if available, otherwise use defaults
-const VERBOSE = get(ENV, "VERBOSE", "false") == "true"
-const SHOWTIMING = get(ENV, "SHOWTIMING", "false") == "true"
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_name_validation()
     Test.@testset "Name Validation Helpers" verbose = VERBOSE showtiming = SHOWTIMING begin

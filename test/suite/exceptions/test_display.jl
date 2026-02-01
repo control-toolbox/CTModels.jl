@@ -3,12 +3,14 @@ module TestExceptionDisplay
 using Test
 using CTModels
 using CTModels.Exceptions
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 """
 Tests for exception display functions (display.jl)
 """
 function test_exception_display()
-    @testset "Exception Display" verbose = true begin
+    @testset "Exception Display" verbose = VERBOSE showtiming = SHOWTIMING begin
         
         @testset "IncorrectArgument - User-Friendly Display" begin
             io = IOBuffer()

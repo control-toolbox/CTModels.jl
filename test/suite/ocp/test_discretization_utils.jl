@@ -2,10 +2,11 @@ module TestDiscretizationUtils
 
 using Test
 using CTModels
-using Main.TestOptions: VERBOSE, SHOWTIMING
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_discretization_utils()
-    @testset "Discretization utilities" verbose = VERBOSE showtiming = SHOWTIMING begin
+    @testset "Discretization utilities" begin
         
         @testset "Basic discretization - scalar function" verbose = VERBOSE showtiming = SHOWTIMING begin
             # Fonction scalaire simple
@@ -22,7 +23,7 @@ function test_discretization_utils()
             @test result_auto ≈ result
         end
         
-        @testset "Basic discretization - vector function" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Basic discretization - vector function" begin
             # Fonction vectorielle
             f_vec = t -> [t, 2*t]
             T = [0.0, 0.5, 1.0]
@@ -37,7 +38,7 @@ function test_discretization_utils()
             @test result_auto ≈ result
         end
         
-        @testset "TimeGridModel support" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "TimeGridModel support" begin
             # Test avec TimeGridModel
             T_grid = CTModels.TimeGridModel(LinRange(0.0, 1.0, 5))
             f = t -> [t, t^2]
@@ -48,7 +49,7 @@ function test_discretization_utils()
             @test result[end, :] ≈ [1.0, 1.0]
         end
         
-        @testset "Discretize dual - nothing handling" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Discretize dual - nothing handling" begin
             T = [0.0, 0.5, 1.0]
             
             # Dual function is nothing
@@ -67,7 +68,7 @@ function test_discretization_utils()
             @test result_auto ≈ result_func
         end
         
-        @testset "Edge cases" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Edge cases" begin
             # Single time point
             f = t -> [t, 2*t]
             T_single = [0.5]
@@ -84,7 +85,7 @@ function test_discretization_utils()
             @test result[2, :] ≈ ones(10)
         end
         
-        @testset "Scalar return from vector function" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Scalar return from vector function" begin
             # Fonction retourne vecteur mais on veut dim=1
             f = t -> [2.0 * t]  # Retourne vecteur de taille 1
             T = [0.0, 0.5, 1.0]
