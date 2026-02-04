@@ -69,11 +69,6 @@ module CTModels
 # FOUNDATIONAL TYPES AND UTILITIES
 # ============================================================================ #
 
-# Exceptions module - enhanced error handling system (must load first)
-include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
-using .Exceptions
-import .Exceptions: set_show_full_stacktrace!, get_show_full_stacktrace
-
 # Utils module - must load before OCP (uses @ensure macro)
 include(joinpath(@__DIR__, "Utils", "Utils.jl"))
 using .Utils
