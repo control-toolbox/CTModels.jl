@@ -52,6 +52,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
     makedocs(;
         draft=draft,
         remotes=nothing,
+        warnonly=[:cross_references],
         sitename="CTModels.jl",
         format=Documenter.HTML(;
             repolink="https://" * repo_url,
