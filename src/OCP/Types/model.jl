@@ -6,10 +6,10 @@ $(TYPEDEF)
 
 Abstract base type for optimal control problem models.
 
-Subtypes represent either a fully built immutable model ([`Model`](@ref CTModels.Model)) or a
+Subtypes represent either a fully built immutable model ([`Model`](@ref CTModels.OCP.Model)) or a
 mutable model under construction ([`PreModel`](@ref)).
 
-See also: [`Model`](@ref CTModels.Model), [`PreModel`](@ref).
+See also: [`Model`](@ref CTModels.OCP.Model), [`PreModel`](@ref).
 """
 abstract type AbstractModel end
 
@@ -102,49 +102,49 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since times are always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since times are always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_times_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since state is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since state is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_state_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since control is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since control is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_control_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since variable is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since variable is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_variable_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since dynamics is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since dynamics is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_dynamics_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since objective is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since objective is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_objective_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since definition is always set in a built [`Model`](@ref CTModels.Model).
+Return `true` since definition is always set in a built [`Model`](@ref CTModels.OCP.Model).
 """
 __is_definition_set(ocp::Model)::Bool = true
 
@@ -154,7 +154,7 @@ $(TYPEDEF)
 Mutable optimal control problem model under construction.
 
 A `PreModel` is used to incrementally define an optimal control problem before
-building it into an immutable [`Model`](@ref CTModels.Model). Fields can be set in any order
+building it into an immutable [`Model`](@ref CTModels.OCP.Model). Fields can be set in any order
 and the model is validated before building.
 
 # Fields

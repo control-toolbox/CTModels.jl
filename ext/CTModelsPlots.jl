@@ -17,4 +17,6 @@ include("plot_utils.jl")
 include("plot_default.jl")
 include("plot.jl")
 
+export plot, plot!
+
 end

@@ -26,22 +26,14 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         Symbol("@pack_PreModel!"),
         Symbol("@unpack_PreModel"),
         :is_empty,
+        :time_ns,
     ]
 
+    CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
+    CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
+    CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
+
     pages = [
-        # ───────────────────────────────────────────────────────────────────
-        # CTModels (main module)
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[CTModels => src("CTModels.jl")],
-            exclude=EXCLUDE_SYMBOLS,
-            public=false,
-            private=true,
-            title="CTModels",
-            title_in_menu="CTModels",
-            filename="api_ctmodels",
-        ),
         # ───────────────────────────────────────────────────────────────────
         # Utils
         # ───────────────────────────────────────────────────────────────────
@@ -161,12 +153,19 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("Display", "Display.jl"),
                     joinpath("Display", "print.jl"),
                 ),
+                CTModelsPlots => ext(
+                    "CTModelsPlots.jl",
+                    "plot.jl",
+                    "plot_utils.jl",
+                    "plot_default.jl",
+                ),
             ],
+            external_modules_to_document=[Plots],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="Display",
-            title_in_menu="Display",
+            title="Display, Plots",
+            title_in_menu="Display, Plots",
             filename="api_display",
         ),
         # ───────────────────────────────────────────────────────────────────
@@ -180,12 +179,14 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("Serialization", "export_import.jl"),
                     joinpath("Serialization", "types.jl"),
                 ),
+                CTModelsJSON => ext("CTModelsJSON.jl"),
+                CTModelsJLD => ext("CTModelsJLD.jl"),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="Serialization",
-            title_in_menu="Serialization",
+            title="Serialization, JSON & JLD2",
+            title_in_menu="Serialization, JSON & JLD2",
             filename="api_serialization",
         ),
         # ───────────────────────────────────────────────────────────────────
@@ -219,75 +220,111 @@ function generate_api_reference(src_dir::String, ext_dir::String)
     # Extensions (conditional)
     # ───────────────────────────────────────────────────────────────────
     
-    # CTModelsPlots extension
-    CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
-    if !isnothing(CTModelsPlots)
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory=".",
-                primary_modules=[
-                    CTModelsPlots => ext("plot.jl", "plot_utils.jl", "plot_default.jl")
-                ],
-                external_modules_to_document=[CTModels],
-                exclude=EXCLUDE_SYMBOLS,
-                public=true,
-                private=true,
-                title="CTModelsPlots",
-                title_in_menu="Plots Extension",
-                filename="api_plots_extension",
-            ),
-        )
-    end
+    # # CTModelsPlots extension
+    # CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
+    # if !isnothing(CTModelsPlots)
+    #     push!(
+    #         pages,
+    #         CTBase.automatic_reference_documentation(;
+    #             subdirectory=".",
+    #             primary_modules=[
+    #                 CTModelsPlots => ext("plot.jl", "plot_utils.jl", "plot_default.jl")
+    #             ],
+    #             external_modules_to_document=[CTModels],
+    #             exclude=EXCLUDE_SYMBOLS,
+    #             public=true,
+    #             private=true,
+    #             title="CTModelsPlots",
+    #             title_in_menu="Plots Extension",
+    #             filename="api_plots_extension",
+    #         ),
+    #     )
+    # end
 
-    # CTModelsJSON extension
-    CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
-    if !isnothing(CTModelsJSON)
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory=".",
-                primary_modules=[CTModelsJSON => ext("CTModelsJSON.jl")],
-                external_modules_to_document=[CTModels],
-                exclude=EXCLUDE_SYMBOLS,
-                public=true,
-                private=true,
-                title="CTModelsJSON",
-                title_in_menu="JSON Extension",
-                filename="api_json_extension",
-            ),
-        )
-    end
+    # # CTModelsJSON extension
+    # CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
+    # if !isnothing(CTModelsJSON)
+    #     push!(
+    #         pages,
+    #         CTBase.automatic_reference_documentation(;
+    #             subdirectory=".",
+    #             primary_modules=[CTModelsJSON => ext("CTModelsJSON.jl")],
+    #             external_modules_to_document=[CTModels],
+    #             exclude=EXCLUDE_SYMBOLS,
+    #             public=true,
+    #             private=true,
+    #             title="CTModelsJSON",
+    #             title_in_menu="JSON Extension",
+    #             filename="api_json_extension",
+    #         ),
+    #     )
+    # end
 
-    # CTModelsJLD extension
-    CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
-    if !isnothing(CTModelsJLD)
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory=".",
-                primary_modules=[CTModelsJLD => ext("CTModelsJLD.jl")],
-                external_modules_to_document=[CTModels],
-                exclude=EXCLUDE_SYMBOLS,
-                public=true,
-                private=true,
-                title="CTModelsJLD",
-                title_in_menu="JLD2 Extension",
-                filename="api_jld_extension",
-            ),
-        )
-    end
+    # # CTModelsJLD extension
+    # CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
+    # if !isnothing(CTModelsJLD)
+    #     push!(
+    #         pages,
+    #         CTBase.automatic_reference_documentation(;
+    #             subdirectory=".",
+    #             primary_modules=[CTModelsJLD => ext("CTModelsJLD.jl")],
+    #             external_modules_to_document=[CTModels],
+    #             exclude=EXCLUDE_SYMBOLS,
+    #             public=true,
+    #             private=true,
+    #             title="CTModelsJLD",
+    #             title_in_menu="JLD2 Extension",
+    #             filename="api_jld_extension",
+    #         ),
+    #     )
+    # end
 
     return pages
 end
 
 """
-    with_api_reference(f, src_dir::String, ext_dir::String)
+    with_api_reference(f::Function, src_dir::String, ext_dir::String)
 
-Execute function `f` with the generated API reference pages.
-This is a helper function to be used in make.jl.
+Generates the API reference, executes `f(pages)`, and cleans up generated files.
 """
-function with_api_reference(f, src_dir::String, ext_dir::String)
-    api_pages = generate_api_reference(src_dir, ext_dir)
-    return f(api_pages)
+function with_api_reference(f::Function, src_dir::String, ext_dir::String)
+    pages = generate_api_reference(src_dir, ext_dir)
+    try
+        f(pages)
+    finally
+        # Clean up generated files
+        # The pages are Pairs: "Title" => "filename.md" (relative to build? no, relative to src)
+        # automatic_reference_documentation returns "filename" which is relative to docs/src if subdirectory="."
+
+        # We need to reconstruct the full path to delete them.
+        # Assuming they are in docs/src (which is where makedocs runs from?)
+        # Wait, makedocs options say subdirectory=".". 
+        # Typically automatic_reference_documentation writes to joinpath(@__DIR__, "src", subdirectory, filename.md) ??
+        # I need to check where automatic_reference_documentation writes.
+        # Assuming we are running from docs/ (where make.jl is).
+
+        # Let's assume the files are in `docs/src`.
+        docs_src = abspath(joinpath(@__DIR__, "src"))
+
+        function cleanup_pages(pages)
+            for p in pages
+                content = last(p)
+                if content isa AbstractString
+                    # file path
+                    filename = content
+                    fname = endswith(filename, ".md") ? filename : filename * ".md"
+                    full_path = joinpath(docs_src, fname)
+                    if isfile(full_path)
+                        rm(full_path)
+                        println("Removed temporary API doc: $full_path")
+                    end
+                elseif content isa Vector
+                    # nested pages
+                    cleanup_pages(content)
+                end
+            end
+        end
+
+        cleanup_pages(pages)
+    end
 end

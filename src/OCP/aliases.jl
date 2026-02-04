@@ -26,7 +26,7 @@ Type alias for a time.
 julia> const Time = ctNumber
 ```
 
-See also: [`ctNumber`](@ref), [`Times`](@ref CTModels.Times), [`TimesDisc`](@ref).
+See also: [`ctNumber`](@ref), [`Times`](@ref CTModels.OCP.Times), [`TimesDisc`](@ref).
 """
 const Time = ctNumber
 
@@ -59,7 +59,7 @@ Type alias for a grid of times. This is used to define a discretization of time 
 julia> const TimesDisc = Union{Times, StepRangeLen}
 ```
 
-See also: [`Time`](@ref), [`Times`](@ref CTModels.Times).
+See also: [`Time`](@ref), [`Times`](@ref CTModels.OCP.Times).
 """
 const TimesDisc = Union{Times,StepRangeLen}
 
@@ -70,7 +70,7 @@ Type alias for a dictionary of constraints. This is used to store constraints be
 julia> const TimesDisc = Union{Times, StepRangeLen}
 ```
 
-See also: [`ConstraintsModel`](@ref), [`PreModel`](@ref) and [`Model`](@ref CTModels.Model).
+See also: [`ConstraintsModel`](@ref), [`PreModel`](@ref) and [`Model`](@ref CTModels.OCP.Model).
 """
 const ConstraintsDictType = OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}

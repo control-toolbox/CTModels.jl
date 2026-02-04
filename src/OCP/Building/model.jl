@@ -357,6 +357,43 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     return model
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a complete optimal control problem model from a pre-model.
+
+This function is an alias for `build(pre_ocp; build_examodel=build_examodel)` and constructs
+a fully validated `Model` from a `PreModel` by extracting and organizing all components
+(times, state, control, variable, dynamics, objective, constraints).
+
+# Arguments
+- `pre_ocp::PreModel`: The pre-model containing all problem components
+- `build_examodel=nothing`: Optional ExaModel builder function for GPU acceleration
+
+# Returns
+- `Model`: A complete, validated optimal control problem model
+
+# Throws
+- `Exceptions.PreconditionError`: If time dependence has not been set via `time_dependence!`
+
+# Example
+```julia
+using CTModels
+
+# Create and configure a pre-model
+pre_ocp = PreModel()
+time_dependence!(pre_ocp, autonomous=true)
+state!(pre_ocp, 2)
+control!(pre_ocp, 1)
+dynamics!(pre_ocp, (x, u) -> [x[2], u[1]])
+objective!(pre_ocp, :mayer, (x0, xf) -> xf[1]^2)
+
+# Build the model
+ocp = build_model(pre_ocp)
+```
+
+See also: [`build`](@ref), [`PreModel`](@ref), [`Model`](@ref), [`time_dependence!`](@ref)
+"""
 function build_model(pre_ocp::PreModel; build_examodel=nothing)::Model
     return build(pre_ocp; build_examodel=build_examodel)
 end
