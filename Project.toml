@@ -50,7 +50,7 @@ test = [
 [compat]
 ADNLPModels = "0.8"
 Aqua = "0.8"
-CTBase = "0.16, 0.17"
+CTBase = "0.18"
 DocStringExtensions = "0.9"
 ExaModels = "0.9"
 Interpolations = "0.16"

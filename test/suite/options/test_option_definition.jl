@@ -1,8 +1,8 @@
 module TestOptionsOptionDefinition
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTBase
 using CTModels.Options
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -85,7 +85,7 @@ function test_option_definition()
             )
             
             # Invalid default value type
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionDefinition(
+            Test.@test_throws Exceptions.IncorrectArgument Options.OptionDefinition(
                 name = :test,
                 type = Int,
                 default = "not an int",

@@ -89,7 +89,7 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         if e isa MethodError
             throw(Exceptions.NotImplemented(
                 "Strategy ID method not implemented",
-                type_info="$T",
+                required_method="id(::Type{<:$T})",
                 context="validate_strategy_contract - checking id() method availability",
                 suggestion="Implement id(::Type{<:$T}) returning a Symbol for your strategy"
             ))
@@ -114,7 +114,7 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         if e isa MethodError
             throw(Exceptions.NotImplemented(
                 "Strategy metadata method not implemented",
-                type_info="$T",
+                required_method="metadata(::Type{<:$T})",
                 context="validate_strategy_contract - checking metadata() method availability",
                 suggestion="Implement metadata(::Type{<:$T}) returning a StrategyMetadata for your strategy"
             ))
@@ -140,7 +140,7 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         if e isa MethodError
             throw(Exceptions.NotImplemented(
                 "Strategy options builder not available",
-                type_info="$T",
+                required_method="build_strategy_options(::Type{<:$T})",
                 context="validate_strategy_contract - checking build_strategy_options() method availability",
                 suggestion="Ensure build_strategy_options() is available for strategy type $T (usually provided by Options API)"
             ))
@@ -156,7 +156,7 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         if e isa MethodError
             throw(Exceptions.NotImplemented(
                 "Default constructor not implemented",
-                type_info="$T",
+                required_method="$T(; kwargs...)",
                 context="validate_strategy_contract - checking default constructor availability",
                 suggestion="Implement default constructor $T(; kwargs...) that uses build_strategy_options"
             ))
@@ -182,7 +182,7 @@ function validate_strategy_contract(strategy_type::Type{T}) where {T<:AbstractSt
         if e isa MethodError
             throw(Exceptions.NotImplemented(
                 "Instance options method not implemented",
-                type_info="$T",
+                required_method="options(instance::$T)",
                 context="validate_strategy_contract - checking options() method availability",
                 suggestion="Implement options(instance::T) returning the StrategyOptions for your strategy"
             ))

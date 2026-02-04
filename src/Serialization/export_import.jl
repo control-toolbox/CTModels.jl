@@ -3,19 +3,19 @@
 # -----------------------------
 # to be extended by extensions
 function export_ocp_solution(::JLD2Tag, ::AbstractSolution; filename::String)
-    throw(CTModels.Exceptions.IncorrectArgument(:JLD2))
+    throw(Exceptions.ExtensionError(:JLD2; message="to export solutions to JLD2 format"))
 end
 
 function import_ocp_solution(::JLD2Tag, ::AbstractModel; filename::String)
-    throw(CTModels.Exceptions.IncorrectArgument(:JLD2))
+    throw(Exceptions.ExtensionError(:JLD2; message="to import solutions from JLD2 format"))
 end
 
 function export_ocp_solution(::JSON3Tag, ::AbstractSolution; filename::String)
-    throw(CTModels.Exceptions.IncorrectArgument(:JSON))
+    throw(Exceptions.ExtensionError(:JSON3; message="to export solutions to JSON format"))
 end
 
 function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
-    throw(CTModels.Exceptions.IncorrectArgument(:JSON))
+    throw(Exceptions.ExtensionError(:JSON3; message="to import solutions from JSON format"))
 end
 
 """

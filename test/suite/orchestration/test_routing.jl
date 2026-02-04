@@ -1,11 +1,11 @@
 module TestOrchestrationRouting
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.Orchestration
 using CTModels.Strategies
 using CTModels.Options
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -183,7 +183,7 @@ function test_routing()
         Test.@testset "Error on unknown option" begin
             kwargs = (unknown_option = 123,)
             
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Orchestration.route_all_options(
+            Test.@test_throws Exceptions.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -199,7 +199,7 @@ function test_routing()
         Test.@testset "Error on ambiguous option" begin
             kwargs = (backend = :sparse,)  # No disambiguation
             
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Orchestration.route_all_options(
+            Test.@test_throws Exceptions.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,
@@ -216,7 +216,7 @@ function test_routing()
             # Try to route max_iter to modeler (wrong family)
             kwargs = (max_iter = (1000, :adnlp),)
             
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Orchestration.route_all_options(
+            Test.@test_throws Exceptions.IncorrectArgument Orchestration.route_all_options(
                 ROUTING_METHOD,
                 ROUTING_FAMILIES,
                 ROUTING_ACTION_DEFS,

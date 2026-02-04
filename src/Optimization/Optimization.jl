@@ -8,11 +8,10 @@
 
 module Optimization
 
-using CTBase: CTBase
+using CTBase: CTBase, Exceptions
 using DocStringExtensions
 using NLPModels
 using SolverCore
-using ..CTModels.Exceptions
 
 # Include submodules
 include(joinpath(@__DIR__, "abstract_types.jl"))

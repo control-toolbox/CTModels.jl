@@ -1,8 +1,8 @@
 module TestOptionsValue
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTBase
 using CTModels.Options
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -36,9 +36,9 @@ function test_options_value()
         # Test OptionValue validation
         Test.@testset "OptionValue validation" begin
             # Test invalid sources
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :invalid)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :wrong)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Options.OptionValue(42, :DEFAULT)  # case sensitive
+            Test.@test_throws Exceptions.IncorrectArgument Options.OptionValue(42, :invalid)
+            Test.@test_throws Exceptions.IncorrectArgument Options.OptionValue(42, :wrong)
+            Test.@test_throws Exceptions.IncorrectArgument Options.OptionValue(42, :DEFAULT)  # case sensitive
         end
         
         # Test OptionValue display

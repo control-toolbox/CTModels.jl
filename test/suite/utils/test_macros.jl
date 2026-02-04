@@ -74,7 +74,7 @@ function test_macros()
             catch e
                 Test.@test e isa CTBase.IncorrectArgument
                 # CTBase.IncorrectArgument stores the message in var field
-                Test.@test e.var == "x must be positive"
+                Test.@test e.msg == "x must be positive"
             end
         end
         

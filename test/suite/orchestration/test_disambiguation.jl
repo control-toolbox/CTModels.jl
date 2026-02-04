@@ -1,11 +1,11 @@
 module TestOrchestrationDisambiguation
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.Orchestration
 using CTModels.Strategies
 using CTModels.Options
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -97,13 +97,13 @@ function test_disambiguation()
             Test.@test result[2] == (:cpu, :ipopt)
             
             # Invalid strategy ID in single disambiguation
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Orchestration.extract_strategy_ids(
+            Test.@test_throws Exceptions.IncorrectArgument Orchestration.extract_strategy_ids(
                 (:sparse, :unknown),
                 TEST_METHOD
             )
             
             # Invalid strategy ID in multi disambiguation
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument Orchestration.extract_strategy_ids(
+            Test.@test_throws Exceptions.IncorrectArgument Orchestration.extract_strategy_ids(
                 ((:sparse, :adnlp), (:cpu, :unknown)),
                 TEST_METHOD
             )

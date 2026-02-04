@@ -6,6 +6,7 @@ using MLStyle: MLStyle
 
 #
 using CTBase
+using CTBase: Exceptions
 using CTModels
 using LinearAlgebra
 using Plots # redefine plot, plot!

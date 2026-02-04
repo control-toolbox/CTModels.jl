@@ -1,7 +1,7 @@
 module TestNameValidation
 
 using Test
-using CTBase
+using CTBase: CTBase, Exceptions
 using CTModels
 
 # Get test options if available, otherwise use defaults
@@ -98,15 +98,15 @@ function test_name_validation()
         @testset "__validate_name_uniqueness" begin
             # Valid case - empty model
             ocp = CTModels.PreModel()
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "", ["x"], :state)
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "", ["x"], :state)
             
             # Empty component
             ocp = CTModels.PreModel()
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", [""], :state)
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", [""], :state)
             
             # Name in components (multiple components) - should fail
             ocp = CTModels.PreModel()
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["x", "y"], :state)
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["x", "y"], :state)
             
             # Name == component (single component) - should PASS (default behavior)
             ocp = CTModels.PreModel()
@@ -114,13 +114,13 @@ function test_name_validation()
             
             # Duplicate components
             ocp = CTModels.PreModel()
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["y", "y"], :state)
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["y", "y"], :state)
             
             # Error: conflict with existing names
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "u", ["x₁"], :state)  # name conflicts
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["u"], :state)  # component conflicts
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "u", ["x₁"], :state)  # name conflicts
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["u"], :state)  # component conflicts
             
             # Complex scenario - all components set
             ocp = CTModels.PreModel()
@@ -130,12 +130,12 @@ function test_name_validation()
             CTModels.variable!(ocp, 1, "v")
             
             # All these should throw
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "t", ["y₁"], :state)  # conflicts with time
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["y₁"], :control)  # conflicts with state
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "u", ["y₁"], :variable)  # conflicts with control
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "v", ["y₁"], :state)  # conflicts with variable
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["x₁"], :control)  # conflicts with state component
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x₁", ["y"], :control)  # conflicts with state component
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "t", ["y₁"], :state)  # conflicts with time
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["y₁"], :control)  # conflicts with state
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "u", ["y₁"], :variable)  # conflicts with control
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "v", ["y₁"], :state)  # conflicts with variable
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["x₁"], :control)  # conflicts with state component
+            @test_throws Exceptions.IncorrectArgument CTModels.OCP.__validate_name_uniqueness(ocp, "x₁", ["y"], :control)  # conflicts with state component
             
             # Valid case with exclude_component
             @test_nowarn CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["y₁", "y₂"], :state)  # exclude state, no conflicts

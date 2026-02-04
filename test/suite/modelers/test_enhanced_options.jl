@@ -9,13 +9,13 @@
 module TestEnhancedOptions
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Import the specific types we need
 using CTModels.Modelers: ADNLPModeler, ExaModeler
-using CTModels.Exceptions
 using KernelAbstractions: CPU
 using CTModels.Strategies: options
 
@@ -211,10 +211,10 @@ function test_enhanced_options()
             @testset "Backend Override Type Validation" begin
                 # Invalid types should throw enriched exceptions (redirect stderr to hide error logs)
                 redirect_stderr(devnull) do
-                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(gradient_backend="invalid")
-                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(hprod_backend=123)
-                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(jprod_backend=:invalid)
-                    @test_throws CTModels.Exceptions.IncorrectArgument ADNLPModeler(ghjvprod_backend="invalid")
+                    @test_throws Exceptions.IncorrectArgument ADNLPModeler(gradient_backend="invalid")
+                    @test_throws Exceptions.IncorrectArgument ADNLPModeler(hprod_backend=123)
+                    @test_throws Exceptions.IncorrectArgument ADNLPModeler(jprod_backend=:invalid)
+                    @test_throws Exceptions.IncorrectArgument ADNLPModeler(ghjvprod_backend="invalid")
                 end
             end
 

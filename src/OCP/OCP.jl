@@ -29,7 +29,7 @@ See also: [`CTModels`](@ref)
 module OCP
 
 using DocStringExtensions
-using CTBase
+using CTBase: CTBase, Exceptions
 using MLStyle: MLStyle
 using MacroTools
 using Parameters
@@ -41,10 +41,6 @@ include("aliases.jl")
 
 # Import macro from Utils module
 import ..Utils: @ensure
-
-# Import Exceptions module for error handling
-import ..Exceptions
-using ..CTModels.Exceptions
 
 # Import build_solution from Optimization to overload it
 import ..Optimization: build_solution, build_model

@@ -1,8 +1,8 @@
 module TestInitialGuessBuilders
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 

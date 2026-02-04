@@ -145,7 +145,7 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
             )
         else
             throw(
-                Exceptions.UnauthorizedCall(
+                Exceptions.IncorrectArgument(
                     "Unknown constraint type",
                     got="constraint type $type for label $label",
                     expected="one of :state, :control, :variable, :boundary, :path",
@@ -277,49 +277,49 @@ julia> model = build(pre_ocp)
 ```
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
-    @ensure __is_times_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(
         "Times must be set before building model",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(pre_ocp, t0, tf) or times!(pre_ocp, N) before building",
         context="build function - times validation"
     )
-    @ensure __is_state_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_state_set(pre_ocp) Exceptions.PreconditionError(
         "State must be set before building model",
         reason="state has not been defined yet",
         suggestion="Call state!(pre_ocp, dimension) before building",
         context="build function - state validation"
     )
-    @ensure __is_control_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_control_set(pre_ocp) Exceptions.PreconditionError(
         "Control must be set before building model",
         reason="control has not been defined yet",
         suggestion="Call control!(pre_ocp, dimension) before building",
         context="build function - control validation"
     )
-    @ensure __is_dynamics_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_dynamics_set(pre_ocp) Exceptions.PreconditionError(
         "Dynamics must be set before building model",
         reason="dynamics have not been defined yet",
         suggestion="Call dynamics!(pre_ocp, f) or partial_dynamics! before building",
         context="build function - dynamics validation"
     )
-    @ensure __is_dynamics_complete(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_dynamics_complete(pre_ocp) Exceptions.PreconditionError(
         "Dynamics must be complete before building model",
         reason="not all state components are covered by dynamics",
         suggestion="Complete dynamics definition with partial_dynamics! or use full dynamics!",
         context="build function - dynamics completeness validation"
     )
-    @ensure __is_objective_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_objective_set(pre_ocp) Exceptions.PreconditionError(
         "Objective must be set before building model",
         reason="objective has not been defined yet",
         suggestion="Call objective!(pre_ocp, ...) before building",
         context="build function - objective validation"
     )
-    @ensure __is_definition_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_definition_set(pre_ocp) Exceptions.PreconditionError(
         "Definition must be set before building model",
         reason="definition has not been set yet",
         suggestion="Call definition!(pre_ocp) before building",
         context="build function - definition validation"
     )
-    @ensure __is_autonomous_set(pre_ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_autonomous_set(pre_ocp) Exceptions.PreconditionError(
         "Time dependence must be set before building model",
         reason="autonomous status has not been defined yet",
         suggestion="Call time_dependence!(pre_ocp, autonomous=true/false) before building",
@@ -594,7 +594,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access.
 """
 function initial_time(ocp::AbstractModel)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot get initial time with this function",
         reason="This model type does not support direct initial time access",
         suggestion="Use initial_time(ocp) on a Model with FixedTimeModel or use initial_time(ocp, variable) for variable initial time",
@@ -608,7 +608,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access with variable.
 """
 function initial_time(ocp::AbstractModel, variable::AbstractVector)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot get initial time with this function",
         reason="This model type does not support initial time access with variable",
         suggestion="Ensure the model has variable initial time configured, or use initial_time(ocp) for fixed initial time",
@@ -715,7 +715,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access.
 """
 function final_time(ocp::AbstractModel)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot get final time with this function",
         reason="This model type does not support direct final time access",
         suggestion="Use final_time(ocp) on a Model with FixedTimeModel or use final_time(ocp, variable) for variable final time",
@@ -729,7 +729,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access with variable.
 """
 function final_time(ocp::AbstractModel, variable::AbstractVector)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot get final time with this function",
         reason="This model type does not support final time access with variable",
         suggestion="Ensure the model has variable final time configured, or use final_time(ocp) for fixed final time",
@@ -867,7 +867,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Mayer cost on a model without one.
 """
 function mayer(ocp::AbstractModel)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot access Mayer cost",
         reason="This OCP has no Mayer objective defined",
         suggestion="Define a Mayer objective using objective!(ocp, :min/:max, mayer=...) before accessing it",
@@ -933,7 +933,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Lagrange cost on a model without one.
 """
 function lagrange(ocp::AbstractModel)
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot access Lagrange cost",
         reason="This OCP has no Lagrange objective defined",
         suggestion="Define a Lagrange objective using objective!(ocp, :min/:max, lagrange=...) before accessing it",
@@ -1039,7 +1039,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return an error (UnauthorizedCall) since the model is not built with the :exa backend.
+Return an error (PreconditionError) since the model is not built with the :exa backend.
 """
 function get_build_examodel(
     ::Model{
@@ -1054,7 +1054,7 @@ function get_build_examodel(
         <:Nothing,
     },
 )
-    throw(CTModels.Exceptions.UnauthorizedCall(
+    throw(Exceptions.PreconditionError(
         "Cannot access dynamics",
         reason="Model must be parsed with :exa backend first",
         suggestion="Parse the OCP with backend=:exa before accessing dynamics",

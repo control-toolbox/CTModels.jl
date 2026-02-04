@@ -292,7 +292,7 @@ ERROR: IncorrectArgument: Backend override must be a Type or nothing
 """
 function validate_backend_override(backend)
     if backend !== nothing && !isa(backend, Type)
-        throw(IncorrectArgument(
+        throw(Exceptions.IncorrectArgument(
             "Backend override must be a Type or nothing",
             got=string(typeof(backend)),
             expected="Type or nothing",

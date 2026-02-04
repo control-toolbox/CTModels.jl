@@ -24,7 +24,7 @@ See also: [`CTModels`](@ref)
 module InitialGuess
 
 using DocStringExtensions
-using CTBase
+using CTBase: CTBase, Exceptions
 
 # Import types and aliases from OCP module
 import ..OCP: AbstractModel, AbstractSolution
@@ -41,9 +41,6 @@ import ..OCP: has_free_initial_time, has_free_final_time
 
 # Import utilities from Utils module
 import ..Utils: ctinterpolate, matrix2vec
-
-# Import exceptions
-import ..Exceptions
 
 # Load types first
 include("types.jl")

@@ -1,10 +1,11 @@
 module TestStrategiesMetadata
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.Strategies
 using CTModels.Options
-using CTBase
+
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -72,7 +73,7 @@ function test_metadata()
         # ========================================================================
         
         Test.@testset "Duplicate detection" begin
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.StrategyMetadata(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Strategies.StrategyMetadata(
                 CTModels.Options.OptionDefinition(
                     name = :max_iter,
                     type = Int,

@@ -1,8 +1,8 @@
 module TestInitialGuessAPI
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 using Main.TestProblems
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -182,13 +182,13 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # Unsupported type should throw
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, 42
             )
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, "invalid"
             )
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, [1, 2, 3]
             )
         end

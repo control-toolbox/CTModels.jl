@@ -37,7 +37,7 @@ ADNLPModel(...)
 function get_adnlp_model_builder(prob::AbstractOptimizationProblem)
     throw(Exceptions.NotImplemented(
         "ADNLP model builder not implemented",
-        type_info="get_adnlp_model_builder not implemented for $(typeof(prob))",
+        required_method="get_adnlp_model_builder(prob::$(typeof(prob)))",
         suggestion="Implement get_adnlp_model_builder for $(typeof(prob)) to support ADNLPModels backend",
         context="AbstractOptimizationProblem.get_adnlp_model_builder - required method implementation"
     ))
@@ -74,7 +74,7 @@ ExaModel{Float64}(...)
 function get_exa_model_builder(prob::AbstractOptimizationProblem)
     throw(Exceptions.NotImplemented(
         "ExaModel builder not implemented",
-        type_info="get_exa_model_builder not implemented for $(typeof(prob))",
+        required_method="get_exa_model_builder(prob::$(typeof(prob)))",
         suggestion="Implement get_exa_model_builder for $(typeof(prob)) to support ExaModels backend",
         context="AbstractOptimizationProblem.get_exa_model_builder - required method implementation"
     ))
@@ -111,7 +111,7 @@ OptimalControlSolution(...)
 function get_adnlp_solution_builder(prob::AbstractOptimizationProblem)
     throw(Exceptions.NotImplemented(
         "ADNLP solution builder not implemented",
-        type_info="get_adnlp_solution_builder not implemented for $(typeof(prob))",
+        required_method="get_adnlp_solution_builder(prob::$(typeof(prob)))",
         suggestion="Implement get_adnlp_solution_builder for $(typeof(prob)) to support ADNLPModels backend",
         context="AbstractOptimizationProblem.get_adnlp_solution_builder - required method implementation"
     ))
@@ -148,7 +148,7 @@ OptimalControlSolution(...)
 function get_exa_solution_builder(prob::AbstractOptimizationProblem)
     throw(Exceptions.NotImplemented(
         "ExaSolution builder not implemented",
-        type_info="get_exa_solution_builder not implemented for $(typeof(prob))",
+        required_method="get_exa_solution_builder(prob::$(typeof(prob)))",
         suggestion="Implement get_exa_solution_builder for $(typeof(prob)) to support ExaModels backend",
         context="AbstractOptimizationProblem.get_exa_solution_builder - required method implementation"
     ))

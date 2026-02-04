@@ -1,10 +1,10 @@
 module TestStrategiesAbstractStrategy
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.Strategies
 using CTModels.Options
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -113,12 +113,12 @@ function test_abstract_strategy()
             
             Test.@testset "Error handling" begin
                 # Test NotImplemented errors for unimplemented methods
-                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.id(UnimplementedStrategy)
-                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.metadata(UnimplementedStrategy)
+                Test.@test_throws Exceptions.NotImplemented CTModels.Strategies.id(UnimplementedStrategy)
+                Test.@test_throws Exceptions.NotImplemented CTModels.Strategies.metadata(UnimplementedStrategy)
                 
                 # Test options error for strategy without options field
                 incomplete_strategy = IncompleteStrategy()
-                Test.@test_throws CTModels.Exceptions.NotImplemented CTModels.Strategies.options(incomplete_strategy)
+                Test.@test_throws Exceptions.NotImplemented CTModels.Strategies.options(incomplete_strategy)
             end
         end
         

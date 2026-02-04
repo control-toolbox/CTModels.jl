@@ -1,10 +1,11 @@
 module TestStrategiesBuilders
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.Strategies
 using CTModels.Options
-using CTBase
+
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -161,7 +162,7 @@ function test_builders()
             Test.@test CTModels.Strategies.option_value(modeler_b, :precision) == 32
             
             # Test error on unknown ID
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.build_strategy(:unknown, AbstractTestModeler, registry)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Strategies.build_strategy(:unknown, AbstractTestModeler, registry)
         end
         
         # ====================================================================
@@ -185,13 +186,13 @@ function test_builders()
             
             # Error: No ID for family
             method_no_modeler = (:solver_x, :solver_y)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.extract_id_from_method(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Strategies.extract_id_from_method(
                 method_no_modeler, AbstractTestModeler, registry
             )
             
             # Error: Multiple IDs for same family
             method_duplicate = (:modeler_a, :modeler_b, :solver_x)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.Strategies.extract_id_from_method(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Strategies.extract_id_from_method(
                 method_duplicate, AbstractTestModeler, registry
             )
         end

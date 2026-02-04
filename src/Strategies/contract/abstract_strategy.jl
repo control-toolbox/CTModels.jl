@@ -170,7 +170,7 @@ the `id` method to provide its unique identifier.
 function id(::Type{T}) where {T<:AbstractStrategy}
     throw(Exceptions.NotImplemented(
         "Strategy ID method not implemented",
-        type_info="id(::Type{<:$T}) must be implemented",
+        required_method="id(::Type{<:$T})",
         suggestion="Implement id(::Type{<:$T}) to return a unique Symbol identifier",
         context="AbstractStrategy.id - required method implementation"
     ))
@@ -192,7 +192,7 @@ a `Dict` of `OptionDefinition` objects.
 function metadata(::Type{T}) where {T<:AbstractStrategy}
     throw(Exceptions.NotImplemented(
         "Strategy metadata method not implemented",
-        type_info="metadata(::Type{<:$T}) must be implemented",
+        required_method="metadata(::Type{<:$T})",
         suggestion="Implement metadata(::Type{<:$T}) to return StrategyMetadata with OptionDefinitions",
         context="AbstractStrategy.metadata - required method implementation"
     ))
@@ -229,7 +229,7 @@ function options(strategy::T) where {T<:AbstractStrategy}
         # Fallback: require custom implementation for complex internal structures
         throw(Exceptions.NotImplemented(
             "Strategy options method not implemented",
-            type_info="Strategy $T must either have an options field or implement options(::$T)",
+            required_method="options(strategy::$T)",
             suggestion="Add options::StrategyOptions field to strategy type or implement custom options() method",
             context="AbstractStrategy.options - required method implementation"
         ))

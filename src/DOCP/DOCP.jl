@@ -11,7 +11,6 @@ module DOCP
 using DocStringExtensions
 using NLPModels
 using SolverCore
-using ..CTModels.Exceptions
 using ..CTModels.Optimization: AbstractOptimizationProblem
 using ..CTModels.Optimization: AbstractBuilder, AbstractModelBuilder, AbstractSolutionBuilder
 using ..CTModels.Optimization: AbstractOCPSolutionBuilder

@@ -65,7 +65,7 @@ function (modeler::AbstractOptimizationModeler)(
 )
     throw(Exceptions.NotImplemented(
         "Model building not implemented",
-        type_info="Model building not implemented for $(typeof(modeler))",
+        required_method="(modeler::$(typeof(modeler)))(prob::AbstractOptimizationProblem, initial_guess)",
         suggestion="Implement the callable method for $(typeof(modeler)) to build NLP models",
         context="AbstractOptimizationModeler - required method implementation"
     ))
@@ -94,7 +94,7 @@ function (modeler::AbstractOptimizationModeler)(
 )
     throw(Exceptions.NotImplemented(
         "Solution building not implemented",
-        type_info="Solution building not implemented for $(typeof(modeler))",
+        required_method="(modeler::$(typeof(modeler)))(prob::AbstractOptimizationProblem, nlp_solution::SolverCore.AbstractExecutionStats)",
         suggestion="Implement the callable method for $(typeof(modeler)) to build solution objects",
         context="AbstractOptimizationModeler - required method implementation"
     ))

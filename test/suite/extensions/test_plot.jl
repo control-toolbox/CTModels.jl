@@ -1,7 +1,7 @@
 module TestPlot
 
 using Test
-using CTBase
+using CTBase: CTBase, Exceptions
 using CTModels
 using Main.TestProblems
 using Plots
@@ -231,7 +231,7 @@ function test_plot()
             Test.@test sz_full == (600, 140 * 5) # 2 (state) + 1 (control) + 2 (path)
 
             # Invalid control keyword should throw
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plots_ext.__size_plot(
+            Test.@test_throws Exceptions.IncorrectArgument plots_ext.__size_plot(
                 fake_state,
                 CTModels.model(fake_state),
                 :wrong_choice,
@@ -343,7 +343,7 @@ function test_plot()
             Test.@test plot(sol; time=:default) isa Plots.Plot
             Test.@test plot(sol; time=:normalize) isa Plots.Plot
             Test.@test plot(sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot(sol; time=:wrong_choice)
         end
 
         Test.@testset "plot(sol) – layout and control options" begin
@@ -351,7 +351,7 @@ function test_plot()
             Test.@test plot(sol; layout=:group, control=:components) isa Plots.Plot
             Test.@test plot(sol; layout=:group, control=:norm) isa Plots.Plot
             Test.@test plot(sol; layout=:group, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(
+            Test.@test_throws Exceptions.IncorrectArgument plot(
                 sol; layout=:group, control=:wrong_choice
             )
 
@@ -359,14 +359,14 @@ function test_plot()
             Test.@test plot(sol; layout=:split, control=:components) isa Plots.Plot
             Test.@test plot(sol; layout=:split, control=:norm) isa Plots.Plot
             Test.@test plot(sol; layout=:split, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(
+            Test.@test_throws Exceptions.IncorrectArgument plot(
                 sol; layout=:split, control=:wrong_choice
             )
 
             # layout only
             Test.@test plot(sol; layout=:split) isa Plots.Plot
             Test.@test plot(sol; layout=:group) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(sol; layout=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot(sol; layout=:wrong_choice)
         end
 
         Test.@testset "plot!(...) – reuse of plots and time keyword" begin
@@ -375,21 +375,21 @@ function test_plot()
             Test.@test plot!(plt, sol; time=:default) isa Plots.Plot
             Test.@test plot!(plt, sol; time=:normalize) isa Plots.Plot
             Test.@test plot!(plt, sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(plt, sol; time=:wrong_choice)
 
             # plot!(sol, ...) variants with implicit current plot
             plot(sol; time=:default)
             Test.@test plot!(sol; time=:default) isa Plots.Plot
             Test.@test plot!(sol; time=:normalize) isa Plots.Plot
             Test.@test plot!(sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(sol; time=:wrong_choice)
 
             # Start from an empty plot()
             plt2 = plot()
             Test.@test plot!(plt2, sol; time=:default) isa Plots.Plot
             Test.@test plot!(plt2, sol; time=:normalize) isa Plots.Plot
             Test.@test plot!(plt2, sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(plt2, sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(plt2, sol; time=:wrong_choice)
         end
 
         Test.@testset "plot!(...) – layout and control options" begin
@@ -404,7 +404,7 @@ function test_plot()
 
             plt = plot(sol; layout=:group, control=:all)
             Test.@test plot!(plt, sol; layout=:group, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(
+            Test.@test_throws Exceptions.IncorrectArgument plot!(
                 plt, sol; layout=:group, control=:wrong_choice
             )
 
@@ -419,7 +419,7 @@ function test_plot()
 
             plt = plot(sol; layout=:split, control=:all)
             Test.@test plot!(plt, sol; layout=:split, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(
+            Test.@test_throws Exceptions.IncorrectArgument plot!(
                 plt, sol; layout=:split, control=:wrong_choice
             )
 
@@ -429,7 +429,7 @@ function test_plot()
 
             plt = plot(sol; layout=:group)
             Test.@test plot!(plt, sol; layout=:group) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(plt, sol; layout=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(plt, sol; layout=:wrong_choice)
         end
 
         Test.@testset "display(sol) – side effect" begin
@@ -447,26 +447,26 @@ function test_plot()
             Test.@test plot(sol_pc; time=:default) isa Plots.Plot
             Test.@test plot(sol_pc; time=:normalize) isa Plots.Plot
             Test.@test plot(sol_pc; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(sol_pc; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot(sol_pc; time=:wrong_choice)
 
             # layout/control
             Test.@test plot(sol_pc; layout=:group, control=:components) isa Plots.Plot
             Test.@test plot(sol_pc; layout=:group, control=:norm) isa Plots.Plot
             Test.@test plot(sol_pc; layout=:group, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(
+            Test.@test_throws Exceptions.IncorrectArgument plot(
                 sol_pc; layout=:group, control=:wrong_choice
             )
 
             Test.@test plot(sol_pc; layout=:split, control=:components) isa Plots.Plot
             Test.@test plot(sol_pc; layout=:split, control=:norm) isa Plots.Plot
             Test.@test plot(sol_pc; layout=:split, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(
+            Test.@test_throws Exceptions.IncorrectArgument plot(
                 sol_pc; layout=:split, control=:wrong_choice
             )
 
             Test.@test plot(sol_pc; layout=:split) isa Plots.Plot
             Test.@test plot(sol_pc; layout=:group) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot(sol_pc; layout=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot(sol_pc; layout=:wrong_choice)
         end
 
         Test.@testset "plot!(sol with path constraints) – layout and time" begin
@@ -475,7 +475,7 @@ function test_plot()
             Test.@test plot!(plt, sol_pc; time=:default) isa Plots.Plot
             Test.@test plot!(plt, sol_pc; time=:normalize) isa Plots.Plot
             Test.@test plot!(plt, sol_pc; time=:normalise) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(plt, sol_pc; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(plt, sol_pc; time=:wrong_choice)
 
             # layout/control
             plt = plot(sol_pc; layout=:group, control=:components)
@@ -488,7 +488,7 @@ function test_plot()
 
             plt = plot(sol_pc; layout=:group, control=:all)
             Test.@test plot!(plt, sol_pc; layout=:group, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(
+            Test.@test_throws Exceptions.IncorrectArgument plot!(
                 plt, sol_pc; layout=:group, control=:wrong_choice
             )
 
@@ -502,7 +502,7 @@ function test_plot()
 
             plt = plot(sol_pc; layout=:split, control=:all)
             Test.@test plot!(plt, sol_pc; layout=:split, control=:all) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(
+            Test.@test_throws Exceptions.IncorrectArgument plot!(
                 plt, sol_pc; layout=:split, control=:wrong_choice
             )
 
@@ -511,7 +511,7 @@ function test_plot()
 
             plt = plot(sol_pc; layout=:group)
             Test.@test plot!(plt, sol_pc; layout=:group) isa Plots.Plot
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument plot!(plt, sol_pc; layout=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument plot!(plt, sol_pc; layout=:wrong_choice)
         end
     end
 end

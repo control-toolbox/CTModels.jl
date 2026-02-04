@@ -25,13 +25,12 @@ See also: [`CTModels`](@ref)
 """
 module Display
 
-using CTBase: CTBase
+using CTBase: CTBase, Exceptions
 using DocStringExtensions
 using MLStyle: MLStyle
 using Base: Base
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
-using ..Exceptions
 
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module

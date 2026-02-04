@@ -143,7 +143,7 @@ function __size_plot(
             :norm => 1
             :all => m + 1
             _ => throw(
-                CTModels.Exceptions.IncorrectArgument(
+                Exceptions.IncorrectArgument(
                     "Invalid control choice",
                     got="control=$control",
                     expected=":components, :norm or :all",
