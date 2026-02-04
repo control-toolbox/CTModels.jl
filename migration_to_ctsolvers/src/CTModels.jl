@@ -65,15 +65,49 @@ The modular architecture ensures that:
 """
 module CTModels
 
+# ============================================================================ #
+# FOUNDATIONAL TYPES AND UTILITIES
+# ============================================================================ #
+
 # Utils module - must load before OCP (uses @ensure macro)
 include(joinpath(@__DIR__, "Utils", "Utils.jl"))
 using .Utils
 import .Utils: @ensure
 
+# ============================================================================ #
+# CONFIGURATION AND STRATEGY MODULES
+# ============================================================================ #
+
+# Configuration and strategy modules (no dependencies)
+include(joinpath(@__DIR__, "Options", "Options.jl"))
+using .Options
+
+include(joinpath(@__DIR__, "Strategies", "Strategies.jl"))
+using .Strategies
+
+include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
+using .Orchestration
+
+# Optimization framework (general types)
+include(joinpath(@__DIR__, "Optimization", "Optimization.jl"))
+using .Optimization
+
+# Modeler implementations (depend on Optimization)
+include(joinpath(@__DIR__, "Modelers", "Modelers.jl"))
+using .Modelers
+
 # OCP module - core optimal control problem functionality
 # Contains type aliases, types, components, builders, and compatibility aliases
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
+
+# Discretized OCP types (depend on OCP and Modelers)
+include(joinpath(@__DIR__, "DOCP", "DOCP.jl"))
+using .DOCP
+
+# ============================================================================ #
+# IMPLEMENTATION MODULES
+# ============================================================================ #
 
 # Display and visualization
 include(joinpath(@__DIR__, "Display", "Display.jl"))
@@ -90,5 +124,9 @@ using .Serialization
 # Initial guess management
 include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
 using .InitialGuess
+
+# ============================================================================ #
+# END OF MODULE
+# ============================================================================ #
 
 end

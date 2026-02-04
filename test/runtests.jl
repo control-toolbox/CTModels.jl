@@ -8,14 +8,8 @@
 
 # Test dependencies
 using Test
-using Aqua
 using CTBase
 using CTModels
-using ADNLPModels
-using SolverCore
-using NLPModels
-using ExaModels
-using MadNLP  # Trigger CTModelsMadNLP extension
 
 # Trigger loading of optional extensions
 const TestRunner = Base.get_extension(CTBase, :TestRunner)

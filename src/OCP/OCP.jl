@@ -42,9 +42,6 @@ include("aliases.jl")
 # Import macro from Utils module
 import ..Utils: @ensure
 
-# Import build_solution from Optimization to overload it
-import ..Optimization: build_solution, build_model
-
 # Import matrix2vec, ctinterpolate and to_out_of_place from Utils for solution building
 import ..Utils: matrix2vec, ctinterpolate, to_out_of_place
 
