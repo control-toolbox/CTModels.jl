@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0-beta] - 2026-02-04
+
+### Breaking
+
+- **Module Migration**: Major refactoring with modules migrated to CTSolvers
+  - Moved modules: Options, Strategies, Orchestration, Optimization, Modelers, DOCP
+  - Updated dependencies and compatibility requirements
+  - Code cleanup and removal of migrated components
+  - **Action Required**: Projects using migrated modules must update to CTSolvers
+
+### Added
+
+- **Complete Documentation Overhaul**: Modern documentation with CTBase.automatic_reference_documentation
+  - Full API reference with automatic generation
+  - Integrated extensions documentation (Plots, JSON, JLD2)
+  - Comprehensive docstrings following project standards
+  - Cross-references and improved navigation
+
+- **Enhanced Extensions**: Better integration and usability
+  - Export of `plot` and `plot!` from CTModelsPlots extension
+  - Extensions now documented in main API reference
+  - Improved developer experience
+
+- **Rich Documentation**: New docstring for `build_model()` and other critical functions
+  - Complete parameter documentation
+  - Usage examples and best practices
+  - Error handling documentation
+
+### Changed
+
+- **Code Quality**: Significant cleanup and optimization
+  - Removed migrated module code
+  - Updated imports and dependencies
+  - Improved type stability and performance
+
+- **Testing**: Comprehensive test suite
+  - 3135 tests passing (100% success rate)
+  - Full coverage of remaining functionality
+  - Integration tests for extensions
+
+### Fixed
+
+- Documentation generation issues resolved
+- Cross-reference warnings handled gracefully
+- Extension integration improvements
+
 ## [Unreleased]
 
 ### Added
