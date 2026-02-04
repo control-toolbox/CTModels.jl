@@ -329,7 +329,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default show method for a [`Model`](@ref CTModels.Model).
+Default show method for a [`Model`](@ref CTModels.OCP.Model).
 
 Prints only the type name.
 """

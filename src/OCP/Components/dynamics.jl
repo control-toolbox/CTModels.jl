@@ -17,28 +17,28 @@ if any of the required fields (`state`, `control`, `times`) are not yet set, or 
 dynamics have already been set.
 
 # Errors
-Throws `Exceptions.UnauthorizedCall` if called out of order or in an invalid state.
+Throws `Exceptions.PreconditionError` if called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
-    @ensure __is_state_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before defining dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before dynamics!",
         context="dynamics! function - state validation"
     )
-    @ensure __is_control_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before defining dynamics",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before dynamics!",
         context="dynamics! function - control validation"
     )
-    @ensure __is_times_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before dynamics!",
         context="dynamics! function - times validation"
     )
-    @ensure !__is_dynamics_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
         "Dynamics already set",
         reason="dynamics have already been defined for this OCP",
         suggestion="Create a new OCP instance or use partial_dynamics! for additional dynamics",
@@ -73,7 +73,7 @@ that the specified indices are not already covered and that the system is in a v
 configuration for adding partial dynamics.
 
 # Errors
-Throws `Exceptions.UnauthorizedCall` if:
+Throws `Exceptions.PreconditionError` if:
 - The state, control, or times are not yet set.
 - The dynamics are already defined completely.
 - Any index in `rg` overlaps with an existing dynamics range.
@@ -85,25 +85,25 @@ julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
 ```
 """
 function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothing
-    @ensure __is_state_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before defining partial dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before partial dynamics!",
         context="partial_dynamics! function - state validation"
     )
-    @ensure __is_control_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before defining partial dynamics",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before partial dynamics!",
         context="partial_dynamics! function - control validation"
     )
-    @ensure __is_times_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining partial dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before partial dynamics!",
         context="partial_dynamics! function - times validation"
     )
-    @ensure !__is_dynamics_complete(ocp) Exceptions.UnauthorizedCall(
+    @ensure !__is_dynamics_complete(ocp) Exceptions.PreconditionError(
         "Complete dynamics already set",
         reason="dynamics have already been completely defined for this OCP",
         suggestion="Use partial_dynamics! before setting complete dynamics, or create a new OCP instance",
@@ -130,7 +130,7 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
         ocp.dynamics = Vector{Tuple{UnitRange{Int},Function}}()
     elseif ocp.dynamics isa Function
         throw(
-            Exceptions.UnauthorizedCall(
+            Exceptions.PreconditionError(
                 "Cannot add partial dynamics to complete dynamics",
                 reason="dynamics already defined as a single function",
                 suggestion="Use partial_dynamics! calls instead of dynamics! function, or create a new OCP instance",
@@ -144,7 +144,7 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
         for i in rg
             if i in existing_range
                 throw(
-                    Exceptions.UnauthorizedCall(
+                    Exceptions.PreconditionError(
                         "Dynamics range overlap",
                         reason="index $i in range already has assigned dynamics",
                         suggestion="Use a non-overlapping range or remove existing dynamics first",

@@ -1,7 +1,7 @@
 module TestOCPTimeDependence
 
 using Test
-using CTBase
+using CTBase: CTBase, Exceptions
 using CTModels
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -25,7 +25,7 @@ function test_time_dependence()
             Test.@test CTModels.is_autonomous(ocp) === true
 
             # Second call must fail
-            Test.@test_throws CTModels.Exceptions.UnauthorizedCall CTModels.time_dependence!(
+            Test.@test_throws Exceptions.PreconditionError CTModels.time_dependence!(
                 ocp; autonomous=false
             )
         end

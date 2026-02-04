@@ -5,9 +5,6 @@
 # 3. Special case handling (constant costate) via parameters
 # 4. Always apply deepcopy+scalar wrapping (single responsibility)
 
-using ..Exceptions: IncorrectArgument
-using ..Utils: @ensure
-
 """
     _interpolate_from_data(data, T, dim, type_param; allow_nothing=false, 
                            constant_if_two_points=false, expected_dim=nothing)
@@ -45,7 +42,7 @@ function _interpolate_from_data(
     # Validation: nothing handling
     if isnothing(data)
         if !allow_nothing
-            throw(IncorrectArgument(
+            throw(Exceptions.IncorrectArgument(
                 "Data cannot be nothing",
                 got="nothing",
                 expected="Matrix{Float64} or Function",
@@ -65,7 +62,7 @@ function _interpolate_from_data(
     # Dimension validation if expected_dim provided
     if !isnothing(expected_dim) && !isnothing(dim)
         actual_dim = size(data, 2)
-        @ensure actual_dim >= dim IncorrectArgument(
+        @ensure actual_dim >= dim Exceptions.IncorrectArgument(
             "Matrix dimension mismatch",
             got="$actual_dim columns",
             expected="at least $dim columns",

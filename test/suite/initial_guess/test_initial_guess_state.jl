@@ -1,8 +1,8 @@
 module TestInitialGuessState
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -40,7 +40,7 @@ function test_initial_guess_state()
             Test.@test result(0.0) == 0.5
             
             ocp_2d = DummyOCP2D()
-            Test.@test_throws IncorrectArgument CTModels.initial_state(ocp_2d, 0.5)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.initial_state(ocp_2d, 0.5)
         end
         
         Test.@testset "initial_state with Vector" begin
@@ -50,7 +50,7 @@ function test_initial_guess_state()
             Test.@test result isa Function
             Test.@test result(0.0) == [0.0, 1.0]
             
-            Test.@test_throws IncorrectArgument CTModels.initial_state(ocp, [0.0])
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.initial_state(ocp, [0.0])
         end
         
         Test.@testset "initial_state with Nothing" begin

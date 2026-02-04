@@ -1,8 +1,8 @@
 module TestOCPConstraints
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -33,103 +33,103 @@ function test_constraints()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(ocp, :dummy)
 
         # control not set
         ocp = CTModels.PreModel()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.state!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(ocp, :dummy)
 
         # times not set
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :dummy)
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(ocp, :dummy)
 
         # variable not set and try to add a :variable constraint
         ocp = CTModels.PreModel()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp, :variable)
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(ocp, :variable)
 
         # lb and ub cannot be both nothing
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(ocp_set, :state)
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(ocp_set, :state)
 
         # twice the same label for two constraints
         CTModels.constraint!(ocp_set, :state; lb=[0, 1], label=:cons)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.constraint!(
+        @test_throws Exceptions.PreconditionError CTModels.constraint!(
             ocp_set, :control, lb=[0, 1], label=:cons
         )
 
         # lb and ub must have the same length
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :state, lb=[0, 1], ub=[0, 1, 2]
         )
 
         # x(1) == [0, 0, 1] must raise an error if x is of dimension 2
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :boundary, lb=[0, 0, 1], ub=[0, 1, 2], codim_f=2
         )
 
         # if no range nor function is provided, lb and ub must have the right length:
         # depending on state, control, or variable
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :state, lb=[0, 1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :control, lb=[0, 1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :variable, lb=[0, 1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :state, ub=[0, 1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :control, ub=[0, 1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :variable, ub=[0, 1, 2]
         )
 
         # if no range nor function is provided, the only possible constraints are 
         # :state, :control, and :variable
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :dummy, lb=[0], ub=[1]
         )
 
         # if a range is provided, lb and ub must have the same length as the range
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :state, rg=1:2, lb=[0], ub=[1]
         )
 
         # if a range is provided, it must be consistent with the dimensions of the model
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :state, rg=3:4, lb=[0, 1], ub=[1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :control, rg=2:3, lb=[0, 1], ub=[1, 2]
         )
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :variable, rg=2:3, lb=[0, 1], ub=[1, 2]
         )
 
         # if a range is provided, the only possible constraints are :state, :control, and :variable
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :dummy, rg=1:2, lb=[0, 1], ub=[1, 2]
         )
 
         # if a function is provided, the only possible constraints are :path, :boundary and :variable
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :dummy, f=(x, y) -> x + y, lb=[0, 1], ub=[1, 2]
         )
 
         # we cannot provide a function and a range
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+        @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
             ocp_set, :variable, f=(x, y) -> x + y, rg=1:2, lb=[0, 1], ub=[1, 2]
         )
 
@@ -230,29 +230,29 @@ function test_constraints()
         # NEW: lb ≤ ub validation tests
         @testset "constraints! - Bounds validation" begin
             # lb > ub for state constraints
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+            @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set, :state, lb=[1.0, 2.0], ub=[0.5, 1.0], label=:invalid_state
             )
 
             # lb > ub for control constraints
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+            @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set, :control, lb=[2.0], ub=[1.0], label=:invalid_control
             )
 
             # lb > ub for variable constraints
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+            @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set, :variable, lb=[1.5], ub=[0.5], label=:invalid_variable
             )
 
             # lb > ub for boundary constraints
             f_boundary(r, x0, xf, v) = r .= x0 .+ v
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+            @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set, :boundary; f=f_boundary, lb=[1.0, 2.0], ub=[0.5, 1.0], label=:invalid_boundary
             )
 
             # lb > ub for path constraints
             f_path(r, t, x, u, v) = r .= x .+ u .+ v
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.constraint!(
+            @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set, :path; f=f_path, lb=[2.0], ub=[1.0], label=:invalid_path
             )
 

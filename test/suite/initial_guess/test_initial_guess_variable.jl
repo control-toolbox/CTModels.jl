@@ -1,8 +1,8 @@
 module TestInitialGuessVariable
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -38,7 +38,7 @@ function test_initial_guess_variable()
             Test.@test result == 0.5
             
             ocp_no_var = DummyOCPNoVar()
-            Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp_no_var, 0.5)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.initial_variable(ocp_no_var, 0.5)
         end
         
         Test.@testset "initial_variable with Vector" begin
@@ -47,7 +47,7 @@ function test_initial_guess_variable()
             result = CTModels.initial_variable(ocp, [0.0, 1.0])
             Test.@test result == [0.0, 1.0]
             
-            Test.@test_throws IncorrectArgument CTModels.initial_variable(ocp, [0.0])
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.initial_variable(ocp, [0.0])
         end
         
         Test.@testset "initial_variable with Nothing" begin

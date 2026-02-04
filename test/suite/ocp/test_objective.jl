@@ -1,8 +1,8 @@
 module TestOCPObjective
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -82,21 +82,21 @@ function test_objective()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
 
         # control not set
         ocp = CTModels.PreModel()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.state!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
 
         # times not set
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
 
         # objective already set
         ocp = CTModels.PreModel()
@@ -105,7 +105,7 @@ function test_objective()
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
         CTModels.objective!(ocp, :min; mayer=mayer)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
 
         # variable set after the objective
         ocp = CTModels.PreModel()
@@ -113,7 +113,7 @@ function test_objective()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.objective!(ocp, :min; mayer=mayer)
-        @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.variable!(ocp, 1)
+        @test_throws Exceptions.PreconditionError CTModels.variable!(ocp, 1)
 
         # no function given
         ocp = CTModels.PreModel()
@@ -121,7 +121,7 @@ function test_objective()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :min)
+        @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :min)
 
         # NEW: Criterion validation tests
         @testset "objective! - Criterion validation" begin
@@ -131,9 +131,9 @@ function test_objective()
             CTModels.state!(ocp, 1)
             CTModels.control!(ocp, 1)
             CTModels.variable!(ocp, 1)
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :invalid, mayer=mayer)
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :optimize, mayer=mayer)
-            @test_throws CTModels.Exceptions.IncorrectArgument CTModels.objective!(ocp, :Minimize, mayer=mayer)  # not in accepted list
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :invalid, mayer=mayer)
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :optimize, mayer=mayer)
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :Minimize, mayer=mayer)  # not in accepted list
 
             # Valid criteria (lowercase)
             ocp2 = CTModels.PreModel()

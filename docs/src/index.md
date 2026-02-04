@@ -9,8 +9,14 @@ It provides the **mathematical model layer** for optimal control problems:
 
 - **types and building blocks** for states, controls, variables, time grids, and constraints;
 - an `AbstractModel`/`Model` and `AbstractSolution`/`Solution` hierarchy for optimal control problems;
-- tools to build **initial guesses**, connect to **NLP backends**, and interpret their solutions;
-- optional extensions for **exporting solutions** (JSON/JLD) and **plotting**.
+- tools to build **initial guesses** for optimization;
+- optional extensions for **exporting/importing solutions** (JSON/JLD) and **plotting**.
+
+!!! info "CTModels vs CTSolvers"
+
+    **CTModels** focuses on **defining** optimal control problems and representing their solutions.
+    For **solving** these problems (discretization, NLP backends, optimization strategies),
+    see [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl).
 
 !!! note
 
@@ -64,24 +70,10 @@ At a high level, CTModels is responsible for:
   `AbstractSolution` / `Solution` store state, control, dual variables, and solver information.
 - **Managing time grids and dimensions** through convenient type aliases.
 - **Structuring constraints** (path, boundary, box constraints on state, control, and variables).
-- **Connecting to NLP backends** (ADNLPModels, ExaModels, etc.) via modelers and builders.
-- **Strategy architecture** (NEW):
-  - **Options**: Generic option handling with aliases and validation
-  - **Strategies**: Configurable components (modelers, solvers, discretizers)
 - **Providing utilities** for initial guesses, export/import, and plotting of solutions.
 
 Most of the public API is organized in a way that closely mirrors the mathematical
 objects you manipulate when formulating an optimal control problem.
-
-## Strategy Architecture
-
-CTModels provides a modern, type-stable architecture for configurable components:
-
-- **Options Module**: Low-level option extraction, validation, and alias resolution.
-- **Strategies Module**: Strategy contract, metadata, registry, and builders.
-
-This architecture replaces the legacy `AbstractOCPTool` interface with a cleaner,
-more maintainable design. See the **Developer Guide → Interfaces → Strategies** section for details.
 
 ## Time grids and basic aliases
 
@@ -121,37 +113,30 @@ These objects are the main bridge between the mathematical problem and the NLP b
 ## Initial guesses
 
 Good initial guesses are crucial for challenging optimal control problems.
-CTModels provides a small layer to organize them:
+CTModels provides a layer to organize them:
 
 - `pre_initial_guess` builds an `OptimalControlPreInit` object from raw user data
   (functions, vectors, or constants for state, control, and variables).
 - `initial_guess` turns this into an `OptimalControlInitialGuess`, checking consistency
-  with the chosen `AbstractOptimalControlProblem`.
+  with the chosen `AbstractModel`.
+- `build_initial_guess` constructs initial guess objects from various input formats.
+- `validate_initial_guess` ensures consistency with the problem dimensions.
 
-The corresponding API is implemented in `src/init/initial_guess.jl` and is documented
-in the *Initial Guess* section of the API reference.
+The corresponding API is documented in the *InitialGuess* section of the API reference.
 
-## NLP backends and modelers
+## Solving optimal control problems
 
-CTModels does **not** solve the NLP itself. Instead, it connects to external NLP
-backends via modelers and builders defined in `src/nlp/`:
+CTModels defines the **problem structure** but does **not** solve it.
+For solving optimal control problems, use [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl),
+which provides:
 
-- `ADNLPModeler` (based on `ADNLPModels.jl`),
-- `ExaModeler` (based on `ExaModels.jl`),
-- additional builder types and helper functions.
+- **Discretization strategies** (direct collocation, multiple shooting, etc.)
+- **NLP backends** (ADNLPModels, ExaModels, etc.)
+- **Optimization modelers** to connect problems to solvers
+- **Strategy architecture** for configurable components
 
-These modelers:
-
-- expose options through the generic `AbstractOCPTool` interface from CTBase
-  (see the *Interfaces → OCP Tools* page),
-- build backend-specific NLP models from an `AbstractOptimizationProblem`,
-- optionally map NLP solutions back to `CTModels.Solution` objects.
-
-The *Interfaces* section of the documentation contains detailed guides for:
-
-- implementing new **optimization problems**,
-- implementing new **optimization modelers**, and
-- implementing new **OCP solution builders**.
+CTModels provides the `AbstractModel` type alias `AbstractOptimalControlProblem`
+for compatibility with CTSolvers.
 
 ## Extensions: JSON, JLD, and plotting
 
@@ -183,56 +168,37 @@ throw a descriptive `CTBase.ExtensionError`.
 
 ## How this documentation is organized
 
-The documentation is split into two main parts:
+The documentation consists of:
 
-- **Interfaces**
-  - *OCP Tools*: how to implement new configurable tools (backends, discretizers, solvers).
-  - *Optimization Problems*: how to define `AbstractOptimizationProblem` types.
-  - *Optimization Modelers*: how to map optimization problems to specific NLP backends.
-  - *Solution Builders*: how to turn NLP execution statistics into `CTModels.Solution` objects.
+- **Introduction** (this page): Overview of CTModels and its role in the control-toolbox ecosystem.
 
-- **API Reference**
-  - *Types*: core types for models, solutions, and internal structures.
-  - *Model / Times / Dynamics / Objective / Constraints*: detailed API for building OCP models.
-  - *Solution & Dual*: how solutions and dual variables are represented.
-  - *Initial Guess*: utilities to build and validate initial guesses.
-  - *NLP Backends*: ADNLPModels/ExaModels-based backends and related options.
-  - *Extensions*: Plot, JSON, and JLD extensions.
+- **API Reference**: Complete documentation of all modules and functions:
+  - *CTModels*: Main module and exports
+  - *Utils*: Utilities (interpolation, macros, matrix operations)
+  - *OCP*: Optimal Control Problem types, components, building, and validation
+  - *Display*: Text display and printing
+  - *Serialization*: Export/import functionality
+  - *InitialGuess*: Initial guess management
+  - *Extensions*: Plots, JSON, and JLD2 extensions
 
-You can start by reading the **Interfaces** pages to understand the high-level
-design, then use the **API Reference** to look up the details of particular
-functions and types.
+Use the **API Reference** to look up the details of particular functions and types.
 
-## I am X, I want to do Y → read…
+## Quick start guide
 
-### User Guide
-
-- **I want to formulate a new optimal control / optimization problem**  
-  Read **User Guide → Optimization Problems**, then **API Reference → Model / Times / Dynamics / Objective / Constraints**
-  for details about fields and conventions.
-- **I want to build good initial guesses for my problems**  
-  Read **User Guide → Solution Builders** for the overall philosophy, then **API Reference → Initial Guess**
-  for the `pre_initial_guess` and `initial_guess` functions.
-- **I want to save / reload solutions (for example for numerical experiments)**  
-  Read **API Reference → Extensions (JSON & JLD)** and the pages associated with the `CTModelsJSON` and `CTModelsJLD` modules.
-- **I want to plot solution trajectories nicely**  
-  Read **API Reference → Extensions (Plot Extension)**, and look at the examples using `Plots.plot(sol)` and `Plots.plot!(sol)`.
-- **I use OptimalControl.jl and I just want to understand what CTModels does in the background**  
-  Read this introduction page, then skim through the **User Guide** section to see how
-  problems, modelers, and builders fit together.
-
-### Developer Guide
-
-- **I want to create a new strategy (modeler, solver, discretizer)**  
-  Read **Developer Guide → Tutorials → Creating a Strategy**, then **Developer Guide → Interfaces → Strategies**
-  for the complete contract specification.
-- **I want to create a family of related strategies**  
-  Read **Developer Guide → Tutorials → Creating a Strategy Family**, then **Developer Guide → Interfaces → Strategy Families**
-  for registry integration and best practices.
-- **I want to migrate from AbstractOCPTool to AbstractStrategy**  
-  Read **Developer Guide → Interfaces → Strategies → Migration Guide** for step-by-step instructions.
-- **I want to connect a new NLP backend or tweak an existing backend**  
-  Read **Developer Guide → Interfaces → Optimization Modelers** (updated) and the **API Reference → NLP Backends** section.
-- **I want to contribute to the core of CTModels (types, constraints, dual variables, etc.)**  
-  Start with **API Reference → Types**, then **Solution & Dual** and **Constraints** to understand the internal structures
-  before modifying or adding new fields.
+- **I want to define an optimal control problem**  
+  See **API Reference → OCP Components** for `state!`, `control!`, `dynamics!`, `objective!`, `constraint!`, etc.
+  
+- **I want to build initial guesses**  
+  See **API Reference → InitialGuess** for `pre_initial_guess`, `initial_guess`, and `build_initial_guess`.
+  
+- **I want to save/load solutions**  
+  See **API Reference → Serialization** and the JSON/JLD2 extension pages for `export_ocp_solution` and `import_ocp_solution`.
+  
+- **I want to plot solution trajectories**  
+  See **API Reference → Plots Extension** for `plot(sol)` and `plot!(sol)` with `Plots.jl`.
+  
+- **I want to solve an optimal control problem**  
+  Use [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl) which provides discretization, NLP backends, and optimization strategies.
+  
+- **I use OptimalControl.jl**  
+  CTModels provides the underlying types and building blocks. OptimalControl.jl offers a higher-level interface.

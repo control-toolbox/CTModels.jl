@@ -2,7 +2,7 @@ module TestExceptionOCPIntegration
 
 using Test
 using CTModels
-using CTModels.Exceptions
+using CTBase: CTBase, Exceptions
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -28,7 +28,7 @@ function test_ocp_exception_integration()
             ocp = OCP()
             state!(ocp, 2)
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 state!(ocp, 3)
             end
             
@@ -36,7 +36,7 @@ function test_ocp_exception_integration()
             try
                 state!(ocp, 3)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "State already set"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -53,7 +53,7 @@ function test_ocp_exception_integration()
             state!(ocp, 2)
             control!(ocp, 1)
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 control!(ocp, 2)
             end
             
@@ -61,7 +61,7 @@ function test_ocp_exception_integration()
             try
                 control!(ocp, 2)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Control already set"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -82,7 +82,7 @@ function test_ocp_exception_integration()
             # Set objective first (should fail)
             objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 variable!(ocp, 1)
             end
             
@@ -90,7 +90,7 @@ function test_ocp_exception_integration()
             try
                 variable!(ocp, 1)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Variable must be set before objective"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -107,7 +107,7 @@ function test_ocp_exception_integration()
             state!(ocp, 2)
             times!(ocp, t0=0, tf=1)
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 times!(ocp, t0=1, tf=2)
             end
             
@@ -115,7 +115,7 @@ function test_ocp_exception_integration()
             try
                 times!(ocp, t0=1, tf=2)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Time already set"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -130,7 +130,7 @@ function test_ocp_exception_integration()
             # Test objective without prerequisites
             ocp = OCP()
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             end
             
@@ -138,7 +138,7 @@ function test_ocp_exception_integration()
             try
                 objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "State must be set before objective"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -153,7 +153,7 @@ function test_ocp_exception_integration()
             try
                 objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Control must be set before objective"
                 @test occursin("control has not been defined yet", e.reason)
                 @test occursin("Call control!(ocp, dimension) before objective!", e.suggestion)
@@ -165,7 +165,7 @@ function test_ocp_exception_integration()
             # Test dynamics without prerequisites
             ocp = OCP()
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 dynamics!(ocp, (out, t, x, u, v) -> out .= x)
             end
             
@@ -173,7 +173,7 @@ function test_ocp_exception_integration()
             try
                 dynamics!(ocp, (out, t, x, u, v) -> out .= x)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "State must be set before defining dynamics"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -190,7 +190,7 @@ function test_ocp_exception_integration()
             times!(ocp2, t0=0, tf=1)
             dynamics!(ocp2, (out, t, x, u, v) -> out .= x)
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
             end
             
@@ -198,7 +198,7 @@ function test_ocp_exception_integration()
             try
                 dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Dynamics already set"
                 @test occursin("dynamics have already been defined", e.reason)
                 @test occursin("Create a new OCP instance", e.suggestion)
@@ -210,7 +210,7 @@ function test_ocp_exception_integration()
             # Test constraint without prerequisites
             ocp = OCP()
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 constraint!(ocp, :state, lb=[0], ub=[1])
             end
             
@@ -218,7 +218,7 @@ function test_ocp_exception_integration()
             try
                 constraint!(ocp, :state, lb=[0], ub=[1])
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "State must be set before adding constraints"
                 @test !isnothing(e.reason)
                 @test !isnothing(e.suggestion)
@@ -235,7 +235,7 @@ function test_ocp_exception_integration()
             times!(ocp2, t0=0, tf=1)
             constraint!(ocp2, :state, lb=[0, 0], ub=[1, 1], label=:test)
             
-            @test_throws Exceptions.UnauthorizedCall begin
+            @test_throws Exceptions.PreconditionError begin
                 constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             end
             
@@ -243,7 +243,7 @@ function test_ocp_exception_integration()
             try
                 constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             catch e
-                @test e isa Exceptions.UnauthorizedCall
+                @test e isa Exceptions.PreconditionError
                 @test e.msg == "Constraint already exists"
                 @test occursin("constraint with label", e.reason)
                 @test occursin("Use a different label", e.suggestion)

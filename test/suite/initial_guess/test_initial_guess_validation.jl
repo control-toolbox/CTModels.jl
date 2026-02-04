@@ -1,8 +1,8 @@
 module TestInitialGuessValidation
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 using Main.TestProblems
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -111,7 +111,7 @@ function test_initial_guess_validation()
             )
 
             # Should throw
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.validate_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
                 ocp, init_bad
             )
         end
@@ -126,7 +126,7 @@ function test_initial_guess_validation()
             )
 
             # Should throw
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.validate_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
                 ocp, init_bad
             )
         end
@@ -140,7 +140,7 @@ function test_initial_guess_validation()
             )
 
             # Should throw
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.validate_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
                 ocp, init_bad
             )
         end
@@ -173,7 +173,7 @@ function test_initial_guess_validation()
             sol = DummySolution1DVar(ocp1, t -> 0.1, t -> -0.2, 0.5)
 
             # Try to use it for ocp2 (wrong dimensions)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp2, sol
             )
         end
@@ -198,7 +198,7 @@ function test_initial_guess_validation()
             ocp = DummyOCP1DNoVar()
 
             bad_unknown = (state=0.1, foo=1.0)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_unknown
             )
         end
@@ -207,7 +207,7 @@ function test_initial_guess_validation()
             ocp = DummyOCP1DNoVar()
 
             bad_time = (time=[0.0, 1.0], state=0.1)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_time
             )
         end
@@ -217,7 +217,7 @@ function test_initial_guess_validation()
 
             # Both block and component level
             bad_nt = (state=[0.0, 0.0], x1=1.0)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_nt
             )
         end
@@ -227,7 +227,7 @@ function test_initial_guess_validation()
 
             # Both block and component level
             bad_nt = (control=[0.0, 1.0], u1=1.0)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_nt
             )
         end
@@ -237,7 +237,7 @@ function test_initial_guess_validation()
 
             # Both block and component level
             bad_nt = (w=[1.0, 2.0], tf=1.0)
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_nt
             )
         end
@@ -314,7 +314,7 @@ function test_initial_guess_validation()
                 CTModels.initial_guess(ocp; state=0.1)
                 Test.@test false  # Should not reach here
             catch e
-                Test.@test e isa CTModels.Exceptions.IncorrectArgument
+                Test.@test e isa Exceptions.IncorrectArgument
                 # Verify enriched fields exist
                 Test.@test !isempty(e.got)
                 Test.@test !isempty(e.expected)

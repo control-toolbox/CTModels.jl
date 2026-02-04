@@ -39,7 +39,6 @@ constraint declarations. If multiple constraints are declared on the same compon
 and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is emitted during model construction.
 
 """
-
 function build_solution(
     ocp::Model,
     T::Vector{Float64},

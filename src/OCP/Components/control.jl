@@ -41,7 +41,7 @@ julia> control_components(ocp)
 
 # Throws
 
-- `Exceptions.UnauthorizedCall`: If control has already been set
+- `Exceptions.PreconditionError`: If control has already been set
 - `Exceptions.IncorrectArgument`: If m ≤ 0
 - `Exceptions.IncorrectArgument`: If number of component names ≠ m
 - `Exceptions.IncorrectArgument`: If name is empty
@@ -59,7 +59,7 @@ function control!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks using @ensure
-    @ensure !__is_control_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure !__is_control_set(ocp) Exceptions.PreconditionError(
         "Control already set",
         reason="control has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing control definition",

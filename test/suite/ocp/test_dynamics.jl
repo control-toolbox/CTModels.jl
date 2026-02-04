@@ -1,8 +1,8 @@
 module TestOCPDynamics
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTBase
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -139,19 +139,19 @@ function test_partial_dynamics()
     ######
     ocp5 = deepcopy(ocp)
     CTModels.dynamics!(ocp5, 1:1, partial_dyn_1!)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp5, full_dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp5, full_dynamics!)
 
     ocp6 = deepcopy(ocp)
     CTModels.dynamics!(ocp6, 1:2, (r, t, x, u, v)->(r[1]=0; r[2]=0))
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp6, full_dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp6, full_dynamics!)
 
     ######
     # 7. Error: add index out of range (< 1 or > n_states)
     ######
     ocp7 = deepcopy(ocp)
-    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
-    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, -1:-1, partial_dyn_1!)
-    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(
+    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
+    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, -1:-1, partial_dyn_1!)
+    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp7, (n_states + 1):(n_states + 1), partial_dyn_1!
     )
 
@@ -159,7 +159,7 @@ function test_partial_dynamics()
     # 8. Error: add range with at least one index out of range
     ######
     ocp8 = deepcopy(ocp)
-    @test_throws CTModels.Exceptions.IncorrectArgument CTModels.dynamics!(
+    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp8, (n_states):(n_states + 1), partial_dyn_1!
     )
 
@@ -168,14 +168,14 @@ function test_partial_dynamics()
     ######
     ocp9 = deepcopy(ocp)
     CTModels.dynamics!(ocp9, 2:2, partial_dyn_1!)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp9, 1:2, partial_dyn_1!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp9, 1:2, partial_dyn_1!)
 
     ######
     # 10. Error: add twice the same index in two different ranges
     ######
     ocp10 = deepcopy(ocp)
     CTModels.dynamics!(ocp10, 1:2, (r, t, x, u, v) -> (r[1]=t; r[2]=u[1]))
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(
         ocp10, 2:3, (r, t, x, u, v) -> (r[2]=0; r[3]=0)
     )
 
@@ -185,21 +185,21 @@ function test_partial_dynamics()
     ocp_missing = CTModels.PreModel()
     CTModels.time!(ocp_missing; t0=0.0, tf=10.0)
     CTModels.control!(ocp_missing, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(
         ocp_missing, 1:1, partial_dyn_1!
     )
 
     ocp_missing = CTModels.PreModel()
     CTModels.time!(ocp_missing; t0=0.0, tf=10.0)
     CTModels.state!(ocp_missing, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(
         ocp_missing, 1:1, partial_dyn_1!
     )
 
     ocp_missing = CTModels.PreModel()
     CTModels.state!(ocp_missing, 1)
     CTModels.control!(ocp_missing, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(
         ocp_missing, 1:1, partial_dyn_1!
     )
 
@@ -209,7 +209,7 @@ function test_partial_dynamics()
     CTModels.state!(ocp_variable, 3)
     CTModels.control!(ocp_variable, 1)
     CTModels.dynamics!(ocp_variable, 1:3, full_dynamics!)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.variable!(ocp_variable, 1)
+    @test_throws Exceptions.PreconditionError CTModels.variable!(ocp_variable, 1)
 end
 
 function test_full_dynamics()
@@ -231,7 +231,7 @@ function test_full_dynamics()
     ######
     # 2. Error: set full dynamics twice not allowed
     ######
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp, dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp, dynamics!)
 
     ######
     # 3. Error: state must be set before dynamics
@@ -240,7 +240,7 @@ function test_full_dynamics()
     CTModels.time!(ocp2; t0=0.0, tf=10.0)
     CTModels.control!(ocp2, 1)
     CTModels.variable!(ocp2, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp2, dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp2, dynamics!)
 
     ######
     # 4. Error: control must be set before dynamics
@@ -249,7 +249,7 @@ function test_full_dynamics()
     CTModels.time!(ocp3; t0=0.0, tf=10.0)
     CTModels.state!(ocp3, 1)
     CTModels.variable!(ocp3, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp3, dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp3, dynamics!)
 
     ######
     # 5. Error: time must be set before dynamics
@@ -258,7 +258,7 @@ function test_full_dynamics()
     CTModels.state!(ocp4, 1)
     CTModels.control!(ocp4, 1)
     CTModels.variable!(ocp4, 1)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp4, dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp4, dynamics!)
 
     ######
     # 6. Error: variable must NOT be set after dynamics
@@ -268,7 +268,7 @@ function test_full_dynamics()
     CTModels.state!(ocp5, 1)
     CTModels.control!(ocp5, 1)
     CTModels.dynamics!(ocp5, dynamics!)
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.variable!(ocp5, 1)
+    @test_throws Exceptions.PreconditionError CTModels.variable!(ocp5, 1)
 
     ######
     # 7. Error: mixing full dynamics and partial dynamics not allowed
@@ -281,7 +281,7 @@ function test_full_dynamics()
     CTModels.dynamics!(ocp6, dynamics!)
 
     # Attempt to add partial dynamics after full dynamics -> error
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(
         ocp6, 1:1, (r, t, x, u, v)->(r[1]=0)
     )
 
@@ -292,7 +292,7 @@ function test_full_dynamics()
     CTModels.control!(ocp7, 1)
     CTModels.variable!(ocp7, 1)
     CTModels.dynamics!(ocp7, 1:1, (r, t, x, u, v)->(r[1]=0))
-    @test_throws CTModels.Exceptions.UnauthorizedCall CTModels.dynamics!(ocp7, dynamics!)
+    @test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp7, dynamics!)
 end
 
 function test_dynamics()

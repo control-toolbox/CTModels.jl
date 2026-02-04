@@ -1,8 +1,8 @@
 module TestInitialGuessIntegration
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
-using CTModels.Exceptions
 using Main.TestProblems
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -38,7 +38,7 @@ function test_initial_guess_integration()
 
             # Test with incorrect state dimension (should throw)
             bad_named = (state=[0.1, 0.2, 0.3], control=[0.1], variable=Float64[])
-            Test.@test_throws CTModels.Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
                 ocp, bad_named
             )
         end

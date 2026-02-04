@@ -55,7 +55,7 @@ julia> state_components(ocp)
 
 # Throws
 
-- `Exceptions.UnauthorizedCall`: If state has already been set
+- `Exceptions.PreconditionError`: If state has already been set
 - `Exceptions.IncorrectArgument`: If n ≤ 0
 - `Exceptions.IncorrectArgument`: If number of component names ≠ n
 - `Exceptions.IncorrectArgument`: If name is empty
@@ -73,7 +73,7 @@ function state!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks
-    @ensure !__is_state_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure !__is_state_set(ocp) Exceptions.PreconditionError(
         "State already set",
         reason="state has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing state definition",

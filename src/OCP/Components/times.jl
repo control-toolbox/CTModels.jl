@@ -30,8 +30,8 @@ julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol
 
 # Throws
 
-- `Exceptions.UnauthorizedCall`: If time has already been set
-- `Exceptions.UnauthorizedCall`: If variable must be set before (when t0 or tf is free)
+- `Exceptions.PreconditionError`: If time has already been set
+- `Exceptions.PreconditionError`: If variable must be set before (when t0 or tf is free)
 - `Exceptions.IncorrectArgument`: If ind0 or indf is out of bounds
 - `Exceptions.IncorrectArgument`: If both t0 and ind0 are provided
 - `Exceptions.IncorrectArgument`: If neither t0 nor ind0 is provided
@@ -49,14 +49,14 @@ function time!(
     indf::Union{Int,Nothing}=nothing,
     time_name::Union{String,Symbol}=__time_name(),
 )::Nothing
-    @ensure !__is_times_set(ocp) Exceptions.UnauthorizedCall(
+    @ensure !__is_times_set(ocp) Exceptions.PreconditionError(
         "Time already set",
         reason="time has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing time definition",
         context="time! function - duplicate definition check"
     )
 
-    @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.UnauthorizedCall(
+    @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
         "Variable must be set for free time",
         reason="variable is required when t0 or tf is free (ind0/indf provided)",
         suggestion="Call variable!(ocp, dimension) before time! with free time parameters, or use fixed times (t0, tf)",

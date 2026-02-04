@@ -1,9 +1,9 @@
 module TestInterpolationHelpers
 
 using Test
+using CTBase: CTBase, Exceptions
 using CTModels
 using CTModels.OCP: build_interpolated_function, _interpolate_from_data, _wrap_scalar_and_deepcopy
-using CTModels.Exceptions: IncorrectArgument
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
@@ -35,7 +35,7 @@ function test_interpolation_helpers()
             @test isnothing(result)
             
             # Test allow_nothing=false (should throw)
-            @test_throws IncorrectArgument _interpolate_from_data(
+            @test_throws Exceptions.IncorrectArgument _interpolate_from_data(
                 nothing, T, 2, Nothing; allow_nothing=false
             )
         end
@@ -77,7 +77,7 @@ function test_interpolation_helpers()
             @test !isnothing(func)
             
             # Invalid: matrix has 2 columns, we expect 3
-            @test_throws IncorrectArgument _interpolate_from_data(
+            @test_throws Exceptions.IncorrectArgument _interpolate_from_data(
                 X_2d, T, 3, Matrix{Float64}; 
                 expected_dim=3
             )
@@ -175,13 +175,13 @@ function test_interpolation_helpers()
         
         @testset "build_interpolated_function: error cases" begin
             # Nothing not allowed
-            @test_throws IncorrectArgument build_interpolated_function(
+            @test_throws Exceptions.IncorrectArgument build_interpolated_function(
                 nothing, T, 2, Nothing;
                 allow_nothing=false
             )
             
             # Dimension mismatch
-            @test_throws IncorrectArgument build_interpolated_function(
+            @test_throws Exceptions.IncorrectArgument build_interpolated_function(
                 X_2d, T, 3, Matrix{Float64};
                 expected_dim=3
             )
