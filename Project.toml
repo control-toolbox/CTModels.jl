@@ -1,7 +1,7 @@
 name = "CTModels"
 uuid = "34c4fa32-2049-4079-8329-de33c2a22e2d"
+version = "0.8.0-beta"
 authors = ["Olivier Cots <olivier.cots@toulouse-inp.fr>"]
-version = "0.6.10-beta.2"
 
 [deps]
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
@@ -24,8 +24,24 @@ CTModelsJLD = "JLD2"
 CTModelsJSON = "JSON3"
 CTModelsPlots = "Plots"
 
+[extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = [
+    "Aqua",
+    "JLD2",
+    "JSON3",
+    "Plots",
+    "Random",
+    "Test"
+]
+
 [compat]
-CTBase = "0.16, 0.17"
+Aqua = "0.8"
+CTBase = "0.18"
 DocStringExtensions = "0.9"
 Interpolations = "0.16"
 JLD2 = "0.6"
@@ -36,5 +52,7 @@ MacroTools = "0.5"
 OrderedCollections = "1"
 Parameters = "0.12"
 Plots = "1"
+Random = "1"
 RecipesBase = "1"
+Test = "1"
 julia = "1.10"

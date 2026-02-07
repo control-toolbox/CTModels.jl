@@ -91,8 +91,8 @@ julia> size = __size_plot(sol, model, :components, :split; ...)
 ```
 """
 function __size_plot(
-    sol::CTModels.Solution,
-    model::Union{CTModels.Model,Nothing},
+    sol::CTModels.AbstractSolution,
+    model::Union{CTModels.AbstractModel,Nothing},
     control::Symbol,
     layout::Symbol,
     description::Symbol...;
@@ -138,13 +138,17 @@ function __size_plot(
     else
         n = CTModels.state_dimension(sol)
         m = CTModels.control_dimension(sol)
-        l = @match control begin
+        l = MLStyle.@match control begin
             :components => m
             :norm => 1
             :all => m + 1
             _ => throw(
-                CTBase.IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all"
+                Exceptions.IncorrectArgument(
+                    "Invalid control choice",
+                    got="control=$control",
+                    expected=":components, :norm or :all",
+                    suggestion="Use control=:components for individual components, control=:norm for norm, or control=:all for all",
+                    context="plot_default - validating control parameter"
                 ),
             )
         end

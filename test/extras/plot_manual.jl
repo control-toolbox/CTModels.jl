@@ -1,6 +1,6 @@
 using Revise
 using Pkg
-Pkg.activate(".")
+Pkg.activate(@__DIR__)
 
 using CTModels
 using Plots

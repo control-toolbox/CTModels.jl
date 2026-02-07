@@ -1,25 +1,17 @@
-# [.github/workflows/CI.yml]
 name: CI
+
 on:
   push:
     branches:
       - main
     tags: '*'
   pull_request:
+    
 jobs:
   call:
-    strategy:
-      matrix:
-        version:
-          - '1.10'
-          - '1.11'
-          - '1.12'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
     uses: control-toolbox/CTActions/.github/workflows/ci.yml@main
     with:
-      version: ${{ matrix.version }}
-      os: ${{ matrix.os }}
-      arch: ${{ matrix.arch }}
+      runs_on: '["ubuntu-latest","macos-latest"]'
+      use_ct_registry: true
+    secrets:
+      SSH_KEY: ${{ secrets.SSH_KEY }}

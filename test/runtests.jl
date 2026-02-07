@@ -1,55 +1,58 @@
+# ==============================================================================
+# CTModels Test Runner
+# ==============================================================================
+#
+# See test/README.md for usage instructions (running specific tests, coverage, etc.)
+#
+# ==============================================================================
+
+# Test dependencies
 using Test
-using Aqua
 using CTBase
 using CTModels
 
-#
-include("solution_example.jl")
+# Trigger loading of optional extensions
+const TestRunner = Base.get_extension(CTBase, :TestRunner)
 
-#
-@testset verbose = true showtiming = true "CTModels tests" begin
-    for name in (
-        :ext_exceptions,
-        :aqua,
-        :times,
-        :control,
-        :state,
-        :variable,
-        :dynamics,
-        :objective,
-        :constraints,
-        :model,
-        :ocp,
-        :init,
-        :utils,
-        :solution,
-    )
-        @testset "$(name)" begin
-            test_name = Symbol(:test_, name)
-            println("testing: ", string(name))
-            include("$(test_name).jl")
-            @eval $test_name()
-        end
-    end
+# Controls nested testset output formatting (used by individual test files)
+module TestOptions
+const VERBOSE = true
+const SHOWTIMING = true
 end
+using .TestOptions: VERBOSE, SHOWTIMING
 
-# test with CTDirect and CTParser: must be commented if new version of CTModels, that is breaking
+# Include shared test problems via TestProblems module
+include(joinpath("problems", "TestProblems.jl"))
+using .TestProblems
 
-using CTDirect
-using NLPModelsIpopt
-using ADNLPModels
-import CTParser: CTParser, @def
+# Run tests using the TestRunner extension
+CTBase.run_tests(;
+    args=String.(ARGS),
+    testset_name="CTModels tests",
+    available_tests=(
+        "suite/*/test_*",
+    ),
+    filename_builder=name -> Symbol(:test_, name),
+    funcname_builder=name -> Symbol(:test_, name),
+    verbose=VERBOSE,
+    showtiming=SHOWTIMING,
+    test_dir=@__DIR__,
+)
 
-#
-include("solution_example_path_constraints.jl")
+# If running with coverage enabled, remind the user to run the post-processing script
+# because .cov files are flushed at process exit and cannot be cleaned up by this script.
+if Base.JLOptions().code_coverage != 0
+    println(
+        """
 
-@testset verbose = true showtiming = true "CTModels tests" begin
-    for name in (:plot, :export_import)
-        @testset "$(name)" begin
-            test_name = Symbol(:test_, name)
-            println("testing: ", string(name))
-            include("$(test_name).jl")
-            @eval $test_name()
-        end
-    end
+================================================================================
+[CTModels] Coverage files generated.
+
+To process them, move them to the coverage/ directory, and generate a report,
+please run:
+
+    julia --project=@. -e 'using Pkg; Pkg.test("CTModels"; coverage=true); include("test/coverage.jl")'
+================================================================================
+""",
+    )
 end
