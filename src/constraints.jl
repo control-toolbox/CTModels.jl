@@ -256,7 +256,7 @@ end
 
 as_vector(::Nothing) = nothing
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
-as_vector(x::Vector{T}) where {T<:ctNumber} = x
+as_vector(x::AbstractVector{T}) where {T<:ctNumber} = x
 
 as_range(::Nothing) = nothing
 as_range(r::T) where {T<:Int} = r:r
