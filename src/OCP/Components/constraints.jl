@@ -352,6 +352,12 @@ as_vector(::Nothing) = nothing
 Wrap a scalar number into a single-element vector.
 """
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
+
+"""
+    as_vector(x::AbstractVector{T}) -> AbstractVector{T} where {T<:ctNumber}
+
+Return a vector unchanged.
+"""
 as_vector(x::AbstractVector{T}) where {T<:ctNumber} = x
 
 """
