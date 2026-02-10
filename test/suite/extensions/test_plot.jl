@@ -1,7 +1,8 @@
 module TestPlot
 
 using Test
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using CTModels
 using Main.TestProblems
 using Plots

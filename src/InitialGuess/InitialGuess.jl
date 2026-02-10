@@ -24,7 +24,8 @@ See also: [`CTModels`](@ref)
 module InitialGuess
 
 using DocStringExtensions
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 
 # Import types and aliases from OCP module
 import ..OCP: AbstractModel, AbstractSolution

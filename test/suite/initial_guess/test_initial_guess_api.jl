@@ -1,7 +1,8 @@
 module TestInitialGuessAPI
 
 using Test
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using CTModels
 using Main.TestProblems
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

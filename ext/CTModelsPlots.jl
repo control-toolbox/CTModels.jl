@@ -5,8 +5,8 @@ using DocStringExtensions
 using MLStyle: MLStyle
 
 #
-using CTBase
-using CTBase: Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using CTModels
 using LinearAlgebra
 using Plots # redefine plot, plot!

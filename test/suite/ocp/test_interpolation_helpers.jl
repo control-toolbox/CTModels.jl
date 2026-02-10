@@ -1,7 +1,8 @@
 module TestInterpolationHelpers
 
 using Test
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using CTModels
 using CTModels.OCP: build_interpolated_function, _interpolate_from_data, _wrap_scalar_and_deepcopy
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

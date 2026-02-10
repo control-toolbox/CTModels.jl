@@ -25,7 +25,8 @@ See also: [`CTModels`](@ref)
 """
 module Display
 
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using DocStringExtensions
 using MLStyle: MLStyle
 using Base: Base

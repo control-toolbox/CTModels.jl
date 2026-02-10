@@ -1,7 +1,8 @@
 module TestNameValidation
 
 using Test
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using CTModels
 
 # Get test options if available, otherwise use defaults

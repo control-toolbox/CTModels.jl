@@ -30,7 +30,8 @@ See also: [`CTModels`](@ref), [`export_ocp_solution`](@ref), [`import_ocp_soluti
 module Serialization
 
 using DocStringExtensions
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 
 # Import types from parent module
 import ..AbstractModel, ..AbstractSolution, ..Solution

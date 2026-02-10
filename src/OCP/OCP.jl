@@ -29,7 +29,8 @@ See also: [`CTModels`](@ref)
 module OCP
 
 using DocStringExtensions
-using CTBase: CTBase, Exceptions
+using CTBase: CTBase
+const Exceptions = CTBase.Exceptions
 using MLStyle: MLStyle
 using MacroTools
 using Parameters
