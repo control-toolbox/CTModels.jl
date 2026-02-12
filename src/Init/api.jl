@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Create a pre-initialisation object for an initial guess.
 
-This function creates an [`OptimalControlPreInit`](@ref) that can later be
+This function creates an [`PreInitialGuess`](@ref) that can later be
 processed into a full [`InitialGuess`](@ref).
 
 # Arguments
@@ -17,7 +17,7 @@ processed into a full [`InitialGuess`](@ref).
 
 # Returns
 
-- `OptimalControlPreInit`: A pre-initialisation container.
+- `PreInitialGuess`: A pre-initialisation container.
 
 # Example
 
@@ -28,7 +28,7 @@ julia> pre = CTModels.pre_initial_guess(state=t -> [0.0, 0.0], control=t -> [1.0
 ```
 """
 function pre_initial_guess(; state=nothing, control=nothing, variable=nothing)
-    return OptimalControlPreInit(state, control, variable)
+    return PreInitialGuess(state, control, variable)
 end
 
 """
@@ -84,7 +84,7 @@ point** that guarantees a validated initial guess.
 Supported input types:
 - `nothing` or `()`: Returns default initial guess.
 - `AbstractInitialGuess`: Validates and returns.
-- `AbstractOptimalControlPreInit`: Converts from pre-initialisation.
+- `AbstractPreInitialGuess`: Converts from pre-initialisation.
 - `AbstractSolution`: Warm-starts from a previous solution.
 - `NamedTuple`: Parses named fields for state, control, and variable.
 
@@ -116,7 +116,7 @@ function build_initial_guess(ocp::AbstractModel, init_data)
         initial_guess(ocp)
     elseif init_data isa AbstractInitialGuess
         init_data
-    elseif init_data isa AbstractOptimalControlPreInit
+    elseif init_data isa AbstractPreInitialGuess
         _initial_guess_from_preinit(ocp, init_data)
     elseif init_data isa AbstractSolution
         _initial_guess_from_solution(ocp, init_data)
@@ -126,7 +126,7 @@ function build_initial_guess(ocp::AbstractModel, init_data)
         throw(Exceptions.IncorrectArgument(
             "Unsupported initial guess type",
             got="$(typeof(init_data))",
-            expected="nothing, InitialGuess, OptimalControlPreInit, Solution, or NamedTuple",
+            expected="nothing, InitialGuess, PreInitialGuess, Solution, or NamedTuple",
             suggestion="Use one of the supported types for initial guess specification",
             context="build_initial_guess"
         ))

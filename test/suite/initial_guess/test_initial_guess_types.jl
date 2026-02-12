@@ -29,12 +29,12 @@ function test_initial_guess_types()
             }
         end
 
-        Test.@testset "OptimalControlPreInit structure" begin
+        Test.@testset "PreInitialGuess structure" begin
             sx = :state_spec
             su = :control_spec
             sv = :variable_spec
 
-            pre = CTModels.OptimalControlPreInit(sx, su, sv)
+            pre = CTModels.PreInitialGuess(sx, su, sv)
 
             Test.@test pre.state === sx
             Test.@test pre.control === su

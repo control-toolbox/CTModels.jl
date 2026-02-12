@@ -52,9 +52,9 @@ initial guess.
 Subtypes store raw or partial information that will be processed into an
 [`InitialGuess`](@ref).
 
-See also: [`OptimalControlPreInit`](@ref).
+See also: [`PreInitialGuess`](@ref).
 """
-abstract type AbstractOptimalControlPreInit end
+abstract type AbstractPreInitialGuess end
 
 """
 $(TYPEDEF)
@@ -73,10 +73,10 @@ interpolation.
 ```julia-repl
 julia> using CTModels
 
-julia> pre = CTModels.OptimalControlPreInit([1.0 2.0; 3.0 4.0], [0.5, 0.6], [1.0])
+julia> pre = CTModels.PreInitialGuess([1.0 2.0; 3.0 4.0], [0.5, 0.6], [1.0])
 ```
 """
-struct OptimalControlPreInit{SX,SU,SV} <: AbstractOptimalControlPreInit
+struct PreInitialGuess{SX,SU,SV} <: AbstractPreInitialGuess
     state::SX
     control::SU
     variable::SV

@@ -52,14 +52,14 @@ function test_initial_guess_api()
                 state=state_data, control=control_data, variable=variable_data
             )
 
-            Test.@test pre isa CTModels.OptimalControlPreInit
+            Test.@test pre isa CTModels.PreInitialGuess
             Test.@test pre.state === state_data
             Test.@test pre.control === control_data
             Test.@test pre.variable === variable_data
 
             # Test with no arguments (all nothing)
             pre_empty = CTModels.pre_initial_guess()
-            Test.@test pre_empty isa CTModels.OptimalControlPreInit
+            Test.@test pre_empty isa CTModels.PreInitialGuess
             Test.@test pre_empty.state === nothing
             Test.@test pre_empty.control === nothing
             Test.@test pre_empty.variable === nothing
@@ -152,7 +152,7 @@ function test_initial_guess_api()
             )
         end
 
-        Test.@testset "build_initial_guess - OptimalControlPreInit input" begin
+        Test.@testset "build_initial_guess - PreInitialGuess input" begin
             ocp1 = DummyOCP1DNoVar()
             ocp2 = DummyOCP1DVar()
 

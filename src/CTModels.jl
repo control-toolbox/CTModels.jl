@@ -34,7 +34,7 @@ CTModels is organized into specialized modules, each with clear responsibilities
 
 - **InitialGuess**: Initial guess management
   - `initial_guess`, `build_initial_guess`, `validate_initial_guess`
-  - Types: `InitialGuess`, `OptimalControlPreInit`
+  - Types: `InitialGuess`, `PreInitialGuess`
 
 ## Supporting Modules
 
@@ -88,7 +88,7 @@ include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
 using .Serialization
 
 # Initial guess management
-include(joinpath(@__DIR__, "InitialGuess", "InitialGuess.jl"))
-using .InitialGuess
+include(joinpath(@__DIR__, "Init", "Init.jl"))
+using .Init
 
 end

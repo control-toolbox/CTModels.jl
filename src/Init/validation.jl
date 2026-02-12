@@ -455,7 +455,7 @@ Build an initial guess from a pre-initialisation object.
 Converts raw data into functions and trajectories. Validation against the OCP
 is performed by [`build_initial_guess`](@ref).
 """
-function _initial_guess_from_preinit(ocp::AbstractModel, pre::OptimalControlPreInit)
+function _initial_guess_from_preinit(ocp::AbstractModel, pre::PreInitialGuess)
     x = initial_state(ocp, pre.state)
     u = initial_control(ocp, pre.control)
     v = initial_variable(ocp, pre.variable)

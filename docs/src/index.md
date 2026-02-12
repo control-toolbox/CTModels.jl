@@ -115,7 +115,7 @@ These objects are the main bridge between the mathematical problem and the NLP b
 Good initial guesses are crucial for challenging optimal control problems.
 CTModels provides a layer to organize them:
 
-- `pre_initial_guess` builds an `OptimalControlPreInit` object from raw user data
+- `pre_initial_guess` builds an `PreInitialGuess` object from raw user data
   (functions, vectors, or constants for state, control, and variables).
 - `initial_guess` turns this into an `InitialGuess`, checking consistency
   with the chosen `AbstractModel`.

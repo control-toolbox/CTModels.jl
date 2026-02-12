@@ -34,8 +34,8 @@ function test_types()
             Test.@test CTModels.InitialGuess <:
                        CTModels.AbstractInitialGuess
 
-            Test.@test isabstracttype(CTModels.AbstractOptimalControlPreInit)
-            Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit
+            Test.@test isabstracttype(CTModels.AbstractPreInitialGuess)
+            Test.@test CTModels.PreInitialGuess <: CTModels.AbstractPreInitialGuess
         end
     end
 end
