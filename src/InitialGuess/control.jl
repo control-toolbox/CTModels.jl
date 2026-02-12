@@ -93,7 +93,7 @@ $(TYPEDSIGNATURES)
 
 Return the control trajectory from an initial guess.
 """
-control(init::AbstractOptimalControlInitialGuess) = init.control
+control(init::AbstractInitialGuess) = init.control
 
 """
 $(TYPEDSIGNATURES)

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **InitialGuess Architecture**: Refactored validation system following Single Responsibility Principle
   - `initial_guess()` is now pure construction (no validation)
   - `build_initial_guess()` centralises validation for ALL input types
-  - Fixed validation hole: direct `AbstractOptimalControlInitialGuess` now properly validated
+  - Fixed validation hole: direct `AbstractInitialGuess` now properly validated
   - Internal builders (`_initial_guess_from_*`) return without validation
   - Updated docstrings to reflect construction/validation separation
 
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Validation Gap**: Direct `AbstractOptimalControlInitialGuess` passed to `build_initial_guess`
+- **Validation Gap**: Direct `AbstractInitialGuess` passed to `build_initial_guess`
   was not being validated, creating a potential runtime error source
 - **Architecture**: Improved code organization with clear separation of concerns
 

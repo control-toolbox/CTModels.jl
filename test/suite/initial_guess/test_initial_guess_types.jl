@@ -12,19 +12,19 @@ function test_initial_guess_types()
         # Unit tests – core initial guess types
         # ========================================================================
 
-        Test.@testset "OptimalControlInitialGuess structure" begin
+        Test.@testset "InitialGuess structure" begin
             state_fun = t -> [t]
             control_fun = t -> [-t]
             variable_vec = [1.0, 2.0]
 
-            ig = CTModels.OptimalControlInitialGuess(state_fun, control_fun, variable_vec)
+            ig = CTModels.InitialGuess(state_fun, control_fun, variable_vec)
 
             Test.@test ig.state === state_fun
             Test.@test ig.control === control_fun
             Test.@test ig.variable === variable_vec
 
             # Type parameters should reflect the concrete field types
-            Test.@test ig isa CTModels.OptimalControlInitialGuess{
+            Test.@test ig isa CTModels.InitialGuess{
                 typeof(state_fun),typeof(control_fun),typeof(variable_vec)
             }
         end
@@ -45,12 +45,12 @@ function test_initial_guess_types()
         # Integration-style tests – fake consumer of initial guesses
         # ========================================================================
 
-        Test.@testset "fake consumer of OptimalControlInitialGuess" begin
+        Test.@testset "fake consumer of InitialGuess" begin
             state_fun = t -> 2t
             control_fun = t -> -3t
             variable_val = 1.23
 
-            ig = CTModels.OptimalControlInitialGuess(state_fun, control_fun, variable_val)
+            ig = CTModels.InitialGuess(state_fun, control_fun, variable_val)
 
             # Simple fake consumer that only relies on the fields of the type
             function consume_initial_guess(ig_local)

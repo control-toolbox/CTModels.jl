@@ -49,7 +49,7 @@ function test_initial_guess_utils()
 
             init_nt = (state=(time_vec, state_data),)
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
 
             # Verify the state function works (proves time grid was formatted correctly)
             x_fun = CTModels.state(ig)
@@ -67,7 +67,7 @@ function test_initial_guess_utils()
 
             init_nt = (state=(time, state_matrix),)
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
 
             # Verify the state function works (proves matrix was formatted correctly)
             x_fun = CTModels.state(ig)
@@ -96,7 +96,7 @@ function test_initial_guess_utils()
             # This should work because _format_time_grid converts the array
             init_nt = (state=(time_array, state_data),)
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
 
             # Verify the state function works
             x_fun = CTModels.state(ig)
@@ -114,7 +114,7 @@ function test_initial_guess_utils()
 
             init_nt = (state=(time, state_matrix),)
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
 
             # Verify the state function works
             x_fun = CTModels.state(ig)

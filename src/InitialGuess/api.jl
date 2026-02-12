@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 Create a pre-initialisation object for an initial guess.
 
 This function creates an [`OptimalControlPreInit`](@ref) that can later be
-processed into a full [`OptimalControlInitialGuess`](@ref).
+processed into a full [`InitialGuess`](@ref).
 
 # Arguments
 
@@ -36,7 +36,7 @@ $(TYPEDSIGNATURES)
 
 Construct an initial guess for an optimal control problem.
 
-Builds an [`OptimalControlInitialGuess`](@ref) from the provided state, control,
+Builds an [`InitialGuess`](@ref) from the provided state, control,
 and variable data. The returned initial guess is **not validated** against the
 problem dimensions; use [`build_initial_guess`](@ref) or
 [`validate_initial_guess`](@ref) for dimension checking.
@@ -50,7 +50,7 @@ problem dimensions; use [`build_initial_guess`](@ref) or
 
 # Returns
 
-- `OptimalControlInitialGuess`: An initial guess (not yet validated).
+- `InitialGuess`: An initial guess (not yet validated).
 
 # Example
 
@@ -69,7 +69,7 @@ function initial_guess(
     x = initial_state(ocp, state)
     u = initial_control(ocp, control)
     v = initial_variable(ocp, variable)
-    return OptimalControlInitialGuess(x, u, v)
+    return InitialGuess(x, u, v)
 end
 
 """
@@ -77,13 +77,13 @@ $(TYPEDSIGNATURES)
 
 Build and validate an initial guess from various input formats.
 
-Accepts multiple input types, converts them to an [`OptimalControlInitialGuess`](@ref),
+Accepts multiple input types, converts them to an [`InitialGuess`](@ref),
 and validates dimensions against the problem definition. This is the **single entry
 point** that guarantees a validated initial guess.
 
 Supported input types:
 - `nothing` or `()`: Returns default initial guess.
-- `AbstractOptimalControlInitialGuess`: Validates and returns.
+- `AbstractInitialGuess`: Validates and returns.
 - `AbstractOptimalControlPreInit`: Converts from pre-initialisation.
 - `AbstractSolution`: Warm-starts from a previous solution.
 - `NamedTuple`: Parses named fields for state, control, and variable.
@@ -95,7 +95,7 @@ Supported input types:
 
 # Returns
 
-- `OptimalControlInitialGuess`: A validated initial guess.
+- `InitialGuess`: A validated initial guess.
 
 # Throws
 
@@ -114,7 +114,7 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
     # Phase 1: Construction (no validation)
     init = if init_data === nothing || init_data === ()
         initial_guess(ocp)
-    elseif init_data isa AbstractOptimalControlInitialGuess
+    elseif init_data isa AbstractInitialGuess
         init_data
     elseif init_data isa AbstractOptimalControlPreInit
         _initial_guess_from_preinit(ocp, init_data)
@@ -126,7 +126,7 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
         throw(Exceptions.IncorrectArgument(
             "Unsupported initial guess type",
             got="$(typeof(init_data))",
-            expected="nothing, OptimalControlInitialGuess, OptimalControlPreInit, Solution, or NamedTuple",
+            expected="nothing, InitialGuess, OptimalControlPreInit, Solution, or NamedTuple",
             suggestion="Use one of the supported types for initial guess specification",
             context="build_initial_guess"
         ))
@@ -143,25 +143,25 @@ Validate an initial guess against an optimal control problem.
 
 Checks that the state, control, and variable dimensions of the initial guess
 are consistent with the problem definition. This function can be called
-explicitly on a manually constructed [`OptimalControlInitialGuess`](@ref).
+explicitly on a manually constructed [`InitialGuess`](@ref).
 
 # Arguments
 
 - `ocp::AbstractOptimalControlProblem`: The optimal control problem.
-- `init::AbstractOptimalControlInitialGuess`: The initial guess to validate.
+- `init::AbstractInitialGuess`: The initial guess to validate.
 
 # Returns
 
-- `AbstractOptimalControlInitialGuess`: The validated initial guess (same object).
+- `AbstractInitialGuess`: The validated initial guess (same object).
 
 # Throws
 
 - `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
 """
 function validate_initial_guess(
-    ocp::AbstractOptimalControlProblem, init::AbstractOptimalControlInitialGuess
+    ocp::AbstractOptimalControlProblem, init::AbstractInitialGuess
 )
-    if init isa OptimalControlInitialGuess
+    if init isa InitialGuess
         return _validate_initial_guess(ocp, init)
     else
         return init

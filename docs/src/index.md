@@ -117,7 +117,7 @@ CTModels provides a layer to organize them:
 
 - `pre_initial_guess` builds an `OptimalControlPreInit` object from raw user data
   (functions, vectors, or constants for state, control, and variables).
-- `initial_guess` turns this into an `OptimalControlInitialGuess`, checking consistency
+- `initial_guess` turns this into an `InitialGuess`, checking consistency
   with the chosen `AbstractModel`.
 - `build_initial_guess` constructs initial guess objects from various input formats.
 - `validate_initial_guess` ensures consistency with the problem dimensions.

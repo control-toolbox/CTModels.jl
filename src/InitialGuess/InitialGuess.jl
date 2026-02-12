@@ -16,7 +16,7 @@ The following functions are exported and accessible as `CTModels.function_name()
 
 # Types
 
-- [`OptimalControlInitialGuess`](@ref): Validated initial guess with callable trajectories
+- [`InitialGuess`](@ref): Validated initial guess with callable trajectories
 - [`OptimalControlPreInit`](@ref): Pre-initialization container for raw data
 
 See also: [`CTModels`](@ref)
@@ -58,12 +58,12 @@ include("api.jl")        # API publique
 # Export public API
 export initial_guess, pre_initial_guess, build_initial_guess, validate_initial_guess
 export initial_state, initial_control, initial_variable
-export OptimalControlInitialGuess, OptimalControlPreInit
-export AbstractOptimalControlInitialGuess, AbstractOptimalControlPreInit
+export InitialGuess, OptimalControlPreInit
+export AbstractInitialGuess, AbstractOptimalControlPreInit
 
 # Note: state, control, variable are NOT exported here as they are already
 # defined in the parent CTModels module for Model and Solution types.
-# The InitialGuess module defines additional methods for OptimalControlInitialGuess
+# The InitialGuess module defines additional methods for InitialGuess
 # which extend the existing functions.
 
 end

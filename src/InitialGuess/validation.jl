@@ -4,12 +4,12 @@
 """
 $(TYPEDSIGNATURES)
 
-Internal validation of an [`OptimalControlInitialGuess`](@ref).
+Internal validation of an [`InitialGuess`](@ref).
 
 Samples the state and control functions at a test time and verifies dimensions.
 """
 function _validate_initial_guess(
-    ocp::AbstractOptimalControlProblem, init::OptimalControlInitialGuess
+    ocp::AbstractOptimalControlProblem, init::InitialGuess
 )
     # Dimensions from the OCP
     xdim = state_dimension(ocp)
@@ -164,7 +164,7 @@ function _initial_guess_from_solution(
     control_fun = control(sol)
     variable_val = variable(sol)
 
-    return OptimalControlInitialGuess(state_fun, control_fun, variable_val)
+    return InitialGuess(state_fun, control_fun, variable_val)
 end
 
 """
@@ -444,7 +444,7 @@ function _initial_guess_from_namedtuple(
         end
     end
 
-    return OptimalControlInitialGuess(state_fun, control_fun, variable_val)
+    return InitialGuess(state_fun, control_fun, variable_val)
 end
 
 """
@@ -459,5 +459,5 @@ function _initial_guess_from_preinit(ocp::AbstractOptimalControlProblem, pre::Op
     x = initial_state(ocp, pre.state)
     u = initial_control(ocp, pre.control)
     v = initial_variable(ocp, pre.variable)
-    return OptimalControlInitialGuess(x, u, v)
+    return InitialGuess(x, u, v)
 end

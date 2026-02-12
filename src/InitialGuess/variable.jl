@@ -97,7 +97,7 @@ $(TYPEDSIGNATURES)
 
 Return the variable value from an initial guess.
 """
-variable(init::AbstractOptimalControlInitialGuess) = init.variable
+variable(init::AbstractInitialGuess) = init.variable
 
 """
 $(TYPEDSIGNATURES)

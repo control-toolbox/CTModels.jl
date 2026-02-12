@@ -34,7 +34,7 @@ CTModels is organized into specialized modules, each with clear responsibilities
 
 - **InitialGuess**: Initial guess management
   - `initial_guess`, `build_initial_guess`, `validate_initial_guess`
-  - Types: `OptimalControlInitialGuess`, `OptimalControlPreInit`
+  - Types: `InitialGuess`, `OptimalControlPreInit`
 
 ## Supporting Modules
 

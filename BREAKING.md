@@ -24,7 +24,7 @@ Refactored the InitialGuess validation system to follow Single Responsibility Pr
 ##### Validation Coverage Fix
 ```julia
 # Before: This case was NOT validated (potential runtime error)
-bad_init = CTModels.OptimalControlInitialGuess(wrong_dimensions...)
+bad_init = CTModels.InitialGuess(wrong_dimensions...)
 validated = CTModels.build_initial_guess(ocp, bad_init)  # No validation!
 
 # After: All branches are validated
@@ -35,7 +35,7 @@ validated = CTModels.build_initial_guess(ocp, bad_init)  # Throws IncorrectArgum
 
 **No user code changes required** - this is an internal refactoring that:
 - Maintains all existing public APIs
-- Fixes a validation gap for direct `AbstractOptimalControlInitialGuess` inputs
+- Fixes a validation gap for direct `AbstractInitialGuess` inputs
 - Improves error detection and code reliability
 - All tests pass (147/147)
 

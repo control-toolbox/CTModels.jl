@@ -30,9 +30,9 @@ function test_types()
         end
 
         Test.@testset "Initial guess core types" begin
-            Test.@test isabstracttype(CTModels.AbstractOptimalControlInitialGuess)
-            Test.@test CTModels.OptimalControlInitialGuess <:
-                       CTModels.AbstractOptimalControlInitialGuess
+            Test.@test isabstracttype(CTModels.AbstractInitialGuess)
+            Test.@test CTModels.InitialGuess <:
+                       CTModels.AbstractInitialGuess
 
             Test.@test isabstracttype(CTModels.AbstractOptimalControlPreInit)
             Test.@test CTModels.OptimalControlPreInit <: CTModels.AbstractOptimalControlPreInit

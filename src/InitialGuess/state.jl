@@ -93,7 +93,7 @@ $(TYPEDSIGNATURES)
 
 Return the state trajectory from an initial guess.
 """
-state(init::AbstractOptimalControlInitialGuess) = init.state
+state(init::AbstractInitialGuess) = init.state
 
 """
 $(TYPEDSIGNATURES)
