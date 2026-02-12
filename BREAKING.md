@@ -2,6 +2,51 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.8.2-beta] - 2026-02-12
+
+### InitialGuess Validation Architecture Change
+
+#### Overview
+Refactored the InitialGuess validation system to follow Single Responsibility Principle. This is an **internal architectural change** that does not affect the public API behavior but improves code organization.
+
+#### What Changed
+
+##### Construction vs Validation Separation
+```julia
+# Before (0.8.1-beta and earlier)
+# initial_guess() validated internally, build_initial_guess() had mixed responsibilities
+
+# After (0.8.2-beta)
+# initial_guess() is pure construction
+# build_initial_guess() centralises validation for ALL input types
+```
+
+##### Validation Coverage Fix
+```julia
+# Before: This case was NOT validated (potential runtime error)
+bad_init = CTModels.OptimalControlInitialGuess(wrong_dimensions...)
+validated = CTModels.build_initial_guess(ocp, bad_init)  # No validation!
+
+# After: All branches are validated
+validated = CTModels.build_initial_guess(ocp, bad_init)  # Throws IncorrectArgument
+```
+
+#### Migration Required
+
+**No user code changes required** - this is an internal refactoring that:
+- Maintains all existing public APIs
+- Fixes a validation gap for direct `AbstractOptimalControlInitialGuess` inputs
+- Improves error detection and code reliability
+- All tests pass (147/147)
+
+#### Benefits
+
+- **Better Error Detection**: Invalid initial guesses are caught consistently
+- **Cleaner Architecture**: Clear separation of construction and validation concerns
+- **Improved Reliability**: Eliminates potential runtime errors from unchecked inputs
+
+---
+
 ## [0.8.0-beta] - 2026-02-04
 
 ### Module Migration to CTSolvers

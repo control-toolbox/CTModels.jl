@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2-beta] - 2026-02-12
+
+### Changed
+
+- **InitialGuess Architecture**: Refactored validation system following Single Responsibility Principle
+  - `initial_guess()` is now pure construction (no validation)
+  - `build_initial_guess()` centralises validation for ALL input types
+  - Fixed validation hole: direct `AbstractOptimalControlInitialGuess` now properly validated
+  - Internal builders (`_initial_guess_from_*`) return without validation
+  - Updated docstrings to reflect construction/validation separation
+
+### Added
+
+- **Regression Tests**: Comprehensive test coverage for refactored validation
+  - Tests for invalid direct InitialGuess detection
+  - Tests for construction/validation separation
+  - Tests for centralised validation in all branches
+  - All 147 tests passing
+
+### Fixed
+
+- **Validation Gap**: Direct `AbstractOptimalControlInitialGuess` passed to `build_initial_guess`
+  was not being validated, creating a potential runtime error source
+- **Architecture**: Improved code organization with clear separation of concerns
+
 ## [0.8.1-beta] - 2026-02-10
 
 ### Changed
