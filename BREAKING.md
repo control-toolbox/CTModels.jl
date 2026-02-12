@@ -2,7 +2,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [0.8.3-beta] - 2026-02-12
+## [0.9.0-beta] - 2026-02-12
 
 ### Module and Type Renaming
 
@@ -16,7 +16,7 @@ The InitialGuess module has been renamed to `Init` for better API ergonomics and
 # Before (0.8.2-beta and earlier)
 using CTModels.InitialGuess
 
-# After (0.8.3-beta)
+# After (0.9.0-beta)
 using CTModels.Init
 ```
 
