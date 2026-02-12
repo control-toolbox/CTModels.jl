@@ -33,8 +33,8 @@ function test_CTModels()
             Test.@test CTModels.JSON3Tag <: CTModels.AbstractTag
 
             # Aliases towards CTSolvers usage
-            Test.@test CTModels.AbstractOptimalControlProblem === CTModels.AbstractModel
-            Test.@test CTModels.AbstractOptimalControlSolution === CTModels.AbstractSolution
+            Test.@test CTModels.AbstractModel === CTModels.AbstractModel
+            Test.@test CTModels.AbstractSolution === CTModels.AbstractSolution
         end
 
         # ========================================================================

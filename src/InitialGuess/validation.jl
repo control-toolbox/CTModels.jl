@@ -9,7 +9,7 @@ Internal validation of an [`InitialGuess`](@ref).
 Samples the state and control functions at a test time and verifies dimensions.
 """
 function _validate_initial_guess(
-    ocp::AbstractOptimalControlProblem, init::InitialGuess
+    ocp::AbstractModel, init::InitialGuess
 )
     # Dimensions from the OCP
     xdim = state_dimension(ocp)
@@ -129,7 +129,7 @@ Dimensional consistency is checked against the solution metadata; final
 validation against the OCP is performed by [`build_initial_guess`](@ref).
 """
 function _initial_guess_from_solution(
-    ocp::AbstractOptimalControlProblem, sol::AbstractSolution
+    ocp::AbstractModel, sol::AbstractSolution
 )
     # Basic dimensional consistency checks
     if state_dimension(ocp) != state_dimension(sol.model)
@@ -177,7 +177,7 @@ the appropriate initialisation functions. Validation against the OCP is
 performed by [`build_initial_guess`](@ref).
 """
 function _initial_guess_from_namedtuple(
-    ocp::AbstractOptimalControlProblem, init_data::NamedTuple
+    ocp::AbstractModel, init_data::NamedTuple
 )
     # Names and component maps from the OCP
     s_name_sym = Symbol(state_name(ocp))
@@ -455,7 +455,7 @@ Build an initial guess from a pre-initialisation object.
 Converts raw data into functions and trajectories. Validation against the OCP
 is performed by [`build_initial_guess`](@ref).
 """
-function _initial_guess_from_preinit(ocp::AbstractOptimalControlProblem, pre::OptimalControlPreInit)
+function _initial_guess_from_preinit(ocp::AbstractModel, pre::OptimalControlPreInit)
     x = initial_state(ocp, pre.state)
     u = initial_control(ocp, pre.control)
     v = initial_variable(ocp, pre.variable)

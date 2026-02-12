@@ -29,7 +29,7 @@ const Exceptions = CTBase.Exceptions
 
 # Import types and aliases from OCP module
 import ..OCP: AbstractModel, AbstractSolution
-import ..OCP: AbstractOptimalControlProblem, AbstractOptimalControlSolution
+import ..OCP: AbstractModel, AbstractSolution
 
 # Import functions from OCP module
 import ..OCP: state, control, variable

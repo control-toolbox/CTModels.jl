@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Return the state function directly when provided as a function.
 """
-initial_state(::AbstractOptimalControlProblem, state::Function) = state
+initial_state(::AbstractModel, state::Function) = state
 
 """
 $(TYPEDSIGNATURES)
@@ -15,7 +15,7 @@ Convert a scalar state value to a constant function for 1D state problems.
 
 Throws `Exceptions.IncorrectArgument` if the state dimension is not 1.
 """
-function initial_state(ocp::AbstractOptimalControlProblem, state::Real)
+function initial_state(ocp::AbstractModel, state::Real)
     dim = state_dimension(ocp)
     if dim == 1
         return t -> state
@@ -37,7 +37,7 @@ Convert a state vector to a constant function.
 
 Throws `Exceptions.IncorrectArgument` if the vector length does not match the state dimension.
 """
-function initial_state(ocp::AbstractOptimalControlProblem, state::Vector{<:Real})
+function initial_state(ocp::AbstractModel, state::Vector{<:Real})
     dim = state_dimension(ocp)
     if length(state) != dim
         throw(Exceptions.IncorrectArgument(
@@ -58,7 +58,7 @@ Return a default state initialisation function when no state is provided.
 
 Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
 """
-function initial_state(ocp::AbstractOptimalControlProblem, ::Nothing)
+function initial_state(ocp::AbstractModel, ::Nothing)
     dim = state_dimension(ocp)
     if dim == 1
         return t -> 0.1
@@ -74,7 +74,7 @@ Handle time-grid state initialization with (time, data) tuple.
 
 Interpolates the provided data over the time grid to create a callable function.
 """
-function initial_state(ocp::AbstractOptimalControlProblem, state::Tuple)
+function initial_state(ocp::AbstractModel, state::Tuple)
     length(state) == 2 || throw(Exceptions.IncorrectArgument(
         "Time-grid state initialization must be a 2-tuple (time, data)",
         got="$(length(state))-tuple",
@@ -100,4 +100,4 @@ $(TYPEDSIGNATURES)
 
 Return the state trajectory from a solution.
 """
-state(sol::AbstractOptimalControlSolution) = sol.state
+state(sol::AbstractSolution) = sol.state

@@ -43,7 +43,7 @@ problem dimensions; use [`build_initial_guess`](@ref) or
 
 # Arguments
 
-- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `ocp::AbstractModel`: The optimal control problem.
 - `state`: State initialisation (function `t -> x(t)`, constant, vector, or `nothing`).
 - `control`: Control initialisation (function `t -> u(t)`, constant, vector, or `nothing`).
 - `variable`: Variable initialisation (scalar, vector, or `nothing`).
@@ -61,7 +61,7 @@ julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> [1
 ```
 """
 function initial_guess(
-    ocp::AbstractOptimalControlProblem;
+    ocp::AbstractModel;
     state::Union{Nothing,Function,Real,Vector{<:Real}}=nothing,
     control::Union{Nothing,Function,Real,Vector{<:Real}}=nothing,
     variable::Union{Nothing,Real,Vector{<:Real}}=nothing,
@@ -90,7 +90,7 @@ Supported input types:
 
 # Arguments
 
-- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `ocp::AbstractModel`: The optimal control problem.
 - `init_data`: The initial guess data in one of the supported formats.
 
 # Returns
@@ -110,7 +110,7 @@ julia> using CTModels
 julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> [1.0]))
 ```
 """
-function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
+function build_initial_guess(ocp::AbstractModel, init_data)
     # Phase 1: Construction (no validation)
     init = if init_data === nothing || init_data === ()
         initial_guess(ocp)
@@ -147,7 +147,7 @@ explicitly on a manually constructed [`InitialGuess`](@ref).
 
 # Arguments
 
-- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `ocp::AbstractModel`: The optimal control problem.
 - `init::AbstractInitialGuess`: The initial guess to validate.
 
 # Returns
@@ -159,7 +159,7 @@ explicitly on a manually constructed [`InitialGuess`](@ref).
 - `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
 """
 function validate_initial_guess(
-    ocp::AbstractOptimalControlProblem, init::AbstractInitialGuess
+    ocp::AbstractModel, init::AbstractInitialGuess
 )
     if init isa InitialGuess
         return _validate_initial_guess(ocp, init)

@@ -8,7 +8,7 @@ Return a scalar variable value for 1D variable problems.
 
 Throws `Exceptions.IncorrectArgument` if the variable dimension is not 1.
 """
-function initial_variable(ocp::AbstractOptimalControlProblem, variable::Real)
+function initial_variable(ocp::AbstractModel, variable::Real)
     dim = variable_dimension(ocp)
     if dim == 0
         throw(Exceptions.IncorrectArgument(
@@ -38,7 +38,7 @@ Return a variable vector.
 
 Throws `Exceptions.IncorrectArgument` if the vector length does not match the variable dimension.
 """
-function initial_variable(ocp::AbstractOptimalControlProblem, variable::Vector{<:Real})
+function initial_variable(ocp::AbstractModel, variable::Vector{<:Real})
     dim = variable_dimension(ocp)
     base_val = variable
     if length(base_val) != dim
@@ -60,7 +60,7 @@ Return a default variable initialisation when no variable is provided.
 
 Returns an empty vector if `dim == 0`, `0.1` if `dim == 1`, or `fill(0.1, dim)` otherwise.
 """
-function initial_variable(ocp::AbstractOptimalControlProblem, ::Nothing)
+function initial_variable(ocp::AbstractModel, ::Nothing)
     dim = variable_dimension(ocp)
     if dim == 0
         return Float64[]
@@ -78,7 +78,7 @@ Handle time-grid variable initialization with (time, data) tuple.
 
 Interpolates the provided data over the time grid to create a callable function.
 """
-function initial_variable(ocp::AbstractOptimalControlProblem, variable::Tuple)
+function initial_variable(ocp::AbstractModel, variable::Tuple)
     length(variable) == 2 || throw(Exceptions.IncorrectArgument(
         "Time-grid variable initialization must be a 2-tuple (time, data)",
         got="$(length(variable))-tuple",
@@ -104,4 +104,4 @@ $(TYPEDSIGNATURES)
 
 Return the variable value from a solution.
 """
-variable(sol::AbstractOptimalControlSolution) = sol.variable
+variable(sol::AbstractSolution) = sol.variable
