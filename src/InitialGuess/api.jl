@@ -34,10 +34,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Construct a validated initial guess for an optimal control problem.
+Construct an initial guess for an optimal control problem.
 
 Builds an [`OptimalControlInitialGuess`](@ref) from the provided state, control,
-and variable data, validating dimensions against the problem definition.
+and variable data. The returned initial guess is **not validated** against the
+problem dimensions; use [`build_initial_guess`](@ref) or
+[`validate_initial_guess`](@ref) for dimension checking.
 
 # Arguments
 
@@ -48,7 +50,7 @@ and variable data, validating dimensions against the problem definition.
 
 # Returns
 
-- `OptimalControlInitialGuess`: A validated initial guess.
+- `OptimalControlInitialGuess`: An initial guess (not yet validated).
 
 # Example
 
@@ -67,18 +69,21 @@ function initial_guess(
     x = initial_state(ocp, state)
     u = initial_control(ocp, control)
     v = initial_variable(ocp, variable)
-    init = OptimalControlInitialGuess(x, u, v)
-    return _validate_initial_guess(ocp, init)
+    return OptimalControlInitialGuess(x, u, v)
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Build an initial guess from various input formats.
+Build and validate an initial guess from various input formats.
 
-Accepts multiple input types and converts them to an [`OptimalControlInitialGuess`](@ref):
+Accepts multiple input types, converts them to an [`OptimalControlInitialGuess`](@ref),
+and validates dimensions against the problem definition. This is the **single entry
+point** that guarantees a validated initial guess.
+
+Supported input types:
 - `nothing` or `()`: Returns default initial guess.
-- `AbstractOptimalControlInitialGuess`: Returns as-is.
+- `AbstractOptimalControlInitialGuess`: Validates and returns.
 - `AbstractOptimalControlPreInit`: Converts from pre-initialisation.
 - `AbstractSolution`: Warm-starts from a previous solution.
 - `NamedTuple`: Parses named fields for state, control, and variable.
@@ -92,6 +97,11 @@ Accepts multiple input types and converts them to an [`OptimalControlInitialGues
 
 - `OptimalControlInitialGuess`: A validated initial guess.
 
+# Throws
+
+- `Exceptions.IncorrectArgument`: If `init_data` has an unsupported type or if
+  dimensions do not match the problem definition.
+
 # Example
 
 ```julia-repl
@@ -101,16 +111,17 @@ julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> 
 ```
 """
 function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
-    if init_data === nothing || init_data === ()
-        return initial_guess(ocp)
+    # Phase 1: Construction (no validation)
+    init = if init_data === nothing || init_data === ()
+        initial_guess(ocp)
     elseif init_data isa AbstractOptimalControlInitialGuess
-        return init_data
+        init_data
     elseif init_data isa AbstractOptimalControlPreInit
-        return _initial_guess_from_preinit(ocp, init_data)
+        _initial_guess_from_preinit(ocp, init_data)
     elseif init_data isa AbstractSolution
-        return _initial_guess_from_solution(ocp, init_data)
+        _initial_guess_from_solution(ocp, init_data)
     elseif init_data isa NamedTuple
-        return _initial_guess_from_namedtuple(ocp, init_data)
+        _initial_guess_from_namedtuple(ocp, init_data)
     else
         throw(Exceptions.IncorrectArgument(
             "Unsupported initial guess type",
@@ -120,16 +131,32 @@ function build_initial_guess(ocp::AbstractOptimalControlProblem, init_data)
             context="build_initial_guess"
         ))
     end
+
+    # Phase 2: Centralised validation
+    return validate_initial_guess(ocp, init)
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Validate an initial guess for an optimal control problem.
+Validate an initial guess against an optimal control problem.
+
+Checks that the state, control, and variable dimensions of the initial guess
+are consistent with the problem definition. This function can be called
+explicitly on a manually constructed [`OptimalControlInitialGuess`](@ref).
+
+# Arguments
+
+- `ocp::AbstractOptimalControlProblem`: The optimal control problem.
+- `init::AbstractOptimalControlInitialGuess`: The initial guess to validate.
+
+# Returns
+
+- `AbstractOptimalControlInitialGuess`: The validated initial guess (same object).
 
 # Throws
 
-- `Exceptions.IncorrectArgument` if dimensions do not match.
+- `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
 """
 function validate_initial_guess(
     ocp::AbstractOptimalControlProblem, init::AbstractOptimalControlInitialGuess
@@ -137,7 +164,6 @@ function validate_initial_guess(
     if init isa OptimalControlInitialGuess
         return _validate_initial_guess(ocp, init)
     else
-        # For now, only OptimalControlInitialGuess is supported.
         return init
     end
 end

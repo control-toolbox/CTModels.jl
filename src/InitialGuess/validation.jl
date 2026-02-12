@@ -124,8 +124,9 @@ $(TYPEDSIGNATURES)
 
 Build an initial guess from a previous solution (warm start).
 
-Extracts state, control, and variable trajectories from the solution and validates
-dimensions against the current problem.
+Extracts state, control, and variable trajectories from the solution.
+Dimensional consistency is checked against the solution metadata; final
+validation against the OCP is performed by [`build_initial_guess`](@ref).
 """
 function _initial_guess_from_solution(
     ocp::AbstractOptimalControlProblem, sol::AbstractSolution
@@ -163,8 +164,7 @@ function _initial_guess_from_solution(
     control_fun = control(sol)
     variable_val = variable(sol)
 
-    init = OptimalControlInitialGuess(state_fun, control_fun, variable_val)
-    return _validate_initial_guess(ocp, init)
+    return OptimalControlInitialGuess(state_fun, control_fun, variable_val)
 end
 
 """
@@ -173,7 +173,8 @@ $(TYPEDSIGNATURES)
 Build an initial guess from a `NamedTuple`.
 
 Parses keys for state, control, variable (by name or component) and constructs
-the appropriate initialisation functions.
+the appropriate initialisation functions. Validation against the OCP is
+performed by [`build_initial_guess`](@ref).
 """
 function _initial_guess_from_namedtuple(
     ocp::AbstractOptimalControlProblem, init_data::NamedTuple
@@ -443,8 +444,7 @@ function _initial_guess_from_namedtuple(
         end
     end
 
-    init = OptimalControlInitialGuess(state_fun, control_fun, variable_val)
-    return _validate_initial_guess(ocp, init)
+    return OptimalControlInitialGuess(state_fun, control_fun, variable_val)
 end
 
 """
@@ -452,12 +452,12 @@ $(TYPEDSIGNATURES)
 
 Build an initial guess from a pre-initialisation object.
 
-Converts raw data into validated functions and trajectories.
+Converts raw data into functions and trajectories. Validation against the OCP
+is performed by [`build_initial_guess`](@ref).
 """
 function _initial_guess_from_preinit(ocp::AbstractOptimalControlProblem, pre::OptimalControlPreInit)
     x = initial_state(ocp, pre.state)
     u = initial_control(ocp, pre.control)
     v = initial_variable(ocp, pre.variable)
-    init = OptimalControlInitialGuess(x, u, v)
-    return _validate_initial_guess(ocp, init)
+    return OptimalControlInitialGuess(x, u, v)
 end

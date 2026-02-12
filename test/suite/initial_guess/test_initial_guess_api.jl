@@ -127,15 +127,29 @@ function test_initial_guess_api()
             Test.@test ig_empty isa CTModels.OptimalControlInitialGuess
         end
 
-        Test.@testset "build_initial_guess - OptimalControlInitialGuess input" begin
+        Test.@testset "build_initial_guess - OptimalControlInitialGuess input (valid)" begin
             ocp = DummyOCP1DNoVar()
 
-            # Create an initial guess
+            # Create a valid initial guess
             init = CTModels.initial_guess(ocp; state=0.5)
 
-            # Passing it to build_initial_guess should return it as-is
+            # Passing it to build_initial_guess should validate and return it
             ig = CTModels.build_initial_guess(ocp, init)
             Test.@test ig === init
+        end
+
+        Test.@testset "build_initial_guess - OptimalControlInitialGuess input (invalid)" begin
+            ocp = DummyOCP1DNoVar()
+
+            # Manually construct an invalid initial guess (wrong state dimension)
+            bad_init = CTModels.OptimalControlInitialGuess(
+                t -> [t, 2t], t -> 0.1, Float64[]
+            )
+
+            # build_initial_guess must now catch this via centralised validation
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
+                ocp, bad_init
+            )
         end
 
         Test.@testset "build_initial_guess - OptimalControlPreInit input" begin
@@ -194,16 +208,69 @@ function test_initial_guess_api()
             )
         end
 
-        Test.@testset "validate_initial_guess" begin
+        Test.@testset "validate_initial_guess - valid" begin
             ocp = DummyOCP1DNoVar()
 
             # Valid initial guess should not throw
             init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
             result = CTModels.validate_initial_guess(ocp, init)
             Test.@test result === init
+        end
 
-            # For non-OptimalControlInitialGuess types, should return as-is
-            # (currently only OptimalControlInitialGuess is validated)
+        Test.@testset "validate_initial_guess - invalid dimensions" begin
+            ocp = DummyOCP1DNoVar()
+
+            # Manually construct an invalid initial guess
+            bad_init = CTModels.OptimalControlInitialGuess(
+                t -> [t, 2t], t -> 0.1, Float64[]
+            )
+
+            # validate_initial_guess must catch dimension mismatch
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
+                ocp, bad_init
+            )
+        end
+
+        # ========================================================================
+        # UNIT TESTS - Separation of Construction and Validation
+        # ========================================================================
+
+        Test.@testset "initial_guess is pure construction (no validation)" begin
+            ocp = DummyOCP1DNoVar()
+
+            # initial_guess() constructs without validating; it returns an
+            # OptimalControlInitialGuess even with compatible dimensions.
+            init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
+            Test.@test init isa CTModels.OptimalControlInitialGuess
+            Test.@test CTModels.state(init)(0.0) ≈ 0.2
+            Test.@test CTModels.control(init)(0.0) ≈ -0.1
+        end
+
+        Test.@testset "build_initial_guess centralises validation" begin
+            ocp = DummyOCP1DNoVar()
+
+            # All branches of build_initial_guess must produce validated output.
+            # Test nothing branch
+            ig1 = CTModels.build_initial_guess(ocp, nothing)
+            Test.@test ig1 isa CTModels.OptimalControlInitialGuess
+
+            # Test () branch
+            ig2 = CTModels.build_initial_guess(ocp, ())
+            Test.@test ig2 isa CTModels.OptimalControlInitialGuess
+
+            # Test PreInit branch
+            pre = CTModels.pre_initial_guess(state=0.2, control=-0.1)
+            ig3 = CTModels.build_initial_guess(ocp, pre)
+            Test.@test ig3 isa CTModels.OptimalControlInitialGuess
+
+            # Test NamedTuple branch
+            ig4 = CTModels.build_initial_guess(ocp, (state=0.2, control=-0.1))
+            Test.@test ig4 isa CTModels.OptimalControlInitialGuess
+
+            # Test direct OptimalControlInitialGuess branch (was not validated before)
+            valid_init = CTModels.initial_guess(ocp; state=0.3)
+            ig5 = CTModels.build_initial_guess(ocp, valid_init)
+            Test.@test ig5 === valid_init
         end
 
         # ========================================================================
@@ -236,11 +303,11 @@ function test_initial_guess_api()
             # Step 1: Create NamedTuple
             init_nt = (state=0.3, control=-0.2, variable=0.7)
 
-            # Step 2: Build initial guess
+            # Step 2: Build initial guess (validates internally)
             ig = CTModels.build_initial_guess(ocp, init_nt)
             Test.@test ig isa CTModels.OptimalControlInitialGuess
 
-            # Step 3: Validate (already done in build, but can be called again)
+            # Step 3: Validate again (idempotent)
             validated = CTModels.validate_initial_guess(ocp, ig)
             Test.@test validated === ig
 
@@ -248,6 +315,21 @@ function test_initial_guess_api()
             Test.@test CTModels.state(ig)(0.5) ≈ 0.3
             Test.@test CTModels.control(ig)(0.5) ≈ -0.2
             Test.@test CTModels.variable(ig) ≈ 0.7
+        end
+
+        Test.@testset "regression: invalid direct InitialGuess is caught by build" begin
+            ocp = DummyOCP1DVar()
+
+            # Construct an invalid initial guess manually (wrong control dimension)
+            bad_init = CTModels.OptimalControlInitialGuess(
+                t -> 0.1, t -> [0.1, 0.2], 0.5
+            )
+
+            # Before refactoring, this would pass through unchecked.
+            # After refactoring, build_initial_guess validates ALL branches.
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
+                ocp, bad_init
+            )
         end
     end
 end
