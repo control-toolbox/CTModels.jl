@@ -2,6 +2,65 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.8.3-beta] - 2026-02-12
+
+### Module and Type Renaming
+
+#### Overview
+The InitialGuess module has been renamed to `Init` for better API ergonomics and more concise naming. This is a **breaking change** that requires users to update their imports and type references.
+
+#### What Changed
+
+##### Module Name
+```julia
+# Before (0.8.2-beta and earlier)
+using CTModels.InitialGuess
+
+# After (0.8.3-beta)
+using CTModels.Init
+```
+
+##### Type Names
+```julia
+# Before
+pre = CTModels.OptimalControlPreInit(...)
+abstract_type = CTModels.AbstractOptimalControlPreInit
+
+# After  
+pre = CTModels.PreInitialGuess(...)
+abstract_type = CTModels.AbstractPreInitialGuess
+```
+
+#### Migration Required
+
+**User code changes required** - update your imports and type references:
+
+```julia
+# Before
+using CTModels.InitialGuess
+pre_init = CTModels.OptimalControlPreInit(state=0.1, control=0.2)
+
+# After
+using CTModels.Init
+pre_init = CTModels.PreInitialGuess(state=0.1, control=0.2)
+```
+
+#### Benefits
+
+- **More Concise API**: `CTModels.Init` vs `CTModels.InitialGuess`
+- **Cleaner Type Names**: `PreInitialGuess` vs `OptimalControlPreInit`
+- **Better Developer Experience**: Shorter, more intuitive names
+- **Maintained Functionality**: Zero behavioral changes, only naming improvements
+
+#### Compatibility
+
+- All public functions remain unchanged
+- Only module and type names have been updated
+- All tests pass (3146/3146)
+- Ready for production use
+
+---
+
 ## [0.8.2-beta] - 2026-02-12
 
 ### InitialGuess Validation Architecture Change

@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3-beta] - 2026-02-12
+
+### Breaking
+
+- **Module Renaming**: InitialGuess module renamed to Init for better API ergonomics
+  - `InitialGuess` module → `Init` module
+  - `OptimalControlPreInit` type → `PreInitialGuess` type
+  - `AbstractOptimalControlPreInit` type → `AbstractPreInitialGuess` type
+  - **Action Required**: Update imports and type references
+
+### Changed
+
+- **API Ergonomics**: Shorter, more intuitive module and type names
+  - `CTModels.InitialGuess` → `CTModels.Init`
+  - Improved developer experience with concise naming
+  - Updated all documentation references
+
+### Added
+
+- **Module Organization**: Consolidated Init module structure
+  - Reorganized under `src/Init/` directory
+  - Updated exports and imports throughout codebase
+  - All tests updated to use new naming (3146 tests passing)
+
+### Migration Guide
+
+```julia
+# Before
+using CTModels.InitialGuess
+pre = CTModels.OptimalControlPreInit(...)
+
+# After
+using CTModels.Init  
+pre = CTModels.PreInitialGuess(...)
+```
+
 ## [0.8.2-beta] - 2026-02-12
 
 ### Changed
