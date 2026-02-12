@@ -135,9 +135,6 @@ which provides:
 - **Optimization modelers** to connect problems to solvers
 - **Strategy architecture** for configurable components
 
-CTModels provides the `AbstractModel` type alias `AbstractOptimalControlProblem`
-for compatibility with CTSolvers.
-
 ## Extensions: JSON, JLD, and plotting
 
 Several optional extensions live in the `ext/` directory and are loaded on demand

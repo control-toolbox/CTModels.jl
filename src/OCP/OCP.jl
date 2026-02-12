@@ -132,23 +132,4 @@ export state_constraints_lb_dual, state_constraints_ub_dual
 export control_constraints_lb_dual, control_constraints_ub_dual
 export variable_constraints_lb_dual, variable_constraints_ub_dual
 
-
-# Compatibility aliases for CTSolvers
-"""
-Type alias for [`AbstractModel`](@ref).
-
-Provides compatibility with CTSolvers naming conventions.
-"""
-const AbstractOptimalControlProblem = AbstractModel
-
-"""
-Type alias for [`AbstractSolution`](@ref).
-
-Provides compatibility with CTSolvers naming conventions.
-"""
-const AbstractOptimalControlSolution = AbstractSolution
-
-# Export aliases
-export AbstractOptimalControlProblem, AbstractOptimalControlSolution
-
 end
