@@ -22,7 +22,7 @@ function test_initial_guess_integration()
             # Test with NamedTuple on real problem
             init_named = (state=[0.05, 0.1], control=[0.1], variable=Float64[])
             ig = CTModels.build_initial_guess(ocp, init_named)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
             CTModels.validate_initial_guess(ocp, ig)
 
             # Verify values
@@ -51,7 +51,7 @@ function test_initial_guess_integration()
             # Test with functions
             init_nt = (state=t -> [sin(t), cos(t)], control=t -> [t])
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
             CTModels.validate_initial_guess(ocp, ig)
 
             # Verify functions work correctly
@@ -74,7 +74,7 @@ function test_initial_guess_integration()
 
             init_nt = (state=(time, state_data), control=(time, control_data))
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
             CTModels.validate_initial_guess(ocp, ig)
 
             # Verify interpolation works
@@ -97,7 +97,7 @@ function test_initial_guess_integration()
 
             # Build and validate
             ig = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
             validated = CTModels.validate_initial_guess(ocp, ig)
             Test.@test validated === ig
 
@@ -123,7 +123,7 @@ function test_initial_guess_integration()
 
             init_nt = (state=(time, state_data), control=t -> [sin(t)])
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractOptimalControlInitialGuess
+            Test.@test ig isa CTModels.AbstractInitialGuess
             CTModels.validate_initial_guess(ocp, ig)
 
             # Verify both time-grid (state) and function (control) work

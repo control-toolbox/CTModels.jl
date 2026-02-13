@@ -9,9 +9,9 @@ Abstract base type for initial guesses used in optimal control problem solvers.
 Subtypes provide initial trajectories for state, control, and optimisation variables
 to warm-start numerical solvers.
 
-See also: [`OptimalControlInitialGuess`](@ref).
+See also: [`InitialGuess`](@ref).
 """
-abstract type AbstractOptimalControlInitialGuess end
+abstract type AbstractInitialGuess end
 
 """
 $(TYPEDEF)
@@ -33,11 +33,11 @@ julia> using CTModels
 julia> x_guess = t -> [cos(t), sin(t)]
 julia> u_guess = t -> [0.5]
 julia> v_guess = [1.0, 2.0]
-julia> ig = CTModels.OptimalControlInitialGuess(x_guess, u_guess, v_guess)
+julia> ig = CTModels.InitialGuess(x_guess, u_guess, v_guess)
 ```
 """
-struct OptimalControlInitialGuess{X<:Function,U<:Function,V} <:
-       AbstractOptimalControlInitialGuess
+struct InitialGuess{X<:Function,U<:Function,V} <:
+       AbstractInitialGuess
     state::X
     control::U
     variable::V
@@ -50,11 +50,11 @@ Abstract base type for pre-initialisation data used before constructing a full
 initial guess.
 
 Subtypes store raw or partial information that will be processed into an
-[`OptimalControlInitialGuess`](@ref).
+[`InitialGuess`](@ref).
 
-See also: [`OptimalControlPreInit`](@ref).
+See also: [`PreInitialGuess`](@ref).
 """
-abstract type AbstractOptimalControlPreInit end
+abstract type AbstractPreInitialGuess end
 
 """
 $(TYPEDEF)
@@ -73,10 +73,10 @@ interpolation.
 ```julia-repl
 julia> using CTModels
 
-julia> pre = CTModels.OptimalControlPreInit([1.0 2.0; 3.0 4.0], [0.5, 0.6], [1.0])
+julia> pre = CTModels.PreInitialGuess([1.0 2.0; 3.0 4.0], [0.5, 0.6], [1.0])
 ```
 """
-struct OptimalControlPreInit{SX,SU,SV} <: AbstractOptimalControlPreInit
+struct PreInitialGuess{SX,SU,SV} <: AbstractPreInitialGuess
     state::SX
     control::SU
     variable::SV

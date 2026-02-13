@@ -28,20 +28,20 @@ println("\n✓ Export successful")
 sol_imported = CTModels.import_ocp_solution(CTModels.JLD2Tag(), ocp; filename=filename)
 println("✓ Import successful")
 
-# Vérifier que les valeurs sont identiques
+# Verify that values are identical
 println("\nImported solution:")
 println("  Objective: ", CTModels.objective(sol_imported))
 println("  State at t=0.5: ", CTModels.state(sol_imported)(0.5))
 println("  Control at t=0.5: ", CTModels.control(sol_imported)(0.5))
 println("  Costate at t=0.5: ", CTModels.costate(sol_imported)(0.5))
 
-# Comparaison détaillée
+# Detailed comparison
 obj_match = CTModels.objective(sol_original) ≈ CTModels.objective(sol_imported)
 state_match = CTModels.state(sol_original)(0.5) ≈ CTModels.state(sol_imported)(0.5)
 control_match = CTModels.control(sol_original)(0.5) ≈ CTModels.control(sol_imported)(0.5)
 costate_match = CTModels.costate(sol_original)(0.5) ≈ CTModels.costate(sol_imported)(0.5)
 
-# Test sur plusieurs points temporels
+# Test on multiple time points
 t_test = [0.0, 0.25, 0.5, 0.75, 1.0]
 all_states_match = all(CTModels.state(sol_original)(t) ≈ CTModels.state(sol_imported)(t) for t in t_test)
 all_controls_match = all(CTModels.control(sol_original)(t) ≈ CTModels.control(sol_imported)(t) for t in t_test)

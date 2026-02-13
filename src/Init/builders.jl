@@ -9,7 +9,7 @@ Build an initialisation function combining block-level and component-level data.
 Merges a base initialisation with per-component overrides.
 """
 function _build_block_with_components(
-    ocp::AbstractOptimalControlProblem, role::Symbol, block_data, comp_data::Dict{Int,Any}
+    ocp::AbstractModel, role::Symbol, block_data, comp_data::Dict{Int,Any}
 )
     dim = role === :state ? state_dimension(ocp) : control_dimension(ocp)
     base_fun = begin
@@ -194,7 +194,7 @@ Build a time-dependent initialisation function from data and a time grid.
 Interpolates the provided data over the time grid to create a callable function.
 """
 function _build_time_dependent_init(
-    ocp::AbstractOptimalControlProblem, role::Symbol, data, time::AbstractVector
+    ocp::AbstractModel, role::Symbol, data, time::AbstractVector
 )
     dim = role === :state ? state_dimension(ocp) : control_dimension(ocp)
     if data === nothing

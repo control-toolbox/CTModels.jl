@@ -195,16 +195,16 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.InitialGuess => src(
-                    joinpath("InitialGuess", "InitialGuess.jl"),
-                    joinpath("InitialGuess", "types.jl"),
-                    joinpath("InitialGuess", "api.jl"),
-                    joinpath("InitialGuess", "builders.jl"),
-                    joinpath("InitialGuess", "state.jl"),
-                    joinpath("InitialGuess", "control.jl"),
-                    joinpath("InitialGuess", "variable.jl"),
-                    joinpath("InitialGuess", "validation.jl"),
-                    joinpath("InitialGuess", "utils.jl"),
+                CTModels.Init => src(
+                    joinpath("Init", "Init.jl"),
+                    joinpath("Init", "types.jl"),
+                    joinpath("Init", "api.jl"),
+                    joinpath("Init", "builders.jl"),
+                    joinpath("Init", "state.jl"),
+                    joinpath("Init", "control.jl"),
+                    joinpath("Init", "variable.jl"),
+                    joinpath("Init", "validation.jl"),
+                    joinpath("Init", "utils.jl"),
                 ),
             ],
             exclude=EXCLUDE_SYMBOLS,

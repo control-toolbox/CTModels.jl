@@ -65,7 +65,7 @@ function test_initial_guess_builders()
             init_nt = (state=(time, state_samples), control=(time, control_samples))
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify interpolation works
             x_fun = CTModels.state(ig)
@@ -96,7 +96,7 @@ function test_initial_guess_builders()
             init_nt = (state=(time, state_matrix),)
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify state function
             x_fun = CTModels.state(ig)
@@ -123,7 +123,7 @@ function test_initial_guess_builders()
             )
 
             ig = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify interpolation
             x_fun = CTModels.state(ig)
@@ -139,7 +139,7 @@ function test_initial_guess_builders()
             init_nt = (x1=0.0, x2=1.0)
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             x = CTModels.state(ig)(0.5)
             Test.@test x isa AbstractVector
@@ -154,7 +154,7 @@ function test_initial_guess_builders()
             init_nt = (x1=(time, [0.0, 1.0]), x2=(time, [1.0, 2.0]))
 
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             x_fun = CTModels.state(ig)
             x0 = x_fun(0.0)
@@ -172,7 +172,7 @@ function test_initial_guess_builders()
             init_nt = (u1=0.0, u2=1.0)
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             u = CTModels.control(ig)(0.5)
             Test.@test u isa AbstractVector
@@ -188,7 +188,7 @@ function test_initial_guess_builders()
             init_nt = (u1=(time, [0.0, 1.0]), u2=(time, [1.0, 2.0]))
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             u_fun = CTModels.control(ig)
             u0 = u_fun(0.0)
@@ -227,7 +227,7 @@ function test_initial_guess_builders()
             init_nt = (x1=(time, x1_data), x2=(time, x2_data), u=(time, u_data))
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify all components
             x = CTModels.state(ig)(0.5)
@@ -245,7 +245,7 @@ function test_initial_guess_builders()
             init_nt = (x1=t -> sin(t), x2=t -> cos(t))
             ig = CTModels.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             x = CTModels.state(ig)(0.5)
             Test.@test x[1] ≈ sin(0.5)

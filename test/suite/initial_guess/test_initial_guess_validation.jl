@@ -107,7 +107,7 @@ function test_initial_guess_validation()
 
             # Function returning wrong dimension
             bad_state_fun = t -> [t, 2t]
-            init_bad = CTModels.OptimalControlInitialGuess(
+            init_bad = CTModels.InitialGuess(
                 bad_state_fun, t -> 0.1, Float64[]
             )
 
@@ -122,7 +122,7 @@ function test_initial_guess_validation()
 
             # Function returning wrong dimension
             bad_control_fun = t -> [t, 2t]
-            init_bad = CTModels.OptimalControlInitialGuess(
+            init_bad = CTModels.InitialGuess(
                 t -> 0.1, bad_control_fun, Float64[]
             )
 
@@ -136,7 +136,7 @@ function test_initial_guess_validation()
             ocp = DummyOCP1DVar()
 
             # Wrong variable dimension
-            init_bad = CTModels.OptimalControlInitialGuess(
+            init_bad = CTModels.InitialGuess(
                 t -> 0.1, t -> 0.1, [0.1, 0.2]  # Should be scalar, not vector
             )
 
@@ -158,7 +158,7 @@ function test_initial_guess_validation()
 
             # Build initial guess from solution
             ig = CTModels.build_initial_guess(ocp, sol)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify values match
             Test.@test CTModels.state(ig)(0.5) ≈ 0.1
@@ -185,13 +185,13 @@ function test_initial_guess_validation()
             # Using generic keys
             init_nt1 = (x=0.2, u=-0.1)
             ig1 = CTModels.build_initial_guess(ocp, init_nt1)
-            Test.@test ig1 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig1 isa CTModels.InitialGuess
             CTModels.validate_initial_guess(ocp, ig1)
 
             # Using standard keys
             init_nt2 = (state=0.2, control=-0.1)
             ig2 = CTModels.build_initial_guess(ocp, init_nt2)
-            Test.@test ig2 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig2 isa CTModels.InitialGuess
             CTModels.validate_initial_guess(ocp, ig2)
         end
 

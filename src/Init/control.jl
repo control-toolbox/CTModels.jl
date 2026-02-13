@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Return the control function directly when provided as a function.
 """
-initial_control(::AbstractOptimalControlProblem, control::Function) = control
+initial_control(::AbstractModel, control::Function) = control
 
 """
 $(TYPEDSIGNATURES)
@@ -15,7 +15,7 @@ Convert a scalar control value to a constant function for 1D control problems.
 
 Throws `Exceptions.IncorrectArgument` if the control dimension is not 1.
 """
-function initial_control(ocp::AbstractOptimalControlProblem, control::Real)
+function initial_control(ocp::AbstractModel, control::Real)
     dim = control_dimension(ocp)
     if dim == 1
         return t -> control
@@ -37,7 +37,7 @@ Convert a control vector to a constant function.
 
 Throws `Exceptions.IncorrectArgument` if the vector length does not match the control dimension.
 """
-function initial_control(ocp::AbstractOptimalControlProblem, control::Vector{<:Real})
+function initial_control(ocp::AbstractModel, control::Vector{<:Real})
     dim = control_dimension(ocp)
     if length(control) != dim
         throw(Exceptions.IncorrectArgument(
@@ -58,7 +58,7 @@ Return a default control initialisation function when no control is provided.
 
 Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
 """
-function initial_control(ocp::AbstractOptimalControlProblem, ::Nothing)
+function initial_control(ocp::AbstractModel, ::Nothing)
     dim = control_dimension(ocp)
     if dim == 1
         return t -> 0.1
@@ -74,7 +74,7 @@ Handle time-grid control initialization with (time, data) tuple.
 
 Interpolates the provided data over the time grid to create a callable function.
 """
-function initial_control(ocp::AbstractOptimalControlProblem, control::Tuple)
+function initial_control(ocp::AbstractModel, control::Tuple)
     length(control) == 2 || throw(Exceptions.IncorrectArgument(
         "Time-grid control initialization must be a 2-tuple (time, data)",
         got="$(length(control))-tuple",
@@ -93,11 +93,11 @@ $(TYPEDSIGNATURES)
 
 Return the control trajectory from an initial guess.
 """
-control(init::AbstractOptimalControlInitialGuess) = init.control
+control(init::AbstractInitialGuess) = init.control
 
 """
 $(TYPEDSIGNATURES)
 
 Return the control trajectory from a solution.
 """
-control(sol::AbstractOptimalControlSolution) = sol.control
+control(sol::AbstractSolution) = sol.control

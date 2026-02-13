@@ -5,9 +5,9 @@
 # JSON: [[1.0], [2.0], [3.0]]
 data_1d = [[1.0], [2.0], [3.0]]
 
-# Case 2: Multi-D path (e.g. state of dimension 2 over 3 time steps)
+# Case 2: Multi-dimensional path (e.g. state of dimension 2 over 3 time steps)
 # JSON: [[1.0, 1.1], [2.0, 2.1], [3.0, 3.1]]
-data_nd = [[1.0, 1.1], [2.0, 2.1], [3.0, 3.1]]
+data_multi = [[1.0, 1.1], [2.0, 2.1], [3.0, 3.1]]
 
 println("--- Case 1: 1D Data ---")
 stacked_1d = stack(data_1d; dims=1)
@@ -15,11 +15,11 @@ println("Type: ", typeof(stacked_1d))
 println("Size: ", size(stacked_1d))
 println("Content: ", stacked_1d)
 
-println("\n--- Case 2: Multi-D Data ---")
-stacked_nd = stack(data_nd; dims=1)
-println("Type: ", typeof(stacked_nd))
-println("Size: ", size(stacked_nd))
-println("Content: ", stacked_nd)
+println("\n--- Case 2: Multi-dimensional Data ---")
+stacked_multi = stack(data_multi; dims=1)
+println("Type: ", typeof(stacked_multi))
+println("Size: ", size(stacked_multi))
+println("Content: ", stacked_multi)
 
 # Verify current logic for 1D
 if stacked_1d isa Vector

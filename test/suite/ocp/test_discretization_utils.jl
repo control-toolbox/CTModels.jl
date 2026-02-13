@@ -9,37 +9,37 @@ function test_discretization_utils()
     @testset "Discretization utilities" begin
         
         @testset "Basic discretization - scalar function" verbose = VERBOSE showtiming = SHOWTIMING begin
-            # Fonction scalaire simple
+            # Simple scalar function
             f_scalar = t -> 2.0 * t
             T = [0.0, 0.5, 1.0]
             
-            # Avec dimension explicite
+            # With explicit dimension
             result = CTModels.OCP._discretize_function(f_scalar, T, 1)
             @test size(result) == (3, 1)
             @test result ≈ [0.0; 1.0; 2.0]
             
-            # Avec auto-détection
+            # With auto-detection
             result_auto = CTModels.OCP._discretize_function(f_scalar, T)
             @test result_auto ≈ result
         end
         
         @testset "Basic discretization - vector function" begin
-            # Fonction vectorielle
+            # Vector function
             f_vec = t -> [t, 2*t]
             T = [0.0, 0.5, 1.0]
             
-            # Avec dimension explicite
+            # With explicit dimension
             result = CTModels.OCP._discretize_function(f_vec, T, 2)
             @test size(result) == (3, 2)
             @test result ≈ [0.0 0.0; 0.5 1.0; 1.0 2.0]
             
-            # Avec auto-détection
+            # With auto-detection
             result_auto = CTModels.OCP._discretize_function(f_vec, T)
             @test result_auto ≈ result
         end
         
         @testset "TimeGridModel support" begin
-            # Test avec TimeGridModel
+            # Test with TimeGridModel
             T_grid = CTModels.TimeGridModel(LinRange(0.0, 1.0, 5))
             f = t -> [t, t^2]
             
@@ -86,8 +86,8 @@ function test_discretization_utils()
         end
         
         @testset "Scalar return from vector function" begin
-            # Fonction retourne vecteur mais on veut dim=1
-            f = t -> [2.0 * t]  # Retourne vecteur de taille 1
+            # Function returns vector but we want dim=1
+            f = t -> [2.0 * t]  # Returns vector of size 1
             T = [0.0, 0.5, 1.0]
             
             result = CTModels.OCP._discretize_function(f, T, 1)

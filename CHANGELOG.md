@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0-beta] - 2026-02-12
+
+### Breaking
+
+- **Module Renaming**: InitialGuess module renamed to Init for better API ergonomics
+  - `InitialGuess` module → `Init` module
+  - `OptimalControlPreInit` type → `PreInitialGuess` type
+  - `AbstractOptimalControlPreInit` type → `AbstractPreInitialGuess` type
+  - **Action Required**: Update imports and type references
+
+### Changed
+
+- **API Ergonomics**: Shorter, more intuitive module and type names
+  - `CTModels.InitialGuess` → `CTModels.Init`
+  - Improved developer experience with concise naming
+  - Updated all documentation references
+
+### Added
+
+- **Module Organization**: Consolidated Init module structure
+  - Reorganized under `src/Init/` directory
+  - Updated exports and imports throughout codebase
+  - All tests updated to use new naming (3146 tests passing)
+
+### Migration Guide
+
+```julia
+# Before
+using CTModels.InitialGuess
+pre = CTModels.OptimalControlPreInit(...)
+
+# After
+using CTModels.Init  
+pre = CTModels.PreInitialGuess(...)
+```
+
 ## [0.8.2-beta] - 2026-02-12
 
 ### Changed
@@ -12,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **InitialGuess Architecture**: Refactored validation system following Single Responsibility Principle
   - `initial_guess()` is now pure construction (no validation)
   - `build_initial_guess()` centralises validation for ALL input types
-  - Fixed validation hole: direct `AbstractOptimalControlInitialGuess` now properly validated
+  - Fixed validation hole: direct `AbstractInitialGuess` now properly validated
   - Internal builders (`_initial_guess_from_*`) return without validation
   - Updated docstrings to reflect construction/validation separation
 
@@ -26,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Validation Gap**: Direct `AbstractOptimalControlInitialGuess` passed to `build_initial_guess`
+- **Validation Gap**: Direct `AbstractInitialGuess` passed to `build_initial_guess`
   was not being validated, creating a potential runtime error source
 - **Architecture**: Improved code organization with clear separation of concerns
 

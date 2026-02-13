@@ -797,32 +797,31 @@ end
 # ============================================================================== #
 
 """
-    _serialize_solution(sol::Solution)::Dict{String, Any}
+$(TYPEDSIGNATURES)
 
-Sérialise une solution en données discrètes pour export (JLD2, JSON, etc.).
-Utilise les getters publics pour accéder aux champs de la solution.
+Serialize a solution into discrete data for export (JLD2, JSON, etc.).
 
-Cette fonction extrait toutes les données d'une solution et les convertit en format
-sérialisable (matrices, vecteurs, scalaires). Les fonctions sont discrétisées sur
-la grille temporelle.
+Extracts all data from a solution and converts it into a serializable format
+(matrices, vectors, scalars). Functions are discretized on the time grid.
+Uses public getters to access solution fields.
 
 # Arguments
-- `sol::Solution`: Solution à sérialiser
+- `sol::Solution`: Solution to serialize.
 
 # Returns
-- `Dict{String, Any}`: Dictionnaire contenant toutes les données discrètes :
-  - `"time_grid"`: Grille temporelle
-  - `"state"`, `"control"`, `"costate"`: Matrices discrétisées
-  - `"variable"`: Vecteur de variables
-  - `"objective"`: Valeur scalaire
-  - Fonctions duales discrétisées (peuvent être `nothing`)
-  - Duals de boundary et variable (vecteurs)
-  - Informations du solveur
+- `Dict{String, Any}`: Dictionary containing all discrete data:
+  - `"time_grid"`: Time grid
+  - `"state"`, `"control"`, `"costate"`: Discretized matrices
+  - `"variable"`: Variable vector
+  - `"objective"`: Scalar value
+  - Discretized dual functions (can be `nothing`)
+  - Boundary and variable duals (vectors)
+  - Solver information
 
 # Notes
-- Les fonctions sont discrétisées via `_discretize_function`
-- Les duals `nothing` sont préservés comme `nothing`
-- Compatible avec `build_solution` pour reconstruction
+- Functions are discretized via `_discretize_function`.
+- `nothing` duals are preserved as `nothing`.
+- Compatible with `build_solution` for reconstruction.
 
 # Example
 ```julia
@@ -830,19 +829,21 @@ sol = solve(ocp)
 data = CTModels._serialize_solution(sol)
 # Reconstruction
 sol_reconstructed = CTModels.build_solution(
-    ocp, data["time_grid"], data["state"], data["control"], 
-    data["variable"], data["costate"]; 
+    ocp, data["time_grid"], data["state"], data["control"],
+    data["variable"], data["costate"];
     objective=data["objective"], ...
 )
 ```
+
+See also: [`build_solution`](@ref), [`_discretize_function`](@ref)
 """
 function _serialize_solution(sol::Solution)::Dict{String, Any}
-    # Utiliser les getters publics
+    # Use public getters
     T = time_grid(sol)
     dim_x = state_dimension(sol)
     dim_u = control_dimension(sol)
     
-    # Discrétiser les fonctions principales
+    # Discretize main functions
     return Dict(
         "time_grid" => T,
         "state" => _discretize_function(state(sol), T, dim_x),
@@ -851,19 +852,19 @@ function _serialize_solution(sol::Solution)::Dict{String, Any}
         "variable" => variable(sol),
         "objective" => objective(sol),
         
-        # Discrétiser les fonctions duales (peuvent être nothing)
+        # Discretize dual functions (can be nothing)
         "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T),
         "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T),
         "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T),
         "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T),
         "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T),
         
-        # Duals de boundary et variable (vecteurs, pas fonctions)
+        # Boundary and variable duals (vectors, not functions)
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
         "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
         
-        # Infos solver
+        # Solver info
         "iterations" => iterations(sol),
         "message" => message(sol),
         "status" => status(sol),

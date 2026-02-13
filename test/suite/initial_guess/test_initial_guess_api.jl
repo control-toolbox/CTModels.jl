@@ -52,14 +52,14 @@ function test_initial_guess_api()
                 state=state_data, control=control_data, variable=variable_data
             )
 
-            Test.@test pre isa CTModels.OptimalControlPreInit
+            Test.@test pre isa CTModels.PreInitialGuess
             Test.@test pre.state === state_data
             Test.@test pre.control === control_data
             Test.@test pre.variable === variable_data
 
             # Test with no arguments (all nothing)
             pre_empty = CTModels.pre_initial_guess()
-            Test.@test pre_empty isa CTModels.OptimalControlPreInit
+            Test.@test pre_empty isa CTModels.PreInitialGuess
             Test.@test pre_empty.state === nothing
             Test.@test pre_empty.control === nothing
             Test.@test pre_empty.variable === nothing
@@ -76,8 +76,8 @@ function test_initial_guess_api()
 
             # Scalar initial guess consistent with dimension 1
             init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
-            Test.@test init isa CTModels.AbstractOptimalControlInitialGuess
-            Test.@test init isa CTModels.OptimalControlInitialGuess
+            Test.@test init isa CTModels.AbstractInitialGuess
+            Test.@test init isa CTModels.InitialGuess
 
             # Verify state and control are functions
             Test.@test CTModels.state(init) isa Function
@@ -97,7 +97,7 @@ function test_initial_guess_api()
 
             # Scalar variable consistent with dimension 1
             init = CTModels.initial_guess(ocp; state=0.2, control=-0.1, variable=0.5)
-            Test.@test init isa CTModels.OptimalControlInitialGuess
+            Test.@test init isa CTModels.InitialGuess
 
             # Verify variable
             Test.@test CTModels.variable(init) ≈ 0.5
@@ -108,7 +108,7 @@ function test_initial_guess_api()
 
             # No arguments - should use defaults
             init = CTModels.initial_guess(ocp)
-            Test.@test init isa CTModels.OptimalControlInitialGuess
+            Test.@test init isa CTModels.InitialGuess
 
             # Defaults should be 0.1
             Test.@test CTModels.state(init)(0.5) ≈ 0.1
@@ -120,14 +120,14 @@ function test_initial_guess_api()
 
             # nothing should return default initial guess
             ig_nothing = CTModels.build_initial_guess(ocp, nothing)
-            Test.@test ig_nothing isa CTModels.OptimalControlInitialGuess
+            Test.@test ig_nothing isa CTModels.InitialGuess
 
             # () should also return default
             ig_empty = CTModels.build_initial_guess(ocp, ())
-            Test.@test ig_empty isa CTModels.OptimalControlInitialGuess
+            Test.@test ig_empty isa CTModels.InitialGuess
         end
 
-        Test.@testset "build_initial_guess - OptimalControlInitialGuess input (valid)" begin
+        Test.@testset "build_initial_guess - InitialGuess input (valid)" begin
             ocp = DummyOCP1DNoVar()
 
             # Create a valid initial guess
@@ -138,11 +138,11 @@ function test_initial_guess_api()
             Test.@test ig === init
         end
 
-        Test.@testset "build_initial_guess - OptimalControlInitialGuess input (invalid)" begin
+        Test.@testset "build_initial_guess - InitialGuess input (invalid)" begin
             ocp = DummyOCP1DNoVar()
 
             # Manually construct an invalid initial guess (wrong state dimension)
-            bad_init = CTModels.OptimalControlInitialGuess(
+            bad_init = CTModels.InitialGuess(
                 t -> [t, 2t], t -> 0.1, Float64[]
             )
 
@@ -152,21 +152,21 @@ function test_initial_guess_api()
             )
         end
 
-        Test.@testset "build_initial_guess - OptimalControlPreInit input" begin
+        Test.@testset "build_initial_guess - PreInitialGuess input" begin
             ocp1 = DummyOCP1DNoVar()
             ocp2 = DummyOCP1DVar()
 
             # Create a PreInit
             pre1 = CTModels.pre_initial_guess(state=0.2, control=-0.1)
             ig1 = CTModels.build_initial_guess(ocp1, pre1)
-            Test.@test ig1 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig1 isa CTModels.InitialGuess
             Test.@test CTModels.state(ig1)(0.5) ≈ 0.2
             Test.@test CTModels.control(ig1)(0.5) ≈ -0.1
 
             # With variable
             pre2 = CTModels.pre_initial_guess(state=0.2, control=-0.1, variable=0.5)
             ig2 = CTModels.build_initial_guess(ocp2, pre2)
-            Test.@test ig2 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig2 isa CTModels.InitialGuess
             Test.@test CTModels.variable(ig2) ≈ 0.5
         end
 
@@ -178,7 +178,7 @@ function test_initial_guess_api()
             # Build from NamedTuple
             init_nt = (state=t -> [0.0, 0.0], control=t -> [1.0])
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Verify state and control
             x = CTModels.state(ig)(0.5)
@@ -221,7 +221,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # Manually construct an invalid initial guess
-            bad_init = CTModels.OptimalControlInitialGuess(
+            bad_init = CTModels.InitialGuess(
                 t -> [t, 2t], t -> 0.1, Float64[]
             )
 
@@ -239,9 +239,9 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # initial_guess() constructs without validating; it returns an
-            # OptimalControlInitialGuess even with compatible dimensions.
+            # InitialGuess even with compatible dimensions.
             init = CTModels.initial_guess(ocp; state=0.2, control=-0.1)
-            Test.@test init isa CTModels.OptimalControlInitialGuess
+            Test.@test init isa CTModels.InitialGuess
             Test.@test CTModels.state(init)(0.0) ≈ 0.2
             Test.@test CTModels.control(init)(0.0) ≈ -0.1
         end
@@ -252,22 +252,22 @@ function test_initial_guess_api()
             # All branches of build_initial_guess must produce validated output.
             # Test nothing branch
             ig1 = CTModels.build_initial_guess(ocp, nothing)
-            Test.@test ig1 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig1 isa CTModels.InitialGuess
 
             # Test () branch
             ig2 = CTModels.build_initial_guess(ocp, ())
-            Test.@test ig2 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig2 isa CTModels.InitialGuess
 
             # Test PreInit branch
             pre = CTModels.pre_initial_guess(state=0.2, control=-0.1)
             ig3 = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig3 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig3 isa CTModels.InitialGuess
 
             # Test NamedTuple branch
             ig4 = CTModels.build_initial_guess(ocp, (state=0.2, control=-0.1))
-            Test.@test ig4 isa CTModels.OptimalControlInitialGuess
+            Test.@test ig4 isa CTModels.InitialGuess
 
-            # Test direct OptimalControlInitialGuess branch (was not validated before)
+            # Test direct InitialGuess branch (was not validated before)
             valid_init = CTModels.initial_guess(ocp; state=0.3)
             ig5 = CTModels.build_initial_guess(ocp, valid_init)
             Test.@test ig5 === valid_init
@@ -285,7 +285,7 @@ function test_initial_guess_api()
 
             # Step 2: Build initial guess
             ig = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Step 3: Validate
             validated = CTModels.validate_initial_guess(ocp, ig)
@@ -305,7 +305,7 @@ function test_initial_guess_api()
 
             # Step 2: Build initial guess (validates internally)
             ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.OptimalControlInitialGuess
+            Test.@test ig isa CTModels.InitialGuess
 
             # Step 3: Validate again (idempotent)
             validated = CTModels.validate_initial_guess(ocp, ig)
@@ -321,7 +321,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DVar()
 
             # Construct an invalid initial guess manually (wrong control dimension)
-            bad_init = CTModels.OptimalControlInitialGuess(
+            bad_init = CTModels.InitialGuess(
                 t -> 0.1, t -> [0.1, 0.2], 0.5
             )
 
