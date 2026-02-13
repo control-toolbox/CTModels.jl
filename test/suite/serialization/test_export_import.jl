@@ -772,22 +772,22 @@ function test_export_import()
             ocp, sol0 = solution_example()
 
             # First cycle
-            CTModels.export_ocp_solution(sol0; filename="idempotence_json_nd1", format=:JSON)
+            CTModels.export_ocp_solution(sol0; filename="idempotence_json_multi1", format=:JSON)
             sol1 = CTModels.import_ocp_solution(
-                ocp; filename="idempotence_json_nd1", format=:JSON
+                ocp; filename="idempotence_json_multi1", format=:JSON
             )
 
             # Second cycle
-            CTModels.export_ocp_solution(sol1; filename="idempotence_json_nd2", format=:JSON)
+            CTModels.export_ocp_solution(sol1; filename="idempotence_json_multi2", format=:JSON)
             sol2 = CTModels.import_ocp_solution(
-                ocp; filename="idempotence_json_nd2", format=:JSON
+                ocp; filename="idempotence_json_multi2", format=:JSON
             )
 
             # Verify idempotence
             Test.@test compare_solutions(sol1, sol2)
 
-            remove_if_exists("idempotence_json_nd1.json")
-            remove_if_exists("idempotence_json_nd2.json")
+            remove_if_exists("idempotence_json_multi1.json")
+            remove_if_exists("idempotence_json_multi2.json")
         end
 
         Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming = SHOWTIMING begin
@@ -910,22 +910,22 @@ function test_export_import()
             ocp, sol0 = solution_example()
 
             # First cycle
-            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_nd1", format=:JLD)
+            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_multi1", format=:JLD)
             sol1 = CTModels.import_ocp_solution(
-                ocp; filename="idempotence_jld_nd1", format=:JLD
+                ocp; filename="idempotence_jld_multi1", format=:JLD
             )
 
             # Second cycle
-            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_nd2", format=:JLD)
+            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_multi2", format=:JLD)
             sol2 = CTModels.import_ocp_solution(
-                ocp; filename="idempotence_jld_nd2", format=:JLD
+                ocp; filename="idempotence_jld_multi2", format=:JLD
             )
 
             # Verify idempotence
             Test.@test compare_solutions(sol1, sol2)
 
-            remove_if_exists("idempotence_jld_nd1.jld2")
-            remove_if_exists("idempotence_jld_nd2.jld2")
+            remove_if_exists("idempotence_jld_multi1.jld2")
+            remove_if_exists("idempotence_jld_multi2.jld2")
         end
 
         # ========================================================================

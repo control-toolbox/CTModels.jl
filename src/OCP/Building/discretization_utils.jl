@@ -2,39 +2,44 @@
 # Used for serialization (JSON, JLD2) and solution reconstruction
 
 """
-    _discretize_function(f::Function, T::AbstractVector, dim::Int=-1)::Matrix{Float64}
+$(TYPEDSIGNATURES)
 
-Discrétise une fonction sur une grille temporelle.
+Discretize a function on a time grid.
+
+Evaluates `f` at each point in `T` and collects the results into a matrix.
+If `dim` is -1, the output dimension is auto-detected from the first evaluation of `f`.
 
 # Arguments
-- `f::Function`: Fonction à discrétiser (peut retourner scalaire ou vecteur)
-- `T::AbstractVector`: Grille temporelle (ou TimeGridModel)
-- `dim::Int`: Dimension attendue du résultat. Si -1, auto-détectée depuis la première évaluation.
+- `f::Function`: Function to discretize (can return a scalar or a vector).
+- `T::AbstractVector`: Time grid.
+- `dim::Int`: Expected dimension of the result. If -1, auto-detected from first evaluation.
 
 # Returns
-- `Matrix{Float64}`: Matrice n×dim où n = length(T)
+- `Matrix{Float64}`: n×dim matrix where n = length(T).
 
 # Examples
 ```julia
-# Fonction scalaire
+# Scalar function
 f_scalar = t -> 2.0 * t
 result = _discretize_function(f_scalar, [0.0, 0.5, 1.0], 1)
 # result = [0.0; 1.0; 2.0]
 
-# Fonction vectorielle
+# Vector function
 f_vec = t -> [t, 2*t]
 result = _discretize_function(f_vec, [0.0, 0.5, 1.0], 2)
 # result = [0.0 0.0; 0.5 1.0; 1.0 2.0]
 
-# Auto-détection de dimension
+# Auto-detect dimension
 result = _discretize_function(f_vec, [0.0, 0.5, 1.0])
 # result = [0.0 0.0; 0.5 1.0; 1.0 2.0]
 ```
+
+See also: [`_discretize_dual`](@ref)
 """
 function _discretize_function(f::Function, T::AbstractVector, dim::Int=-1)::Matrix{Float64}
     n = length(T)
     
-    # Auto-détecter dimension si nécessaire
+    # Auto-detect dimension if necessary
     if dim == -1
         first_val = f(T[1])
         dim = first_val isa Number ? 1 : length(first_val)
@@ -53,27 +58,31 @@ function _discretize_function(f::Function, T::AbstractVector, dim::Int=-1)::Matr
 end
 
 """
-    _discretize_function(f::Function, T::TimeGridModel, dim::Int=-1)::Matrix{Float64}
+$(TYPEDSIGNATURES)
 
-Surcharge pour TimeGridModel - extrait automatiquement la grille temporelle.
+Discretize a function on a `TimeGridModel` by extracting the underlying time grid.
+
+See also: [`_discretize_function`](@ref)
 """
 function _discretize_function(f::Function, T::TimeGridModel, dim::Int=-1)::Matrix{Float64}
     return _discretize_function(f, T.value, dim)
 end
 
 """
-    _discretize_dual(dual_func::Union{Function,Nothing}, T, dim::Int=-1)
+$(TYPEDSIGNATURES)
 
-Helper pour discrétiser les fonctions duales qui peuvent être `nothing`.
+Discretize a dual function, returning `nothing` if the input is `nothing`.
 
 # Arguments
-- `dual_func`: Fonction duale ou `nothing`
-- `T`: Grille temporelle
-- `dim`: Dimension (auto-détectée si -1)
+- `dual_func::Union{Function,Nothing}`: Dual function or `nothing`.
+- `T`: Time grid.
+- `dim::Int`: Dimension (auto-detected if -1).
 
 # Returns
-- `Matrix{Float64}` si `dual_func` est une fonction
-- `nothing` si `dual_func` est `nothing`
+- `Matrix{Float64}` if `dual_func` is a function.
+- `nothing` if `dual_func` is `nothing`.
+
+See also: [`_discretize_function`](@ref)
 """
 function _discretize_dual(dual_func::Union{Function,Nothing}, T, dim::Int=-1)
     return isnothing(dual_func) ? nothing : _discretize_function(dual_func, T, dim)
