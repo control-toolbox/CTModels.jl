@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-03-02
+
+### Removed
+
+- **Test Extras Cleanup**: Removed `test/extras/` directory and all experimental test files
+  - Removed `test/extras/Project.toml`
+  - Removed debugging scripts (`debug_stack.jl`)
+  - Removed experimental dynamics tests (`dynamics.jl`)
+  - Removed export/import tests (`export_import.jl`)
+  - Removed plotting experiments (`plot_duals.jl`, `plot_manual.jl`, `plot_series.jl`, `plot_variable.jl`)
+  - Removed utility tests (`print_model.jl`, `test_deepcopy_necessity.jl`, `test_jld2_roundtrip.jl`, `test_manual.jl`)
+  - Updated `.gitignore` to reflect cleanup
+
+### Changed
+
+- **Repository Hygiene**: Cleaner test structure focusing on production test suite
+  - All functionality is covered by the main test suite
+  - Removed ~900 lines of experimental/debugging code
+  - Improved maintainability and clarity
+
 ## [0.9.0-beta] - 2026-02-12
 
 ### Breaking

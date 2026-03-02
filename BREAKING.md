@@ -2,6 +2,12 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.1] - 2026-03-02
+
+**No breaking changes** - This release only removes experimental test files from `test/extras/` directory. All public APIs remain unchanged.
+
+---
+
 ## [0.9.0-beta] - 2026-02-12
 
 ### Module and Type Renaming
