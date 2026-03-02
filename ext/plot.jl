@@ -79,13 +79,17 @@ function __plot_time!(
 )
 
     # t_label depends if time is normalize or not
-    t_label = @match time begin
+    t_label = MLStyle.@match time begin
         :default => t_label
         :normalize => t_label == "" ? "" : t_label * " (normalized)"
         :normalise => t_label == "" ? "" : t_label * " (normalised)"
         _ => throw(
-            CTBase.IncorrectArgument(
-                "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
+            Exceptions.IncorrectArgument(
+                "Invalid time choice";
+                got="time=$time",
+                expected=":default, :normalize or :normalise",
+                suggestion="Use one of the supported time options",
+                context="plot time parameter"
             ),
         )
     end
@@ -217,7 +221,7 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     end
     #
     kwargs_plot = depth == 0 ? kwargs : ()
-    ps = @match node.layout begin
+    ps = MLStyle.@match node.layout begin
         :row => plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
         :column =>
             plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
@@ -274,7 +278,7 @@ function __initial_plot(
 
     if layout == :group
         plots = Vector{Plots.Plot}()
-        @match control begin
+        MLStyle.@match control begin
             :components => begin
                 do_plot_state && push!(plots, Plots.plot()) # state
                 do_plot_costate && push!(plots, Plots.plot()) # costate
@@ -305,8 +309,12 @@ function __initial_plot(
                 end
             end
             _ => throw(
-                CTBase.IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all"
+                Exceptions.IncorrectArgument(
+                    "Invalid control choice";
+                    got="control=$control",
+                    expected=":components, :norm or :all",
+                    suggestion="Use one of the supported control options",
+                    context="plot control parameter"
                 ),
             )
         end
@@ -327,7 +335,7 @@ function __initial_plot(
         # create the control plots
         if do_plot_control
             l = m
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     for i in 1:m
                         push!(control_plots, PlotLeaf())
@@ -345,7 +353,7 @@ function __initial_plot(
                     l = m + 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -430,7 +438,13 @@ function __initial_plot(
         end
 
     else
-        throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))
+        throw(Exceptions.IncorrectArgument(
+            "Invalid layout choice";
+            got="layout=$layout",
+            expected=":group or :split",
+            suggestion="Use one of the supported layout options",
+            context="plot layout parameter"
+        ))
     end
 end
 
@@ -577,7 +591,7 @@ function __plot!(
 
         # control
         if do_plot_control
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     __plot_time!(
                         p[icur],
@@ -653,7 +667,7 @@ function __plot!(
                     icur += 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -758,7 +772,7 @@ function __plot!(
 
             # control trajectory
             l = m
-            @match control begin
+            MLStyle.@match control begin
                 :components => begin
                     for i in 1:m
                         title = i==1 ? "control" : ""
@@ -848,7 +862,7 @@ function __plot!(
                     icur += 1
                 end
                 _ => throw(
-                    CTBase.IncorrectArgument(
+                    Exceptions.IncorrectArgument(
                         "No such choice for control. Use :components, :norm or :all"
                     ),
                 )
@@ -978,7 +992,13 @@ function __plot!(
             end
         end
     else
-        throw(CTBase.IncorrectArgument("No such choice for layout. Use :group or :split"))
+        throw(Exceptions.IncorrectArgument(
+            "Invalid layout choice";
+            got="layout=$layout",
+            expected=":group or :split",
+            suggestion="Use one of the supported layout options",
+            context="plot layout parameter"
+        ))
     end # end layout
 
     # plot vertical lines at the initial and final times if model is not nothing
@@ -1419,19 +1439,23 @@ function __get_data_plot(
 
     # if the time grid is empty then throw an error
     if CTModels.is_empty_time_grid(sol) == true
-        throw(CTBase.IncorrectArgument("The time grid is empty"))
+        throw(Exceptions.IncorrectArgument(
+            "The time grid is empty";
+            suggestion="Provide a solution with non-empty time grid",
+            context="plot validation"
+        ))
     end
 
-    vv, ii = @match xx begin
+    vv, ii = MLStyle.@match xx begin
         ::Symbol => (xx, 1)
         _ => xx
     end
 
     T = CTModels.time_grid(sol)
     m = size(T, 1)
-    return @match vv begin
+    return MLStyle.@match vv begin
         :time => begin
-            @match time begin
+            MLStyle.@match time begin
                 :default => T
                 :normalize => (T .- T[1]) ./ (T[end] - T[1])
                 :normalise => (T .- T[1]) ./ (T[end] - T[1])

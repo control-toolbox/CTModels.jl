@@ -1,6 +1,6 @@
 using Documenter
 using CTModels
-using CTBase  # For automatic_reference_documentation
+using CTBase
 using Plots
 using JSON3
 using JLD2
@@ -20,12 +20,10 @@ const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
 const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 
-# Reset DocumenterReference configuration for proper local/remote link generation
 if !isnothing(DocumenterReference)
     DocumenterReference.reset_config!()
 end
 
-# to add docstrings from external packages
 Modules = [Plots, CTModelsPlots, CTModelsJSON, CTModelsJLD]
 for Module in Modules
     isnothing(DocMeta.getdocmeta(Module, :DocTestSetup)) &&
@@ -48,28 +46,19 @@ include("api_reference.jl")
 with_api_reference(src_dir, ext_dir) do api_pages
     makedocs(;
         draft=draft,
-        remotes=nothing,  # Disable remote links. Needed for DocumenterReference
-        warnonly=true,
+        remotes=nothing,
+        warnonly=[:cross_references],
         sitename="CTModels.jl",
         format=Documenter.HTML(;
             repolink="https://" * repo_url,
             prettyurls=false,
-            #size_threshold_ignore=["api.md", "dev.md"],
-            #size_threshold=300_000,  # 300 KiB threshold
             assets=[
                 asset("https://control-toolbox.org/assets/css/documentation.css"),
                 asset("https://control-toolbox.org/assets/js/documentation.js"),
             ],
         ),
-        checkdocs=:none,
         pages=[
             "Introduction" => "index.md",
-            "Interfaces" => [
-                "OCP Tools" => "interfaces/ocp_tools.md",
-                "Optimization Problems" => "interfaces/optimization_problems.md",
-                "Optimization Modelers" => "interfaces/optimization_modelers.md",
-                "Solution Builders" => "interfaces/ocp_solution_builders.md",
-            ],
             "API Reference" => api_pages,
         ],
     )

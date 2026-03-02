@@ -31,7 +31,9 @@ test/solution.jld2
 test/solution.json
 
 #
-reports/
 profiling/
 tmp/
 .agent/
+.windsurf/
+.reports/
+.extras/
