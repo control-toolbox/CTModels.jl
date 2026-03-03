@@ -24,25 +24,25 @@ function dynamics!(ocp::PreModel, f::Function)::Nothing
         "State must be set before defining dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before dynamics!",
-        context="dynamics! function - state validation"
+        context="dynamics! function - state validation",
     )
     @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before defining dynamics",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before dynamics!",
-        context="dynamics! function - control validation"
+        context="dynamics! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before dynamics!",
-        context="dynamics! function - times validation"
+        context="dynamics! function - times validation",
     )
     @ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
         "Dynamics already set",
         reason="dynamics have already been defined for this OCP",
         suggestion="Create a new OCP instance or use partial_dynamics! for additional dynamics",
-        context="dynamics! function - duplicate definition check"
+        context="dynamics! function - duplicate definition check",
     )
 
     # set the dynamics
@@ -89,25 +89,25 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
         "State must be set before defining partial dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before partial dynamics!",
-        context="partial_dynamics! function - state validation"
+        context="partial_dynamics! function - state validation",
     )
     @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before defining partial dynamics",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before partial dynamics!",
-        context="partial_dynamics! function - control validation"
+        context="partial_dynamics! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining partial dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before partial dynamics!",
-        context="partial_dynamics! function - times validation"
+        context="partial_dynamics! function - times validation",
     )
     @ensure !__is_dynamics_complete(ocp) Exceptions.PreconditionError(
         "Complete dynamics already set",
         reason="dynamics have already been completely defined for this OCP",
         suggestion="Use partial_dynamics! before setting complete dynamics, or create a new OCP instance",
-        context="partial_dynamics! function - complete dynamics check"
+        context="partial_dynamics! function - complete dynamics check",
     )
 
     # Check indices in rg are within valid state index bounds
@@ -115,11 +115,11 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
         if i < 1 || i > state_dimension(ocp)
             throw(
                 Exceptions.IncorrectArgument(
-                    "Dynamics index out of bounds",
+                    "Dynamics index out of bounds";
                     got="index=$i",
                     expected="index in range [1, $(state_dimension(ocp))]",
                     suggestion="Use indices in 1:$(state_dimension(ocp)), e.g., dynamics!(ocp, 1:2, f)",
-                    context="dynamics! index validation"
+                    context="dynamics! index validation",
                 ),
             )
         end
@@ -131,10 +131,10 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
     elseif ocp.dynamics isa Function
         throw(
             Exceptions.PreconditionError(
-                "Cannot add partial dynamics to complete dynamics",
+                "Cannot add partial dynamics to complete dynamics";
                 reason="dynamics already defined as a single function",
                 suggestion="Use partial_dynamics! calls instead of dynamics! function, or create a new OCP instance",
-                context="partial_dynamics! function - dynamics type conflict"
+                context="partial_dynamics! function - dynamics type conflict",
             ),
         )
     end
@@ -145,10 +145,10 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
             if i in existing_range
                 throw(
                     Exceptions.PreconditionError(
-                        "Dynamics range overlap",
+                        "Dynamics range overlap";
                         reason="index $i in range already has assigned dynamics",
                         suggestion="Use a non-overlapping range or remove existing dynamics first",
-                        context="partial_dynamics! function - range overlap check"
+                        context="partial_dynamics! function - range overlap check",
                     ),
                 )
             end

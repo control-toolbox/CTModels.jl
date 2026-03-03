@@ -53,14 +53,14 @@ function time!(
         "Time already set",
         reason="time has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing time definition",
-        context="time! function - duplicate definition check"
+        context="time! function - duplicate definition check",
     )
 
     @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
         "Variable must be set for free time",
         reason="variable is required when t0 or tf is free (ind0/indf provided)",
         suggestion="Call variable!(ocp, dimension) before time! with free time parameters, or use fixed times (t0, tf)",
-        context="time! function - free time validation"
+        context="time! function - free time validation",
     )
 
     if __is_variable_set(ocp)
@@ -71,7 +71,7 @@ function time!(
             got="ind0=$ind0",
             expected="index in range 1:$q",
             suggestion="Provide an index between 1 and $q for the initial time variable",
-            context="time! with free initial time"
+            context="time! with free initial time",
         )
 
         @ensure isnothing(indf) || (1 ≤ indf ≤ q) Exceptions.IncorrectArgument(
@@ -79,7 +79,7 @@ function time!(
             got="indf=$indf",
             expected="index in range 1:$q",
             suggestion="Provide an index between 1 and $q for the final time variable",
-            context="time! with free final time"
+            context="time! with free final time",
         )
     end
 
@@ -88,7 +88,7 @@ function time!(
         got="both t0 and ind0 provided",
         expected="either t0 (fixed) or ind0 (free), not both",
         suggestion="Use time!(ocp, t0=value, ...) for fixed initial time OR time!(ocp, ind0=index, ...) for free initial time",
-        context="time! argument validation"
+        context="time! argument validation",
     )
 
     @ensure !(isnothing(t0) && isnothing(ind0)) Exceptions.IncorrectArgument(
@@ -96,7 +96,7 @@ function time!(
         got="neither t0 nor ind0 provided",
         expected="either t0 (fixed) or ind0 (free)",
         suggestion="Use time!(ocp, t0=value, ...) for fixed initial time OR time!(ocp, ind0=index, ...) for free initial time",
-        context="time! argument validation"
+        context="time! argument validation",
     )
 
     @ensure isnothing(tf) || isnothing(indf) Exceptions.IncorrectArgument(
@@ -104,7 +104,7 @@ function time!(
         got="both tf and indf provided",
         expected="either tf (fixed) or indf (free), not both",
         suggestion="Use time!(ocp, ..., tf=value) for fixed final time OR time!(ocp, ..., indf=index) for free final time",
-        context="time! argument validation"
+        context="time! argument validation",
     )
 
     @ensure !(isnothing(tf) && isnothing(indf)) Exceptions.IncorrectArgument(
@@ -112,7 +112,7 @@ function time!(
         got="neither tf nor indf provided",
         expected="either tf (fixed) or indf (free)",
         suggestion="Use time!(ocp, ..., tf=value) for fixed final time OR time!(ocp, ..., indf=index) for free final time",
-        context="time! argument validation"
+        context="time! argument validation",
     )
 
     time_name = time_name isa String ? time_name : string(time_name)
@@ -123,7 +123,7 @@ function time!(
         got="empty string",
         expected="non-empty string or symbol",
         suggestion="Provide a valid time name like time_name=\"t\" or time_name=:s",
-        context="time! time_name validation"
+        context="time! time_name validation",
     )
 
     # NEW: Validate time_name doesn't conflict with existing names
@@ -132,7 +132,7 @@ function time!(
         got="time_name='$time_name'",
         expected="unique name not conflicting with: $(__collect_used_names(ocp))",
         suggestion="Choose a different time name that doesn't conflict with existing component names",
-        context="time! name validation"
+        context="time! name validation",
     )
 
     (initial_time, final_time) = MLStyle.@match (t0, ind0, tf, indf) begin
@@ -152,13 +152,15 @@ function time!(
             FreeTimeModel(ind0, components(ocp.variable)[ind0]),
             FreeTimeModel(indf, components(ocp.variable)[indf]),
         )
-        _ => throw(Exceptions.IncorrectArgument(
-            "Inconsistent time arguments",
-            got="invalid combination of t0, ind0, tf, indf",
-            expected="valid pattern: (t0, tf), (t0, indf), (ind0, tf), or (ind0, indf)",
-            suggestion="Check time! documentation for valid argument combinations",
-            context="time!(ocp, t0/ind0=..., tf/indf=...) - validating argument combinations"
-        ))
+        _ => throw(
+            Exceptions.IncorrectArgument(
+                "Inconsistent time arguments",
+                got="invalid combination of t0, ind0, tf, indf",
+                expected="valid pattern: (t0, tf), (t0, indf), (ind0, tf), or (ind0, indf)",
+                suggestion="Check time! documentation for valid argument combinations",
+                context="time!(ocp, t0/ind0=..., tf/indf=...) - validating argument combinations",
+            ),
+        )
     end
 
     # NEW: Validate t0 < tf when both are fixed
@@ -170,7 +172,7 @@ function time!(
             got="t0=$t0_val, tf=$tf_val (t0 ≥ tf)",
             expected="t0 < tf",
             suggestion="Ensure initial time is strictly less than final time",
-            context="time! with fixed times validation"
+            context="time! with fixed times validation",
         )
     end
 
@@ -235,7 +237,7 @@ function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ct
         got="index=$(model.index)",
         expected="index in range 1:$(length(variable))",
         suggestion="Ensure the variable vector has at least $(model.index) elements",
-        context="time() accessor for free time"
+        context="time() accessor for free time",
     )
     return variable[model.index]
 end

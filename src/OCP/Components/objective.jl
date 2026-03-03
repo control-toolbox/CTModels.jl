@@ -49,19 +49,19 @@ function objective!(
         "State must be set before objective",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before objective!(ocp, ...)",
-        context="objective! function - state validation"
+        context="objective! function - state validation",
     )
     @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before objective",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before objective!(ocp, ...)",
-        context="objective! function - control validation"
+        context="objective! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before objective",
         reason="time horizon has not been defined yet",
         suggestion="Call time!(ocp, t0, tf) before objective!(ocp, ...)",
-        context="objective! function - times validation"
+        context="objective! function - times validation",
     )
 
     # checks: the objective must not already be set
@@ -69,7 +69,7 @@ function objective!(
         "Objective already set",
         reason="objective has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing objective definition",
-        context="objective! function - duplicate definition check"
+        context="objective! function - duplicate definition check",
     )
 
     # NEW: Validate criterion (case-insensitive)
@@ -78,12 +78,12 @@ function objective!(
         got=":$criterion",
         expected=":min, :max, :MIN, or :MAX",
         suggestion="Use objective!(ocp, :min, ...) for minimization or objective!(ocp, :max, ...) for maximization",
-        context="objective!(ocp, criterion=:$criterion, ...) - validating criterion parameter"
+        context="objective!(ocp, criterion=:$criterion, ...) - validating criterion parameter",
     )
 
     # Normalize criterion to lowercase for consistency
-    normalized_criterion = criterion in (:MIN, :MAX) ? 
-        (criterion == :MIN ? :min : :max) : criterion
+    normalized_criterion =
+        criterion in (:MIN, :MAX) ? (criterion == :MIN ? :min : :max) : criterion
 
     # checks: at least one of the two functions must be given
     @ensure !(isnothing(mayer) && isnothing(lagrange)) Exceptions.IncorrectArgument(
@@ -91,7 +91,7 @@ function objective!(
         got="neither mayer nor lagrange provided",
         expected="at least one of mayer or lagrange function",
         suggestion="Provide mayer=function for terminal cost, lagrange=function for running cost, or both for Bolza problem",
-        context="objective! function validation"
+        context="objective! function validation",
     )
 
     # set the objective

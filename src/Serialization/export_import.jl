@@ -47,11 +47,11 @@ function export_ocp_solution(
     else
         throw(
             Exceptions.IncorrectArgument(
-                "Invalid export format specified",
+                "Invalid export format specified";
                 got="format=$format",
                 expected=":JLD or :JSON",
                 suggestion="Use format=:JLD for binary files or format=:JSON for text files",
-                context="export_ocp_solution - validating export format"
+                context="export_ocp_solution - validating export format",
             ),
         )
     end
@@ -89,11 +89,11 @@ function import_ocp_solution(
     else
         throw(
             Exceptions.IncorrectArgument(
-                "Invalid import format specified",
+                "Invalid import format specified";
                 got="format=$format",
                 expected=":JLD or :JSON",
                 suggestion="Use format=:JLD for binary files or format=:JSON for text files",
-                context="import_ocp_solution - validating import format"
+                context="import_ocp_solution - validating import format",
             ),
         )
     end

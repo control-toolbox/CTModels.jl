@@ -104,33 +104,45 @@ function test_times()
         CTModels.variable!(ocp, 2)
         @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, ind0=1)
         @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, tf=10.0, indf=1)
-        @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0.0, tf=10.0, indf=1)
+        @test_throws Exceptions.IncorrectArgument CTModels.time!(
+            ocp, t0=0.0, tf=10.0, indf=1
+        )
 
         # NEW: Name validation tests
         Test.@testset "times: Name validation" verbose = VERBOSE showtiming = SHOWTIMING begin
             # Empty time_name
             ocp = CTModels.PreModel()
-            @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="")
+            @test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=0, tf=1, time_name=""
+            )
 
             # time_name conflicts with state
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 1, "x")
-            @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x")
+            @test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=0, tf=1, time_name="x"
+            )
 
             # time_name conflicts with control
             ocp = CTModels.PreModel()
             CTModels.control!(ocp, 1, "u")
-            @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="u")
+            @test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=0, tf=1, time_name="u"
+            )
 
             # time_name conflicts with variable
             ocp = CTModels.PreModel()
             CTModels.variable!(ocp, 1, "v")
-            @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="v")
+            @test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=0, tf=1, time_name="v"
+            )
 
             # time_name conflicts with state component
             ocp = CTModels.PreModel()
             CTModels.state!(ocp, 2, "x", ["x₁", "x₂"])
-            @test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=0, tf=1, time_name="x₁")
+            @test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=0, tf=1, time_name="x₁"
+            )
         end
 
         # NEW: Temporal validation tests
@@ -153,7 +165,8 @@ function test_times()
             @test_nowarn CTModels.time!(ocp, ind0=1, indf=2)  # Cannot validate at this point
         end
 
-        Test.@testset "times: FreeTimeModel with FakeTimeVector" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "times: FreeTimeModel with FakeTimeVector" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             ft = CTModels.FreeTimeModel(2, "s")
             v_ok = FakeTimeVector([1.0, 3.0])
             @test CTModels.time(ft, v_ok) == 3.0
@@ -162,7 +175,8 @@ function test_times()
             @test_throws Exceptions.IncorrectArgument CTModels.time(ft, v_short)
         end
 
-        Test.@testset "times: TimesModel names and flags" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "times: TimesModel names and flags" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             t0 = CTModels.FixedTimeModel(0.0, "t0")
             tf = CTModels.FixedTimeModel(1.0, "tf")
             times = CTModels.TimesModel(t0, tf, "t")
@@ -199,13 +213,13 @@ function test_times()
 
             # Test that is_* aliases return the same values as has_* functions
             @test CTModels.is_initial_time_fixed(times_fixed) ==
-                  CTModels.has_fixed_initial_time(times_fixed)
+                CTModels.has_fixed_initial_time(times_fixed)
             @test CTModels.is_initial_time_free(times_fixed) ==
-                  CTModels.has_free_initial_time(times_fixed)
+                CTModels.has_free_initial_time(times_fixed)
             @test CTModels.is_final_time_fixed(times_fixed) ==
-                  CTModels.has_fixed_final_time(times_fixed)
+                CTModels.has_fixed_final_time(times_fixed)
             @test CTModels.is_final_time_free(times_fixed) ==
-                  CTModels.has_free_final_time(times_fixed)
+                CTModels.has_free_final_time(times_fixed)
 
             # Verify actual values for fixed times
             @test CTModels.is_initial_time_fixed(times_fixed) == true

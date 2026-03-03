@@ -58,7 +58,9 @@ function test_ocp()
             pre_constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2]
         )
         f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-        CTModels.OCP.__constraint!(pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
+        CTModels.OCP.__constraint!(
+            pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3]
+        )
 
         # boundary constraint
         f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
@@ -76,11 +78,17 @@ function test_ocp()
 
         # control box constraint
         CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
-        CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3])
+        CTModels.OCP.__constraint!(
+            pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3]
+        )
 
         # variable box constraint
-        CTModels.OCP.__constraint!(pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
-        CTModels.OCP.__constraint!(pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3])
+        CTModels.OCP.__constraint!(
+            pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2]
+        )
+        CTModels.OCP.__constraint!(
+            pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3]
+        )
 
         # build constraints
         constraints = CTModels.build(pre_constraints)
@@ -169,7 +177,9 @@ function test_ocp()
 
         # Get all constraints and test. Be careful, the order is not guaranteed. 
         # We will check up to permutations by sorting the results.
-        (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub) = CTModels.path_constraints_nl(ocp)
+        (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub) = CTModels.path_constraints_nl(
+            ocp
+        )
         (boundary_cons_nl_lb, boundary_cons_nl!, boundary_cons_nl_ub) = CTModels.boundary_constraints_nl(
             ocp
         )

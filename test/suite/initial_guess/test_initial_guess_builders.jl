@@ -48,7 +48,6 @@ CTModels.variable_name(::DummyOCP1D2Control) = "v"
 CTModels.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
-
     Test.@testset "Testing initial guess builders" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================

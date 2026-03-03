@@ -148,7 +148,7 @@ function __size_plot(
                     got="control=$control",
                     expected=":components, :norm or :all",
                     suggestion="Use control=:components for individual components, control=:norm for norm, or control=:all for all",
-                    context="plot_default - validating control parameter"
+                    context="plot_default - validating control parameter",
                 ),
             )
         end

@@ -77,21 +77,21 @@ function state!(
         "State already set",
         reason="state has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing state definition",
-        context="state! function - duplicate definition check"
+        context="state! function - duplicate definition check",
     )
     @ensure n > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",
         got="n=$n",
         expected="n > 0 (positive integer)",
         suggestion="Use state!(ocp, n=3) with n > 0",
-        context="state!(ocp, n=$n, name=\"$name\") - validating dimension parameter"
+        context="state!(ocp, n=$n, name=\"$name\") - validating dimension parameter",
     )
     @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
         "Component names count mismatch",
         got="$(size(components_names, 1)) names for dimension $n",
         expected="exactly $n component names",
         suggestion="Use state!(ocp, n, name, [\"x1\", \"x2\", ..., \"x$n\"]) or omit for auto-generation",
-        context="state!(ocp, n=$n, components_names=[...]) - validating names count"
+        context="state!(ocp, n=$n, components_names=[...]) - validating names count",
     )
 
     # NEW: Comprehensive name validation

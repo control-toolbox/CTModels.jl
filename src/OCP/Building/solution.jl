@@ -88,32 +88,45 @@ function build_solution(
     # Using unified API with validation and deepcopy+scalar wrapping
     fx = build_interpolated_function(X, T, dim_x, TX; expected_dim=dim_x)
     fu = build_interpolated_function(U, T, dim_u, TU; expected_dim=dim_u)
-    fp = build_interpolated_function(P, T, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x)
+    fp = build_interpolated_function(
+        P, T, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
+    )
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     fpcd = build_interpolated_function(
-        path_constraints_dual, T, dim_path_constraints_nl(ocp), TPCD;
-        allow_nothing=true
+        path_constraints_dual, T, dim_path_constraints_nl(ocp), TPCD; allow_nothing=true
     )
 
     # box constraints multipliers (optional, can be nothing)
     fscbd = build_interpolated_function(
-        state_constraints_lb_dual, T, dim_x, Union{Matrix{Float64},Nothing};
-        allow_nothing=true
+        state_constraints_lb_dual,
+        T,
+        dim_x,
+        Union{Matrix{Float64},Nothing};
+        allow_nothing=true,
     )
     fscud = build_interpolated_function(
-        state_constraints_ub_dual, T, dim_x, Union{Matrix{Float64},Nothing};
-        allow_nothing=true
+        state_constraints_ub_dual,
+        T,
+        dim_x,
+        Union{Matrix{Float64},Nothing};
+        allow_nothing=true,
     )
     fccbd = build_interpolated_function(
-        control_constraints_lb_dual, T, dim_u, Union{Matrix{Float64},Nothing};
-        allow_nothing=true
+        control_constraints_lb_dual,
+        T,
+        dim_u,
+        Union{Matrix{Float64},Nothing};
+        allow_nothing=true,
     )
     fccud = build_interpolated_function(
-        control_constraints_ub_dual, T, dim_u, Union{Matrix{Float64},Nothing};
-        allow_nothing=true
+        control_constraints_ub_dual,
+        T,
+        dim_u,
+        Union{Matrix{Float64},Nothing};
+        allow_nothing=true,
     )
 
     # build Models
@@ -751,7 +764,6 @@ function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
 end
 
-
 # --------------------------------------------------------------------------------------------------
 # print a solution
 """
@@ -837,12 +849,12 @@ sol_reconstructed = CTModels.build_solution(
 
 See also: [`build_solution`](@ref), [`_discretize_function`](@ref)
 """
-function _serialize_solution(sol::Solution)::Dict{String, Any}
+function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters
     T = time_grid(sol)
     dim_x = state_dimension(sol)
     dim_u = control_dimension(sol)
-    
+
     # Discretize main functions
     return Dict(
         "time_grid" => T,
@@ -851,19 +863,21 @@ function _serialize_solution(sol::Solution)::Dict{String, Any}
         "costate" => _discretize_function(costate(sol), T, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
-        
+
         # Discretize dual functions (can be nothing)
         "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T),
         "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T),
         "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T),
-        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T),
-        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T),
-        
+        "control_constraints_lb_dual" =>
+            _discretize_dual(control_constraints_lb_dual(sol), T),
+        "control_constraints_ub_dual" =>
+            _discretize_dual(control_constraints_ub_dual(sol), T),
+
         # Boundary and variable duals (vectors, not functions)
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
         "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
-        
+
         # Solver info
         "iterations" => iterations(sol),
         "message" => message(sol),

@@ -83,21 +83,27 @@ function test_objective()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(
+            ocp, :min, mayer=mayer
+        )
 
         # control not set
         ocp = CTModels.PreModel()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.state!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(
+            ocp, :min, mayer=mayer
+        )
 
         # times not set
         ocp = CTModels.PreModel()
         CTModels.state!(ocp, 1)
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(
+            ocp, :min, mayer=mayer
+        )
 
         # objective already set
         ocp = CTModels.PreModel()
@@ -106,7 +112,9 @@ function test_objective()
         CTModels.control!(ocp, 1)
         CTModels.variable!(ocp, 1)
         CTModels.objective!(ocp, :min; mayer=mayer)
-        @test_throws Exceptions.PreconditionError CTModels.objective!(ocp, :min, mayer=mayer)
+        @test_throws Exceptions.PreconditionError CTModels.objective!(
+            ocp, :min, mayer=mayer
+        )
 
         # variable set after the objective
         ocp = CTModels.PreModel()
@@ -132,9 +140,15 @@ function test_objective()
             CTModels.state!(ocp, 1)
             CTModels.control!(ocp, 1)
             CTModels.variable!(ocp, 1)
-            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :invalid, mayer=mayer)
-            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :optimize, mayer=mayer)
-            @test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :Minimize, mayer=mayer)  # not in accepted list
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(
+                ocp, :invalid, mayer=mayer
+            )
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(
+                ocp, :optimize, mayer=mayer
+            )
+            @test_throws Exceptions.IncorrectArgument CTModels.objective!(
+                ocp, :Minimize, mayer=mayer
+            )  # not in accepted list
 
             # Valid criteria (lowercase)
             ocp2 = CTModels.PreModel()
@@ -183,27 +197,27 @@ function test_objective()
             # MayerObjectiveModel
             obj_mayer = CTModels.MayerObjectiveModel(mayer_alias, :min)
             @test CTModels.is_mayer_cost_defined(obj_mayer) ==
-                  CTModels.has_mayer_cost(obj_mayer)
+                CTModels.has_mayer_cost(obj_mayer)
             @test CTModels.is_lagrange_cost_defined(obj_mayer) ==
-                  CTModels.has_lagrange_cost(obj_mayer)
+                CTModels.has_lagrange_cost(obj_mayer)
             @test CTModels.is_mayer_cost_defined(obj_mayer) === true
             @test CTModels.is_lagrange_cost_defined(obj_mayer) === false
 
             # LagrangeObjectiveModel
             obj_lagrange = CTModels.LagrangeObjectiveModel(lagrange_alias, :max)
             @test CTModels.is_mayer_cost_defined(obj_lagrange) ==
-                  CTModels.has_mayer_cost(obj_lagrange)
+                CTModels.has_mayer_cost(obj_lagrange)
             @test CTModels.is_lagrange_cost_defined(obj_lagrange) ==
-                  CTModels.has_lagrange_cost(obj_lagrange)
+                CTModels.has_lagrange_cost(obj_lagrange)
             @test CTModels.is_mayer_cost_defined(obj_lagrange) === false
             @test CTModels.is_lagrange_cost_defined(obj_lagrange) === true
 
             # BolzaObjectiveModel
             obj_bolza = CTModels.BolzaObjectiveModel(mayer_alias, lagrange_alias, :min)
             @test CTModels.is_mayer_cost_defined(obj_bolza) ==
-                  CTModels.has_mayer_cost(obj_bolza)
+                CTModels.has_mayer_cost(obj_bolza)
             @test CTModels.is_lagrange_cost_defined(obj_bolza) ==
-                  CTModels.has_lagrange_cost(obj_bolza)
+                CTModels.has_lagrange_cost(obj_bolza)
             @test CTModels.is_mayer_cost_defined(obj_bolza) === true
             @test CTModels.is_lagrange_cost_defined(obj_bolza) === true
         end

@@ -8,7 +8,6 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 
 function test_ocp_components()
     Test.@testset "OCP components" verbose = VERBOSE showtiming = SHOWTIMING begin
-
         Test.@testset "state/control/variable models" begin
             state = CTModels.StateModel("y", ["u", "v"])
             Test.@test CTModels.dimension(state) == 2

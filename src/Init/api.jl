@@ -123,13 +123,15 @@ function build_initial_guess(ocp::AbstractModel, init_data)
     elseif init_data isa NamedTuple
         _initial_guess_from_namedtuple(ocp, init_data)
     else
-        throw(Exceptions.IncorrectArgument(
-            "Unsupported initial guess type",
-            got="$(typeof(init_data))",
-            expected="nothing, InitialGuess, PreInitialGuess, Solution, or NamedTuple",
-            suggestion="Use one of the supported types for initial guess specification",
-            context="build_initial_guess"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Unsupported initial guess type";
+                got="$(typeof(init_data))",
+                expected="nothing, InitialGuess, PreInitialGuess, Solution, or NamedTuple",
+                suggestion="Use one of the supported types for initial guess specification",
+                context="build_initial_guess",
+            ),
+        )
     end
 
     # Phase 2: Centralised validation
@@ -158,9 +160,7 @@ explicitly on a manually constructed [`InitialGuess`](@ref).
 
 - `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
 """
-function validate_initial_guess(
-    ocp::AbstractModel, init::AbstractInitialGuess
-)
+function validate_initial_guess(ocp::AbstractModel, init::AbstractInitialGuess)
     if init isa InitialGuess
         return _validate_initial_guess(ocp, init)
     else

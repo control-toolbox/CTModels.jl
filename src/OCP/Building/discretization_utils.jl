@@ -38,13 +38,13 @@ See also: [`_discretize_dual`](@ref)
 """
 function _discretize_function(f::Function, T::AbstractVector, dim::Int=-1)::Matrix{Float64}
     n = length(T)
-    
+
     # Auto-detect dimension if necessary
     if dim == -1
         first_val = f(T[1])
         dim = first_val isa Number ? 1 : length(first_val)
     end
-    
+
     result = Matrix{Float64}(undef, n, dim)
     for (i, t) in enumerate(T)
         val = f(t)

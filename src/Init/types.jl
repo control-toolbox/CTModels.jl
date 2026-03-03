@@ -36,8 +36,7 @@ julia> v_guess = [1.0, 2.0]
 julia> ig = CTModels.InitialGuess(x_guess, u_guess, v_guess)
 ```
 """
-struct InitialGuess{X<:Function,U<:Function,V} <:
-       AbstractInitialGuess
+struct InitialGuess{X<:Function,U<:Function,V} <: AbstractInitialGuess
     state::X
     control::U
     variable::V

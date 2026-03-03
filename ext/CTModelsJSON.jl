@@ -76,9 +76,7 @@ end
 Convert Dict{String,Any} back to Dict{Symbol,Any} after JSON deserialization.
 Uses symbol_keys metadata to restore Symbol types where they were originally present.
 """
-function _deserialize_infos(
-    blob, symbol_keys::Vector{String}=String[]
-)::Dict{Symbol,Any}
+function _deserialize_infos(blob, symbol_keys::Vector{String}=String[])::Dict{Symbol,Any}
     if isnothing(blob) || isempty(blob)
         return Dict{Symbol,Any}()
     end
@@ -105,8 +103,7 @@ function _deserialize_value(v, path::String, symbol_keys::Vector{String})
         end
     elseif v isa AbstractVector
         return [
-            _deserialize_value(x, "$(path)[$(i-1)]", symbol_keys) for
-            (i, x) in enumerate(v)
+            _deserialize_value(x, "$(path)[$(i-1)]", symbol_keys) for (i, x) in enumerate(v)
         ]
     elseif v isa AbstractDict
         result = Dict{Symbol,Any}()
@@ -167,8 +164,7 @@ function CTModels.export_ocp_solution(
         "message" => CTModels.message(sol),
         "status" => CTModels.status(sol),
         "successful" => CTModels.successful(sol),
-        "path_constraints_dual" =>
-            _apply_over_grid(CTModels.path_constraints_dual(sol), T),
+        "path_constraints_dual" => _apply_over_grid(CTModels.path_constraints_dual(sol), T),
         "state_constraints_lb_dual" =>
             _apply_over_grid(CTModels.state_constraints_lb_dual(sol), T),
         "state_constraints_ub_dual" =>

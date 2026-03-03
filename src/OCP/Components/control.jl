@@ -63,21 +63,21 @@ function control!(
         "Control already set",
         reason="control has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing control definition",
-        context="control! function - duplicate definition check"
+        context="control! function - duplicate definition check",
     )
     @ensure m > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",
         got="m=$m",
         expected="m > 0 (positive integer)",
         suggestion="Use control!(ocp, m=2) with m > 0",
-        context="control!(ocp, m=$m, name=\"$name\") - validating dimension parameter"
+        context="control!(ocp, m=$m, name=\"$name\") - validating dimension parameter",
     )
     @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
         "Component names count mismatch",
         got="$(size(components_names, 1)) names for dimension $m",
         expected="exactly $m component names",
         suggestion="Use control!(ocp, m, name, [\"u1\", \"u2\", ..., \"u$m\"]) or omit for auto-generation",
-        context="control!(ocp, m=$m, components_names=[...]) - validating names count"
+        context="control!(ocp, m=$m, components_names=[...]) - validating names count",
     )
 
     # NEW: Comprehensive name validation

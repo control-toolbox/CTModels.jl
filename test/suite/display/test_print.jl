@@ -6,7 +6,6 @@ const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_print()
-
     Test.@testset "Test print" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
@@ -85,7 +84,6 @@ function test_print()
             Test.@test occursin("Abstract definition:", s)
             Test.@test occursin("optimal control problem is of the form:", s)
         end
-
     end
 end
 

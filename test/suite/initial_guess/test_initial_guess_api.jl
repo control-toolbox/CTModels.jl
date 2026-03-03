@@ -142,9 +142,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # Manually construct an invalid initial guess (wrong state dimension)
-            bad_init = CTModels.InitialGuess(
-                t -> [t, 2t], t -> 0.1, Float64[]
-            )
+            bad_init = CTModels.InitialGuess(t -> [t, 2t], t -> 0.1, Float64[])
 
             # build_initial_guess must now catch this via centralised validation
             Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
@@ -221,9 +219,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # Manually construct an invalid initial guess
-            bad_init = CTModels.InitialGuess(
-                t -> [t, 2t], t -> 0.1, Float64[]
-            )
+            bad_init = CTModels.InitialGuess(t -> [t, 2t], t -> 0.1, Float64[])
 
             # validate_initial_guess must catch dimension mismatch
             Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
@@ -321,9 +317,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DVar()
 
             # Construct an invalid initial guess manually (wrong control dimension)
-            bad_init = CTModels.InitialGuess(
-                t -> 0.1, t -> [0.1, 0.2], 0.5
-            )
+            bad_init = CTModels.InitialGuess(t -> 0.1, t -> [0.1, 0.2], 0.5)
 
             # Before refactoring, this would pass through unchecked.
             # After refactoring, build_initial_guess validates ALL branches.

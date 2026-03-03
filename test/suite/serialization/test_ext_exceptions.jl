@@ -41,7 +41,7 @@ function test_ext_exceptions()
         Test.@testset "ExtensionError for JLD2Tag export/import" begin
             dummy_sol = DummyAbstractSolution()
             dummy_ocp = DummyAbstractModel()
-            
+
             Test.@test_throws Exceptions.ExtensionError CTModels.export_ocp_solution(
                 CTModels.JLD2Tag(), dummy_sol; filename="test"
             )
@@ -53,7 +53,7 @@ function test_ext_exceptions()
         Test.@testset "ExtensionError for JSON3Tag export/import" begin
             dummy_sol = DummyAbstractSolution()
             dummy_ocp = DummyAbstractModel()
-            
+
             Test.@test_throws Exceptions.ExtensionError CTModels.export_ocp_solution(
                 CTModels.JSON3Tag(), dummy_sol; filename="test"
             )
@@ -98,7 +98,9 @@ function test_ext_exceptions()
         Test.@testset "Plot method signature errors" begin
             # Test that calling plot with a dummy AbstractSolution subtype uses the stub
             # The stub should throw IncorrectArgument since Plots extension is not loaded
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(DummyAbstractSolution())
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
+                DummyAbstractSolution()
+            )
         end
 
         # ============================================================================

@@ -8,7 +8,6 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 
 function test_defaults()
     Test.@testset "defaults" verbose = VERBOSE showtiming = SHOWTIMING begin
-
         Test.@testset "constraints and format defaults" begin
             Test.@test CTModels.OCP.__constraints() === nothing
             Test.@test CTModels.OCP.__format() == :JLD

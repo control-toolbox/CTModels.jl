@@ -101,13 +101,15 @@ function dual(sol::Solution, model::Model, label::Symbol)
     end
 
     # throw an exception if the label is not found
-    throw(Exceptions.IncorrectArgument(
-        "Label not found in model",
-        got="label=$label",
-        expected="existing label in the model",
-        suggestion="Check available labels in the model or use a valid label",
-        context="get_constraint_dual - looking up constraint label in dual model"
-    ))
+    throw(
+        Exceptions.IncorrectArgument(
+            "Label not found in model";
+            got="label=$label",
+            expected="existing label in the model",
+            suggestion="Check available labels in the model or use a valid label",
+            context="get_constraint_dual - looking up constraint label in dual model",
+        ),
+    )
 end
 
 """
