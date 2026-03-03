@@ -269,12 +269,15 @@ Return the state dimension of the [`PreModel`](@ref).
 Throws `Exceptions.PreconditionError` if state has not been set.
 """
 function state_dimension(ocp::PreModel)::Dimension
-    @ensure(__is_state_set(ocp), Exceptions.PreconditionError(
-        "State must be set before accessing dimension",
-        reason="state has not been defined yet",
-        suggestion="Call state!(ocp, dimension) before accessing state_dimension",
-        context="state_dimension - state validation"
-    ))
+    @ensure(
+        __is_state_set(ocp),
+        Exceptions.PreconditionError(
+            "State must be set before accessing dimension",
+            reason="state has not been defined yet",
+            suggestion="Call state!(ocp, dimension) before accessing state_dimension",
+            context="state_dimension - state validation",
+        )
+    )
     return length(ocp.state.components)
 end
 
@@ -291,12 +294,15 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
     elseif ocp.dynamics isa Function
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
-        @ensure(__is_state_set(ocp), Exceptions.PreconditionError(
-            "State must be set before checking dynamics completeness",
-            reason="state has not been defined yet",
-            suggestion="Call state!(ocp, dimension) before defining dynamics",
-            context="__is_dynamics_complete - state validation"
-        ))
+        @ensure(
+            __is_state_set(ocp),
+            Exceptions.PreconditionError(
+                "State must be set before checking dynamics completeness",
+                reason="state has not been defined yet",
+                suggestion="Call state!(ocp, dimension) before defining dynamics",
+                context="__is_dynamics_complete - state validation",
+            )
+        )
         n = state_dimension(ocp)
         covered = falses(n)
         for (range, _) in ocp.dynamics
@@ -306,11 +312,11 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
                 else
                     throw(
                         Exceptions.PreconditionError(
-                            "Dynamics index out of bounds",
+                            "Dynamics index out of bounds";
                             got="dynamics index $i for state of size $n",
                             expected="indices in range 1:$n",
                             suggestion="Check dynamics indices match state dimension",
-                            context="__is_dynamics_complete - validating dynamics indices"
+                            context="__is_dynamics_complete - validating dynamics indices",
                         ),
                     )
                 end

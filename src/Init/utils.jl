@@ -14,13 +14,15 @@ function _format_time_grid(time_data)
     elseif time_data isa AbstractArray
         return vec(time_data)
     else
-        throw(Exceptions.IncorrectArgument(
-            "Invalid time grid type for initial guess",
-            got="$(typeof(time_data))",
-            expected="Vector or Array",
-            suggestion="Provide a vector or array for the time grid",
-            context="time grid formatting"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid time grid type for initial guess";
+                got="$(typeof(time_data))",
+                expected="Vector or Array",
+                suggestion="Provide a vector or array for the time grid",
+                context="time grid formatting",
+            ),
+        )
     end
 end
 

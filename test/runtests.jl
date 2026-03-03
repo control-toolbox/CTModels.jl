@@ -29,9 +29,7 @@ using .TestProblems
 CTBase.run_tests(;
     args=String.(ARGS),
     testset_name="CTModels tests",
-    available_tests=(
-        "suite/*/test_*",
-    ),
+    available_tests=("suite/*/test_*",),
     filename_builder=name -> Symbol(:test_, name),
     funcname_builder=name -> Symbol(:test_, name),
     verbose=VERBOSE,

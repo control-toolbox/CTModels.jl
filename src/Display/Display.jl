@@ -45,7 +45,8 @@ import ..OCP: dimension, name, state_name, control_name, variable_name
 import ..OCP: components, state_components, control_components, variable_components
 import ..OCP: is_autonomous, has_lagrange_cost, has_mayer_cost
 import ..OCP: dim_path_constraints_nl, dim_boundary_constraints_nl
-import ..OCP: dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
+import ..OCP:
+    dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
 import ..OCP: build
 
 # Include display functions
@@ -54,13 +55,15 @@ include("print.jl")
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
 function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(Exceptions.IncorrectArgument(
-        "Plots extension not loaded",
-        got="plot call without Plots extension",
-        expected="Plots.jl to be loaded",
-        suggestion="Load Plots.jl with: using Plots",
-        context="RecipesBase.plot - extension availability check"
-    ))
+    throw(
+        Exceptions.IncorrectArgument(
+            "Plots extension not loaded";
+            got="plot call without Plots extension",
+            expected="Plots.jl to be loaded",
+            suggestion="Load Plots.jl with: using Plots",
+            context="RecipesBase.plot - extension availability check",
+        ),
+    )
 end
 
 # Note: plot is not exported from Display, it will be imported and exported from CTModels

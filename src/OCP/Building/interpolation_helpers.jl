@@ -37,27 +37,29 @@ function _interpolate_from_data(
     type_param::Type;
     allow_nothing::Bool=false,
     constant_if_two_points::Bool=false,
-    expected_dim::Union{Int,Nothing}=nothing
+    expected_dim::Union{Int,Nothing}=nothing,
 )
     # Validation: nothing handling
     if isnothing(data)
         if !allow_nothing
-            throw(Exceptions.IncorrectArgument(
-                "Data cannot be nothing",
-                got="nothing",
-                expected="Matrix{Float64} or Function",
-                suggestion="Provide valid data or set allow_nothing=true",
-                context="_interpolate_from_data"
-            ))
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Data cannot be nothing";
+                    got="nothing",
+                    expected="Matrix{Float64} or Function",
+                    suggestion="Provide valid data or set allow_nothing=true",
+                    context="_interpolate_from_data",
+                ),
+            )
         end
         return nothing
     end
-    
+
     # Case 1: Already a function, pass through
     if type_param <: Function
         return data
     end
-    
+
     # Case 2: Matrix data - validate and interpolate
     # Dimension validation if expected_dim provided
     if !isnothing(expected_dim) && !isnothing(dim)
@@ -67,16 +69,16 @@ function _interpolate_from_data(
             got="$actual_dim columns",
             expected="at least $dim columns",
             suggestion="Provide a matrix with at least $dim columns or adjust expected_dim parameter",
-            context="_interpolate_from_data - validating matrix dimensions"
+            context="_interpolate_from_data - validating matrix dimensions",
         )
     end
-    
+
     # Special case: constant function for 2-point grids
     if constant_if_two_points && length(T) == 2
         cols = isnothing(dim) ? (:) : (1:dim)
         return t -> data[1, cols]
     end
-    
+
     # Standard interpolation
     N = size(data, 1)
     cols = isnothing(dim) ? (:) : (1:dim)
@@ -112,10 +114,7 @@ param_x = 999.0
 # With deepcopy: sol.state(0.5) returns [0.5] (uses original param_x value)
 ```
 """
-function _wrap_scalar_and_deepcopy(
-    func,
-    dim::Union{Int,Nothing}
-)
+function _wrap_scalar_and_deepcopy(func, dim::Union{Int,Nothing})
     if isnothing(func)
         return nothing
     elseif !isnothing(dim) && dim == 1
@@ -172,16 +171,19 @@ function build_interpolated_function(
     type_param::Type;
     allow_nothing::Bool=false,
     constant_if_two_points::Bool=false,
-    expected_dim::Union{Int,Nothing}=nothing
+    expected_dim::Union{Int,Nothing}=nothing,
 )
     # Step 1: Interpolate
     func = _interpolate_from_data(
-        data, T, dim, type_param;
+        data,
+        T,
+        dim,
+        type_param;
         allow_nothing=allow_nothing,
         constant_if_two_points=constant_if_two_points,
-        expected_dim=expected_dim
+        expected_dim=expected_dim,
     )
-    
+
     # Step 2: Wrap with deepcopy and scalar extraction
     return _wrap_scalar_and_deepcopy(func, dim)
 end

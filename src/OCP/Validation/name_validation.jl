@@ -31,24 +31,24 @@ See also: [`__has_name_conflict`](@ref), [`__validate_name_uniqueness`](@ref)
 """
 function __collect_used_names(ocp::PreModel)::Vector{String}
     names = String[]
-    
+
     # Time name
     if __is_times_set(ocp)
         push!(names, time_name(ocp.times))
     end
-    
+
     # State name and components
     if __is_state_set(ocp)
         push!(names, name(ocp.state))
         append!(names, components(ocp.state))
     end
-    
+
     # Control name and components
     if __is_control_set(ocp)
         push!(names, name(ocp.control))
         append!(names, components(ocp.control))
     end
-    
+
     # Variable name and components (if not empty)
     if __is_variable_set(ocp)
         var_model = ocp.variable
@@ -57,7 +57,7 @@ function __collect_used_names(ocp::PreModel)::Vector{String}
             append!(names, components(var_model))
         end
     end
-    
+
     # Return unique names (to handle case where name == component for scalars)
     return unique(names)
 end
@@ -94,9 +94,11 @@ false
 
 See also: [`__collect_used_names`](@ref), [`__validate_name_uniqueness`](@ref)
 """
-function __has_name_conflict(ocp::PreModel, new_name::String, exclude_component::Symbol=:none)::Bool
+function __has_name_conflict(
+    ocp::PreModel, new_name::String, exclude_component::Symbol=:none
+)::Bool
     existing_names = __collect_used_names(ocp)
-    
+
     # Remove names from the component being updated
     if exclude_component == :state && __is_state_set(ocp)
         filter!(x -> x != name(ocp.state), existing_names)
@@ -113,7 +115,7 @@ function __has_name_conflict(ocp::PreModel, new_name::String, exclude_component:
     elseif exclude_component == :time && __is_times_set(ocp)
         filter!(x -> x != time_name(ocp.times), existing_names)
     end
-    
+
     return new_name ∈ existing_names
 end
 
@@ -152,31 +154,28 @@ julia> __validate_name_uniqueness(ocp, "x", ["u"], :control)  # Would throw if "
 See also: [`__has_name_conflict`](@ref), [`__collect_used_names`](@ref)
 """
 function __validate_name_uniqueness(
-    ocp::PreModel, 
-    name::String, 
-    components::Vector{String}, 
-    component_type::Symbol
+    ocp::PreModel, name::String, components::Vector{String}, component_type::Symbol
 )
     component_label = String(component_type)
-    
+
     # 1. Name is not empty
     @ensure !isempty(name) Exceptions.IncorrectArgument(
         "Empty $(component_label) name",
         got="empty string",
         expected="non-empty string",
         suggestion="Use a non-empty string: name=\"x\" or name=:state",
-        context="$(component_label)! name validation"
+        context="$(component_label)! name validation",
     )
-    
+
     # 2. Components are not empty
     @ensure all(!isempty(c) for c in components) Exceptions.IncorrectArgument(
         "Empty component name in $(component_label)",
         got="one or more empty component names",
         expected="all non-empty component names",
         suggestion="Ensure all component names are non-empty strings",
-        context="$(component_label)! component names validation"
+        context="$(component_label)! component names validation",
     )
-    
+
     # 3. Name not in components (internal conflict)
     # Exception: when there's only one component and it equals the name (default behavior)
     if length(components) == 1 && components[1] == name
@@ -187,35 +186,35 @@ function __validate_name_uniqueness(
             got="name='$name' appears in components=$components",
             expected="name different from all component names",
             suggestion="Choose a different name or use auto-generated component names",
-            context="$(component_label)! name uniqueness validation"
+            context="$(component_label)! name uniqueness validation",
         )
     end
-    
+
     # 4. No duplicates in components
     @ensure length(unique(components)) == length(components) Exceptions.IncorrectArgument(
         "Duplicate component names in $(component_label)",
         got="components=$components with duplicates",
         expected="all unique component names",
         suggestion="Ensure each component has a unique name",
-        context="$(component_label)! component uniqueness validation"
+        context="$(component_label)! component uniqueness validation",
     )
-    
+
     # 5. No conflicts with existing names (global uniqueness)
     @ensure !__has_name_conflict(ocp, name, component_type) Exceptions.IncorrectArgument(
         "$(component_label) name conflicts with existing names",
         got="name='$name'",
         expected="unique name not in: $(__collect_used_names(ocp))",
         suggestion="Choose a different name that doesn't conflict with existing components",
-        context="$(component_label)! global name validation"
+        context="$(component_label)! global name validation",
     )
-    
+
     for comp_name in components
         @ensure !__has_name_conflict(ocp, comp_name, component_type) Exceptions.IncorrectArgument(
             "$(component_label) component name conflicts with existing names",
             got="component='$comp_name'",
             expected="unique name not in: $(__collect_used_names(ocp))",
             suggestion="Choose different component names that don't conflict with existing components",
-            context="$(component_label)! component global validation"
+            context="$(component_label)! component global validation",
         )
     end
 end

@@ -89,7 +89,7 @@ function __plot_time!(
                 got="time=$time",
                 expected=":default, :normalize or :normalise",
                 suggestion="Use one of the supported time options",
-                context="plot time parameter"
+                context="plot time parameter",
             ),
         )
     end
@@ -314,7 +314,7 @@ function __initial_plot(
                     got="control=$control",
                     expected=":components, :norm or :all",
                     suggestion="Use one of the supported control options",
-                    context="plot control parameter"
+                    context="plot control parameter",
                 ),
             )
         end
@@ -438,13 +438,15 @@ function __initial_plot(
         end
 
     else
-        throw(Exceptions.IncorrectArgument(
-            "Invalid layout choice";
-            got="layout=$layout",
-            expected=":group or :split",
-            suggestion="Use one of the supported layout options",
-            context="plot layout parameter"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid layout choice";
+                got="layout=$layout",
+                expected=":group or :split",
+                suggestion="Use one of the supported layout options",
+                context="plot layout parameter",
+            ),
+        )
     end
 end
 
@@ -992,13 +994,15 @@ function __plot!(
             end
         end
     else
-        throw(Exceptions.IncorrectArgument(
-            "Invalid layout choice";
-            got="layout=$layout",
-            expected=":group or :split",
-            suggestion="Use one of the supported layout options",
-            context="plot layout parameter"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid layout choice";
+                got="layout=$layout",
+                expected=":group or :split",
+                suggestion="Use one of the supported layout options",
+                context="plot layout parameter",
+            ),
+        )
     end # end layout
 
     # plot vertical lines at the initial and final times if model is not nothing
@@ -1439,11 +1443,13 @@ function __get_data_plot(
 
     # if the time grid is empty then throw an error
     if CTModels.is_empty_time_grid(sol) == true
-        throw(Exceptions.IncorrectArgument(
-            "The time grid is empty";
-            suggestion="Provide a solution with non-empty time grid",
-            context="plot validation"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "The time grid is empty";
+                suggestion="Provide a solution with non-empty time grid",
+                context="plot validation",
+            ),
+        )
     end
 
     vv, ii = MLStyle.@match xx begin

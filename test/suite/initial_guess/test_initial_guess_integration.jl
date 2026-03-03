@@ -91,9 +91,7 @@ function test_initial_guess_integration()
             ocp = beam_data.ocp
 
             # Create PreInit
-            pre = CTModels.pre_initial_guess(
-                state=t -> [0.1, 0.2], control=t -> [0.5]
-            )
+            pre = CTModels.pre_initial_guess(state=t -> [0.1, 0.2], control=t -> [0.5])
 
             # Build and validate
             ig = CTModels.build_initial_guess(ocp, pre)
@@ -138,4 +136,6 @@ function test_initial_guess_integration()
 end
 end # module
 
-test_initial_guess_integration() = TestInitialGuessIntegration.test_initial_guess_integration()
+function test_initial_guess_integration()
+    TestInitialGuessIntegration.test_initial_guess_integration()
+end

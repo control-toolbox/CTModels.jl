@@ -22,10 +22,7 @@ Compare two trajectories (functions) at given time points.
 Returns true if the trajectories are approximately equal at all time points.
 """
 function compare_trajectories(
-    f1::Function,
-    f2::Function,
-    times::Vector{Float64};
-    atol::Float64=1e-8,
+    f1::Function, f2::Function, times::Vector{Float64}; atol::Float64=1e-8
 )::Bool
     for t in times
         v1 = f1(t)
@@ -166,8 +163,7 @@ function compare_solutions(
     if isnothing(pcd1) != isnothing(pcd2)
         return false
     end
-    if !isnothing(pcd1) &&
-       !compare_trajectories(pcd1, pcd2, T1; atol=atol_trajectories)
+    if !isnothing(pcd1) && !compare_trajectories(pcd1, pcd2, T1; atol=atol_trajectories)
         return false
     end
 
@@ -177,7 +173,7 @@ function compare_solutions(
         return false
     end
     if !isnothing(sclbd1) &&
-       !compare_trajectories(sclbd1, sclbd2, T1; atol=atol_trajectories)
+        !compare_trajectories(sclbd1, sclbd2, T1; atol=atol_trajectories)
         return false
     end
 
@@ -187,7 +183,7 @@ function compare_solutions(
         return false
     end
     if !isnothing(scubd1) &&
-       !compare_trajectories(scubd1, scubd2, T1; atol=atol_trajectories)
+        !compare_trajectories(scubd1, scubd2, T1; atol=atol_trajectories)
         return false
     end
 
@@ -197,7 +193,7 @@ function compare_solutions(
         return false
     end
     if !isnothing(cclbd1) &&
-       !compare_trajectories(cclbd1, cclbd2, T1; atol=atol_trajectories)
+        !compare_trajectories(cclbd1, cclbd2, T1; atol=atol_trajectories)
         return false
     end
 
@@ -207,7 +203,7 @@ function compare_solutions(
         return false
     end
     if !isnothing(ccubd1) &&
-       !compare_trajectories(ccubd1, ccubd2, T1; atol=atol_trajectories)
+        !compare_trajectories(ccubd1, ccubd2, T1; atol=atol_trajectories)
         return false
     end
 
@@ -265,7 +261,8 @@ function test_export_import()
                 ocp; filename="solution_test", format=:JSON
             )
 
-            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol = 1e-8
+            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol =
+                1e-8
             Test.@test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
             Test.@test CTModels.successful(sol) == CTModels.successful(sol_reloaded)
             Test.@test CTModels.status(sol) == CTModels.status(sol_reloaded)
@@ -281,7 +278,8 @@ function test_export_import()
                 ocp; filename="solution_test_fun", format=:JSON
             )
 
-            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol = 1e-8
+            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol =
+                1e-8
             Test.@test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
 
             remove_if_exists("solution_test_fun.json")
@@ -296,7 +294,8 @@ function test_export_import()
                 ocp; filename="solution_test", format=:JLD
             )
 
-            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol = 1e-8
+            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol =
+                1e-8
             Test.@test CTModels.iterations(sol) == CTModels.iterations(sol_reloaded)
 
             remove_if_exists("solution_test.jld2")
@@ -346,7 +345,8 @@ function test_export_import()
             # Verify scalar fields
             Test.@test blob["objective"] ≈ CTModels.objective(sol) atol = 1e-10
             Test.@test blob["iterations"] == CTModels.iterations(sol)
-            Test.@test blob["constraints_violation"] ≈ CTModels.constraints_violation(sol) atol = 1e-10
+            Test.@test blob["constraints_violation"] ≈ CTModels.constraints_violation(sol) atol =
+                1e-10
             Test.@test blob["message"] == CTModels.message(sol)
             Test.@test blob["status"] == string(CTModels.status(sol))
             Test.@test blob["successful"] == CTModels.successful(sol)
@@ -460,33 +460,42 @@ function test_export_import()
             )
 
             # Scalar fields
-            Test.@test CTModels.objective(sol_reloaded) ≈ CTModels.objective(sol) atol = 1e-8
+            Test.@test CTModels.objective(sol_reloaded) ≈ CTModels.objective(sol) atol =
+                1e-8
             Test.@test CTModels.iterations(sol_reloaded) == CTModels.iterations(sol)
             Test.@test CTModels.constraints_violation(sol_reloaded) ≈
-                       CTModels.constraints_violation(sol) atol = 1e-8
+                CTModels.constraints_violation(sol) atol = 1e-8
             Test.@test CTModels.message(sol_reloaded) == CTModels.message(sol)
             Test.@test CTModels.status(sol_reloaded) == CTModels.status(sol)
             Test.@test CTModels.successful(sol_reloaded) == CTModels.successful(sol)
 
             # Time grid
-            Test.@test CTModels.time_grid(sol_reloaded) ≈ CTModels.time_grid(sol) atol = 1e-10
+            Test.@test CTModels.time_grid(sol_reloaded) ≈ CTModels.time_grid(sol) atol =
+                1e-10
 
             # Metadata: dimensions, names, components and time labels
-            Test.@test CTModels.state_dimension(sol_reloaded) == CTModels.state_dimension(sol)
-            Test.@test CTModels.control_dimension(sol_reloaded) == CTModels.control_dimension(sol)
-            Test.@test CTModels.variable_dimension(sol_reloaded) == CTModels.variable_dimension(sol)
+            Test.@test CTModels.state_dimension(sol_reloaded) ==
+                CTModels.state_dimension(sol)
+            Test.@test CTModels.control_dimension(sol_reloaded) ==
+                CTModels.control_dimension(sol)
+            Test.@test CTModels.variable_dimension(sol_reloaded) ==
+                CTModels.variable_dimension(sol)
 
             Test.@test CTModels.state_name(sol_reloaded) == CTModels.state_name(sol)
             Test.@test CTModels.control_name(sol_reloaded) == CTModels.control_name(sol)
             Test.@test CTModels.variable_name(sol_reloaded) == CTModels.variable_name(sol)
 
-            Test.@test CTModels.state_components(sol_reloaded) == CTModels.state_components(sol)
-            Test.@test CTModels.control_components(sol_reloaded) == CTModels.control_components(sol)
+            Test.@test CTModels.state_components(sol_reloaded) ==
+                CTModels.state_components(sol)
+            Test.@test CTModels.control_components(sol_reloaded) ==
+                CTModels.control_components(sol)
             Test.@test CTModels.variable_components(sol_reloaded) ==
-                       CTModels.variable_components(sol)
+                CTModels.variable_components(sol)
 
-            Test.@test CTModels.initial_time_name(sol_reloaded) == CTModels.initial_time_name(sol)
-            Test.@test CTModels.final_time_name(sol_reloaded) == CTModels.final_time_name(sol)
+            Test.@test CTModels.initial_time_name(sol_reloaded) ==
+                CTModels.initial_time_name(sol)
+            Test.@test CTModels.final_time_name(sol_reloaded) ==
+                CTModels.final_time_name(sol)
             Test.@test CTModels.time_name(sol_reloaded) == CTModels.time_name(sol)
 
             # Variable
@@ -717,7 +726,8 @@ function test_export_import()
         # Idempotence tests – verify stability across multiple export/import cycles
         # ========================================================================
 
-        Test.@testset "JSON idempotence: double cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JSON idempotence: double cycle (solution_example_dual)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
@@ -739,7 +749,8 @@ function test_export_import()
             remove_if_exists("idempotence_json_2.json")
         end
 
-        Test.@testset "JSON idempotence: triple cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JSON idempotence: triple cycle (solution_example_dual)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example_dual()
 
             # First cycle
@@ -768,17 +779,22 @@ function test_export_import()
             remove_if_exists("idempotence_json_t3.json")
         end
 
-        Test.@testset "JSON idempotence: double cycle (solution_example no duals)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JSON idempotence: double cycle (solution_example no duals)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example()
 
             # First cycle
-            CTModels.export_ocp_solution(sol0; filename="idempotence_json_multi1", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol0; filename="idempotence_json_multi1", format=:JSON
+            )
             sol1 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_json_multi1", format=:JSON
             )
 
             # Second cycle
-            CTModels.export_ocp_solution(sol1; filename="idempotence_json_multi2", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol1; filename="idempotence_json_multi2", format=:JSON
+            )
             sol2 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_json_multi2", format=:JSON
             )
@@ -790,7 +806,8 @@ function test_export_import()
             remove_if_exists("idempotence_json_multi2.json")
         end
 
-        Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             ocp, sol_base = solution_example()
             T = CTModels.time_grid(sol_base)
 
@@ -827,13 +844,17 @@ function test_export_import()
             )
 
             # First cycle
-            CTModels.export_ocp_solution(sol0; filename="idempotence_json_ci1", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol0; filename="idempotence_json_ci1", format=:JSON
+            )
             sol1 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_json_ci1", format=:JSON
             )
 
             # Second cycle
-            CTModels.export_ocp_solution(sol1; filename="idempotence_json_ci2", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol1; filename="idempotence_json_ci2", format=:JSON
+            )
             sol2 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_json_ci2", format=:JSON
             )
@@ -859,16 +880,21 @@ function test_export_import()
             remove_if_exists("idempotence_json_ci2.json")
         end
 
-        Test.@testset "JLD2 idempotence: double cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JLD2 idempotence: double cycle (solution_example_dual)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
             CTModels.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
-            sol1 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_1", format=:JLD)
+            sol1 = CTModels.import_ocp_solution(
+                ocp; filename="idempotence_jld_1", format=:JLD
+            )
 
             # Second cycle: sol1 → export → import → sol2
             CTModels.export_ocp_solution(sol1; filename="idempotence_jld_2", format=:JLD)
-            sol2 = CTModels.import_ocp_solution(ocp; filename="idempotence_jld_2", format=:JLD)
+            sol2 = CTModels.import_ocp_solution(
+                ocp; filename="idempotence_jld_2", format=:JLD
+            )
 
             # Verify idempotence: sol1 ≈ sol2
             Test.@test compare_solutions(sol1, sol2)
@@ -877,7 +903,8 @@ function test_export_import()
             remove_if_exists("idempotence_jld_2.jld2")
         end
 
-        Test.@testset "JLD2 idempotence: triple cycle (solution_example_dual)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JLD2 idempotence: triple cycle (solution_example_dual)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example_dual()
 
             # First cycle
@@ -906,17 +933,22 @@ function test_export_import()
             remove_if_exists("idempotence_jld_t3.jld2")
         end
 
-        Test.@testset "JLD2 idempotence: double cycle (solution_example no duals)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JLD2 idempotence: double cycle (solution_example no duals)" verbose =
+            VERBOSE showtiming = SHOWTIMING begin
             ocp, sol0 = solution_example()
 
             # First cycle
-            CTModels.export_ocp_solution(sol0; filename="idempotence_jld_multi1", format=:JLD)
+            CTModels.export_ocp_solution(
+                sol0; filename="idempotence_jld_multi1", format=:JLD
+            )
             sol1 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_jld_multi1", format=:JLD
             )
 
             # Second cycle
-            CTModels.export_ocp_solution(sol1; filename="idempotence_jld_multi2", format=:JLD)
+            CTModels.export_ocp_solution(
+                sol1; filename="idempotence_jld_multi2", format=:JLD
+            )
             sol2 = CTModels.import_ocp_solution(
                 ocp; filename="idempotence_jld_multi2", format=:JLD
             )
@@ -932,7 +964,8 @@ function test_export_import()
         # Empirical investigation: stack() behavior
         # ========================================================================
 
-        Test.@testset "JSON stack() behavior investigation" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "JSON stack() behavior investigation" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             # Empirical investigation: When does stack() return Vector vs Matrix?
             # This validates the need for the conditional in _json_array_to_matrix
             # 
@@ -964,8 +997,11 @@ function test_export_import()
             Test.@test costate_stacked isa Matrix  # Multi-D → Matrix
 
             # Verify import works correctly (indirect test of _json_array_to_matrix)
-            sol_reloaded = CTModels.import_ocp_solution(ocp; filename="stack_investigation", format=:JSON)
-            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol = 1e-8
+            sol_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="stack_investigation", format=:JSON
+            )
+            Test.@test CTModels.objective(sol) ≈ CTModels.objective(sol_reloaded) atol =
+                1e-8
 
             remove_if_exists("stack_investigation.json")
         end

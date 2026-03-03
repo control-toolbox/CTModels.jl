@@ -7,7 +7,6 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 
 function test_types()
     Test.@testset "CTModels.jl type system" begin
-
         Test.@testset "OCP model and solution core types" begin
             # Abstract/model hierarchy
             Test.@test isabstracttype(CTModels.AbstractModel)
@@ -31,8 +30,7 @@ function test_types()
 
         Test.@testset "Initial guess core types" begin
             Test.@test isabstracttype(CTModels.AbstractInitialGuess)
-            Test.@test CTModels.InitialGuess <:
-                       CTModels.AbstractInitialGuess
+            Test.@test CTModels.InitialGuess <: CTModels.AbstractInitialGuess
 
             Test.@test isabstracttype(CTModels.AbstractPreInitialGuess)
             Test.@test CTModels.PreInitialGuess <: CTModels.AbstractPreInitialGuess

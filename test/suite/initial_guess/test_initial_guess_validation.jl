@@ -107,9 +107,7 @@ function test_initial_guess_validation()
 
             # Function returning wrong dimension
             bad_state_fun = t -> [t, 2t]
-            init_bad = CTModels.InitialGuess(
-                bad_state_fun, t -> 0.1, Float64[]
-            )
+            init_bad = CTModels.InitialGuess(bad_state_fun, t -> 0.1, Float64[])
 
             # Should throw
             Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
@@ -122,9 +120,7 @@ function test_initial_guess_validation()
 
             # Function returning wrong dimension
             bad_control_fun = t -> [t, 2t]
-            init_bad = CTModels.InitialGuess(
-                t -> 0.1, bad_control_fun, Float64[]
-            )
+            init_bad = CTModels.InitialGuess(t -> 0.1, bad_control_fun, Float64[])
 
             # Should throw
             Test.@test_throws Exceptions.IncorrectArgument CTModels.validate_initial_guess(
@@ -137,7 +133,9 @@ function test_initial_guess_validation()
 
             # Wrong variable dimension
             init_bad = CTModels.InitialGuess(
-                t -> 0.1, t -> 0.1, [0.1, 0.2]  # Should be scalar, not vector
+                t -> 0.1,
+                t -> 0.1,
+                [0.1, 0.2],  # Should be scalar, not vector
             )
 
             # Should throw

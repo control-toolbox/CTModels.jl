@@ -19,7 +19,6 @@ correctly warns users about overwriting bounds. If you see warnings like
 """
 function test_constraints()
     Test.@testset "Constraints" verbose = VERBOSE showtiming = SHOWTIMING begin
-
         ∅ = Vector{Float64}()
 
         # From PreModel
@@ -201,8 +200,12 @@ function test_constraints()
                 CTModels.time_dependence!(ocp_dup; autonomous=false)
 
                 # Add constraints on control component 1
-                CTModels.constraint!(ocp_dup, :control; rg=1:1, lb=[0.0], ub=[1.0], label=:c1)
-                CTModels.constraint!(ocp_dup, :control; rg=1:1, lb=[0.5], ub=[1.5], label=:c2)
+                CTModels.constraint!(
+                    ocp_dup, :control; rg=1:1, lb=[0.0], ub=[1.0], label=:c1
+                )
+                CTModels.constraint!(
+                    ocp_dup, :control; rg=1:1, lb=[0.5], ub=[1.5], label=:c2
+                )
 
                 @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
             end
@@ -221,8 +224,12 @@ function test_constraints()
                 CTModels.time_dependence!(ocp_dup; autonomous=false)
 
                 # Add constraints on variable component 1
-                CTModels.constraint!(ocp_dup, :variable; rg=1:1, lb=[0.0], ub=[1.0], label=:v1)
-                CTModels.constraint!(ocp_dup, :variable; rg=1:1, lb=[0.5], ub=[1.5], label=:v2)
+                CTModels.constraint!(
+                    ocp_dup, :variable; rg=1:1, lb=[0.0], ub=[1.0], label=:v1
+                )
+                CTModels.constraint!(
+                    ocp_dup, :variable; rg=1:1, lb=[0.5], ub=[1.5], label=:v2
+                )
 
                 @test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
             end
@@ -248,7 +255,12 @@ function test_constraints()
             # lb > ub for boundary constraints
             f_boundary(r, x0, xf, v) = r .= x0 .+ v
             @test_throws Exceptions.IncorrectArgument CTModels.constraint!(
-                ocp_set, :boundary; f=f_boundary, lb=[1.0, 2.0], ub=[0.5, 1.0], label=:invalid_boundary
+                ocp_set,
+                :boundary;
+                f=f_boundary,
+                lb=[1.0, 2.0],
+                ub=[0.5, 1.0],
+                label=:invalid_boundary,
             )
 
             # lb > ub for path constraints

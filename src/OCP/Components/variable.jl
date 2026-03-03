@@ -43,7 +43,7 @@ function variable!(
         "Variable already set",
         reason="variable has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing variable definition",
-        context="variable! function - duplicate definition check"
+        context="variable! function - duplicate definition check",
     )
 
     @ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
@@ -51,21 +51,21 @@ function variable!(
         got="$(size(components_names, 1)) names for dimension $q",
         expected="exactly $q component names",
         suggestion="Use variable!(ocp, q, name, [\"v1\", \"v2\", ..., \"v$q\"]) or omit for auto-generation",
-        context="variable!(ocp, q=$q, components_names=[...]) - validating names count"
+        context="variable!(ocp, q=$q, components_names=[...]) - validating names count",
     )
 
     @ensure !__is_objective_set(ocp) Exceptions.PreconditionError(
         "Variable must be set before objective",
         reason="objective has already been defined but variable is not set yet",
         suggestion="Call variable!(ocp, dimension) before objective!(ocp, ...)",
-        context="variable! function - objective ordering check"
+        context="variable! function - objective ordering check",
     )
 
     @ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
         "Variable must be set before dynamics",
         reason="dynamics have already been defined but variable is not set yet",
         suggestion="Call variable!(ocp, dimension) before dynamics!(ocp, ...)",
-        context="variable! function - dynamics ordering check"
+        context="variable! function - dynamics ordering check",
     )
 
     # NEW: Comprehensive name validation (only if q > 0)

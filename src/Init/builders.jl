@@ -52,14 +52,16 @@ function _build_block_with_components(
             end
         else
             if (base_val isa AbstractVector && length(base_val) != dim) ||
-               (!(base_val isa AbstractVector) && dim != 1)
-                throw(Exceptions.IncorrectArgument(
-                    "Block-level $role initialization has incompatible dimension",
-                    got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
-                    expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
-                    suggestion="Ensure the $role function returns the correct dimension",
-                    context="block-level $role initialization"
-                ))
+                (!(base_val isa AbstractVector) && dim != 1)
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Block-level $role initialization has incompatible dimension";
+                        got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
+                        expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
+                        suggestion="Ensure the $role function returns the correct dimension",
+                        context="block-level $role initialization",
+                    ),
+                )
             end
             collect(base_val)
         end
@@ -68,26 +70,30 @@ function _build_block_with_components(
             val = fi(t)
             val_scalar = if val isa AbstractVector
                 if length(val) != 1
-                    throw(Exceptions.IncorrectArgument(
-                        "Component-level initialization must return scalar or length-1 vector",
-                        got="vector of length $(length(val)) for $role component $i",
-                        expected="scalar or length-1 vector",
-                        suggestion="Ensure the function for component $i returns a single value",
-                        context="component-level $role initialization"
-                    ))
+                    throw(
+                        Exceptions.IncorrectArgument(
+                            "Component-level initialization must return scalar or length-1 vector";
+                            got="vector of length $(length(val)) for $role component $i",
+                            expected="scalar or length-1 vector",
+                            suggestion="Ensure the function for component $i returns a single value",
+                            context="component-level $role initialization",
+                        ),
+                    )
                 end
                 val[1]
             else
                 val
             end
             if !(1 <= i <= dim)
-                throw(Exceptions.IncorrectArgument(
-                    "Component index out of bounds",
-                    got="index $i for $role",
-                    expected="index between 1 and $dim",
-                    suggestion="Use a valid component index in range 1:$dim",
-                    context="component-level $role initialization"
-                ))
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Component index out of bounds";
+                        got="index $i for $role",
+                        expected="index between 1 and $dim",
+                        suggestion="Use a valid component index in range 1:$dim",
+                        context="component-level $role initialization",
+                    ),
+                )
             end
             vec[i] = val_scalar
         end
@@ -128,22 +134,26 @@ function _build_component_function_without_time(data)
             c = data[1]
             return t -> c
         else
-            throw(Exceptions.IncorrectArgument(
-                "Component-level initialization vector has invalid length",
-                got="vector of length $(length(data))",
-                expected="scalar or length-1 vector",
-                suggestion="Use a scalar value or a single-element vector for component initialization",
-                context="component-level initialization without time grid"
-            ))
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Component-level initialization vector has invalid length";
+                    got="vector of length $(length(data))",
+                    expected="scalar or length-1 vector",
+                    suggestion="Use a scalar value or a single-element vector for component initialization",
+                    context="component-level initialization without time grid",
+                ),
+            )
         end
     else
-        throw(Exceptions.IncorrectArgument(
-            "Unsupported component-level initialization type",
-            got="$(typeof(data))",
-            expected="Function, Real, or Vector{<:Real}",
-            suggestion="Use a function, scalar, or vector for component initialization",
-            context="component-level initialization without time grid"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Unsupported component-level initialization type";
+                got="$(typeof(data))",
+                expected="Function, Real, or Vector{<:Real}",
+                suggestion="Use a function, scalar, or vector for component initialization",
+                context="component-level initialization without time grid",
+            ),
+        )
     end
 end
 
@@ -167,22 +177,26 @@ function _build_component_function_with_time(data, time::AbstractVector)
             c = data[1]
             return t -> c
         else
-            throw(Exceptions.IncorrectArgument(
-                "Component-level initialization time-grid mismatch",
-                got="$(length(data)) data points",
-                expected="$(length(time)) points matching time grid, or 1 for constant",
-                suggestion="Provide data with $(length(time)) samples or use a single value for constant initialization",
-                context="component-level initialization with time grid"
-            ))
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Component-level initialization time-grid mismatch";
+                    got="$(length(data)) data points",
+                    expected="$(length(time)) points matching time grid, or 1 for constant",
+                    suggestion="Provide data with $(length(time)) samples or use a single value for constant initialization",
+                    context="component-level initialization with time grid",
+                ),
+            )
         end
     else
-        throw(Exceptions.IncorrectArgument(
-            "Unsupported component-level initialization type with time grid",
-            got="$(typeof(data))",
-            expected="Function, Real, or Vector{<:Real}",
-            suggestion="Use a function, scalar, or vector for component initialization with time grid",
-            context="component-level initialization with time grid"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Unsupported component-level initialization type with time grid";
+                got="$(typeof(data))",
+                expected="Function, Real, or Vector{<:Real}",
+                suggestion="Use a function, scalar, or vector for component initialization with time grid",
+                context="component-level initialization with time grid",
+            ),
+        )
     end
 end
 
@@ -219,33 +233,39 @@ function _build_time_dependent_init(
         !isempty(data_fmt) &&
         (data_fmt[1] isa AbstractVector)
         if length(data_fmt) != length(time)
-            throw(Exceptions.IncorrectArgument(
-                "Time-grid $role initialization mismatch",
-                got="$(length(data_fmt)) samples",
-                expected="$(length(time)) samples matching time grid",
-                suggestion="Provide data with $(length(time)) samples for the $role initialization",
-                context="time-grid based $role initialization"
-            ))
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Time-grid $role initialization mismatch";
+                    got="$(length(data_fmt)) samples",
+                    expected="$(length(time)) samples matching time grid",
+                    suggestion="Provide data with $(length(time)) samples for the $role initialization",
+                    context="time-grid based $role initialization",
+                ),
+            )
         end
         itp = ctinterpolate(time, data_fmt)
         sample = itp(first(time))
         if !(sample isa AbstractVector) || length(sample) != dim
-            throw(Exceptions.IncorrectArgument(
-                "Time-grid $role initialization has incompatible dimension",
-                got="$(sample isa AbstractVector ? "vector of length $(length(sample))" : "scalar")",
-                expected="vector of length $dim",
-                suggestion="Ensure each sample in the $role data has dimension $dim",
-                context="time-grid based $role initialization"
-            ))
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Time-grid $role initialization has incompatible dimension";
+                    got="$(sample isa AbstractVector ? "vector of length $(length(sample))" : "scalar")",
+                    expected="vector of length $dim",
+                    suggestion="Ensure each sample in the $role data has dimension $dim",
+                    context="time-grid based $role initialization",
+                ),
+            )
         end
         return t -> itp(t)
     else
-        throw(Exceptions.IncorrectArgument(
-            "Unsupported $role initialization type for time-grid based initial guess",
-            got="$(typeof(data))",
-            expected="Function, Vector{<:Real}, or Vector{<:Vector}",
-            suggestion="Use a function, scalar vector, or vector-of-vectors for time-grid based initialization",
-            context="time-grid based $role initialization"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Unsupported $role initialization type for time-grid based initial guess";
+                got="$(typeof(data))",
+                expected="Function, Vector{<:Real}, or Vector{<:Vector}",
+                suggestion="Use a function, scalar vector, or vector-of-vectors for time-grid based initialization",
+                context="time-grid based $role initialization",
+            ),
+        )
     end
 end

@@ -151,7 +151,9 @@ function test_partial_dynamics()
     ######
     ocp7 = deepcopy(ocp)
     @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
-    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, -1:-1, partial_dyn_1!)
+    @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+        ocp7, -1:-1, partial_dyn_1!
+    )
     @test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp7, (n_states + 1):(n_states + 1), partial_dyn_1!
     )

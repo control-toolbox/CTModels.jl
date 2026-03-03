@@ -37,10 +37,10 @@ function CTModels.export_ocp_solution(
 )
     # Serialize solution to discrete data
     data = CTModels.OCP._serialize_solution(sol)
-    
+
     # Save only the serialized data (no more OCP model)
     jldsave(filename * ".jld2"; solution_data=data)
-    
+
     return nothing
 end
 
@@ -79,14 +79,14 @@ function CTModels.import_ocp_solution(
     # Load the saved data
     file_data = load(filename * ".jld2")
     data = file_data["solution_data"]
-    
+
     # Extract time grid - handle both TimeGridModel and raw Vector
     T = if data["time_grid"] isa CTModels.TimeGridModel
         data["time_grid"].value
     else
         data["time_grid"]
     end
-    
+
     # Reconstruct solution using build_solution with provided ocp
     sol = CTModels.build_solution(
         ocp,
@@ -95,22 +95,22 @@ function CTModels.import_ocp_solution(
         data["control"],
         data["variable"],
         data["costate"];
-        objective = data["objective"],
-        iterations = data["iterations"],
-        constraints_violation = data["constraints_violation"],
-        message = data["message"],
-        status = data["status"],
-        successful = data["successful"],
-        path_constraints_dual = data["path_constraints_dual"],
-        boundary_constraints_dual = data["boundary_constraints_dual"],
-        state_constraints_lb_dual = data["state_constraints_lb_dual"],
-        state_constraints_ub_dual = data["state_constraints_ub_dual"],
-        control_constraints_lb_dual = data["control_constraints_lb_dual"],
-        control_constraints_ub_dual = data["control_constraints_ub_dual"],
-        variable_constraints_lb_dual = data["variable_constraints_lb_dual"],
-        variable_constraints_ub_dual = data["variable_constraints_ub_dual"]
+        objective=data["objective"],
+        iterations=data["iterations"],
+        constraints_violation=data["constraints_violation"],
+        message=data["message"],
+        status=data["status"],
+        successful=data["successful"],
+        path_constraints_dual=data["path_constraints_dual"],
+        boundary_constraints_dual=data["boundary_constraints_dual"],
+        state_constraints_lb_dual=data["state_constraints_lb_dual"],
+        state_constraints_ub_dual=data["state_constraints_ub_dual"],
+        control_constraints_lb_dual=data["control_constraints_lb_dual"],
+        control_constraints_ub_dual=data["control_constraints_ub_dual"],
+        variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
+        variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
     )
-    
+
     return sol
 end
 

@@ -28,7 +28,7 @@ function time_dependence!(ocp::PreModel; autonomous::Bool)::Nothing
         "Time dependence already set",
         reason="time dependence has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing time dependence definition",
-        context="time_dependence! function - duplicate definition check"
+        context="time_dependence! function - duplicate definition check",
     )
     ocp.autonomous = autonomous
     return nothing

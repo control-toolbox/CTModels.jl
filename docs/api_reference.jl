@@ -149,16 +149,10 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.Display => src(
-                    joinpath("Display", "Display.jl"),
-                    joinpath("Display", "print.jl"),
-                ),
-                CTModelsPlots => ext(
-                    "CTModelsPlots.jl",
-                    "plot.jl",
-                    "plot_utils.jl",
-                    "plot_default.jl",
-                ),
+                CTModels.Display =>
+                    src(joinpath("Display", "Display.jl"), joinpath("Display", "print.jl")),
+                CTModelsPlots =>
+                    ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),
             ],
             external_modules_to_document=[Plots],
             exclude=EXCLUDE_SYMBOLS,
@@ -219,7 +213,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
     # ───────────────────────────────────────────────────────────────────
     # Extensions (conditional)
     # ───────────────────────────────────────────────────────────────────
-    
+
     # # CTModelsPlots extension
     # CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
     # if !isnothing(CTModelsPlots)

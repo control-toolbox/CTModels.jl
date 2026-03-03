@@ -155,7 +155,14 @@ function test_solution()
             )
             @test CTModels.path_constraints_dual(sol_)(1) == [5.0, 6.0]
             sol_ = CTModels.build_solution(
-                ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual_func
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
+                kwargs...,
+                path_constraints_dual=path_constraints_dual_func,
             )
             @test CTModels.path_constraints_dual(sol_)(1) == [5.0, 6.0]
             # boundary constraints dual: vector
@@ -265,7 +272,14 @@ function test_solution()
             @test CTModels.dim_boundary_constraints_nl(sol) == 0  # no boundary constraints
             boundary_constraints_dual = [3.0, 2.0, 1.0]
             sol_bc = CTModels.build_solution(
-                ocp, T, X, U, v, P; kwargs..., boundary_constraints_dual=boundary_constraints_dual
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
+                kwargs...,
+                boundary_constraints_dual=boundary_constraints_dual,
             )
             @test CTModels.dim_boundary_constraints_nl(sol_bc) == 3  # 3 boundary constraints
 
@@ -273,7 +287,14 @@ function test_solution()
             @test CTModels.dim_variable_constraints_box(sol) == 0  # no variable constraints
             variable_constraints_lb_dual = [1.0, 2.0]
             sol_vc = CTModels.build_solution(
-                ocp, T, X, U, v, P; kwargs..., variable_constraints_lb_dual=variable_constraints_lb_dual
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
+                kwargs...,
+                variable_constraints_lb_dual=variable_constraints_lb_dual,
             )
             @test CTModels.dim_variable_constraints_box(sol_vc) == 2  # 2 variable constraints
 
@@ -281,7 +302,14 @@ function test_solution()
             @test CTModels.dim_state_constraints_box(sol) == 0  # no state constraints
             state_constraints_lb_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
             sol_sc = CTModels.build_solution(
-                ocp, T, X, U, v, P; kwargs..., state_constraints_lb_dual=state_constraints_lb_dual
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
+                kwargs...,
+                state_constraints_lb_dual=state_constraints_lb_dual,
             )
             @test CTModels.dim_state_constraints_box(sol_sc) == 2  # 2 state constraints (dim_x = 2)
 
@@ -290,7 +318,14 @@ function test_solution()
             control_constraints_lb_dual = zeros(3, 1)
             control_constraints_lb_dual[:, 1] = [1.0, 2.0, 3.0]
             sol_cc = CTModels.build_solution(
-                ocp, T, X, U, v, P; kwargs..., control_constraints_lb_dual=control_constraints_lb_dual
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
+                kwargs...,
+                control_constraints_lb_dual=control_constraints_lb_dual,
             )
             @test CTModels.dim_control_constraints_box(sol_cc) == 1  # 1 control constraint (dim_u = 1)
         end
@@ -332,7 +367,8 @@ function test_solution()
         # ========================================================================
         # Closure independence tests (Phase 3: deepcopy removal validation)
         # ========================================================================
-        @testset "Closure independence (deepcopy validation)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        @testset "Closure independence (deepcopy validation)" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             # Test 1: Multiple solutions from same data should be independent
             T1 = [0.0, 0.5, 1.0]
             X1 = [0.0 0.0; 0.5 0.5; 1.0 1.0]
@@ -380,7 +416,9 @@ function test_solution()
             U_func = t -> [param_u * t]
             P_func = t -> [param_p + t, param_p + t]
 
-            sol_func = CTModels.build_solution(ocp, T1, X_func, U_func, v1, P_func; kwargs...)
+            sol_func = CTModels.build_solution(
+                ocp, T1, X_func, U_func, v1, P_func; kwargs...
+            )
 
             # Verify initial values
             @test CTModels.state(sol_func)(0.5) == [0.5, 0.5]
@@ -414,7 +452,9 @@ function test_solution()
             control_results_2 = [CTModels.control(sol1)(t) for t in t_values]
 
             @test all(state_results[i] == state_results_2[i] for i in 1:length(t_values))
-            @test all(control_results[i] == control_results_2[i] for i in 1:length(t_values))
+            @test all(
+                control_results[i] == control_results_2[i] for i in 1:length(t_values)
+            )
         end
     end
 end

@@ -69,7 +69,7 @@ function __constraint!(
             "Constraint already exists",
             reason="constraint with label '$(label)' is already defined",
             suggestion="Use a different label or remove the existing constraint first",
-            context="constraint! function - duplicate label validation"
+            context="constraint! function - duplicate label validation",
         ),
     )
 
@@ -80,7 +80,7 @@ function __constraint!(
             "Both bounds cannot be nothing",
             reason="constraint requires at least one bound (lower or upper)",
             suggestion="Provide lb (lower bound), ub (upper bound), or both",
-            context="constraint! function - bounds validation"
+            context="constraint! function - bounds validation",
         ),
     )
 
@@ -96,7 +96,7 @@ function __constraint!(
             got="lb length=$(length(lb)), ub length=$(length(ub))",
             expected="lb and ub with same length",
             suggestion="Use constraint!(ocp, type, lb=[...], ub=[...]) with equal-length vectors",
-            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds dimensions"
+            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds dimensions",
         ),
     )
 
@@ -108,7 +108,7 @@ function __constraint!(
             got="some lb[i] > ub[i] violations",
             expected="lb[i] ≤ ub[i] for all i",
             suggestion="Check bounds values: lb=[$(lb[1]),...] ≤ ub=[$(ub[1]),...]",
-            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds order"
+            context="constraint!(ocp, type=:$type, lb=[...], ub=[...]) - validating bounds order",
         ),
     )
 
@@ -135,24 +135,30 @@ function __constraint!(
                     ),
                 )
             end
-            @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
-                "Bounds dimension mismatch with implicit range",
-                got="range length=$(length(rg)), bounds length=$(length(lb))",
-                expected="range and bounds must have same dimension",
-                suggestion="Ensure bounds length matches implicit range (type only)",
-                context="constraint! with type but no explicit range - validating bounds dimension"
-            ))
+            @ensure(
+                length(rg) == length(lb),
+                Exceptions.IncorrectArgument(
+                    "Bounds dimension mismatch with implicit range",
+                    got="range length=$(length(rg)), bounds length=$(length(lb))",
+                    expected="range and bounds must have same dimension",
+                    suggestion="Ensure bounds length matches implicit range (type only)",
+                    context="constraint! with type but no explicit range - validating bounds dimension",
+                )
+            )
             __constraint!(ocp_constraints, type, n, m, q; rg=rg, lb=lb, ub=ub, label=label)
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
-            @ensure(length(rg) == length(lb), Exceptions.IncorrectArgument(
-                "Range-bounds dimension mismatch with explicit range",
-                got="range length=$(length(rg)), bounds length=$(length(lb))",
-                expected="range and bounds must have same dimension",
-                suggestion="Ensure bounds length matches explicit range parameter",
-                context="constraint! with explicit range parameter - validating range-bounds match"
-            ))
+            @ensure(
+                length(rg) == length(lb),
+                Exceptions.IncorrectArgument(
+                    "Range-bounds dimension mismatch with explicit range",
+                    got="range length=$(length(rg)), bounds length=$(length(lb))",
+                    expected="range and bounds must have same dimension",
+                    suggestion="Ensure bounds length matches explicit range parameter",
+                    context="constraint! with explicit range parameter - validating range-bounds match",
+                )
+            )
             # check if the range is valid
             if type == :state
                 @ensure(
@@ -162,7 +168,7 @@ function __constraint!(
                         got="range=$rg for state dimension $n",
                         expected="all indices in 1:$n",
                         suggestion="Use constraint!(ocp, :state, 1:$n, ...) or subset like 1:2",
-                        context="constraint!(ocp, type=:state, rg=$rg) - validating range bounds"
+                        context="constraint!(ocp, type=:state, rg=$rg) - validating range bounds",
                     ),
                 )
             elseif type == :control
@@ -173,7 +179,7 @@ function __constraint!(
                         got="range=$rg for control dimension $m",
                         expected="all indices in 1:$m",
                         suggestion="Use constraint!(ocp, :control, 1:$m, ...) or subset like 1:2",
-                        context="constraint!(ocp, type=:control, rg=$rg) - validating range bounds"
+                        context="constraint!(ocp, type=:control, rg=$rg) - validating range bounds",
                     ),
                 )
             elseif type == :variable
@@ -184,7 +190,7 @@ function __constraint!(
                         got="range=$rg for variable dimension $q",
                         expected="all indices in 1:$q",
                         suggestion="Use constraint!(ocp, :variable, 1:$q, ...) or subset like 1:2",
-                        context="constraint!(ocp, type=:variable, rg=$rg) - validating range bounds"
+                        context="constraint!(ocp, type=:variable, rg=$rg) - validating range bounds",
                     ),
                 )
             else
@@ -212,7 +218,7 @@ function __constraint!(
                         got="bounds length=$(length(lb))",
                         expected="bounds length=codim_f=$codim_f",
                         suggestion="Ensure bounds length matches function output dimension",
-                        context="constraint! function bounds validation"
+                        context="constraint! function bounds validation",
                     )
                 )
             end
@@ -227,19 +233,21 @@ function __constraint!(
                         got="type=$type",
                         expected=":boundary or :path",
                         suggestion="Choose a valid constraint type for function-based constraints",
-                        context="constraint! function type validation"
+                        context="constraint! function type validation",
                     ),
                 )
             end
         end
 
-        _ => throw(Exceptions.IncorrectArgument(
-            "Inconsistent constraint arguments",
-            got="arguments that don't match any valid constraint pattern",
-            expected="valid combination of type, range, function, bounds, and label",
-            suggestion="Check constraint! documentation for valid argument combinations. Common patterns: constraint!(ocp, :state, rg, f, lb, ub) or constraint!(ocp, :boundary, f)",
-            context="constraint! argument validation"
-        ))
+        _ => throw(
+            Exceptions.IncorrectArgument(
+                "Inconsistent constraint arguments",
+                got="arguments that don't match any valid constraint pattern",
+                expected="valid combination of type, range, function, bounds, and label",
+                suggestion="Check constraint! documentation for valid argument combinations. Common patterns: constraint!(ocp, :state, rg, f, lb, ub) or constraint!(ocp, :boundary, f)",
+                context="constraint! argument validation",
+            ),
+        )
     end
     return nothing
 end
@@ -295,19 +303,19 @@ function constraint!(
         "State must be set before adding constraints",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before adding constraints",
-        context="constraint! function - state validation"
+        context="constraint! function - state validation",
     )
     @ensure __is_control_set(ocp) Exceptions.PreconditionError(
         "Control must be set before adding constraints",
         reason="control has not been defined yet",
         suggestion="Call control!(ocp, dimension) before adding constraints",
-        context="constraint! function - control validation"
+        context="constraint! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before adding constraints",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before adding constraints",
-        context="constraint! function - times validation"
+        context="constraint! function - times validation",
     )
 
     # checks: variable must be set if using type=:variable
@@ -315,7 +323,7 @@ function constraint!(
         "Variable must be set for type=:variable constraints",
         reason="OCP has no variable defined but constraint type requires it",
         suggestion="Call variable!(ocp, dimension) before adding variable constraints, or use a different constraint type",
-        context="constraint! function - variable type validation"
+        context="constraint! function - variable type validation",
     )
 
     # dimensions
@@ -380,7 +388,6 @@ as_range(r::T) where {T<:Int} = r:r
 Return an ordinal range unchanged.
 """
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
-
 
 # ------------------------------------------------------------------------------ #
 # GETTERS
@@ -809,11 +816,13 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     end
 
     # throw an exception if the label is not found
-    throw(Exceptions.IncorrectArgument(
-        "Constraint label not found",
-        got="label :$label",
-        expected="existing constraint label in the model",
-        suggestion="Check available constraint labels or add a constraint with this label first",
-        context="constraint lookup by label"
-    ))
+    throw(
+        Exceptions.IncorrectArgument(
+            "Constraint label not found";
+            got="label :$label",
+            expected="existing constraint label in the model",
+            suggestion="Check available constraint labels or add a constraint with this label first",
+            context="constraint lookup by label",
+        ),
+    )
 end

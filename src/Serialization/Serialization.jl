@@ -34,7 +34,9 @@ using CTBase: CTBase
 const Exceptions = CTBase.Exceptions
 
 # Import types from parent module
-import ..AbstractModel, ..AbstractSolution, ..Solution
+using ..AbstractModel: AbstractModel
+using ..AbstractSolution: AbstractSolution
+using ..Solution: Solution
 
 # Import default functions from OCP
 import ..OCP: __format, __filename_export_import
