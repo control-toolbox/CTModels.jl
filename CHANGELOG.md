@@ -5,6 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-03-05
+
+### Added
+
+- **Multi-Time-Grid System**: Complete implementation of multiple time grid support
+  - New `UnifiedTimeGridModel` for single time grid solutions
+  - New `MultipleTimeGridModel` for different time grids per component
+  - New `time_grid_model()` getter function for accessing time grid models
+  - Enhanced `time_grid()` function with component-specific access
+  - Support for empty dual grids with `nothing` values
+
+- **Enhanced Serialization**: Dual format support for backward compatibility
+  - Legacy format preservation for existing solutions
+  - New multi-grid format with component-specific time grids
+  - `_serialize_solution()` function now exported for advanced usage
+  - Automatic format detection and conversion
+
+- **Component Symbol Cleaning**: Order-preserving component name normalization
+  - `clean_component_symbols()` function preserves input order
+  - Plural to singular conversion (`:states` → `:state`, `:controls` → `:control`)
+  - Ambiguous term mapping (`:constraint` → `:path`, `:cons` → `:path`)
+  - Duplicate removal while maintaining original sequence
+
+- **Plotting Enhancements**: Multi-time-grid compatible plotting system
+  - Component mapping for special plotting symbols (`:control_norm` → `:control`)
+  - Path constraint plotting support (`:path_constraint` → `:state`)
+  - Dual constraint plotting (`:dual_path_constraint` → `:dual`)
+  - Robust error handling for invalid component specifications
+
+### Changed
+
+- **Build Solution API**: Enhanced multi-grid support in `build_solution()`
+  - Accepts separate time grids for state, control, costate, and dual components
+  - Automatic conversion from `LinRange` to `Vector{Float64}` for compatibility
+  - Improved error messages for mismatched grid and data sizes
+  - Better type stability for `UnifiedTimeGridModel` operations
+
+- **Exception Handling**: Improved error messages and formatting
+  - `IncorrectArgument` exceptions with semicolon-separated named arguments
+  - Better localization of errors with file, line, and function information
+  - Actionable error messages with suggestions for fixes
+
+### Fixed
+
+- **Type Stability**: Resolved type inference issues in multi-time-grid operations
+  - `UnifiedTimeGridModel` operations are now fully type-stable
+  - `MultipleTimeGridModel` handles Union return types gracefully
+  - Proper type annotations for time grid getter functions
+
+- **Data Grid Consistency**: Fixed bounds errors in multi-grid test cases
+  - Corrected data matrix sizes to match corresponding time grids
+  - Proper handling of different grid sizes in test scenarios
+  - Improved interpolation for mismatched grid dimensions
+
+### Test Coverage
+
+- **Comprehensive Test Suite**: 79 tests passing (100% success rate)
+  - Time Grid Models: 10 tests
+  - Component Symbol Cleaning: 15 tests
+  - Build Solution with Multiple Grids: 14 tests
+  - Time Grid Getters: 17 tests
+  - Serialization with Multiple Grids: 9 tests
+  - Backward Compatibility: 5 tests
+  - Error Handling: 3 tests
+  - Type Stability: 6 tests
+
 ## [0.9.1] - 2026-03-02
 
 ### Removed
