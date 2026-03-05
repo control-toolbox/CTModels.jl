@@ -87,6 +87,7 @@ export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
+export UnifiedTimeGridModel, MultipleTimeGridModel
 export Autonomous, NonAutonomous
 export ConstraintsModel
 
@@ -102,6 +103,7 @@ export append_box_constraints!
 export constraint, constraints, name, dimension, components
 export initial_time, final_time, time_name, time_grid, times
 export initial_time_name, final_time_name
+export clean_component_symbols, time_grid_model, _serialize_solution
 export criterion, has_mayer_cost, has_lagrange_cost
 export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time

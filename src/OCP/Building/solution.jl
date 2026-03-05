@@ -41,7 +41,10 @@ and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is 
 """
 function build_solution(
     ocp::Model,
-    T::Vector{Float64},
+    T_state::Vector{Float64},
+    T_control::Vector{Float64},
+    T_costate::Vector{Float64},
+    T_dual::Union{Vector{Float64},Nothing},
     X::TX,
     U::TU,
     v::Vector{Float64},
@@ -73,64 +76,77 @@ function build_solution(
     dim_u = control_dimension(ocp)
     dim_v = variable_dimension(ocp)
 
-    # check that time grid is strictly increasing
-    # if not proceed with list of indexes as time grid
-    if !issorted(T; lt=<)
-        println(
-            "WARNING: time grid at solution is not increasing, replacing with list of indices...",
+    # Validate and fix time grids
+    T_state = _validate_and_fix_time_grid(T_state, "state")
+    T_control = _validate_and_fix_time_grid(T_control, "control")
+    T_costate = _validate_and_fix_time_grid(T_costate, "costate")
+    T_dual = isnothing(T_dual) ? nothing : _validate_and_fix_time_grid(T_dual, "dual")
+
+    # Detect if all non-nothing grids are identical
+    non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_dual])
+    all_identical = length(non_nothing_grids) <= 1 || all(g -> g == first(non_nothing_grids), non_nothing_grids)
+
+    # Create appropriate time grid model
+    time_grid = if all_identical
+        UnifiedTimeGridModel(first(non_nothing_grids))
+    else
+        # For dual grid, use T_state if T_dual is nothing (path constraints share state grid)
+        T_dual_safe = isnothing(T_dual) ? T_state : T_dual
+        MultipleTimeGridModel(
+            state=T_state,
+            control=T_control,
+            costate=T_costate,
+            path=T_dual_safe,
+            dual=T_dual_safe
         )
-        println(T)
-        dim_NLP_steps = length(T) - 1
-        T = LinRange(0, dim_NLP_steps, dim_NLP_steps + 1)
     end
 
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
-    fx = build_interpolated_function(X, T, dim_x, TX; expected_dim=dim_x)
-    fu = build_interpolated_function(U, T, dim_u, TU; expected_dim=dim_u)
+    fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
+    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u)
     fp = build_interpolated_function(
-        P, T, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
+        P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     fpcd = build_interpolated_function(
-        path_constraints_dual, T, dim_path_constraints_nl(ocp), TPCD; allow_nothing=true
+        path_constraints_dual, T_dual, dim_path_constraints_nl(ocp), TPCD; allow_nothing=true
     )
 
     # box constraints multipliers (optional, can be nothing)
     fscbd = build_interpolated_function(
         state_constraints_lb_dual,
-        T,
+        T_dual,
         dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fscud = build_interpolated_function(
         state_constraints_ub_dual,
-        T,
+        T_dual,
         dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
-        T,
+        T_dual,
         dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
-        T,
+        T_dual,
         dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
 
     # build Models
-    time_grid = TimeGridModel(T)
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
     control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
@@ -160,6 +176,128 @@ function build_solution(
         objective,
         dual,
         solver_infos,
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Validate and fix a time grid by ensuring it is strictly increasing.
+
+# Arguments
+- `T::Vector{Float64}`: Time grid to validate
+- `component_name::String`: Name of the component for error messages
+
+# Returns
+- `Vector{Float64}`: Validated and potentially reordered time grid
+
+# Notes
+If the grid is not strictly increasing, it is reordered and a warning is emitted.
+"""
+function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
+    if !issorted(T; lt=<)
+        # Build appropriate message based on component name
+        components_with_issues = [component_name]  # TODO: Collect all components when called multiple times
+        
+        if length(components_with_issues) == 1
+            msg = "The time grid for $(components_with_issues[1]) is not increasing. It is reordered."
+        else
+            msg = "The time grids for $(join(components_with_issues, ", ")) are not increasing. They are reordered."
+        end
+        
+        @warn msg
+        return sort(T)
+    end
+    return T
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build a solution from the optimal control problem, the time grid, the state, control, variable, and dual variables.
+
+# Arguments
+
+- `ocp::Model`: the optimal control problem.
+- `T::Vector{Float64}`: the time grid.
+- `X::Matrix{Float64}`: the state trajectory.
+- `U::Matrix{Float64}`: the control trajectory.
+- `v::Vector{Float64}`: the variable trajectory.
+- `P::Matrix{Float64}`: the costate trajectory.
+- `objective::Float64`: the objective value.
+- `iterations::Int`: the number of iterations.
+- `constraints_violation::Float64`: the constraints violation.
+- `message::String`: the message associated to the status criterion.
+- `status::Symbol`: the status criterion.
+- `successful::Bool`: the successful status.
+- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
+- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
+- `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
+- `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
+- `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.
+- `control_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the control constraints.
+- `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
+- `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
+- `infos::Dict{Symbol,Any}`: additional solver information dictionary.
+
+# Returns
+
+- `sol::Solution`: the optimal control solution.
+
+# Notes
+
+The dimensions of box constraint dual variables (`state_constraints_*_dual`, `control_constraints_*_dual`, 
+`variable_constraints_*_dual`) correspond to the **state/control/variable dimension**, not the number of 
+constraint declarations. If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` 
+and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is emitted during model construction.
+
+"""
+function build_solution(
+    ocp::Model,
+    T::Vector{Float64},
+    X::TX,
+    U::TU,
+    v::Vector{Float64},
+    P::TP;
+    objective::Float64,
+    iterations::Int,
+    constraints_violation::Float64,
+    message::String,
+    status::Symbol,
+    successful::Bool,
+    path_constraints_dual::TPCD=__constraints(),
+    boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    state_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
+) where {
+    TX<:Union{Matrix{Float64},Function},
+    TU<:Union{Matrix{Float64},Function},
+    TP<:Union{Matrix{Float64},Function},
+    TPCD<:Union{Matrix{Float64},Function,Nothing},
+}
+    # Legacy compatibility: call new multi-grid method with same grid for all components
+    return build_solution(
+        ocp, T, T, T, T, X, U, v, P;
+        objective=objective,
+        iterations=iterations,
+        constraints_violation=constraints_violation,
+        message=message,
+        status=status,
+        successful=successful,
+        path_constraints_dual=path_constraints_dual,
+        boundary_constraints_dual=boundary_constraints_dual,
+        state_constraints_lb_dual=state_constraints_lb_dual,
+        state_constraints_ub_dual=state_constraints_ub_dual,
+        control_constraints_lb_dual=control_constraints_lb_dual,
+        control_constraints_ub_dual=control_constraints_ub_dual,
+        variable_constraints_lb_dual=variable_constraints_lb_dual,
+        variable_constraints_ub_dual=variable_constraints_ub_dual,
+        infos=infos,
     )
 end
 
@@ -537,12 +675,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the time grid.
+Return the time grid for solutions with unified time grid.
 
 """
 function time_grid(
     sol::Solution{
-        <:TimeGridModel{T},
+        <:UnifiedTimeGridModel{T},
         <:AbstractTimesModel,
         <:AbstractStateModel,
         <:AbstractControlModel,
@@ -555,6 +693,166 @@ function time_grid(
     },
 )::T where {T<:TimesDisc}
     return sol.time_grid.value
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the time grid for a specific component.
+
+# Arguments
+- `sol::Solution`: The solution (unified or multiple time grids)
+- `component::Symbol`: The component (:state, :control, :costate, :path, :dual)
+  Plural forms (:states, :controls, :costates, :duals) are also accepted
+
+# Returns
+- `TimesDisc`: The time grid for the specified component
+
+# Behavior
+- For `UnifiedTimeGridModel`: Returns the unique time grid for any component
+- For `MultipleTimeGridModel`: Returns the specific time grid for the component
+
+# Throws
+- `IncorrectArgument`: If component is not one of the valid symbols
+
+# Examples
+```julia-repl
+julia> time_grid(sol, :state)  # Works for both unified and multiple grids
+julia> time_grid(sol, :control)  # Works for both unified and multiple grids
+julia> time_grid(sol, :states)  # Plural form also works
+```
+"""
+function time_grid(
+    sol::Solution{
+        <:UnifiedTimeGridModel{T},
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:AbstractModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+    component::Symbol,
+)::T where {T<:TimesDisc}
+    # Clean and validate component symbol
+    component_clean = clean_component_symbols((component,))[1]
+    
+    # Validate component
+    if component_clean ∉ (:state, :control, :costate, :path, :dual)
+        # ⚠️ Applying Exception Rule: Invalid component symbol
+        throw(CTBase.Exceptions.IncorrectArgument(
+            "Invalid component for time grid access";
+            got=string(component),
+            expected="one of :state, :control, :costate, :path, :dual (or plural forms)",
+            suggestion="Use time_grid(sol, :state) or another valid component",
+            context="time_grid for UnifiedTimeGridModel"
+        ))
+    end
+    
+    # For unified time grid, return the unique grid regardless of component
+    return sol.time_grid.value
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the time grid for a specific component in solutions with multiple time grids.
+
+# Arguments
+- `sol::Solution`: The solution with multiple time grids
+- `component::Symbol`: The component (:state, :control, :costate, :path, :dual)
+  Plural forms (:states, :controls, :costates, :duals) are also accepted
+
+# Returns
+- `TimesDisc`: The time grid for the specified component
+
+# Throws
+- `IncorrectArgument`: If component is not one of the valid symbols
+
+# Examples
+```julia-repl
+julia> time_grid(sol, :state)  # Get state time grid
+julia> time_grid(sol, :control)  # Get control time grid
+julia> time_grid(sol, :states)  # Plural form also works
+```
+"""
+function time_grid(
+    sol::Solution{
+        <:MultipleTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:AbstractModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+    component::Symbol,
+)::TimesDisc
+    # Clean and validate component symbol
+    component_clean = clean_component_symbols((component,))[1]
+    
+    # Validate component
+    if component_clean ∉ (:state, :control, :costate, :path, :dual)
+        # ⚠️ Applying Exception Rule: Invalid component symbol
+        throw(CTBase.Exceptions.IncorrectArgument(
+            "Invalid component for time grid access";
+            got=string(component),
+            expected="one of :state, :control, :costate, :path, :dual (or plural forms)",
+            suggestion="Use time_grid(sol, :state) or another valid component",
+            context="time_grid for MultipleTimeGridModel"
+        ))
+    end
+    
+    # Return the appropriate grid
+    return getfield(sol.time_grid.grids, component_clean)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the time grid for solutions with multiple time grids (component must be specified).
+
+# Throws
+- `IncorrectArgument`: Always thrown for MultipleTimeGridModel without component specification
+
+# Notes
+This method enforces explicit component specification for solutions with multiple time grids
+to avoid ambiguity about which grid is being accessed.
+
+# Examples
+```julia-repl
+julia> time_grid(sol)  # ❌ Error for MultipleTimeGridModel
+julia> time_grid(sol, :state)  # ✅ Correct usage
+```
+"""
+function time_grid(
+    sol::Solution{
+        <:MultipleTimeGridModel,
+        <:AbstractTimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:AbstractModel,
+        <:Function,
+        <:ctNumber,
+        <:AbstractDualModel,
+        <:AbstractSolverInfos,
+    },
+)
+    # ⚠️ Applying Exception Rule: Missing component specification
+    throw(CTBase.Exceptions.IncorrectArgument(
+        "Component must be specified for solutions with multiple time grids";
+        got="no component specified",
+        expected="time_grid(sol, :component) where component ∈ {:state, :control, :costate, :path, :dual}",
+        suggestion="Specify which time grid to access, e.g., time_grid(sol, :state)",
+        context="time_grid for MultipleTimeGridModel"
+    ))
 end
 
 """
@@ -851,11 +1149,25 @@ See also: [`build_solution`](@ref), [`_discretize_function`](@ref)
 """
 function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters
-    T = time_grid(sol)
     dim_x = state_dimension(sol)
     dim_u = control_dimension(sol)
 
-    # Discretize main functions
+    # Dispatch based on time grid model type
+    return _serialize_solution(time_grid_model(sol), sol, dim_x, dim_u)
+end
+
+"""
+Serialize solution for unified time grid (legacy format).
+"""
+function _serialize_solution(
+    ::UnifiedTimeGridModel,
+    sol::Solution,
+    dim_x::Int,
+    dim_u::Int
+)
+    # Legacy format: single time grid
+    T = time_grid(sol)
+    
     return Dict(
         "time_grid" => T,
         "state" => _discretize_function(state(sol), T, dim_x),
@@ -884,5 +1196,59 @@ function _serialize_solution(sol::Solution)::Dict{String,Any}
         "status" => status(sol),
         "successful" => successful(sol),
         "constraints_violation" => constraints_violation(sol),
+        "infos" => infos(sol),
+    )
+end
+
+"""
+Serialize solution for multiple time grids format.
+"""
+function _serialize_solution(
+    ::MultipleTimeGridModel,
+    sol::Solution,
+    dim_x::Int,
+    dim_u::Int
+)
+    # Multiple time grids format
+    T_state = time_grid(sol, :state)
+    T_control = time_grid(sol, :control)
+    T_costate = time_grid(sol, :costate)
+    T_dual = time_grid(sol, :dual)  # Same as :path
+    
+    return Dict(
+        # Multiple time grids
+        "time_grid_state" => T_state,
+        "time_grid_control" => T_control,
+        "time_grid_costate" => T_costate,
+        "time_grid_dual" => T_dual,
+        
+        # Discretized functions with appropriate grids
+        "state" => _discretize_function(state(sol), T_state, dim_x),
+        "control" => _discretize_function(control(sol), T_control, dim_u),
+        "costate" => _discretize_function(costate(sol), T_costate, dim_x),
+        "variable" => variable(sol),
+        "objective" => objective(sol),
+
+        # Discretize dual functions with dual grid
+        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_dual),
+        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T_dual),
+        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T_dual),
+        "control_constraints_lb_dual" =>
+            _discretize_dual(control_constraints_lb_dual(sol), T_dual),
+        "control_constraints_ub_dual" =>
+            _discretize_dual(control_constraints_ub_dual(sol), T_dual),
+
+        # Boundary and variable duals (vectors, not functions)
+        "boundary_constraints_dual" => boundary_constraints_dual(sol),
+        "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
+        "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
+
+        # Solver info
+        "iterations" => iterations(sol),
+        "message" => message(sol),
+        "status" => status(sol),
+        "successful" => successful(sol),
+        "constraints_violation" => constraints_violation(sol),
+        "infos" => infos(sol),
     )
 end

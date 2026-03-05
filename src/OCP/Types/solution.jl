@@ -16,7 +16,9 @@ abstract type AbstractTimeGridModel end
 """
 $(TYPEDEF)
 
-Time grid model storing the discretised time points of a solution.
+Unified time grid model storing a single discretised time grid for all solution components.
+
+Used when all variables (state, control, costate, duals) share the same time grid.
 
 # Fields
 
@@ -27,13 +29,143 @@ Time grid model storing the discretised time points of a solution.
 ```julia-repl
 julia> using CTModels
 
-julia> tg = CTModels.TimeGridModel(LinRange(0, 1, 101))
+julia> tg = CTModels.UnifiedTimeGridModel(LinRange(0, 1, 101))
 julia> length(tg.value)
 101
 ```
 """
-struct TimeGridModel{T<:TimesDisc} <: AbstractTimeGridModel
+struct UnifiedTimeGridModel{T<:TimesDisc} <: AbstractTimeGridModel
     value::T
+end
+
+"""
+$(TYPEDEF)
+
+Multiple time grid model storing different time grids for each solution component.
+
+Used when variables have different discretisations (e.g., different grid densities for state vs control).
+
+# Fields
+
+- `grids::NamedTuple`: Named tuple with time grids for each component:
+  - `state::TimesDisc`: State trajectory time grid
+  - `control::TimesDisc`: Control trajectory time grid  
+  - `costate::TimesDisc`: Costate trajectory time grid
+  - `path::TimesDisc`: Path constraints and duals time grid
+  - `dual::TimesDisc`: Alias for path constraints grid (same physical grid)
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> T_state = LinRange(0, 1, 101)
+julia> T_control = LinRange(0, 1, 51)
+julia> tg = CTModels.MultipleTimeGridModel(
+    state=T_state, control=T_control, costate=T_state, path=T_state, dual=T_state
+)
+julia> length(tg.grids.state)
+101
+```
+"""
+struct MultipleTimeGridModel <: AbstractTimeGridModel
+    grids::NamedTuple{
+        (:state, :control, :costate, :path, :dual),
+        Tuple{TimesDisc, TimesDisc, TimesDisc, TimesDisc, TimesDisc}
+    }
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Construct a `MultipleTimeGridModel` with keyword arguments for each component time grid.
+
+# Arguments
+- `state`: Time grid for state variables
+- `control`: Time grid for control variables  
+- `costate`: Time grid for costate variables
+- `path`: Time grid for path constraints
+- `dual`: Time grid for dual variables
+
+# Returns
+- `MultipleTimeGridModel`: A model containing all component time grids
+
+# Example
+```julia-repl
+julia> T_state = LinRange(0, 1, 101)
+julia> T_control = LinRange(0, 1, 51)
+julia> mtgm = MultipleTimeGridModel(
+    state=T_state, 
+    control=T_control, 
+    costate=T_state, 
+    path=T_state, 
+    dual=T_state
+)
+```
+"""
+function MultipleTimeGridModel(;
+    state::TimesDisc,
+    control::TimesDisc,
+    costate::TimesDisc,
+    path::TimesDisc,
+    dual::TimesDisc
+)
+    return MultipleTimeGridModel((
+        state=state,
+        control=control,
+        costate=costate,
+        path=path,
+        dual=dual
+    ))
+end
+
+# Legacy alias for backward compatibility
+const TimeGridModel = UnifiedTimeGridModel
+
+"""
+$(TYPEDSIGNATURES)
+
+Clean and standardize component symbols for time grid access.
+
+# Behavior
+- Converts plural forms (`:states`, `:costates`, etc.) to their singular equivalents.
+- Maps ambiguous terms (`:constraint`, `:constraints`, `:cons`) to `:path`.
+- Removes duplicate symbols.
+
+# Arguments
+- `description`: A tuple of symbols passed by the user, typically from time grid access.
+
+# Returns
+- A cleaned `Tuple{Symbol...}` of unique, standardized symbols.
+
+# Example
+```julia-repl
+julia> clean_component_symbols((:states, :controls, :costate, :constraint, :duals))
+# → (:state, :control, :costate, :path, :dual)
+```
+"""
+function clean_component_symbols(description)
+    # remove the nouns in plural form
+    description = replace(
+        description,
+        :states => :state,
+        :costates => :costate,
+        :controls => :control,
+        :constraints => :path,
+        :constraint => :path,
+        :cons => :path,
+        :duals => :dual,
+    )
+    # remove the duplicates while preserving order
+    seen = Set{Symbol}()
+    result = Symbol[]
+    for comp in description
+        if comp ∉ seen
+            push!(seen, comp)
+            push!(result, comp)
+        end
+    end
+    return tuple(result...)
 end
 
 """
@@ -53,8 +185,46 @@ julia> etg = CTModels.EmptyTimeGridModel()
 """
 struct EmptyTimeGridModel <: AbstractTimeGridModel end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the time grid model is empty.
+
+# Arguments
+- `model::EmptyTimeGridModel`: An empty time grid model
+
+# Returns
+- `Bool`: Always `true` for empty time grid models
+
+# Example
+```julia-repl
+julia> etg = CTModels.EmptyTimeGridModel()
+julia> CTModels.is_empty(etg)
+true
+```
+"""
 is_empty(model::EmptyTimeGridModel)::Bool = true
-is_empty(model::TimeGridModel)::Bool = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `false` for non-empty time grid models.
+
+# Arguments
+- `model::AbstractTimeGridModel`: Any non-empty time grid model
+
+# Returns
+- `Bool`: Always `false` for non-empty time grid models
+
+# Example
+```julia-repl
+julia> T = LinRange(0, 1, 101)
+julia> utg = CTModels.UnifiedTimeGridModel(T)
+julia> CTModels.is_empty(utg)
+false
+```
+"""
+is_empty(model::AbstractTimeGridModel)::Bool = false
 
 # ------------------------------------------------------------------------------ #
 # Solver infos
@@ -235,4 +405,14 @@ $(TYPEDSIGNATURES)
 
 Check if the time grid is empty from the solution.
 """
-is_empty_time_grid(sol::Solution)::Bool = is_empty(sol.time_grid)
+is_empty_time_grid(sol::Solution)::Bool = is_empty(time_grid_model(sol))
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the time grid model from a solution.
+
+# Returns
+- `AbstractTimeGridModel`: The time grid model (UnifiedTimeGridModel or MultipleTimeGridModel)
+"""
+time_grid_model(sol::Solution)::AbstractTimeGridModel = sol.time_grid

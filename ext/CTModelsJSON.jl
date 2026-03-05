@@ -340,26 +340,50 @@ function CTModels.import_ocp_solution(
         Dict{Symbol,Any}()
     end
 
-    # NB. convert vect{vect} to matrix
-    return CTModels.build_solution(
+    # Create data dictionary compatible with helper function
+    data = Dict{String,Any}(
+        "objective" => blob.objective,
+        "iterations" => blob.iterations,
+        "constraints_violation" => blob.constraints_violation,
+        "message" => blob.message,
+        "status" => blob.status,
+        "successful" => blob.successful,
+        "state" => X,
+        "control" => U,
+        "variable" => Vector{Float64}(blob.variable),
+        "costate" => P,
+        "path_constraints_dual" => path_constraints_dual,
+        "boundary_constraints_dual" => boundary_constraints_dual,
+        "state_constraints_lb_dual" => state_constraints_lb_dual,
+        "state_constraints_ub_dual" => state_constraints_ub_dual,
+        "control_constraints_lb_dual" => control_constraints_lb_dual,
+        "control_constraints_ub_dual" => control_constraints_ub_dual,
+        "variable_constraints_lb_dual" => variable_constraints_lb_dual,
+        "variable_constraints_ub_dual" => variable_constraints_ub_dual,
+    )
+    
+    # Add time grid data (format detection handled by helper)
+    if haskey(blob, "time_grid_state")
+        # New format: multiple time grids
+        data["time_grid_state"] = blob.time_grid_state
+        data["time_grid_control"] = blob.time_grid_control
+        data["time_grid_costate"] = blob.time_grid_costate
+        data["time_grid_dual"] = blob.time_grid_dual
+    else
+        # Legacy format: single time grid
+        data["time_grid"] = blob.time_grid
+    end
+    
+    # Reconstruct solution using helper function (handles both single and multiple time grids)
+    return CTModels.Serialization._reconstruct_solution_from_data(
         ocp,
-        Vector{Float64}(blob.time_grid),
-        X,
-        U,
-        Vector{Float64}(blob.variable),
-        P;
-        objective=Float64(blob.objective),
-        iterations=blob.iterations,
-        constraints_violation=Float64(blob.constraints_violation),
-        message=blob.message,
-        status=Symbol(blob.status),
-        successful=blob.successful,
+        data;
         path_constraints_dual=path_constraints_dual,
+        boundary_constraints_dual=boundary_constraints_dual,
         state_constraints_lb_dual=state_constraints_lb_dual,
         state_constraints_ub_dual=state_constraints_ub_dual,
         control_constraints_lb_dual=control_constraints_lb_dual,
         control_constraints_ub_dual=control_constraints_ub_dual,
-        boundary_constraints_dual=boundary_constraints_dual,
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,
         infos=infos,

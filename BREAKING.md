@@ -2,6 +2,51 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.2] - 2026-03-05
+
+**No breaking changes** - This release adds new multi-time-grid functionality while maintaining full backward compatibility. All existing APIs continue to work unchanged.
+
+### New Features (Non-Breaking)
+
+While not breaking changes, the following new features are available:
+
+```julia
+# New time grid model access
+sol = build_solution(...)
+time_grid_model(sol)  # Returns UnifiedTimeGridModel or MultipleTimeGridModel
+
+# Enhanced time_grid with component specification
+time_grid(sol, :state)     # Component-specific time grid
+time_grid(sol, :control)   # Control time grid
+time_grid(sol, :costate)   # Costate time grid
+
+# Multi-grid build solution (new signature)
+build_solution(ocp, T_state, T_control, T_costate, T_dual, X, U, v, P; kwargs...)
+
+# Component symbol cleaning
+clean_component_symbols((:states, :controls, :constraint))  # Returns (:state, :control, :path)
+```
+
+### Serialization Format Changes
+
+The serialization format has been enhanced to support multi-time-grids, but existing files remain compatible:
+
+- **Legacy Format**: Automatically detected and loaded
+- **Multi-Grid Format**: New format with component-specific time grids
+- **Automatic Conversion**: Seamless handling of both formats
+
+### Plotting Enhancements
+
+Plotting now supports additional component symbols with automatic mapping:
+
+- `:control_norm` → `:control`
+- `:path_constraint` → `:state`
+- `:dual_path_constraint` → `:dual`
+
+Existing plotting code continues to work unchanged.
+
+---
+
 ## [0.9.1] - 2026-03-02
 
 **No breaking changes** - This release only removes experimental test files from `test/extras/` directory. All public APIs remain unchanged.
