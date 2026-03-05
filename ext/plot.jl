@@ -1408,8 +1408,7 @@ Returns the `(x, y)` values based on symbolic references like `:state`, `:contro
 )
 
     #
-    x = __get_data_plot(sol, model, xx; time=time)
-    y = __get_data_plot(sol, model, yy; time=time)
+    x, y = __get_plot_data_pair(sol, model, xx, yy; time=time)
 
     #
     # label := recipe_label(sol, xx, yy)
@@ -1457,7 +1456,8 @@ function __get_data_plot(
         _ => xx
     end
 
-    T = CTModels.time_grid(sol)
+    # Get appropriate time grid based on component
+    T = CTModels.time_grid(sol, vv)
     m = size(T, 1)
     return MLStyle.@match vv begin
         :time => begin
@@ -1504,5 +1504,252 @@ function __get_data_plot(
             [D[i][ii] for i in 1:m]
         end
         _ => error("Internal error, no such choice for xx")
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Extract data for plotting from a `Solution` and optional `Model` for a pair of axes.
+
+This function handles the complexity of multi-time-grids by ensuring both axes
+use compatible grids for proper plotting.
+
+# Arguments
+- `xx`: Symbol or `(Symbol, Int)` indicating the x-axis quantity and component.
+- `yy`: Symbol or `(Symbol, Int)` indicating the y-axis quantity and component.
+- `time`: Whether to normalize the time grid (only applies to time axes).
+
+# Returns
+- `(x_data, y_data)`: Data vectors for x and y axes
+
+# Cases Handled
+- `(t, x)` or `(x, t)`: Time-based plots with proper axis ordering
+- `(x, u)`: Variable-variable plots with common grid interpolation
+- `(t, t)`: Invalid - throws IncorrectArgument
+"""
+function __get_plot_data_pair(
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    xx::Union{Symbol,Tuple{Symbol,Int}},
+    yy::Union{Symbol,Tuple{Symbol,Int}};
+    time::Symbol=:default,
+)
+
+    # if the time grid is empty then throw an error
+    if CTModels.is_empty_time_grid(sol) == true
+        throw(
+            Exceptions.IncorrectArgument(
+                "The time grid is empty";
+                suggestion="Provide a solution with non-empty time grid",
+                context="plot validation",
+            ),
+        )
+    end
+
+    # Extract symbols and indices
+    xx_sym, xx_idx = MLStyle.@match xx begin
+        ::Symbol => (xx, 1)
+        _ => xx
+    end
+    
+    yy_sym, yy_idx = MLStyle.@match yy begin
+        ::Symbol => (yy, 1)
+        _ => yy
+    end
+
+    # Check for invalid (t, t) case
+    if xx_sym == :time && yy_sym == :time
+        throw(
+            Exceptions.IncorrectArgument(
+                "Cannot plot time vs time";
+                got="both axes are :time",
+                expected="one time axis and one variable axis",
+                suggestion="Use (:time, :state), (:state, :time), or (:state, :control)",
+                context="plot axis selection"
+            )
+        )
+    end
+
+    # Case 1: Time-based plots
+    if xx_sym == :time || yy_sym == :time
+        return _handle_time_based_plot(sol, model, xx_sym, xx_idx, yy_sym, yy_idx; time=time)
+    end
+
+    # Case 2: Variable-variable plots
+    return _handle_variable_variable_plot(sol, model, xx_sym, xx_idx, yy_sym, yy_idx)
+end
+
+"""
+Map plotting components to valid time grid components.
+"""
+function _map_to_time_grid_component(sym::Symbol)::Symbol
+    return MLStyle.@match sym begin
+        :time => error("Internal error: :time should not be mapped")
+        :state => :state
+        :control => :control
+        :costate => :costate
+        :control_norm => :control  # Map control_norm to control for time grid
+        :path_constraint => :state  # Map path_constraint to state for time grid
+        :dual_path_constraint => :dual  # Map dual_path_constraint to dual for time grid
+        _ => error("Internal error: unknown component $sym for time grid mapping")
+    end
+end
+
+"""
+Handle time-based plots: (t, x) or (x, t)
+"""
+function _handle_time_based_plot(
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    x_sym::Symbol,
+    x_idx::Int,
+    y_sym::Symbol, 
+    y_idx::Int;
+    time::Symbol=:default
+)
+    # Determine which variable provides the grid
+    variable_sym = x_sym == :time ? y_sym : x_sym
+    variable_idx = x_sym == :time ? y_idx : x_idx
+    
+    # Map special components to valid time grid components
+    grid_component = _map_to_time_grid_component(variable_sym)
+    
+    # Get the grid from the mapped component
+    T = CTModels.time_grid(sol, grid_component)
+    
+    # Get variable values
+    var_values = _get_variable_values(sol, model, variable_sym, variable_idx, T)
+    
+    # Apply time normalization if requested
+    time_values = MLStyle.@match time begin
+        :default => T
+        :normalize => (T .- T[1]) ./ (T[end] - T[1])
+        :normalise => (T .- T[1]) ./ (T[end] - T[1])
+        _ => error(
+            "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
+        )
+    end
+    
+    # Return in correct order (x, y)
+    if x_sym == :time
+        return (time_values, var_values)
+    else  # y_sym == :time
+        return (var_values, time_values)
+    end
+end
+
+"""
+Handle variable-variable plots: (x, u)
+"""
+function _handle_variable_variable_plot(
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    x_sym::Symbol,
+    x_idx::Int,
+    y_sym::Symbol,
+    y_idx::Int
+)
+    # Get grids for both variables (with mapping for special components)
+    T_x = CTModels.time_grid(sol, _map_to_time_grid_component(x_sym))
+    T_y = CTModels.time_grid(sol, _map_to_time_grid_component(y_sym))
+    
+    # Dispatch based on time grid model type
+    return _handle_variable_variable_plot(time_grid_model(sol), sol, model, x_sym, x_idx, y_sym, y_idx, T_x, T_y)
+end
+
+"""
+Handle variable-variable plots for unified time grid.
+"""
+function _handle_variable_variable_plot(
+    ::CTModels.UnifiedTimeGridModel,
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    x_sym::Symbol,
+    x_idx::Int,
+    y_sym::Symbol,
+    y_idx::Int,
+    T_x::Vector{Float64},
+    T_y::Vector{Float64}
+)
+    # For unified time grid, both grids should be the same
+    T_common = T_x  # Both should be the same
+    x_values = _get_variable_values(sol, model, x_sym, x_idx, T_common)
+    y_values = _get_variable_values(sol, model, y_sym, y_idx, T_common)
+    return (x_values, y_values)
+end
+
+"""
+Handle variable-variable plots for multiple time grids.
+"""
+function _handle_variable_variable_plot(
+    ::CTModels.MultipleTimeGridModel,
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    x_sym::Symbol,
+    x_idx::Int,
+    y_sym::Symbol,
+    y_idx::Int,
+    T_x::Vector{Float64},
+    T_y::Vector{Float64}
+)
+    # For multiple time grids, create common grid
+    T_common = unique(sort(vcat(T_x, T_y)))
+    
+    # Get variable functions and evaluate on common grid
+    x_values = _get_variable_values(sol, model, x_sym, x_idx, T_common)
+    y_values = _get_variable_values(sol, model, y_sym, y_idx, T_common)
+    
+    return (x_values, y_values)
+end
+
+"""
+Get variable values for a given symbol, index, and time grid
+"""
+function _get_variable_values(
+    sol::CTModels.Solution,
+    model::Union{CTModels.Model,Nothing},
+    sym::Symbol,
+    idx::Int,
+    T::Vector{Float64}
+)
+    m = length(T)
+    
+    return MLStyle.@match sym begin
+        :time => error("Internal error: _get_variable_values called with :time")
+        :state => begin
+            X = CTModels.state(sol).(T)
+            [X[i][idx] for i in 1:m]
+        end
+        :control => begin
+            U = CTModels.control(sol).(T)
+            [U[i][idx] for i in 1:m]
+        end
+        :costate => begin
+            P = CTModels.costate(sol).(T)
+            [P[i][idx] for i in 1:m]
+        end
+        :control_norm => begin
+            U = CTModels.control(sol).(T)
+            [norm(U[i]) for i in 1:m]
+        end
+        :path_constraint => begin
+            X = CTModels.state(sol).(T)
+            U = CTModels.control(sol).(T)
+            v = CTModels.variable(sol)
+            pc = CTModels.path_constraints_nl(model)
+            C = zeros(Float64, m)
+            g = zeros(Float64, length(pc[1]))
+            for i in 1:m
+                pc[2](g, T[i], X[i], U[i], v)
+                C[i] = g[idx]
+            end
+            C
+        end
+        :dual_path_constraint => begin
+            D = CTModels.path_constraints_dual(sol).(T)
+            [D[i][idx] for i in 1:m]
+        end
+        _ => error("Internal error, no such choice for variable: $sym")
     end
 end

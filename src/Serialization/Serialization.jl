@@ -33,10 +33,10 @@ using DocStringExtensions
 using CTBase: CTBase
 const Exceptions = CTBase.Exceptions
 
+import ..CTModels.OCP
+
 # Import types from parent module
-using ..AbstractModel: AbstractModel
-using ..AbstractSolution: AbstractSolution
-using ..Solution: Solution
+using ..OCP: AbstractModel, AbstractSolution, Solution
 
 # Import default functions from OCP
 import ..OCP: __format, __filename_export_import
@@ -46,6 +46,9 @@ include("types.jl")
 
 # Include serialization functions
 include("export_import.jl")
+
+# Include helper functions for multi-grid reconstruction
+include("reconstruction_helpers.jl")
 
 # Export public API
 export export_ocp_solution, import_ocp_solution
