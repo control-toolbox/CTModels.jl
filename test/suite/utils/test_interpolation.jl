@@ -1,11 +1,10 @@
 module TestUtilsInterpolation
 
-using Test
-using CTModels
+import Test
+import CTModels
 
-# Default test options (can be overridden by Main.TestOptions if available)
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 """
     test_interpolation()
@@ -13,7 +12,19 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 Test interpolation utility functions from src/utils/interpolation.jl.
 """
 function test_interpolation()
-    Test.@testset "Interpolation Utils" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Interpolation Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for interpolation utils functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Interpolation Utility Functions
+        # ====================================================================
         Test.@testset "ctinterpolate - basic linear interpolation" begin
             # Simple linear data
             x = [0.0, 1.0, 2.0]
@@ -103,4 +114,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_interpolation() = TestUtilsInterpolation.test_interpolation()

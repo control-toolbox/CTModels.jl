@@ -1,11 +1,10 @@
 module TestUtilsFunctionUtils
 
-using Test
-using CTModels
+import Test
+import CTModels
 
-# Default test options (can be overridden by Main.TestOptions if available)
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 """
     test_function_utils()
@@ -13,7 +12,19 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 Test function utility functions from src/utils/function_utils.jl.
 """
 function test_function_utils()
-    Test.@testset "Function Utils" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Function Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for function utils functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Function Utility Functions
+        # ====================================================================
         Test.@testset "to_out_of_place - basic conversion" begin
             # In-place function that fills a 2-element vector
             function f!(r, x)
@@ -131,4 +142,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_function_utils() = TestUtilsFunctionUtils.test_function_utils()

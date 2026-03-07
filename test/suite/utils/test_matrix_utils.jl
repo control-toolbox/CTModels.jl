@@ -1,11 +1,10 @@
 module TestUtilsMatrixUtils
 
-using Test
-using CTModels
+import Test
+import CTModels
 
-# Default test options (can be overridden by Main.TestOptions if available)
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 """
     test_matrix_utils()
@@ -13,7 +12,19 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 Test matrix utility functions from src/utils/matrix_utils.jl.
 """
 function test_matrix_utils()
-    Test.@testset "Matrix Utils" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Matrix Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for matrix utils functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Matrix Utility Functions
+        # ====================================================================
         Test.@testset "matrix2vec - dimension 1 (rows)" begin
             A = [
                 0 1
@@ -112,4 +123,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_matrix_utils() = TestUtilsMatrixUtils.test_matrix_utils()

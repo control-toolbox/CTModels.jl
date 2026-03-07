@@ -1,12 +1,11 @@
 module TestUtilsMacros
 
-using Test
-using CTModels
-using CTBase
+import Test
+import CTModels
+import CTBase
 
-# Default test options (can be overridden by Main.TestOptions if available)
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 """
     test_macros()
@@ -14,7 +13,19 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 Test macro utility functions from src/utils/macros.jl.
 """
 function test_macros()
-    Test.@testset "Macro Utils" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Macro Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for macro utils functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Macro Utility Functions
+        # ====================================================================
         Test.@testset "@ensure - condition true" begin
             # Should not throw when condition is true
             x = 5
@@ -116,4 +127,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_macros() = TestUtilsMacros.test_macros()
