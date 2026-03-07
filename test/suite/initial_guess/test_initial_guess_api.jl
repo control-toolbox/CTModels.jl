@@ -1,12 +1,14 @@
 module TestInitialGuessAPI
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-using Main.TestProblems
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+include(joinpath("..", "..", "problems", "TestProblems.jl"))
+import .TestProblems
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
@@ -36,11 +38,19 @@ CTModels.variable_name(::DummyOCP1DVar) = "v"
 CTModels.variable_components(::DummyOCP1DVar) = ["v"]
 
 function test_initial_guess_api()
-    Test.@testset "Testing initial guess API" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
+    Test.@testset "Initial Guess API Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess functionality
+        end
+        
+        # ====================================================================
         # UNIT TESTS - Public API Functions
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "pre_initial_guess" begin
             # Test with all arguments
@@ -170,7 +180,7 @@ function test_initial_guess_api()
 
         Test.@testset "build_initial_guess - NamedTuple input" begin
             # Use Beam problem from TestProblems
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Build from NamedTuple
@@ -227,9 +237,9 @@ function test_initial_guess_api()
             )
         end
 
-        # ========================================================================
+        # ====================================================================
         # UNIT TESTS - Separation of Construction and Validation
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "initial_guess is pure construction (no validation)" begin
             ocp = DummyOCP1DNoVar()
@@ -269,9 +279,9 @@ function test_initial_guess_api()
             Test.@test ig5 === valid_init
         end
 
-        # ========================================================================
+        # ====================================================================
         # INTEGRATION TESTS - API Workflow
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "complete workflow: PreInit -> build -> validate" begin
             ocp = DummyOCP1DVar()
@@ -329,4 +339,5 @@ function test_initial_guess_api()
 end
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_api() = TestInitialGuessAPI.test_initial_guess_api()
