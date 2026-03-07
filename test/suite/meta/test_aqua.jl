@@ -1,13 +1,14 @@
 module TestAqua
 
-using Test
-using CTModels
-using Aqua
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+import Aqua
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_aqua()
-    Test.@testset "Aqua.jl" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Aqua.jl Quality Checks" verbose=VERBOSE showtiming=SHOWTIMING begin
         Aqua.test_all(
             CTModels;
             ambiguities=false,
@@ -22,4 +23,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_aqua() = TestAqua.test_aqua()
