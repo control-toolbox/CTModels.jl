@@ -1,12 +1,15 @@
 module TestExportImport
 
-using Test
-using CTModels
-using Main.TestProblems
-using JLD2
-using JSON3
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+import JLD2
+import JSON3
+
+include(joinpath("..", "..", "problems", "TestProblems.jl"))
+import .TestProblems
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # ============================================================================
 # TEST HELPERS
@@ -247,14 +250,22 @@ end
 # ============================================================================
 
 function test_export_import()
-    Test.@testset "Export/Import" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Export/Import Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for export/import functionality
+        end
+        
+        # ====================================================================
+        # INTEGRATION TESTS - Basic Round-Trip with TestProblems
+        # ====================================================================
 
-        # ========================================================================
-        # Integration tests – basic round-trip with solution_example
-        # ========================================================================
-
-        Test.@testset "JSON round-trip: solution_example (matrix)" begin
-            ocp, sol = solution_example()
+        Test.@testset "JSON round-trip: TestProblems.solution_example (matrix)" begin
+            ocp, sol = TestProblems.solution_example()
 
             CTModels.export_ocp_solution(sol; filename="solution_test", format=:JSON)
             sol_reloaded = CTModels.import_ocp_solution(
@@ -270,8 +281,8 @@ function test_export_import()
             remove_if_exists("solution_test.json")
         end
 
-        Test.@testset "JSON round-trip: solution_example (function)" begin
-            ocp, sol = solution_example(; fun=true)
+        Test.@testset "JSON round-trip: TestProblems.solution_example (function)" begin
+            ocp, sol = TestProblems.solution_example(; fun=true)
 
             CTModels.export_ocp_solution(sol; filename="solution_test_fun", format=:JSON)
             sol_reloaded = CTModels.import_ocp_solution(
@@ -285,8 +296,8 @@ function test_export_import()
             remove_if_exists("solution_test_fun.json")
         end
 
-        Test.@testset "JLD round-trip: solution_example" begin
-            ocp, sol = solution_example()
+        Test.@testset "JLD round-trip: TestProblems.solution_example" begin
+            ocp, sol = TestProblems.solution_example()
 
             # Export solution (no more JLD2 warnings!)
             CTModels.export_ocp_solution(sol; filename="solution_test") # default is :JLD
@@ -302,12 +313,12 @@ function test_export_import()
         end
 
         # ========================================================================
-        # Comprehensive JSON tests – all fields with solution_example_dual
+        # Comprehensive JSON tests – all fields with TestProblems.solution_example_dual
         # ========================================================================
 
         Test.@testset "JSON comprehensive: all fields preserved" begin
-            # Use solution_example_dual which has all duals populated
-            ocp, sol = solution_example_dual()
+            # Use TestProblems.solution_example_dual which has all duals populated
+            ocp, sol = TestProblems.solution_example_dual()
 
             # Export
             CTModels.export_ocp_solution(sol; filename="solution_full", format=:JSON)
@@ -452,7 +463,7 @@ function test_export_import()
         end
 
         Test.@testset "JSON import: all fields reconstructed" begin
-            ocp, sol = solution_example_dual()
+            ocp, sol = TestProblems.solution_example_dual()
 
             CTModels.export_ocp_solution(sol; filename="solution_import_test", format=:JSON)
             sol_reloaded = CTModels.import_ocp_solution(
@@ -621,8 +632,8 @@ function test_export_import()
         # ========================================================================
 
         Test.@testset "JSON: solution with all duals nothing" begin
-            # solution_example has no duals
-            ocp, sol = solution_example()
+            # TestProblems.solution_example has no duals
+            ocp, sol = TestProblems.solution_example()
 
             CTModels.export_ocp_solution(sol; filename="solution_no_duals", format=:JSON)
 
@@ -658,7 +669,7 @@ function test_export_import()
 
         Test.@testset "JSON: solver infos dict preserved" begin
             # Create a solution with custom infos
-            ocp, sol_base = solution_example()
+            ocp, sol_base = TestProblems.solution_example()
             T = CTModels.time_grid(sol_base)
 
             # Build a new solution with custom infos
@@ -728,7 +739,7 @@ function test_export_import()
 
         Test.@testset "JSON idempotence: double cycle (solution_example_dual)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example_dual()
+            ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
             CTModels.export_ocp_solution(sol0; filename="idempotence_json_1", format=:JSON)
@@ -751,7 +762,7 @@ function test_export_import()
 
         Test.@testset "JSON idempotence: triple cycle (solution_example_dual)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example_dual()
+            ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle
             CTModels.export_ocp_solution(sol0; filename="idempotence_json_t1", format=:JSON)
@@ -781,7 +792,7 @@ function test_export_import()
 
         Test.@testset "JSON idempotence: double cycle (solution_example no duals)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example()
+            ocp, sol0 = TestProblems.solution_example()
 
             # First cycle
             CTModels.export_ocp_solution(
@@ -808,7 +819,7 @@ function test_export_import()
 
         Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming =
             SHOWTIMING begin
-            ocp, sol_base = solution_example()
+            ocp, sol_base = TestProblems.solution_example()
             T = CTModels.time_grid(sol_base)
 
             # Build solution with complex infos
@@ -882,7 +893,7 @@ function test_export_import()
 
         Test.@testset "JLD2 idempotence: double cycle (solution_example_dual)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example_dual()
+            ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
             CTModels.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
@@ -905,7 +916,7 @@ function test_export_import()
 
         Test.@testset "JLD2 idempotence: triple cycle (solution_example_dual)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example_dual()
+            ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle
             CTModels.export_ocp_solution(sol0; filename="idempotence_jld_t1", format=:JLD)
@@ -935,7 +946,7 @@ function test_export_import()
 
         Test.@testset "JLD2 idempotence: double cycle (solution_example no duals)" verbose =
             VERBOSE showtiming = SHOWTIMING begin
-            ocp, sol0 = solution_example()
+            ocp, sol0 = TestProblems.solution_example()
 
             # First cycle
             CTModels.export_ocp_solution(
@@ -971,11 +982,11 @@ function test_export_import()
             # 
             # Findings:
             # - Multi-dimensional trajectories (state, costate): stack() → Matrix
-            # - 1-dimensional trajectories (control in solution_example): stack() → Vector
+            # - 1-dimensional trajectories (control in TestProblems.solution_example): stack() → Vector
             # 
             # This proves the refactoring with _json_array_to_matrix is correct and necessary.
 
-            ocp, sol = solution_example()
+            ocp, sol = TestProblems.solution_example()
 
             # Export to JSON
             CTModels.export_ocp_solution(sol; filename="stack_investigation", format=:JSON)
@@ -984,11 +995,11 @@ function test_export_import()
             json_string = read("stack_investigation.json", String)
             blob = JSON3.read(json_string)
 
-            # Test state (multi-dimensional: 2D in solution_example)
+            # Test state (multi-dimensional: 2D in TestProblems.solution_example)
             state_stacked = stack(blob["state"]; dims=1)
             Test.@test state_stacked isa Matrix  # Multi-D → Matrix
 
-            # Test control (1-dimensional in solution_example)
+            # Test control (1-dimensional in TestProblems.solution_example)
             control_stacked = stack(blob["control"]; dims=1)
             Test.@test control_stacked isa Vector  # 1D → Vector
 
@@ -1010,4 +1021,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_export_import() = TestExportImport.test_export_import()
