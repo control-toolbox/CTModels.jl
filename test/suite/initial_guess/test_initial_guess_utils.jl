@@ -1,9 +1,10 @@
 module TestInitialGuessUtils
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Helper struct for testing
 struct DummyOCP1D <: CTModels.AbstractModel end
@@ -33,11 +34,19 @@ CTModels.variable_name(::DummyOCP2D) = "v"
 CTModels.variable_components(::DummyOCP2D) = String[]
 
 function test_initial_guess_utils()
-    Test.@testset "Initial Guess Utils" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
+    Test.@testset "Initial Guess Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess utils functionality
+        end
+        
+        # ====================================================================
         # UNIT TESTS - Utility Functions
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "time grid formatting (indirect test)" begin
             ocp = DummyOCP1D()
@@ -82,9 +91,9 @@ function test_initial_guess_utils()
             Test.@test x1[2] ≈ 2.0
         end
 
-        # ========================================================================
+        # ====================================================================
         # INTEGRATION TESTS - Utils with Builders
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "time grid formatting in context" begin
             ocp = DummyOCP1D()
@@ -133,4 +142,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_utils() = TestInitialGuessUtils.test_initial_guess_utils()
