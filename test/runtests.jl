@@ -15,15 +15,11 @@ using CTModels
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 
 # Controls nested testset output formatting (used by individual test files)
-module TestOptions
-const VERBOSE = true
-const SHOWTIMING = true
+module TestData
+    const VERBOSE = true
+    const SHOWTIMING = true
 end
-using .TestOptions: VERBOSE, SHOWTIMING
-
-# Include shared test problems via TestProblems module
-include(joinpath("problems", "TestProblems.jl"))
-using .TestProblems
+using .TestData: VERBOSE, SHOWTIMING
 
 # Run tests using the TestRunner extension
 CTBase.run_tests(;

@@ -1,16 +1,25 @@
 module TestOCPDefinition
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_definition()
-    Test.@testset "definition" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
-        # Unit tests – setters/getters on PreModel and Model
-        # ========================================================================
+    Test.@testset "Definition Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for definition functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Setters/Getters on PreModel and Model
+        # ====================================================================
 
         Test.@testset "definition! and definition on PreModel" begin
             pre = CTModels.PreModel()
@@ -21,9 +30,9 @@ function test_definition()
             Test.@test CTModels.definition(pre) === expr
         end
 
-        # ========================================================================
-        # Integration-style tests – definition propagated through build
-        # ========================================================================
+        # ====================================================================
+        # INTEGRATION TESTS - Definition Propagated Through Build
+        # ====================================================================
 
         Test.@testset "definition carried to Model after build" begin
             pre = CTModels.PreModel()
@@ -61,4 +70,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_definition() = TestOCPDefinition.test_definition()

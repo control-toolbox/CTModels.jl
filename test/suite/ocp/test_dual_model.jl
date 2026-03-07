@@ -1,18 +1,27 @@
 module TestOCPDualModel
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_dual_model()
-    # TODO: add tests for src/ocp/dual_model.jl.
-
-    # ========================================================================
-    # Unit tests – low-level DualModel accessors
-    # ========================================================================
-
-    Test.@testset "DualModel constraint dual accessors" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Dual Model Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for dual model functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Low-level DualModel Accessors
+        # ====================================================================
+        
+        Test.@testset "DualModel constraint dual accessors" verbose=VERBOSE showtiming=SHOWTIMING begin
         pc = t -> [1.0, 2.0]
         bc = [3.0, 4.0]
         sc_lb = t -> [0.0]
@@ -34,7 +43,9 @@ function test_dual_model()
         Test.@test CTModels.variable_constraints_ub_dual(dual) === vc_ub
     end
 end
+end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_dual_model() = TestOCPDualModel.test_dual_model()

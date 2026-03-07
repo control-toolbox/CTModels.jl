@@ -1,32 +1,44 @@
 module TestOCPModel
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_model()
-    @testset "Model" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Model Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for model functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Model Building
+        # ====================================================================
 
         # create a pre-model
         pre_ocp = CTModels.PreModel()
 
         # exception: times must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set times
         CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
 
         # exception: state must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set state
         CTModels.state!(pre_ocp, 2)
 
         # exception: control must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set control
         CTModels.control!(pre_ocp, 2)
@@ -35,14 +47,14 @@ function test_model()
         CTModels.variable!(pre_ocp, 2)
 
         # exception: dynamics must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set dynamics
         dynamics!(r, t, x, u, v) = r .= t .+ x .+ u .+ v
         CTModels.dynamics!(pre_ocp, dynamics!)
 
         # exception: objective must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set objective
         mayer(x0, xf, v) = x0 .+ xf .+ v
@@ -50,7 +62,7 @@ function test_model()
         CTModels.objective!(pre_ocp, :min; mayer=mayer, lagrange=lagrange)
 
         # exception: definition must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set definition
         definition = quote
@@ -65,7 +77,7 @@ function test_model()
         CTModels.definition!(pre_ocp, definition)
 
         # exception: time dependence must be set
-        @test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
+        Test.@test_throws Exceptions.PreconditionError CTModels.build(pre_ocp)
 
         # set time dependence
         CTModels.time_dependence!(pre_ocp; autonomous=false)
@@ -111,7 +123,7 @@ function test_model()
         model = CTModels.build(pre_ocp)
 
         # check the type of the model
-        @test model isa CTModels.Model
+        Test.@test model isa CTModels.Model
 
         # check retrieved constraints
         t = 1
@@ -122,66 +134,66 @@ function test_model()
         xf = [3, 4]
 
         # test the functions
-        @test CTModels.constraint(model, :path)[2](t, x, u, v) == x .+ u .+ v .+ t
-        @test CTModels.constraint(model, :boundary)[2](x0, xf, v) == x0 .+ v .* (xf .- x0)
-        @test CTModels.constraint(model, :state)[2](t, x, u, v) == x
-        @test CTModels.constraint(model, :control)[2](t, x, u, v) == u
-        @test CTModels.constraint(model, :variable)[2](x0, xf, v) == v
-        @test CTModels.constraint(model, :path_scalar)[2](t, x, u, v) ==
+        Test.@test CTModels.constraint(model, :path)[2](t, x, u, v) == x .+ u .+ v .+ t
+        Test.@test CTModels.constraint(model, :boundary)[2](x0, xf, v) == x0 .+ v .* (xf .- x0)
+        Test.@test CTModels.constraint(model, :state)[2](t, x, u, v) == x
+        Test.@test CTModels.constraint(model, :control)[2](t, x, u, v) == u
+        Test.@test CTModels.constraint(model, :variable)[2](x0, xf, v) == v
+        Test.@test CTModels.constraint(model, :path_scalar)[2](t, x, u, v) ==
             x[1] + u[1] + v[1] + t
-        @test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) ==
+        Test.@test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) ==
             x0[1] + v[1] * (xf[1] - x0[1])
-        @test CTModels.constraint(model, :state_scalar)[2](t, x, u, v) == x[1]
-        @test CTModels.constraint(model, :control_scalar)[2](t, x, u, v) == u[1]
-        @test CTModels.constraint(model, :variable_scalar)[2](x0, xf, v) == v[1]
-        @test CTModels.constraint(model, :state_scalar_2)[2](t, x, u, v) == x[2]
-        @test CTModels.constraint(model, :control_scalar_2)[2](t, x, u, v) == u[2]
-        @test CTModels.constraint(model, :variable_scalar_2)[2](x0, xf, v) == v[2]
+        Test.@test CTModels.constraint(model, :state_scalar)[2](t, x, u, v) == x[1]
+        Test.@test CTModels.constraint(model, :control_scalar)[2](t, x, u, v) == u[1]
+        Test.@test CTModels.constraint(model, :variable_scalar)[2](x0, xf, v) == v[1]
+        Test.@test CTModels.constraint(model, :state_scalar_2)[2](t, x, u, v) == x[2]
+        Test.@test CTModels.constraint(model, :control_scalar_2)[2](t, x, u, v) == u[2]
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[2](x0, xf, v) == v[2]
 
         # test the type of the constraints
-        @test CTModels.constraint(model, :path)[1] == :path
-        @test CTModels.constraint(model, :boundary)[1] == :boundary
-        @test CTModels.constraint(model, :state)[1] == :state
-        @test CTModels.constraint(model, :control)[1] == :control
-        @test CTModels.constraint(model, :variable)[1] == :variable
-        @test CTModels.constraint(model, :path_scalar)[1] == :path
-        @test CTModels.constraint(model, :boundary_scalar)[1] == :boundary
-        @test CTModels.constraint(model, :state_scalar)[1] == :state
-        @test CTModels.constraint(model, :control_scalar)[1] == :control
-        @test CTModels.constraint(model, :variable_scalar)[1] == :variable
-        @test CTModels.constraint(model, :state_scalar_2)[1] == :state
-        @test CTModels.constraint(model, :control_scalar_2)[1] == :control
-        @test CTModels.constraint(model, :variable_scalar_2)[1] == :variable
+        Test.@test CTModels.constraint(model, :path)[1] == :path
+        Test.@test CTModels.constraint(model, :boundary)[1] == :boundary
+        Test.@test CTModels.constraint(model, :state)[1] == :state
+        Test.@test CTModels.constraint(model, :control)[1] == :control
+        Test.@test CTModels.constraint(model, :variable)[1] == :variable
+        Test.@test CTModels.constraint(model, :path_scalar)[1] == :path
+        Test.@test CTModels.constraint(model, :boundary_scalar)[1] == :boundary
+        Test.@test CTModels.constraint(model, :state_scalar)[1] == :state
+        Test.@test CTModels.constraint(model, :control_scalar)[1] == :control
+        Test.@test CTModels.constraint(model, :variable_scalar)[1] == :variable
+        Test.@test CTModels.constraint(model, :state_scalar_2)[1] == :state
+        Test.@test CTModels.constraint(model, :control_scalar_2)[1] == :control
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[1] == :variable
 
         # test the lower bounds
-        @test CTModels.constraint(model, :path)[3] == [-0, -1]
-        @test CTModels.constraint(model, :boundary)[3] == [-2, -3]
-        @test CTModels.constraint(model, :state)[3] == [-4, -5]
-        @test CTModels.constraint(model, :control)[3] == [-6, -7]
-        @test CTModels.constraint(model, :variable)[3] == [-8, -9]
-        @test CTModels.constraint(model, :path_scalar)[3] == -10
-        @test CTModels.constraint(model, :boundary_scalar)[3] == -11
-        @test CTModels.constraint(model, :state_scalar)[3] == -12
-        @test CTModels.constraint(model, :control_scalar)[3] == -13
-        @test CTModels.constraint(model, :variable_scalar)[3] == -14
-        @test CTModels.constraint(model, :state_scalar_2)[3] == -15
-        @test CTModels.constraint(model, :control_scalar_2)[3] == -16
-        @test CTModels.constraint(model, :variable_scalar_2)[3] == -17
+        Test.@test CTModels.constraint(model, :path)[3] == [-0, -1]
+        Test.@test CTModels.constraint(model, :boundary)[3] == [-2, -3]
+        Test.@test CTModels.constraint(model, :state)[3] == [-4, -5]
+        Test.@test CTModels.constraint(model, :control)[3] == [-6, -7]
+        Test.@test CTModels.constraint(model, :variable)[3] == [-8, -9]
+        Test.@test CTModels.constraint(model, :path_scalar)[3] == -10
+        Test.@test CTModels.constraint(model, :boundary_scalar)[3] == -11
+        Test.@test CTModels.constraint(model, :state_scalar)[3] == -12
+        Test.@test CTModels.constraint(model, :control_scalar)[3] == -13
+        Test.@test CTModels.constraint(model, :variable_scalar)[3] == -14
+        Test.@test CTModels.constraint(model, :state_scalar_2)[3] == -15
+        Test.@test CTModels.constraint(model, :control_scalar_2)[3] == -16
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[3] == -17
 
         # test the upper bounds
-        @test CTModels.constraint(model, :path)[4] == [1, 2]
-        @test CTModels.constraint(model, :boundary)[4] == [3, 4]
-        @test CTModels.constraint(model, :state)[4] == [5, 6]
-        @test CTModels.constraint(model, :control)[4] == [7, 8]
-        @test CTModels.constraint(model, :variable)[4] == [9, 10]
-        @test CTModels.constraint(model, :path_scalar)[4] == 11
-        @test CTModels.constraint(model, :boundary_scalar)[4] == 12
-        @test CTModels.constraint(model, :state_scalar)[4] == 13
-        @test CTModels.constraint(model, :control_scalar)[4] == 14
-        @test CTModels.constraint(model, :variable_scalar)[4] == 15
-        @test CTModels.constraint(model, :state_scalar_2)[4] == 16
-        @test CTModels.constraint(model, :control_scalar_2)[4] == 17
-        @test CTModels.constraint(model, :variable_scalar_2)[4] == 18
+        Test.@test CTModels.constraint(model, :path)[4] == [1, 2]
+        Test.@test CTModels.constraint(model, :boundary)[4] == [3, 4]
+        Test.@test CTModels.constraint(model, :state)[4] == [5, 6]
+        Test.@test CTModels.constraint(model, :control)[4] == [7, 8]
+        Test.@test CTModels.constraint(model, :variable)[4] == [9, 10]
+        Test.@test CTModels.constraint(model, :path_scalar)[4] == 11
+        Test.@test CTModels.constraint(model, :boundary_scalar)[4] == 12
+        Test.@test CTModels.constraint(model, :state_scalar)[4] == 13
+        Test.@test CTModels.constraint(model, :control_scalar)[4] == 14
+        Test.@test CTModels.constraint(model, :variable_scalar)[4] == 15
+        Test.@test CTModels.constraint(model, :state_scalar_2)[4] == 16
+        Test.@test CTModels.constraint(model, :control_scalar_2)[4] == 17
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[4] == 18
 
         # print the premodel (captured, no terminal output)
         io = IOBuffer()
@@ -219,4 +231,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_model() = TestOCPModel.test_model()

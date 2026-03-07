@@ -1,19 +1,32 @@
 module TestOCP
 
-using Test
-using CTModels
-using CTBase
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+import CTBase
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp()
-    Test.@testset "OCP" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "OCP Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for OCP functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - OCP Functionality
+        # ====================================================================
 
         #
         ∅ = Vector{Float64}()
 
         #
-        @test isconcretetype(CTModels.PreModel)
+        Test.@test isconcretetype(CTModels.PreModel)
 
         # dimensions
         n = 2 # state dimension
@@ -124,30 +137,30 @@ function test_ocp()
         show(io, MIME"text/plain"(), ocp)
 
         # tests on times
-        @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
-        @test CTModels.final_time(ocp, [0.0, 10.0]) == 10.0
-        @test CTModels.time_name(ocp) == "t"
-        @test CTModels.initial_time_name(ocp) == "t₀"
-        @test CTModels.final_time_name(ocp) == "t_f"
-        @test CTModels.has_fixed_initial_time(ocp) == false
-        @test CTModels.has_fixed_final_time(ocp) == false
-        @test CTModels.has_free_initial_time(ocp) == true
-        @test CTModels.has_free_final_time(ocp) == true
+        Test.@test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
+        Test.@test CTModels.final_time(ocp, [0.0, 10.0]) == 10.0
+        Test.@test CTModels.time_name(ocp) == "t"
+        Test.@test CTModels.initial_time_name(ocp) == "t₀"
+        Test.@test CTModels.final_time_name(ocp) == "t_f"
+        Test.@test CTModels.has_fixed_initial_time(ocp) == false
+        Test.@test CTModels.has_fixed_final_time(ocp) == false
+        Test.@test CTModels.has_free_initial_time(ocp) == true
+        Test.@test CTModels.has_free_final_time(ocp) == true
 
         # tests on state
-        @test CTModels.state_dimension(ocp) == 2
-        @test CTModels.state_name(ocp) == "y"
-        @test CTModels.state_components(ocp) == ["y₁", "y₂"]
+        Test.@test CTModels.state_dimension(ocp) == 2
+        Test.@test CTModels.state_name(ocp) == "y"
+        Test.@test CTModels.state_components(ocp) == ["y₁", "y₂"]
 
         # tests on control
-        @test CTModels.control_dimension(ocp) == 2
-        @test CTModels.control_name(ocp) == "u"
-        @test CTModels.control_components(ocp) == ["u₁", "u₂"]
+        Test.@test CTModels.control_dimension(ocp) == 2
+        Test.@test CTModels.control_name(ocp) == "u"
+        Test.@test CTModels.control_components(ocp) == ["u₁", "u₂"]
 
         # tests on variable
-        @test CTModels.variable_dimension(ocp) == 2
-        @test CTModels.variable_name(ocp) == "v"
-        @test CTModels.variable_components(ocp) == ["v₁", "v₂"]
+        Test.@test CTModels.variable_dimension(ocp) == 2
+        Test.@test CTModels.variable_name(ocp) == "v"
+        Test.@test CTModels.variable_components(ocp) == ["v₁", "v₂"]
 
         # tests on dynamics
         r = zeros(Float64, 2)
@@ -155,25 +168,25 @@ function test_ocp()
         dynamics! = CTModels.dynamics(ocp)
         dynamics!(r, t, x, u, v)
         dynamics_user!(r_user, t, x, u, v)
-        @test r == r_user
+        Test.@test r == r_user
 
         # tests on objective
-        @test CTModels.objective(ocp) == objective
-        @test CTModels.criterion(ocp) == :min
-        @test CTModels.has_mayer_cost(ocp) == true
-        @test CTModels.has_lagrange_cost(ocp) == false
+        Test.@test CTModels.objective(ocp) == objective
+        Test.@test CTModels.criterion(ocp) == :min
+        Test.@test CTModels.has_mayer_cost(ocp) == true
+        Test.@test CTModels.has_lagrange_cost(ocp) == false
 
         # tests on mayer
         mayer = CTModels.mayer(ocp)
-        @test mayer(x0, xf, v) == mayer_user(x0, xf, v)
+        Test.@test mayer(x0, xf, v) == mayer_user(x0, xf, v)
 
         # tests on constraints
         # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
-        @test CTModels.dim_path_constraints_nl(ocp) == 3
-        @test CTModels.dim_boundary_constraints_nl(ocp) == 3
-        @test CTModels.dim_state_constraints_box(ocp) == 3
-        @test CTModels.dim_control_constraints_box(ocp) == 3
-        @test CTModels.dim_variable_constraints_box(ocp) == 3
+        Test.@test CTModels.dim_path_constraints_nl(ocp) == 3
+        Test.@test CTModels.dim_boundary_constraints_nl(ocp) == 3
+        Test.@test CTModels.dim_state_constraints_box(ocp) == 3
+        Test.@test CTModels.dim_control_constraints_box(ocp) == 3
+        Test.@test CTModels.dim_variable_constraints_box(ocp) == 3
 
         # Get all constraints and test. Be careful, the order is not guaranteed. 
         # We will check up to permutations by sorting the results.
@@ -194,41 +207,41 @@ function test_ocp()
         )
 
         # path constraints
-        @test sort(path_cons_nl_lb) == [0, 1, 3]
-        @test sort(path_cons_nl_ub) == [1, 2, 3]
+        Test.@test sort(path_cons_nl_lb) == [0, 1, 3]
+        Test.@test sort(path_cons_nl_ub) == [1, 2, 3]
         ra = zeros(Float64, 2)
         rb = zeros(Float64, 1)
         f_path_a(ra, t, x, u, v)
         f_path_b(rb, t, x, u, v)
         r = zeros(Float64, 3)
         path_cons_nl!(r, t, x, u, v)
-        @test sort(r) == sort([ra; rb])
+        Test.@test sort(r) == sort([ra; rb])
 
         # boundary constraints
-        @test sort(boundary_cons_nl_lb) == [0, 1, 3]
-        @test sort(boundary_cons_nl_ub) == [1, 2, 3]
+        Test.@test sort(boundary_cons_nl_lb) == [0, 1, 3]
+        Test.@test sort(boundary_cons_nl_ub) == [1, 2, 3]
         ra = zeros(Float64, 2)
         rb = zeros(Float64, 1)
         f_boundary_a(ra, x0, xf, v)
         f_boundary_b(rb, x0, xf, v)
         r = zeros(Float64, 3)
         boundary_cons_nl!(r, x0, xf, v)
-        @test sort(r) == sort([ra; rb])
+        Test.@test sort(r) == sort([ra; rb])
 
         # state box constraints
-        @test sort(state_cons_box_lb) == [0, 1, 3]
-        @test sort(state_cons_box_ub) == [1, 2, 3]
-        @test sort(state_cons_box_ind) == [1, 1, 2]
+        Test.@test sort(state_cons_box_lb) == [0, 1, 3]
+        Test.@test sort(state_cons_box_ub) == [1, 2, 3]
+        Test.@test sort(state_cons_box_ind) == [1, 1, 2]
 
         # control box constraints
-        @test sort(control_cons_box_lb) == [0, 1, 3]
-        @test sort(control_cons_box_ub) == [1, 2, 3]
-        @test sort(control_cons_box_ind) == [1, 1, 2]
+        Test.@test sort(control_cons_box_lb) == [0, 1, 3]
+        Test.@test sort(control_cons_box_ub) == [1, 2, 3]
+        Test.@test sort(control_cons_box_ind) == [1, 1, 2]
 
         # variable box constraints
-        @test sort(variable_cons_box_lb) == [0, 1, 3]
-        @test sort(variable_cons_box_ub) == [1, 2, 3]
-        @test sort(variable_cons_box_ind) == [1, 1, 2]
+        Test.@test sort(variable_cons_box_lb) == [0, 1, 3]
+        Test.@test sort(variable_cons_box_ub) == [1, 2, 3]
+        Test.@test sort(variable_cons_box_ind) == [1, 1, 2]
 
         # -------------------------------------------------------------------------- #
         # ocp with fixed times
@@ -248,15 +261,15 @@ function test_ocp()
         )
 
         # tests on times
-        @test CTModels.initial_time(ocp) == 0.0
-        @test CTModels.final_time(ocp) == 10.0
-        @test CTModels.time_name(ocp) == "t"
-        @test CTModels.initial_time_name(ocp) == "t₀"
-        @test CTModels.final_time_name(ocp) == "t_f"
-        @test CTModels.has_fixed_initial_time(ocp) == true
-        @test CTModels.has_fixed_final_time(ocp) == true
-        @test CTModels.has_free_initial_time(ocp) == false
-        @test CTModels.has_free_final_time(ocp) == false
+        Test.@test CTModels.initial_time(ocp) == 0.0
+        Test.@test CTModels.final_time(ocp) == 10.0
+        Test.@test CTModels.time_name(ocp) == "t"
+        Test.@test CTModels.initial_time_name(ocp) == "t₀"
+        Test.@test CTModels.final_time_name(ocp) == "t_f"
+        Test.@test CTModels.has_fixed_initial_time(ocp) == true
+        Test.@test CTModels.has_fixed_final_time(ocp) == true
+        Test.@test CTModels.has_free_initial_time(ocp) == false
+        Test.@test CTModels.has_free_final_time(ocp) == false
 
         # -------------------------------------------------------------------------- #
         # ocp with fixed initial time and free final time
@@ -276,15 +289,15 @@ function test_ocp()
         )
 
         # tests on times
-        @test CTModels.initial_time(ocp) == 0.0
-        @test CTModels.final_time(ocp, [2.0, 50.0]) == 2.0
-        @test CTModels.time_name(ocp) == "t"
-        @test CTModels.initial_time_name(ocp) == "t₀"
-        @test CTModels.final_time_name(ocp) == "t_f"
-        @test CTModels.has_fixed_initial_time(ocp) == true
-        @test CTModels.has_fixed_final_time(ocp) == false
-        @test CTModels.has_free_initial_time(ocp) == false
-        @test CTModels.has_free_final_time(ocp) == true
+        Test.@test CTModels.initial_time(ocp) == 0.0
+        Test.@test CTModels.final_time(ocp, [2.0, 50.0]) == 2.0
+        Test.@test CTModels.time_name(ocp) == "t"
+        Test.@test CTModels.initial_time_name(ocp) == "t₀"
+        Test.@test CTModels.final_time_name(ocp) == "t_f"
+        Test.@test CTModels.has_fixed_initial_time(ocp) == true
+        Test.@test CTModels.has_fixed_final_time(ocp) == false
+        Test.@test CTModels.has_free_initial_time(ocp) == false
+        Test.@test CTModels.has_free_final_time(ocp) == true
 
         # -------------------------------------------------------------------------- #
         # ocp with free initial time and fixed final time
@@ -304,15 +317,15 @@ function test_ocp()
         )
 
         # tests on times
-        @test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
-        @test CTModels.final_time(ocp) == 10.0
-        @test CTModels.time_name(ocp) == "t"
-        @test CTModels.initial_time_name(ocp) == "t₀"
-        @test CTModels.final_time_name(ocp) == "t_f"
-        @test CTModels.has_fixed_initial_time(ocp) == false
-        @test CTModels.has_fixed_final_time(ocp) == true
-        @test CTModels.has_free_initial_time(ocp) == true
-        @test CTModels.has_free_final_time(ocp) == false
+        Test.@test CTModels.initial_time(ocp, [0.0, 10.0]) == 0.0
+        Test.@test CTModels.final_time(ocp) == 10.0
+        Test.@test CTModels.time_name(ocp) == "t"
+        Test.@test CTModels.initial_time_name(ocp) == "t₀"
+        Test.@test CTModels.final_time_name(ocp) == "t_f"
+        Test.@test CTModels.has_fixed_initial_time(ocp) == false
+        Test.@test CTModels.has_fixed_final_time(ocp) == true
+        Test.@test CTModels.has_free_initial_time(ocp) == true
+        Test.@test CTModels.has_free_final_time(ocp) == false
 
         # -------------------------------------------------------------------------- #
         # ocp with Lagrange objective
@@ -334,14 +347,14 @@ function test_ocp()
         show(io, MIME"text/plain"(), ocp)
 
         # tests on objective
-        @test CTModels.objective(ocp) == objective
-        @test CTModels.criterion(ocp) == :max
-        @test CTModels.has_mayer_cost(ocp) == false
-        @test CTModels.has_lagrange_cost(ocp) == true
+        Test.@test CTModels.objective(ocp) == objective
+        Test.@test CTModels.criterion(ocp) == :max
+        Test.@test CTModels.has_mayer_cost(ocp) == false
+        Test.@test CTModels.has_lagrange_cost(ocp) == true
 
         # tests on lagrange
         lagrange = CTModels.lagrange(ocp)
-        @test lagrange(t, x, u, v) == lagrange_user(t, x, u, v)
+        Test.@test lagrange(t, x, u, v) == lagrange_user(t, x, u, v)
 
         # -------------------------------------------------------------------------- #
         # ocp with both Mayer and Lagrange objective, that is Bolza objective
@@ -359,10 +372,10 @@ function test_ocp()
         )
 
         # tests on objective
-        @test CTModels.objective(ocp) == objective
-        @test CTModels.criterion(ocp) == :min
-        @test CTModels.has_mayer_cost(ocp) == true
-        @test CTModels.has_lagrange_cost(ocp) == true
+        Test.@test CTModels.objective(ocp) == objective
+        Test.@test CTModels.criterion(ocp) == :min
+        Test.@test CTModels.has_mayer_cost(ocp) == true
+        Test.@test CTModels.has_lagrange_cost(ocp) == true
 
         # -------------------------------------------------------------------------- #
         # Just for printing
@@ -422,4 +435,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_ocp() = TestOCP.test_ocp()

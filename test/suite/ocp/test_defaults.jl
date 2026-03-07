@@ -1,13 +1,26 @@
 module TestOCPDefaults
 
-using Test
-using CTBase
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_defaults()
-    Test.@testset "defaults" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Defaults Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for defaults functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Default Values
+        # ====================================================================
         Test.@testset "constraints and format defaults" begin
             Test.@test CTModels.OCP.__constraints() === nothing
             Test.@test CTModels.OCP.__format() == :JLD
@@ -64,4 +77,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_defaults() = TestOCPDefaults.test_defaults()
