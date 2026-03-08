@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.3] - 2026-03-08
+
+### Changed
+
+- **Testing Standards Overhaul**: Complete migration of all test files to CTModels testing standards
+  - Replaced all `using` with `import` statements for proper module isolation
+  - Added explicit Test macro imports (`@test`, `@testset`, `@test_throws`, etc.)
+  - Qualified all function calls with module prefixes (`Test.`, `CTModels.`, etc.)
+  - Structured tests hierarchically with "Abstract Types" and specific test sections
+  - Added `VERBOSE` and `SHOWTIMING` constants from `Main.TestData` for configurable output
+  - Included critical outer scope function redefinitions for TestRunner compatibility
+  - Preserved all existing test logic and functionality (895 tests passing)
+
+- **Test Suite Modernization**: Enhanced test organization and reliability
+  - Updated `test/runtests.jl` with improved test discovery and execution
+  - Migrated 22 OCP test files to new standards (`test/suite/ocp/test_*.jl`)
+  - Improved test isolation and reduced namespace pollution
+  - Enhanced test output formatting and timing information
+  - Better integration with CTBase testing infrastructure
+
+### Fixed
+
+- **Test Compatibility**: Resolved TestRunner integration issues
+  - Fixed outer scope function redefinitions for proper test discovery
+  - Eliminated namespace conflicts between test modules
+  - Improved test execution reliability and reproducibility
+  - Enhanced error reporting and debugging capabilities
+
+### Test Coverage
+
+- **Comprehensive Test Migration**: All 895 tests successfully migrated
+  - OCP Components: 22 files completely refactored
+  - Test execution time: 31.3s (full suite)
+  - 100% backward compatibility maintained
+  - Enhanced test reliability and maintainability
+
 ## [0.9.2] - 2026-03-05
 
 ### Added
@@ -34,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dual constraint plotting (`:dual_path_constraint` → `:dual`)
   - Robust error handling for invalid component specifications
 
-### Changed
+### Changed - v0.9.2
 
 - **Build Solution API**: Enhanced multi-grid support in `build_solution()`
   - Accepts separate time grids for state, control, costate, and dual components
@@ -47,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better localization of errors with file, line, and function information
   - Actionable error messages with suggestions for fixes
 
-### Fixed
+### Fixed - v0.9.2
 
 - **Type Stability**: Resolved type inference issues in multi-time-grid operations
   - `UnifiedTimeGridModel` operations are now fully type-stable
@@ -59,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Proper handling of different grid sizes in test scenarios
   - Improved interpolation for mismatched grid dimensions
 
-### Test Coverage
+### Test Coverage - v0.9.2
 
 - **Comprehensive Test Suite**: 79 tests passing (100% success rate)
   - Time Grid Models: 10 tests

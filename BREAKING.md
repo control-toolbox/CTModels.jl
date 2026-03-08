@@ -2,9 +2,24 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.3] - 2026-03-08
+
+**No breaking changes** - This release focuses on internal testing infrastructure improvements with no API changes.
+
+### Internal Changes
+
+- **Testing Infrastructure**: Complete migration to CTModels testing standards
+  - All test files now use `import` instead of `using` for better module isolation
+  - Test execution and discovery improved, but no impact on public API
+  - Enhanced test reliability and maintainability (internal improvement only)
+
+### Migration Notes
+
+No action required for users. All existing code continues to work unchanged.
+
 ## [0.9.2] - 2026-03-05
 
-**No breaking changes** - This release adds new multi-time-grid functionality while maintaining full backward compatibility. All existing APIs continue to work unchanged.
+**No breaking changes** - This release adds new multi-time-grid functionality while maintaining full backward compatibility.d functionality while maintaining full backward compatibility. All existing APIs continue to work unchanged.
 
 ### New Features (Non-Breaking)
 
