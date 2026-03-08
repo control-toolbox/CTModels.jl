@@ -1,12 +1,14 @@
 module TestInitialGuessValidation
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-using Main.TestProblems
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+include(joinpath("..", "..", "problems", "TestProblems.jl"))
+import .TestProblems
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
@@ -85,11 +87,19 @@ CTModels.control(sol::DummySolution1DVar) = sol.ufun
 CTModels.variable(sol::DummySolution1DVar) = sol.v
 
 function test_initial_guess_validation()
-    Test.@testset "Initial Guess Validation" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
+    Test.@testset "Initial Guess Validation Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess validation functionality
+        end
+        
+        # ====================================================================
         # UNIT TESTS - Validation Functions
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "dimension validation - correct dimensions" begin
             ocp = DummyOCP1DNoVar()
@@ -283,7 +293,7 @@ function test_initial_guess_validation()
         # ========================================================================
 
         Test.@testset "complete validation workflow with Beam problem" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Build from NamedTuple
@@ -326,4 +336,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_validation() = TestInitialGuessValidation.test_initial_guess_validation()

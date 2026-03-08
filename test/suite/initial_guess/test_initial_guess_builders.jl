@@ -1,11 +1,11 @@
 module TestInitialGuessBuilders
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1DNoVar <: CTModels.AbstractModel end
@@ -48,11 +48,19 @@ CTModels.variable_name(::DummyOCP1D2Control) = "v"
 CTModels.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
-    Test.@testset "Testing initial guess builders" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
+    Test.@testset "Initial Guess Builders Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess builders functionality
+        end
+        
+        # ====================================================================
         # UNIT TESTS - Builder Functions
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "time-grid NamedTuple (per-block tuples)" begin
             ocp = DummyOCP1DNoVar()
@@ -211,9 +219,9 @@ function test_initial_guess_builders()
             Test.@test x[2] ≈ 0.1  # default value
         end
 
-        # ========================================================================
+        # ====================================================================
         # INTEGRATION TESTS - Complex Builder Scenarios
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "complex time-grid with all components" begin
             ocp = DummyOCP2DNoVar()
@@ -255,4 +263,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_builders() = TestInitialGuessBuilders.test_initial_guess_builders()

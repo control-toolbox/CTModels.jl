@@ -1,16 +1,25 @@
 module TestOCPSolutionTypes
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp_solution_types()
-    Test.@testset "OCP solution types" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
-        # Unit tests – core solution-related types
-        # ========================================================================
+    Test.@testset "OCP Solution Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for OCP solution types functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Core Solution Types
+        # ====================================================================
 
         Test.@testset "TimeGridModel and is_empty" begin
             grid = CTModels.TimeGridModel([0.0, 0.5, 1.0])
@@ -222,4 +231,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_ocp_solution_types() = TestOCPSolutionTypes.test_ocp_solution_types()

@@ -1,11 +1,11 @@
 module TestInitialGuessState
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy OCPs for testing
 struct DummyOCP1D <: CTModels.AbstractModel end
@@ -23,7 +23,20 @@ CTModels.has_fixed_initial_time(::DummyOCP2D) = true
 CTModels.initial_time(::DummyOCP2D) = 0.0
 
 function test_initial_guess_state()
-    Test.@testset "State Initial Guess" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "State Initial Guess Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for state initial guess functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - State Initial Guess Functions
+        # ====================================================================
+        
         Test.@testset "initial_state with Function" begin
             ocp = DummyOCP2D()
 
@@ -83,4 +96,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_state() = TestInitialGuessState.test_initial_guess_state()

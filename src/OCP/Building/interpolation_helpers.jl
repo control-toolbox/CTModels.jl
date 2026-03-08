@@ -166,13 +166,29 @@ fscbd = build_interpolated_function(state_constraints_lb_dual, T, dim_x,
 """
 function build_interpolated_function(
     data,
-    T::Vector{Float64},
+    T::Union{Vector{Float64},Nothing},
     dim::Union{Int,Nothing},
     type_param::Type;
     allow_nothing::Bool=false,
     constant_if_two_points::Bool=false,
     expected_dim::Union{Int,Nothing}=nothing,
 )
+    # Handle T=nothing case
+    if isnothing(T)
+        if isnothing(data)
+            return nothing  # Consistent: both grid and data are nothing
+        else
+            # ⚠️ Applying Exception Rule: Invalid combination of grid and data
+            throw(CTBase.Exceptions.IncorrectArgument(
+                "Time grid cannot be nothing when data is provided";
+                got="time grid=nothing, data≠nothing",
+                expected="both time grid and data to be nothing, or both to be provided",
+                suggestion="Provide a valid time grid or set data=nothing",
+                context="build_interpolated_function"
+            ))
+        end
+    end
+
     # Step 1: Interpolate
     func = _interpolate_from_data(
         data,

@@ -1,22 +1,32 @@
 module TestInitialGuessIntegration
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-using Main.TestProblems
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+include(joinpath("..", "..", "problems", "TestProblems.jl"))
+import .TestProblems
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_integration()
-    Test.@testset "Initial Guess Integration" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
+    Test.@testset "Initial Guess Integration Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess integration functionality
+        end
+        
+        # ====================================================================
         # INTEGRATION TESTS - Real OCP Problems
-        # ========================================================================
+        # ====================================================================
 
         Test.@testset "Beam problem - NamedTuple initialization" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Test with NamedTuple on real problem
@@ -45,7 +55,7 @@ function test_initial_guess_integration()
         end
 
         Test.@testset "Beam problem - function-based initialization" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Test with functions
@@ -64,7 +74,7 @@ function test_initial_guess_integration()
         end
 
         Test.@testset "Beam problem - time-grid initialization" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Test with time-grid data
@@ -87,7 +97,7 @@ function test_initial_guess_integration()
         end
 
         Test.@testset "Beam problem - PreInit workflow" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Create PreInit
@@ -109,7 +119,7 @@ function test_initial_guess_integration()
         end
 
         Test.@testset "Beam problem - complete workflow with all features" begin
-            beam_data = Beam()
+            beam_data = TestProblems.Beam()
             ocp = beam_data.ocp
 
             # Complex initialization with mixed features:
@@ -136,6 +146,5 @@ function test_initial_guess_integration()
 end
 end # module
 
-function test_initial_guess_integration()
-    TestInitialGuessIntegration.test_initial_guess_integration()
-end
+# CRITICAL: Redefine in outer scope for TestRunner
+test_initial_guess_integration() = TestInitialGuessIntegration.test_initial_guess_integration()

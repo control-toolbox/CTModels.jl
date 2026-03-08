@@ -1,16 +1,25 @@
 module TestOCPModelTypes
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp_model_types()
-    Test.@testset "OCP model types" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
-        # Unit tests – core OCP model types
-        # ========================================================================
+    Test.@testset "OCP Model Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for OCP model types functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Core OCP Model Types
+        # ====================================================================
 
         Test.@testset "Model and PreModel hierarchy" begin
             Test.@test isabstracttype(CTModels.AbstractModel)
@@ -151,4 +160,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_ocp_model_types() = TestOCPModelTypes.test_ocp_model_types()

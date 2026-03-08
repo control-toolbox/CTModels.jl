@@ -1,16 +1,25 @@
 module TestInitialGuessTypes
 
-using Test
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_types()
-    Test.@testset "Initial Guess Types" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
-        # Unit tests – core initial guess types
-        # ========================================================================
+    Test.@testset "Initial Guess Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for initial guess types functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Core Initial Guess Types
+        # ====================================================================
 
         Test.@testset "InitialGuess structure" begin
             state_fun = t -> [t]
@@ -41,9 +50,9 @@ function test_initial_guess_types()
             Test.@test pre.variable === sv
         end
 
-        # ========================================================================
-        # Integration-style tests – fake consumer of initial guesses
-        # ========================================================================
+        # ====================================================================
+        # INTEGRATION TESTS - Fake Consumer of Initial Guesses
+        # ====================================================================
 
         Test.@testset "fake consumer of InitialGuess" begin
             state_fun = t -> 2t
@@ -71,4 +80,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_initial_guess_types() = TestInitialGuessTypes.test_initial_guess_types()

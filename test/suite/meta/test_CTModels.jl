@@ -1,21 +1,29 @@
 module TestCTModelsTop
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 struct CTMDummySol <: CTModels.AbstractSolution end
 struct CTMDummyModelTop <: CTModels.AbstractModel end
 
 function test_CTModels()
-    Test.@testset "CTModels.jl top-level module" begin
-
-        # ========================================================================
-        # Unit tests – basic aliases and tags
-        # ========================================================================
+    Test.@testset "CTModels.jl Top-Level Module Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for CTModels top-level functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Basic Aliases and Tags
+        # ====================================================================
 
         Test.@testset "type aliases and tags" begin
             Test.@test CTModels.Dimension == Int
@@ -37,9 +45,9 @@ function test_CTModels()
             Test.@test CTModels.AbstractSolution === CTModels.AbstractSolution
         end
 
-        # ========================================================================
-        # Integration-style tests – export/import format guards
-        # ========================================================================
+        # ====================================================================
+        # INTEGRATION TESTS - Export/Import Format Guards
+        # ====================================================================
 
         Test.@testset "export/import format guards" begin
             sol = CTMDummySol()
@@ -58,4 +66,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_CTModels() = TestCTModelsTop.test_CTModels()

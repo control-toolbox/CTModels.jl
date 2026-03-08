@@ -80,27 +80,17 @@ function CTModels.import_ocp_solution(
     file_data = load(filename * ".jld2")
     data = file_data["solution_data"]
 
-    # Extract time grid - handle both TimeGridModel and raw Vector
-    T = if data["time_grid"] isa CTModels.TimeGridModel
-        data["time_grid"].value
+    # Extract solver infos if present
+    infos = if haskey(data, "infos")
+        data["infos"]
     else
-        data["time_grid"]
+        Dict{Symbol,Any}()
     end
 
-    # Reconstruct solution using build_solution with provided ocp
-    sol = CTModels.build_solution(
+    # Reconstruct solution using helper function (handles both single and multiple time grids)
+    sol = CTModels.Serialization._reconstruct_solution_from_data(
         ocp,
-        T,
-        data["state"],
-        data["control"],
-        data["variable"],
-        data["costate"];
-        objective=data["objective"],
-        iterations=data["iterations"],
-        constraints_violation=data["constraints_violation"],
-        message=data["message"],
-        status=data["status"],
-        successful=data["successful"],
+        data;
         path_constraints_dual=data["path_constraints_dual"],
         boundary_constraints_dual=data["boundary_constraints_dual"],
         state_constraints_lb_dual=data["state_constraints_lb_dual"],
@@ -109,6 +99,7 @@ function CTModels.import_ocp_solution(
         control_constraints_ub_dual=data["control_constraints_ub_dual"],
         variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
         variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
+        infos=infos,
     )
 
     return sol

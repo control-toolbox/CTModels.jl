@@ -1,13 +1,26 @@
 module TestOCPComponents
 
-using Test
-using CTBase
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp_components()
-    Test.@testset "OCP components" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "OCP Components Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for OCP components functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - OCP Components
+        # ====================================================================
         Test.@testset "state/control/variable models" begin
             state = CTModels.StateModel("y", ["u", "v"])
             Test.@test CTModels.dimension(state) == 2
@@ -73,4 +86,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_ocp_components() = TestOCPComponents.test_ocp_components()

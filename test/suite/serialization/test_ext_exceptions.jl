@@ -1,12 +1,14 @@
 module TestExtExceptions
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-using Main.TestProblems
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+include(joinpath("..", "..", "problems", "TestProblems.jl"))
+import .TestProblems
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy tags for testing stubs - these won't be overridden by extensions
 # because extensions only override for JLD2Tag and JSON3Tag specifically
@@ -18,8 +20,20 @@ struct DummyAbstractSolution <: CTModels.AbstractSolution end
 struct DummyAbstractModel <: CTModels.AbstractModel end
 
 function test_ext_exceptions()
-    Test.@testset "Extension Exceptions" verbose = VERBOSE showtiming = SHOWTIMING begin
-        ocp, sol, pre_ocp = solution_example()
+    Test.@testset "Extension Exceptions Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for extension exceptions functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Extension Exception Handling
+        # ====================================================================
+        ocp, sol, pre_ocp = TestProblems.solution_example()
 
         # ============================================================================
         # Test IncorrectArgument for unknown format
@@ -115,4 +129,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_ext_exceptions() = TestExtExceptions.test_ext_exceptions()

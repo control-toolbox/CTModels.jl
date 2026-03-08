@@ -1,18 +1,26 @@
 module TestOCPTimeDependence
 
-using Test
-using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+import Test
+import CTBase.Exceptions
+import CTModels
+
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_time_dependence()
-    Test.@testset "time dependence" verbose = VERBOSE showtiming = SHOWTIMING begin
-
-        # ========================================================================
-        # Unit tests – time_dependence! and is_autonomous
-        # ========================================================================
+    Test.@testset "Time Dependence Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+        
+        # ====================================================================
+        # UNIT TESTS - Abstract Types
+        # ====================================================================
+        
+        Test.@testset "Abstract Types" begin
+            # Pure unit tests for time dependence functionality
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Time Dependence Functions
+        # ====================================================================
 
         Test.@testset "time_dependence! basic behavior" begin
             ocp = CTModels.PreModel()
@@ -66,4 +74,5 @@ end
 
 end # module
 
+# CRITICAL: Redefine in outer scope for TestRunner
 test_time_dependence() = TestOCPTimeDependence.test_time_dependence()
