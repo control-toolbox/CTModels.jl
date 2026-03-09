@@ -1,23 +1,23 @@
 module TestOCPComponents
 
-import Test
-import CTBase
-import CTModels
+using Test: Test
+using CTBase: CTBase
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp_components()
     Test.@testset "OCP Components Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for OCP components functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - OCP Components
         # ====================================================================

@@ -1,22 +1,22 @@
 module TestInitialGuessTypes
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_types()
     Test.@testset "Initial Guess Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess types functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Core Initial Guess Types
         # ====================================================================

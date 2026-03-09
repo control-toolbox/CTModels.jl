@@ -179,13 +179,15 @@ function build_interpolated_function(
             return nothing  # Consistent: both grid and data are nothing
         else
             # ⚠️ Applying Exception Rule: Invalid combination of grid and data
-            throw(CTBase.Exceptions.IncorrectArgument(
-                "Time grid cannot be nothing when data is provided";
-                got="time grid=nothing, data≠nothing",
-                expected="both time grid and data to be nothing, or both to be provided",
-                suggestion="Provide a valid time grid or set data=nothing",
-                context="build_interpolated_function"
-            ))
+            throw(
+                CTBase.Exceptions.IncorrectArgument(
+                    "Time grid cannot be nothing when data is provided";
+                    got="time grid=nothing, data≠nothing",
+                    expected="both time grid and data to be nothing, or both to be provided",
+                    suggestion="Provide a valid time grid or set data=nothing",
+                    context="build_interpolated_function",
+                ),
+            )
         end
     end
 

@@ -1,27 +1,27 @@
 module TestOCPVariable
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_variable()
     Test.@testset "Variable Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for variable functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Variable Model
         # ====================================================================
-        
+
         # VariableModel
 
         # some checks
@@ -81,7 +81,9 @@ function test_variable()
 
         # wrong number of components
         ocp = CTModels.PreModel()
-        Test.@test_throws Exceptions.IncorrectArgument CTModels.variable!(ocp, 2, "w", ["a"])
+        Test.@test_throws Exceptions.IncorrectArgument CTModels.variable!(
+            ocp, 2, "w", ["a"]
+        )
 
         # NEW: Internal name validation tests (only for q > 0)
         Test.@testset "variable! - Internal name validation" begin

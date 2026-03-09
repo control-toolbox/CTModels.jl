@@ -1,8 +1,8 @@
 module TestOCPConstraints
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -19,15 +19,15 @@ correctly warns users about overwriting bounds. If you see warnings like
 """
 function test_constraints()
     Test.@testset "Constraints Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for constraints functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Constraint Handling
         # ====================================================================

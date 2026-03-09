@@ -1,23 +1,23 @@
 module TestOCPDefaults
 
-import Test
-import CTBase
-import CTModels
+using Test: Test
+using CTBase: CTBase
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_defaults()
     Test.@testset "Defaults Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for defaults functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Default Values
         # ====================================================================

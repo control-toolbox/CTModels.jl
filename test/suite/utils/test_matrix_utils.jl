@@ -1,7 +1,7 @@
 module TestUtilsMatrixUtils
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -13,15 +13,15 @@ Test matrix utility functions from src/utils/matrix_utils.jl.
 """
 function test_matrix_utils()
     Test.@testset "Matrix Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for matrix utils functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Matrix Utility Functions
         # ====================================================================

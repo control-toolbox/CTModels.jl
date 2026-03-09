@@ -1,7 +1,7 @@
 module TestOCPIntegration
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 import CTBase.Exceptions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -9,15 +9,15 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp_exception_integration()
     Test.@testset "OCP Exception Integration" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Exception Types
         # ====================================================================
-        
+
         Test.@testset "Exception Types" begin
             # Test exception type definitions
         end
-        
+
         # ====================================================================
         # INTEGRATION TESTS
         # ====================================================================
@@ -183,7 +183,9 @@ function test_ocp_exception_integration()
                 Test.@test !isnothing(e.suggestion)
                 Test.@test !isnothing(e.context)
                 Test.@test occursin("state has not been defined yet", e.reason)
-                Test.@test occursin("Call state!(ocp, dimension) before dynamics!", e.suggestion)
+                Test.@test occursin(
+                    "Call state!(ocp, dimension) before dynamics!", e.suggestion
+                )
                 Test.@test occursin("state validation", e.context)
             end
 

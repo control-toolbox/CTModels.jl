@@ -1,8 +1,8 @@
 module TestOCPTimes
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -16,15 +16,15 @@ Base.getindex(v::FakeTimeVector{T}, i::Int) where {T} = v.data[i]
 
 function test_times()
     Test.@testset "Times Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for times functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Time Models
         # ====================================================================
@@ -161,11 +161,15 @@ function test_times()
         Test.@testset "times: Temporal validation" verbose = VERBOSE showtiming = SHOWTIMING begin
             # t0 > tf
             ocp = CTModels.PreModel()
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=0.0)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=1.0, tf=0.0
+            )
 
             # t0 = tf
             ocp = CTModels.PreModel()
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.time!(ocp, t0=1.0, tf=1.0)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.time!(
+                ocp, t0=1.0, tf=1.0
+            )
 
             # Valid: t0 < tf
             ocp = CTModels.PreModel()

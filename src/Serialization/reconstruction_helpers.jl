@@ -53,7 +53,7 @@ function _reconstruct_solution_from_data(
         T_control = _extract_time_vector(data["time_grid_control"])
         T_costate = _extract_time_vector(data["time_grid_costate"])
         T_dual = _extract_time_vector(data["time_grid_dual"])
-        
+
         # Reconstruct solution with multiple time grids
         return OCP.build_solution(
             ocp,

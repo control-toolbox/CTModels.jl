@@ -1,8 +1,8 @@
 module TestExtExceptions
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -21,15 +21,15 @@ struct DummyAbstractModel <: CTModels.AbstractModel end
 
 function test_ext_exceptions()
     Test.@testset "Extension Exceptions Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for extension exceptions functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Extension Exception Handling
         # ====================================================================

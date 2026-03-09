@@ -71,7 +71,7 @@ julia> length(tg.grids.state)
 struct MultipleTimeGridModel <: AbstractTimeGridModel
     grids::NamedTuple{
         (:state, :control, :costate, :path, :dual),
-        Tuple{TimesDisc, TimesDisc, TimesDisc, TimesDisc, TimesDisc}
+        Tuple{TimesDisc,TimesDisc,TimesDisc,TimesDisc,TimesDisc},
     }
 end
 
@@ -108,14 +108,10 @@ function MultipleTimeGridModel(;
     control::TimesDisc,
     costate::TimesDisc,
     path::TimesDisc,
-    dual::TimesDisc
+    dual::TimesDisc,
 )
     return MultipleTimeGridModel((
-        state=state,
-        control=control,
-        costate=costate,
-        path=path,
-        dual=dual
+        state=state, control=control, costate=costate, path=path, dual=dual
     ))
 end
 

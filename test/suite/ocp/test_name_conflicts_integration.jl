@@ -1,23 +1,23 @@
 module TestNameConflictsIntegrationSimple
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_name_conflicts_integration()
     Test.@testset "Name Conflicts Integration Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for name conflicts functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Name Conflicts Detection
         # ====================================================================
@@ -152,7 +152,9 @@ function test_name_conflicts_integration()
             )
 
             # Test with mixed finite/infinite bounds
-            Test.@test_nowarn CTModels.constraint!(ocp, :control, lb=[-1.0, -Inf], ub=[1.0, Inf])
+            Test.@test_nowarn CTModels.constraint!(
+                ocp, :control, lb=[-1.0, -Inf], ub=[1.0, Inf]
+            )
 
             # Test equality constraints (lb == ub)
             Test.@test_nowarn CTModels.constraint!(ocp, :variable, lb=[0.5], ub=[0.5])
@@ -284,4 +286,6 @@ end
 end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
-test_name_conflicts_integration() = TestNameConflictsIntegrationSimple.test_name_conflicts_integration()
+function test_name_conflicts_integration()
+    TestNameConflictsIntegrationSimple.test_name_conflicts_integration()
+end

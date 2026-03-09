@@ -1,23 +1,23 @@
 module TestNameValidation
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_name_validation()
     Test.@testset "Name Validation Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for name validation functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Name Validation Helpers
         # ====================================================================
@@ -126,7 +126,9 @@ function test_name_validation()
 
             # Name == component (single component) - should PASS (default behavior)
             ocp = CTModels.PreModel()
-            Test.@test_nowarn CTModels.OCP.__validate_name_uniqueness(ocp, "x", ["x"], :state)
+            Test.@test_nowarn CTModels.OCP.__validate_name_uniqueness(
+                ocp, "x", ["x"], :state
+            )
 
             # Duplicate components
             ocp = CTModels.PreModel()
@@ -175,7 +177,9 @@ function test_name_validation()
             Test.@test_nowarn CTModels.OCP.__validate_name_uniqueness(
                 ocp, "x", ["y₁", "y₂"], :state
             )  # exclude state, no conflicts
-            Test.@test_nowarn CTModels.OCP.__validate_name_uniqueness(ocp, "u", ["y₁"], :control)  # exclude control, no conflicts
+            Test.@test_nowarn CTModels.OCP.__validate_name_uniqueness(
+                ocp, "u", ["y₁"], :control
+            )  # exclude control, no conflicts
         end
     end
 end

@@ -1,8 +1,8 @@
 module TestInitialGuessBuilders
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -49,15 +49,15 @@ CTModels.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
     Test.@testset "Initial Guess Builders Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess builders functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Builder Functions
         # ====================================================================

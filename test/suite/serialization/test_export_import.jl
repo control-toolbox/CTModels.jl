@@ -1,9 +1,9 @@
 module TestExportImport
 
-import Test
-import CTModels
-import JLD2
-import JSON3
+using Test: Test
+using CTModels: CTModels
+using JLD2: JLD2
+using JSON3: JSON3
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -251,15 +251,15 @@ end
 
 function test_export_import()
     Test.@testset "Export/Import Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for export/import functionality
         end
-        
+
         # ====================================================================
         # INTEGRATION TESTS - Basic Round-Trip with TestProblems
         # ====================================================================

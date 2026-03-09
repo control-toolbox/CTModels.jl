@@ -1,26 +1,26 @@
 module TestTypes
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_types()
     Test.@testset "CTModels.jl Type System Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for CTModels type system functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - OCP Model and Solution Core Types
         # ====================================================================
-        
+
         Test.@testset "OCP model and solution core types" begin
             # Abstract/model hierarchy
             Test.@test isabstracttype(CTModels.AbstractModel)
@@ -45,7 +45,7 @@ function test_types()
         # ====================================================================
         # UNIT TESTS - Initial Guess Core Types
         # ====================================================================
-        
+
         Test.@testset "Initial guess core types" begin
             Test.@test isabstracttype(CTModels.AbstractInitialGuess)
             Test.@test CTModels.InitialGuess <: CTModels.AbstractInitialGuess

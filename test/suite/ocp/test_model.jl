@@ -1,23 +1,23 @@
 module TestOCPModel
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_model()
     Test.@testset "Model Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for model functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Model Building
         # ====================================================================
@@ -135,7 +135,8 @@ function test_model()
 
         # test the functions
         Test.@test CTModels.constraint(model, :path)[2](t, x, u, v) == x .+ u .+ v .+ t
-        Test.@test CTModels.constraint(model, :boundary)[2](x0, xf, v) == x0 .+ v .* (xf .- x0)
+        Test.@test CTModels.constraint(model, :boundary)[2](x0, xf, v) ==
+            x0 .+ v .* (xf .- x0)
         Test.@test CTModels.constraint(model, :state)[2](t, x, u, v) == x
         Test.@test CTModels.constraint(model, :control)[2](t, x, u, v) == u
         Test.@test CTModels.constraint(model, :variable)[2](x0, xf, v) == v

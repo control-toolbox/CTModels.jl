@@ -1,8 +1,8 @@
 module TestInterpolationHelpers
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 import CTModels.OCP
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -10,15 +10,15 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_interpolation_helpers()
     Test.@testset "Interpolation Helpers Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for interpolation helpers functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Interpolation Helpers
         # ====================================================================
@@ -135,13 +135,17 @@ function test_interpolation_helpers()
 
         Test.@testset "build_interpolated_function: complete workflow" begin
             # Test state-like: required, with validation
-            fx = OCP.build_interpolated_function(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
+            fx = OCP.build_interpolated_function(
+                X_2d, T, 2, Matrix{Float64}; expected_dim=2
+            )
             Test.@test !isnothing(fx)
             Test.@test fx(0.0) ≈ [1.0, 2.0]
             Test.@test fx(1.0) ≈ [2.0, 3.0]
 
             # Test scalar dimension
-            fx_1d = OCP.build_interpolated_function(X_1d, T, 1, Matrix{Float64}; expected_dim=1)
+            fx_1d = OCP.build_interpolated_function(
+                X_1d, T, 1, Matrix{Float64}; expected_dim=1
+            )
             Test.@test fx_1d(0.5) isa Float64  # Scalar extraction
             Test.@test fx_1d(0.5) ≈ 1.5
         end
@@ -166,7 +170,9 @@ function test_interpolation_helpers()
 
         Test.@testset "build_interpolated_function: optional duals" begin
             # Test with nothing (allowed)
-            fdual = OCP.build_interpolated_function(nothing, T, 2, Nothing; allow_nothing=true)
+            fdual = OCP.build_interpolated_function(
+                nothing, T, 2, Nothing; allow_nothing=true
+            )
             Test.@test isnothing(fdual)
 
             # Test with actual data

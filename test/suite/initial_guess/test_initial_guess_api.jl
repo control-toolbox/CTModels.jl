@@ -1,8 +1,8 @@
 module TestInitialGuessAPI
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -39,15 +39,15 @@ CTModels.variable_components(::DummyOCP1DVar) = ["v"]
 
 function test_initial_guess_api()
     Test.@testset "Initial Guess API Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Public API Functions
         # ====================================================================

@@ -1552,7 +1552,7 @@ function __get_plot_data_pair(
         ::Symbol => (xx, 1)
         _ => xx
     end
-    
+
     yy_sym, yy_idx = MLStyle.@match yy begin
         ::Symbol => (yy, 1)
         _ => yy
@@ -1566,14 +1566,16 @@ function __get_plot_data_pair(
                 got="both axes are :time",
                 expected="one time axis and one variable axis",
                 suggestion="Use (:time, :state), (:state, :time), or (:state, :control)",
-                context="plot axis selection"
-            )
+                context="plot axis selection",
+            ),
         )
     end
 
     # Case 1: Time-based plots
     if xx_sym == :time || yy_sym == :time
-        return _handle_time_based_plot(sol, model, xx_sym, xx_idx, yy_sym, yy_idx; time=time)
+        return _handle_time_based_plot(
+            sol, model, xx_sym, xx_idx, yy_sym, yy_idx; time=time
+        )
     end
 
     # Case 2: Variable-variable plots
@@ -1604,23 +1606,23 @@ function _handle_time_based_plot(
     model::Union{CTModels.Model,Nothing},
     x_sym::Symbol,
     x_idx::Int,
-    y_sym::Symbol, 
+    y_sym::Symbol,
     y_idx::Int;
-    time::Symbol=:default
+    time::Symbol=:default,
 )
     # Determine which variable provides the grid
     variable_sym = x_sym == :time ? y_sym : x_sym
     variable_idx = x_sym == :time ? y_idx : x_idx
-    
+
     # Map special components to valid time grid components
     grid_component = _map_to_time_grid_component(variable_sym)
-    
+
     # Get the grid from the mapped component
     T = CTModels.time_grid(sol, grid_component)
-    
+
     # Get variable values
     var_values = _get_variable_values(sol, model, variable_sym, variable_idx, T)
-    
+
     # Apply time normalization if requested
     time_values = MLStyle.@match time begin
         :default => T
@@ -1630,7 +1632,7 @@ function _handle_time_based_plot(
             "Internal error, no such choice for time: $time. Use :default, :normalize or :normalise",
         )
     end
-    
+
     # Return in correct order (x, y)
     if x_sym == :time
         return (time_values, var_values)
@@ -1648,14 +1650,16 @@ function _handle_variable_variable_plot(
     x_sym::Symbol,
     x_idx::Int,
     y_sym::Symbol,
-    y_idx::Int
+    y_idx::Int,
 )
     # Get grids for both variables (with mapping for special components)
     T_x = CTModels.time_grid(sol, _map_to_time_grid_component(x_sym))
     T_y = CTModels.time_grid(sol, _map_to_time_grid_component(y_sym))
-    
+
     # Dispatch based on time grid model type
-    return _handle_variable_variable_plot(time_grid_model(sol), sol, model, x_sym, x_idx, y_sym, y_idx, T_x, T_y)
+    return _handle_variable_variable_plot(
+        time_grid_model(sol), sol, model, x_sym, x_idx, y_sym, y_idx, T_x, T_y
+    )
 end
 
 """
@@ -1670,7 +1674,7 @@ function _handle_variable_variable_plot(
     y_sym::Symbol,
     y_idx::Int,
     T_x::Vector{Float64},
-    T_y::Vector{Float64}
+    T_y::Vector{Float64},
 )
     # For unified time grid, both grids should be the same
     T_common = T_x  # Both should be the same
@@ -1691,15 +1695,15 @@ function _handle_variable_variable_plot(
     y_sym::Symbol,
     y_idx::Int,
     T_x::Vector{Float64},
-    T_y::Vector{Float64}
+    T_y::Vector{Float64},
 )
     # For multiple time grids, create common grid
     T_common = unique(sort(vcat(T_x, T_y)))
-    
+
     # Get variable functions and evaluate on common grid
     x_values = _get_variable_values(sol, model, x_sym, x_idx, T_common)
     y_values = _get_variable_values(sol, model, y_sym, y_idx, T_common)
-    
+
     return (x_values, y_values)
 end
 
@@ -1711,10 +1715,10 @@ function _get_variable_values(
     model::Union{CTModels.Model,Nothing},
     sym::Symbol,
     idx::Int,
-    T::Vector{Float64}
+    T::Vector{Float64},
 )
     m = length(T)
-    
+
     return MLStyle.@match sym begin
         :time => error("Internal error: _get_variable_values called with :time")
         :state => begin
