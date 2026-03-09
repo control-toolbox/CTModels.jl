@@ -2,6 +2,26 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.4] - 2026-03-09
+
+**No breaking changes** - This release focuses on code formatting and documentation improvements with no API changes.
+
+### Internal Changes
+
+- **Code Formatting**: Applied JuliaFormatter across entire codebase
+  - Consistent code style throughout all source files
+  - Improved readability and maintainability
+  - No functional changes - formatting only
+
+- **Documentation**: Fixed formatting issues in documentation files
+  - Resolved duplicate text in BREAKING.md
+  - Cleaned up markdown formatting
+  - Enhanced documentation consistency
+
+### Migration Notes
+
+No action required for users. All existing code continues to work unchanged.
+
 ## [0.9.3] - 2026-03-08
 
 **No breaking changes** - This release focuses on internal testing infrastructure improvements with no API changes.

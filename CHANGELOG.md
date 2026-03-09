@@ -5,9 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.3] - 2026-03-08
+## [0.9.4] - 2026-03-09
 
 ### Changed
+
+- **Code Formatting**: Applied JuliaFormatter across entire codebase
+  - Consistent code style throughout all source files
+  - Improved readability and maintainability
+  - No functional changes - formatting only
+
+- **Documentation**: Fixed formatting issues in documentation files
+  - Resolved duplicate text in BREAKING.md
+  - Cleaned up markdown formatting
+  - Enhanced documentation consistency
+
+### Fixed
+
+- **Documentation Issues**: Resolved formatting inconsistencies
+  - Fixed duplicate text in v0.9.2 section of BREAKING.md
+  - Improved markdown structure and readability
+  - Ensured consistent documentation style
+
+## [0.9.3] - 2026-03-08
+
+### Changed - v0.9.3
 
 - **Testing Standards Overhaul**: Complete migration of all test files to CTModels testing standards
   - Replaced all `using` with `import` statements for proper module isolation
@@ -25,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced test output formatting and timing information
   - Better integration with CTBase testing infrastructure
 
-### Fixed
+### Fixed - v0.9.3
 
 - **Test Compatibility**: Resolved TestRunner integration issues
   - Fixed outer scope function redefinitions for proper test discovery
