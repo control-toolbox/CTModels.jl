@@ -24,7 +24,7 @@ The main exported types and functions are accessible via `CTModels.function_name
 - Component builders: `state!`, `control!`, `variable!`, etc.
 - Model builders: `build_model`, `build_solution`
 
-See also: [`CTModels`](@ref)
+See also: `CTModels`
 """
 module OCP
 

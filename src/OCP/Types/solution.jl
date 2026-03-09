@@ -9,7 +9,7 @@ Abstract base type for time grid models used in optimal control solutions.
 
 Subtypes store the discretised time points at which the solution is evaluated.
 
-See also: [`TimeGridModel`](@ref), [`EmptyTimeGridModel`](@ref).
+See also: `TimeGridModel`, `EmptyTimeGridModel`.
 """
 abstract type AbstractTimeGridModel end
 
@@ -231,7 +231,7 @@ Abstract base type for solver information associated with an optimal control sol
 
 Subtypes store metadata about the numerical solution process.
 
-See also: [`SolverInfos`](@ref).
+See also: `SolverInfos`.
 """
 abstract type AbstractSolverInfos end
 
@@ -277,7 +277,7 @@ Abstract base type for dual variable models in optimal control solutions.
 
 Subtypes store Lagrange multipliers (dual variables) associated with constraints.
 
-See also: [`DualModel`](@ref).
+See also: `DualModel`.
 """
 abstract type AbstractDualModel end
 
@@ -337,7 +337,7 @@ Abstract base type for optimal control problem solutions.
 Subtypes store the complete solution including primal trajectories, dual variables,
 and solver information.
 
-See also: [`Solution`](@ref).
+See also: `Solution`.
 """
 abstract type AbstractSolution end
 

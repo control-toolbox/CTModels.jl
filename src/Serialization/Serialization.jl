@@ -10,8 +10,8 @@ solutions to various formats (JLD2, JSON).
 
 The following functions are exported and accessible as `CTModels.function_name()`:
 
-- [`export_ocp_solution`](@ref): Export a solution to file
-- [`import_ocp_solution`](@ref): Import a solution from file
+- `export_ocp_solution`: Export a solution to file
+- `import_ocp_solution`: Import a solution from file
 
 # Supported Formats
 
@@ -25,7 +25,7 @@ The following are internal utilities (accessible via `Serialization.function_nam
 - `__format`: Get default format
 - `__filename_export_import`: Get default filename
 
-See also: [`CTModels`](@ref), [`export_ocp_solution`](@ref), [`import_ocp_solution`](@ref)
+See also: `CTModels`, `export_ocp_solution`, `import_ocp_solution`
 """
 module Serialization
 

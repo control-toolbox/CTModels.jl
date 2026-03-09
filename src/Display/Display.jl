@@ -21,7 +21,7 @@ The following are internal utilities (accessible via `Display.function_name`):
 - `__print_abstract_definition`: Print abstract OCP definition
 - `__print_mathematical_definition`: Print mathematical OCP formulation
 
-See also: [`CTModels`](@ref)
+See also: `CTModels`
 """
 module Display
 

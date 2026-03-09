@@ -19,7 +19,7 @@ No action required for users. All existing code continues to work unchanged.
 
 ## [0.9.2] - 2026-03-05
 
-**No breaking changes** - This release adds new multi-time-grid functionality while maintaining full backward compatibility.d functionality while maintaining full backward compatibility. All existing APIs continue to work unchanged.
+**No breaking changes** - This release adds new multi-time-grid functionality while maintaining full backward compatibility. All existing APIs continue to work unchanged.
 
 ### New Features (Non-Breaking)
 

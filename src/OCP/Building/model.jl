@@ -392,7 +392,7 @@ objective!(pre_ocp, :mayer, (x0, xf) -> xf[1]^2)
 ocp = build_model(pre_ocp)
 ```
 
-See also: [`build`](@ref), [`PreModel`](@ref), [`Model`](@ref), [`time_dependence!`](@ref)
+See also: `build`, `PreModel`, `Model`, `time_dependence!`
 """
 function build_model(pre_ocp::PreModel; build_examodel=nothing)::Model
     return build(pre_ocp; build_examodel=build_examodel)

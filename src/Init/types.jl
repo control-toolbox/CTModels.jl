@@ -9,7 +9,7 @@ Abstract base type for initial guesses used in optimal control problem solvers.
 Subtypes provide initial trajectories for state, control, and optimisation variables
 to warm-start numerical solvers.
 
-See also: [`InitialGuess`](@ref).
+See also: `InitialGuess`.
 """
 abstract type AbstractInitialGuess end
 
@@ -49,9 +49,9 @@ Abstract base type for pre-initialisation data used before constructing a full
 initial guess.
 
 Subtypes store raw or partial information that will be processed into an
-[`InitialGuess`](@ref).
+`InitialGuess`.
 
-See also: [`PreInitialGuess`](@ref).
+See also: `PreInitialGuess`.
 """
 abstract type AbstractPreInitialGuess end
 

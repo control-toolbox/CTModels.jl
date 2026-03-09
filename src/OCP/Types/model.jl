@@ -7,9 +7,9 @@ $(TYPEDEF)
 Abstract base type for optimal control problem models.
 
 Subtypes represent either a fully built immutable model ([`Model`](@ref CTModels.OCP.Model)) or a
-mutable model under construction ([`PreModel`](@ref)).
+mutable model under construction (`PreModel`).
 
-See also: [`Model`](@ref CTModels.OCP.Model), [`PreModel`](@ref).
+See also: [`Model`](@ref CTModels.OCP.Model), `PreModel`.
 """
 abstract type AbstractModel end
 
@@ -18,7 +18,7 @@ $(TYPEDEF)
 
 Immutable optimal control problem model containing all problem components.
 
-A `Model` is created from a [`PreModel`](@ref) once all required fields have been
+A `Model` is created from a `PreModel` once all required fields have been
 set. It is parameterised by the time dependence type (`Autonomous` or `NonAutonomous`)
 and the types of all its components.
 
@@ -201,70 +201,70 @@ __is_set(x) = !isnothing(x)
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if the autonomous flag has been set in the [`PreModel`](@ref).
+Return `true` if the autonomous flag has been set in the `PreModel`.
 """
 __is_autonomous_set(ocp::PreModel)::Bool = __is_set(ocp.autonomous)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if times have been set in the [`PreModel`](@ref).
+Return `true` if times have been set in the `PreModel`.
 """
 __is_times_set(ocp::PreModel)::Bool = __is_set(ocp.times)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if state has been set in the [`PreModel`](@ref).
+Return `true` if state has been set in the `PreModel`.
 """
 __is_state_set(ocp::PreModel)::Bool = __is_set(ocp.state)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if control has been set in the [`PreModel`](@ref).
+Return `true` if control has been set in the `PreModel`.
 """
 __is_control_set(ocp::PreModel)::Bool = __is_set(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if `v` is an [`EmptyVariableModel`](@ref).
+Return `true` if `v` is an `EmptyVariableModel`.
 """
 __is_variable_empty(v) = v isa EmptyVariableModel
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if a non-empty variable has been set in the [`PreModel`](@ref).
+Return `true` if a non-empty variable has been set in the `PreModel`.
 """
 __is_variable_set(ocp::PreModel)::Bool = !__is_variable_empty(ocp.variable)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if dynamics have been set in the [`PreModel`](@ref).
+Return `true` if dynamics have been set in the `PreModel`.
 """
 __is_dynamics_set(ocp::PreModel)::Bool = __is_set(ocp.dynamics)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if objective has been set in the [`PreModel`](@ref).
+Return `true` if objective has been set in the `PreModel`.
 """
 __is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if definition has been set in the [`PreModel`](@ref).
+Return `true` if definition has been set in the `PreModel`.
 """
 __is_definition_set(ocp::PreModel)::Bool = __is_set(ocp.definition)
 
 """
 $(TYPEDSIGNATURES)
 
-Return the state dimension of the [`PreModel`](@ref).
+Return the state dimension of the `PreModel`.
 
 Throws `Exceptions.PreconditionError` if state has not been set.
 """
@@ -284,7 +284,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if dynamics cover all state components in the [`PreModel`](@ref).
+Return `true` if dynamics cover all state components in the `PreModel`.
 
 For component-wise dynamics, checks that all state indices are covered.
 """

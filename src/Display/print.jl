@@ -430,7 +430,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default show method for a [`PreModel`](@ref).
+Default show method for a `PreModel`.
 
 Prints only the type name.
 """

@@ -33,7 +33,7 @@ Export an optimal control solution to a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: [`import_ocp_solution`](@ref)
+See also: `import_ocp_solution`
 """
 function export_ocp_solution(
     sol::AbstractSolution;
@@ -75,7 +75,7 @@ Import an optimal control solution from a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: [`export_ocp_solution`](@ref)
+See also: `export_ocp_solution`
 """
 function import_ocp_solution(
     ocp::AbstractModel;

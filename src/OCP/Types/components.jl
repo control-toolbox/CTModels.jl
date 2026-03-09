@@ -10,7 +10,7 @@ Abstract base type representing time dependence of an optimal control problem.
 Used as a type parameter to distinguish between autonomous and non-autonomous
 systems at the type level, enabling dispatch and compile-time optimisations.
 
-See also: [`Autonomous`](@ref), [`NonAutonomous`](@ref).
+See also: `Autonomous`, `NonAutonomous`.
 """
 abstract type TimeDependence end
 
@@ -23,7 +23,7 @@ problem do not explicitly depend on time.
 For autonomous systems, the dynamics have the form `ẋ = f(x, u)` rather than
 `ẋ = f(t, x, u)`.
 
-See also: [`TimeDependence`](@ref), [`NonAutonomous`](@ref).
+See also: `TimeDependence`, `NonAutonomous`.
 """
 abstract type Autonomous<:TimeDependence end
 
@@ -35,7 +35,7 @@ problem explicitly depend on time.
 
 For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
 
-See also: [`TimeDependence`](@ref), [`Autonomous`](@ref).
+See also: `TimeDependence`, `Autonomous`.
 """
 abstract type NonAutonomous<:TimeDependence end
 
@@ -48,7 +48,7 @@ Abstract base type for state variable models in optimal control problems.
 Subtypes describe the state space structure including dimension, naming, and
 optionally the state trajectory itself.
 
-See also: [`StateModel`](@ref), [`StateModelSolution`](@ref).
+See also: `StateModel`, `StateModelSolution`.
 """
 abstract type AbstractStateModel end
 
@@ -115,7 +115,7 @@ Abstract base type for control variable models in optimal control problems.
 Subtypes describe the control space structure including dimension, naming, and
 optionally the control trajectory itself.
 
-See also: [`ControlModel`](@ref), [`ControlModelSolution`](@ref).
+See also: `ControlModel`, `ControlModelSolution`.
 """
 abstract type AbstractControlModel end
 
@@ -181,7 +181,7 @@ Abstract base type for optimisation variable models in optimal control problems.
 Optimisation variables are decision variables that do not depend on time, such as
 free final time or unknown parameters.
 
-See also: [`VariableModel`](@ref), [`EmptyVariableModel`](@ref), [`VariableModelSolution`](@ref).
+See also: `VariableModel`, `EmptyVariableModel`, `VariableModelSolution`.
 """
 abstract type AbstractVariableModel end
 
@@ -263,7 +263,7 @@ Abstract base type for time boundary models (initial or final time).
 Subtypes represent either fixed or free time boundaries in an optimal control
 problem.
 
-See also: [`FixedTimeModel`](@ref), [`FreeTimeModel`](@ref).
+See also: `FixedTimeModel`, `FreeTimeModel`.
 """
 abstract type AbstractTimeModel end
 
@@ -324,7 +324,7 @@ $(TYPEDEF)
 
 Abstract base type for combined initial and final time models.
 
-See also: [`TimesModel`](@ref).
+See also: `TimesModel`.
 """
 abstract type AbstractTimesModel end
 
@@ -364,7 +364,7 @@ Abstract base type for objective function models in optimal control problems.
 Subtypes represent different forms of the cost functional: Mayer (terminal cost),
 Lagrange (integral cost), or Bolza (both).
 
-See also: [`MayerObjectiveModel`](@ref), [`LagrangeObjectiveModel`](@ref), [`BolzaObjectiveModel`](@ref).
+See also: `MayerObjectiveModel`, `LagrangeObjectiveModel`, `BolzaObjectiveModel`.
 """
 abstract type AbstractObjectiveModel end
 
@@ -455,7 +455,7 @@ Abstract base type for constraint models in optimal control problems.
 Subtypes store all constraint information including path constraints, boundary
 constraints, and box constraints on state, control, and variables.
 
-See also: [`ConstraintsModel`](@ref).
+See also: `ConstraintsModel`.
 """
 abstract type AbstractConstraintsModel end
 

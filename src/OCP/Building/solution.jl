@@ -1165,7 +1165,7 @@ sol_reconstructed = CTModels.build_solution(
 )
 ```
 
-See also: [`build_solution`](@ref), [`_discretize_function`](@ref)
+See also: `build_solution`, `_discretize_function`
 """
 function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters

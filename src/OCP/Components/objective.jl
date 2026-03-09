@@ -237,27 +237,27 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Alias for [`has_mayer_cost`](@ref). Check if the objective has a Mayer (terminal) cost defined.
+Alias for `has_mayer_cost`. Check if the objective has a Mayer (terminal) cost defined.
 
 # Example
 ```julia-repl
 julia> is_mayer_cost_defined(obj)  # equivalent to has_mayer_cost(obj)
 ```
 
-See also: [`has_mayer_cost`](@ref), [`is_lagrange_cost_defined`](@ref).
+See also: `has_mayer_cost`, `is_lagrange_cost_defined`.
 """
 const is_mayer_cost_defined = has_mayer_cost
 
 """
 $(TYPEDSIGNATURES)
 
-Alias for [`has_lagrange_cost`](@ref). Check if the objective has a Lagrange (integral) cost defined.
+Alias for `has_lagrange_cost`. Check if the objective has a Lagrange (integral) cost defined.
 
 # Example
 ```julia-repl
 julia> is_lagrange_cost_defined(obj)  # equivalent to has_lagrange_cost(obj)
 ```
 
-See also: [`has_lagrange_cost`](@ref), [`is_mayer_cost_defined`](@ref).
+See also: `has_lagrange_cost`, `is_mayer_cost_defined`.
 """
 const is_lagrange_cost_defined = has_lagrange_cost

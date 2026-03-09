@@ -10,8 +10,8 @@ including interpolation, matrix operations, and function transformations.
 
 The following functions are exported and accessible as `CTModels.function_name()`:
 
-- [`ctinterpolate`](@ref): Linear interpolation for data
-- [`matrix2vec`](@ref): Convert matrices to vectors
+- `ctinterpolate`: Linear interpolation for data
+- `matrix2vec`: Convert matrices to vectors
 
 # Private API
 
@@ -20,7 +20,7 @@ The following are internal utilities (accessible via `Utils.function_name`):
 - `to_out_of_place`: Convert in-place functions to out-of-place
 - `@ensure`: Validation macro for preconditions
 
-See also: [`CTModels`](@ref)
+See also: `CTModels`
 """
 module Utils
 

@@ -11,15 +11,15 @@ solvers by providing starting trajectories for state, control, and variables.
 
 The following functions are exported and accessible as `CTModels.function_name()`:
 
-- [`initial_guess`](@ref): Construct a validated initial guess
-- [`pre_initial_guess`](@ref): Create a pre-initialization object
+- `initial_guess`: Construct a validated initial guess
+- `pre_initial_guess`: Create a pre-initialization object
 
 # Types
 
-- [`InitialGuess`](@ref): Validated initial guess with callable trajectories
-- [`PreInitialGuess`](@ref): Pre-initialization container for raw data
+- `InitialGuess`: Validated initial guess with callable trajectories
+- `PreInitialGuess`: Pre-initialization container for raw data
 
-See also: [`CTModels`](@ref)
+See also: `CTModels`
 """
 module Init
 

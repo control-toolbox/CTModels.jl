@@ -4,7 +4,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Internal validation of an [`InitialGuess`](@ref).
+Internal validation of an `InitialGuess`.
 
 Samples the state and control functions at a test time and verifies dimensions.
 """
@@ -140,7 +140,7 @@ Build an initial guess from a previous solution (warm start).
 
 Extracts state, control, and variable trajectories from the solution.
 Dimensional consistency is checked against the solution metadata; final
-validation against the OCP is performed by [`build_initial_guess`](@ref).
+validation against the OCP is performed by `build_initial_guess`.
 """
 function _initial_guess_from_solution(ocp::AbstractModel, sol::AbstractSolution)
     # Basic dimensional consistency checks
@@ -192,7 +192,7 @@ Build an initial guess from a `NamedTuple`.
 
 Parses keys for state, control, variable (by name or component) and constructs
 the appropriate initialisation functions. Validation against the OCP is
-performed by [`build_initial_guess`](@ref).
+performed by `build_initial_guess`.
 """
 function _initial_guess_from_namedtuple(ocp::AbstractModel, init_data::NamedTuple)
     # Names and component maps from the OCP
@@ -507,7 +507,7 @@ $(TYPEDSIGNATURES)
 Build an initial guess from a pre-initialisation object.
 
 Converts raw data into functions and trajectories. Validation against the OCP
-is performed by [`build_initial_guess`](@ref).
+is performed by `build_initial_guess`.
 """
 function _initial_guess_from_preinit(ocp::AbstractModel, pre::PreInitialGuess)
     x = initial_state(ocp, pre.state)

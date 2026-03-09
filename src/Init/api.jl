@@ -6,8 +6,8 @@ $(TYPEDSIGNATURES)
 
 Create a pre-initialisation object for an initial guess.
 
-This function creates an [`PreInitialGuess`](@ref) that can later be
-processed into a full [`InitialGuess`](@ref).
+This function creates an `PreInitialGuess` that can later be
+processed into a full `InitialGuess`.
 
 # Arguments
 
@@ -36,10 +36,10 @@ $(TYPEDSIGNATURES)
 
 Construct an initial guess for an optimal control problem.
 
-Builds an [`InitialGuess`](@ref) from the provided state, control,
+Builds an `InitialGuess` from the provided state, control,
 and variable data. The returned initial guess is **not validated** against the
-problem dimensions; use [`build_initial_guess`](@ref) or
-[`validate_initial_guess`](@ref) for dimension checking.
+problem dimensions; use `build_initial_guess` or
+`validate_initial_guess` for dimension checking.
 
 # Arguments
 
@@ -77,7 +77,7 @@ $(TYPEDSIGNATURES)
 
 Build and validate an initial guess from various input formats.
 
-Accepts multiple input types, converts them to an [`InitialGuess`](@ref),
+Accepts multiple input types, converts them to an `InitialGuess`,
 and validates dimensions against the problem definition. This is the **single entry
 point** that guarantees a validated initial guess.
 
@@ -145,7 +145,7 @@ Validate an initial guess against an optimal control problem.
 
 Checks that the state, control, and variable dimensions of the initial guess
 are consistent with the problem definition. This function can be called
-explicitly on a manually constructed [`InitialGuess`](@ref).
+explicitly on a manually constructed `InitialGuess`.
 
 # Arguments
 
