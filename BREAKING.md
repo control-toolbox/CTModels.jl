@@ -2,6 +2,26 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.5] - 2026-03-09
+
+**No breaking changes** - This release focuses on internal API cleanup with no impact on public functionality.
+
+### Internal Changes
+
+- **Variable API Cleanup**: Removed redundant `variable(sol::AbstractSolution)` method
+  - Eliminated potential semantic inconsistency between different AbstractSolution subtypes
+  - Solution concrete type already provides specific method that returns `value(sol.variable)`
+  - Test types like `DummySolution1DVar` now require explicit implementations
+  - Enhanced method dispatch clarity and maintainability
+
+### Migration Notes
+
+No action required for users. All existing code continues to work unchanged. This is an internal improvement that:
+- Removes a redundant generic method
+- Improves type safety and method dispatch clarity
+- Maintains all existing public APIs
+- All tests pass (2941/2941)
+
 ## [0.9.4] - 2026-03-09
 
 **No breaking changes** - This release focuses on code formatting and documentation improvements with no API changes.

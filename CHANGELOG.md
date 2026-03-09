@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.5] - 2026-03-09
+
+### Fixed
+
+- **Variable API Cleanup**: Removed redundant `variable(sol::AbstractSolution)` method
+  - Eliminated potential semantic inconsistency between different AbstractSolution subtypes
+  - Solution concrete type already provides specific method that returns `value(sol.variable)`
+  - Test types like `DummySolution1DVar` now require explicit implementations
+  - Improved API clarity - each AbstractSolution subtype must implement explicit `variable()` method
+  - All tests pass (2941/2941) - no functional impact on users
+
+### Changed
+
+- **Internal Architecture**: Cleaner method dispatch for variable extraction
+  - Removed generic fallback that could return inconsistent data types
+  - Each solution type now has explicit, well-defined variable extraction behavior
+  - Enhanced maintainability and reduced potential for type confusion
+
 ## [0.9.4] - 2026-03-09
 
 ### Changed
