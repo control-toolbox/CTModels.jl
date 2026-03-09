@@ -106,10 +106,3 @@ $(TYPEDSIGNATURES)
 Return the variable value from an initial guess.
 """
 variable(init::AbstractInitialGuess) = init.variable
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the variable value from a solution.
-"""
-variable(sol::AbstractSolution) = sol.variable
