@@ -329,7 +329,227 @@ function test_multi_grids()
         end
 
         # ====================================================================
+        # Test 8: Serialization Internal Structure
+        # ====================================================================
+
+        Test.@testset "Serialization structure" begin
+            # Test UnifiedTimeGridModel serialization
+            T = collect(LinRange(0.0, 1.0, 11))
+            X_func = CTModels.state(sol_unified)
+            U_func = CTModels.control(sol_unified)
+            P_func = CTModels.costate(sol_unified)
+
+            sol_uni = CTModels.build_solution(
+                ocp, T, T, T, T,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Serialize and check structure
+            data_uni = CTModels.OCP._serialize_solution(sol_uni)
+            
+            # Should have legacy format keys
+            Test.@test haskey(data_uni, "time_grid")
+            Test.@test !haskey(data_uni, "time_grid_state")
+            Test.@test data_uni["time_grid"] ≈ T
+
+            # Test MultipleTimeGridModel serialization
+            T_state = collect(LinRange(0.0, 1.0, 21))
+            T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 21))
+            T_dual = collect(LinRange(0.0, 1.0, 21))
+
+            sol_multi = CTModels.build_solution(
+                ocp, T_state, T_control, T_costate, T_dual,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Serialize and check structure
+            data_multi = CTModels.OCP._serialize_solution(sol_multi)
+            
+            # Should have multi-grid format keys
+            Test.@test haskey(data_multi, "time_grid_state")
+            Test.@test haskey(data_multi, "time_grid_control")
+            Test.@test haskey(data_multi, "time_grid_costate")
+            Test.@test haskey(data_multi, "time_grid_dual")
+            Test.@test !haskey(data_multi, "time_grid")
+            
+            # Verify grid values
+            Test.@test data_multi["time_grid_state"] ≈ T_state
+            Test.@test data_multi["time_grid_control"] ≈ T_control
+            Test.@test data_multi["time_grid_costate"] ≈ T_costate
+            Test.@test data_multi["time_grid_dual"] ≈ T_dual
+        end
+
+        # ====================================================================
+        # Test 9: Extreme Grid Sizes
+        # ====================================================================
+
+        Test.@testset "Extreme grid sizes" begin
+            X_func = CTModels.state(sol_unified)
+            U_func = CTModels.control(sol_unified)
+            P_func = CTModels.costate(sol_unified)
+
+            # Very different grid sizes
+            T_state_large = collect(LinRange(0.0, 1.0, 1001))  # Fine grid
+            T_control_small = collect(LinRange(0.0, 1.0, 11))  # Coarse grid
+            T_costate_large = collect(LinRange(0.0, 1.0, 1001))
+            T_dual_large = collect(LinRange(0.0, 1.0, 1001))
+
+            sol_extreme = CTModels.build_solution(
+                ocp,
+                T_state_large, T_control_small, T_costate_large, T_dual_large,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Should create MultipleTimeGridModel
+            Test.@test CTModels.time_grid_model(sol_extreme) isa CTModels.MultipleTimeGridModel
+            
+            # Verify grids
+            Test.@test length(CTModels.time_grid(sol_extreme, :state)) == 1001
+            Test.@test length(CTModels.time_grid(sol_extreme, :control)) == 11
+            Test.@test CTModels.time_grid(sol_extreme, :state) ≈ T_state_large
+            Test.@test CTModels.time_grid(sol_extreme, :control) ≈ T_control_small
+
+            # Minimum grid size (2 points)
+            T_min = collect(LinRange(0.0, 1.0, 2))
+            
+            sol_min = CTModels.build_solution(
+                ocp, T_min, T_min, T_min, T_min,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Should work with minimum grid
+            Test.@test CTModels.time_grid_model(sol_min) isa CTModels.UnifiedTimeGridModel
+            Test.@test length(CTModels.time_grid(sol_min)) == 2
+        end
+
+        # ====================================================================
+        # Test 10: Grid Reconstruction from Serialized Data
+        # ====================================================================
+
+        Test.@testset "Grid reconstruction" begin
+            # Create multi-grid solution
+            T_state = collect(LinRange(0.0, 1.0, 21))
+            T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 21))
+            T_dual = collect(LinRange(0.0, 1.0, 21))
+
+            X_func = CTModels.state(sol_unified)
+            U_func = CTModels.control(sol_unified)
+            P_func = CTModels.costate(sol_unified)
+
+            sol_orig = CTModels.build_solution(
+                ocp, T_state, T_control, T_costate, T_dual,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Serialize
+            data = CTModels.OCP._serialize_solution(sol_orig)
+
+            # Reconstruct using helper function
+            sol_reconstructed = CTModels.Serialization._reconstruct_solution_from_data(
+                ocp, data;
+                path_constraints_dual=data["path_constraints_dual"],
+                boundary_constraints_dual=data["boundary_constraints_dual"],
+                state_constraints_lb_dual=data["state_constraints_lb_dual"],
+                state_constraints_ub_dual=data["state_constraints_ub_dual"],
+                control_constraints_lb_dual=data["control_constraints_lb_dual"],
+                control_constraints_ub_dual=data["control_constraints_ub_dual"],
+                variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
+                variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
+                infos=get(data, "infos", Dict{Symbol,Any}()),
+            )
+
+            # Verify reconstruction
+            Test.@test CTModels.time_grid_model(sol_reconstructed) isa CTModels.MultipleTimeGridModel
+            Test.@test CTModels.time_grid(sol_reconstructed, :state) ≈ T_state
+            Test.@test CTModels.time_grid(sol_reconstructed, :control) ≈ T_control
+            Test.@test CTModels.time_grid(sol_reconstructed, :costate) ≈ T_costate
+            Test.@test CTModels.time_grid(sol_reconstructed, :dual) ≈ T_dual
+            Test.@test CTModels.objective(sol_reconstructed) ≈ CTModels.objective(sol_orig)
+        end
+
+        # ====================================================================
+        # Test 11: Backward Compatibility - Legacy Format Detection
+        # ====================================================================
+
+        Test.@testset "Legacy format detection" begin
+            # Create a legacy-format data structure (single time_grid)
+            T = collect(LinRange(0.0, 1.0, 11))
+            X_func = CTModels.state(sol_unified)
+            U_func = CTModels.control(sol_unified)
+            P_func = CTModels.costate(sol_unified)
+
+            sol = CTModels.build_solution(
+                ocp, T, T, T, T,
+                X_func, U_func, v, P_func;
+                objective=CTModels.objective(sol_unified),
+                iterations=CTModels.iterations(sol_unified),
+                constraints_violation=CTModels.constraints_violation(sol_unified),
+                message=CTModels.message(sol_unified),
+                status=CTModels.status(sol_unified),
+                successful=CTModels.successful(sol_unified),
+            )
+
+            # Serialize (should produce legacy format)
+            data = CTModels.OCP._serialize_solution(sol)
+
+            # Verify legacy format
+            Test.@test haskey(data, "time_grid")
+            Test.@test !haskey(data, "time_grid_state")
+
+            # Reconstruct from legacy format
+            sol_from_legacy = CTModels.Serialization._reconstruct_solution_from_data(
+                ocp, data;
+                path_constraints_dual=data["path_constraints_dual"],
+                boundary_constraints_dual=data["boundary_constraints_dual"],
+                state_constraints_lb_dual=data["state_constraints_lb_dual"],
+                state_constraints_ub_dual=data["state_constraints_ub_dual"],
+                control_constraints_lb_dual=data["control_constraints_lb_dual"],
+                control_constraints_ub_dual=data["control_constraints_ub_dual"],
+                variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
+                variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
+                infos=get(data, "infos", Dict{Symbol,Any}()),
+            )
+
+            # Should create UnifiedTimeGridModel from legacy format
+            Test.@test CTModels.time_grid_model(sol_from_legacy) isa CTModels.UnifiedTimeGridModel
+            Test.@test CTModels.time_grid(sol_from_legacy) ≈ T
+        end
+
+        # ====================================================================
         # TODO: Add JSON tests once matrix dimension issues are fixed
+        # TODO: Add tests with path_constraints_dual on multi-grids
         # ====================================================================
     end
 end
