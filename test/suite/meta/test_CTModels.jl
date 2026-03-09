@@ -1,8 +1,8 @@
 module TestCTModelsTop
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -12,15 +12,15 @@ struct CTMDummyModelTop <: CTModels.AbstractModel end
 
 function test_CTModels()
     Test.@testset "CTModels.jl Top-Level Module Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for CTModels top-level functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Basic Aliases and Tags
         # ====================================================================

@@ -1,8 +1,8 @@
 module TestOCPDynamics
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -150,7 +150,9 @@ function test_partial_dynamics()
     # 7. Error: add index out of range (< 1 or > n_states)
     ######
     ocp7 = deepcopy(ocp)
-    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(ocp7, 0:0, partial_dyn_1!)
+    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+        ocp7, 0:0, partial_dyn_1!
+    )
     Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
         ocp7, -1:-1, partial_dyn_1!
     )
@@ -171,7 +173,9 @@ function test_partial_dynamics()
     ######
     ocp9 = deepcopy(ocp)
     CTModels.dynamics!(ocp9, 2:2, partial_dyn_1!)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp9, 1:2, partial_dyn_1!)
+    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+        ocp9, 1:2, partial_dyn_1!
+    )
 
     ######
     # 10. Error: add twice the same index in two different ranges
@@ -300,27 +304,27 @@ end
 
 function test_dynamics()
     Test.@testset "Dynamics Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for dynamics functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Full Dynamics
         # ====================================================================
-        
+
         Test.@testset "Full dynamics" begin
             test_full_dynamics()
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Partial Dynamics
         # ====================================================================
-        
+
         Test.@testset "Partial dynamics" begin
             test_partial_dynamics()
         end

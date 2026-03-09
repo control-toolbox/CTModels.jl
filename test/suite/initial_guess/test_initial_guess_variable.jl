@@ -1,8 +1,8 @@
 module TestInitialGuessVariable
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -31,19 +31,19 @@ CTModels.initial_time(::DummyOCP2DVar) = 0.0
 
 function test_initial_guess_variable()
     Test.@testset "Variable Initial Guess Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for variable initial guess functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Variable Initial Guess Functions
         # ====================================================================
-        
+
         Test.@testset "initial_variable with Scalar" begin
             ocp_1d = DummyOCP1DVar()
 

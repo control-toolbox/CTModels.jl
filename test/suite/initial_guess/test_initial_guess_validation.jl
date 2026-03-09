@@ -1,8 +1,8 @@
 module TestInitialGuessValidation
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -88,15 +88,15 @@ CTModels.variable(sol::DummySolution1DVar) = sol.v
 
 function test_initial_guess_validation()
     Test.@testset "Initial Guess Validation Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess validation functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Validation Functions
         # ====================================================================

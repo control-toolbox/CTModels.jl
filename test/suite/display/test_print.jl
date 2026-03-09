@@ -1,22 +1,22 @@
 module TestPrint
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_print()
     Test.@testset "Display Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Display Functions
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for display functionality
         end
-        
+
         # ====================================================================
         # INTEGRATION TESTS
         # ====================================================================

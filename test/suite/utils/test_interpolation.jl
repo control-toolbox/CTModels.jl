@@ -1,7 +1,7 @@
 module TestUtilsInterpolation
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -13,15 +13,15 @@ Test interpolation utility functions from src/utils/interpolation.jl.
 """
 function test_interpolation()
     Test.@testset "Interpolation Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for interpolation utils functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Interpolation Utility Functions
         # ====================================================================

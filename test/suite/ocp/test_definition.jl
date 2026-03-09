@@ -1,22 +1,22 @@
 module TestOCPDefinition
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_definition()
     Test.@testset "Definition Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for definition functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Setters/Getters on PreModel and Model
         # ====================================================================

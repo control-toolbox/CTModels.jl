@@ -1,8 +1,8 @@
 module TestInitialGuessIntegration
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
+using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -12,15 +12,15 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_integration()
     Test.@testset "Initial Guess Integration Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess integration functionality
         end
-        
+
         # ====================================================================
         # INTEGRATION TESTS - Real OCP Problems
         # ====================================================================
@@ -147,4 +147,6 @@ end
 end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
-test_initial_guess_integration() = TestInitialGuessIntegration.test_initial_guess_integration()
+function test_initial_guess_integration()
+    TestInitialGuessIntegration.test_initial_guess_integration()
+end

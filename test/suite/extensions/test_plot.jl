@@ -1,9 +1,9 @@
 module TestPlot
 
-import Test
+using Test: Test
 import CTBase.Exceptions
-import CTModels
-import Plots
+using CTModels: CTModels
+using Plots: Plots
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -27,19 +27,19 @@ CTModels.control_dimension(::FakeSolutionDoPlot) = 1
 
 function test_plot()
     Test.@testset "Plotting Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Plotting Helper Functions
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for plotting functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Helper Logic
         # ====================================================================
-        
+
         # Resolve the plotting extension module to access internal helpers.
         plots_ext = Base.get_extension(CTModels, :CTModelsPlots)
 
@@ -358,7 +358,9 @@ function test_plot()
             Test.@test CTModels.plot(sol; time=:default) isa Plots.Plot
             Test.@test CTModels.plot(sol; time=:normalize) isa Plots.Plot
             Test.@test CTModels.plot(sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
+                sol; time=:wrong_choice
+            )
         end
 
         Test.@testset "plot(sol) – layout and control options" begin
@@ -381,7 +383,9 @@ function test_plot()
             # layout only
             Test.@test CTModels.plot(sol; layout=:split) isa Plots.Plot
             Test.@test CTModels.plot(sol; layout=:group) isa Plots.Plot
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(sol; layout=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
+                sol; layout=:wrong_choice
+            )
         end
 
         Test.@testset "plot!(...) – reuse of plots and time keyword" begin
@@ -399,7 +403,9 @@ function test_plot()
             Test.@test CTModels.plot!(sol; time=:default) isa Plots.Plot
             Test.@test CTModels.plot!(sol; time=:normalize) isa Plots.Plot
             Test.@test CTModels.plot!(sol; time=:normalise) isa Plots.Plot
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot!(sol; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot!(
+                sol; time=:wrong_choice
+            )
 
             # Start from an empty CTModels.plot()
             plt2 = CTModels.plot()
@@ -414,11 +420,13 @@ function test_plot()
         Test.@testset "plot!(...) – layout and control options" begin
             # group layout
             plt = CTModels.plot(sol; layout=:group, control=:components)
-            Test.@test CTModels.plot!(plt, sol; layout=:group, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol; layout=:group, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot!(plt, sol; layout=:group, control=:norm) isa Plots.Plot
 
             plt = CTModels.plot(sol; layout=:group, control=:norm)
-            Test.@test CTModels.plot!(plt, sol; layout=:group, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol; layout=:group, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot!(plt, sol; layout=:group, control=:norm) isa Plots.Plot
 
             plt = CTModels.plot(sol; layout=:group, control=:all)
@@ -429,11 +437,13 @@ function test_plot()
 
             # split layout
             plt = CTModels.plot(sol; layout=:split, control=:components)
-            Test.@test CTModels.plot!(plt, sol; layout=:split, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol; layout=:split, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot!(plt, sol; layout=:split, control=:norm) isa Plots.Plot
 
             plt = CTModels.plot(sol; layout=:split, control=:norm)
-            Test.@test CTModels.plot!(plt, sol; layout=:split, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol; layout=:split, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot!(plt, sol; layout=:split, control=:norm) isa Plots.Plot
 
             plt = CTModels.plot(sol; layout=:split, control=:all)
@@ -468,17 +478,21 @@ function test_plot()
             Test.@test CTModels.plot(sol_pc; time=:default) isa Plots.Plot
             Test.@test CTModels.plot(sol_pc; time=:normalize) isa Plots.Plot
             Test.@test CTModels.plot(sol_pc; time=:normalise) isa Plots.Plot
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(sol_pc; time=:wrong_choice)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
+                sol_pc; time=:wrong_choice
+            )
 
             # layout/control
-            Test.@test CTModels.plot(sol_pc; layout=:group, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot(sol_pc; layout=:group, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot(sol_pc; layout=:group, control=:norm) isa Plots.Plot
             Test.@test CTModels.plot(sol_pc; layout=:group, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
                 sol_pc; layout=:group, control=:wrong_choice
             )
 
-            Test.@test CTModels.plot(sol_pc; layout=:split, control=:components) isa Plots.Plot
+            Test.@test CTModels.plot(sol_pc; layout=:split, control=:components) isa
+                Plots.Plot
             Test.@test CTModels.plot(sol_pc; layout=:split, control=:norm) isa Plots.Plot
             Test.@test CTModels.plot(sol_pc; layout=:split, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
@@ -504,29 +518,39 @@ function test_plot()
 
             # layout/control
             plt = CTModels.plot(sol_pc; layout=:group, control=:components)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:components) isa Plots.Plot
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:norm) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:components) isa
+                Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:norm) isa
+                Plots.Plot
 
             plt = CTModels.plot(sol_pc; layout=:group, control=:norm)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:components) isa Plots.Plot
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:norm) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:components) isa
+                Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:norm) isa
+                Plots.Plot
 
             plt = CTModels.plot(sol_pc; layout=:group, control=:all)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:all) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:group, control=:all) isa
+                Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument CTModels.plot!(
                 plt, sol_pc; layout=:group, control=:wrong_choice
             )
 
             plt = CTModels.plot(sol_pc; layout=:split, control=:components)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:components) isa Plots.Plot
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:norm) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:components) isa
+                Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:norm) isa
+                Plots.Plot
 
             plt = CTModels.plot(sol_pc; layout=:split, control=:norm)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:components) isa Plots.Plot
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:norm) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:components) isa
+                Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:norm) isa
+                Plots.Plot
 
             plt = CTModels.plot(sol_pc; layout=:split, control=:all)
-            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:all) isa Plots.Plot
+            Test.@test CTModels.plot!(plt, sol_pc; layout=:split, control=:all) isa
+                Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument CTModels.plot!(
                 plt, sol_pc; layout=:split, control=:wrong_choice
             )

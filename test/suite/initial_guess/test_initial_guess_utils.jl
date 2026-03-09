@@ -1,7 +1,7 @@
 module TestInitialGuessUtils
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -35,15 +35,15 @@ CTModels.variable_components(::DummyOCP2D) = String[]
 
 function test_initial_guess_utils()
     Test.@testset "Initial Guess Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for initial guess utils functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Utility Functions
         # ====================================================================

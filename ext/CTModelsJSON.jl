@@ -361,7 +361,7 @@ function CTModels.import_ocp_solution(
         "variable_constraints_lb_dual" => variable_constraints_lb_dual,
         "variable_constraints_ub_dual" => variable_constraints_ub_dual,
     )
-    
+
     # Add time grid data (format detection handled by helper)
     if haskey(blob, "time_grid_state")
         # New format: multiple time grids
@@ -373,7 +373,7 @@ function CTModels.import_ocp_solution(
         # Legacy format: single time grid
         data["time_grid"] = blob.time_grid
     end
-    
+
     # Reconstruct solution using helper function (handles both single and multiple time grids)
     return CTModels.Serialization._reconstruct_solution_from_data(
         ocp,

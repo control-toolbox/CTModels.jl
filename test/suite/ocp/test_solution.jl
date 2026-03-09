@@ -1,22 +1,22 @@
 module TestOCPSolution
 
-import Test
-import CTModels
+using Test: Test
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_solution()
     Test.@testset "Solution Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Abstract Types
         # ====================================================================
-        
+
         Test.@testset "Abstract Types" begin
             # Pure unit tests for solution functionality
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Solution Functionality
         # ====================================================================
@@ -464,7 +464,9 @@ function test_solution()
             state_results_2 = [CTModels.state(sol1)(t) for t in t_values]
             control_results_2 = [CTModels.control(sol1)(t) for t in t_values]
 
-            Test.@test all(state_results[i] == state_results_2[i] for i in 1:length(t_values))
+            Test.@test all(
+                state_results[i] == state_results_2[i] for i in 1:length(t_values)
+            )
             Test.@test all(
                 control_results[i] == control_results_2[i] for i in 1:length(t_values)
             )
