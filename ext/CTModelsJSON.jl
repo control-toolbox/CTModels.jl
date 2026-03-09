@@ -150,36 +150,11 @@ julia> export_ocp_solution(JSON3Tag(), sol; filename="mysolution")
 function CTModels.export_ocp_solution(
     ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String
 )
-    T = CTModels.time_grid(sol)
-
-    blob = Dict(
-        "time_grid" => CTModels.time_grid(sol),
-        "state" => _apply_over_grid(CTModels.state(sol), T),
-        "control" => _apply_over_grid(CTModels.control(sol), T),
-        "variable" => CTModels.variable(sol),
-        "costate" => _apply_over_grid(CTModels.costate(sol), T),
-        "objective" => CTModels.objective(sol),
-        "iterations" => CTModels.iterations(sol),
-        "constraints_violation" => CTModels.constraints_violation(sol),
-        "message" => CTModels.message(sol),
-        "status" => CTModels.status(sol),
-        "successful" => CTModels.successful(sol),
-        "path_constraints_dual" => _apply_over_grid(CTModels.path_constraints_dual(sol), T),
-        "state_constraints_lb_dual" =>
-            _apply_over_grid(CTModels.state_constraints_lb_dual(sol), T),
-        "state_constraints_ub_dual" =>
-            _apply_over_grid(CTModels.state_constraints_ub_dual(sol), T),
-        "control_constraints_lb_dual" =>
-            _apply_over_grid(CTModels.control_constraints_lb_dual(sol), T),
-        "control_constraints_ub_dual" =>
-            _apply_over_grid(CTModels.control_constraints_ub_dual(sol), T),
-        "boundary_constraints_dual" => CTModels.boundary_constraints_dual(sol),       # ctVector or Nothing
-        "variable_constraints_lb_dual" => CTModels.variable_constraints_lb_dual(sol),    # ctVector or Nothing
-        "variable_constraints_ub_dual" => CTModels.variable_constraints_ub_dual(sol),    # ctVector or Nothing
-    )
+    # Use unified serialization that handles both unified and multiple time grids
+    blob = CTModels.OCP._serialize_solution(sol)
 
     # Serialize infos and get Symbol type metadata
-    infos_serialized, symbol_keys = _serialize_infos(CTModels.infos(sol))
+    infos_serialized, symbol_keys = _serialize_infos(blob["infos"])
     blob["infos"] = infos_serialized
     blob["infos_symbol_keys"] = symbol_keys
 
