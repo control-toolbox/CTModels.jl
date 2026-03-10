@@ -55,6 +55,8 @@ Determine which components should be plotted based on the `description` and styl
 # Notes
 - Duals are only plotted if `sol` contains path constraint dual variables.
 - A style must not be `:none` for the component to be included.
+- Control is **never** plotted when `control_dimension(sol) == 0`, even if `:control` is
+  listed in `description`. This supports solutions of problems without a control input.
 
 # Example
 ```julia-repl

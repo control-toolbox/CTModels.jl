@@ -258,7 +258,14 @@ $(TYPEDSIGNATURES)
 
 Converts a mutable `PreModel` into an immutable `Model`.
 
-This function finalizes a pre-defined optimal control problem (`PreModel`) by verifying that all necessary components (times, state, control, dynamics) are set. It then constructs a `Model` instance, incorporating optional components like objective and constraints if they are defined.
+This function finalizes a pre-defined optimal control problem (`PreModel`) by verifying that all
+necessary components (times, state, dynamics, objective) are set. It then constructs a `Model`
+instance, incorporating optional components like control, variable, and constraints.
+
+!!! note
+    Control is **optional**: calling `control!` is not required. When omitted, the model is
+    built with `control_dimension == 0` (an `EmptyControlModel`). This is useful for problems
+    where the dynamics depend only on the state, such as pure state-space systems.
 
 # Arguments
 - `pre_ocp::PreModel`: The pre-defined optimal control problem to be finalized.
@@ -266,7 +273,18 @@ This function finalizes a pre-defined optimal control problem (`PreModel`) by ve
 # Returns
 - `Model`: A fully constructed model ready for solving.
 
-# Example
+# Example without control
+```julia-repl
+julia> pre_ocp = PreModel()
+julia> times!(pre_ocp, 0.0, 1.0, 100)
+julia> state!(pre_ocp, 2, "x", ["x1", "x2"])
+julia> dynamics!(pre_ocp, (t, x, u) -> [-x[2], x[1]])
+julia> objective!(pre_ocp, :min, mayer=(x0, xf) -> xf[1]^2)
+julia> model = build(pre_ocp)
+julia> control_dimension(model)  # 0
+```
+
+# Example with control
 ```julia-repl
 julia> pre_ocp = PreModel()
 julia> times!(pre_ocp, 0.0, 1.0, 100)

@@ -8,13 +8,13 @@ Set the full dynamics of the optimal control problem `ocp` using the function `f
 - `f::Function`: A function that defines the complete system dynamics.
 
 # Preconditions
-- The state, control, and times must be set before calling this function.
+- The state and times must be set before calling this function.
+- Control is **optional**: problems without control input (dimension 0) are supported.
 - No dynamics must have been set previously.
 
 # Behavior
 This function assigns `f` as the complete dynamics of the system. It throws an error
-if any of the required fields (`state`, `control`, `times`) are not yet set, or if
-dynamics have already been set.
+if the state or times are not yet set, or if dynamics have already been set.
 
 # Errors
 Throws `Exceptions.PreconditionError` if called out of order or in an invalid state.
@@ -57,7 +57,8 @@ subset of state indices specified by the range `rg`.
 - `f::Function`: A function describing the dynamics over the specified state indices.
 
 # Preconditions
-- The state, control, and times must be set before calling this function.
+- The state and times must be set before calling this function.
+- Control is **optional**: problems without control input (dimension 0) are supported.
 - The full dynamics must not yet be complete.
 - No overlap is allowed between `rg` and existing dynamics index ranges.
 
@@ -68,7 +69,7 @@ configuration for adding partial dynamics.
 
 # Errors
 Throws `Exceptions.PreconditionError` if:
-- The state, control, or times are not yet set.
+- The state or times are not yet set.
 - The dynamics are already defined completely.
 - Any index in `rg` overlaps with an existing dynamics range.
 

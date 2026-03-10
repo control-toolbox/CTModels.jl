@@ -278,14 +278,19 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 # Throws
 
 - `Exceptions.PreconditionError`: If state has not been set
-- `Exceptions.PreconditionError`: If control has not been set
 - `Exceptions.PreconditionError`: If times has not been set
+- `Exceptions.PreconditionError`: If control has not been set **and** `type == :control`
 - `Exceptions.PreconditionError`: If variable has not been set (when type=:variable)
 - `Exceptions.PreconditionError`: If constraint with same label already exists
 - `Exceptions.PreconditionError`: If both lb and ub are nothing
 - `Exceptions.IncorrectArgument`: If lb and ub have different lengths
 - `Exceptions.IncorrectArgument`: If lb > ub element-wise
 - `Exceptions.IncorrectArgument`: If dimensions don't match expected sizes
+
+!!! note
+    Control is only required for `type == :control` constraints. All other types
+    (`:state`, `:boundary`, `:path`, `:variable`) are valid even when no control
+    is defined (control dimension 0).
 """
 function constraint!(
     ocp::PreModel,

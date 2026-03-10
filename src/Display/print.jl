@@ -53,6 +53,13 @@ Print the mathematical definition of an optimal control problem.
 Displays the problem in standard mathematical notation with objective,
 dynamics, and constraints.
 
+When `u_dim == 0` (no control input), all control-dependent parts of the
+output are suppressed:
+- The objective is rendered as `J(x, v)` instead of `J(x, u, v)`.
+- Dynamics arguments omit the control: `f(t, x, v)` instead of `f(t, x, u, v)`.
+- The "where" clause lists only `x` (and `v` if variable-dependent).
+- Box constraints on control are not listed.
+
 # Returns
 
 - `Bool`: `true` if something was printed.

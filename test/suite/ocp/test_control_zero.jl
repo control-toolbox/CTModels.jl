@@ -4,7 +4,10 @@ import Test
 import CTBase.Exceptions
 import CTModels.OCP
 import CTModels.Init
+import CTModels
 import Plots
+import JLD2
+import JSON3
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -333,7 +336,7 @@ function test_control_zero()
         # ====================================================================
         # INTEGRATION TESTS - Phase 8: Plotting without control
         # ====================================================================
-        
+
         Test.@testset "Plotting - Verify subplot count without control" begin
             # Build a Model without control
             pre = OCP.PreModel()
@@ -344,14 +347,14 @@ function test_control_zero()
             OCP.time_dependence!(pre, autonomous=false)
             OCP.definition!(pre, quote end)
             model = OCP.build(pre)
-            
+
             # Create a solution without control
             T = collect(range(0, 1, length=10))
-            x_data = hcat(sin.(T), cos.(T))  # (10, 2) matrix
-            u_data = Matrix{Float64}(undef, 10, 0)  # Empty control matrix (10×0)
-            p_data = hcat(cos.(T), -sin.(T))  # (10, 2) matrix
+            x_data = hcat(sin.(T), cos.(T))
+            u_data = Matrix{Float64}(undef, 10, 0)
+            p_data = hcat(cos.(T), -sin.(T))
             v_data = Float64[]
-            
+
             sol = OCP.build_solution(
                 model,
                 T, T, T, T,
@@ -363,20 +366,192 @@ function test_control_zero()
                 status=:success,
                 successful=true
             )
-            
+
             # Test plotting with :group layout
             p = Plots.plot(sol, layout=:group)
             # Without control: state + costate = 2 subplots
-            # With control: state + costate + control = 3 subplots
             Test.@test length(p.subplots) == 2
-            
+
             # Test plotting with :split layout
             p_split = Plots.plot(sol, layout=:split)
             # Without control: 2 state components + 2 costate components = 4 subplots
-            # With control: 2 state + 2 costate + m control = 4 + m subplots
             Test.@test length(p_split.subplots) == 4
+
+            # Test explicit :control in description - should be ignored when dim=0
+            # (:state,:control) with :group → state+costate subplots (control skipped since dim=0)
+            p_ctrl = Plots.plot(sol, layout=:group, description=(:state, :control))
+            Test.@test length(p_ctrl.subplots) == 2  # state+costate (control silently skipped)
+
+            # Test that plot does not error with state-only description
+            # (:state,) with :split → 4 subplots (2 state + 2 costate, costate included by default)
+            p_state = Plots.plot(sol, layout=:split, description=(:state,))
+            Test.@test length(p_state.subplots) == 4  # 2 state + 2 costate
         end
-        
+
+        # ====================================================================
+        # UNIT TESTS - Phase 5 supplement: initial_control with empty vector
+        # ====================================================================
+
+        Test.@testset "Init - initial_control with empty vector accepted" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+
+            # Empty vector should be accepted when dim=0
+            u_init = Init.initial_control(model, Float64[])
+            Test.@test u_init isa Function
+            Test.@test u_init(0.5) == Float64[]
+        end
+
+        # ====================================================================
+        # INTEGRATION TESTS - Phase 3 supplement: build with variable + no control
+        # ====================================================================
+
+        Test.@testset "build() - Model without control but with variable" begin
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.variable!(pre, 1)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            Test.@test OCP.control_dimension(model) == 0
+            Test.@test OCP.variable_dimension(model) == 1
+            Test.@test OCP.state_dimension(model) == 2
+        end
+
+        # ====================================================================
+        # UNIT TESTS - Phase 4 supplement: display with variable but no control
+        # ====================================================================
+
+        Test.@testset "Display - Model without control but with variable" begin
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.variable!(pre, 1)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+
+            io = IOBuffer()
+            Test.@test_nowarn show(io, MIME"text/plain"(), model)
+            output = String(take!(io))
+
+            # Control should not appear in output
+            Test.@test !occursin("u(", output)
+            # Variable should appear
+            Test.@test occursin("v", output)
+            # Objective should mention x and v but not u
+            Test.@test occursin("J(x", output)
+            Test.@test !occursin("J(x, u", output)
+        end
+
+        # ====================================================================
+        # INTEGRATION TESTS - Phase 7: Serialization round-trip JSON
+        # ====================================================================
+
+        Test.@testset "Serialization - Round-trip JSON export/import" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+
+            T = collect(range(0, 1, length=10))
+            x_data = hcat(sin.(T), cos.(T))
+            u_data = Matrix{Float64}(undef, 10, 0)
+            p_data = hcat(cos.(T), -sin.(T))
+            v_data = Float64[]
+
+            sol = OCP.build_solution(
+                model,
+                T, T, T, T,
+                x_data, u_data, v_data, p_data;
+                objective=0.5,
+                iterations=5,
+                constraints_violation=0.0,
+                message="zero control test",
+                status=:success,
+                successful=true
+            )
+
+            mktempdir() do dir
+                filename = joinpath(dir, "sol_zero_ctrl")
+                CTModels.export_ocp_solution(sol; format=:JSON, filename=filename)
+                sol2 = CTModels.import_ocp_solution(model; format=:JSON, filename=filename)
+
+                Test.@test CTModels.control_dimension(sol2) == 0
+                Test.@test CTModels.state_dimension(sol2) == 2
+                Test.@test CTModels.objective(sol2) ≈ CTModels.objective(sol) atol=1e-10
+                Test.@test CTModels.iterations(sol2) == CTModels.iterations(sol)
+                Test.@test CTModels.successful(sol2) == CTModels.successful(sol)
+                # Control function should return empty vector after round-trip
+                Test.@test CTModels.control(sol2)(0.5) == Float64[]
+            end
+        end
+
+        # ====================================================================
+        # INTEGRATION TESTS - Phase 7: Serialization round-trip JLD2
+        # ====================================================================
+
+        Test.@testset "Serialization - Round-trip JLD2 export/import" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+
+            T = collect(range(0, 1, length=10))
+            x_data = hcat(sin.(T), cos.(T))
+            u_data = Matrix{Float64}(undef, 10, 0)
+            p_data = hcat(cos.(T), -sin.(T))
+            v_data = Float64[]
+
+            sol = OCP.build_solution(
+                model,
+                T, T, T, T,
+                x_data, u_data, v_data, p_data;
+                objective=0.5,
+                iterations=5,
+                constraints_violation=0.0,
+                message="zero control test",
+                status=:success,
+                successful=true
+            )
+
+            mktempdir() do dir
+                filename = joinpath(dir, "sol_zero_ctrl")
+                CTModels.export_ocp_solution(sol; format=:JLD, filename=filename)
+                sol2 = CTModels.import_ocp_solution(model; format=:JLD, filename=filename)
+
+                Test.@test CTModels.control_dimension(sol2) == 0
+                Test.@test CTModels.state_dimension(sol2) == 2
+                Test.@test CTModels.objective(sol2) ≈ CTModels.objective(sol) atol=1e-10
+                Test.@test CTModels.iterations(sol2) == CTModels.iterations(sol)
+                Test.@test CTModels.successful(sol2) == CTModels.successful(sol)
+                # Control function should return empty vector after round-trip
+                Test.@test CTModels.control(sol2)(0.5) == Float64[]
+            end
+        end
+
     end
 end
 

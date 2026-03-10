@@ -177,15 +177,27 @@ $(TYPEDEF)
 
 Sentinel type representing the absence of a control input in an optimal control problem.
 
-Used when the problem has no control variable (dimension 0).
+Used when the problem has no control variable (control dimension 0). An `EmptyControlModel`
+is the default value of the `control` field in [`PreModel`](@ref): it is automatically
+substituted when the user does not call `control!` before [`build`](@ref).
+
+The methods `name`, `components`, and `dimension` are defined for this type and return
+`""`, `String[]`, and `0` respectively.
 
 # Example
 
 ```julia-repl
 julia> using CTModels
 
-julia> ecm = CTModels.EmptyControlModel()
+julia> pre = CTModels.PreModel()
+julia> CTModels.OCP.__is_control_set(pre)  # false — still EmptyControlModel
+false
+
+julia> CTModels.OCP.control_dimension(pre)  # 0
+0
 ```
+
+See also: [`ControlModel`](@ref), [`PreModel`](@ref), [`build`](@ref).
 """
 struct EmptyControlModel <: AbstractControlModel end
 
