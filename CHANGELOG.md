@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2026-03-10
+
+### Added
+
+- **Dedicated Costate Time Grid**: Reintroduced independent `T_costate` time grid for costate trajectories
+  - `build_solution` now accepts 4 independent time grids: `T_state`, `T_control`, `T_costate`, `T_path`
+  - Costate can now use a different discretization from state (e.g., for symplectic integrators)
+  - `MultipleTimeGridModel` extended to include `:costate` grid
+  - `clean_component_symbols` updated to map `:costate` → `:costate` (own grid)
+  - `time_grid(sol, :costate)` now returns the costate-specific grid
+  - All tests passing (3324/3324)
+
+- **Enhanced Serialization**: Multi-grid format now includes `time_grid_costate`
+  - JSON/JLD export includes dedicated costate grid
+  - Backward compatibility: files without `time_grid_costate` use `T_state` as fallback
+  - Automatic format detection and conversion
+
+- **Comprehensive Documentation**: Added detailed docstrings explaining time grid semantics
+  - `build_solution`: 173 lines of detailed documentation on 4-grid system
+  - `_serialize_solution`: 128 lines explaining serialization formats
+  - `_discretize_all_components`: 41 lines on grid-component associations
+  - Complete examples and usage patterns
+
+### Changed
+
+- **Time Grid Validation**: `time_grid` getter now accepts `:costate` for both `UnifiedTimeGridModel` and `MultipleTimeGridModel`
+- **Legacy Signature**: `build_solution(ocp, T, X, U, v, P; ...)` now forwards to 4-grid version with `T_state = T_control = T_costate = T_path = T`
+- **Plotting**: Costate now maps to its dedicated grid in `_map_to_time_grid_component`
+
+### Fixed
+
+- **Grid Optimization**: Solutions with identical grids automatically use `UnifiedTimeGridModel` for memory efficiency
+- **Test Coverage**: All multi-grid tests updated to use 4-grid signature and verify costate grid independence
+
 ## [0.9.5] - 2026-03-09
 
 ### Fixed
