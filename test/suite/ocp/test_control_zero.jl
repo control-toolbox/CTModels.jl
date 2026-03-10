@@ -3,6 +3,7 @@ module TestControlZero
 import Test
 import CTBase.Exceptions
 import CTModels.OCP
+import CTModels.Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -173,6 +174,88 @@ function test_control_zero()
             Test.@test !occursin("u(", output)
             Test.@test occursin("x(", output)  # State should be present
             Test.@test occursin("J(x", output)  # Objective should have only state
+        end
+        
+        # ====================================================================
+        # UNIT TESTS - Phase 5: Initialization without control
+        # ====================================================================
+        
+        Test.@testset "Init - initial_control with nothing" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # Test that initial_control with nothing returns empty vector function
+            u_init = Init.initial_control(model, nothing)
+            Test.@test u_init isa Function
+            Test.@test u_init(0.5) == Float64[]
+        end
+        
+        Test.@testset "Init - initial_control with scalar throws error" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # This should throw an error
+            exception_thrown = false
+            try
+                Init.initial_control(model, 0.5)
+            catch e
+                exception_thrown = true
+                Test.@test e isa Exceptions.IncorrectArgument
+            end
+            Test.@test exception_thrown
+        end
+        
+        Test.@testset "Init - initial_control with non-empty vector throws error" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # This should throw an error
+            exception_thrown = false
+            try
+                Init.initial_control(model, [0.5])
+            catch e
+                exception_thrown = true
+                Test.@test e isa Exceptions.IncorrectArgument
+            end
+            Test.@test exception_thrown
+        end
+        
+        Test.@testset "Init - initial_guess without control" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # Test that initial_guess works without control
+            init = Init.initial_guess(model)
+            Test.@test init isa Init.InitialGuess
+            Test.@test init.control(0.5) == Float64[]
         end
         
     end

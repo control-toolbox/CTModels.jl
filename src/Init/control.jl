@@ -17,7 +17,17 @@ Throws `Exceptions.IncorrectArgument` if the control dimension is not 1.
 """
 function initial_control(ocp::AbstractModel, control::Real)
     dim = control_dimension(ocp)
-    if dim == 1
+    if dim == 0
+        throw(
+            Exceptions.IncorrectArgument(
+                "Initial control dimension mismatch";
+                got="scalar value",
+                expected="no control (dimension 0)",
+                suggestion="Remove the control argument or set control=nothing",
+                context="initial_control with scalar input for zero-dimensional control",
+            ),
+        )
+    elseif dim == 1
         return t -> control
     else
         throw(
@@ -41,7 +51,17 @@ Throws `Exceptions.IncorrectArgument` if the vector length does not match the co
 """
 function initial_control(ocp::AbstractModel, control::Vector{<:Real})
     dim = control_dimension(ocp)
-    if length(control) != dim
+    if dim == 0 && !isempty(control)
+        throw(
+            Exceptions.IncorrectArgument(
+                "Initial control dimension mismatch";
+                got="vector of length $(length(control))",
+                expected="no control (dimension 0)",
+                suggestion="Remove the control argument or set control=nothing",
+                context="initial_control with vector input for zero-dimensional control",
+            ),
+        )
+    elseif length(control) != dim
         throw(
             Exceptions.IncorrectArgument(
                 "Initial control dimension mismatch";
@@ -60,11 +80,14 @@ $(TYPEDSIGNATURES)
 
 Return a default control initialisation function when no control is provided.
 
-Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
+Returns a constant function yielding `Float64[]` (empty) if `dim == 0`, 
+`0.1` (scalar) if `dim == 1`, or `fill(0.1, dim)` (vector) otherwise.
 """
 function initial_control(ocp::AbstractModel, ::Nothing)
     dim = control_dimension(ocp)
-    if dim == 1
+    if dim == 0
+        return t -> Float64[]
+    elseif dim == 1
         return t -> 0.1
     else
         return t -> fill(0.1, dim)
