@@ -333,6 +333,10 @@ function CTModels.import_ocp_solution(
         # Multiple time grids format
         data["time_grid_state"] = blob.time_grid_state
         data["time_grid_control"] = blob.time_grid_control
+        # Support time_grid_costate (backward compatibility: if missing, will use T_state in reconstruction)
+        if haskey(blob, "time_grid_costate")
+            data["time_grid_costate"] = blob.time_grid_costate
+        end
         # Support both new (time_grid_path) and legacy (time_grid_dual) keys
         if haskey(blob, "time_grid_path")
             data["time_grid_path"] = blob.time_grid_path

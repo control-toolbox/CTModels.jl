@@ -1590,7 +1590,7 @@ function _map_to_time_grid_component(sym::Symbol)::Symbol
         :time => error("Internal error: :time should not be mapped")
         :state => :state
         :control => :control
-        :costate => :state  # Costate shares the state grid
+        :costate => :costate  # Costate has its own grid
         :control_norm => :control  # Map control_norm to control for time grid
         :path_constraint => :path  # Path constraints use the path grid
         :dual_path_constraint => :path  # Path constraint duals use the path grid

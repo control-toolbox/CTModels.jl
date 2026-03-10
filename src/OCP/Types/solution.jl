@@ -48,8 +48,9 @@ Used when variables have different discretisations (e.g., different grid densiti
 # Fields
 
 - `grids::NamedTuple`: Named tuple with time grids for each component:
-  - `state::TimesDisc`: Time grid for state, costate, and state box constraint duals
+  - `state::TimesDisc`: Time grid for state and state box constraint duals
   - `control::TimesDisc`: Time grid for control and control box constraint duals
+  - `costate::TimesDisc`: Time grid for costate
   - `path::TimesDisc`: Time grid for path constraints and their duals
 
 # Example
@@ -59,8 +60,9 @@ julia> using CTModels
 
 julia> T_state = LinRange(0, 1, 101)
 julia> T_control = LinRange(0, 1, 51)
+julia> T_costate = LinRange(0, 1, 76)
 julia> tg = CTModels.MultipleTimeGridModel(
-    state=T_state, control=T_control, path=T_state
+    state=T_state, control=T_control, costate=T_costate, path=T_state
 )
 julia> length(tg.grids.state)
 101
@@ -68,8 +70,8 @@ julia> length(tg.grids.state)
 """
 struct MultipleTimeGridModel <: AbstractTimeGridModel
     grids::NamedTuple{
-        (:state, :control, :path),
-        Tuple{TimesDisc,TimesDisc,TimesDisc},
+        (:state, :control, :costate, :path),
+        Tuple{TimesDisc,TimesDisc,TimesDisc,TimesDisc},
     }
 end
 
@@ -79,8 +81,9 @@ $(TYPEDSIGNATURES)
 Construct a `MultipleTimeGridModel` with keyword arguments for each component time grid.
 
 # Arguments
-- `state`: Time grid for state, costate, and state box constraint duals
+- `state`: Time grid for state and state box constraint duals
 - `control`: Time grid for control and control box constraint duals
+- `costate`: Time grid for costate
 - `path`: Time grid for path constraints and their duals
 
 # Returns
@@ -90,9 +93,11 @@ Construct a `MultipleTimeGridModel` with keyword arguments for each component ti
 ```julia-repl
 julia> T_state = LinRange(0, 1, 101)
 julia> T_control = LinRange(0, 1, 51)
+julia> T_costate = LinRange(0, 1, 76)
 julia> mtgm = MultipleTimeGridModel(
     state=T_state, 
     control=T_control, 
+    costate=T_costate,
     path=T_state
 )
 ```
@@ -100,10 +105,11 @@ julia> mtgm = MultipleTimeGridModel(
 function MultipleTimeGridModel(;
     state::TimesDisc,
     control::TimesDisc,
+    costate::TimesDisc,
     path::TimesDisc,
 )
     return MultipleTimeGridModel((
-        state=state, control=control, path=path
+        state=state, control=control, costate=costate, path=path
     ))
 end
 
@@ -116,8 +122,8 @@ $(TYPEDSIGNATURES)
 Clean and standardize component symbols for time grid access.
 
 # Behavior
-- Maps all component symbols to their canonical time grid: `:state`, `:control`, or `:path`.
-- `:costate`, `:costates` map to `:state` (costate shares the state grid).
+- Maps all component symbols to their canonical time grid: `:state`, `:control`, `:costate`, or `:path`.
+- `:costate`, `:costates` map to `:costate` (costate has its own grid).
 - `:dual`, `:duals`, `:constraint`, `:constraints`, `:cons` map to `:path`.
 - `:state_box_constraint(s)` maps to `:state`.
 - `:control_box_constraint(s)` maps to `:control`.
@@ -132,7 +138,7 @@ Clean and standardize component symbols for time grid access.
 # Example
 ```julia-repl
 julia> clean_component_symbols((:states, :controls, :costate, :constraint, :duals))
-# → (:state, :control, :path)
+# → (:state, :control, :costate, :path)
 ```
 """
 function clean_component_symbols(description)
@@ -140,8 +146,7 @@ function clean_component_symbols(description)
     description = replace(
         description,
         :states => :state,
-        :costates => :state,
-        :costate => :state,
+        :costates => :costate,
         :controls => :control,
         :state_box_constraints => :state,
         :state_box_constraint => :state,

@@ -43,6 +43,7 @@ function build_solution(
     ocp::Model,
     T_state::Vector{Float64},
     T_control::Vector{Float64},
+    T_costate::Vector{Float64},
     T_path::Union{Vector{Float64},Nothing},
     X::TX,
     U::TU,
@@ -78,10 +79,11 @@ function build_solution(
     # Validate and fix time grids
     T_state = _validate_and_fix_time_grid(T_state, "state")
     T_control = _validate_and_fix_time_grid(T_control, "control")
+    T_costate = _validate_and_fix_time_grid(T_costate, "costate")
     T_path = isnothing(T_path) ? nothing : _validate_and_fix_time_grid(T_path, "path")
 
     # Detect if all non-nothing grids are identical
-    non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_path])
+    non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_path])
     all_identical =
         length(non_nothing_grids) <= 1 ||
         all(g -> g == first(non_nothing_grids), non_nothing_grids)
@@ -95,17 +97,18 @@ function build_solution(
         MultipleTimeGridModel(;
             state=T_state,
             control=T_control,
+            costate=T_costate,
             path=T_path_safe,
         )
     end
 
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
-    # Note: costate shares the state grid (T_state)
+    # Note: costate uses its own grid (T_costate)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
     fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u)
     fp = build_interpolated_function(
-        P, T_state, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
+        P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
     var = (dim_v == 1) ? v[1] : v
 
@@ -291,6 +294,7 @@ function build_solution(
     # Legacy compatibility: call new multi-grid method with same grid for all components
     return build_solution(
         ocp,
+        T,
         T,
         T,
         T,
@@ -759,13 +763,13 @@ function time_grid(
     component_clean = clean_component_symbols((component,))[1]
 
     # Validate component
-    if component_clean ∉ (:state, :control, :path)
+    if component_clean ∉ (:state, :control, :costate, :path)
         # ⚠️ Applying Exception Rule: Invalid component symbol
         throw(
             CTBase.Exceptions.IncorrectArgument(
                 "Invalid component for time grid access";
                 got=string(component),
-                expected="one of :state, :control, :path (or aliases like :costate, :dual, plural forms)",
+                expected="one of :state, :control, :costate, :path (or aliases like :dual, plural forms)",
                 suggestion="Use time_grid(sol, :state) or another valid component",
                 context="time_grid for UnifiedTimeGridModel",
             ),
@@ -821,13 +825,13 @@ function time_grid(
     component_clean = clean_component_symbols((component,))[1]
 
     # Validate component
-    if component_clean ∉ (:state, :control, :path)
+    if component_clean ∉ (:state, :control, :costate, :path)
         # ⚠️ Applying Exception Rule: Invalid component symbol
         throw(
             CTBase.Exceptions.IncorrectArgument(
                 "Invalid component for time grid access";
                 got=string(component),
-                expected="one of :state, :control, :path (or aliases like :costate, :dual, plural forms)",
+                expected="one of :state, :control, :costate, :path (or aliases like :dual, plural forms)",
                 suggestion="Use time_grid(sol, :state) or another valid component",
                 context="time_grid for MultipleTimeGridModel",
             ),
@@ -1193,6 +1197,7 @@ function _discretize_all_components(
     sol::Solution,
     T_state::Vector{Float64},
     T_control::Vector{Float64},
+    T_costate::Vector{Float64},
     T_path::Vector{Float64},
     dim_x::Int,
     dim_u::Int,
@@ -1200,7 +1205,7 @@ function _discretize_all_components(
     return Dict{String,Any}(
         "state" => _discretize_function(state(sol), T_state, dim_x),
         "control" => _discretize_function(control(sol), T_control, dim_u),
-        "costate" => _discretize_function(costate(sol), T_state, dim_x),
+        "costate" => _discretize_function(costate(sol), T_costate, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
         "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)),
@@ -1228,7 +1233,7 @@ function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, 
     T = time_grid(sol)
     
     # Discretize all components
-    data = _discretize_all_components(sol, T, T, T, dim_x, dim_u)
+    data = _discretize_all_components(sol, T, T, T, T, dim_x, dim_u)
     
     # Add time grid
     data["time_grid"] = T
@@ -1243,14 +1248,16 @@ function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int,
     # Multiple time grids format
     T_state = time_grid(sol, :state)
     T_control = time_grid(sol, :control)
+    T_costate = time_grid(sol, :costate)
     T_path = time_grid(sol, :path)
     
     # Discretize all components
-    data = _discretize_all_components(sol, T_state, T_control, T_path, dim_x, dim_u)
+    data = _discretize_all_components(sol, T_state, T_control, T_costate, T_path, dim_x, dim_u)
     
     # Add multiple time grids
     data["time_grid_state"] = T_state
     data["time_grid_control"] = T_control
+    data["time_grid_costate"] = T_costate
     data["time_grid_path"] = T_path
     
     return data

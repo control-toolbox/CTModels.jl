@@ -63,7 +63,7 @@ function test_multi_grids()
             
             sol = CTModels.build_solution(
                 ocp,
-                T, T, T,  # All grids identical
+                T, T, T, T,  # All grids identical
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -89,7 +89,7 @@ function test_multi_grids()
             # Create solution with different grids using functions
             T_state = collect(LinRange(0.0, 1.0, 21))     # Fine grid
             T_control = collect(LinRange(0.0, 1.0, 11))   # Coarse grid
-            T_path = collect(LinRange(0.0, 1.0, 21))   # Fine grid
+            T_costate = collect(LinRange(0.0, 1.0, 16))   # Medium grid
             T_path = collect(LinRange(0.0, 1.0, 21))      # Fine grid
 
             # Use functions instead of matrices (simpler)
@@ -99,7 +99,7 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_path,  # Different grids
+                T_state, T_control, T_costate, T_path,  # Different grids
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -115,7 +115,7 @@ function test_multi_grids()
             # time_grid with component should work
             Test.@test CTModels.time_grid(sol_multi, :state) ≈ T_state
             Test.@test CTModels.time_grid(sol_multi, :control) ≈ T_control
-            Test.@test CTModels.time_grid(sol_multi, :costate) ≈ T_state
+            Test.@test CTModels.time_grid(sol_multi, :costate) ≈ T_costate
             Test.@test CTModels.time_grid(sol_multi, :dual) ≈ T_path
         end
 
@@ -127,6 +127,7 @@ function test_multi_grids()
             # Create solution with different grids using functions
             T_state = collect(LinRange(0.0, 1.0, 21))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
@@ -136,7 +137,7 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_path,
+                T_state, T_control, T_costate, T_path,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -158,7 +159,7 @@ function test_multi_grids()
             # Verify grids are preserved
             Test.@test CTModels.time_grid(sol_reloaded, :state) ≈ T_state
             Test.@test CTModels.time_grid(sol_reloaded, :control) ≈ T_control
-            Test.@test CTModels.time_grid(sol_reloaded, :costate) ≈ T_state
+            Test.@test CTModels.time_grid(sol_reloaded, :costate) ≈ T_costate
             Test.@test CTModels.time_grid(sol_reloaded, :dual) ≈ T_path
 
             # Verify data integrity
@@ -184,6 +185,7 @@ function test_multi_grids()
             # Create a multi-grid solution
             T_state = collect(LinRange(0.0, 1.0, 21))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
@@ -193,7 +195,7 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_path,
+                T_state, T_control, T_costate, T_path,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -218,6 +220,7 @@ function test_multi_grids()
             # Create a multi-grid solution
             T_state = collect(LinRange(0.0, 1.0, 21))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
@@ -227,7 +230,7 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_path,
+                T_state, T_control, T_costate, T_path,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -240,7 +243,7 @@ function test_multi_grids()
             # Test plural forms work
             Test.@test CTModels.time_grid(sol_multi, :states) ≈ T_state
             Test.@test CTModels.time_grid(sol_multi, :controls) ≈ T_control
-            Test.@test CTModels.time_grid(sol_multi, :costates) ≈ T_state
+            Test.@test CTModels.time_grid(sol_multi, :costates) ≈ T_costate
 
             # Test path/dual equivalence
             Test.@test CTModels.time_grid(sol_multi, :path) ≈ T_path
@@ -255,6 +258,7 @@ function test_multi_grids()
             # Test with T_path = nothing
             T_state = collect(LinRange(0.0, 1.0, 11))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 11))
             T_path = collect(LinRange(0.0, 1.0, 11))
 
             X_func = CTModels.state(sol_unified)
@@ -263,7 +267,7 @@ function test_multi_grids()
 
             sol = CTModels.build_solution(
                 ocp,
-                T_state, T_control, nothing,  # T_path = nothing
+                T_state, T_control, T_costate, nothing,  # T_path = nothing
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -290,10 +294,10 @@ function test_multi_grids()
             U_func = CTModels.control(sol_unified)
             P_func = CTModels.costate(sol_unified)
 
-            # Pass same grid 3 times
+            # Pass same grid 4 times
             sol = CTModels.build_solution(
                 ocp,
-                T, T, T,  # All identical
+                T, T, T, T,  # All identical
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -312,7 +316,7 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T, T_control_diff, T,  # One different
+                T, T_control_diff, T, T,  # One different
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -340,7 +344,7 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol_uni = CTModels.build_solution(
-                ocp, T, T, T,
+                ocp, T, T, T, T,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -361,11 +365,12 @@ function test_multi_grids()
             # Test MultipleTimeGridModel serialization
             T_state = collect(LinRange(0.0, 1.0, 21))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
             sol_multi = CTModels.build_solution(
-                ocp, T_state, T_control, T_path,
+                ocp, T_state, T_control, T_costate, T_path,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -381,14 +386,14 @@ function test_multi_grids()
             # Should have multi-grid format keys
             Test.@test haskey(data_multi, "time_grid_state")
             Test.@test haskey(data_multi, "time_grid_control")
-            Test.@test haskey(data_multi, "time_grid_path")
+            Test.@test haskey(data_multi, "time_grid_costate")
             Test.@test haskey(data_multi, "time_grid_path")
             Test.@test !haskey(data_multi, "time_grid")
             
             # Verify grid values
             Test.@test data_multi["time_grid_state"] ≈ T_state
             Test.@test data_multi["time_grid_control"] ≈ T_control
-            Test.@test data_multi["time_grid_path"] ≈ T_path
+            Test.@test data_multi["time_grid_costate"] ≈ T_costate
             Test.@test data_multi["time_grid_path"] ≈ T_path
         end
 
@@ -404,11 +409,12 @@ function test_multi_grids()
             # Very different grid sizes
             T_state_large = collect(LinRange(0.0, 1.0, 1001))  # Fine grid
             T_control_small = collect(LinRange(0.0, 1.0, 11))  # Coarse grid
+            T_costate_medium = collect(LinRange(0.0, 1.0, 101))  # Medium grid
             T_path_large = collect(LinRange(0.0, 1.0, 1001))
 
             sol_extreme = CTModels.build_solution(
                 ocp,
-                T_state_large, T_control_small, T_path_large,
+                T_state_large, T_control_small, T_costate_medium, T_path_large,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -431,7 +437,7 @@ function test_multi_grids()
             T_min = collect(LinRange(0.0, 1.0, 2))
             
             sol_min = CTModels.build_solution(
-                ocp, T_min, T_min, T_min,
+                ocp, T_min, T_min, T_min, T_min,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -454,6 +460,7 @@ function test_multi_grids()
             # Create multi-grid solution
             T_state = collect(LinRange(0.0, 1.0, 21))
             T_control = collect(LinRange(0.0, 1.0, 11))
+            T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
@@ -462,7 +469,7 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol_orig = CTModels.build_solution(
-                ocp, T_state, T_control, T_path,
+                ocp, T_state, T_control, T_costate, T_path,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
@@ -493,7 +500,7 @@ function test_multi_grids()
             Test.@test CTModels.time_grid_model(sol_reconstructed) isa CTModels.MultipleTimeGridModel
             Test.@test CTModels.time_grid(sol_reconstructed, :state) ≈ T_state
             Test.@test CTModels.time_grid(sol_reconstructed, :control) ≈ T_control
-            Test.@test CTModels.time_grid(sol_reconstructed, :costate) ≈ T_state
+            Test.@test CTModels.time_grid(sol_reconstructed, :costate) ≈ T_costate
             Test.@test CTModels.time_grid(sol_reconstructed, :dual) ≈ T_path
             Test.@test CTModels.objective(sol_reconstructed) ≈ CTModels.objective(sol_orig)
         end
@@ -510,7 +517,7 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol = CTModels.build_solution(
-                ocp, T, T, T,
+                ocp, T, T, T, T,
                 X_func, U_func, v, P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),

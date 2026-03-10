@@ -34,17 +34,20 @@ function test_solution_multi_grids()
             Test.@testset "MultipleTimeGridModel" begin
                 T_state = LinRange(0, 1, 101)
                 T_control = LinRange(0, 1, 51)
-                T_path = LinRange(0, 1, 76)
+                T_costate = LinRange(0, 1, 76)
+                T_path = LinRange(0, 1, 61)
 
                 mtgm = CTModels.MultipleTimeGridModel(
                     state=T_state,
                     control=T_control,
+                    costate=T_costate,
                     path=T_path,
                 )
                 Test.@test mtgm isa CTModels.MultipleTimeGridModel
                 Test.@test mtgm isa CTModels.AbstractTimeGridModel
                 Test.@test mtgm.grids.state == T_state
                 Test.@test mtgm.grids.control == T_control
+                Test.@test mtgm.grids.costate == T_costate
                 Test.@test mtgm.grids.path == T_path
             end
         end
@@ -60,9 +63,9 @@ function test_solution_multi_grids()
                 Test.@test CTModels.clean_component_symbols((:control,)) == (:control,)
                 Test.@test CTModels.clean_component_symbols((:path,)) == (:path,)
 
-                # Test costate maps to state (shares state grid)
-                Test.@test CTModels.clean_component_symbols((:costate,)) == (:state,)
-                Test.@test CTModels.clean_component_symbols((:costates,)) == (:state,)
+                # Test costate maps to costate (has its own grid)
+                Test.@test CTModels.clean_component_symbols((:costate,)) == (:costate,)
+                Test.@test CTModels.clean_component_symbols((:costates,)) == (:costate,)
 
                 # Test dual maps to path (shares path grid)
                 Test.@test CTModels.clean_component_symbols((:dual,)) == (:path,)
@@ -91,7 +94,8 @@ function test_solution_multi_grids()
                 # Test duplicate removal
                 Test.@test CTModels.clean_component_symbols((:state, :state)) == (:state,)
                 Test.@test CTModels.clean_component_symbols((:states, :state)) == (:state,)
-                Test.@test CTModels.clean_component_symbols((:costate, :state)) == (:state,)
+                Test.@test CTModels.clean_component_symbols((:costate, :costate)) == (:costate,)
+                Test.@test CTModels.clean_component_symbols((:costates, :costate)) == (:costate,)
                 Test.@test CTModels.clean_component_symbols((:dual, :path)) == (:path,)
             end
         end
@@ -148,6 +152,7 @@ function test_solution_multi_grids()
                     T,
                     T,
                     T,
+                    T,
                     X,
                     U,
                     v,
@@ -167,17 +172,19 @@ function test_solution_multi_grids()
             Test.@testset "Different grids → MultipleTimeGridModel" begin
                 T_state = collect(LinRange(0, 1, 101))
                 T_control = collect(LinRange(0, 1, 51))
-                T_path = collect(LinRange(0, 1, 76))
+                T_costate = collect(LinRange(0, 1, 76))
+                T_path = collect(LinRange(0, 1, 61))
 
                 X = [1.0 - t/100 for t in 1:101, i in 1:2]
                 U = [sin(2π * t/50) for t in 1:51, i in 1:1]
-                P = zeros(101, 2)  # Costate shares state grid
+                P = zeros(76, 2)  # Costate has its own grid
                 v = Float64[]
 
                 sol = CTModels.build_solution(
                     ocp,
                     T_state,
                     T_control,
+                    T_costate,
                     T_path,
                     X,
                     U,
@@ -194,26 +201,28 @@ function test_solution_multi_grids()
                 Test.@test CTModels.time_grid_model(sol) isa CTModels.MultipleTimeGridModel
                 Test.@test CTModels.time_grid(sol, :state) == T_state
                 Test.@test CTModels.time_grid(sol, :control) == T_control
+                Test.@test CTModels.time_grid(sol, :costate) == T_costate
                 Test.@test CTModels.time_grid(sol, :path) == T_path
-                # Costate maps to state grid, dual maps to path grid
-                Test.@test CTModels.time_grid(sol, :costate) == T_state
+                # Dual maps to path grid
                 Test.@test CTModels.time_grid(sol, :dual) == T_path
             end
 
             Test.@testset "Nothing path grid" begin
                 T_state = collect(LinRange(0, 1, 101))
                 T_control = collect(LinRange(0, 1, 51))
+                T_costate = collect(LinRange(0, 1, 76))
                 T_path = nothing
 
                 X = [1.0 - t/100 for t in 1:101, i in 1:2]
                 U = [sin(2π * t/50) for t in 1:51, i in 1:1]
-                P = zeros(101, 2)  # Costate shares state grid
+                P = zeros(76, 2)  # Costate has its own grid
                 v = Float64[]
 
                 sol = CTModels.build_solution(
                     ocp,
                     T_state,
                     T_control,
+                    T_costate,
                     T_path,
                     X,
                     U,
@@ -230,9 +239,9 @@ function test_solution_multi_grids()
                 Test.@test CTModels.time_grid_model(sol) isa CTModels.MultipleTimeGridModel
                 Test.@test CTModels.time_grid(sol, :state) == T_state
                 Test.@test CTModels.time_grid(sol, :control) == T_control
+                Test.@test CTModels.time_grid(sol, :costate) == T_costate
                 # Path grid falls back to state grid when nothing
                 Test.@test CTModels.time_grid(sol, :path) == T_state
-                Test.@test CTModels.time_grid(sol, :costate) == T_state
                 Test.@test CTModels.time_grid(sol, :dual) == T_state
             end
         end
@@ -286,6 +295,7 @@ function test_solution_multi_grids()
                     T,
                     T,
                     T,
+                    T,
                     X,
                     U,
                     v,
@@ -316,18 +326,21 @@ function test_solution_multi_grids()
             Test.@testset "MultipleTimeGridModel getters" begin
                 T_state = collect(LinRange(0, 1, 101))
                 T_control = collect(LinRange(0, 1, 51))
+                T_costate = collect(LinRange(0, 1, 76))
+                T_path = collect(LinRange(0, 1, 61))
 
                 # Create data matching the grid sizes
                 X_multi = [1.0 - t/100 for t in 1:101, i in 1:2]  # 101 points for state
                 U_multi = [sin(2π * t/50) for t in 1:51, i in 1:1]   # 51 points for control
-                P_multi = zeros(101, 2)  # 101 points for costate (shares state grid)
+                P_multi = zeros(76, 2)  # 76 points for costate (has its own grid)
                 v_multi = Float64[]
 
                 sol = CTModels.build_solution(
                     ocp,
                     T_state,
                     T_control,
-                    T_state,
+                    T_costate,
+                    T_path,
                     X_multi,
                     U_multi,
                     v_multi,
@@ -346,9 +359,9 @@ function test_solution_multi_grids()
                 # Should work with component specification
                 Test.@test CTModels.time_grid(sol, :state) == T_state
                 Test.@test CTModels.time_grid(sol, :control) == T_control
-                Test.@test CTModels.time_grid(sol, :costate) == T_state
-                Test.@test CTModels.time_grid(sol, :dual) == T_state
-                Test.@test CTModels.time_grid(sol, :path) == T_state
+                Test.@test CTModels.time_grid(sol, :costate) == T_costate
+                Test.@test CTModels.time_grid(sol, :dual) == T_path
+                Test.@test CTModels.time_grid(sol, :path) == T_path
 
                 # Test plural forms
                 Test.@test CTModels.time_grid(sol, :states) == T_state
@@ -400,17 +413,19 @@ function test_solution_multi_grids()
 
             T_state = collect(LinRange(0, 1, 101))
             T_control = collect(LinRange(0, 1, 51))
-            T_path = collect(LinRange(0, 1, 76))
+            T_costate = collect(LinRange(0, 1, 76))
+            T_path = collect(LinRange(0, 1, 61))
 
             X = [1.0 - t/100 for t in 1:101, i in 1:2]
             U = [sin(2π * t/50) for t in 1:51, i in 1:1]
-            P = zeros(101, 2)  # Costate shares state grid
+            P = zeros(76, 2)  # Costate has its own grid
             v = Float64[]
 
             sol = CTModels.build_solution(
                 ocp,
                 T_state,
                 T_control,
+                T_costate,
                 T_path,
                 X,
                 U,
@@ -430,16 +445,17 @@ function test_solution_multi_grids()
                 # Should have multiple time grid fields
                 Test.@test haskey(data, "time_grid_state")
                 Test.@test haskey(data, "time_grid_control")
+                Test.@test haskey(data, "time_grid_costate")
                 Test.@test haskey(data, "time_grid_path")
 
                 # Should not have legacy single time grid or old keys
                 Test.@test !haskey(data, "time_grid")
-                Test.@test !haskey(data, "time_grid_costate")
                 Test.@test !haskey(data, "time_grid_dual")
 
                 # Time grids should match
                 Test.@test data["time_grid_state"] == T_state
                 Test.@test data["time_grid_control"] == T_control
+                Test.@test data["time_grid_costate"] == T_costate
                 Test.@test data["time_grid_path"] == T_path
             end
         end
@@ -552,16 +568,19 @@ function test_solution_multi_grids()
 
             T_state = collect(LinRange(0, 1, 101))
             T_control = collect(LinRange(0, 1, 51))
+            T_costate = collect(LinRange(0, 1, 76))
+            T_path = collect(LinRange(0, 1, 61))
             X = [1.0 - t/100 for t in 1:101, i in 1:2]
             U = [sin(2π * t/50) for t in 1:51, i in 1:1]
-            P = zeros(101, 2)
+            P = zeros(76, 2)
             v = Float64[]
 
             sol = CTModels.build_solution(
                 ocp,
                 T_state,
                 T_control,
-                T_state,
+                T_costate,
+                T_path,
                 X,
                 U,
                 v,
@@ -636,6 +655,7 @@ function test_solution_multi_grids()
                     T,
                     T,
                     T,
+                    T,
                     X,
                     U,
                     v,
@@ -656,18 +676,21 @@ function test_solution_multi_grids()
             Test.@testset "MultipleTimeGridModel type stability" begin
                 T_state = collect(LinRange(0, 1, 101))
                 T_control = collect(LinRange(0, 1, 51))
+                T_costate = collect(LinRange(0, 1, 76))
+                T_path = collect(LinRange(0, 1, 61))
 
                 # Create data matching the grid sizes
                 X_stab = [1.0 - t/100 for t in 1:101, i in 1:2]  # 101 points for state
                 U_stab = [sin(2π * t/50) for t in 1:51, i in 1:1]   # 51 points for control
-                P_stab = zeros(101, 2)  # 101 points for costate
+                P_stab = zeros(76, 2)  # 76 points for costate
                 v_stab = Float64[]
 
                 sol = CTModels.build_solution(
                     ocp,
                     T_state,
                     T_control,
-                    T_state,
+                    T_costate,
+                    T_path,
                     X_stab,
                     U_stab,
                     v_stab,
