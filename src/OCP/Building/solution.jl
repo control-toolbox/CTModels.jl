@@ -1,43 +1,176 @@
 """
 $(TYPEDSIGNATURES)
 
-Build a solution from the optimal control problem, the time grid, the state, control, variable, and dual variables.
+Build a solution from an optimal control problem with independent time grids for each component.
+
+This function constructs a `Solution` object by assembling trajectory data (state, control, costate, 
+path constraint duals) defined on potentially different time discretizations. The solution automatically 
+creates interpolated functions to evaluate trajectories at arbitrary time points, and optimizes storage 
+when all grids are identical.
+
+# Time Grid Semantics
+
+The solution supports **four independent time grids**, each associated with a specific trajectory component:
+
+- **`T_state`**: Time grid for the state trajectory `X` and state box constraint duals
+  - Defines discretization points where state values are known
+  - State box constraint duals (`state_constraints_lb_dual`, `state_constraints_ub_dual`) share this grid
+  
+- **`T_control`**: Time grid for the control trajectory `U` and control box constraint duals
+  - Defines discretization points where control values are known
+  - Control box constraint duals (`control_constraints_lb_dual`, `control_constraints_ub_dual`) share this grid
+  - May differ from `T_state` (e.g., coarser discretization for piecewise constant controls)
+  
+- **`T_costate`**: Time grid for the costate (adjoint) trajectory `P`
+  - Defines discretization points where costate values are known
+  - Independent from state grid to accommodate different numerical schemes
+  - Example: symplectic integrators may use different grids for state and costate
+  
+- **`T_path`**: Time grid for path constraint duals (can be `nothing`)
+  - Defines discretization points for path constraint dual variables
+  - Set to `nothing` if no path constraints exist
+  - When `nothing`, internally defaults to `T_state` for consistency
+
+**Grid Optimization**: If all non-nothing grids are identical, the solution uses `UnifiedTimeGridModel` 
+for memory efficiency. Otherwise, it uses `MultipleTimeGridModel` to store each grid separately.
+
+# Trajectory Data Formats
+
+Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two formats:
+
+1. **Matrix format**: `Matrix{Float64}` with dimensions `(n_points, n_dim)`
+   - Each row corresponds to a time point in the associated grid
+   - Each column corresponds to a component dimension
+   - Example: `X` is `(length(T_state), state_dimension(ocp))`
+
+2. **Function format**: `Function` that takes time `t::Float64` and returns a vector
+   - Allows analytical or pre-interpolated trajectories
+   - Function signature: `t -> Vector{Float64}` of appropriate dimension
+   - Useful for exact solutions or when data is already interpolated
 
 # Arguments
 
-- `ocp::Model`: the optimal control problem.
-- `T::Vector{Float64}`: the time grid.
-- `X::Matrix{Float64}`: the state trajectory.
-- `U::Matrix{Float64}`: the control trajectory.
-- `v::Vector{Float64}`: the variable trajectory.
-- `P::Matrix{Float64}`: the costate trajectory.
-- `objective::Float64`: the objective value.
-- `iterations::Int`: the number of iterations.
-- `constraints_violation::Float64`: the constraints violation.
-- `message::String`: the message associated to the status criterion.
-- `status::Symbol`: the status criterion.
-- `successful::Bool`: the successful status.
-- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
-- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
-- `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
-- `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
-- `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.
-- `control_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the control constraints.
-- `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
-- `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
-- `infos::Dict{Symbol,Any}`: additional solver information dictionary.
+## Required Positional Arguments
+
+- `ocp::Model`: The optimal control problem model defining dimensions and structure
+- `T_state::Vector{Float64}`: Time grid for state trajectory (must be strictly increasing)
+- `T_control::Vector{Float64}`: Time grid for control trajectory (must be strictly increasing)
+- `T_costate::Vector{Float64}`: Time grid for costate trajectory (must be strictly increasing)
+- `T_path::Union{Vector{Float64},Nothing}`: Time grid for path constraint duals (or `nothing`)
+- `X::Union{Matrix{Float64},Function}`: State trajectory data
+- `U::Union{Matrix{Float64},Function}`: Control trajectory data
+- `v::Vector{Float64}`: Variable values (static optimization variables, not time-dependent)
+- `P::Union{Matrix{Float64},Function}`: Costate (adjoint) trajectory data
+
+## Required Keyword Arguments
+
+- `objective::Float64`: Optimal objective function value
+- `iterations::Int`: Number of solver iterations performed
+- `constraints_violation::Float64`: Maximum constraint violation (feasibility measure)
+- `message::String`: Solver status message (e.g., "Solve_Succeeded", "Iteration_Limit")
+- `status::Symbol`: Solver termination status (e.g., `:Solve_Succeeded`, `:Iteration_Limit`)
+- `successful::Bool`: Whether the solve was successful (true/false)
+
+## Optional Keyword Arguments (Dual Variables)
+
+All dual variable arguments default to `nothing` if not provided:
+
+- `path_constraints_dual::Union{Matrix{Float64},Function,Nothing}`: Path constraint duals on `T_path` grid
+- `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: Boundary constraint duals (time-independent)
+- `state_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: State lower bound duals on `T_state` grid
+- `state_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: State upper bound duals on `T_state` grid
+- `control_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: Control lower bound duals on `T_control` grid
+- `control_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: Control upper bound duals on `T_control` grid
+- `variable_constraints_lb_dual::Union{Vector{Float64},Nothing}`: Variable lower bound duals (time-independent)
+- `variable_constraints_ub_dual::Union{Vector{Float64},Nothing}`: Variable upper bound duals (time-independent)
+- `infos::Dict{Symbol,Any}`: Additional solver-specific information (default: empty dict)
 
 # Returns
 
-- `sol::Solution`: the optimal control solution.
+- `sol::Solution`: Complete solution object with interpolated trajectory functions and metadata
+
+# Example
+
+```julia
+using CTModels
+
+# Build OCP
+ocp = Model(...)
+state!(ocp, 2)
+control!(ocp, 1)
+# ... define dynamics, objective, etc.
+
+# Define independent time grids
+T_state = collect(LinRange(0.0, 1.0, 101))    # Fine state grid (101 points)
+T_control = collect(LinRange(0.0, 1.0, 51))   # Coarser control grid (51 points)
+T_costate = collect(LinRange(0.0, 1.0, 76))   # Custom costate grid (76 points)
+T_path = collect(LinRange(0.0, 1.0, 61))      # Path constraint grid (61 points)
+
+# Trajectory data (matrix format)
+X = rand(101, 2)  # State on T_state grid
+U = rand(51, 1)   # Control on T_control grid
+P = rand(76, 2)   # Costate on T_costate grid
+v = [0.5, 1.2]    # Static variables
+
+# Build solution
+sol = build_solution(
+    ocp,
+    T_state, T_control, T_costate, T_path,
+    X, U, v, P;
+    objective=1.23,
+    iterations=50,
+    constraints_violation=1e-8,
+    message="Optimal",
+    status=:first_order,
+    successful=true
+)
+
+# Access trajectories (automatically interpolated)
+x_at_t = state(sol)(0.5)      # Interpolated from T_state grid
+u_at_t = control(sol)(0.5)    # Interpolated from T_control grid
+p_at_t = costate(sol)(0.5)    # Interpolated from T_costate grid
+
+# Query time grids
+time_grid(sol, :state)    # Returns T_state
+time_grid(sol, :control)  # Returns T_control
+time_grid(sol, :costate)  # Returns T_costate
+```
 
 # Notes
 
-The dimensions of box constraint dual variables (`state_constraints_*_dual`, `control_constraints_*_dual`, 
-`variable_constraints_*_dual`) correspond to the **state/control/variable dimension**, not the number of 
-constraint declarations. If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` 
-and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is emitted during model construction.
+## Box Constraint Dual Dimensions
 
+The dimensions of box constraint dual variables correspond to the **component dimension**, not the 
+number of constraint declarations:
+
+- `state_constraints_*_dual`: Dimension `(length(T_state), state_dimension(ocp))`
+- `control_constraints_*_dual`: Dimension `(length(T_control), control_dimension(ocp))`
+- `variable_constraints_*_dual`: Dimension `variable_dimension(ocp)`
+
+If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` and `x₂(t) ≤ 2.0`), 
+only the last bound value is retained, and a warning is emitted during model construction.
+
+## Grid Validation
+
+All time grids must be:
+- Strictly increasing: `T[i] < T[i+1]` for all `i`
+- Non-empty: At least one time point
+- Finite: No `Inf` or `NaN` values
+
+The function automatically validates and fixes grids (e.g., converts ranges to vectors).
+
+## Memory Optimization
+
+When all grids are identical, the solution uses `UnifiedTimeGridModel` to store a single grid, 
+reducing memory overhead. This is detected automatically.
+
+## Backward Compatibility
+
+A legacy signature `build_solution(ocp, T, X, U, v, P; ...)` exists for single-grid solutions. 
+It internally calls this multi-grid version with `T_state = T_control = T_costate = T_path = T`.
+
+See also: `Solution`, `UnifiedTimeGridModel`, `MultipleTimeGridModel`, 
+`time_grid`, `state`, `control`, `costate`
 """
 function build_solution(
     ocp::Model,
