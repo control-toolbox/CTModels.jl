@@ -1273,43 +1273,131 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Serialize a solution into discrete data for export (JLD2, JSON, etc.).
+Serialize a solution into discrete data for export to persistent storage (JLD2, JSON, etc.).
 
-Extracts all data from a solution and converts it into a serializable format
-(matrices, vectors, scalars). Functions are discretized on the time grid.
-Uses public getters to access solution fields.
+This function converts a `Solution` object (which may contain interpolated functions) into a 
+fully discrete, serializable representation. All trajectory functions are evaluated on their 
+respective time grids and stored as matrices. The serialization format automatically adapts 
+based on whether the solution uses unified or multiple time grids.
 
-# Arguments
-- `sol::Solution`: Solution to serialize.
+# Serialization Formats
 
-# Returns
-- `Dict{String, Any}`: Dictionary containing all discrete data:
-  - `"time_grid"`: Time grid
-  - `"state"`, `"control"`, `"costate"`: Discretized matrices
-  - `"variable"`: Variable vector
-  - `"objective"`: Scalar value
-  - Discretized dual functions (can be `nothing`)
-  - Boundary and variable duals (vectors)
-  - Solver information
+The function produces two different formats depending on the solution's time grid model:
 
-# Notes
-- Functions are discretized via `_discretize_function`.
-- `nothing` duals are preserved as `nothing`.
-- Compatible with `build_solution` for reconstruction.
+## Unified Time Grid Format (Legacy)
 
-# Example
+When all grids are identical (`UnifiedTimeGridModel`), produces:
 ```julia
-sol = solve(ocp)
-data = CTModels._serialize_solution(sol)
-# Reconstruction
-sol_reconstructed = CTModels.build_solution(
-    ocp, data["time_grid"], data["state"], data["control"],
-    data["variable"], data["costate"];
-    objective=data["objective"], ...
+Dict(
+    "time_grid" => T,                    # Single grid for all components
+    "state" => Matrix,                   # Discretized on T
+    "control" => Matrix,                 # Discretized on T
+    "costate" => Matrix,                 # Discretized on T
+    "path_constraints_dual" => Matrix,   # Discretized on T
+    # ... other fields
 )
 ```
 
-See also: `build_solution`, `_discretize_function`
+## Multiple Time Grids Format
+
+When grids differ (`MultipleTimeGridModel`), produces:
+```julia
+Dict(
+    "time_grid_state" => T_state,        # State-specific grid
+    "time_grid_control" => T_control,    # Control-specific grid
+    "time_grid_costate" => T_costate,    # Costate-specific grid
+    "time_grid_path" => T_path,          # Path constraints grid
+    "state" => Matrix,                   # Discretized on T_state
+    "control" => Matrix,                 # Discretized on T_control
+    "costate" => Matrix,                 # Discretized on T_costate
+    "path_constraints_dual" => Matrix,   # Discretized on T_path
+    # ... other fields
+)
+```
+
+# Arguments
+
+- `sol::Solution`: Solution object to serialize (may contain functions or matrices)
+
+# Returns
+
+- `Dict{String, Any}`: Complete serializable dictionary containing:
+  - **Time grids**: Either single `"time_grid"` or four separate grids
+  - **Trajectories**: `"state"`, `"control"`, `"costate"` as `Matrix{Float64}`
+  - **Variable**: `"variable"` as `Vector{Float64}` (time-independent)
+  - **Objective**: `"objective"` as `Float64`
+  - **Dual variables**: All constraint duals (can be `nothing` if not present)
+    - `"path_constraints_dual"`: Path constraint duals on path grid
+    - `"state_constraints_lb_dual"`, `"state_constraints_ub_dual"`: State box duals on state grid
+    - `"control_constraints_lb_dual"`, `"control_constraints_ub_dual"`: Control box duals on control grid
+    - `"boundary_constraints_dual"`: Boundary duals (time-independent vector)
+    - `"variable_constraints_lb_dual"`, `"variable_constraints_ub_dual"`: Variable duals (vectors)
+  - **Solver info**: `"iterations"`, `"message"`, `"status"`, `"successful"`, `"constraints_violation"`, `"infos"`
+
+# Discretization Behavior
+
+- **Function trajectories**: Evaluated at each point of their associated time grid
+- **Matrix trajectories**: Copied as-is (already discrete)
+- **Nothing duals**: Preserved as `nothing` in the dictionary
+- **Grid association**: Each component is discretized on its correct grid:
+  - State and state box duals → `T_state`
+  - Control and control box duals → `T_control`
+  - Costate → `T_costate`
+  - Path constraint duals → `T_path`
+
+# Example
+
+```julia
+using CTModels
+
+# Solve OCP with multiple grids
+sol = solve(ocp, strategy=MyStrategy())
+
+# Serialize to dictionary
+data = _serialize_solution(sol)
+
+# Check format
+if haskey(data, "time_grid_state")
+    # Multiple grids format
+    println("State grid: ", length(data["time_grid_state"]), " points")
+    println("Control grid: ", length(data["time_grid_control"]), " points")
+    println("Costate grid: ", length(data["time_grid_costate"]), " points")
+else
+    # Unified grid format
+    println("Unified grid: ", length(data["time_grid"]), " points")
+end
+
+# Export to file (handled by extensions)
+export_ocp_solution(sol; filename="solution", format=:JLD)
+
+# Reconstruct from data
+sol_reconstructed = _reconstruct_solution_from_data(ocp, data)
+```
+
+# Notes
+
+## Backward Compatibility
+
+The serialization format is designed for backward compatibility:
+- Old files with single `"time_grid"` can be read (costate defaults to state grid)
+- New files with four grids are forward-compatible with updated readers
+- The `_reconstruct_solution_from_data` function handles both formats automatically
+
+## Memory Efficiency
+
+When all grids are identical, the unified format avoids storing redundant grid data, 
+reducing file size and memory usage.
+
+## Round-Trip Guarantee
+
+The serialized data is fully compatible with `build_solution` for exact reconstruction:
+```julia
+data = _serialize_solution(sol)
+sol_new = build_solution(ocp, data["time_grid_state"], ...; objective=data["objective"], ...)
+```
+
+See also: [`build_solution`](@ref), [`_reconstruct_solution_from_data`](@ref), 
+[`export_ocp_solution`](@ref), [`import_ocp_solution`](@ref)
 """
 function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters
@@ -1321,10 +1409,47 @@ function _serialize_solution(sol::Solution)::Dict{String,Any}
 end
 
 """
-Discretize all solution components on given time grids.
+$(TYPEDSIGNATURES)
 
-This helper extracts the common discretization logic shared by both
-UnifiedTimeGridModel and MultipleTimeGridModel serialization.
+Discretize all solution components on their respective time grids for serialization.
+
+This internal helper function extracts the common discretization logic shared by both 
+`UnifiedTimeGridModel` and `MultipleTimeGridModel` serialization. It evaluates all 
+trajectory functions on their associated time grids and assembles them into a dictionary.
+
+# Grid-Component Association
+
+Each component is discretized on its semantically correct time grid:
+
+- **State trajectory** → `T_state` grid
+- **Control trajectory** → `T_control` grid  
+- **Costate trajectory** → `T_costate` grid
+- **Path constraint duals** → `T_path` grid
+- **State box constraint duals** (lb/ub) → `T_state` grid
+- **Control box constraint duals** (lb/ub) → `T_control` grid
+- **Boundary/variable duals** → Time-independent (vectors, not discretized)
+
+# Arguments
+
+- `sol::Solution`: Solution object containing trajectory functions
+- `T_state::Vector{Float64}`: Time grid for state discretization
+- `T_control::Vector{Float64}`: Time grid for control discretization
+- `T_costate::Vector{Float64}`: Time grid for costate discretization
+- `T_path::Vector{Float64}`: Time grid for path constraint dual discretization
+- `dim_x::Int`: State dimension (for validation)
+- `dim_u::Int`: Control dimension (for validation)
+
+# Returns
+
+- `Dict{String, Any}`: Dictionary with all discretized components (grids not included)
+
+# Notes
+
+This function does NOT include time grid data in the returned dictionary. The calling 
+function (`_serialize_solution` for `UnifiedTimeGridModel` or `MultipleTimeGridModel`) 
+is responsible for adding the appropriate grid keys.
+
+See also: [`_serialize_solution`](@ref), [`_discretize_function`](@ref), [`_discretize_dual`](@ref)
 """
 function _discretize_all_components(
     sol::Solution,
@@ -1359,7 +1484,44 @@ function _discretize_all_components(
 end
 
 """
-Serialize solution for unified time grid (legacy format).
+$(TYPEDSIGNATURES)
+
+Serialize solution with unified time grid (legacy single-grid format).
+
+This method handles solutions where all components share the same time grid. It produces 
+the legacy format with a single `"time_grid"` key, which is backward-compatible with 
+older versions of the package.
+
+# Format Produced
+
+```julia
+Dict(
+    "time_grid" => T,                    # Single unified grid
+    "state" => Matrix,                   # All components discretized on T
+    "control" => Matrix,
+    "costate" => Matrix,
+    # ... all other fields
+)
+```
+
+# Arguments
+
+- `::UnifiedTimeGridModel`: Time grid model type (dispatch parameter)
+- `sol::Solution`: Solution to serialize
+- `dim_x::Int`: State dimension
+- `dim_u::Int`: Control dimension
+
+# Returns
+
+- `Dict{String, Any}`: Serialized data with single time grid
+
+# Notes
+
+This format is used when `build_solution` is called with identical grids for all components, 
+or when using the legacy single-grid signature. It ensures backward compatibility with files 
+created before the multi-grid feature was introduced.
+
+See also: [`_serialize_solution(::MultipleTimeGridModel, ...)`](@ref)
 """
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
@@ -1375,7 +1537,51 @@ function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, 
 end
 
 """
-Serialize solution for multiple time grids format.
+$(TYPEDSIGNATURES)
+
+Serialize solution with multiple independent time grids (modern format).
+
+This method handles solutions where different components use different time grids. It produces 
+the modern format with four separate grid keys (`time_grid_state`, `time_grid_control`, 
+`time_grid_costate`, `time_grid_path`), preserving the independent discretizations.
+
+# Format Produced
+
+```julia
+Dict(
+    "time_grid_state" => T_state,        # State-specific grid
+    "time_grid_control" => T_control,    # Control-specific grid
+    "time_grid_costate" => T_costate,    # Costate-specific grid
+    "time_grid_path" => T_path,          # Path constraints grid
+    "state" => Matrix,                   # Discretized on T_state
+    "control" => Matrix,                 # Discretized on T_control
+    "costate" => Matrix,                 # Discretized on T_costate
+    "path_constraints_dual" => Matrix,   # Discretized on T_path
+    # ... all other fields
+)
+```
+
+# Arguments
+
+- `::MultipleTimeGridModel`: Time grid model type (dispatch parameter)
+- `sol::Solution`: Solution to serialize
+- `dim_x::Int`: State dimension
+- `dim_u::Int`: Control dimension
+
+# Returns
+
+- `Dict{String, Any}`: Serialized data with four independent time grids
+
+# Notes
+
+This format is used when `build_solution` is called with different grids for different 
+components. It allows numerical schemes to use optimal discretizations for each component 
+(e.g., finer grid for state, coarser for control, custom for costate).
+
+The reconstruction function `_reconstruct_solution_from_data` detects this format by checking 
+for the presence of `"time_grid_state"` key and handles it appropriately.
+
+See also: [`_serialize_solution(::UnifiedTimeGridModel, ...)`](@ref), [`build_solution`](@ref)
 """
 function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Multiple time grids format
