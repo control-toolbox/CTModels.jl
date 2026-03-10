@@ -91,10 +91,11 @@ function __print_mathematical_definition(
     # args
     t_ = is_time_dependent ? t_name * ", " : ""
     _v = is_variable_dependent ? ", " * v_name : ""
+    _u = u_dim > 0 ? ", " * u_name * "(" * t_name * ")" : ""
 
     # other names
     bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
-    mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+    mixed_args_names = t_ * x_name * "(" * t_name * ")" * _u * _v
     state_args_names = x_name * "(" * t_name * ")"
     control_args_names = u_name * "(" * t_name * ")"
     variable_args_names = v_name
@@ -112,7 +113,9 @@ function __print_mathematical_definition(
 
     # J
     printstyled(io, "    minimize  "; color=:blue)
-    print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
+    # Only include control in objective if u_dim > 0
+    u_in_obj = u_dim > 0 ? ", " * u_name : ""
+    print(io, "J(" * x_name * u_in_obj * _v * ") = ")
 
     # Mayer
     has_a_mayer_cost && print(io, "g(" * bounds_args_names * ")")
@@ -205,22 +208,26 @@ function __print_mathematical_definition(
     end
     x_name_space *= " ∈ " * x_space
 
-    # control name and space
-    if u_dim == 1
-        u_name_space = u_name * "(" * t_name * ")"
-    else
-        u_name_space = u_name * "(" * t_name * ")"
-        if ui_names != [u_name * CTBase.ctindices(i) for i in range(1, u_dim)]
-            u_name_space *= " = ("
-            for i in 1:u_dim
-                u_name_space *= ui_names[i] * "(" * t_name * ")"
-                i < u_dim && (u_name_space *= ", ")
+    # control name and space (only if u_dim > 0)
+    u_name_space = ""
+    if u_dim > 0
+        if u_dim == 1
+            u_name_space = u_name * "(" * t_name * ")"
+        else
+            u_name_space = u_name * "(" * t_name * ")"
+            if ui_names != [u_name * CTBase.ctindices(i) for i in range(1, u_dim)]
+                u_name_space *= " = ("
+                for i in 1:u_dim
+                    u_name_space *= ui_names[i] * "(" * t_name * ")"
+                    i < u_dim && (u_name_space *= ", ")
+                end
+                u_name_space *= ")"
             end
-            u_name_space *= ")"
         end
+        u_name_space *= " ∈ " * u_space
     end
-    u_name_space *= " ∈ " * u_space
 
+    # Build the "where" clause based on what's present
     if is_variable_dependent
         # space
         v_space = "R" * (v_dim == 1 ? "" : CTBase.ctupperscripts(v_dim))
@@ -239,13 +246,21 @@ function __print_mathematical_definition(
             end
         end
         v_name_space *= " ∈ " * v_space
-        # print
-        print(
-            io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n"
-        )
+        # print with or without control
+        if u_dim > 0
+            print(
+                io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n"
+            )
+        else
+            print(io, "    where ", x_name_space, " and ", v_name_space, ".\n")
+        end
     else
-        # print
-        print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
+        # print with or without control
+        if u_dim > 0
+            print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
+        else
+            print(io, "    where ", x_name_space, ".\n")
+        end
     end
     return true
 end

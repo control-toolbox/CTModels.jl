@@ -149,6 +149,32 @@ function test_control_zero()
             Test.@test OCP.control_components(model) == String[]
         end
         
+        # ====================================================================
+        # UNIT TESTS - Phase 4: Display without control
+        # ====================================================================
+        
+        Test.@testset "Display - Model without control" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # Test that display works without error
+            io = IOBuffer()
+            Test.@test_nowarn show(io, MIME"text/plain"(), model)
+            output = String(take!(io))
+            
+            # Verify control is not mentioned in output
+            Test.@test !occursin("u(", output)
+            Test.@test occursin("x(", output)  # State should be present
+            Test.@test occursin("J(x", output)  # Objective should have only state
+        end
+        
     end
 end
 
