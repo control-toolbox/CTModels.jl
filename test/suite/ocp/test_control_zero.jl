@@ -127,6 +127,28 @@ function test_control_zero()
             Test.@test exception_thrown
         end
         
+        # ====================================================================
+        # UNIT TESTS - Phase 3: Building without control
+        # ====================================================================
+        
+        Test.@testset "build() - Model without control" begin
+            # Build a complete Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            
+            # This should work without calling control!
+            model = OCP.build(pre)
+            Test.@test model isa OCP.Model
+            Test.@test OCP.control_dimension(model) == 0
+            Test.@test OCP.control_name(model) == ""
+            Test.@test OCP.control_components(model) == String[]
+        end
+        
     end
 end
 

@@ -289,12 +289,6 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
         suggestion="Call state!(pre_ocp, dimension) before building",
         context="build function - state validation",
     )
-    @ensure __is_control_set(pre_ocp) Exceptions.PreconditionError(
-        "Control must be set before building model",
-        reason="control has not been defined yet",
-        suggestion="Call control!(pre_ocp, dimension) before building",
-        context="build function - control validation",
-    )
     @ensure __is_dynamics_set(pre_ocp) Exceptions.PreconditionError(
         "Dynamics must be set before building model",
         reason="dynamics have not been defined yet",
