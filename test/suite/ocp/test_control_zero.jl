@@ -4,6 +4,7 @@ import Test
 import CTBase.Exceptions
 import CTModels.OCP
 import CTModels.Init
+import Plots
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -258,10 +259,123 @@ function test_control_zero()
             Test.@test init.control(0.5) == Float64[]
         end
         
-        # Note: Phase 8 (Plotting) is handled by the Plots extension
-        # The modification in ext/plot_utils.jl ensures that do_plot_control
-        # returns false when control_dimension(sol) == 0, which prevents
-        # control plots from being created for models without control.
+        # ====================================================================
+        # UNIT TESTS - Phase 6: Name validation without control
+        # ====================================================================
+        
+        Test.@testset "Validation - Name conflicts without control" begin
+            # Build a PreModel without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2, "x", ["x1", "x2"])
+            
+            # Verify that control names are not collected
+            used_names = OCP.__collect_used_names(pre)
+            Test.@test "t" ∈ used_names  # time should be present
+            Test.@test "x" ∈ used_names  # state should be present
+            Test.@test "x1" ∈ used_names
+            Test.@test "x2" ∈ used_names
+            Test.@test !("u" ∈ used_names)  # control should NOT be present
+            
+            # Should be able to use "u" as a state component name since control is not set
+            pre2 = OCP.PreModel()
+            OCP.time!(pre2, t0=0, tf=1)
+            OCP.state!(pre2, 2, "x", ["u", "v"])  # "u" is allowed as state component
+            Test.@test OCP.__is_state_set(pre2)
+        end
+        
+        # ====================================================================
+        # INTEGRATION TESTS - Phase 7: Serialization without control
+        # ====================================================================
+        
+        Test.@testset "Serialization - Solution building without control" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # Create a solution without control
+            T = collect(range(0, 1, length=10))
+            x_data = hcat(sin.(T), cos.(T))  # (10, 2) matrix
+            u_data = Matrix{Float64}(undef, 10, 0)  # Empty control matrix (10×0)
+            p_data = hcat(cos.(T), -sin.(T))  # (10, 2) matrix
+            v_data = Float64[]
+            
+            sol = OCP.build_solution(
+                model,
+                T, T, T, T,
+                x_data, u_data, v_data, p_data;
+                objective=1.0,
+                iterations=10,
+                constraints_violation=0.0,
+                message="Test solution",
+                status=:success,
+                successful=true
+            )
+            
+            # Test that control_dimension is 0
+            Test.@test OCP.control_dimension(sol) == 0
+            
+            # Test that control function returns empty vector
+            u_func = OCP.control(sol)
+            Test.@test u_func(0.5) == Float64[]
+            
+            # Test that solution properties are correct
+            Test.@test OCP.state_dimension(sol) == 2
+            Test.@test OCP.objective(sol) == 1.0
+        end
+        
+        # ====================================================================
+        # INTEGRATION TESTS - Phase 8: Plotting without control
+        # ====================================================================
+        
+        Test.@testset "Plotting - Verify subplot count without control" begin
+            # Build a Model without control
+            pre = OCP.PreModel()
+            OCP.time!(pre, t0=0, tf=1)
+            OCP.state!(pre, 2)
+            OCP.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            OCP.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            OCP.time_dependence!(pre, autonomous=false)
+            OCP.definition!(pre, quote end)
+            model = OCP.build(pre)
+            
+            # Create a solution without control
+            T = collect(range(0, 1, length=10))
+            x_data = hcat(sin.(T), cos.(T))  # (10, 2) matrix
+            u_data = Matrix{Float64}(undef, 10, 0)  # Empty control matrix (10×0)
+            p_data = hcat(cos.(T), -sin.(T))  # (10, 2) matrix
+            v_data = Float64[]
+            
+            sol = OCP.build_solution(
+                model,
+                T, T, T, T,
+                x_data, u_data, v_data, p_data;
+                objective=1.0,
+                iterations=10,
+                constraints_violation=0.0,
+                message="Test solution",
+                status=:success,
+                successful=true
+            )
+            
+            # Test plotting with :group layout
+            p = Plots.plot(sol, layout=:group)
+            # Without control: state + costate = 2 subplots
+            # With control: state + costate + control = 3 subplots
+            Test.@test length(p.subplots) == 2
+            
+            # Test plotting with :split layout
+            p_split = Plots.plot(sol, layout=:split)
+            # Without control: 2 state components + 2 costate components = 4 subplots
+            # With control: 2 state + 2 costate + m control = 4 + m subplots
+            Test.@test length(p_split.subplots) == 4
+        end
         
     end
 end
