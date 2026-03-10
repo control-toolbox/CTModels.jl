@@ -99,14 +99,24 @@ function test_control_zero()
             Test.@test length(pre.constraints) == 1
         end
         
-        Test.@testset "constraint! - control type requires control" begin
-            # Control constraints should require control to be set
+        Test.@testset "constraint! - path type without control" begin
+            # Path constraints should work without control (e.g., state-only path constraints)
             pre = OCP.PreModel()
             OCP.state!(pre, 2)
             OCP.time!(pre, t0=0, tf=1)
             
-            # This should throw an exception because control is not set
-            # We verify that an exception is thrown (the specific type will be PreconditionError)
+            # This should work without calling control!
+            OCP.constraint!(pre, :path, f=(t, x, u) -> x[1], lb=0, ub=1)
+            Test.@test length(pre.constraints) == 1
+        end
+        
+        Test.@testset "constraint! - control type requires control" begin
+            # Only :control type constraints require control to be set
+            pre = OCP.PreModel()
+            OCP.state!(pre, 2)
+            OCP.time!(pre, t0=0, tf=1)
+            
+            # This should throw a PreconditionError because control is not set
             exception_thrown = false
             try
                 OCP.constraint!(pre, :control, rg=1, lb=-1, ub=1)

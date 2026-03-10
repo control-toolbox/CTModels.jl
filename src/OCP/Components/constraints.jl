@@ -312,13 +312,13 @@ function constraint!(
         context="constraint! function - times validation",
     )
 
-    # checks: control must be set for control-dependent constraint types
-    if type ∈ (:control, :path)
+    # checks: control must be set for :control constraint type
+    if type == :control
         @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-            "Control must be set for type=:$type constraints",
+            "Control must be set for type=:control constraints",
             reason="control has not been defined yet but constraint type requires it",
-            suggestion="Call control!(ocp, dimension) before adding :$type constraints, or use a different constraint type",
-            context="constraint! function - control validation for type=:$type",
+            suggestion="Call control!(ocp, dimension) before adding :control constraints, or use a different constraint type",
+            context="constraint! function - control validation for type=:control",
         )
     end
 
