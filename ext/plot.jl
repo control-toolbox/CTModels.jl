@@ -1590,10 +1590,10 @@ function _map_to_time_grid_component(sym::Symbol)::Symbol
         :time => error("Internal error: :time should not be mapped")
         :state => :state
         :control => :control
-        :costate => :costate
+        :costate => :costate  # Costate has its own grid
         :control_norm => :control  # Map control_norm to control for time grid
-        :path_constraint => :state  # Map path_constraint to state for time grid
-        :dual_path_constraint => :dual  # Map dual_path_constraint to dual for time grid
+        :path_constraint => :path  # Path constraints use the path grid
+        :dual_path_constraint => :path  # Path constraint duals use the path grid
         _ => error("Internal error: unknown component $sym for time grid mapping")
     end
 end

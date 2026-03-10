@@ -24,7 +24,7 @@ Reconstruct a solution from imported data, detecting the format (single vs multi
 - `Solution`: Reconstructed solution with appropriate time grid model
 
 # Notes
-- If `time_grid_state` key exists, assumes new multiple time grid format
+- If `time_grid_state` key exists, assumes multiple time grid format
 - Otherwise, uses legacy single time grid format
 - Handles both raw vectors and TimeGridModel objects for legacy format
 
@@ -48,11 +48,14 @@ function _reconstruct_solution_from_data(
 )
     # Detect format and extract time grids
     if haskey(data, "time_grid_state")
-        # New format: multiple time grids
+        # Multiple time grids format
         T_state = _extract_time_vector(data["time_grid_state"])
         T_control = _extract_time_vector(data["time_grid_control"])
-        T_costate = _extract_time_vector(data["time_grid_costate"])
-        T_dual = _extract_time_vector(data["time_grid_dual"])
+        # Backward compatibility: if time_grid_costate is missing, use T_state
+        T_costate = haskey(data, "time_grid_costate") ? _extract_time_vector(data["time_grid_costate"]) : T_state
+        # Support both new (time_grid_path) and legacy (time_grid_dual) keys
+        T_path_key = haskey(data, "time_grid_path") ? "time_grid_path" : "time_grid_dual"
+        T_path = _extract_time_vector(data[T_path_key])
 
         # Reconstruct solution with multiple time grids
         return OCP.build_solution(
@@ -60,7 +63,7 @@ function _reconstruct_solution_from_data(
             T_state,
             T_control,
             T_costate,
-            T_dual,
+            T_path,
             data["state"],
             data["control"],
             _extract_time_vector(data["variable"]),

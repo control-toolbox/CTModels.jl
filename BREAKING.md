@@ -2,6 +2,40 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.6] - 2026-03-10
+
+**No breaking changes** - This release adds a dedicated costate time grid while maintaining full backward compatibility.
+
+### New Features (Non-Breaking)
+
+- **4-Grid Time System**: `build_solution` now supports 4 independent time grids
+  - New signature: `build_solution(ocp, T_state, T_control, T_costate, T_path, X, U, v, P; ...)`
+  - Legacy signature preserved: `build_solution(ocp, T, X, U, v, P; ...)` still works
+  - Automatic grid optimization when all grids are identical
+
+- **Costate Grid Independence**: Costate now has its own dedicated time grid
+  - `time_grid(sol, :costate)` returns costate-specific grid
+  - `clean_component_symbols((:costate,))` → `(:costate,)` (was `(:state,)` before)
+  - Enables different discretizations for state and costate (e.g., symplectic integrators)
+
+- **Enhanced Serialization**: Multi-grid format includes `time_grid_costate`
+  - Backward compatible: old files without `time_grid_costate` use `T_state` as fallback
+  - Forward compatible: new files with 4 grids work with updated readers
+
+### Migration Notes
+
+**No action required** - All existing code continues to work unchanged:
+
+```julia
+# Legacy single-grid code (still works)
+sol = build_solution(ocp, T, X, U, v, P; objective=obj, ...)
+
+# New multi-grid code (optional)
+sol = build_solution(ocp, T_state, T_control, T_costate, T_path, X, U, v, P; objective=obj, ...)
+```
+
+The package automatically detects and handles both formats. All tests pass (3324/3324).
+
 ## [0.9.5] - 2026-03-09
 
 **No breaking changes** - This release focuses on internal API cleanup with no impact on public functionality.

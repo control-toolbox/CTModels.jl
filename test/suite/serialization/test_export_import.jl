@@ -383,10 +383,11 @@ function test_export_import()
             x_func = CTModels.state(sol)
             for (i, t) in enumerate(T_orig)
                 x_expected = x_func(t)
-                x_from_json = if state_json[i] isa Number
-                    state_json[i]
-                else
-                    Vector{Float64}(state_json[i])
+                # After fix: state_json[i] is always a vector (even for 1D states)
+                x_from_json = Vector{Float64}(state_json[i])
+                # For 1D states, extract scalar to match x_expected type
+                if length(x_from_json) == 1 && x_expected isa Number
+                    x_from_json = x_from_json[1]
                 end
                 Test.@test x_from_json ≈ x_expected atol = 1e-8
             end
@@ -397,10 +398,11 @@ function test_export_import()
             u_func = CTModels.control(sol)
             for (i, t) in enumerate(T_orig)
                 u_expected = u_func(t)
-                u_from_json = if control_json[i] isa Number
-                    control_json[i]
-                else
-                    Vector{Float64}(control_json[i])
+                # After fix: control_json[i] is always a vector (even for 1D controls)
+                u_from_json = Vector{Float64}(control_json[i])
+                # For 1D controls, extract scalar
+                if length(u_from_json) == 1
+                    u_from_json = u_from_json[1]
                 end
                 Test.@test u_from_json ≈ u_expected atol = 1e-8
             end
@@ -411,10 +413,11 @@ function test_export_import()
             p_func = CTModels.costate(sol)
             for (i, t) in enumerate(T_orig)
                 p_expected = p_func(t)
-                p_from_json = if costate_json[i] isa Number
-                    costate_json[i]
-                else
-                    Vector{Float64}(costate_json[i])
+                # After fix: costate_json[i] is always a vector
+                p_from_json = Vector{Float64}(costate_json[i])
+                # For 1D costates, extract scalar to match p_expected type
+                if length(p_from_json) == 1 && p_expected isa Number
+                    p_from_json = p_from_json[1]
                 end
                 Test.@test p_from_json ≈ p_expected atol = 1e-8
             end
@@ -977,14 +980,13 @@ function test_export_import()
 
         Test.@testset "JSON stack() behavior investigation" verbose = VERBOSE showtiming =
             SHOWTIMING begin
-            # Empirical investigation: When does stack() return Vector vs Matrix?
-            # This validates the need for the conditional in _json_array_to_matrix
+            # Empirical investigation: JSON export format verification
             # 
-            # Findings:
-            # - Multi-dimensional trajectories (state, costate): stack() → Matrix
-            # - 1-dimensional trajectories (control in TestProblems.solution_example): stack() → Vector
+            # After fix: All trajectories are exported as Vector{Vector} to preserve structure
+            # - Multi-dimensional trajectories (state, costate): Vector{Vector} with each element being a vector
+            # - 1-dimensional trajectories (control): Vector{Vector} with each element being a 1-element vector
             # 
-            # This proves the refactoring with _json_array_to_matrix is correct and necessary.
+            # This ensures proper round-trip serialization without dimension loss.
 
             ocp, sol = TestProblems.solution_example()
 
@@ -996,16 +998,21 @@ function test_export_import()
             blob = JSON3.read(json_string)
 
             # Test state (multi-dimensional: 2D in TestProblems.solution_example)
+            # Now exported as Vector{Vector}, so stack() returns Matrix
             state_stacked = stack(blob["state"]; dims=1)
-            Test.@test state_stacked isa Matrix  # Multi-D → Matrix
+            Test.@test state_stacked isa Matrix  # Vector{Vector} → Matrix
+            Test.@test size(state_stacked, 2) == 2  # 2D state
 
             # Test control (1-dimensional in TestProblems.solution_example)
+            # Now exported as Vector{Vector}, so stack() returns Matrix (N×1)
             control_stacked = stack(blob["control"]; dims=1)
-            Test.@test control_stacked isa Vector  # 1D → Vector
+            Test.@test control_stacked isa Matrix  # Vector{Vector} → Matrix
+            Test.@test size(control_stacked, 2) == 1  # 1D control
 
             # Test costate (multi-dimensional: 2D)
             costate_stacked = stack(blob["costate"]; dims=1)
-            Test.@test costate_stacked isa Matrix  # Multi-D → Matrix
+            Test.@test costate_stacked isa Matrix  # Vector{Vector} → Matrix
+            Test.@test size(costate_stacked, 2) == 2  # 2D costate
 
             # Verify import works correctly (indirect test of _json_array_to_matrix)
             sol_reloaded = CTModels.import_ocp_solution(
