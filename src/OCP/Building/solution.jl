@@ -123,31 +123,33 @@ function build_solution(
     )
 
     # box constraints multipliers (optional, can be nothing)
+    # Note: No expected_dim validation for box constraints because they use
+    # dim_*_constraints_box which may differ from state/control dimensions
     fscbd = build_interpolated_function(
         state_constraints_lb_dual,
         T_dual,
-        dim_x,
+        dim_state_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fscud = build_interpolated_function(
         state_constraints_ub_dual,
         T_dual,
-        dim_x,
+        dim_state_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
         T_dual,
-        dim_u,
+        dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
         T_dual,
-        dim_u,
+        dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
@@ -1177,35 +1179,34 @@ function _serialize_solution(sol::Solution)::Dict{String,Any}
 end
 
 """
-Serialize solution for unified time grid (legacy format).
-"""
-function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
-    # Legacy format: single time grid
-    T = time_grid(sol)
+Discretize all solution components on given time grids.
 
-    return Dict(
-        "time_grid" => T,
-        "state" => _discretize_function(state(sol), T, dim_x),
-        "control" => _discretize_function(control(sol), T, dim_u),
-        "costate" => _discretize_function(costate(sol), T, dim_x),
+This helper extracts the common discretization logic shared by both
+UnifiedTimeGridModel and MultipleTimeGridModel serialization.
+"""
+function _discretize_all_components(
+    sol::Solution,
+    T_state::Vector{Float64},
+    T_control::Vector{Float64},
+    T_costate::Vector{Float64},
+    T_dual::Vector{Float64},
+    dim_x::Int,
+    dim_u::Int,
+)::Dict{String,Any}
+    return Dict{String,Any}(
+        "state" => _discretize_function(state(sol), T_state, dim_x),
+        "control" => _discretize_function(control(sol), T_control, dim_u),
+        "costate" => _discretize_function(costate(sol), T_costate, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
-
-        # Discretize dual functions (can be nothing)
-        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T),
-        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T),
-        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T),
-        "control_constraints_lb_dual" =>
-            _discretize_dual(control_constraints_lb_dual(sol), T),
-        "control_constraints_ub_dual" =>
-            _discretize_dual(control_constraints_ub_dual(sol), T),
-
-        # Boundary and variable duals (vectors, not functions)
+        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_dual, dim_path_constraints_nl(sol)),
+        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T_dual, dim_state_constraints_box(sol)),
+        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T_dual, dim_state_constraints_box(sol)),
+        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T_dual, dim_control_constraints_box(sol)),
+        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T_dual, dim_control_constraints_box(sol)),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
         "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
-
-        # Solver info
         "iterations" => iterations(sol),
         "message" => message(sol),
         "status" => status(sol),
@@ -1213,6 +1214,22 @@ function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, 
         "constraints_violation" => constraints_violation(sol),
         "infos" => infos(sol),
     )
+end
+
+"""
+Serialize solution for unified time grid (legacy format).
+"""
+function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
+    # Legacy format: single time grid
+    T = time_grid(sol)
+    
+    # Discretize all components
+    data = _discretize_all_components(sol, T, T, T, T, dim_x, dim_u)
+    
+    # Add time grid
+    data["time_grid"] = T
+    
+    return data
 end
 
 """
@@ -1224,43 +1241,15 @@ function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int,
     T_control = time_grid(sol, :control)
     T_costate = time_grid(sol, :costate)
     T_dual = time_grid(sol, :dual)  # Same as :path
-
-    return Dict(
-        # Multiple time grids
-        "time_grid_state" => T_state,
-        "time_grid_control" => T_control,
-        "time_grid_costate" => T_costate,
-        "time_grid_dual" => T_dual,
-
-        # Discretized functions with appropriate grids
-        "state" => _discretize_function(state(sol), T_state, dim_x),
-        "control" => _discretize_function(control(sol), T_control, dim_u),
-        "costate" => _discretize_function(costate(sol), T_costate, dim_x),
-        "variable" => variable(sol),
-        "objective" => objective(sol),
-
-        # Discretize dual functions with dual grid
-        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_dual),
-        "state_constraints_lb_dual" =>
-            _discretize_dual(state_constraints_lb_dual(sol), T_dual),
-        "state_constraints_ub_dual" =>
-            _discretize_dual(state_constraints_ub_dual(sol), T_dual),
-        "control_constraints_lb_dual" =>
-            _discretize_dual(control_constraints_lb_dual(sol), T_dual),
-        "control_constraints_ub_dual" =>
-            _discretize_dual(control_constraints_ub_dual(sol), T_dual),
-
-        # Boundary and variable duals (vectors, not functions)
-        "boundary_constraints_dual" => boundary_constraints_dual(sol),
-        "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
-        "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
-
-        # Solver info
-        "iterations" => iterations(sol),
-        "message" => message(sol),
-        "status" => status(sol),
-        "successful" => successful(sol),
-        "constraints_violation" => constraints_violation(sol),
-        "infos" => infos(sol),
-    )
+    
+    # Discretize all components
+    data = _discretize_all_components(sol, T_state, T_control, T_costate, T_dual, dim_x, dim_u)
+    
+    # Add multiple time grids
+    data["time_grid_state"] = T_state
+    data["time_grid_control"] = T_control
+    data["time_grid_costate"] = T_costate
+    data["time_grid_dual"] = T_dual
+    
+    return data
 end

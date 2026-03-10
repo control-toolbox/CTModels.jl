@@ -6,6 +6,42 @@ using DocStringExtensions
 using JSON3
 
 # ============================================================================
+# Private helpers for JSON matrix conversion
+# ============================================================================
+
+# Liste des champs matriciels à convertir
+const _MATRIX_FIELDS = ["state", "control", "costate"]
+const _OPTIONAL_MATRIX_FIELDS = [
+    "path_constraints_dual",
+    "state_constraints_lb_dual",
+    "state_constraints_ub_dual",
+    "control_constraints_lb_dual",
+    "control_constraints_ub_dual",
+]
+
+"""
+Convert Matrix fields to Vector{Vector} for JSON3 export.
+
+JSON3 flattens Matrix{Float64} into 1D arrays, losing the 2D structure.
+This function converts all matrix fields to Vector{Vector} format to preserve dimensions.
+"""
+function _convert_matrices_for_json!(blob::Dict)
+    # Convert required matrix fields
+    for key in _MATRIX_FIELDS
+        if haskey(blob, key) && blob[key] isa Matrix
+            blob[key] = CTModels.Utils.matrix2vec(blob[key], 1)
+        end
+    end
+    
+    # Convert optional matrix fields (can be nothing)
+    for key in _OPTIONAL_MATRIX_FIELDS
+        if haskey(blob, key) && !isnothing(blob[key]) && blob[key] isa Matrix
+            blob[key] = CTModels.Utils.matrix2vec(blob[key], 1)
+        end
+    end
+end
+
+# ============================================================================
 # Private helper: broadcast with Nothing fallback
 # ============================================================================
 
@@ -153,6 +189,9 @@ function CTModels.export_ocp_solution(
     # Use unified serialization that handles both unified and multiple time grids
     blob = CTModels.OCP._serialize_solution(sol)
 
+    # Convert Matrix → Vector{Vector} for JSON (to avoid JSON3 flattening)
+    _convert_matrices_for_json!(blob)
+
     # Serialize infos and get Symbol type metadata
     infos_serialized, symbol_keys = _serialize_infos(blob["infos"])
     blob["infos"] = infos_serialized
@@ -166,55 +205,35 @@ function CTModels.export_ocp_solution(
 end
 
 """
-$(TYPEDSIGNATURES)
+Convert a JSON field (Vector{Vector} via stack) to Matrix{Float64}.
 
-Convert JSON3 array data to `Matrix{Float64}` for trajectory import.
-
-# Context
-
-When importing JSON data, `stack(blob[field]; dims=1)` returns different types
-depending on the dimensionality of the original trajectory:
-- **1D trajectories** (e.g., scalar control): `stack()` → `Vector{Float64}`
-- **Multi-D trajectories** (e.g., 2D state): `stack()` → `Matrix{Float64}`
-
-This function normalizes both cases to `Matrix{Float64}` as required by `build_solution`.
+JSON exports matrices as Vector{Vector}. After `stack(blob[field]; dims=1)`,
+we get either a Matrix (multi-D) or Vector (1D). This normalizes to Matrix.
 
 # Arguments
-- `data`: Output from `stack(blob[field]; dims=1)`, either `Vector` or `Matrix`
+- `blob_field`: JSON array field (Vector of Vectors)
 
 # Returns
-- `Matrix{Float64}`: Properly shaped matrix `(n_time_points, n_dim)` for `build_solution`
-
-# Implementation Details
-
-- **Vector case**: Converts `Vector{Float64}` of length `n` to `Matrix{Float64}(n, 1)`
-  using `reduce(hcat, data)'` to preserve time-series ordering
-- **Matrix case**: Direct conversion to `Matrix{Float64}`
-
-# Examples
-
-```julia
-# 1D control trajectory (101 time points)
-control_data = [5.99, 5.93, ..., -5.99]  # Vector{Float64}
-control_matrix = _json_array_to_matrix(control_data)
-# → Matrix{Float64}(101, 1)
-
-# 2D state trajectory (101 time points, 2 dimensions)
-state_data = [1.0 2.0; 1.1 2.1; ...]  # Matrix{Float64}(101, 2)
-state_matrix = _json_array_to_matrix(state_data)
-# → Matrix{Float64}(101, 2)
-```
-
-# See Also
-- Test coverage: `test/suite/serialization/test_export_import.jl` 
-  (testset "JSON stack() behavior investigation")
+- `Matrix{Float64}`: (n_time_points, n_dim)
 """
-function _json_array_to_matrix(data)::Matrix{Float64}
-    if data isa Vector
-        return Matrix{Float64}(reduce(hcat, data)')
-    else
-        return Matrix{Float64}(data)
-    end
+function _json_to_matrix(blob_field)::Matrix{Float64}
+    stacked = stack(blob_field; dims=1)
+    # 1D case: stack() returns Vector → reshape to (n, 1) Matrix
+    # Multi-D case: stack() returns Matrix → use directly
+    return stacked isa Vector ? reshape(stacked, :, 1) : Matrix{Float64}(stacked)
+end
+
+"""
+Convert an optional JSON field to Matrix{Float64} or nothing.
+
+# Arguments
+- `blob_field`: JSON array field or nothing
+
+# Returns
+- `Matrix{Float64}` or `nothing`
+"""
+function _json_to_optional_matrix(blob_field)
+    return isnothing(blob_field) ? nothing : _json_to_matrix(blob_field)
 end
 
 """
@@ -250,45 +269,17 @@ function CTModels.import_ocp_solution(
     json_string = read(filename * ".json", String)
     blob = JSON3.read(json_string)
 
-    # get state
-    X = _json_array_to_matrix(stack(blob["state"]; dims=1))
+    # Convert JSON arrays (Vector{Vector}) back to Matrix{Float64}
+    X = _json_to_matrix(blob["state"])
+    U = _json_to_matrix(blob["control"])
+    P = _json_to_matrix(blob["costate"])
 
-    # get control
-    U = _json_array_to_matrix(stack(blob["control"]; dims=1))
-
-    # get costate
-    P = _json_array_to_matrix(stack(blob["costate"]; dims=1))
-
-    # get dual path constraints: convert to matrix
-    path_constraints_dual = if isnothing(blob["path_constraints_dual"])
-        nothing
-    else
-        _json_array_to_matrix(stack(blob["path_constraints_dual"]; dims=1))
-    end
-
-    # get state constraints (and dual): convert to matrix
-    state_constraints_lb_dual = if isnothing(blob["state_constraints_lb_dual"])
-        nothing
-    else
-        _json_array_to_matrix(stack(blob["state_constraints_lb_dual"]; dims=1))
-    end
-    state_constraints_ub_dual = if isnothing(blob["state_constraints_ub_dual"])
-        nothing
-    else
-        _json_array_to_matrix(stack(blob["state_constraints_ub_dual"]; dims=1))
-    end
-
-    # get control constraints (and dual): convert to matrix
-    control_constraints_lb_dual = if isnothing(blob["control_constraints_lb_dual"])
-        nothing
-    else
-        _json_array_to_matrix(stack(blob["control_constraints_lb_dual"]; dims=1))
-    end
-    control_constraints_ub_dual = if isnothing(blob["control_constraints_ub_dual"])
-        nothing
-    else
-        _json_array_to_matrix(stack(blob["control_constraints_ub_dual"]; dims=1))
-    end
+    # Convert optional dual matrices
+    path_constraints_dual = _json_to_optional_matrix(blob["path_constraints_dual"])
+    state_constraints_lb_dual = _json_to_optional_matrix(blob["state_constraints_lb_dual"])
+    state_constraints_ub_dual = _json_to_optional_matrix(blob["state_constraints_ub_dual"])
+    control_constraints_lb_dual = _json_to_optional_matrix(blob["control_constraints_lb_dual"])
+    control_constraints_ub_dual = _json_to_optional_matrix(blob["control_constraints_ub_dual"])
 
     # get dual of boundary constraints: no conversion needed
     boundary_constraints_dual = blob["boundary_constraints_dual"]
