@@ -258,6 +258,11 @@ function test_control_zero()
             Test.@test init.control(0.5) == Float64[]
         end
         
+        # Note: Phase 8 (Plotting) is handled by the Plots extension
+        # The modification in ext/plot_utils.jl ensures that do_plot_control
+        # returns false when control_dimension(sol) == 0, which prevents
+        # control plots from being created for models without control.
+        
     end
 end
 
