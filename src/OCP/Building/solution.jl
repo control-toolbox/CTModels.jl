@@ -43,8 +43,7 @@ function build_solution(
     ocp::Model,
     T_state::Vector{Float64},
     T_control::Vector{Float64},
-    T_costate::Vector{Float64},
-    T_dual::Union{Vector{Float64},Nothing},
+    T_path::Union{Vector{Float64},Nothing},
     X::TX,
     U::TU,
     v::Vector{Float64},
@@ -79,11 +78,10 @@ function build_solution(
     # Validate and fix time grids
     T_state = _validate_and_fix_time_grid(T_state, "state")
     T_control = _validate_and_fix_time_grid(T_control, "control")
-    T_costate = _validate_and_fix_time_grid(T_costate, "costate")
-    T_dual = isnothing(T_dual) ? nothing : _validate_and_fix_time_grid(T_dual, "dual")
+    T_path = isnothing(T_path) ? nothing : _validate_and_fix_time_grid(T_path, "path")
 
     # Detect if all non-nothing grids are identical
-    non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_dual])
+    non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_path])
     all_identical =
         length(non_nothing_grids) <= 1 ||
         all(g -> g == first(non_nothing_grids), non_nothing_grids)
@@ -92,31 +90,31 @@ function build_solution(
     time_grid = if all_identical
         UnifiedTimeGridModel(first(non_nothing_grids))
     else
-        # For dual grid, use T_state if T_dual is nothing (path constraints share state grid)
-        T_dual_safe = isnothing(T_dual) ? T_state : T_dual
+        # For path grid, use T_state if T_path is nothing (path constraints share state grid)
+        T_path_safe = isnothing(T_path) ? T_state : T_path
         MultipleTimeGridModel(;
             state=T_state,
             control=T_control,
-            costate=T_costate,
-            path=T_dual_safe,
-            dual=T_dual_safe,
+            path=T_path_safe,
         )
     end
 
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
+    # Note: costate shares the state grid (T_state)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
     fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u)
     fp = build_interpolated_function(
-        P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
+        P, T_state, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
+    # Path constraints duals share the path grid (T_path)
     fpcd = build_interpolated_function(
         path_constraints_dual,
-        T_dual,
+        T_path,
         dim_path_constraints_nl(ocp),
         TPCD;
         allow_nothing=true,
@@ -125,30 +123,32 @@ function build_solution(
     # box constraints multipliers (optional, can be nothing)
     # Note: No expected_dim validation for box constraints because they use
     # dim_*_constraints_box which may differ from state/control dimensions
+    # State box constraint duals share the state grid (T_state)
     fscbd = build_interpolated_function(
         state_constraints_lb_dual,
-        T_dual,
+        T_state,
         dim_state_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fscud = build_interpolated_function(
         state_constraints_ub_dual,
-        T_dual,
+        T_state,
         dim_state_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
+    # Control box constraint duals share the control grid (T_control)
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
-        T_dual,
+        T_control,
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
-        T_dual,
+        T_control,
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
@@ -291,7 +291,6 @@ function build_solution(
     # Legacy compatibility: call new multi-grid method with same grid for all components
     return build_solution(
         ocp,
-        T,
         T,
         T,
         T,
@@ -718,8 +717,10 @@ Return the time grid for a specific component.
 
 # Arguments
 - `sol::Solution`: The solution (unified or multiple time grids)
-- `component::Symbol`: The component (:state, :control, :costate, :path, :dual)
-  Plural forms (:states, :controls, :costates, :duals) are also accepted
+- `component::Symbol`: The component (:state, :control, :path)
+  Also accepted: :costate/:costates (→ :state), :dual/:duals (→ :path),
+  :state_box_constraint(s) (→ :state), :control_box_constraint(s) (→ :control),
+  plural forms (:states, :controls)
 
 # Returns
 - `TimesDisc`: The time grid for the specified component
@@ -733,9 +734,10 @@ Return the time grid for a specific component.
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)  # Works for both unified and multiple grids
-julia> time_grid(sol, :control)  # Works for both unified and multiple grids
-julia> time_grid(sol, :states)  # Plural form also works
+julia> time_grid(sol, :state)   # Works for both unified and multiple grids
+julia> time_grid(sol, :control) # Works for both unified and multiple grids
+julia> time_grid(sol, :costate) # Maps to :state grid
+julia> time_grid(sol, :dual)    # Maps to :path grid
 ```
 """
 function time_grid(
@@ -757,13 +759,13 @@ function time_grid(
     component_clean = clean_component_symbols((component,))[1]
 
     # Validate component
-    if component_clean ∉ (:state, :control, :costate, :path, :dual)
+    if component_clean ∉ (:state, :control, :path)
         # ⚠️ Applying Exception Rule: Invalid component symbol
         throw(
             CTBase.Exceptions.IncorrectArgument(
                 "Invalid component for time grid access";
                 got=string(component),
-                expected="one of :state, :control, :costate, :path, :dual (or plural forms)",
+                expected="one of :state, :control, :path (or aliases like :costate, :dual, plural forms)",
                 suggestion="Use time_grid(sol, :state) or another valid component",
                 context="time_grid for UnifiedTimeGridModel",
             ),
@@ -781,8 +783,10 @@ Return the time grid for a specific component in solutions with multiple time gr
 
 # Arguments
 - `sol::Solution`: The solution with multiple time grids
-- `component::Symbol`: The component (:state, :control, :costate, :path, :dual)
-  Plural forms (:states, :controls, :costates, :duals) are also accepted
+- `component::Symbol`: The component (:state, :control, :path)
+  Also accepted: :costate/:costates (→ :state), :dual/:duals (→ :path),
+  :state_box_constraint(s) (→ :state), :control_box_constraint(s) (→ :control),
+  plural forms (:states, :controls)
 
 # Returns
 - `TimesDisc`: The time grid for the specified component
@@ -792,9 +796,10 @@ Return the time grid for a specific component in solutions with multiple time gr
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)  # Get state time grid
-julia> time_grid(sol, :control)  # Get control time grid
-julia> time_grid(sol, :states)  # Plural form also works
+julia> time_grid(sol, :state)   # Get state time grid
+julia> time_grid(sol, :control) # Get control time grid
+julia> time_grid(sol, :costate) # Maps to state time grid
+julia> time_grid(sol, :dual)    # Maps to path time grid
 ```
 """
 function time_grid(
@@ -816,13 +821,13 @@ function time_grid(
     component_clean = clean_component_symbols((component,))[1]
 
     # Validate component
-    if component_clean ∉ (:state, :control, :costate, :path, :dual)
+    if component_clean ∉ (:state, :control, :path)
         # ⚠️ Applying Exception Rule: Invalid component symbol
         throw(
             CTBase.Exceptions.IncorrectArgument(
                 "Invalid component for time grid access";
                 got=string(component),
-                expected="one of :state, :control, :costate, :path, :dual (or plural forms)",
+                expected="one of :state, :control, :path (or aliases like :costate, :dual, plural forms)",
                 suggestion="Use time_grid(sol, :state) or another valid component",
                 context="time_grid for MultipleTimeGridModel",
             ),
@@ -870,7 +875,7 @@ function time_grid(
         CTBase.Exceptions.IncorrectArgument(
             "Component must be specified for solutions with multiple time grids";
             got="no component specified",
-            expected="time_grid(sol, :component) where component ∈ {:state, :control, :costate, :path, :dual}",
+            expected="time_grid(sol, :component) where component ∈ {:state, :control, :path}",
             suggestion="Specify which time grid to access, e.g., time_grid(sol, :state)",
             context="time_grid for MultipleTimeGridModel",
         ),
@@ -1188,22 +1193,21 @@ function _discretize_all_components(
     sol::Solution,
     T_state::Vector{Float64},
     T_control::Vector{Float64},
-    T_costate::Vector{Float64},
-    T_dual::Vector{Float64},
+    T_path::Vector{Float64},
     dim_x::Int,
     dim_u::Int,
 )::Dict{String,Any}
     return Dict{String,Any}(
         "state" => _discretize_function(state(sol), T_state, dim_x),
         "control" => _discretize_function(control(sol), T_control, dim_u),
-        "costate" => _discretize_function(costate(sol), T_costate, dim_x),
+        "costate" => _discretize_function(costate(sol), T_state, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
-        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_dual, dim_path_constraints_nl(sol)),
-        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T_dual, dim_state_constraints_box(sol)),
-        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T_dual, dim_state_constraints_box(sol)),
-        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T_dual, dim_control_constraints_box(sol)),
-        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T_dual, dim_control_constraints_box(sol)),
+        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)),
+        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T_state, dim_state_constraints_box(sol)),
+        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T_state, dim_state_constraints_box(sol)),
+        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T_control, dim_control_constraints_box(sol)),
+        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T_control, dim_control_constraints_box(sol)),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
         "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
@@ -1224,7 +1228,7 @@ function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, 
     T = time_grid(sol)
     
     # Discretize all components
-    data = _discretize_all_components(sol, T, T, T, T, dim_x, dim_u)
+    data = _discretize_all_components(sol, T, T, T, dim_x, dim_u)
     
     # Add time grid
     data["time_grid"] = T
@@ -1239,17 +1243,15 @@ function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int,
     # Multiple time grids format
     T_state = time_grid(sol, :state)
     T_control = time_grid(sol, :control)
-    T_costate = time_grid(sol, :costate)
-    T_dual = time_grid(sol, :dual)  # Same as :path
+    T_path = time_grid(sol, :path)
     
     # Discretize all components
-    data = _discretize_all_components(sol, T_state, T_control, T_costate, T_dual, dim_x, dim_u)
+    data = _discretize_all_components(sol, T_state, T_control, T_path, dim_x, dim_u)
     
     # Add multiple time grids
     data["time_grid_state"] = T_state
     data["time_grid_control"] = T_control
-    data["time_grid_costate"] = T_costate
-    data["time_grid_dual"] = T_dual
+    data["time_grid_path"] = T_path
     
     return data
 end

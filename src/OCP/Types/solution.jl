@@ -48,11 +48,9 @@ Used when variables have different discretisations (e.g., different grid densiti
 # Fields
 
 - `grids::NamedTuple`: Named tuple with time grids for each component:
-  - `state::TimesDisc`: State trajectory time grid
-  - `control::TimesDisc`: Control trajectory time grid  
-  - `costate::TimesDisc`: Costate trajectory time grid
-  - `path::TimesDisc`: Path constraints and duals time grid
-  - `dual::TimesDisc`: Alias for path constraints grid (same physical grid)
+  - `state::TimesDisc`: Time grid for state, costate, and state box constraint duals
+  - `control::TimesDisc`: Time grid for control and control box constraint duals
+  - `path::TimesDisc`: Time grid for path constraints and their duals
 
 # Example
 
@@ -62,7 +60,7 @@ julia> using CTModels
 julia> T_state = LinRange(0, 1, 101)
 julia> T_control = LinRange(0, 1, 51)
 julia> tg = CTModels.MultipleTimeGridModel(
-    state=T_state, control=T_control, costate=T_state, path=T_state, dual=T_state
+    state=T_state, control=T_control, path=T_state
 )
 julia> length(tg.grids.state)
 101
@@ -70,8 +68,8 @@ julia> length(tg.grids.state)
 """
 struct MultipleTimeGridModel <: AbstractTimeGridModel
     grids::NamedTuple{
-        (:state, :control, :costate, :path, :dual),
-        Tuple{TimesDisc,TimesDisc,TimesDisc,TimesDisc,TimesDisc},
+        (:state, :control, :path),
+        Tuple{TimesDisc,TimesDisc,TimesDisc},
     }
 end
 
@@ -81,11 +79,9 @@ $(TYPEDSIGNATURES)
 Construct a `MultipleTimeGridModel` with keyword arguments for each component time grid.
 
 # Arguments
-- `state`: Time grid for state variables
-- `control`: Time grid for control variables  
-- `costate`: Time grid for costate variables
-- `path`: Time grid for path constraints
-- `dual`: Time grid for dual variables
+- `state`: Time grid for state, costate, and state box constraint duals
+- `control`: Time grid for control and control box constraint duals
+- `path`: Time grid for path constraints and their duals
 
 # Returns
 - `MultipleTimeGridModel`: A model containing all component time grids
@@ -97,21 +93,17 @@ julia> T_control = LinRange(0, 1, 51)
 julia> mtgm = MultipleTimeGridModel(
     state=T_state, 
     control=T_control, 
-    costate=T_state, 
-    path=T_state, 
-    dual=T_state
+    path=T_state
 )
 ```
 """
 function MultipleTimeGridModel(;
     state::TimesDisc,
     control::TimesDisc,
-    costate::TimesDisc,
     path::TimesDisc,
-    dual::TimesDisc,
 )
     return MultipleTimeGridModel((
-        state=state, control=control, costate=costate, path=path, dual=dual
+        state=state, control=control, path=path
     ))
 end
 
@@ -124,8 +116,11 @@ $(TYPEDSIGNATURES)
 Clean and standardize component symbols for time grid access.
 
 # Behavior
-- Converts plural forms (`:states`, `:costates`, etc.) to their singular equivalents.
-- Maps ambiguous terms (`:constraint`, `:constraints`, `:cons`) to `:path`.
+- Maps all component symbols to their canonical time grid: `:state`, `:control`, or `:path`.
+- `:costate`, `:costates` map to `:state` (costate shares the state grid).
+- `:dual`, `:duals`, `:constraint`, `:constraints`, `:cons` map to `:path`.
+- `:state_box_constraint(s)` maps to `:state`.
+- `:control_box_constraint(s)` maps to `:control`.
 - Removes duplicate symbols.
 
 # Arguments
@@ -137,20 +132,26 @@ Clean and standardize component symbols for time grid access.
 # Example
 ```julia-repl
 julia> clean_component_symbols((:states, :controls, :costate, :constraint, :duals))
-# → (:state, :control, :costate, :path, :dual)
+# → (:state, :control, :path)
 ```
 """
 function clean_component_symbols(description)
-    # remove the nouns in plural form
+    # map all component symbols to their canonical time grid
     description = replace(
         description,
         :states => :state,
-        :costates => :costate,
+        :costates => :state,
+        :costate => :state,
         :controls => :control,
+        :state_box_constraints => :state,
+        :state_box_constraint => :state,
+        :control_box_constraints => :control,
+        :control_box_constraint => :control,
         :constraints => :path,
         :constraint => :path,
         :cons => :path,
-        :duals => :dual,
+        :duals => :path,
+        :dual => :path,
     )
     # remove the duplicates while preserving order
     seen = Set{Symbol}()

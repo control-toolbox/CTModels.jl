@@ -330,11 +330,15 @@ function CTModels.import_ocp_solution(
 
     # Add time grid data (format detection handled by helper)
     if haskey(blob, "time_grid_state")
-        # New format: multiple time grids
+        # Multiple time grids format
         data["time_grid_state"] = blob.time_grid_state
         data["time_grid_control"] = blob.time_grid_control
-        data["time_grid_costate"] = blob.time_grid_costate
-        data["time_grid_dual"] = blob.time_grid_dual
+        # Support both new (time_grid_path) and legacy (time_grid_dual) keys
+        if haskey(blob, "time_grid_path")
+            data["time_grid_path"] = blob.time_grid_path
+        elseif haskey(blob, "time_grid_dual")
+            data["time_grid_path"] = blob.time_grid_dual
+        end
     else
         # Legacy format: single time grid
         data["time_grid"] = blob.time_grid
