@@ -26,12 +26,6 @@ function dynamics!(ocp::PreModel, f::Function)::Nothing
         suggestion="Call state!(ocp, dimension) before dynamics!",
         context="dynamics! function - state validation",
     )
-    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-        "Control must be set before defining dynamics",
-        reason="control has not been defined yet",
-        suggestion="Call control!(ocp, dimension) before dynamics!",
-        context="dynamics! function - control validation",
-    )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining dynamics",
         reason="time horizon has not been defined yet",
@@ -90,12 +84,6 @@ function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothin
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before partial dynamics!",
         context="partial_dynamics! function - state validation",
-    )
-    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-        "Control must be set before defining partial dynamics",
-        reason="control has not been defined yet",
-        suggestion="Call control!(ocp, dimension) before partial dynamics!",
-        context="partial_dynamics! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining partial dynamics",

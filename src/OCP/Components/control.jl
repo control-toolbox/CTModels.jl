@@ -208,3 +208,30 @@ Get the control function associated with the solution.
 function value(model::ControlModelSolution{TS})::TS where {TS<:Function}
     return model.value
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return an empty string, since no control is defined.
+"""
+function name(::EmptyControlModel)::String
+    return ""
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return an empty vector since there are no control components defined.
+"""
+function components(::EmptyControlModel)::Vector{String}
+    return String[]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `0` since no control is defined.
+"""
+function dimension(::EmptyControlModel)::Dimension
+    return 0
+end

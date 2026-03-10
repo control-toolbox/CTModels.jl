@@ -82,7 +82,7 @@ export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictTyp
 export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
 export FixedTimeModel, FreeTimeModel, TimesModel, AbstractTimeModel
-export StateModel, ControlModel, VariableModel, EmptyVariableModel
+export StateModel, ControlModel, EmptyControlModel, VariableModel, EmptyVariableModel
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos

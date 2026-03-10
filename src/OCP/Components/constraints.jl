@@ -298,18 +298,12 @@ function constraint!(
     codim_f::Union{Dimension,Nothing}=nothing,
 )
 
-    # checks: times, state and control must be set before adding constraints
+    # checks: times and state must be set before adding constraints
     @ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before adding constraints",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before adding constraints",
         context="constraint! function - state validation",
-    )
-    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-        "Control must be set before adding constraints",
-        reason="control has not been defined yet",
-        suggestion="Call control!(ocp, dimension) before adding constraints",
-        context="constraint! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before adding constraints",
@@ -317,6 +311,16 @@ function constraint!(
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before adding constraints",
         context="constraint! function - times validation",
     )
+
+    # checks: control must be set for control-dependent constraint types
+    if type ∈ (:control, :path)
+        @ensure __is_control_set(ocp) Exceptions.PreconditionError(
+            "Control must be set for type=:$type constraints",
+            reason="control has not been defined yet but constraint type requires it",
+            suggestion="Call control!(ocp, dimension) before adding :$type constraints, or use a different constraint type",
+            context="constraint! function - control validation for type=:$type",
+        )
+    end
 
     # checks: variable must be set if using type=:variable
     @ensure (type != :variable || __is_variable_set(ocp)) Exceptions.PreconditionError(

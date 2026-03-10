@@ -172,6 +172,23 @@ struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     value::TS
 end
 
+"""
+$(TYPEDEF)
+
+Sentinel type representing the absence of a control input in an optimal control problem.
+
+Used when the problem has no control variable (dimension 0).
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> ecm = CTModels.EmptyControlModel()
+```
+"""
+struct EmptyControlModel <: AbstractControlModel end
+
 # ------------------------------------------------------------------------------ #
 """
 $(TYPEDEF)
