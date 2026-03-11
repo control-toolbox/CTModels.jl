@@ -116,7 +116,12 @@ __is_state_set(ocp::Model)::Bool = true
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since control is always set in a built [`Model`](@ref CTModels.OCP.Model).
+Return `true` since the control field is always structurally set in a built
+[`Model`](@ref CTModels.OCP.Model) (i.e. it is never `nothing`).
+
+Note: this does not imply a positive control dimension. The model may hold an
+[`EmptyControlModel`](@ref) when the user did not call `control!`, in which case
+`control_dimension(ocp) == 0`.
 """
 __is_control_set(ocp::Model)::Bool = true
 
@@ -161,7 +166,7 @@ and the model is validated before building.
 
 - `times::Union{AbstractTimesModel,Nothing}`: Initial and final time specification.
 - `state::Union{AbstractStateModel,Nothing}`: State variable structure.
-- `control::Union{AbstractControlModel,Nothing}`: Control variable structure.
+- `control::AbstractControlModel`: Control variable structure (defaults to `EmptyControlModel()`, i.e. no control).
 - `variable::AbstractVariableModel`: Optimisation variable (defaults to empty).
 - `dynamics::Union{Function,Vector,Nothing}`: System dynamics (function or component-wise).
 - `objective::Union{AbstractObjectiveModel,Nothing}`: Cost functional.
@@ -181,7 +186,7 @@ julia> # Set fields incrementally...
 @with_kw mutable struct PreModel <: AbstractModel
     times::Union{AbstractTimesModel,Nothing} = nothing
     state::Union{AbstractStateModel,Nothing} = nothing
-    control::Union{AbstractControlModel,Nothing} = nothing
+    control::AbstractControlModel = EmptyControlModel()
     variable::AbstractVariableModel = EmptyVariableModel()
     dynamics::Union{Function,Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}},Nothing} =
         nothing
@@ -222,9 +227,16 @@ __is_state_set(ocp::PreModel)::Bool = __is_set(ocp.state)
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if control has been set in the `PreModel`.
+Return `true` if `c` is an `EmptyControlModel`.
 """
-__is_control_set(ocp::PreModel)::Bool = __is_set(ocp.control)
+__is_control_empty(c) = c isa EmptyControlModel
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if a non-empty control has been set in the `PreModel`.
+"""
+__is_control_set(ocp::PreModel)::Bool = !__is_control_empty(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
@@ -334,7 +346,6 @@ Return true if all the required fields are set in the PreModel.
 function __is_consistent(ocp::PreModel)::Bool
     return __is_times_set(ocp) &&
            __is_state_set(ocp) &&
-           __is_control_set(ocp) &&
            __is_dynamics_complete(ocp) &&
            __is_objective_set(ocp) &&
            __is_autonomous_set(ocp)
@@ -348,7 +359,6 @@ Return true if the PreModel can be built into a Model.
 function __is_complete(ocp::PreModel)::Bool
     return __is_times_set(ocp) &&
            __is_state_set(ocp) &&
-           __is_control_set(ocp) &&
            __is_dynamics_complete(ocp) &&
            __is_objective_set(ocp) &&
            __is_definition_set(ocp) &&

@@ -150,18 +150,18 @@ function test_ocp_exception_integration()
                 Test.@test occursin("state validation", e.context)
             end
 
-            # Test with state set but not control
+            # Test with state set but not times (control is now optional)
             CTModels.state!(ocp, 2)
             try
                 CTModels.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             catch e
                 Test.@test e isa Exceptions.PreconditionError
-                Test.@test e.msg == "Control must be set before objective"
-                Test.@test occursin("control has not been defined yet", e.reason)
+                Test.@test e.msg == "Times must be set before objective"
+                Test.@test occursin("time horizon has not been defined yet", e.reason)
                 Test.@test occursin(
-                    "Call control!(ocp, dimension) before objective!", e.suggestion
+                    "Call time!(ocp, t0, tf) before objective!", e.suggestion
                 )
-                Test.@test occursin("control validation", e.context)
+                Test.@test occursin("objective! function - times validation", e.context)
             end
         end
 

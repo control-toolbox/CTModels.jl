@@ -55,6 +55,8 @@ Determine which components should be plotted based on the `description` and styl
 # Notes
 - Duals are only plotted if `sol` contains path constraint dual variables.
 - A style must not be `:none` for the component to be included.
+- Control is **never** plotted when `control_dimension(sol) == 0`, even if `:control` is
+  listed in `description`. This supports solutions of problems without a control input.
 
 # Example
 ```julia-repl
@@ -73,7 +75,7 @@ function do_plot(
 )
     do_plot_state = :state ∈ description && state_style != :none
     do_plot_costate = :costate ∈ description && costate_style != :none
-    do_plot_control = :control ∈ description && control_style != :none
+    do_plot_control = :control ∈ description && control_style != :none && CTModels.control_dimension(sol) > 0
     ocp = CTModels.model(sol)
     do_plot_path =
         :path ∈ description &&

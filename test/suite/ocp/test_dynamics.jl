@@ -196,12 +196,13 @@ function test_partial_dynamics()
         ocp_missing, 1:1, partial_dyn_1!
     )
 
+    # Control is now optional, so this should NOT throw an error
     ocp_missing = CTModels.PreModel()
     CTModels.time!(ocp_missing; t0=0.0, tf=10.0)
     CTModels.state!(ocp_missing, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
-        ocp_missing, 1:1, partial_dyn_1!
-    )
+    # This should succeed now that control is optional
+    CTModels.dynamics!(ocp_missing, 1:1, partial_dyn_1!)
+    Test.@test CTModels.OCP.__is_dynamics_set(ocp_missing)
 
     ocp_missing = CTModels.PreModel()
     CTModels.state!(ocp_missing, 1)
@@ -250,13 +251,15 @@ function test_full_dynamics()
     Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp2, dynamics!)
 
     ######
-    # 4. Error: control must be set before dynamics
+    # 4. Control is now optional - this should succeed
     ######
     ocp3 = CTModels.PreModel()
     CTModels.time!(ocp3; t0=0.0, tf=10.0)
     CTModels.state!(ocp3, 1)
     CTModels.variable!(ocp3, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp3, dynamics!)
+    # This should succeed now that control is optional
+    CTModels.dynamics!(ocp3, dynamics!)
+    Test.@test CTModels.OCP.__is_dynamics_set(ocp3)
 
     ######
     # 5. Error: time must be set before dynamics

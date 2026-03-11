@@ -12,7 +12,8 @@ Set the objective of the optimal control problem.
 
 !!! note
 
-    - The state, control and variable must be set before the objective.
+    - The state and times must be set before the objective.
+    - Control is **optional**: problems without control input (dimension 0) are fully supported.
     - The objective must not be set before.
     - At least one of the two functions must be given. Please provide a Mayer or a Lagrange function.
 
@@ -31,7 +32,6 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 # Throws
 
 - `Exceptions.PreconditionError`: If state has not been set
-- `Exceptions.PreconditionError`: If control has not been set
 - `Exceptions.PreconditionError`: If times has not been set
 - `Exceptions.PreconditionError`: If objective has already been set
 - `Exceptions.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
@@ -44,18 +44,12 @@ function objective!(
     lagrange::Union{Function,Nothing}=nothing,
 )::Nothing
 
-    # checks: times, state, and control must be set before the objective
+    # checks: times and state must be set before the objective
     @ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before objective",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before objective!(ocp, ...)",
         context="objective! function - state validation",
-    )
-    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-        "Control must be set before objective",
-        reason="control has not been defined yet",
-        suggestion="Call control!(ocp, dimension) before objective!(ocp, ...)",
-        context="objective! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before objective",

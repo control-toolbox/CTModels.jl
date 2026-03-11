@@ -99,14 +99,14 @@ function test_objective()
             ocp, :min, mayer=mayer
         )
 
-        # control not set
+        # control is now optional - this should succeed
         ocp = CTModels.PreModel()
         CTModels.time!(ocp; t0=0.0, tf=10.0)
         CTModels.state!(ocp, 1)
         CTModels.variable!(ocp, 1)
-        Test.@test_throws Exceptions.PreconditionError CTModels.objective!(
-            ocp, :min, mayer=mayer
-        )
+        # This should succeed now that control is optional
+        CTModels.objective!(ocp, :min, mayer=mayer)
+        Test.@test CTModels.OCP.__is_objective_set(ocp)
 
         # times not set
         ocp = CTModels.PreModel()

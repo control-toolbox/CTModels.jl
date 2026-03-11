@@ -278,14 +278,19 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 # Throws
 
 - `Exceptions.PreconditionError`: If state has not been set
-- `Exceptions.PreconditionError`: If control has not been set
 - `Exceptions.PreconditionError`: If times has not been set
+- `Exceptions.PreconditionError`: If control has not been set **and** `type == :control`
 - `Exceptions.PreconditionError`: If variable has not been set (when type=:variable)
 - `Exceptions.PreconditionError`: If constraint with same label already exists
 - `Exceptions.PreconditionError`: If both lb and ub are nothing
 - `Exceptions.IncorrectArgument`: If lb and ub have different lengths
 - `Exceptions.IncorrectArgument`: If lb > ub element-wise
 - `Exceptions.IncorrectArgument`: If dimensions don't match expected sizes
+
+!!! note
+    Control is only required for `type == :control` constraints. All other types
+    (`:state`, `:boundary`, `:path`, `:variable`) are valid even when no control
+    is defined (control dimension 0).
 """
 function constraint!(
     ocp::PreModel,
@@ -298,18 +303,12 @@ function constraint!(
     codim_f::Union{Dimension,Nothing}=nothing,
 )
 
-    # checks: times, state and control must be set before adding constraints
+    # checks: times and state must be set before adding constraints
     @ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before adding constraints",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before adding constraints",
         context="constraint! function - state validation",
-    )
-    @ensure __is_control_set(ocp) Exceptions.PreconditionError(
-        "Control must be set before adding constraints",
-        reason="control has not been defined yet",
-        suggestion="Call control!(ocp, dimension) before adding constraints",
-        context="constraint! function - control validation",
     )
     @ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before adding constraints",
@@ -317,6 +316,16 @@ function constraint!(
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before adding constraints",
         context="constraint! function - times validation",
     )
+
+    # checks: control must be set for :control constraint type
+    if type == :control
+        @ensure __is_control_set(ocp) Exceptions.PreconditionError(
+            "Control must be set for type=:control constraints",
+            reason="control has not been defined yet but constraint type requires it",
+            suggestion="Call control!(ocp, dimension) before adding :control constraints, or use a different constraint type",
+            context="constraint! function - control validation for type=:control",
+        )
+    end
 
     # checks: variable must be set if using type=:variable
     @ensure (type != :variable || __is_variable_set(ocp)) Exceptions.PreconditionError(
