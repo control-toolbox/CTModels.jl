@@ -228,10 +228,7 @@ function build_solution(
         # For path grid, use T_state if T_path is nothing (path constraints share state grid)
         T_path_safe = isnothing(T_path) ? T_state : T_path
         MultipleTimeGridModel(;
-            state=T_state,
-            control=T_control,
-            costate=T_costate,
-            path=T_path_safe,
+            state=T_state, control=T_control, costate=T_costate, path=T_path_safe
         )
     end
 
@@ -1466,11 +1463,25 @@ function _discretize_all_components(
         "costate" => _discretize_function(costate(sol), T_costate, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
-        "path_constraints_dual" => _discretize_dual(path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)),
-        "state_constraints_lb_dual" => _discretize_dual(state_constraints_lb_dual(sol), T_state, dim_state_constraints_box(sol)),
-        "state_constraints_ub_dual" => _discretize_dual(state_constraints_ub_dual(sol), T_state, dim_state_constraints_box(sol)),
-        "control_constraints_lb_dual" => _discretize_dual(control_constraints_lb_dual(sol), T_control, dim_control_constraints_box(sol)),
-        "control_constraints_ub_dual" => _discretize_dual(control_constraints_ub_dual(sol), T_control, dim_control_constraints_box(sol)),
+        "path_constraints_dual" => _discretize_dual(
+            path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)
+        ),
+        "state_constraints_lb_dual" => _discretize_dual(
+            state_constraints_lb_dual(sol), T_state, dim_state_constraints_box(sol)
+        ),
+        "state_constraints_ub_dual" => _discretize_dual(
+            state_constraints_ub_dual(sol), T_state, dim_state_constraints_box(sol)
+        ),
+        "control_constraints_lb_dual" => _discretize_dual(
+            control_constraints_lb_dual(sol),
+            T_control,
+            dim_control_constraints_box(sol),
+        ),
+        "control_constraints_ub_dual" => _discretize_dual(
+            control_constraints_ub_dual(sol),
+            T_control,
+            dim_control_constraints_box(sol),
+        ),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
         "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
@@ -1526,13 +1537,13 @@ See also: [`_serialize_solution(::MultipleTimeGridModel, ...)`](@ref)
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
     T = time_grid(sol)
-    
+
     # Discretize all components
     data = _discretize_all_components(sol, T, T, T, T, dim_x, dim_u)
-    
+
     # Add time grid
     data["time_grid"] = T
-    
+
     return data
 end
 
@@ -1589,15 +1600,17 @@ function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int,
     T_control = time_grid(sol, :control)
     T_costate = time_grid(sol, :costate)
     T_path = time_grid(sol, :path)
-    
+
     # Discretize all components
-    data = _discretize_all_components(sol, T_state, T_control, T_costate, T_path, dim_x, dim_u)
-    
+    data = _discretize_all_components(
+        sol, T_state, T_control, T_costate, T_path, dim_x, dim_u
+    )
+
     # Add multiple time grids
     data["time_grid_state"] = T_state
     data["time_grid_control"] = T_control
     data["time_grid_costate"] = T_costate
     data["time_grid_path"] = T_path
-    
+
     return data
 end

@@ -32,7 +32,7 @@ function _convert_matrices_for_json!(blob::Dict)
             blob[key] = CTModels.Utils.matrix2vec(blob[key], 1)
         end
     end
-    
+
     # Convert optional matrix fields (can be nothing)
     for key in _OPTIONAL_MATRIX_FIELDS
         if haskey(blob, key) && !isnothing(blob[key]) && blob[key] isa Matrix
@@ -278,8 +278,12 @@ function CTModels.import_ocp_solution(
     path_constraints_dual = _json_to_optional_matrix(blob["path_constraints_dual"])
     state_constraints_lb_dual = _json_to_optional_matrix(blob["state_constraints_lb_dual"])
     state_constraints_ub_dual = _json_to_optional_matrix(blob["state_constraints_ub_dual"])
-    control_constraints_lb_dual = _json_to_optional_matrix(blob["control_constraints_lb_dual"])
-    control_constraints_ub_dual = _json_to_optional_matrix(blob["control_constraints_ub_dual"])
+    control_constraints_lb_dual = _json_to_optional_matrix(
+        blob["control_constraints_lb_dual"]
+    )
+    control_constraints_ub_dual = _json_to_optional_matrix(
+        blob["control_constraints_ub_dual"]
+    )
 
     # get dual of boundary constraints: no conversion needed
     boundary_constraints_dual = blob["boundary_constraints_dual"]

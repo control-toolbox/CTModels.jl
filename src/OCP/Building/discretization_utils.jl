@@ -87,4 +87,3 @@ See also: `_discretize_function`
 function _discretize_dual(dual_func::Union{Function,Nothing}, T, dim::Int=-1)
     return isnothing(dual_func) ? nothing : _discretize_function(dual_func, T, dim)
 end
-

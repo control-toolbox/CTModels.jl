@@ -52,7 +52,11 @@ function _reconstruct_solution_from_data(
         T_state = _extract_time_vector(data["time_grid_state"])
         T_control = _extract_time_vector(data["time_grid_control"])
         # Backward compatibility: if time_grid_costate is missing, use T_state
-        T_costate = haskey(data, "time_grid_costate") ? _extract_time_vector(data["time_grid_costate"]) : T_state
+        T_costate = if haskey(data, "time_grid_costate")
+            _extract_time_vector(data["time_grid_costate"])
+        else
+            T_state
+        end
         # Support both new (time_grid_path) and legacy (time_grid_dual) keys
         T_path_key = haskey(data, "time_grid_path") ? "time_grid_path" : "time_grid_dual"
         T_path = _extract_time_vector(data[T_path_key])
