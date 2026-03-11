@@ -38,10 +38,7 @@ function test_solution_multi_grids()
                 T_path = LinRange(0, 1, 61)
 
                 mtgm = CTModels.MultipleTimeGridModel(
-                    state=T_state,
-                    control=T_control,
-                    costate=T_costate,
-                    path=T_path,
+                    state=T_state, control=T_control, costate=T_costate, path=T_path
                 )
                 Test.@test mtgm isa CTModels.MultipleTimeGridModel
                 Test.@test mtgm isa CTModels.AbstractTimeGridModel
@@ -81,10 +78,14 @@ function test_solution_multi_grids()
                 Test.@test CTModels.clean_component_symbols((:cons,)) == (:path,)
 
                 # Test box constraint aliases
-                Test.@test CTModels.clean_component_symbols((:state_box_constraint,)) == (:state,)
-                Test.@test CTModels.clean_component_symbols((:state_box_constraints,)) == (:state,)
-                Test.@test CTModels.clean_component_symbols((:control_box_constraint,)) == (:control,)
-                Test.@test CTModels.clean_component_symbols((:control_box_constraints,)) == (:control,)
+                Test.@test CTModels.clean_component_symbols((:state_box_constraint,)) ==
+                    (:state,)
+                Test.@test CTModels.clean_component_symbols((:state_box_constraints,)) ==
+                    (:state,)
+                Test.@test CTModels.clean_component_symbols((:control_box_constraint,)) ==
+                    (:control,)
+                Test.@test CTModels.clean_component_symbols((:control_box_constraints,)) ==
+                    (:control,)
 
                 # Test mixed input (costate→state, dual→path, so only 3 unique)
                 Test.@test CTModels.clean_component_symbols((
@@ -94,8 +95,10 @@ function test_solution_multi_grids()
                 # Test duplicate removal
                 Test.@test CTModels.clean_component_symbols((:state, :state)) == (:state,)
                 Test.@test CTModels.clean_component_symbols((:states, :state)) == (:state,)
-                Test.@test CTModels.clean_component_symbols((:costate, :costate)) == (:costate,)
-                Test.@test CTModels.clean_component_symbols((:costates, :costate)) == (:costate,)
+                Test.@test CTModels.clean_component_symbols((:costate, :costate)) ==
+                    (:costate,)
+                Test.@test CTModels.clean_component_symbols((:costates, :costate)) ==
+                    (:costate,)
                 Test.@test CTModels.clean_component_symbols((:dual, :path)) == (:path,)
             end
         end

@@ -1,9 +1,9 @@
 module TestMultiGrids
 
-import Test
-import CTModels
-import JLD2
-import JSON3
+using Test: Test
+using CTModels: CTModels
+using JLD2: JLD2
+using JSON3: JSON3
 import CTBase.Exceptions
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
@@ -55,16 +55,22 @@ function test_multi_grids()
         Test.@testset "Unified grid detection" begin
             # Create solution with same grid for all components using functions
             T = collect(LinRange(0.0, 1.0, 11))
-            
+
             # Use functions (simpler and more robust)
             X_func = CTModels.state(sol_unified)
             U_func = CTModels.control(sol_unified)
             P_func = CTModels.costate(sol_unified)
-            
+
             sol = CTModels.build_solution(
                 ocp,
-                T, T, T, T,  # All grids identical
-                X_func, U_func, v, P_func;
+                T,
+                T,
+                T,
+                T,  # All grids identical
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -75,7 +81,7 @@ function test_multi_grids()
 
             # Should create UnifiedTimeGridModel (optimization)
             Test.@test CTModels.time_grid_model(sol) isa CTModels.UnifiedTimeGridModel
-            
+
             # time_grid without argument should work
             T_retrieved = CTModels.time_grid(sol)
             Test.@test T_retrieved ≈ T
@@ -99,8 +105,14 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_costate, T_path,  # Different grids
-                X_func, U_func, v, P_func;
+                T_state,
+                T_control,
+                T_costate,
+                T_path,  # Different grids
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -110,8 +122,9 @@ function test_multi_grids()
             )
 
             # Should create MultipleTimeGridModel
-            Test.@test CTModels.time_grid_model(sol_multi) isa CTModels.MultipleTimeGridModel
-            
+            Test.@test CTModels.time_grid_model(sol_multi) isa
+                CTModels.MultipleTimeGridModel
+
             # time_grid with component should work
             Test.@test CTModels.time_grid(sol_multi, :state) ≈ T_state
             Test.@test CTModels.time_grid(sol_multi, :control) ≈ T_control
@@ -137,8 +150,14 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_costate, T_path,
-                X_func, U_func, v, P_func;
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -149,12 +168,15 @@ function test_multi_grids()
 
             # Export
             CTModels.export_ocp_solution(sol_multi; filename="multi_grid_test", format=:JLD)
-            
+
             # Import
-            sol_reloaded = CTModels.import_ocp_solution(ocp; filename="multi_grid_test", format=:JLD)
+            sol_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="multi_grid_test", format=:JLD
+            )
 
             # Verify time grid model type
-            Test.@test CTModels.time_grid_model(sol_reloaded) isa CTModels.MultipleTimeGridModel
+            Test.@test CTModels.time_grid_model(sol_reloaded) isa
+                CTModels.MultipleTimeGridModel
 
             # Verify grids are preserved
             Test.@test CTModels.time_grid(sol_reloaded, :state) ≈ T_state
@@ -171,7 +193,8 @@ function test_multi_grids()
                 Test.@test CTModels.state(sol_reloaded)(t) ≈ CTModels.state(sol_multi)(t) atol=1e-8
             end
             for t in T_control
-                Test.@test CTModels.control(sol_reloaded)(t) ≈ CTModels.control(sol_multi)(t) atol=1e-8
+                Test.@test CTModels.control(sol_reloaded)(t) ≈
+                    CTModels.control(sol_multi)(t) atol=1e-8
             end
 
             remove_if_exists("multi_grid_test.jld2")
@@ -195,8 +218,14 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_costate, T_path,
-                X_func, U_func, v, P_func;
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -209,7 +238,9 @@ function test_multi_grids()
             Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(sol_multi)
 
             # Invalid component should throw error
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(sol_multi, :invalid)
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(
+                sol_multi, :invalid
+            )
         end
 
         # ====================================================================
@@ -230,8 +261,14 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_costate, T_path,
-                X_func, U_func, v, P_func;
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -267,8 +304,14 @@ function test_multi_grids()
 
             sol = CTModels.build_solution(
                 ocp,
-                T_state, T_control, T_costate, nothing,  # T_path = nothing
-                X_func, U_func, v, P_func;
+                T_state,
+                T_control,
+                T_costate,
+                nothing,  # T_path = nothing
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -297,8 +340,14 @@ function test_multi_grids()
             # Pass same grid 4 times
             sol = CTModels.build_solution(
                 ocp,
-                T, T, T, T,  # All identical
-                X_func, U_func, v, P_func;
+                T,
+                T,
+                T,
+                T,  # All identical
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -316,8 +365,14 @@ function test_multi_grids()
 
             sol_multi = CTModels.build_solution(
                 ocp,
-                T, T_control_diff, T, T,  # One different
-                X_func, U_func, v, P_func;
+                T,
+                T_control_diff,
+                T,
+                T,  # One different
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -327,7 +382,8 @@ function test_multi_grids()
             )
 
             # Should use MultipleTimeGridModel
-            Test.@test CTModels.time_grid_model(sol_multi) isa CTModels.MultipleTimeGridModel
+            Test.@test CTModels.time_grid_model(sol_multi) isa
+                CTModels.MultipleTimeGridModel
             Test.@test CTModels.time_grid(sol_multi, :state) ≈ T
             Test.@test CTModels.time_grid(sol_multi, :control) ≈ T_control_diff
         end
@@ -344,8 +400,15 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol_uni = CTModels.build_solution(
-                ocp, T, T, T, T,
-                X_func, U_func, v, P_func;
+                ocp,
+                T,
+                T,
+                T,
+                T,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -356,7 +419,7 @@ function test_multi_grids()
 
             # Serialize and check structure
             data_uni = CTModels.OCP._serialize_solution(sol_uni)
-            
+
             # Should have legacy format keys
             Test.@test haskey(data_uni, "time_grid")
             Test.@test !haskey(data_uni, "time_grid_state")
@@ -370,8 +433,15 @@ function test_multi_grids()
             # T_path same as T_state for this test
 
             sol_multi = CTModels.build_solution(
-                ocp, T_state, T_control, T_costate, T_path,
-                X_func, U_func, v, P_func;
+                ocp,
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -382,14 +452,14 @@ function test_multi_grids()
 
             # Serialize and check structure
             data_multi = CTModels.OCP._serialize_solution(sol_multi)
-            
+
             # Should have multi-grid format keys
             Test.@test haskey(data_multi, "time_grid_state")
             Test.@test haskey(data_multi, "time_grid_control")
             Test.@test haskey(data_multi, "time_grid_costate")
             Test.@test haskey(data_multi, "time_grid_path")
             Test.@test !haskey(data_multi, "time_grid")
-            
+
             # Verify grid values
             Test.@test data_multi["time_grid_state"] ≈ T_state
             Test.@test data_multi["time_grid_control"] ≈ T_control
@@ -414,8 +484,14 @@ function test_multi_grids()
 
             sol_extreme = CTModels.build_solution(
                 ocp,
-                T_state_large, T_control_small, T_costate_medium, T_path_large,
-                X_func, U_func, v, P_func;
+                T_state_large,
+                T_control_small,
+                T_costate_medium,
+                T_path_large,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -425,8 +501,9 @@ function test_multi_grids()
             )
 
             # Should create MultipleTimeGridModel
-            Test.@test CTModels.time_grid_model(sol_extreme) isa CTModels.MultipleTimeGridModel
-            
+            Test.@test CTModels.time_grid_model(sol_extreme) isa
+                CTModels.MultipleTimeGridModel
+
             # Verify grids
             Test.@test length(CTModels.time_grid(sol_extreme, :state)) == 1001
             Test.@test length(CTModels.time_grid(sol_extreme, :control)) == 11
@@ -435,10 +512,17 @@ function test_multi_grids()
 
             # Minimum grid size (2 points)
             T_min = collect(LinRange(0.0, 1.0, 2))
-            
+
             sol_min = CTModels.build_solution(
-                ocp, T_min, T_min, T_min, T_min,
-                X_func, U_func, v, P_func;
+                ocp,
+                T_min,
+                T_min,
+                T_min,
+                T_min,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -469,8 +553,15 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol_orig = CTModels.build_solution(
-                ocp, T_state, T_control, T_costate, T_path,
-                X_func, U_func, v, P_func;
+                ocp,
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -484,7 +575,8 @@ function test_multi_grids()
 
             # Reconstruct using helper function
             sol_reconstructed = CTModels.Serialization._reconstruct_solution_from_data(
-                ocp, data;
+                ocp,
+                data;
                 path_constraints_dual=data["path_constraints_dual"],
                 boundary_constraints_dual=data["boundary_constraints_dual"],
                 state_constraints_lb_dual=data["state_constraints_lb_dual"],
@@ -497,7 +589,8 @@ function test_multi_grids()
             )
 
             # Verify reconstruction
-            Test.@test CTModels.time_grid_model(sol_reconstructed) isa CTModels.MultipleTimeGridModel
+            Test.@test CTModels.time_grid_model(sol_reconstructed) isa
+                CTModels.MultipleTimeGridModel
             Test.@test CTModels.time_grid(sol_reconstructed, :state) ≈ T_state
             Test.@test CTModels.time_grid(sol_reconstructed, :control) ≈ T_control
             Test.@test CTModels.time_grid(sol_reconstructed, :costate) ≈ T_costate
@@ -517,8 +610,15 @@ function test_multi_grids()
             P_func = CTModels.costate(sol_unified)
 
             sol = CTModels.build_solution(
-                ocp, T, T, T, T,
-                X_func, U_func, v, P_func;
+                ocp,
+                T,
+                T,
+                T,
+                T,
+                X_func,
+                U_func,
+                v,
+                P_func;
                 objective=CTModels.objective(sol_unified),
                 iterations=CTModels.iterations(sol_unified),
                 constraints_violation=CTModels.constraints_violation(sol_unified),
@@ -536,7 +636,8 @@ function test_multi_grids()
 
             # Reconstruct from legacy format
             sol_from_legacy = CTModels.Serialization._reconstruct_solution_from_data(
-                ocp, data;
+                ocp,
+                data;
                 path_constraints_dual=data["path_constraints_dual"],
                 boundary_constraints_dual=data["boundary_constraints_dual"],
                 state_constraints_lb_dual=data["state_constraints_lb_dual"],
@@ -549,7 +650,8 @@ function test_multi_grids()
             )
 
             # Should create UnifiedTimeGridModel from legacy format
-            Test.@test CTModels.time_grid_model(sol_from_legacy) isa CTModels.UnifiedTimeGridModel
+            Test.@test CTModels.time_grid_model(sol_from_legacy) isa
+                CTModels.UnifiedTimeGridModel
             Test.@test CTModels.time_grid(sol_from_legacy) ≈ T
         end
 
