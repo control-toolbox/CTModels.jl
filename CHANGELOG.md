@@ -1,9 +1,31 @@
 # Changelog
 
+<!-- markdownlint-disable MD024 -->
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.9.7] - 2026-03-11
+
+### Added - 0.9.7
+
+- **OCP Without Control Input**: Optimal control problems can now be built and solved without defining a control variable (`control_dimension(ocp) == 0`)
+  - `PreModel` defaults to an `EmptyControlModel()` when `control!` is not called
+  - `build` accepts models without control while preserving backward compatibility
+
+### Changed - 0.9.7
+
+- **Relaxed Preconditions**: `dynamics!` and `objective!` no longer require control to be set (control is optional)
+- **Constraints**: `constraint!` only requires control when `type == :control`
+- **Plotting**: Requesting `:control` in plot descriptions is ignored when `control_dimension(sol) == 0`
+- **Initialization**: `initial_control(ocp, Float64[])` is accepted when `control_dimension(ocp) == 0`
+
+### Fixed - 0.9.7
+
+- **Serialization Round-Trip Coverage**: Added JSON/JLD2 round-trip tests for solutions with `control_dimension == 0`
+- **Documentation Accuracy**: Updated docstrings for control-optional behavior (build/dynamics/objective/constraints/plotting/display)
 
 ## [0.9.6] - 2026-03-10
 

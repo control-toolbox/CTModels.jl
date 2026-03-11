@@ -1,6 +1,37 @@
 # Breaking Changes
 
+<!-- markdownlint-disable MD024 -->
+
 This document describes breaking changes in CTModels releases and how to migrate your code.
+
+## [0.9.7] - 2026-03-11
+
+**No breaking changes** - This release adds support for optimal control problems without a control input (`control_dimension == 0`) while maintaining full backward compatibility.
+
+### New Features (Non-Breaking) - 0.9.7
+
+- **Zero Control Dimension Support**
+  - `control!` is now optional in `PreModel`
+  - `build(pre)` accepts models where no control has been defined
+  - Plotting ignores `:control` when `control_dimension(sol) == 0`
+  - Serialization (JSON/JLD2) supports round-tripping solutions with empty control
+
+### Migration Notes - 0.9.7
+
+**No action required** - existing code continues to work unchanged.
+
+You can now write models without `control!`:
+
+```julia
+pre = PreModel()
+time!(pre, t0=0.0, tf=1.0)
+state!(pre, 2)
+dynamics!(pre, (x, u) -> [x[2], -x[1]])
+objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+model = build(pre)
+
+@assert control_dimension(model) == 0
+```
 
 ## [0.9.6] - 2026-03-10
 
