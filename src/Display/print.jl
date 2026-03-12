@@ -256,7 +256,14 @@ function __print_mathematical_definition(
         # print with or without control
         if u_dim > 0
             print(
-                io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n"
+                io,
+                "    where ",
+                x_name_space,
+                ", ",
+                u_name_space,
+                " and ",
+                v_name_space,
+                ".\n",
             )
         else
             print(io, "    where ", x_name_space, " and ", v_name_space, ".\n")
