@@ -75,7 +75,10 @@ function do_plot(
 )
     do_plot_state = :state ∈ description && state_style != :none
     do_plot_costate = :costate ∈ description && costate_style != :none
-    do_plot_control = :control ∈ description && control_style != :none && CTModels.control_dimension(sol) > 0
+    do_plot_control =
+        :control ∈ description &&
+        control_style != :none &&
+        CTModels.control_dimension(sol) > 0
     ocp = CTModels.model(sol)
     do_plot_path =
         :path ∈ description &&
