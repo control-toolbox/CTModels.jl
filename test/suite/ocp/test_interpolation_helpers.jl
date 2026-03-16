@@ -283,6 +283,123 @@ function test_interpolation_helpers()
                 U_test, T_test, 1, Matrix{Float64}; interpolation=:invalid
             )
         end
+
+        # ====================================================================
+        # INTEGRATION TESTS - build_solution with constant control interpolation
+        # ====================================================================
+
+        Test.@testset "INTEGRATION: build_solution - piecewise constant control" begin
+            # 🧪 **Applying Testing Rule**: Integration testing with build_solution
+            # Create a simple OCP and solution to verify control interpolation behavior
+            
+            # Build a minimal OCP
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u[1]]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            # Create solution data with control values that vary
+            T = [0.0, 0.3, 0.7, 1.0]
+            X = [0.0 0.0; 0.3 0.1; 0.7 0.3; 1.0 0.5]
+            U = [5.0; 3.0; 2.0; 1.0]  # 1D control as column vector
+            U = reshape(U, :, 1)  # Convert to matrix (4, 1)
+            v = Float64[]
+            P = [0.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
+
+            sol = CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true
+            )
+
+            u_func = CTModels.control(sol)
+
+            # Test 1: Values at knots should match the data
+            Test.@test u_func(0.0) ≈ 5.0
+            Test.@test u_func(0.3) ≈ 3.0
+            Test.@test u_func(0.7) ≈ 2.0
+            Test.@test u_func(1.0) ≈ 1.0
+
+            # Test 2: Piecewise constant behavior - value held on [t_i, t_{i+1})
+            # On [0.0, 0.3): should be 5.0
+            Test.@test u_func(0.0) ≈ 5.0
+            Test.@test u_func(0.1) ≈ 5.0
+            Test.@test u_func(0.29) ≈ 5.0
+
+            # On [0.3, 0.7): should be 3.0
+            Test.@test u_func(0.3) ≈ 3.0
+            Test.@test u_func(0.5) ≈ 3.0
+            Test.@test u_func(0.69) ≈ 3.0
+
+            # On [0.7, 1.0]: should be 2.0
+            Test.@test u_func(0.7) ≈ 2.0
+            Test.@test u_func(0.85) ≈ 2.0
+            Test.@test u_func(0.99) ≈ 2.0
+
+            # Test 3: Verify NOT linear interpolation
+            # If it were linear, u(0.15) would be between 5.0 and 3.0
+            # With constant interpolation, it should be exactly 5.0
+            Test.@test u_func(0.15) ≈ 5.0
+            Test.@test u_func(0.15) != (5.0 + 3.0) / 2  # Not the midpoint
+        end
+
+        Test.@testset "INTEGRATION: build_solution - multi-dimensional constant control" begin
+            # Test with 2D control to verify vector-valued constant interpolation
+            
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 2)  # 2D control
+            dynamics!(r, t, x, u, v) = r .= [x[2], u[1] + u[2]]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            T = [0.0, 0.5, 1.0]
+            X = [0.0 0.0; 0.5 0.1; 1.0 0.2]
+            U = [1.0 2.0; 3.0 4.0; 5.0 6.0]  # 2D control
+            v = Float64[]
+            P = [0.0 0.0; 0.0 0.0; 0.0 0.0]
+
+            sol = CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true
+            )
+
+            u_func = CTModels.control(sol)
+
+            # Test at knots
+            Test.@test u_func(0.0) ≈ [1.0, 2.0]
+            Test.@test u_func(0.5) ≈ [3.0, 4.0]
+            Test.@test u_func(1.0) ≈ [5.0, 6.0]
+
+            # Test piecewise constant on intervals
+            Test.@test u_func(0.25) ≈ [1.0, 2.0]  # On [0.0, 0.5)
+            Test.@test u_func(0.75) ≈ [3.0, 4.0]  # On [0.5, 1.0]
+
+            # Verify NOT linear interpolation
+            # Linear would give [2.0, 3.0] at t=0.25
+            Test.@test u_func(0.25) != [2.0, 3.0]
+        end
     end
 end
 
