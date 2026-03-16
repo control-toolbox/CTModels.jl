@@ -11,6 +11,7 @@ including interpolation, matrix operations, and function transformations.
 The following functions are exported and accessible as `CTModels.function_name()`:
 
 - `ctinterpolate`: Linear interpolation for data
+- `ctinterpolate_constant`: Piecewise-constant interpolation for data
 - `matrix2vec`: Convert matrices to vectors
 
 # Private API
@@ -25,7 +26,6 @@ See also: `CTModels`
 module Utils
 
 using DocStringExtensions
-using Interpolations
 using CTBase: ctNumber
 
 # Private utilities (not exported)
@@ -37,6 +37,6 @@ include("interpolation.jl")
 include("matrix_utils.jl")
 
 # Export public API
-export ctinterpolate, matrix2vec
+export ctinterpolate, ctinterpolate_constant, matrix2vec
 
 end

@@ -43,8 +43,8 @@ include("aliases.jl")
 # Import macro from Utils module
 import ..Utils: @ensure
 
-# Import matrix2vec, ctinterpolate and to_out_of_place from Utils for solution building
-import ..Utils: matrix2vec, ctinterpolate, to_out_of_place
+# Import matrix2vec, ctinterpolate, ctinterpolate_constant and to_out_of_place from Utils for solution building
+import ..Utils: matrix2vec, ctinterpolate, ctinterpolate_constant, to_out_of_place
 
 # Load types first (no dependencies)
 include("Types/components.jl")

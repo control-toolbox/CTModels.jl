@@ -43,17 +43,17 @@ function test_interpolation()
         end
 
         Test.@testset "ctinterpolate - extrapolation" begin
-            # Test linear extrapolation beyond bounds
+            # Test extrapolation beyond bounds (flat extrapolation)
             x = [0.0, 1.0, 2.0]
             f = [1.0, 2.0, 3.0]
 
             interp = CTModels.ctinterpolate(x, f)
 
-            # Extrapolate before first point (should follow line)
-            Test.@test interp(-1.0) ≈ 0.0
+            # Extrapolate before first point (should hold first value)
+            Test.@test interp(-1.0) ≈ 1.0
 
-            # Extrapolate after last point (should follow line)
-            Test.@test interp(3.0) ≈ 4.0
+            # Extrapolate after last point (should hold last value)
+            Test.@test interp(3.0) ≈ 3.0
         end
 
         Test.@testset "ctinterpolate - sine wave" begin
@@ -108,6 +108,93 @@ function test_interpolation()
 
             # Test at intermediate point
             Test.@test interp(0.5) ≈ [0.5, 1.0]
+        end
+
+        # ====================================================================
+        # UNIT TESTS - Constant Interpolation
+        # ====================================================================
+        
+        Test.@testset "ctinterpolate_constant - basic piecewise constant" begin
+            # Simple piecewise constant data
+            x = [0.0, 1.0, 2.0]
+            f = [1.0, 2.0, 3.0]
+
+            interp = CTModels.ctinterpolate_constant(x, f)
+
+            # Test at data points
+            Test.@test interp(0.0) ≈ 1.0
+            Test.@test interp(1.0) ≈ 2.0
+            Test.@test interp(2.0) ≈ 3.0
+
+            # Test left-continuous behavior: constant on [t_i, t_{i+1})
+            Test.@test interp(0.5) ≈ 1.0  # Held from x[1] on [0.0, 1.0)
+            Test.@test interp(0.9) ≈ 1.0  # Still held from x[1]
+            Test.@test interp(1.5) ≈ 2.0  # Held from x[2] on [1.0, 2.0)
+        end
+
+        Test.@testset "ctinterpolate_constant - extrapolation with Flat" begin
+            # Test constant extrapolation beyond bounds
+            x = [0.0, 1.0, 2.0]
+            f = [1.0, 2.0, 3.0]
+
+            interp = CTModels.ctinterpolate_constant(x, f)
+
+            # Extrapolate before first point (should hold first value)
+            Test.@test interp(-1.0) ≈ 1.0
+            Test.@test interp(-0.5) ≈ 1.0
+
+            # Extrapolate after last point (should hold last value)
+            Test.@test interp(3.0) ≈ 3.0
+            Test.@test interp(5.0) ≈ 3.0
+        end
+
+        Test.@testset "ctinterpolate_constant - control-like data" begin
+            # Simulate control values that should be piecewise constant
+            x = [0.0, 0.1, 0.5, 1.0]
+            f = [5.0, 4.0, 3.0, 2.0]
+
+            interp = CTModels.ctinterpolate_constant(x, f)
+
+            # Test left-continuous behavior: constant on [t_i, t_{i+1})
+            Test.@test interp(0.0) ≈ 5.0
+            Test.@test interp(0.05) ≈ 5.0   # Held from 0.0 on [0.0, 0.1)
+            Test.@test interp(0.1) ≈ 4.0
+            Test.@test interp(0.3) ≈ 4.0    # Held from 0.1 on [0.1, 0.5)
+            Test.@test interp(0.5) ≈ 3.0
+            Test.@test interp(0.75) ≈ 3.0   # Held from 0.5 on [0.5, 1.0)
+            Test.@test interp(1.0) ≈ 2.0
+        end
+
+        Test.@testset "ctinterpolate_constant - vector values" begin
+            # Test with vector-valued piecewise constant function
+            x = [0.0, 1.0, 2.0]
+            f = [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]
+
+            interp = CTModels.ctinterpolate_constant(x, f)
+
+            # Test at data points
+            Test.@test interp(0.0) ≈ [1.0, 2.0]
+            Test.@test interp(1.0) ≈ [3.0, 4.0]
+            Test.@test interp(2.0) ≈ [5.0, 6.0]
+
+            # Test left-continuous behavior with vectors
+            Test.@test interp(0.5) ≈ [1.0, 2.0]  # Held from x[1] on [0.0, 1.0)
+            Test.@test interp(1.5) ≈ [3.0, 4.0]  # Held from x[2] on [1.0, 2.0)
+        end
+
+        Test.@testset "ctinterpolate_constant - constant function" begin
+            # All values the same
+            x = [0.0, 1.0, 2.0, 3.0]
+            f = [7.0, 7.0, 7.0, 7.0]
+
+            interp = CTModels.ctinterpolate_constant(x, f)
+
+            # Should be constant everywhere
+            Test.@test interp(0.5) ≈ 7.0
+            Test.@test interp(1.5) ≈ 7.0
+            Test.@test interp(2.5) ≈ 7.0
+            Test.@test interp(-1.0) ≈ 7.0  # Extrapolation
+            Test.@test interp(5.0) ≈ 7.0   # Extrapolation
         end
     end
 end

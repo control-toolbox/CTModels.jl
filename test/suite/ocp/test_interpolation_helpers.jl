@@ -204,6 +204,85 @@ function test_interpolation_helpers()
             Test.@test result(0.0) ≈ [0.0, 1.0]
             Test.@test result(π/2) ≈ [1.0, 0.0] atol=1e-10
         end
+
+        # ====================================================================
+        # UNIT TESTS - Constant Interpolation
+        # ====================================================================
+
+        Test.@testset "build_interpolated_function: constant interpolation" begin
+            # Test piecewise-constant interpolation for control-like data
+            T_control = [0.0, 0.5, 1.0]
+            U_control = [5.0 6.0; 4.0 5.0; 3.0 4.0]  # 3x2 matrix
+
+            fu = OCP.build_interpolated_function(
+                U_control, T_control, 2, Matrix{Float64}; 
+                expected_dim=2, interpolation=:constant
+            )
+
+            # Test at knots
+            Test.@test fu(0.0) ≈ [5.0, 6.0]
+            Test.@test fu(0.5) ≈ [4.0, 5.0]
+            Test.@test fu(1.0) ≈ [3.0, 4.0]
+
+            # Test left-continuous behavior: constant on [t_i, t_{i+1})
+            Test.@test fu(0.25) ≈ [5.0, 6.0]  # Held from t=0.0 on [0.0, 0.5)
+            Test.@test fu(0.75) ≈ [4.0, 5.0]  # Held from t=0.5 on [0.5, 1.0)
+        end
+
+        Test.@testset "build_interpolated_function: constant vs linear comparison" begin
+            # Compare constant and linear interpolation
+            T_test = [0.0, 1.0, 2.0]
+            U_test = [1.0; 2.0; 3.0]
+
+            # Linear interpolation
+            fu_linear = OCP.build_interpolated_function(
+                U_test, T_test, 1, Matrix{Float64}; interpolation=:linear
+            )
+
+            # Constant interpolation
+            fu_constant = OCP.build_interpolated_function(
+                U_test, T_test, 1, Matrix{Float64}; interpolation=:constant
+            )
+
+            # At knots, both should match
+            Test.@test fu_linear(0.0) ≈ fu_constant(0.0)
+            Test.@test fu_linear(1.0) ≈ fu_constant(1.0)
+
+            # Between knots, they differ
+            # Linear: interpolates
+            Test.@test fu_linear(0.5) ≈ 1.5
+
+            # Constant: left-continuous (held from previous knot)
+            Test.@test fu_constant(0.5) ≈ 1.0  # Held from t=0.0 on [0.0, 1.0)
+        end
+
+        Test.@testset "build_interpolated_function: constant with scalar extraction" begin
+            # Test scalar extraction with constant interpolation
+            T_1d = [0.0, 0.5, 1.0]
+            U_1d = [5.0; 4.0; 3.0]
+
+            fu = OCP.build_interpolated_function(
+                U_1d, T_1d, 1, Matrix{Float64}; 
+                expected_dim=1, interpolation=:constant
+            )
+
+            # Should extract scalar
+            Test.@test fu(0.0) isa Float64
+            Test.@test fu(0.0) ≈ 5.0
+            Test.@test fu(0.25) ≈ 5.0  # Held from t=0.0 on [0.0, 0.5)
+            Test.@test fu(0.5) ≈ 4.0
+            Test.@test fu(0.75) ≈ 4.0  # Held from t=0.5 on [0.5, 1.0)
+        end
+
+        Test.@testset "build_interpolated_function: invalid interpolation type" begin
+            # Test error handling for invalid interpolation type
+            T_test = [0.0, 1.0]
+            U_test = [1.0; 2.0]
+
+            Test.@test_throws Exceptions.IncorrectArgument OCP.build_interpolated_function(
+                U_test, T_test, 1, Matrix{Float64}; interpolation=:invalid
+            )
+        end
     end
 end
 
