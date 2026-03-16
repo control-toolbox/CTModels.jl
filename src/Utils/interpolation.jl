@@ -3,8 +3,8 @@ $(TYPEDSIGNATURES)
 
 Return a linear interpolation function for the data `f` defined at points `x`.
 
-This function creates a one-dimensional linear interpolant using the 
-[`Interpolations.jl`](https://github.com/JuliaMath/Interpolations.jl) package, with linear extrapolation beyond the bounds of `x`.
+This function creates a one-dimensional linear interpolant with flat extrapolation 
+beyond the bounds of `x` (returns `f[1]` for `t < x[1]` and `f[end]` for `t >= x[end]`).
 
 # Arguments
 - `x`: A vector of points at which the values `f` are defined.
@@ -15,12 +15,77 @@ A callable interpolation object that can be evaluated at new points.
 
 # Example
 ```julia-repl
-julia> x = 0:0.5:2
-julia> f = [0.0, 1.0, 0.0, -1.0, 0.0]
+julia> x = [0.0, 1.0, 2.0]
+julia> f = [1.0, 2.0, 3.0]
 julia> interp = ctinterpolate(x, f)
-julia> interp(1.2)
+julia> interp(0.5)  # Returns 1.5 (linear interpolation)
+julia> interp(-1.0)  # Returns 1.0 (flat extrapolation)
+julia> interp(3.0)  # Returns 3.0 (flat extrapolation)
 ```
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
-    return Interpolations.linear_interpolation(x, f; extrapolation_bc=Interpolations.Line())
+    function linear_interp(t)
+        if t < x[1]
+            return f[1]  # Flat extrapolation before
+        elseif t >= x[end]
+            return f[end]  # Flat extrapolation after
+        else
+            # Find the interval [x[i], x[i+1]] containing t
+            i = searchsortedlast(x, t)
+            if i == length(x)
+                return f[end]
+            end
+            # Linear interpolation: f[i] + (f[i+1] - f[i]) * (t - x[i]) / (x[i+1] - x[i])
+            α = (t - x[i]) / (x[i+1] - x[i])
+            return f[i] + α * (f[i+1] - f[i])
+        end
+    end
+    return linear_interp
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return a piecewise-constant interpolation function for the data `f` defined at points `x`.
+
+This function creates a right-continuous piecewise constant interpolant:
+the value at knot `x[i]` is held constant on the interval `[x[i], x[i+1})`.
+
+This implements the standard steppost behavior for optimal control:
+- `u(t_i) = u_i` (value at the knot)
+- `u(t) = u_i` for all `t ∈ [t_i, t_{i+1})`
+- Right-continuous: `lim_{t→t_i^+} u(t) = u(t_i)`
+
+# Arguments
+- `x`: A vector of points at which the values `f` are defined.
+- `f`: A vector of values to interpolate.
+
+# Returns
+A callable interpolation object that can be evaluated at new points.
+
+# Example
+```julia-repl
+julia> x = [0.0, 1.0, 2.0]
+julia> f = [1.0, 2.0, 3.0]
+julia> interp = ctinterpolate_constant(x, f)
+julia> interp(0.0)  # Returns 1.0 (value at x[1])
+julia> interp(0.5)  # Returns 1.0 (held from x[1] on [0.0, 1.0))
+julia> interp(1.0)  # Returns 2.0 (value at x[2], right-continuous)
+julia> interp(1.5)  # Returns 2.0 (held from x[2] on [1.0, 2.0))
+```
+"""
+function ctinterpolate_constant(x, f)
+    # Use searchsortedlast to implement right-continuous steppost behavior
+    # For t in [x[i], x[i+1]), return f[i]
+    function steppost_interp(t)
+        if t < x[1]
+            return f[1]  # Flat extrapolation before
+        elseif t >= x[end]
+            return f[end]  # Flat extrapolation after
+        else
+            i = searchsortedlast(x, t)
+            return f[i]
+        end
+    end
+    return steppost_interp
 end

@@ -7,7 +7,8 @@
 
 """
     _interpolate_from_data(data, T, dim, type_param; allow_nothing=false, 
-                           constant_if_two_points=false, expected_dim=nothing)
+                           constant_if_two_points=false, expected_dim=nothing,
+                           interpolation=:linear)
 
 Internal helper to create an interpolated function from discrete data.
 
@@ -19,6 +20,7 @@ Internal helper to create an interpolated function from discrete data.
 - `allow_nothing`: If false, throws IncorrectArgument when data is nothing
 - `constant_if_two_points`: If true and length(T)==2, return constant function
 - `expected_dim`: If provided, validates matrix dimension matches (via @ensure)
+- `interpolation`: Interpolation type (`:linear` or `:constant`)
 
 # Returns
 - Interpolated function (or nothing if data=nothing and allow_nothing=true)
@@ -38,6 +40,7 @@ function _interpolate_from_data(
     allow_nothing::Bool=false,
     constant_if_two_points::Bool=false,
     expected_dim::Union{Int,Nothing}=nothing,
+    interpolation::Symbol=:linear,
 )
     # Validation: nothing handling
     if isnothing(data)
@@ -83,7 +86,23 @@ function _interpolate_from_data(
     N = size(data, 1)
     cols = isnothing(dim) ? (:) : (1:dim)
     V = matrix2vec(data[:, cols], 1)
-    return ctinterpolate(T[1:N], V)
+    
+    # Choose interpolation method
+    if interpolation == :linear
+        return ctinterpolate(T[1:N], V)
+    elseif interpolation == :constant
+        return ctinterpolate_constant(T[1:N], V)
+    else
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid interpolation type";
+                got="interpolation=$interpolation",
+                expected=":linear or :constant",
+                suggestion="Use interpolation=:linear for linear interpolation or interpolation=:constant for piecewise-constant",
+                context="_interpolate_from_data",
+            ),
+        )
+    end
 end
 
 """
@@ -126,7 +145,8 @@ end
 
 """
     build_interpolated_function(data, T, dim, type_param; allow_nothing=false,
-                                constant_if_two_points=false, expected_dim=nothing)
+                                constant_if_two_points=false, expected_dim=nothing,
+                                interpolation=:linear)
 
 Unified function to build an interpolated function with deepcopy and scalar wrapping.
 
@@ -140,6 +160,7 @@ This is the main entry point that combines interpolation and wrapping in one cal
 - `allow_nothing`: Allow data=nothing (for optional duals)
 - `constant_if_two_points`: Return constant function if length(T)==2 (for costate)
 - `expected_dim`: Validate matrix has this dimension (for robustness)
+- `interpolation`: Interpolation type (`:linear` or `:constant`)
 
 # Returns
 - Wrapped interpolated function ready for use in Solution
@@ -153,6 +174,9 @@ This is the main entry point that combines interpolation and wrapping in one cal
 ```julia
 # State interpolation (required, with validation)
 fx = build_interpolated_function(X, T, dim_x, TX; expected_dim=dim_x)
+
+# Control with piecewise-constant interpolation
+fu = build_interpolated_function(U, T, dim_u, TU; expected_dim=dim_u, interpolation=:constant)
 
 # Costate with special 2-point handling
 fp = build_interpolated_function(P, T, dim_x, TP; 
@@ -172,6 +196,7 @@ function build_interpolated_function(
     allow_nothing::Bool=false,
     constant_if_two_points::Bool=false,
     expected_dim::Union{Int,Nothing}=nothing,
+    interpolation::Symbol=:linear,
 )
     # Handle T=nothing case
     if isnothing(T)
@@ -200,6 +225,7 @@ function build_interpolated_function(
         allow_nothing=allow_nothing,
         constant_if_two_points=constant_if_two_points,
         expected_dim=expected_dim,
+        interpolation=interpolation,
     )
 
     # Step 2: Wrap with deepcopy and scalar extraction

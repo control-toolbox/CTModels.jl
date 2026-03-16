@@ -235,8 +235,9 @@ function build_solution(
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
     # Note: costate uses its own grid (T_costate)
+    # Note: control uses piecewise-constant interpolation (steppost behavior)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
-    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u)
+    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=:constant)
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
@@ -272,12 +273,14 @@ function build_solution(
         allow_nothing=true,
     )
     # Control box constraint duals share the control grid (T_control)
+    # Note: use piecewise-constant interpolation like control (steppost behavior)
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
         T_control,
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        interpolation=:constant,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
@@ -285,6 +288,7 @@ function build_solution(
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        interpolation=:constant,
     )
 
     # build Models

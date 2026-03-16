@@ -96,8 +96,16 @@ function __plot_time!(
 
     #
     f(; kwargs...) = kwargs
+    
+    # Default seriestype for controls (user can override with kwargs)
+    default_seriestype = if s == :control || s == :control_norm
+        :steppost
+    else
+        :path
+    end
+    
     kwargs_plot = if isnothing(color)
-        f(; ylims=:auto, xlabel=t_label, ylabel=y_label, linewidth=2, z_order=:front, kwargs...)
+        f(; ylims=:auto, xlabel=t_label, ylabel=y_label, linewidth=2, z_order=:front, seriestype=default_seriestype, kwargs...)
     else
         f(;
             color=color,
@@ -106,6 +114,7 @@ function __plot_time!(
             ylabel=y_label,
             linewidth=2,
             z_order=:front,
+            seriestype=default_seriestype,
             kwargs...,
         )
     end

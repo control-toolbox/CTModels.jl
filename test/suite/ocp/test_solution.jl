@@ -118,7 +118,7 @@ function test_solution()
             Test.@test CTModels.variable(sol) == [10.0, 11.0]
         end
         Test.@testset "costate" begin
-            Test.@test CTModels.costate(sol)(1) == [12.0, 12.0] # linear interpolation
+            Test.@test CTModels.costate(sol)(1) == [11.0, 11.0] # flat extrapolation (last value)
             P_ = [10.0 10.0; 11.0 11.0; 12.0 12.0] # test with 3 points
             sol_ = CTModels.build_solution(ocp, T, X, U, v, P_; kwargs...)
             Test.@test CTModels.costate(sol_)(1) == [12.0, 12.0]

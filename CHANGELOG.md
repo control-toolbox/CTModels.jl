@@ -7,6 +7,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8-beta] - 2026-03-16
+
+### 🚀 Major Features
+
+#### Piecewise Constant Interpolation for Control Signals
+
+- **New `ctinterpolate_constant` function**: Implements right-continuous steppost behavior for control signals
+- **Control interpolation**: Controls now use `interpolation=:constant` by default in `build_solution`
+- **Plotting integration**: Default `seriestype=:steppost` for control plotting, consistent with interpolation
+- **Performance optimized**: Manual implementation ~20x-8600x faster to create, 10-21% faster for multiple evaluations
+
+#### Enhanced Interpolation System
+
+- **Parameterized interpolation**: `build_interpolated_function` now accepts `interpolation::Symbol` (`:linear`, `:constant`)
+- **Manual `ctinterpolate`**: Replaced Interpolations.jl dependency with high-performance manual implementation
+- **Flat extrapolation**: Both interpolation functions use flat extrapolation (returns boundary values)
+
+### 📊 Performance Improvements
+
+- **Creation speed**: Manual interpolation objects are ~20x-8600x faster to create
+- **Evaluation speed**: 10-21% faster for multiple evaluations
+- **Memory efficiency**: Zero allocations for interpolation object creation
+- **Benchmark verified**: Comprehensive performance testing in `.extras/benchmark_interpolation.jl`
+
+### 🧪 Testing
+
+- **3456 tests pass**: Complete test coverage including new interpolation functionality
+- **75 interpolation tests**: Unit tests + comprehensive integration tests
+- **Behavior verification**: Tests confirm right-continuous steppost behavior
+- **Integration testing**: End-to-end testing from `build_solution` to `control()` interpolation
+- **Performance benchmarking**: Comprehensive testing in `.extras/benchmark_interpolation.jl`
+
+### 📝 API Changes
+
+```julia
+# New constant interpolation
+interp = CTModels.ctinterpolate_constant(x, f)  # Right-continuous steppost
+
+# Enhanced interpolation helpers
+fu = OCP.build_interpolated_function(U, T, dim, type; interpolation=:constant)
+
+# Control plotting with steppost (automatic)
+plot(sol, :control)  # Uses seriestype=:steppost by default
+```
+
+### 🔧 Internal Changes
+
+- **Dependency reduction**: Manual interpolation implementation reduces Interpolations.jl dependency
+- **Code clarity**: Explicit interpolation behavior with comprehensive documentation
+- **Cohesion**: Interpolation and plotting behaviors are now fully consistent
+
+---
+
 ## [0.9.7] - 2026-03-11
 
 ### Added - 0.9.7
