@@ -4,6 +4,53 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.8-beta] - 2026-03-16
+
+**No breaking changes** - This release adds piecewise constant interpolation for control signals while maintaining full backward compatibility.
+
+### New Features (Non-Breaking) - 0.9.8-beta
+
+- **Piecewise Constant Interpolation**
+  - New `ctinterpolate_constant` function with right-continuous steppost behavior
+  - Controls use `interpolation=:constant` by default in `build_solution`
+  - Control plotting uses `seriestype=:steppost` by default
+  - Enhanced `build_interpolated_function` with `interpolation` parameter
+
+- **Performance Improvements**
+  - Manual interpolation implementation ~20x-8600x faster to create
+  - 10-21% faster for multiple evaluations
+  - Zero allocations for interpolation object creation
+
+### API Enhancements (Non-Breaking)
+
+```julia
+# New constant interpolation (optional)
+interp = CTModels.ctinterpolate_constant(x, f)
+
+# Enhanced interpolation helpers (backward compatible)
+fu = OCP.build_interpolated_function(U, T, dim, type; interpolation=:constant)
+
+# Control plotting improvements (automatic)
+plot(sol, :control)  # Now uses seriestype=:steppost by default
+```
+
+### Migration Notes - 0.9.8-beta
+
+**No action required** - existing code continues to work unchanged.
+
+You can now benefit from improved control interpolation:
+
+```julia
+# Existing code (still works)
+sol = build_solution(ocp, T, X, U, v, P; objective=obj, ...)
+
+# New behavior (automatic)
+u = control(sol)  # Now uses piecewise constant interpolation
+plot(sol, :control)  # Now uses steppost plotting by default
+```
+
+---
+
 ## [0.9.7] - 2026-03-11
 
 **No breaking changes** - This release adds support for optimal control problems without a control input (`control_dimension == 0`) while maintaining full backward compatibility.
