@@ -1,6 +1,30 @@
 # ------------------------------------------------------------------------------ #
 # PRINT
 # ------------------------------------------------------------------------------ #
+
+"""
+Generate ANSI escape sequence for the specified color and formatting.
+"""
+function _ansi_color(color::Symbol, bold::Bool=false)
+    color_codes = Dict(
+        :black => 30, :red => 31, :green => 32, :yellow => 33,
+        :blue => 34, :magenta => 35, :cyan => 36, :white => 37,
+        :default => 39
+    )
+    
+    code = get(color_codes, color, 39)
+    return bold ? "\033[1;$(code)m" : "\033[$(code)m"
+end
+
+"""Generate ANSI reset sequence to clear formatting."""
+_ansi_reset() = "\033[0m"
+
+"""
+Print text with ANSI color formatting for Documenter compatibility.
+"""
+function _print_ansi_styled(io, text::Union{String,Symbol,Type}, color::Symbol, bold::Bool=false)
+    print(io, _ansi_color(color, bold), string(text), _ansi_reset())
+end
 """
 $(TYPEDSIGNATURES)
 
@@ -35,7 +59,7 @@ Print the abstract definition of an optimal control problem.
 """
 function __print_abstract_definition(io::IO, ocp::Union{Model,PreModel})
     @assert hasproperty(definition(ocp), :head)
-    printstyled(io, "Abstract definition:\n\n"; bold=true)
+    _print_ansi_styled(io, "Abstract definition:\n\n", :default, true)
     tab = 4
     code = MacroTools.striplines(definition(ocp))
     MLStyle.@match code.head begin
@@ -109,17 +133,17 @@ function __print_mathematical_definition(
 
     #
     some_printing && println(io)
-    printstyled(io, "The "; bold=true)
+    _print_ansi_styled(io, "The ", :default, true)
     if is_time_dependent
-        printstyled(io, "(non autonomous) "; bold=true)
+        _print_ansi_styled(io, "(non autonomous) ", :default, true)
     else
-        printstyled(io, "(autonomous) "; bold=true)
+        _print_ansi_styled(io, "(autonomous) ", :default, true)
     end
-    printstyled(io, "optimal control problem is of the form:\n"; bold=true)
+    _print_ansi_styled(io, "optimal control problem is of the form:\n", :default, true)
     println(io)
 
     # J
-    printstyled(io, "    minimize  "; color=:blue)
+    _print_ansi_styled(io, "    minimize  ", :blue, false)
     # Only include control in objective if u_dim > 0
     u_in_obj = u_dim > 0 ? ", " * u_name : ""
     print(io, "J(" * x_name * u_in_obj * _v * ") = ")
@@ -149,7 +173,7 @@ function __print_mathematical_definition(
 
     # constraints
     println(io, "")
-    printstyled(io, "    subject to\n"; color=:blue)
+    _print_ansi_styled(io, "    subject to\n", :blue, false)
     println(io, "")
 
     # dynamics
