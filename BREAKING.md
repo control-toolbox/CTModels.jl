@@ -4,6 +4,19 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.10-beta] - 2026-03-17
+
+### No Breaking Changes
+
+This version includes only internal improvements and documentation enhancements:
+
+- Migration from `printstyled()` to ANSI sequences for better Documenter compatibility
+- All existing APIs remain unchanged
+- Terminal behavior is preserved
+- New color support in generated documentation
+
+---
+
 ## [0.9.9-beta] - 2026-03-17
 
 **No breaking changes** - This release adds flexible control interpolation with both constant and linear options while maintaining full backward compatibility.

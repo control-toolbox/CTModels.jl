@@ -7,6 +7,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.10-beta] - 2026-03-17
+
+### 🎨 Documentation Enhancements
+
+#### ANSI Color Support for Documenter
+
+- **Printstyled to ANSI migration**: Replaced `printstyled()` calls with raw ANSI escape sequences for Documenter compatibility
+- **Color preservation**: Colors now appear correctly in both terminal and generated HTML documentation
+- **ANSI helper functions**: Added `_ansi_color()`, `_ansi_reset()`, and `_print_ansi_styled()` utilities
+- **Documenter integration**: ANSI sequences automatically converted to CSS classes (`sgrXX`) in HTML output
+- **Zero breaking changes**: Complete backward compatibility maintained for existing terminal usage
+
+### 🔧 Internal Improvements
+
+- **Display system refactoring**: 7 `printstyled()` calls migrated in `src/Display/print.jl`
+- **Enhanced color support**: Bold and colored text now works in documentation examples
+- **Performance optimized**: ANSI sequences have minimal overhead compared to `printstyled()`
+- **Test coverage**: All display tests passing with new ANSI implementation
+
+### 📚 Documentation Quality
+
+- **Better visual hierarchy**: Mathematical problem definitions now properly colored in docs
+- **Improved readability**: "Abstract definition", "minimize", and "subject to" sections highlighted
+- **Consistent experience**: Terminal and documentation displays now visually identical
+
+---
+
 ## [0.9.9-beta] - 2026-03-17
 
 ### 🚀 Major Features
