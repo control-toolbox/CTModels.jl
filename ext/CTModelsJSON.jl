@@ -5,6 +5,8 @@ using DocStringExtensions
 
 using JSON3
 
+import CTModels.OCP: __control_interpolation
+
 # ============================================================================
 # Private helpers for JSON matrix conversion
 # ============================================================================
@@ -330,6 +332,7 @@ function CTModels.import_ocp_solution(
         "control_constraints_ub_dual" => control_constraints_ub_dual,
         "variable_constraints_lb_dual" => variable_constraints_lb_dual,
         "variable_constraints_ub_dual" => variable_constraints_ub_dual,
+        "control_interpolation" => get(blob, "control_interpolation", string(__control_interpolation())),
     )
 
     # Add time grid data (format detection handled by helper)

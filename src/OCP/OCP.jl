@@ -114,6 +114,7 @@ export is_final_time_fixed, is_final_time_free
 export state_dimension, control_dimension, variable_dimension
 export state_name, control_name, variable_name
 export state_components, control_components, variable_components
+export control_interpolation
 # Constraint accessors
 export path_constraints_nl, boundary_constraints_nl
 export state_constraints_box, control_constraints_box, variable_constraints_box

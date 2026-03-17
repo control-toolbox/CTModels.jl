@@ -212,6 +212,21 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Get the interpolation type for the control.
+
+# Arguments
+- `model::ControlModelSolution`: The control model solution.
+
+# Returns
+- `Symbol`: The interpolation type (`:constant` or `:linear`).
+"""
+function interpolation(model::ControlModelSolution)::Symbol
+    return model.interpolation
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return an empty string, since no control is defined.
 """
 function name(::EmptyControlModel)::String

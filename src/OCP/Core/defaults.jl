@@ -103,3 +103,12 @@ Return the default filename (without extension) for exporting and importing solu
 The default value is `"solution"`.
 """
 __filename_export_import() = "solution"
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of the control interpolation type.
+The default value is `:constant` for piecewise constant interpolation (direct methods).
+The other possible value is `:linear` for piecewise linear interpolation (indirect methods).
+"""
+__control_interpolation()::Symbol = :constant

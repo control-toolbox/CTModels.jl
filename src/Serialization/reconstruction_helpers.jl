@@ -1,7 +1,6 @@
 # ------------------------------------------------------------------------------ #
 # Helper functions for solution reconstruction with multiple time grids
 # ------------------------------------------------------------------------------ #
-
 """
 $(TYPEDSIGNATURES)
 
@@ -46,6 +45,9 @@ function _reconstruct_solution_from_data(
     variable_constraints_ub_dual=nothing,
     infos=nothing,
 )
+    # Extract control_interpolation (backward compatibility: use default method)
+    control_interpolation = Symbol(get(data, "control_interpolation", string(__control_interpolation())))
+
     # Detect format and extract time grids
     if haskey(data, "time_grid_state")
         # Multiple time grids format
@@ -87,6 +89,7 @@ function _reconstruct_solution_from_data(
             variable_constraints_lb_dual=variable_constraints_lb_dual,
             variable_constraints_ub_dual=variable_constraints_ub_dual,
             infos=infos,
+            control_interpolation=control_interpolation,
         )
     else
         # Legacy format: single time grid
@@ -124,6 +127,7 @@ function _reconstruct_solution_from_data(
             variable_constraints_lb_dual=variable_constraints_lb_dual,
             variable_constraints_ub_dual=variable_constraints_ub_dual,
             infos=infos,
+            control_interpolation=control_interpolation,
         )
     end
 end
