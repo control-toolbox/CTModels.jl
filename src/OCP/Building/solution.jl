@@ -237,7 +237,9 @@ function build_solution(
     # Note: costate uses its own grid (T_costate)
     # Note: control uses piecewise-constant interpolation (steppost behavior)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
-    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=:constant)
+    fu = build_interpolated_function(
+        U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=:constant
+    )
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )

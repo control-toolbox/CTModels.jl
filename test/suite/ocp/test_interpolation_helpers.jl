@@ -215,8 +215,12 @@ function test_interpolation_helpers()
             U_control = [5.0 6.0; 4.0 5.0; 3.0 4.0]  # 3x2 matrix
 
             fu = OCP.build_interpolated_function(
-                U_control, T_control, 2, Matrix{Float64}; 
-                expected_dim=2, interpolation=:constant
+                U_control,
+                T_control,
+                2,
+                Matrix{Float64};
+                expected_dim=2,
+                interpolation=:constant,
             )
 
             # Test at knots
@@ -262,8 +266,7 @@ function test_interpolation_helpers()
             U_1d = [5.0; 4.0; 3.0]
 
             fu = OCP.build_interpolated_function(
-                U_1d, T_1d, 1, Matrix{Float64}; 
-                expected_dim=1, interpolation=:constant
+                U_1d, T_1d, 1, Matrix{Float64}; expected_dim=1, interpolation=:constant
             )
 
             # Should extract scalar
@@ -291,7 +294,7 @@ function test_interpolation_helpers()
         Test.@testset "INTEGRATION: build_solution - piecewise constant control" begin
             # 🧪 **Applying Testing Rule**: Integration testing with build_solution
             # Create a simple OCP and solution to verify control interpolation behavior
-            
+
             # Build a minimal OCP
             pre_ocp = CTModels.PreModel()
             CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
@@ -314,13 +317,18 @@ function test_interpolation_helpers()
             P = [0.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
 
             sol = CTModels.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=0.5,
                 iterations=10,
                 constraints_violation=0.0,
                 message="test",
                 status=:success,
-                successful=true
+                successful=true,
             )
 
             u_func = CTModels.control(sol)
@@ -356,7 +364,7 @@ function test_interpolation_helpers()
 
         Test.@testset "INTEGRATION: build_solution - multi-dimensional constant control" begin
             # Test with 2D control to verify vector-valued constant interpolation
-            
+
             pre_ocp = CTModels.PreModel()
             CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
             CTModels.state!(pre_ocp, 2)
@@ -376,13 +384,18 @@ function test_interpolation_helpers()
             P = [0.0 0.0; 0.0 0.0; 0.0 0.0]
 
             sol = CTModels.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=0.5,
                 iterations=10,
                 constraints_violation=0.0,
                 message="test",
                 status=:success,
-                successful=true
+                successful=true,
             )
 
             u_func = CTModels.control(sol)
