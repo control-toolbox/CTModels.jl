@@ -4,6 +4,52 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.9-beta] - 2026-03-17
+
+**No breaking changes** - This release adds flexible control interpolation with both constant and linear options while maintaining full backward compatibility.
+
+### New Features (Non-Breaking) - 0.9.9-beta
+
+- **Flexible Control Interpolation**
+  - New `control_interpolation` keyword argument in `build_solution` signatures
+  - Support for both `:constant` (piecewise constant) and `:linear` (piecewise linear) interpolation
+  - Default behavior unchanged: controls use `:constant` interpolation
+  - Dynamic plotting adaptation based on interpolation type
+
+- **Enhanced Control Architecture**
+  - `ControlModelSolution` now includes `interpolation::Symbol` field
+  - New `control_interpolation(sol::Solution)` accessor method
+  - New `interpolation(model::ControlModelSolution)` accessor method
+  - `control_interpolation` added to public API exports
+
+- **Serialization Support**
+  - Complete round-trip preservation of interpolation type in JSON/JLD2 formats
+  - Backward compatibility: existing files without interpolation field default to `:constant`
+  - Cross-format compatibility between JSON and JLD2 verified
+
+### API Enhancements (Non-Breaking)
+
+```julia
+# Flexible interpolation (optional, defaults to :constant)
+sol = CTModels.build_solution(ocp, T_state, T_control, T_costate, T_path, X, U, v, P; 
+                           control_interpolation=:linear)  # or :constant
+
+# Access interpolation type (new)
+interp_type = CTModels.control_interpolation(sol)  # Returns :constant or :linear
+
+# Automatic plotting adaptation (enhanced)
+plot(sol, :control)  # Uses :steppost for constant, :path for linear
+```
+
+### Migration Notes
+
+- **No action required** for existing code - all current behavior preserved
+- **Optional enhancement**: Use `control_interpolation=:linear` for smoother control signals
+- **Serialization**: Existing solution files continue to work without modification
+- **Plotting**: Automatic adaptation ensures correct visualization
+
+---
+
 ## [0.9.8-beta] - 2026-03-16
 
 **No breaking changes** - This release adds piecewise constant interpolation for control signals while maintaining full backward compatibility.

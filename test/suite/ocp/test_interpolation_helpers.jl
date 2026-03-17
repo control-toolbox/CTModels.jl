@@ -400,6 +400,215 @@ function test_interpolation_helpers()
             # Linear would give [2.0, 3.0] at t=0.25
             Test.@test u_func(0.25) != [2.0, 3.0]
         end
+
+        # ====================================================================
+        # UNIT TESTS - Control Interpolation Type
+        # ====================================================================
+
+        Test.@testset "ControlModelSolution with interpolation field" begin
+            # Test constant interpolation
+            u_const = t -> [sin(t)]
+            cms_const = OCP.ControlModelSolution("u", ["u₁"], u_const, :constant)
+            Test.@test OCP.interpolation(cms_const) == :constant
+            Test.@test OCP.name(cms_const) == "u"
+            Test.@test OCP.components(cms_const) == ["u₁"]
+            Test.@test OCP.value(cms_const) === u_const
+
+            # Test linear interpolation
+            u_linear = t -> [cos(t)]
+            cms_linear = OCP.ControlModelSolution("u", ["u₁"], u_linear, :linear)
+            Test.@test OCP.interpolation(cms_linear) == :linear
+            Test.@test OCP.name(cms_linear) == "u"
+            Test.@test OCP.components(cms_linear) == ["u₁"]
+            Test.@test OCP.value(cms_linear) === u_linear
+        end
+
+        # ====================================================================
+        # INTEGRATION TESTS - build_solution with control_interpolation
+        # ====================================================================
+
+        Test.@testset "build_solution: default constant interpolation" begin
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 1)
+            CTModels.variable!(pre_ocp, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            f_boundary(r, x0, xf, v) = begin
+                r[1] = x0[1] - 0.0
+                r[2] = x0[2] - 0.0
+                r[3] = xf[1] - 1.0
+                r[4] = xf[2] - 0.0
+                return nothing
+            end
+            CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4))
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            T = [0.0, 0.5, 1.0]
+            X = [0.0 0.0; 0.5 0.5; 1.0 0.0]
+            U = reshape([1.0, 0.0, -1.0], 3, 1)
+            v = [0.0]
+            P = [0.0 0.0; 0.0 0.0; 2.0 0.0]
+
+            # Build solution without specifying control_interpolation (should default to :constant)
+            sol = CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true
+            )
+
+            # Verify default is :constant
+            Test.@test CTModels.control_interpolation(sol) == :constant
+        end
+
+        Test.@testset "build_solution: explicit constant interpolation" begin
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 1)
+            CTModels.variable!(pre_ocp, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            f_boundary(r, x0, xf, v) = begin
+                r[1] = x0[1] - 0.0
+                r[2] = x0[2] - 0.0
+                r[3] = xf[1] - 1.0
+                r[4] = xf[2] - 0.0
+                return nothing
+            end
+            CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4))
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            T = [0.0, 0.5, 1.0]
+            X = [0.0 0.0; 0.5 0.5; 1.0 0.0]
+            U = reshape([1.0, 0.0, -1.0], 3, 1)
+            v = [0.0]
+            P = [0.0 0.0; 0.0 0.0; 2.0 0.0]
+
+            sol = CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true,
+                control_interpolation=:constant
+            )
+
+            Test.@test CTModels.control_interpolation(sol) == :constant
+            
+            # Verify piecewise constant behavior
+            u_func = CTModels.control(sol)
+            Test.@test u_func(0.0) ≈ 1.0
+            Test.@test u_func(0.25) ≈ 1.0  # Constant on [0.0, 0.5)
+            Test.@test u_func(0.5) ≈ 0.0
+            Test.@test u_func(0.75) ≈ 0.0  # Constant on [0.5, 1.0]
+        end
+
+        Test.@testset "build_solution: linear interpolation" begin
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 1)
+            CTModels.variable!(pre_ocp, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            f_boundary(r, x0, xf, v) = begin
+                r[1] = x0[1] - 0.0
+                r[2] = x0[2] - 0.0
+                r[3] = xf[1] - 1.0
+                r[4] = xf[2] - 0.0
+                return nothing
+            end
+            CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4))
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            T = [0.0, 0.5, 1.0]
+            X = [0.0 0.0; 0.5 0.5; 1.0 0.0]
+            U = reshape([1.0, 0.0, -1.0], 3, 1)
+            v = [0.0]
+            P = [0.0 0.0; 0.0 0.0; 2.0 0.0]
+
+            sol = CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true,
+                control_interpolation=:linear
+            )
+
+            Test.@test CTModels.control_interpolation(sol) == :linear
+            
+            # Verify piecewise linear behavior
+            u_func = CTModels.control(sol)
+            Test.@test u_func(0.0) ≈ 1.0
+            Test.@test u_func(0.25) ≈ 0.5  # Linear interpolation: 1.0 + (0.0-1.0)*0.5
+            Test.@test u_func(0.5) ≈ 0.0
+            Test.@test u_func(0.75) ≈ -0.5  # Linear interpolation: 0.0 + (-1.0-0.0)*0.5
+            Test.@test u_func(1.0) ≈ -1.0
+        end
+
+        Test.@testset "build_solution: invalid interpolation type" begin
+            pre_ocp = CTModels.PreModel()
+            CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp, 2)
+            CTModels.control!(pre_ocp, 1)
+            CTModels.variable!(pre_ocp, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u]
+            CTModels.dynamics!(pre_ocp, dynamics!)
+            mayer(x0, xf, v) = xf[1]^2
+            CTModels.objective!(pre_ocp, :min; mayer=mayer)
+            f_boundary(r, x0, xf, v) = begin
+                r[1] = x0[1] - 0.0
+                r[2] = x0[2] - 0.0
+                r[3] = xf[1] - 1.0
+                r[4] = xf[2] - 0.0
+                return nothing
+            end
+            CTModels.constraint!(pre_ocp, :boundary; f=f_boundary, lb=zeros(4), ub=zeros(4))
+            CTModels.definition!(pre_ocp, quote end)
+            CTModels.time_dependence!(pre_ocp; autonomous=false)
+            ocp = CTModels.build(pre_ocp)
+
+            T = [0.0, 0.5, 1.0]
+            X = [0.0 0.0; 0.5 0.5; 1.0 0.0]
+            U = reshape([1.0, 0.0, -1.0], 3, 1)
+            v = [0.0]
+            P = [0.0 0.0; 0.0 0.0; 2.0 0.0]
+
+            # Should throw IncorrectArgument for invalid interpolation type
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_solution(
+                ocp, T, X, U, v, P;
+                objective=0.5,
+                iterations=10,
+                constraints_violation=0.0,
+                message="test",
+                status=:success,
+                successful=true,
+                control_interpolation=:cubic
+            )
+        end
     end
 end
 

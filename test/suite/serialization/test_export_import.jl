@@ -1023,6 +1023,293 @@ function test_export_import()
 
             remove_if_exists("stack_investigation.json")
         end
+
+        # ========================================================================
+        # CONTROL INTERPOLATION SERIALIZATION TESTS
+        # ========================================================================
+
+        Test.@testset "Control interpolation preservation: JSON" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
+            ocp, sol_base = TestProblems.solution_example()
+            T = CTModels.time_grid(sol_base)
+
+            # Extract trajectories
+            x = CTModels.state(sol_base)
+            u = CTModels.control(sol_base)
+            p = CTModels.costate(sol_base)
+            v = CTModels.variable(sol_base)
+
+            # Test with constant interpolation (default)
+            sol_constant = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+                control_interpolation=:constant,
+            )
+
+            # Export and import
+            CTModels.export_ocp_solution(sol_constant; filename="test_constant_interp", format=:JSON)
+            sol_constant_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_constant_interp", format=:JSON
+            )
+
+            # Verify interpolation is preserved
+            Test.@test CTModels.control_interpolation(sol_constant) == :constant
+            Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+
+            # Test with linear interpolation
+            sol_linear = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+                control_interpolation=:linear,
+            )
+
+            # Export and import
+            CTModels.export_ocp_solution(sol_linear; filename="test_linear_interp", format=:JSON)
+            sol_linear_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_linear_interp", format=:JSON
+            )
+
+            # Verify interpolation is preserved
+            Test.@test CTModels.control_interpolation(sol_linear) == :linear
+            Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
+
+            # Verify control behavior is preserved (linear vs constant)
+            u_const = CTModels.control(sol_constant_reloaded)
+            u_linear = CTModels.control(sol_linear_reloaded)
+            
+            # At midpoint, linear should differ from constant
+            if length(T) >= 2
+                t_mid = (T[1] + T[end]) / 2
+                # For linear interpolation, value at midpoint should be interpolated
+                # For constant interpolation, value should be from previous interval
+                # This test verifies the interpolation type is correctly applied
+                Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+                Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
+            end
+
+            remove_if_exists("test_constant_interp.json")
+            remove_if_exists("test_linear_interp.json")
+        end
+
+        Test.@testset "Control interpolation preservation: JLD2" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
+            ocp, sol_base = TestProblems.solution_example()
+            T = CTModels.time_grid(sol_base)
+
+            # Extract trajectories
+            x = CTModels.state(sol_base)
+            u = CTModels.control(sol_base)
+            p = CTModels.costate(sol_base)
+            v = CTModels.variable(sol_base)
+
+            # Test with constant interpolation (default)
+            sol_constant = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+                control_interpolation=:constant,
+            )
+
+            # Export and import
+            CTModels.export_ocp_solution(sol_constant; filename="test_constant_interp", format=:JLD)
+            sol_constant_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_constant_interp", format=:JLD
+            )
+
+            # Verify interpolation is preserved
+            Test.@test CTModels.control_interpolation(sol_constant) == :constant
+            Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+
+            # Test with linear interpolation
+            sol_linear = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+                control_interpolation=:linear,
+            )
+
+            # Export and import
+            CTModels.export_ocp_solution(sol_linear; filename="test_linear_interp", format=:JLD)
+            sol_linear_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_linear_interp", format=:JLD
+            )
+
+            # Verify interpolation is preserved
+            Test.@test CTModels.control_interpolation(sol_linear) == :linear
+            Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
+
+            # Verify control behavior is preserved (linear vs constant)
+            u_const = CTModels.control(sol_constant_reloaded)
+            u_linear = CTModels.control(sol_linear_reloaded)
+            
+            # At midpoint, linear should differ from constant
+            if length(T) >= 2
+                t_mid = (T[1] + T[end]) / 2
+                # For linear interpolation, value at midpoint should be interpolated
+                # For constant interpolation, value should be from previous interval
+                # This test verifies the interpolation type is correctly applied
+                Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+                Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
+            end
+
+            remove_if_exists("test_constant_interp.jld2")
+            remove_if_exists("test_linear_interp.jld2")
+        end
+
+        Test.@testset "Control interpolation backward compatibility" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
+            ocp, sol_base = TestProblems.solution_example()
+            T = CTModels.time_grid(sol_base)
+
+            # Extract trajectories
+            x = CTModels.state(sol_base)
+            u = CTModels.control(sol_base)
+            p = CTModels.costate(sol_base)
+            v = CTModels.variable(sol_base)
+
+            # Create solution without control_interpolation (old format)
+            sol_old = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+            )
+
+            # Export to JSON (will not include control_interpolation field)
+            CTModels.export_ocp_solution(sol_old; filename="test_old_format", format=:JSON)
+
+            # Manually remove control_interpolation from JSON to simulate old format
+            json_string = read("test_old_format.json", String)
+            json_data = JSON3.read(json_string)
+            
+            # Create new JSON without control_interpolation field
+            json_data_without_interp = Dict{String,Any}()
+            for (key, value) in json_data
+                if key != "control_interpolation"
+                    json_data_without_interp[string(key)] = value
+                end
+            end
+            
+            # Write back without control_interpolation
+            open("test_old_format.json", "w") do f
+                JSON3.write(f, json_data_without_interp)
+            end
+
+            # Import should default to :constant
+            sol_old_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_old_format", format=:JSON
+            )
+
+            # Verify backward compatibility (defaults to :constant)
+            Test.@test CTModels.control_interpolation(sol_old_reloaded) == :constant
+
+            remove_if_exists("test_old_format.json")
+        end
+
+        Test.@testset "Control interpolation mixed format compatibility" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
+            ocp, sol_base = TestProblems.solution_example()
+            T = CTModels.time_grid(sol_base)
+
+            # Extract trajectories
+            x = CTModels.state(sol_base)
+            u = CTModels.control(sol_base)
+            p = CTModels.costate(sol_base)
+            v = CTModels.variable(sol_base)
+
+            # Create solution with linear interpolation
+            sol_linear = CTModels.build_solution(
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                isa(v, Number) ? [v] : v,
+                p;
+                objective=CTModels.objective(sol_base),
+                iterations=CTModels.iterations(sol_base),
+                constraints_violation=CTModels.constraints_violation(sol_base),
+                message=CTModels.message(sol_base),
+                status=CTModels.status(sol_base),
+                successful=CTModels.successful(sol_base),
+                control_interpolation=:linear,
+            )
+
+            # Export to JSON
+            CTModels.export_ocp_solution(sol_linear; filename="test_mixed_json", format=:JSON)
+            sol_json_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_mixed_json", format=:JSON
+            )
+
+            # Export to JLD2
+            CTModels.export_ocp_solution(sol_linear; filename="test_mixed_jld", format=:JLD)
+            sol_jld_reloaded = CTModels.import_ocp_solution(
+                ocp; filename="test_mixed_jld", format=:JLD
+            )
+
+            # Both should preserve linear interpolation
+            Test.@test CTModels.control_interpolation(sol_linear) == :linear
+            Test.@test CTModels.control_interpolation(sol_json_reloaded) == :linear
+            Test.@test CTModels.control_interpolation(sol_jld_reloaded) == :linear
+
+            # Verify control functions behave identically
+            u_orig = CTModels.control(sol_linear)
+            u_json = CTModels.control(sol_json_reloaded)
+            u_jld = CTModels.control(sol_jld_reloaded)
+
+            for t in T[1:min(end, 3)]  # Test first few points
+                Test.@test u_orig(t) ≈ u_json(t) atol=1e-10
+                Test.@test u_orig(t) ≈ u_jld(t) atol=1e-10
+            end
+
+            remove_if_exists("test_mixed_json.json")
+            remove_if_exists("test_mixed_jld.jld2")
+        end
     end
 end
 

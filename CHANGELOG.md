@@ -7,6 +7,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.9-beta] - 2026-03-17
+
+### 🚀 Major Features
+
+#### Flexible Control Interpolation System
+
+- **Dual interpolation support**: Both piecewise constant (`:constant`) and piecewise linear (`:linear`) interpolation for control signals
+- **Configurable interpolation**: New `control_interpolation` keyword argument in `build_solution` signatures
+- **Dynamic plotting**: Automatic seriestype selection based on interpolation type (`:steppost` for constant, `:path` for linear)
+- **Serialization support**: Full round-trip preservation of interpolation type in JSON/JLD2 formats
+- **Backward compatibility**: Existing files without `control_interpolation` field default to `:constant`
+
+#### Enhanced Control Architecture
+
+- **ControlModelSolution**: Added `interpolation::Symbol` field to store interpolation type
+- **Accessors**: New `control_interpolation(sol::Solution)` and `interpolation(model::ControlModelSolution)` methods
+- **Default system**: Centralized `__control_interpolation()::Symbol = :constant` method for consistent defaults
+- **Export system**: `control_interpolation` added to CTModels exports for public API access
+
+### 📊 API Enhancements
+
+```julia
+# Flexible interpolation in build_solution
+sol = CTModels.build_solution(ocp, T_state, T_control, T_costate, T_path, X, U, v, P; 
+                           control_interpolation=:linear)  # or :constant
+
+# Access interpolation type
+interp_type = CTModels.control_interpolation(sol)  # Returns :constant or :linear
+
+# Automatic plotting adaptation
+plot(sol, :control)  # Uses :steppost for constant, :path for linear
+```
+
+### 🔧 Serialization & Compatibility
+
+- **JSON/JLD2 preservation**: Interpolation type survives complete export/import cycles
+- **Backward compatibility**: Files without interpolation field default to `:constant`
+- **Cross-format compatibility**: JSON ↔ JLD2 interpolation preservation verified
+- **Comprehensive testing**: 1751 tests passing with full serialization coverage
+
+### 🧪 Testing & Quality
+
+- **Comprehensive test suite**: 96 new interpolation-specific tests added
+- **Integration testing**: End-to-end testing from creation to serialization to plotting
+- **Compatibility testing**: Backward compatibility with existing solutions verified
+- **Performance validation**: No performance impact on existing workflows
+
+### 📝 Internal Improvements
+
+- **Consistent defaults**: `__control_interpolation()` method used across all components
+- **Clean architecture**: Separation of interpolation logic from core functionality
+- **Enhanced extensions**: JSON and JLD2 extensions updated with interpolation support
+- **Documentation**: Complete docstrings and examples for new features
+
+---
+
 ## [0.9.8-beta] - 2026-03-16
 
 ### 🚀 Major Features

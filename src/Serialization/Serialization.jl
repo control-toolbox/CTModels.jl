@@ -39,7 +39,7 @@ import ..CTModels.OCP
 using ..OCP: AbstractModel, AbstractSolution, Solution
 
 # Import default functions from OCP
-import ..OCP: __format, __filename_export_import
+import ..OCP: __format, __filename_export_import, __control_interpolation
 
 # Define export/import tag types
 include("types.jl")

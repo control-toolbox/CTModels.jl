@@ -146,13 +146,13 @@ end
 """
 $(TYPEDEF)
 
-Control model for a solved optimal control problem, including the control trajectory.
+Represents the control trajectory in a solution.
 
 # Fields
-
-- `name::String`: Display name for the control variable.
-- `components::Vector{String}`: Names of individual control components.
+- `name::String`: Name of the control variable (e.g., `"u"`).
+- `components::Vector{String}`: Names of individual control components (e.g., `["u₁", "u₂"]`).
 - `value::TS`: A function `t -> u(t)` returning the control vector at time `t`.
+- `interpolation::Symbol`: Interpolation type (`:constant` for piecewise constant, `:linear` for piecewise linear).
 
 # Example
 
@@ -160,7 +160,7 @@ Control model for a solved optimal control problem, including the control trajec
 julia> using CTModels
 
 julia> u_traj = t -> [sin(t)]
-julia> cms = CTModels.ControlModelSolution("u", ["u₁"], u_traj)
+julia> cms = CTModels.ControlModelSolution("u", ["u₁"], u_traj, :constant)
 julia> cms.value(π/2)
 1-element Vector{Float64}:
  1.0
@@ -170,6 +170,7 @@ struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     name::String
     components::Vector{String}
     value::TS
+    interpolation::Symbol
 end
 
 """

@@ -98,8 +98,9 @@ function __plot_time!(
     f(; kwargs...) = kwargs
     
     # Default seriestype for controls (user can override with kwargs)
+    # Use :steppost for constant interpolation, :path for linear interpolation
     default_seriestype = if s == :control || s == :control_norm
-        :steppost
+        CTModels.control_interpolation(sol) == :constant ? :steppost : :path
     else
         :path
     end

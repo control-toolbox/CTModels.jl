@@ -197,12 +197,26 @@ function build_solution(
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
+    control_interpolation::Symbol=__control_interpolation(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
     TP<:Union{Matrix{Float64},Function},
     TPCD<:Union{Matrix{Float64},Function,Nothing},
 }
+
+    # Validate control_interpolation
+    if control_interpolation ∉ (:constant, :linear)
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid control_interpolation";
+                got="control_interpolation=$control_interpolation",
+                expected=":constant or :linear",
+                suggestion="Use :constant for piecewise constant (direct methods) or :linear for piecewise linear (indirect methods)",
+                context="build_solution parameter",
+            ),
+        )
+    end
 
     # get dimensions
     dim_x = state_dimension(ocp)
@@ -235,9 +249,9 @@ function build_solution(
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
     # Note: costate uses its own grid (T_costate)
-    # Note: control uses piecewise-constant interpolation (steppost behavior)
+    # Note: control uses configurable interpolation (constant for direct methods, linear for indirect methods)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
-    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=:constant)
+    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=control_interpolation)
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
@@ -273,14 +287,14 @@ function build_solution(
         allow_nothing=true,
     )
     # Control box constraint duals share the control grid (T_control)
-    # Note: use piecewise-constant interpolation like control (steppost behavior)
+    # Note: use same interpolation as control
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
         T_control,
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
-        interpolation=:constant,
+        interpolation=control_interpolation,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
@@ -288,12 +302,12 @@ function build_solution(
         dim_control_constraints_box(ocp),
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
-        interpolation=:constant,
+        interpolation=control_interpolation,
     )
 
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
-    control = ControlModelSolution(control_name(ocp), control_components(ocp), fu)
+    control = ControlModelSolution(control_name(ocp), control_components(ocp), fu, control_interpolation)
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
         fpcd,
@@ -419,6 +433,7 @@ function build_solution(
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
+    control_interpolation::Symbol=__control_interpolation(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
@@ -451,6 +466,7 @@ function build_solution(
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,
         infos=infos,
+        control_interpolation=control_interpolation,
     )
 end
 
@@ -543,6 +559,18 @@ Return the name of the control.
 """
 function control_name(sol::Solution)::String
     return name(sol.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the interpolation type of the control.
+
+# Returns
+- `Symbol`: The interpolation type (`:constant` or `:linear`).
+"""
+function control_interpolation(sol::Solution)::Symbol
+    return interpolation(sol.control)
 end
 
 """
@@ -1464,6 +1492,7 @@ function _discretize_all_components(
     return Dict{String,Any}(
         "state" => _discretize_function(state(sol), T_state, dim_x),
         "control" => _discretize_function(control(sol), T_control, dim_u),
+        "control_interpolation" => string(control_interpolation(sol)),
         "costate" => _discretize_function(costate(sol), T_costate, dim_x),
         "variable" => variable(sol),
         "objective" => objective(sol),
