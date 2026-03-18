@@ -36,8 +36,8 @@ function ctinterpolate(x, f) # default for interpolation of the initialization
                 return f[end]
             end
             # Linear interpolation: f[i] + (f[i+1] - f[i]) * (t - x[i]) / (x[i+1] - x[i])
-            α = (t - x[i]) / (x[i+1] - x[i])
-            return f[i] + α * (f[i+1] - f[i])
+            α = (t - x[i]) / (x[i + 1] - x[i])
+            return f[i] + α * (f[i + 1] - f[i])
         end
     end
     return linear_interp

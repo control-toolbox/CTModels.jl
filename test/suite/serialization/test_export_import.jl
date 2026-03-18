@@ -1057,7 +1057,9 @@ function test_export_import()
             )
 
             # Export and import
-            CTModels.export_ocp_solution(sol_constant; filename="test_constant_interp", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol_constant; filename="test_constant_interp", format=:JSON
+            )
             sol_constant_reloaded = CTModels.import_ocp_solution(
                 ocp; filename="test_constant_interp", format=:JSON
             )
@@ -1084,7 +1086,9 @@ function test_export_import()
             )
 
             # Export and import
-            CTModels.export_ocp_solution(sol_linear; filename="test_linear_interp", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol_linear; filename="test_linear_interp", format=:JSON
+            )
             sol_linear_reloaded = CTModels.import_ocp_solution(
                 ocp; filename="test_linear_interp", format=:JSON
             )
@@ -1096,14 +1100,15 @@ function test_export_import()
             # Verify control behavior is preserved (linear vs constant)
             u_const = CTModels.control(sol_constant_reloaded)
             u_linear = CTModels.control(sol_linear_reloaded)
-            
+
             # At midpoint, linear should differ from constant
             if length(T) >= 2
                 t_mid = (T[1] + T[end]) / 2
                 # For linear interpolation, value at midpoint should be interpolated
                 # For constant interpolation, value should be from previous interval
                 # This test verifies the interpolation type is correctly applied
-                Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+                Test.@test CTModels.control_interpolation(sol_constant_reloaded) ==
+                    :constant
                 Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
             end
 
@@ -1140,7 +1145,9 @@ function test_export_import()
             )
 
             # Export and import
-            CTModels.export_ocp_solution(sol_constant; filename="test_constant_interp", format=:JLD)
+            CTModels.export_ocp_solution(
+                sol_constant; filename="test_constant_interp", format=:JLD
+            )
             sol_constant_reloaded = CTModels.import_ocp_solution(
                 ocp; filename="test_constant_interp", format=:JLD
             )
@@ -1167,7 +1174,9 @@ function test_export_import()
             )
 
             # Export and import
-            CTModels.export_ocp_solution(sol_linear; filename="test_linear_interp", format=:JLD)
+            CTModels.export_ocp_solution(
+                sol_linear; filename="test_linear_interp", format=:JLD
+            )
             sol_linear_reloaded = CTModels.import_ocp_solution(
                 ocp; filename="test_linear_interp", format=:JLD
             )
@@ -1179,14 +1188,15 @@ function test_export_import()
             # Verify control behavior is preserved (linear vs constant)
             u_const = CTModels.control(sol_constant_reloaded)
             u_linear = CTModels.control(sol_linear_reloaded)
-            
+
             # At midpoint, linear should differ from constant
             if length(T) >= 2
                 t_mid = (T[1] + T[end]) / 2
                 # For linear interpolation, value at midpoint should be interpolated
                 # For constant interpolation, value should be from previous interval
                 # This test verifies the interpolation type is correctly applied
-                Test.@test CTModels.control_interpolation(sol_constant_reloaded) == :constant
+                Test.@test CTModels.control_interpolation(sol_constant_reloaded) ==
+                    :constant
                 Test.@test CTModels.control_interpolation(sol_linear_reloaded) == :linear
             end
 
@@ -1227,7 +1237,7 @@ function test_export_import()
             # Manually remove control_interpolation from JSON to simulate old format
             json_string = read("test_old_format.json", String)
             json_data = JSON3.read(json_string)
-            
+
             # Create new JSON without control_interpolation field
             json_data_without_interp = Dict{String,Any}()
             for (key, value) in json_data
@@ -1235,7 +1245,7 @@ function test_export_import()
                     json_data_without_interp[string(key)] = value
                 end
             end
-            
+
             # Write back without control_interpolation
             open("test_old_format.json", "w") do f
                 JSON3.write(f, json_data_without_interp)
@@ -1281,7 +1291,9 @@ function test_export_import()
             )
 
             # Export to JSON
-            CTModels.export_ocp_solution(sol_linear; filename="test_mixed_json", format=:JSON)
+            CTModels.export_ocp_solution(
+                sol_linear; filename="test_mixed_json", format=:JSON
+            )
             sol_json_reloaded = CTModels.import_ocp_solution(
                 ocp; filename="test_mixed_json", format=:JSON
             )
