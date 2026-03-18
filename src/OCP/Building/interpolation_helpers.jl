@@ -86,7 +86,7 @@ function _interpolate_from_data(
     N = size(data, 1)
     cols = isnothing(dim) ? (:) : (1:dim)
     V = matrix2vec(data[:, cols], 1)
-    
+
     # Choose interpolation method
     if interpolation == :linear
         return ctinterpolate(T[1:N], V)

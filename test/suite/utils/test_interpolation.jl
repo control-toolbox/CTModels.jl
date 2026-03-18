@@ -113,7 +113,7 @@ function test_interpolation()
         # ====================================================================
         # UNIT TESTS - Constant Interpolation
         # ====================================================================
-        
+
         Test.@testset "ctinterpolate_constant - basic piecewise constant" begin
             # Simple piecewise constant data
             x = [0.0, 1.0, 2.0]

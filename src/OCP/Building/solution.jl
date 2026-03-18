@@ -251,7 +251,9 @@ function build_solution(
     # Note: costate uses its own grid (T_costate)
     # Note: control uses configurable interpolation (constant for direct methods, linear for indirect methods)
     fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
-    fu = build_interpolated_function(U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=control_interpolation)
+    fu = build_interpolated_function(
+        U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=control_interpolation
+    )
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
@@ -307,7 +309,9 @@ function build_solution(
 
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
-    control = ControlModelSolution(control_name(ocp), control_components(ocp), fu, control_interpolation)
+    control = ControlModelSolution(
+        control_name(ocp), control_components(ocp), fu, control_interpolation
+    )
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     dual = DualModel(
         fpcd,
