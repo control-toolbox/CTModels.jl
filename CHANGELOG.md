@@ -7,6 +7,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.11] - 2026-03-31
+
+### 🔧 Internal Improvements
+
+#### Code Quality and Maintenance
+
+- **Code formatting**: Applied JuliaFormatter across entire codebase for consistent style
+- **Enhanced readability**: Improved code formatting in interpolation, serialization, and display modules
+- **Test formatting**: Updated test files for better maintainability
+- **Zero functional changes**: All APIs remain unchanged, formatting only
+
+#### Development Workflow
+
+- **CompatHelper enhancement**: Added subdirectories input to CompatHelper workflow for better dependency management
+- **Automated formatting**: Integrated JuliaFormatter in CI/CD pipeline
+- **Development tools**: Improved development experience with consistent code style
+
+### 📚 Documentation
+
+- **No breaking changes**: This release focuses on internal code quality
+- **Maintained compatibility**: All existing functionality preserved
+- **Enhanced maintainability**: Cleaner codebase for future development
+
+---
+
 ## [0.9.10-beta] - 2026-03-17
 
 ### 🎨 Documentation Enhancements
