@@ -4,6 +4,20 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.11] - 2026-03-31
+
+### No Breaking Changes
+
+This version includes only internal improvements and code formatting enhancements:
+
+- Applied JuliaFormatter across entire codebase for consistent style
+- Enhanced CompatHelper workflow with subdirectories support
+- All existing APIs remain unchanged
+- Zero functional changes - formatting and maintenance only
+- Improved code maintainability and development experience
+
+---
+
 ## [0.9.10-beta] - 2026-03-17
 
 ### No Breaking Changes
