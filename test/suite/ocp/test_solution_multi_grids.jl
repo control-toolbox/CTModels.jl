@@ -356,8 +356,8 @@ function test_solution_multi_grids()
                     successful=true,
                 )
 
-                # Should require component specification
-                Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(sol)
+                # Should work with default component (state)
+                Test.@test CTModels.time_grid(sol) == T_state
 
                 # Should work with component specification
                 Test.@test CTModels.time_grid(sol, :state) == T_state
@@ -605,8 +605,10 @@ function test_solution_multi_grids()
                 )
             end
 
-            Test.@testset "Missing component specification" begin
-                Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(sol)
+            Test.@testset "Default component specification" begin
+                # Should default to state grid
+                Test.@test CTModels.time_grid(sol) == T_state
+                Test.@test CTModels.time_grid(sol) == CTModels.time_grid(sol, :state)
             end
         end
 

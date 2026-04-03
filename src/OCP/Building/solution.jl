@@ -985,7 +985,7 @@ function time_grid(
         <:AbstractDualModel,
         <:AbstractSolverInfos,
     },
-    component::Symbol,
+    component::Symbol = __time_grid_default_component(),
 )::TimesDisc
     # Clean and validate component symbol
     component_clean = clean_component_symbols((component,))[1]
@@ -1006,50 +1006,6 @@ function time_grid(
 
     # Return the appropriate grid
     return getfield(sol.time_grid.grids, component_clean)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the time grid for solutions with multiple time grids (component must be specified).
-
-# Throws
-- `IncorrectArgument`: Always thrown for MultipleTimeGridModel without component specification
-
-# Notes
-This method enforces explicit component specification for solutions with multiple time grids
-to avoid ambiguity about which grid is being accessed.
-
-# Examples
-```julia-repl
-julia> time_grid(sol)  # ❌ Error for MultipleTimeGridModel
-julia> time_grid(sol, :state)  # ✅ Correct usage
-```
-"""
-function time_grid(
-    sol::Solution{
-        <:MultipleTimeGridModel,
-        <:AbstractTimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:AbstractModel,
-        <:Function,
-        <:ctNumber,
-        <:AbstractDualModel,
-        <:AbstractSolverInfos,
-    },
-)
-    # ⚠️ Applying Exception Rule: Missing component specification
-    throw(
-        CTBase.Exceptions.IncorrectArgument(
-            "Component must be specified for solutions with multiple time grids";
-            got="no component specified",
-            expected="time_grid(sol, :component) where component ∈ {:state, :control, :path}",
-            suggestion="Specify which time grid to access, e.g., time_grid(sol, :state)",
-            context="time_grid for MultipleTimeGridModel",
-        ),
-    )
 end
 
 """

@@ -7,6 +7,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.12-beta] - 2026-04-03
+
+### 🚀 Enhancements
+
+#### Default Component for Multiple Time Grid Solutions
+
+- **Default time grid access**: `time_grid(sol)` now works for `MultipleTimeGridModel` without explicit component specification
+- **Sensible default**: When no component is specified, defaults to `:state` grid (most commonly used)
+- **Consistent API**: Same `time_grid(sol)` syntax works for both unified and multiple time grid solutions
+- **Backward compatibility**: All existing code with explicit component specification continues to work unchanged
+
+#### Improved Developer Experience
+
+- **Reduced verbosity**: No need to specify `:state` component for most common use case
+- **Intuitive behavior**: State trajectory is the natural default for optimal control problems
+- **Cleaner code**: Simplified access to time grids in multi-grid solutions
+
+### 📊 API Changes
+
+```julia
+# Before (required component specification)
+time_grid(sol_multi, :state)  # Required for MultipleTimeGridModel
+time_grid(sol_unified)        # Worked for UnifiedTimeGridModel
+
+# After (consistent behavior)
+time_grid(sol_multi)          # Now works! Defaults to :state
+time_grid(sol_multi, :state)  # Still works (explicit)
+time_grid(sol_unified)        # Still works (unchanged)
+```
+
+### 🔧 Internal Changes
+
+- **Default function**: Added `__time_grid_default_component()::Symbol = :state` in `defaults.jl`
+- **Method signature**: Updated `time_grid` method for `MultipleTimeGridModel` with default parameter
+- **Removed exception**: Eliminated method that threw `IncorrectArgument` for missing component
+- **Enhanced tests**: Updated test suites to verify new default behavior
+
+### 🧪 Testing
+
+- **Comprehensive coverage**: All existing tests pass with new behavior
+- **Default behavior tests**: Added tests for automatic component selection
+- **Compatibility verification**: Confirmed backward compatibility with explicit specifications
+- **Integration testing**: End-to-end testing of multi-grid workflows
+
+### 📝 Migration Notes
+
+- **No breaking changes**: Existing code continues to work unchanged
+- **Optional enhancement**: Can adopt new shorter syntax when convenient
+- **Explicit still supported**: `time_grid(sol, :component)` syntax remains fully functional
+
+---
+
 ## [0.9.11] - 2026-03-31
 
 ### 🔧 Internal Improvements

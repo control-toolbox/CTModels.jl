@@ -52,6 +52,7 @@ function test_defaults()
         Test.@testset "time and criterion defaults" begin
             Test.@test CTModels.OCP.__time_name() == "t"
             Test.@test CTModels.OCP.__criterion_type() == :min
+            Test.@test CTModels.OCP.__time_grid_default_component() == :state
         end
 
         Test.@testset "variable naming defaults" begin
