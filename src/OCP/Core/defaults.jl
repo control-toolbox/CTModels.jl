@@ -112,3 +112,13 @@ The default value is `:constant` for piecewise constant interpolation (direct me
 The other possible value is `:linear` for piecewise linear interpolation (indirect methods).
 """
 __control_interpolation()::Symbol = :constant
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default component for time grid access in multiple time grid solutions.
+
+The default value is `:state` since the state trajectory is typically the most
+commonly accessed component in optimal control problems.
+"""
+__time_grid_default_component()::Symbol = :state

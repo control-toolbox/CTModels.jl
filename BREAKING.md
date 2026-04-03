@@ -4,6 +4,38 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.12-beta] - 2026-04-03
+
+### No Breaking Changes
+
+This release introduces enhancements without breaking existing functionality:
+
+#### New Default Behavior (Non-Breaking)
+
+- **Enhanced `time_grid()` function**: `time_grid(sol)` now works for `MultipleTimeGridModel` solutions without explicit component
+- **Default component**: Automatically uses `:state` when no component specified
+- **Full backward compatibility**: All existing code continues to work unchanged
+
+#### What Changed
+
+```julia
+# These still work exactly as before
+time_grid(sol_unified)              # UnifiedTimeGridModel (unchanged)
+time_grid(sol_multi, :state)        # MultipleTimeGridModel with explicit component
+time_grid(sol_multi, :control)      # MultipleTimeGridModel with explicit component
+
+# This now works (previously threw IncorrectArgument)
+time_grid(sol_multi)                # MultipleTimeGridModel without component (NEW)
+```
+
+#### Migration
+
+- **No action required**: Existing code continues to work
+- **Optional simplification**: Can use `time_grid(sol)` instead of `time_grid(sol, :state)` for state grid access
+- **Explicit still preferred**: Use explicit component specification when accessing non-state grids
+
+---
+
 ## [0.9.11] - 2026-03-31
 
 ### No Breaking Changes
