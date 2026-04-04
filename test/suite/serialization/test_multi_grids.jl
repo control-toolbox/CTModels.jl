@@ -236,7 +236,8 @@ function test_multi_grids()
 
             # time_grid without component should return state grid (default behavior)
             Test.@test CTModels.time_grid(sol_multi) == T_state
-            Test.@test CTModels.time_grid(sol_multi) == CTModels.time_grid(sol_multi, :state)
+            Test.@test CTModels.time_grid(sol_multi) ==
+                CTModels.time_grid(sol_multi, :state)
 
             # Invalid component should throw error
             Test.@test_throws Exceptions.IncorrectArgument CTModels.time_grid(
