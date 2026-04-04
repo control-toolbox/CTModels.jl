@@ -985,7 +985,7 @@ function time_grid(
         <:AbstractDualModel,
         <:AbstractSolverInfos,
     },
-    component::Symbol = __time_grid_default_component(),
+    component::Symbol=__time_grid_default_component(),
 )::TimesDisc
     # Clean and validate component symbol
     component_clean = clean_component_symbols((component,))[1]
