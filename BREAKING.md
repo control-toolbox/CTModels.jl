@@ -4,6 +4,40 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.14] - 2026-04-12
+
+### No Breaking Changes
+
+This release introduces automatic grid extension for memory optimization without breaking existing functionality:
+
+#### New Behavior (Non-Breaking)
+
+- **Automatic grid extension**: Time grids that differ by only the last element are automatically extended to enable `UnifiedTimeGridModel`
+- **Memory optimization**: More solutions benefit from unified grid storage instead of multiple separate grids
+- **Transparent behavior**: Extension is automatic and requires no user intervention
+- **No data modification**: Trajectory data matrices remain unchanged
+
+#### What Changed
+
+```julia
+# Before: Grids with missing last element used MultipleTimeGridModel
+T_state = [0.0, 0.5, 1.0]
+T_control = [0.0, 0.5]  # Missing last element
+# Result: MultipleTimeGridModel (separate storage)
+
+# After: Automatic extension enables UnifiedTimeGridModel
+T_state = [0.0, 0.5, 1.0]
+T_control = [0.0, 0.5]  # Missing last element
+# Result: T_control automatically extended to [0.0, 0.5, 1.0]
+# Result: UnifiedTimeGridModel (single grid storage)
+```
+
+#### Migration
+
+- **No action required**: Existing code continues to work unchanged
+- **Automatic benefit**: Solutions with "almost identical" grids now automatically use unified grid model
+- **Same API**: No changes to user-facing API; behavior is fully backward compatible
+
 ## [0.9.12-beta] - 2026-04-03
 
 ### No Breaking Changes

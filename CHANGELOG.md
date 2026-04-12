@@ -7,6 +7,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.14] - 2026-04-12
+
+### 🚀 Enhancements
+
+#### Automatic Grid Extension for Memory Optimization
+
+- **Automatic grid unification**: Time grids that differ by only the last element (e.g., `T_control = T_state[1:end-1]`) are automatically extended to enable `UnifiedTimeGridModel`
+- **Memory optimization**: Extending grids allows using `UnifiedTimeGridModel` instead of `MultipleTimeGridModel`, reducing memory overhead
+- **No data modification**: Trajectory data matrices remain unchanged; interpolation automatically handles extended grids via `T[1:N]`
+- **Transparent behavior**: Extension is automatic and requires no user intervention
+- **Extension condition**: Only applies when a grid is a strict prefix (missing exactly the last element): `length(T_short) == length(T_long) - 1` AND `T_short == T_long[1:end-1]`
+
+#### Improved Memory Efficiency
+
+- **More unified grids**: Solutions with "almost identical" grids now benefit from unified grid model
+- **Reduced storage**: Single grid stored instead of multiple separate grids
+- **Same API**: No changes to user-facing API; behavior is fully backward compatible
+
+### 📊 API Changes
+
+```julia
+# No API changes - behavior is automatic
+
+# Before: Grids with missing last element used MultipleTimeGridModel
+T_state = [0.0, 0.5, 1.0]
+T_control = [0.0, 0.5]  # Missing last element
+# Result: MultipleTimeGridModel (separate storage)
+
+# After: Automatic extension enables UnifiedTimeGridModel
+T_state = [0.0, 0.5, 1.0]
+T_control = [0.0, 0.5]  # Missing last element
+# Result: T_control automatically extended to [0.0, 0.5, 1.0]
+# Result: UnifiedTimeGridModel (single grid storage)
+```
+
+### 🔧 Internal Changes
+
+- **New function**: Added `_extend_grid_to_match()` helper function in `solution.jl`
+- **Grid extension logic**: Integrated into `build_solution()` after validation, before grid detection
+- **Reference grid selection**: Automatically selects longest grid as reference for extension
+- **All grids extended**: `T_state`, `T_control`, `T_costate`, and `T_path` are all checked for extension
+- **Updated docstring**: Added "Automatic Grid Extension" section to `build_solution()` documentation
+
+### 🧪 Testing
+
+- **New test file**: Added `test/suite/ocp/test_grid_extension.jl`
+- **Unit tests**: Tests for extension logic (strict prefix detection, no extension for different grids)
+- **Integration tests**: Tests for grid unification after extension
+- **Coverage**: 8 tests passing, covering all extension scenarios
+
 ## [0.9.12-beta] - 2026-04-03
 
 ### 🚀 Enhancements
