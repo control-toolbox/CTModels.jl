@@ -159,6 +159,20 @@ All time grids must be:
 
 The function automatically validates and fixes grids (e.g., converts ranges to vectors).
 
+## Automatic Grid Extension
+
+When time grids differ by only the last element (e.g., `T_control = T_state[1:end-1]`),
+the function automatically extends the shorter grid to match the longest one. This enables
+the use of `UnifiedTimeGridModel` for memory optimization without modifying trajectory data.
+
+The extension condition is:
+- The shorter grid must be a strict prefix of the longest grid
+- Only the last element may be missing: `length(T_short) == length(T_long) - 1`
+- All other elements must match exactly: `T_short == T_long[1:end-1]`
+
+If extended, the interpolation automatically uses only the available data points via `T[1:N]`,
+so trajectory data matrices do not need to be extended.
+
 ## Memory Optimization
 
 When all grids are identical, the solution uses `UnifiedTimeGridModel` to store a single grid, 
@@ -228,6 +242,21 @@ function build_solution(
     T_control = _validate_and_fix_time_grid(T_control, "control")
     T_costate = _validate_and_fix_time_grid(T_costate, "costate")
     T_path = isnothing(T_path) ? nothing : _validate_and_fix_time_grid(T_path, "path")
+
+    # NEW: Extend grids that are prefixes of the longest grid to enable UnifiedTimeGridModel
+    non_nothing_grids_initial = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_path])
+    if length(non_nothing_grids_initial) > 1
+        # Find the longest grid as reference
+        T_ref = non_nothing_grids_initial[argmax(map(length, non_nothing_grids_initial))]
+
+        # Extend grids that are strict prefixes (missing only the last element)
+        T_state = _extend_grid_to_match(T_state, T_ref, "state")
+        T_control = _extend_grid_to_match(T_control, T_ref, "control")
+        T_costate = _extend_grid_to_match(T_costate, T_ref, "costate")
+        if !isnothing(T_path)
+            T_path = _extend_grid_to_match(T_path, T_ref, "path")
+        end
+    end
 
     # Detect if all non-nothing grids are identical
     non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_path])
@@ -372,6 +401,43 @@ function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
         return sort(T)
     end
     return T
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Extend a target time grid to match a reference grid if the target is a strict prefix.
+
+This function checks if `T_target` is missing only the last element of `T_reference`
+(i.e., `T_target == T_reference[1:end-1]`). If so, it returns `T_reference` to enable
+grid unification. Otherwise, it returns `T_target` unchanged.
+
+# Arguments
+- `T_target::Vector{Float64}`: Time grid to potentially extend
+- `T_reference::Vector{Float64}`: Reference time grid (typically the longest grid)
+- `component_name::String`: Name of the component for logging purposes
+
+# Returns
+- `Vector{Float64}`: Extended grid if extension condition met, otherwise original `T_target`
+
+# Notes
+- Extension condition: `length(T_target) == length(T_reference) - 1` AND `T_target == T_reference[1:end-1]`
+- Emits `@info` log when extension is performed for transparency
+- Does not modify trajectory data matrices (interpolation handles this via `T[1:N]`)
+
+See also: [`_validate_and_fix_time_grid`](@ref), [`build_solution`](@ref)
+"""
+function _extend_grid_to_match(
+    T_target::Vector{Float64},
+    T_reference::Vector{Float64},
+    component_name::String,
+)::Vector{Float64}
+    # Check if T_target is a strict prefix of T_reference (missing only last element)
+    if length(T_target) == length(T_reference) - 1 && T_target == T_reference[1:(end - 1)]
+        # @info "Extending $(component_name) time grid from $(length(T_target)) to $(length(T_reference)) points for grid unification"
+        return T_reference
+    end
+    return T_target
 end
 
 """
