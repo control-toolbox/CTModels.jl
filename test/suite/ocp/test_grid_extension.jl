@@ -1,6 +1,6 @@
 module TestGridExtension
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 import CTModels.OCP
 
@@ -61,7 +61,9 @@ function test_grid_extension()
             T_path = nothing
 
             # Apply extension logic (mimicking build_solution internal logic)
-            non_nothing_grids = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_path])
+            non_nothing_grids = filter(
+                g -> !isnothing(g), [T_state, T_control, T_costate, T_path]
+            )
             T_ref = non_nothing_grids[argmax(map(length, non_nothing_grids))]
             T_control_extended = OCP._extend_grid_to_match(T_control, T_ref, "control")
             T_costate_extended = OCP._extend_grid_to_match(T_costate, T_ref, "costate")
@@ -72,11 +74,15 @@ function test_grid_extension()
             Test.@test T_state == T_ref
 
             # This would enable UnifiedTimeGridModel in build_solution
-            non_nothing_grids_extended = filter(g -> !isnothing(g), [T_state, T_control_extended, T_costate_extended, T_path])
-            all_identical = all(g -> g == first(non_nothing_grids_extended), non_nothing_grids_extended)
+            non_nothing_grids_extended = filter(
+                g -> !isnothing(g),
+                [T_state, T_control_extended, T_costate_extended, T_path],
+            )
+            all_identical = all(
+                g -> g == first(non_nothing_grids_extended), non_nothing_grids_extended
+            )
             Test.@test all_identical
         end
-
     end
 end
 
