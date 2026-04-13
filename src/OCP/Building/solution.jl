@@ -244,7 +244,9 @@ function build_solution(
     T_path = isnothing(T_path) ? nothing : _validate_and_fix_time_grid(T_path, "path")
 
     # NEW: Extend grids that are prefixes of the longest grid to enable UnifiedTimeGridModel
-    non_nothing_grids_initial = filter(g -> !isnothing(g), [T_state, T_control, T_costate, T_path])
+    non_nothing_grids_initial = filter(
+        g -> !isnothing(g), [T_state, T_control, T_costate, T_path]
+    )
     if length(non_nothing_grids_initial) > 1
         # Find the longest grid as reference
         T_ref = non_nothing_grids_initial[argmax(map(length, non_nothing_grids_initial))]
@@ -428,9 +430,7 @@ grid unification. Otherwise, it returns `T_target` unchanged.
 See also: [`_validate_and_fix_time_grid`](@ref), [`build_solution`](@ref)
 """
 function _extend_grid_to_match(
-    T_target::Vector{Float64},
-    T_reference::Vector{Float64},
-    component_name::String,
+    T_target::Vector{Float64}, T_reference::Vector{Float64}, component_name::String
 )::Vector{Float64}
     # Check if T_target is a strict prefix of T_reference (missing only last element)
     if length(T_target) == length(T_reference) - 1 && T_target == T_reference[1:(end - 1)]
