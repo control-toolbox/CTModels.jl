@@ -19,6 +19,20 @@ defined in the model and returns the corresponding dual value from the solution.
 # Returns
 A function of time `t` for time-dependent constraints, or a scalar/vector for time-invariant duals.
 If the label is not found, throws an `IncorrectArgument` exception.
+
+# Notes
+- For path/boundary constraints, duals are indexed per declaration (one column per
+  row of the stacked nonlinear constraint vector).
+- For box constraints (state/control/variable), the dual matrices/vectors stored
+  in the `Solution` are indexed **by primal component** (i.e.
+  `state_dimension(model)` columns for state, etc.), following the CTDirect
+  convention. For a label targeting component indices `rg`, this function
+  returns `duals_lb[:, rg] - duals_ub[:, rg]` (or the time-independent analogue
+  for variables). Components never constrained carry a zero multiplier.
+- If several labels target the same component, `dual(sol, model, :label)` returns
+  the (same) per-component multiplier for each: CTModels does not track which
+  declaration "owns" the multiplier, because the solver only sees the effective
+  (intersected) bound.
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 
@@ -52,51 +66,59 @@ function dual(sol::Solution, model::Model, label::Symbol)
         end
     end
 
-    # check if the label is in the state constraints
+    # Box constraints: resolve `label` via the `aliases` field (cp[5]) of each
+    # box tuple. `cp[2][k]` gives the primal component index for row `k`, which
+    # is used to slice the per-component dual matrix/vector.
+    function _box_idxs(cp)
+        aliases = cp[5]
+        out = Int[]
+        for k in eachindex(aliases)
+            if label in aliases[k]
+                push!(out, cp[2][k])
+            end
+        end
+        return out
+    end
+
+    # state box
     cp = state_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices = findall(x -> x == label, labels)
-        # get the corresponding dual values
+    idxs = _box_idxs(cp)
+    if !isempty(idxs)
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
-        if length(indices) == 1
-            return t -> (duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]])
+        if length(idxs) == 1
+            i = idxs[1]
+            return t -> (duals_lb(t)[i] - duals_ub(t)[i])
         else
-            return t -> (duals_lb(t)[indices] - duals_ub(t)[indices])
+            return t -> (duals_lb(t)[idxs] - duals_ub(t)[idxs])
         end
     end
 
-    # check if the label is in the control constraints
+    # control box
     cp = control_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices = findall(x -> x == label, labels)
-        # get the corresponding dual values, either lower or upper bound
+    idxs = _box_idxs(cp)
+    if !isempty(idxs)
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
-        if length(indices) == 1
-            return t -> (duals_lb(t)[indices[1]] - duals_ub(t)[indices[1]])
+        if length(idxs) == 1
+            i = idxs[1]
+            return t -> (duals_lb(t)[i] - duals_ub(t)[i])
         else
-            return t -> (duals_lb(t)[indices] - duals_ub(t)[indices])
+            return t -> (duals_lb(t)[idxs] - duals_ub(t)[idxs])
         end
     end
 
-    # check if the label is in the variable constraints
+    # variable box
     cp = variable_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices = findall(x -> x == label, labels)
-        # get the corresponding dual values, either lower or upper bound
+    idxs = _box_idxs(cp)
+    if !isempty(idxs)
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
-        if length(indices) == 1
-            return duals_lb[indices[1]] - duals_ub[indices[1]]
+        if length(idxs) == 1
+            i = idxs[1]
+            return duals_lb[i] - duals_ub[i]
         else
-            return duals_lb[indices] - duals_ub[indices]
+            return duals_lb[idxs] - duals_ub[idxs]
         end
     end
 

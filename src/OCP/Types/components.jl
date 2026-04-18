@@ -496,11 +496,18 @@ Container for all constraints in an optimal control problem.
 
 # Fields
 
-- `path_nl::TP`: Tuple of nonlinear path constraints `(t, x, u, v) -> c(t, x, u, v)`.
-- `boundary_nl::TB`: Tuple of nonlinear boundary constraints `(x0, xf, v) -> b(x0, xf, v)`.
-- `state_box::TS`: Tuple of box constraints on state variables (lower/upper bounds).
-- `control_box::TC`: Tuple of box constraints on control variables (lower/upper bounds).
-- `variable_box::TV`: Tuple of box constraints on optimisation variables (lower/upper bounds).
+- `path_nl::TP`: Tuple of nonlinear path constraints `(lb, f!, ub, labels)`.
+- `boundary_nl::TB`: Tuple of nonlinear boundary constraints `(lb, f!, ub, labels)`.
+- `state_box::TS`: Tuple of box constraints on state variables, with structure
+  `(lb, ind, ub, labels, aliases)` where `labels[k]` is the first label that
+  declared component `ind[k]`, and `aliases[k]` is the list of **all** labels
+  that declared `ind[k]` (in declaration order). This 5-element form allows
+  `constraint(model, :label)` / `dual(sol, model, :label)` to resolve labels
+  merged by the per-component uniqueness invariant.
+- `control_box::TC`: Tuple of box constraints on control variables (same
+  `(lb, ind, ub, labels, aliases)` structure as `state_box`).
+- `variable_box::TV`: Tuple of box constraints on optimisation variables (same
+  `(lb, ind, ub, labels, aliases)` structure as `state_box`).
 
 # Example
 

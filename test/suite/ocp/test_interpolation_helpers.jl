@@ -74,13 +74,14 @@ function test_interpolation_helpers()
         end
 
         Test.@testset "_interpolate_from_data: dimension validation" begin
-            # Valid: matrix has 2 columns, we extract 2
+            # Valid: matrix has exactly `expected_dim` columns (strict check)
             func = OCP._interpolate_from_data(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
             Test.@test !isnothing(func)
 
-            # Valid: matrix has 2 columns, we extract 1
-            func = OCP._interpolate_from_data(X_2d, T, 1, Matrix{Float64}; expected_dim=1)
-            Test.@test !isnothing(func)
+            # Invalid: matrix has 2 columns but expected_dim=1 (strict mismatch)
+            Test.@test_throws Exceptions.IncorrectArgument OCP._interpolate_from_data(
+                X_2d, T, 1, Matrix{Float64}; expected_dim=1
+            )
 
             # Invalid: matrix has 2 columns, we expect 3
             Test.@test_throws Exceptions.IncorrectArgument OCP._interpolate_from_data(

@@ -293,6 +293,8 @@ function build_solution(
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
+    # Convention for path/boundary duals: one column per constraint row
+    #   (indexed by declaration, matching cp[4] labels).
     fpcd = build_interpolated_function(
         path_constraints_dual,
         T_path,
@@ -302,41 +304,69 @@ function build_solution(
     )
 
     # box constraints multipliers (optional, can be nothing)
-    # Note: No expected_dim validation for box constraints because they use
-    # dim_*_constraints_box which may differ from state/control dimensions
+    # Convention for box duals: one column per primal component
+    #   (state_dimension / control_dimension / variable_dimension).
+    # Components without a bound carry a zero multiplier. This matches what
+    # CTDirect produces natively and guarantees that `dual(sol, m, :label)`
+    # can return the multiplier of the component(s) targeted by :label.
     # State box constraint duals share the state grid (T_state)
     fscbd = build_interpolated_function(
         state_constraints_lb_dual,
         T_state,
-        dim_state_constraints_box(ocp),
+        dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_x,
     )
     fscud = build_interpolated_function(
         state_constraints_ub_dual,
         T_state,
-        dim_state_constraints_box(ocp),
+        dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_x,
     )
     # Control box constraint duals share the control grid (T_control)
     # Note: use same interpolation as control
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
         T_control,
-        dim_control_constraints_box(ocp),
+        dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_u,
         interpolation=control_interpolation,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
         T_control,
-        dim_control_constraints_box(ocp),
+        dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_u,
         interpolation=control_interpolation,
     )
+
+    # Variable box constraint duals are (time-independent) vectors.
+    # Enforce length == variable_dimension(ocp) when provided.
+    if !isnothing(variable_constraints_lb_dual)
+        @ensure length(variable_constraints_lb_dual) == dim_v Exceptions.IncorrectArgument(
+            "variable_constraints_lb_dual length mismatch";
+            got="length=$(length(variable_constraints_lb_dual))",
+            expected="length=$(dim_v) (= variable_dimension)",
+            suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
+            context="build_solution - validating variable dual length",
+        )
+    end
+    if !isnothing(variable_constraints_ub_dual)
+        @ensure length(variable_constraints_ub_dual) == dim_v Exceptions.IncorrectArgument(
+            "variable_constraints_ub_dual length mismatch";
+            got="length=$(length(variable_constraints_ub_dual))",
+            expected="length=$(dim_v) (= variable_dimension)",
+            suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
+            context="build_solution - validating variable dual length",
+        )
+    end
 
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)

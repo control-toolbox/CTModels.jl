@@ -30,7 +30,11 @@ and the types of all its components.
 - `variable::VariableModelType`: Optimisation variable structure (may be empty).
 - `dynamics::DynamicsModelType`: System dynamics function `(t, x, u, v) -> ẋ`.
 - `objective::ObjectiveModelType`: Cost functional (Mayer, Lagrange, or Bolza).
-- `constraints::ConstraintsModelType`: All problem constraints.
+- `constraints::ConstraintsModelType`: All problem constraints. Box constraints
+  satisfy the per-component uniqueness invariant: each component appears at most
+  once in the stored tuples, bounds are the intersection of all declared bounds,
+  and every declared label is preserved in the `aliases` field of the box tuples
+  (see `ConstraintsModel`).
 - `definition::Expr`: Original symbolic definition of the problem.
 - `build_examodel::BuildExaModelType`: Optional ExaModels builder function.
 

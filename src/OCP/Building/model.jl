@@ -1,39 +1,148 @@
 """
 $(TYPEDSIGNATURES)
 
-Appends box constraint data to the provided vectors.
+Append box constraint data to the provided flat vectors.
+
+This is an internal helper used by `build(::ConstraintsDictType)`. It simply
+accumulates declarations. Deduplication (one entry per component with
+intersection semantics) and associated warnings are handled later by
+`_dedup_box_constraints!`.
 
 # Arguments
-- `inds::Vector{Int}`: Vector of indices to which the range `rg` will be appended.
-- `lbs::Vector{<:Real}`: Vector of lower bounds to which `lb` will be appended.
-- `ubs::Vector{<:Real}`: Vector of upper bounds to which `ub` will be appended.
-- `labels::Vector{String}`: Vector of labels to which the `label` will be repeated and appended.
-- `rg::AbstractVector{Int}`: Index range corresponding to the constraint variables.
+- `inds::Vector{Int}`: Vector of component indices to append to.
+- `lbs::Vector{<:Real}`: Vector of lower bounds to append to.
+- `ubs::Vector{<:Real}`: Vector of upper bounds to append to.
+- `labels::Vector{Symbol}`: Vector of labels (one entry per declared component).
+- `rg::AbstractVector{Int}`: Component indices declared by the new constraint.
 - `lb::AbstractVector{<:Real}`: Lower bounds associated with `rg`.
 - `ub::AbstractVector{<:Real}`: Upper bounds associated with `rg`.
-- `label::String`: Label describing the constraint block (e.g., "state", "control").
+- `label::Symbol`: Label describing the declaration.
 
 # Notes
-- All input vectors (`rg`, `lb`, `ub`) must have the same length.
-- The function modifies the `inds`, `lbs`, `ubs`, and `labels` vectors in-place.
-- If a component index already exists in `inds`, a warning is emitted indicating that the
-  previous bound will be overwritten by the new constraint. The dual variable dimension
-  remains equal to the state/control/variable dimension, not the number of constraint declarations.
+- Modifies `inds`, `lbs`, `ubs`, `labels` in-place.
+- No deduplication or warning emitted here; see `_dedup_box_constraints!`.
 """
 function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
-    # Check for duplicate indices and emit warning
-    for idx in rg
-        if idx in inds
-            @warn "Overwriting bound for component $idx (label: $label). Previous value will be discarded. " *
-                "Note: dual variable dimension equals the state/control/variable dimension, not the number of constraints."
-        end
-    end
     append!(inds, rg)
     append!(lbs, lb)
     append!(ubs, ub)
     for _ in 1:length(lb)
         push!(labels, label)
     end
+    return nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Deduplicate box-constraint declarations by component, applying the intersection
+of all declared bounds for each repeated component. Produces an `aliases` vector
+recording every label that targeted each component.
+
+After this function returns, the vectors satisfy the invariant:
+
+- `allunique(inds)` — each component appears at most once.
+- `lbs[k]` = `max` of all declared lower bounds for component `inds[k]`.
+- `ubs[k]` = `min` of all declared upper bounds for component `inds[k]`.
+- `labels[k]` = the first label that declared component `inds[k]` (stable order).
+- `aliases[k]` = all distinct labels that declared component `inds[k]`, in
+  first-seen order (always starts with `labels[k]`).
+- Vectors are sorted by `inds`.
+
+A `@warn` is emitted once for each duplicated component, listing all contributing
+labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
+`IncorrectArgument` is thrown.
+
+# Arguments
+- `inds`, `lbs`, `ubs`, `labels`: in-place flat vectors produced by successive
+  calls to [`append_box_constraints!`](@ref).
+- `aliases`: in-place empty `Vector{Vector{Symbol}}` to be populated with the
+  per-component list of all declaring labels.
+- `kind::String`: human-readable descriptor (e.g. "state", "control",
+  "variable") used in diagnostic messages.
+
+# Throws
+- `Exceptions.IncorrectArgument` if the intersection of declared bounds is
+  empty for some component.
+"""
+function _dedup_box_constraints!(
+    inds::Vector{Int},
+    lbs::Vector{T},
+    ubs::Vector{T},
+    labels::Vector{Symbol},
+    aliases::Vector{Vector{Symbol}},
+    kind::String,
+) where {T<:Real}
+    if isempty(inds)
+        empty!(aliases)
+        return nothing
+    end
+
+    # group declaration positions by component index, preserving first-seen order
+    unique_order = Int[]
+    positions = Dict{Int,Vector{Int}}()
+    @inbounds for (k, i) in pairs(inds)
+        if haskey(positions, i)
+            push!(positions[i], k)
+        else
+            positions[i] = [k]
+            push!(unique_order, i)
+        end
+    end
+
+    # build deduped vectors; emit warning for each duplicated component
+    new_inds = Int[]
+    new_lbs = T[]
+    new_ubs = T[]
+    new_labels = Symbol[]
+    new_aliases = Vector{Symbol}[]
+    for i in unique_order
+        ks = positions[i]
+        # distinct labels for component i, in first-seen order
+        dup_labels = Symbol[]
+        for k in ks
+            l = labels[k]
+            if l ∉ dup_labels
+                push!(dup_labels, l)
+            end
+        end
+        if length(ks) == 1
+            k = ks[1]
+            push!(new_inds, i)
+            push!(new_lbs, lbs[k])
+            push!(new_ubs, ubs[k])
+            push!(new_labels, labels[k])
+            push!(new_aliases, dup_labels)
+        else
+            lb_eff = maximum(lbs[ks])
+            ub_eff = minimum(ubs[ks])
+            @warn "Multiple bound declarations for $kind component $i " *
+                "(labels: $(join(dup_labels, ", "))). " *
+                "Intersection applied: effective lb = $lb_eff, effective ub = $ub_eff."
+            @ensure lb_eff <= ub_eff Exceptions.IncorrectArgument(
+                "Empty feasible set for $kind component $i";
+                got="max(lbs)=$lb_eff > min(ubs)=$ub_eff",
+                expected="max(lbs) ≤ min(ubs)",
+                suggestion="Check the declared bounds for labels $(join(dup_labels, ", ")).",
+                context="_dedup_box_constraints! - infeasibility check",
+            )
+            push!(new_inds, i)
+            push!(new_lbs, lb_eff)
+            push!(new_ubs, ub_eff)
+            push!(new_labels, dup_labels[1])
+            push!(new_aliases, dup_labels)
+        end
+    end
+
+    # sort by component index for readability
+    perm = sortperm(new_inds)
+    resize!(inds, length(new_inds)); inds .= new_inds[perm]
+    resize!(lbs, length(new_lbs)); lbs .= new_lbs[perm]
+    resize!(ubs, length(new_ubs)); ubs .= new_ubs[perm]
+    resize!(labels, length(new_labels)); labels .= new_labels[perm]
+    empty!(aliases)
+    append!(aliases, new_aliases[perm])
+    return nothing
 end
 
 """
@@ -77,16 +186,19 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
     state_cons_box_lb = Vector{LocalNumber}()
     state_cons_box_ub = Vector{LocalNumber}()
     state_cons_box_labels = Vector{Symbol}()
+    state_cons_box_aliases = Vector{Vector{Symbol}}()
 
     control_cons_box_ind = Vector{Int}() # control range
     control_cons_box_lb = Vector{LocalNumber}()
     control_cons_box_ub = Vector{LocalNumber}()
     control_cons_box_labels = Vector{Symbol}()
+    control_cons_box_aliases = Vector{Vector{Symbol}}()
 
     variable_cons_box_ind = Vector{Int}() # variable range
     variable_cons_box_lb = Vector{LocalNumber}()
     variable_cons_box_ub = Vector{LocalNumber}()
     variable_cons_box_labels = Vector{Symbol}()
+    variable_cons_box_aliases = Vector{Vector{Symbol}}()
 
     for (label, c) in constraints
         type = c[1]
@@ -229,6 +341,34 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
         length_boundary_cons_nl, boundary_cons_nl_dim, boundary_cons_nl_f...
     )
 
+    # Enforce the per-component uniqueness invariant for box constraints:
+    # deduplicate by component, applying intersection (max of lbs, min of ubs)
+    # and emitting a warning for each duplicated component.
+    _dedup_box_constraints!(
+        state_cons_box_ind,
+        state_cons_box_lb,
+        state_cons_box_ub,
+        state_cons_box_labels,
+        state_cons_box_aliases,
+        "state",
+    )
+    _dedup_box_constraints!(
+        control_cons_box_ind,
+        control_cons_box_lb,
+        control_cons_box_ub,
+        control_cons_box_labels,
+        control_cons_box_aliases,
+        "control",
+    )
+    _dedup_box_constraints!(
+        variable_cons_box_ind,
+        variable_cons_box_lb,
+        variable_cons_box_ub,
+        variable_cons_box_labels,
+        variable_cons_box_aliases,
+        "variable",
+    )
+
     return ConstraintsModel(
         (path_cons_nl_lb, path_cons_nl!, path_cons_nl_ub, path_cons_nl_labels),
         (
@@ -237,18 +377,26 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
             boundary_cons_nl_ub,
             boundary_cons_nl_labels,
         ),
-        (state_cons_box_lb, state_cons_box_ind, state_cons_box_ub, state_cons_box_labels),
+        (
+            state_cons_box_lb,
+            state_cons_box_ind,
+            state_cons_box_ub,
+            state_cons_box_labels,
+            state_cons_box_aliases,
+        ),
         (
             control_cons_box_lb,
             control_cons_box_ind,
             control_cons_box_ub,
             control_cons_box_labels,
+            control_cons_box_aliases,
         ),
         (
             variable_cons_box_lb,
             variable_cons_box_ind,
             variable_cons_box_ub,
             variable_cons_box_labels,
+            variable_cons_box_aliases,
         ),
     )
 end

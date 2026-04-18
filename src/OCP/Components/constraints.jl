@@ -749,78 +749,72 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
         )
     end
 
-    # check if the label is in the state constraints
+    # Box constraints: each box tuple has the form
+    #   (lb, ind, ub, labels, aliases)
+    # where `aliases[k]` lists every label that declared component `ind[k]`.
+    # We look up `label` in that field (rather than in `labels[k]`, which only
+    # stores the *first* label per component after dedup). The returned bounds
+    # are the **effective** (intersected) bounds stored in `lb`/`ub`, not the
+    # bounds as initially declared for that specific label.
+    function _lookup_box(cp)
+        aliases = cp[5]
+        idxs = Int[]
+        for k in eachindex(aliases)
+            if label in aliases[k]
+                push!(idxs, k)
+            end
+        end
+        return idxs
+    end
+
+    # state box
     cp = state_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices_state = Int[]
-        indices_bound = Int[]
-        for i in eachindex(labels)
-            if labels[i] == label
-                push!(indices_state, cp[2][i])
-                push!(indices_bound, i)
-            end
-        end
+    idxs = _lookup_box(cp)
+    if !isempty(idxs)
+        component_idxs = cp[2][idxs]
         fc =
             (t, x, u, v) -> begin
-                length(indices_state) == 1 ? x[indices_state[1]] : x[indices_state]
+                length(component_idxs) == 1 ? x[component_idxs[1]] : x[component_idxs]
             end
         return (
-            :state, # type of the constraint
+            :state,
             fc,
-            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
+            length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )
     end
 
-    # check if the label is in the control constraints
+    # control box
     cp = control_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices_state = Int[]
-        indices_bound = Int[]
-        for i in eachindex(labels)
-            if labels[i] == label
-                push!(indices_state, cp[2][i])
-                push!(indices_bound, i)
-            end
-        end
+    idxs = _lookup_box(cp)
+    if !isempty(idxs)
+        component_idxs = cp[2][idxs]
         fc =
             (t, x, u, v) -> begin
-                length(indices_state) == 1 ? u[indices_state[1]] : u[indices_state]
+                length(component_idxs) == 1 ? u[component_idxs[1]] : u[component_idxs]
             end
         return (
-            :control, # type of the constraint
+            :control,
             fc,
-            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
+            length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )
     end
 
-    # check if the label is in the variable constraints
+    # variable box
     cp = variable_constraints_box(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        # get all the indices of the label
-        indices_state = Int[]
-        indices_bound = Int[]
-        for i in eachindex(labels)
-            if labels[i] == label
-                push!(indices_state, cp[2][i])
-                push!(indices_bound, i)
-            end
-        end
+    idxs = _lookup_box(cp)
+    if !isempty(idxs)
+        component_idxs = cp[2][idxs]
         fc =
             (x0, xf, v) -> begin
-                length(indices_state) == 1 ? v[indices_state[1]] : v[indices_state]
+                length(component_idxs) == 1 ? v[component_idxs[1]] : v[component_idxs]
             end
         return (
-            :variable, # type of the constraint
+            :variable,
             fc,
-            length(indices_bound)==1 ? cp[1][indices_bound[1]] : cp[1][indices_bound], # lower bound
-            length(indices_bound) == 1 ? cp[3][indices_bound[1]] : cp[3][indices_bound], # upper bound
+            length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
+            length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )
     end
 
