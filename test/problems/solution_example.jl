@@ -7,7 +7,7 @@ function solution_example(; fun=false)
     CTModels.time!(pre_ocp; t0=0.0, tf=1.0)
 
     # set state
-    CTModels.state!(pre_ocp, 2)
+    CTModels.state!(pre_ocp, 2, "x", ["q", "w"])
 
     # set control
     CTModels.control!(pre_ocp, 1)
