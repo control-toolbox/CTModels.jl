@@ -761,10 +761,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of the variable box constraints.
+Return the dimension of the variable box constraints duals.
 
 """
-function dim_variable_constraints_box(sol::Solution)::Dimension
+function dim_dual_variable_constraints_box(sol::Solution)::Dimension
     vc_lb_dual = variable_constraints_lb_dual(sol)
     return vc_lb_dual === nothing ? 0 : length(vc_lb_dual)
 end
@@ -772,23 +772,29 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of box constraints on state.
+Return the dimension of a dual value, evaluating at initial time.
+"""
+_dual_dimension(::Nothing, ::Solution)::Dimension = 0
+_dual_dimension(dual::Function, sol::Solution)::Dimension = length(dual(initial_time(sol)))
 
 """
-function dim_state_constraints_box(sol::Solution)::Dimension
-    sc_lb_dual = state_constraints_lb_dual(sol)
-    return sc_lb_dual === nothing ? 0 : state_dimension(sol)
+$(TYPEDSIGNATURES)
+
+Return the dimension of the box constraints duals on state.
+
+"""
+function dim_dual_state_constraints_box(sol::Solution)::Dimension
+    return _dual_dimension(state_constraints_lb_dual(sol), sol)
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of box constraints on control.
+Return the dimension of the box constraints duals on control.
 
 """
-function dim_control_constraints_box(sol::Solution)::Dimension
-    cc_lb_dual = control_constraints_lb_dual(sol)
-    return cc_lb_dual === nothing ? 0 : control_dimension(sol)
+function dim_dual_control_constraints_box(sol::Solution)::Dimension
+    return _dual_dimension(control_constraints_lb_dual(sol), sol)
 end
 
 """
@@ -1339,7 +1345,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
             ") = ",
             variable(sol),
         )
-        if dim_variable_constraints_box(sol) > 0
+        if dim_dual_variable_constraints_box(sol) > 0 && dim_variable_constraints_box(model(sol)) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
         end
@@ -1556,20 +1562,20 @@ function _discretize_all_components(
             path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)
         ),
         "state_constraints_lb_dual" => _discretize_dual(
-            state_constraints_lb_dual(sol), T_state, dim_state_constraints_box(sol)
+            state_constraints_lb_dual(sol), T_state, dim_dual_state_constraints_box(sol)
         ),
         "state_constraints_ub_dual" => _discretize_dual(
-            state_constraints_ub_dual(sol), T_state, dim_state_constraints_box(sol)
+            state_constraints_ub_dual(sol), T_state, dim_dual_state_constraints_box(sol)
         ),
         "control_constraints_lb_dual" => _discretize_dual(
             control_constraints_lb_dual(sol),
             T_control,
-            dim_control_constraints_box(sol),
+            dim_dual_control_constraints_box(sol),
         ),
         "control_constraints_ub_dual" => _discretize_dual(
             control_constraints_ub_dual(sol),
             T_control,
-            dim_control_constraints_box(sol),
+            dim_dual_control_constraints_box(sol),
         ),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
