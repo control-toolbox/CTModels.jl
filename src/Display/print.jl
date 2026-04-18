@@ -116,6 +116,7 @@ function __print_mathematical_definition(
     # dependencies
     is_variable_dependent::Bool,
     is_time_dependent::Bool,
+    is_control_free_ocp::Bool,
     # cost
     has_a_lagrange_cost::Bool,
     has_a_mayer_cost::Bool,
@@ -130,7 +131,7 @@ function __print_mathematical_definition(
     # args
     t_ = is_time_dependent ? t_name * ", " : ""
     _v = is_variable_dependent ? ", " * v_name : ""
-    _u = u_dim > 0 ? ", " * u_name * "(" * t_name * ")" : ""
+    _u = !is_control_free_ocp ? ", " * u_name * "(" * t_name * ")" : ""
 
     # other names
     bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
@@ -152,8 +153,8 @@ function __print_mathematical_definition(
 
     # J
     _print_ansi_styled(io, "    minimize  ", :blue, false)
-    # Only include control in objective if u_dim > 0
-    u_in_obj = u_dim > 0 ? ", " * u_name : ""
+    # Only include control in objective if !is_control_free_ocp
+    u_in_obj = !is_control_free_ocp ? ", " * u_name : ""
     print(io, "J(" * x_name * u_in_obj * _v * ") = ")
 
     # Mayer
@@ -247,9 +248,9 @@ function __print_mathematical_definition(
     end
     x_name_space *= " ∈ " * x_space
 
-    # control name and space (only if u_dim > 0)
+    # control name and space (only if !is_control_free_ocp)
     u_name_space = ""
-    if u_dim > 0
+    if !is_control_free_ocp
         if u_dim == 1
             u_name_space = u_name * "(" * t_name * ")"
         else
@@ -286,7 +287,7 @@ function __print_mathematical_definition(
         end
         v_name_space *= " ∈ " * v_space
         # print with or without control
-        if u_dim > 0
+        if !is_control_free_ocp
             print(
                 io,
                 "    where ",
@@ -302,7 +303,7 @@ function __print_mathematical_definition(
         end
     else
         # print with or without control
-        if u_dim > 0
+        if !is_control_free_ocp
             print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
         else
             print(io, "    where ", x_name_space, ".\n")
@@ -342,8 +343,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
     vi_names = variable_components(ocp)
 
     # dependencies
-    is_variable_dependent = v_dim > 0
+    is_variable_dependent = is_variable(ocp)
     is_time_dependent = !is_autonomous(ocp)
+    is_control_free_ocp = is_control_free(ocp)
 
     # cost
     has_a_lagrange_cost = has_lagrange_cost(ocp)
@@ -374,6 +376,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
         vi_names,
         is_variable_dependent,
         is_time_dependent,
+        is_control_free_ocp,
         has_a_lagrange_cost,
         has_a_mayer_cost,
         dim_path_cons_nl,
@@ -442,8 +445,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         vi_names = components(ocp.variable)
 
         # dependencies
-        is_variable_dependent = v_dim > 0
+        is_variable_dependent = is_variable(ocp)
         is_time_dependent = !is_autonomous(ocp)
+        is_control_free_ocp = is_control_free(ocp)
 
         # cost
         has_a_lagrange_cost = has_lagrange_cost(ocp.objective)
@@ -475,6 +479,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
             vi_names,
             is_variable_dependent,
             is_time_dependent,
+            is_control_free_ocp,
             has_a_lagrange_cost,
             has_a_mayer_cost,
             dim_path_cons_nl,

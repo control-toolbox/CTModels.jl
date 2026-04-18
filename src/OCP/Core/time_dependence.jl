@@ -51,3 +51,39 @@ julia> is_autonomous(ocp)  # returns true or false
 ```
 """
 is_autonomous(ocp::PreModel) = ocp.autonomous
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has optimisation variables.
+
+# Arguments
+- `ocp::PreModel`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has optimisation variables (variable dimension > 0), `false` otherwise.
+
+# Example
+```julia-repl
+julia> is_variable(ocp)  # returns true if variables are present
+```
+"""
+is_variable(ocp::PreModel) = dimension(ocp.variable) > 0
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem is control-free (no control input).
+
+# Arguments
+- `ocp::PreModel`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has no control input (control dimension == 0), `false` otherwise.
+
+# Example
+```julia-repl
+julia> is_control_free(ocp)  # returns true if no control input
+```
+"""
+is_control_free(ocp::PreModel) = dimension(ocp.control) == 0

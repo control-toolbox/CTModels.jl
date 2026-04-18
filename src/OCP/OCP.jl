@@ -109,6 +109,7 @@ export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
 export is_autonomous
+export is_variable, is_control_free
 export is_initial_time_fixed, is_initial_time_free
 export is_final_time_fixed, is_final_time_free
 export state_dimension, control_dimension, variable_dimension

@@ -457,6 +457,24 @@ function is_autonomous(
     return false
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has optimisation variables.
+"""
+function is_variable(ocp::Model)::Bool
+    return variable_dimension(ocp) > 0
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem is control-free (no control input).
+"""
+function is_control_free(ocp::Model)::Bool
+    return control_dimension(ocp) == 0
+end
+
 # State
 """
 $(TYPEDSIGNATURES)

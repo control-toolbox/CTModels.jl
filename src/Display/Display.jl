@@ -43,7 +43,7 @@ import ..OCP: state_dimension, control_dimension, variable_dimension
 import ..OCP: time_name, initial_time_name, final_time_name
 import ..OCP: dimension, name, state_name, control_name, variable_name
 import ..OCP: components, state_components, control_components, variable_components
-import ..OCP: is_autonomous, has_lagrange_cost, has_mayer_cost
+import ..OCP: is_autonomous, has_lagrange_cost, has_mayer_cost, is_variable, is_control_free
 import ..OCP: dim_path_constraints_nl, dim_boundary_constraints_nl
 import ..OCP:
     dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
