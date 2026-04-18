@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Enhancements
 
+#### Box Constraint Aliases for Label Resolution
+
+- **Unified source of truth**: Removed `original_dict` from `ConstraintsModel` and `original_constraints()` accessor
+- **Aliases field**: Added `aliases::Vector{Vector{Symbol}}` as 5th element in box constraint tuples
+- **Label resolution**: `constraint(model, label)` and `dual(sol, model, label)` now resolve labels via aliases
+- **Effective bounds**: Returns intersected bounds when multiple constraints declared on same component
+- **Per-component duals**: Dual matrices sized by state/control/variable dimension, not by number of declarations
+- **Deduplication warning**: Single warning per component when duplicate bounds are declared
+
+#### Dual Dimension Function Clarification
+
+- **Renamed functions**: `dim_*_constraints_box(sol)` → `dim_dual_*_constraints_box(sol)` for clarity
+- **Multiple dispatch**: `_dual_dimension` uses dispatch on `Nothing` (→ 0) and `Function` (→ length at t0)
+- **Display improvement**: Dual variables only displayed if model has declared constraints
+- **New exports**: `dim_dual_state_constraints_box`, `dim_dual_control_constraints_box`, `dim_dual_variable_constraints_box`
+
 #### Consistent Variable and Control Checking Functions
 
 - **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
