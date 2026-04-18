@@ -4,6 +4,42 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.9.15] - 2026-04-18
+
+### No Breaking Changes
+
+This release introduces consistent variable and control checking functions without breaking existing functionality:
+
+#### New Functions (Non-Breaking)
+
+- **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
+- **Dual methods**: Both functions have methods for `PreModel` and `Model` types
+- **Consistent API**: These functions follow the same pattern as `is_autonomous()`
+- **Runtime dimension checks**: Unlike time dependence (type-parameterized), variable and control use runtime dimension checks
+
+#### What Changed
+
+```julia
+# New functions available (non-breaking)
+is_variable(ocp)        # Returns true if variable_dimension > 0
+is_control_free(ocp)   # Returns true if control_dimension == 0
+
+# Works for both PreModel and Model
+ocp = PreModel()
+state!(ocp, 2)
+control!(ocp, 1)
+variable!(ocp, 2)
+
+is_variable(ocp)        # Returns true
+is_control_free(ocp)    # Returns false
+```
+
+#### Migration
+
+- **No action required**: Existing code continues to work unchanged
+- **Optional enhancement**: Can use new functions for more readable code instead of inline dimension comparisons
+- **Same API**: No changes to existing user-facing API; behavior is fully backward compatible
+
 ## [0.9.14] - 2026-04-12
 
 ### No Breaking Changes
