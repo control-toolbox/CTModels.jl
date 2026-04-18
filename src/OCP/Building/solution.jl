@@ -1300,15 +1300,29 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
 
     # Variable (si définie)
     if variable_dimension(sol) > 0
-        println(
-            io,
-            "\n• Variable: ",
-            variable_name(sol),
-            " = (",
-            join(variable_components(sol), ", "),
-            ") = ",
-            variable(sol),
-        )
+        components = variable_components(sol)
+        var_name = variable_name(sol)
+        
+        # Cas simplifié: dimension 1 et nom identique
+        if variable_dimension(sol) == 1 && var_name == components[1]
+            println(
+                io,
+                "\n• Variable: ",
+                var_name,
+                " = ",
+                variable(sol),
+            )
+        else
+            println(
+                io,
+                "\n• Variable: ",
+                var_name,
+                " = (",
+                join(components, ", "),
+                ") = ",
+                variable(sol),
+            )
+        end
         if dim_variable_constraints_box(sol) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
