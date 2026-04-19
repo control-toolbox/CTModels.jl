@@ -84,7 +84,7 @@ function test_ocp_solution_types()
             dynamics = (r, t, x, u, v) -> nothing
             objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
             constraints = CTModels.ConstraintsModel((), (), (), (), ())
-            definition = quote end
+            definition = CTModels.OCP.EmptyDefinition()
             build_examodel = nothing
 
             model = CTModels.Model{CTModels.Autonomous}(
@@ -183,7 +183,7 @@ function test_ocp_solution_types()
             dynamics = (r, t, x, u, v) -> nothing
             objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
             constraints = CTModels.ConstraintsModel((), (), (), (), ())
-            definition = quote end
+            definition = CTModels.OCP.EmptyDefinition()
             build_examodel = nothing
 
             model = CTModels.Model{CTModels.Autonomous}(
