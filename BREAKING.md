@@ -32,6 +32,30 @@ The old function names were misleading because they returned the dimension of du
 
 The functions `dim_*_constraints_box(ocp::Model)` (for Model, not Solution) remain unchanged and still refer to constraint dimension in the model.
 
+### Breaking Changes: Definition Getter Removal on PreModel
+
+The `definition` and `expression` getters on `PreModel` have been removed to maintain consistency with the rest of the codebase where `PreModel` fields are accessed directly.
+
+#### Migration Guide
+
+```julia
+# Before (removed getters)
+d = definition(pre)          # No longer available
+e = expression(pre)          # No longer available
+
+# After (direct field access)
+d = pre.definition            # Access the field directly
+e = expression(pre.definition) # Pass the definition to expression()
+```
+
+#### Rationale
+
+The removal aligns with the existing pattern in CTModels where `PreModel` fields are accessed directly (e.g., `pre.state`, `pre.control`, `pre.variable`) rather than through getter functions. Getters on `Model` remain unchanged.
+
+#### Note
+
+The `definition(ocp::Model)` and `expression(ocp::Model)` getters remain available and unchanged. Only the `PreModel` variants were removed.
+
 ### Non-Breaking Changes
 
 This release also introduces consistent variable and control checking functions without breaking existing functionality:

@@ -27,6 +27,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Display improvement**: Dual variables only displayed if model has declared constraints
 - **New exports**: `dim_dual_state_constraints_box`, `dim_dual_control_constraints_box`, `dim_dual_variable_constraints_box`
 
+#### Optional Definition with EmptyDefinition Sentinel
+
+- **Type hierarchy**: Introduced `AbstractDefinition` with concrete types `Definition(expr::Expr)` and `EmptyDefinition` (sentinel)
+- **Optional definition**: `PreModel.definition` defaults to `EmptyDefinition()` instead of `nothing`
+- **Model parametric**: `Model` is now parametric on `DefinitionType<<:AbstractDefinition`
+- **Expression getter**: Added `expression()` function to extract `Expr` from `AbstractDefinition`
+- **Build relaxation**: Removed precondition requiring definition in `build()`
+- **Display refactor**: Split `Display/print.jl` into 5 focused files by responsibility
+- **Code organization**: Moved definition setters to `Components/definition.jl`, Model getters to `Building/model.jl`
+
+#### API Enhancements
+
+```julia
+# Definition is now optional
+pre = PreModel()
+pre.definition isa EmptyDefinition  # true by default
+
+# Set definition via setter (auto-wraps Expr)
+definition!(pre, quote
+    t ∈ [0, 1], time
+    x ∈ R, state
+    u ∈ R, control
+    ẋ(t) == u(t)
+    ∫(0.5u(t)^2) → min
+end)
+
+# Extract expression
+expr = expression(pre.definition)  # Returns the Expr
+
+# Build without definition is now valid
+model = build(pre)  # Works even without definition
+```
+
+#### Breaking Changes
+
+- **PreModel getters removed**: `definition(pre::PreModel)` and `expression(pre::PreModel)` removed; use `pre.definition` and `expression(pre.definition)` instead
+- **Model getters unchanged**: `definition(model::Model)` and `expression(model::Model)` remain available
+
 #### Consistent Variable and Control Checking Functions
 
 - **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
