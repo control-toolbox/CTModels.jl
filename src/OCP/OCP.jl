@@ -83,6 +83,7 @@ export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
 export FixedTimeModel, FreeTimeModel, TimesModel, AbstractTimeModel
 export StateModel, ControlModel, EmptyControlModel, VariableModel, EmptyVariableModel
+export AbstractDefinition, Definition, EmptyDefinition
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos

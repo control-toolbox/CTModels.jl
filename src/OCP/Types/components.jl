@@ -526,3 +526,70 @@ struct ConstraintsModel{TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple} <:
     control_box::TC
     variable_box::TV
 end
+
+# ------------------------------------------------------------------------------ #
+# Definition (symbolic)
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+
+Abstract base type for the symbolic (abstract) definition attached to an
+optimal control problem.
+
+Subtypes represent either a concrete symbolic definition ([`Definition`](@ref))
+or the absence of such a definition ([`EmptyDefinition`](@ref)). The
+`definition` field of [`Model`](@ref CTModels.OCP.Model) and `PreModel` stores
+a value of a subtype of `AbstractDefinition`.
+
+See also: [`Definition`](@ref), [`EmptyDefinition`](@ref).
+"""
+abstract type AbstractDefinition end
+
+"""
+$(TYPEDEF)
+
+Sentinel type representing the absence of a symbolic definition attached to
+an optimal control problem.
+
+Used as the default value of the `definition` field in `PreModel` and in a
+built [`Model`](@ref CTModels.OCP.Model) when the user did not call
+[`definition!`](@ref). When encountered, display and serialization routines
+treat the definition as empty and skip the "Abstract definition" section.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> ed = CTModels.EmptyDefinition()
+```
+
+See also: [`AbstractDefinition`](@ref), [`Definition`](@ref).
+"""
+struct EmptyDefinition <: AbstractDefinition end
+
+"""
+$(TYPEDEF)
+
+Wrapper around a Julia `Expr` holding the original symbolic definition of an
+optimal control problem (typically produced by the `@def` DSL).
+
+# Fields
+
+- `expr::Expr`: The symbolic expression defining the problem.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> d = CTModels.Definition(:(x = 1))
+julia> d.expr
+:(x = 1)
+```
+
+See also: [`AbstractDefinition`](@ref), [`EmptyDefinition`](@ref).
+"""
+struct Definition <: AbstractDefinition
+    expr::Expr
+end

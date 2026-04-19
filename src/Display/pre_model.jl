@@ -12,14 +12,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     # check if the problem is empty
     __is_empty(ocp) && return nothing
 
-    #
-    some_printing = false
-
-    if __is_definition_set(ocp)
-        # ------------------------------------------------------------------------------ #
-        # print the code
-        some_printing = __print_abstract_definition(io, ocp)
-    end
+    # ------------------------------------------------------------------------------ #
+    # print the abstract (symbolic) definition, if any
+    some_printing = _print_abstract_definition(io, definition(ocp))
 
     # ------------------------------------------------------------------------------ #
     # print in mathematical form

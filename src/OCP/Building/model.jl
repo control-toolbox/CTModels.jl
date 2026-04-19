@@ -473,12 +473,6 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
         suggestion="Call objective!(pre_ocp, ...) before building",
         context="build function - objective validation",
     )
-    @ensure __is_definition_set(pre_ocp) Exceptions.PreconditionError(
-        "Definition must be set before building model",
-        reason="definition has not been set yet",
-        suggestion="Call definition!(pre_ocp) before building",
-        context="build function - definition validation",
-    )
     @ensure __is_autonomous_set(pre_ocp) Exceptions.PreconditionError(
         "Time dependence must be set before building model",
         reason="autonomous status has not been defined yet",

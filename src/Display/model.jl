@@ -10,8 +10,8 @@ Print the optimal control problem.
 function Base.show(io::IO, ::MIME"text/plain", ocp::Model)
 
     # ------------------------------------------------------------------------------ #
-    # print the code
-    some_printing = __print_abstract_definition(io, ocp)
+    # print the abstract (symbolic) definition, if any
+    some_printing = _print_abstract_definition(io, definition(ocp))
 
     # ------------------------------------------------------------------------------ #
     # print in mathematical form
