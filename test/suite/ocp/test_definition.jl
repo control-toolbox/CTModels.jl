@@ -68,6 +68,36 @@ function test_definition()
         end
 
         # ====================================================================
+        # UNIT TESTS - expression getter
+        # ====================================================================
+
+        Test.@testset "expression on EmptyDefinition returns empty block Expr" begin
+            e = CTModels.expression(CTModels.EmptyDefinition())
+            Test.@test e isa Expr
+            Test.@test e.head == :block
+        end
+
+        Test.@testset "expression on Definition returns wrapped expr" begin
+            expr = :(x = 1)
+            e = CTModels.expression(CTModels.Definition(expr))
+            Test.@test e === expr
+        end
+
+        Test.@testset "expression on PreModel without definition returns empty block" begin
+            pre = CTModels.PreModel()
+            e = CTModels.expression(pre)
+            Test.@test e isa Expr
+            Test.@test e.head == :block
+        end
+
+        Test.@testset "expression on PreModel with definition returns expr" begin
+            pre = CTModels.PreModel()
+            expr = :(x = 1)
+            CTModels.definition!(pre, expr)
+            Test.@test CTModels.expression(pre) === expr
+        end
+
+        # ====================================================================
         # INTEGRATION TESTS
         # ====================================================================
 
@@ -85,6 +115,8 @@ function test_definition()
             model = CTModels.build(pre)
             Test.@test CTModels.definition(model) isa CTModels.EmptyDefinition
             Test.@test CTModels.OCP.__is_definition_set(model)
+            Test.@test CTModels.expression(model) isa Expr
+            Test.@test CTModels.expression(model).head == :block
         end
 
         Test.@testset "build with definition → Model holds Definition with correct expr" begin
@@ -110,6 +142,7 @@ function test_definition()
             Test.@test CTModels.definition(model) isa CTModels.Definition
             Test.@test CTModels.definition(model).expr === expr
             Test.@test CTModels.OCP.__is_definition_set(model)
+            Test.@test CTModels.expression(model) === expr
         end
     end
 end

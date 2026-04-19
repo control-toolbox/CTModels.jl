@@ -125,7 +125,7 @@ export dim_state_constraints_box, dim_control_constraints_box, dim_variable_cons
 export dim_dual_state_constraints_box, dim_dual_control_constraints_box, dim_dual_variable_constraints_box
 export state, control, variable, costate, objective
 export dynamics, mayer, lagrange
-export definition, dual
+export definition, expression, dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
