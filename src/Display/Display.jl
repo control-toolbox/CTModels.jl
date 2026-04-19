@@ -49,8 +49,12 @@ import ..OCP:
     dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
 import ..OCP: build
 
-# Include display functions
-include("print.jl")
+# Include display functions (split by responsibility)
+include("ansi.jl")
+include("definition.jl")
+include("mathematical.jl")
+include("model.jl")
+include("pre_model.jl")
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
