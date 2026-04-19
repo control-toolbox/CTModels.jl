@@ -572,6 +572,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )
@@ -593,6 +594,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )
@@ -633,6 +635,7 @@ function state(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractStateModel}
@@ -682,6 +685,7 @@ function control(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractControlModel}
@@ -731,6 +735,7 @@ function variable(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractVariableModel}
@@ -780,6 +785,7 @@ function times(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:TimesModel}
@@ -844,6 +850,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
@@ -865,6 +872,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
@@ -887,6 +895,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::T,
@@ -969,6 +978,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
@@ -990,6 +1000,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
@@ -1012,6 +1023,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::T,
@@ -1062,6 +1074,7 @@ function objective(
         <:Function,
         O,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::O where {O<:AbstractObjectiveModel}
@@ -1109,6 +1122,7 @@ function mayer(
         <:Function,
         <:MayerObjectiveModel{M},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
@@ -1130,6 +1144,7 @@ function mayer(
         <:Function,
         <:BolzaObjectiveModel{M,<:Function},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
@@ -1177,6 +1192,7 @@ function lagrange(
         <:Function,
         LagrangeObjectiveModel{L},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
@@ -1198,6 +1214,7 @@ function lagrange(
         <:Function,
         <:BolzaObjectiveModel{<:Function,L},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
@@ -1229,6 +1246,7 @@ function dynamics(
         D,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::D where {D<:Function}
@@ -1251,6 +1269,7 @@ function get_build_examodel(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         BE,
     },
 )::BE where {BE<:Function}
@@ -1272,6 +1291,7 @@ function get_build_examodel(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Nothing,
     },
 )
@@ -1301,6 +1321,7 @@ function constraints(
         <:Function,
         <:AbstractObjectiveModel,
         C,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::C where {C<:AbstractConstraintsModel}
@@ -1331,6 +1352,7 @@ function path_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TP where {TP<:Tuple}
@@ -1352,6 +1374,7 @@ function boundary_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TB where {TB<:Tuple}
@@ -1373,6 +1396,7 @@ function state_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TS where {TS<:Tuple}
@@ -1394,6 +1418,7 @@ function control_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TC where {TC<:Tuple}
@@ -1415,6 +1440,7 @@ function variable_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TV where {TV<:Tuple}
