@@ -1302,16 +1302,10 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     if variable_dimension(sol) > 0
         components = variable_components(sol)
         var_name = variable_name(sol)
-        
+
         # Cas simplifié: dimension 1 et nom identique
         if variable_dimension(sol) == 1 && var_name == components[1]
-            println(
-                io,
-                "\n• Variable: ",
-                var_name,
-                " = ",
-                variable(sol),
-            )
+            println(io, "\n• Variable: ", var_name, " = ", variable(sol))
         else
             println(
                 io,
