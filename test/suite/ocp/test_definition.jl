@@ -10,60 +10,106 @@ function test_definition()
     Test.@testset "Definition Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
+        # UNIT TESTS - Type Hierarchy
         # ====================================================================
 
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for definition functionality
+        Test.@testset "AbstractDefinition hierarchy" begin
+            Test.@testset "EmptyDefinition construction" begin
+                d = CTModels.EmptyDefinition()
+                Test.@test d isa CTModels.EmptyDefinition
+                Test.@test d isa CTModels.AbstractDefinition
+            end
+
+            Test.@testset "Definition construction and field access" begin
+                expr = :(x = 1)
+                d = CTModels.Definition(expr)
+                Test.@test d isa CTModels.Definition
+                Test.@test d isa CTModels.AbstractDefinition
+                Test.@test d.expr === expr
+            end
         end
 
         # ====================================================================
-        # UNIT TESTS - Setters/Getters on PreModel and Model
+        # UNIT TESTS - PreModel default
         # ====================================================================
 
-        Test.@testset "definition! and definition on PreModel" begin
+        Test.@testset "PreModel default definition is EmptyDefinition" begin
+            pre = CTModels.PreModel()
+            Test.@test CTModels.definition(pre) isa CTModels.EmptyDefinition
+            Test.@test !CTModels.OCP.__is_definition_set(pre)
+        end
+
+        # ====================================================================
+        # UNIT TESTS - Setters/Getters
+        # ====================================================================
+
+        Test.@testset "definition! auto-wraps Expr into Definition" begin
             pre = CTModels.PreModel()
             expr = :(x = 1)
-
             CTModels.definition!(pre, expr)
+            Test.@test CTModels.definition(pre) isa CTModels.Definition
+            Test.@test CTModels.definition(pre).expr === expr
+            Test.@test CTModels.OCP.__is_definition_set(pre)
+        end
 
-            Test.@test CTModels.definition(pre) === expr
+        Test.@testset "definition! accepts AbstractDefinition directly" begin
+            pre = CTModels.PreModel()
+            d = CTModels.Definition(:(y = 2))
+            CTModels.definition!(pre, d)
+            Test.@test CTModels.definition(pre) === d
+            Test.@test CTModels.OCP.__is_definition_set(pre)
+        end
+
+        Test.@testset "definition! with EmptyDefinition leaves predicate false" begin
+            pre = CTModels.PreModel()
+            CTModels.definition!(pre, CTModels.EmptyDefinition())
+            Test.@test CTModels.definition(pre) isa CTModels.EmptyDefinition
+            Test.@test !CTModels.OCP.__is_definition_set(pre)
         end
 
         # ====================================================================
-        # INTEGRATION TESTS - Definition Propagated Through Build
+        # INTEGRATION TESTS
         # ====================================================================
 
-        Test.@testset "definition carried to Model after build" begin
+        Test.@testset "build without definition → Model holds EmptyDefinition" begin
             pre = CTModels.PreModel()
-
-            # Minimal consistent problem using the high-level API
             CTModels.time!(pre; t0=0.0, tf=1.0)
             CTModels.state!(pre, 1)
             CTModels.control!(pre, 1)
             CTModels.variable!(pre, 0)
-
             dyn!(r, t, x, u, v) = r .= 0
             CTModels.dynamics!(pre, dyn!)
+            CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
+            CTModels.time_dependence!(pre; autonomous=false)
 
-            mayer(x0, xf, v) = 0.0
-            lagrange(t, x, u, v) = 0.0
-            CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+            model = CTModels.build(pre)
+            Test.@test CTModels.definition(model) isa CTModels.EmptyDefinition
+            Test.@test CTModels.OCP.__is_definition_set(model)
+        end
 
+        Test.@testset "build with definition → Model holds Definition with correct expr" begin
+            pre = CTModels.PreModel()
+            CTModels.time!(pre; t0=0.0, tf=1.0)
+            CTModels.state!(pre, 1)
+            CTModels.control!(pre, 1)
+            CTModels.variable!(pre, 0)
+            dyn!(r, t, x, u, v) = r .= 0
+            CTModels.dynamics!(pre, dyn!)
+            CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
             expr = quote
                 t ∈ [0, 1], time
                 x ∈ R, state
                 u ∈ R, control
-                ẋ(t) == u(t)
+                ẋ(t) == u(t)
                 ∫(0.5u(t)^2) → min
             end
-
             CTModels.definition!(pre, expr)
             CTModels.time_dependence!(pre; autonomous=false)
 
             model = CTModels.build(pre)
-
-            Test.@test CTModels.definition(model) === expr
+            Test.@test CTModels.definition(model) isa CTModels.Definition
+            Test.@test CTModels.definition(model).expr === expr
+            Test.@test CTModels.OCP.__is_definition_set(model)
         end
     end
 end

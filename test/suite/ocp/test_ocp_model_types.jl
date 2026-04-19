@@ -37,7 +37,7 @@ function test_ocp_model_types()
             dynamics = (r, t, x, u, v) -> nothing
             objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
             constraints = CTModels.ConstraintsModel((), (), (), (), ())
-            definition = quote end
+            definition = CTModels.EmptyDefinition()
             build_examodel = nothing
 
             ocp = CTModels.Model{CTModels.Autonomous}(
@@ -62,6 +62,7 @@ function test_ocp_model_types()
                 typeof(dynamics),
                 typeof(objective),
                 typeof(constraints),
+                typeof(definition),
                 typeof(build_examodel),
             }
 
@@ -111,11 +112,11 @@ function test_ocp_model_types()
             Test.@test CTModels.OCP.__is_objective_set(ocp)
             Test.@test CTModels.OCP.__is_autonomous_set(ocp)
 
-            # At this stage the model is consistent but not yet complete
+            # definition is optional: model is complete without it
             Test.@test CTModels.OCP.__is_consistent(ocp)
-            Test.@test !CTModels.OCP.__is_complete(ocp)
+            Test.@test CTModels.OCP.__is_complete(ocp)
 
-            ocp.definition = quote end
+            ocp.definition = CTModels.Definition(quote end)
 
             Test.@test CTModels.OCP.__is_definition_set(ocp)
             Test.@test CTModels.OCP.__is_complete(ocp)
@@ -150,7 +151,7 @@ function test_ocp_model_types()
             ocp.variable = variable
             ocp.dynamics = dynamics
             ocp.objective = objective
-            ocp.definition = quote end
+            ocp.definition = CTModels.Definition(quote end)
             ocp.autonomous = true
 
             Test.@test can_build(ocp)
