@@ -1491,3 +1491,59 @@ Return the dimension of box constraints on variable.
 function dim_variable_constraints_box(ocp::Model)::Dimension
     return dim_variable_constraints_box(constraints(ocp))
 end
+
+# ------------------------------------------------------------------------------ #
+# Definition getters
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the model definition of the optimal control problem.
+
+# Arguments
+
+- `ocp::Model`: The built optimal control problem model.
+
+# Returns
+
+- `AbstractDefinition`: The [`Definition`](@ref) wrapping the symbolic
+  expression, or an [`EmptyDefinition`](@ref) if the user did not attach one
+  before [`build`](@ref).
+"""
+function definition(
+    ocp::Model{
+        <:TimeDependence,
+        <:TimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+        D,
+        <:Union{Function,Nothing},
+    },
+)::D where {D<:AbstractDefinition}
+    return ocp.definition
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the symbolic expression of the model definition of a built optimal control
+problem.
+
+Delegates to [`expression`](@ref) on the underlying [`AbstractDefinition`](@ref):
+returns `d.expr` if a [`Definition`](@ref) was attached before [`build`](@ref),
+or `:(begin end)` if the definition is an [`EmptyDefinition`](@ref).
+
+# Arguments
+
+- `ocp::Model`: The built optimal control problem model.
+
+# Returns
+
+- `Expr`: The symbolic expression, or `:(begin end)` if no definition was attached.
+"""
+expression(ocp::Model)::Expr = expression(definition(ocp))

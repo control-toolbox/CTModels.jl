@@ -35,7 +35,7 @@ function test_definition()
 
         Test.@testset "PreModel default definition is EmptyDefinition" begin
             pre = CTModels.PreModel()
-            Test.@test CTModels.definition(pre) isa CTModels.EmptyDefinition
+            Test.@test pre.definition isa CTModels.EmptyDefinition
             Test.@test !CTModels.OCP.__is_definition_set(pre)
         end
 
@@ -47,8 +47,8 @@ function test_definition()
             pre = CTModels.PreModel()
             expr = :(x = 1)
             CTModels.definition!(pre, expr)
-            Test.@test CTModels.definition(pre) isa CTModels.Definition
-            Test.@test CTModels.definition(pre).expr === expr
+            Test.@test pre.definition isa CTModels.Definition
+            Test.@test pre.definition.expr === expr
             Test.@test CTModels.OCP.__is_definition_set(pre)
         end
 
@@ -56,14 +56,14 @@ function test_definition()
             pre = CTModels.PreModel()
             d = CTModels.Definition(:(y = 2))
             CTModels.definition!(pre, d)
-            Test.@test CTModels.definition(pre) === d
+            Test.@test pre.definition === d
             Test.@test CTModels.OCP.__is_definition_set(pre)
         end
 
         Test.@testset "definition! with EmptyDefinition leaves predicate false" begin
             pre = CTModels.PreModel()
             CTModels.definition!(pre, CTModels.EmptyDefinition())
-            Test.@test CTModels.definition(pre) isa CTModels.EmptyDefinition
+            Test.@test pre.definition isa CTModels.EmptyDefinition
             Test.@test !CTModels.OCP.__is_definition_set(pre)
         end
 
@@ -83,18 +83,18 @@ function test_definition()
             Test.@test e === expr
         end
 
-        Test.@testset "expression on PreModel without definition returns empty block" begin
+        Test.@testset "expression on EmptyDefinition via field returns empty block" begin
             pre = CTModels.PreModel()
-            e = CTModels.expression(pre)
+            e = CTModels.expression(pre.definition)
             Test.@test e isa Expr
             Test.@test e.head == :block
         end
 
-        Test.@testset "expression on PreModel with definition returns expr" begin
+        Test.@testset "expression on Definition via field returns expr" begin
             pre = CTModels.PreModel()
             expr = :(x = 1)
             CTModels.definition!(pre, expr)
-            Test.@test CTModels.expression(pre) === expr
+            Test.@test CTModels.expression(pre.definition) === expr
         end
 
         # ====================================================================
