@@ -60,11 +60,6 @@ expr = expression(pre.definition)  # Returns the Expr
 model = build(pre)  # Works even without definition
 ```
 
-#### Breaking Changes
-
-- **PreModel getters removed**: `definition(pre::PreModel)` and `expression(pre::PreModel)` removed; use `pre.definition` and `expression(pre.definition)` instead
-- **Model getters unchanged**: `definition(model::Model)` and `expression(model::Model)` remain available
-
 #### Consistent Variable and Control Checking Functions
 
 - **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
