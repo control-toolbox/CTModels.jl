@@ -67,11 +67,11 @@ function _interpolate_from_data(
     # Dimension validation if expected_dim provided
     if !isnothing(expected_dim) && !isnothing(dim)
         actual_dim = size(data, 2)
-        @ensure actual_dim >= dim Exceptions.IncorrectArgument(
+        @ensure actual_dim == dim Exceptions.IncorrectArgument(
             "Matrix dimension mismatch",
             got="$actual_dim columns",
-            expected="at least $dim columns",
-            suggestion="Provide a matrix with at least $dim columns or adjust expected_dim parameter",
+            expected="exactly $dim columns",
+            suggestion="Provide a matrix with exactly $dim columns (pad with zeros for unconstrained components if dual).",
             context="_interpolate_from_data - validating matrix dimensions",
         )
     end

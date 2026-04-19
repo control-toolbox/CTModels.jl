@@ -6,9 +6,35 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## [0.9.15] - 2026-04-18
 
-### No Breaking Changes
+### Breaking Changes: Dual Dimension Function Renaming
 
-This release introduces consistent variable and control checking functions without breaking existing functionality:
+The following functions have been renamed to clarify that they return dual dimension, not constraint dimension:
+
+- `dim_variable_constraints_box(sol)` → `dim_dual_variable_constraints_box(sol)`
+- `dim_state_constraints_box(sol)` → `dim_dual_state_constraints_box(sol)`
+- `dim_control_constraints_box(sol)` → `dim_dual_control_constraints_box(sol)`
+
+#### Migration Guide
+
+```julia
+# Before (old function names)
+dim = dim_state_constraints_box(sol)
+
+# After (new function names)
+dim = dim_dual_state_constraints_box(sol)
+```
+
+#### Rationale
+
+The old function names were misleading because they returned the dimension of dual multipliers, not the dimension of constraints declared in the model. The new names clarify this distinction.
+
+#### Note
+
+The functions `dim_*_constraints_box(ocp::Model)` (for Model, not Solution) remain unchanged and still refer to constraint dimension in the model.
+
+### Non-Breaking Changes
+
+This release also introduces consistent variable and control checking functions without breaking existing functionality:
 
 #### New Functions (Non-Breaking)
 

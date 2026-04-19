@@ -7,6 +7,29 @@ using CTModels: CTModels
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+# Top-level helper (module-level to avoid world-age issues)
+"""
+    _make_min_premodel(; state_dim, control_dim=1, variable_dim=0)
+
+Build a minimal `PreModel` with the given dimensions, ready to receive constraints.
+Used by storage / retrieval tests.
+"""
+function _make_min_premodel(; state_dim::Int, control_dim::Int=1, variable_dim::Int=0)
+    ocp = CTModels.PreModel()
+    CTModels.time!(ocp; t0=0.0, tf=1.0)
+    CTModels.state!(ocp, state_dim)
+    CTModels.control!(ocp, control_dim)
+    if variable_dim > 0
+        CTModels.variable!(ocp, variable_dim)
+    end
+    _dyn!(r, t, x, u, v) = (r .= zero(x))
+    CTModels.dynamics!(ocp, _dyn!)
+    CTModels.objective!(ocp, :min; mayer=(x0, xf, v) -> 0.0)
+    CTModels.definition!(ocp, quote end)
+    CTModels.time_dependence!(ocp; autonomous=false)
+    return ocp
+end
+
 """
     test_constraints()
 
@@ -14,8 +37,9 @@ Test constraint handling in OCP models.
 
 # Note
 Some tests in this file intentionally generate warnings to verify that the system
-correctly warns users about overwriting bounds. If you see warnings like
-"Overwriting bound for component X", they are expected and part of the test assertions.
+correctly warns users about multiple bound declarations on the same component.
+If you see warnings like "Multiple bound declarations for component X", they are
+expected and part of the test assertions.
 """
 function test_constraints()
     Test.@testset "Constraints Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -172,12 +196,14 @@ function test_constraints()
         # -----------------------------------------------------------------------
         # Test duplicate constraint warning (Issue #105)
         # When multiple constraints are declared on the same component index,
-        # a warning should be emitted during model build.
+        # a warning should be emitted during model build. All declarations are
+        # kept; the effective bound at solver level is the intersection.
         # Applies to: state, control, and variable constraints.
         #
         # NOTE: The warnings displayed during these tests are INTENTIONAL and EXPECTED.
-        # They verify that the system correctly warns users about overwriting bounds.
-        # These warnings are part of the test assertions using Test.@test_warn.
+        # They verify that the system correctly warns users about multiple bound
+        # declarations. These warnings are part of the test assertions using
+        # Test.@test_warn.
         # -----------------------------------------------------------------------
         Test.@testset "duplicate constraint warning" begin
             # --- State constraints ---
@@ -196,7 +222,9 @@ function test_constraints()
                 CTModels.constraint!(ocp_dup, :state; rg=1:1, lb=[0.0], ub=[1.0], label=:s1)
                 CTModels.constraint!(ocp_dup, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2)
 
-                Test.@test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+                Test.@test_warn "Multiple bound declarations for state component 1" CTModels.build(
+                    ocp_dup
+                )
             end
 
             # --- Control constraints ---
@@ -219,7 +247,9 @@ function test_constraints()
                     ocp_dup, :control; rg=1:1, lb=[0.5], ub=[1.5], label=:c2
                 )
 
-                Test.@test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+                Test.@test_warn "Multiple bound declarations for control component 1" CTModels.build(
+                    ocp_dup
+                )
             end
 
             # --- Variable constraints ---
@@ -243,8 +273,135 @@ function test_constraints()
                     ocp_dup, :variable; rg=1:1, lb=[0.5], ub=[1.5], label=:v2
                 )
 
-                Test.@test_warn "Overwriting bound for component 1" CTModels.build(ocp_dup)
+                Test.@test_warn "Multiple bound declarations for variable component 1" CTModels.build(
+                    ocp_dup
+                )
             end
+        end
+
+        # ====================================================================
+        # UNIT TESTS - Bound declarations storage in ConstraintsModel
+        # Verifies the contract of `build(constraints)`: how declared bounds
+        # are stored in the `state_constraints_box` / `control_constraints_box`
+        # / `variable_constraints_box` tuples of the resulting Model.
+        # ====================================================================
+
+        Test.@testset "bound declarations storage" begin
+            Test.@testset "single full-range declaration preserves order" begin
+                ocp = _make_min_premodel(; state_dim=3)
+                CTModels.constraint!(
+                    ocp,
+                    :state;
+                    rg=1:3,
+                    lb=[0.0, 1.0, 2.0],
+                    ub=[1.0, 2.0, 3.0],
+                    label=:s,
+                )
+                m = CTModels.build(ocp)
+                cs = CTModels.state_constraints_box(m)
+                Test.@test cs[1] == [0.0, 1.0, 2.0]
+                Test.@test cs[2] == [1, 2, 3]
+                Test.@test cs[3] == [1.0, 2.0, 3.0]
+                Test.@test cs[4] == [:s, :s, :s]
+                Test.@test cs[5] == [[:s], [:s], [:s]]
+                Test.@test CTModels.dim_state_constraints_box(m) == 3
+            end
+
+            Test.@testset "partial range not starting at 1" begin
+                ocp = _make_min_premodel(; state_dim=3)
+                CTModels.constraint!(
+                    ocp, :state; rg=2:3, lb=[0.0, 1.0], ub=[1.0, 2.0], label=:s
+                )
+                m = CTModels.build(ocp)
+                cs = CTModels.state_constraints_box(m)
+                Test.@test cs[1] == [0.0, 1.0]
+                Test.@test cs[2] == [2, 3]
+                Test.@test cs[3] == [1.0, 2.0]
+                Test.@test cs[5] == [[:s], [:s]]
+                Test.@test CTModels.dim_state_constraints_box(m) == 2
+            end
+
+            Test.@testset "duplicate: intersection applied, per-component uniqueness" begin
+                ocp = _make_min_premodel(; state_dim=2)
+                CTModels.constraint!(
+                    ocp, :state; rg=1:1, lb=[0.0], ub=[2.0], label=:s1
+                )
+                CTModels.constraint!(
+                    ocp, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2
+                )
+                # warning emitted once at build; storage holds one entry per component
+                m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
+                    ocp
+                ))
+                cs = CTModels.state_constraints_box(m)
+                # effective (intersected) bounds
+                Test.@test cs[1] == [0.5]
+                Test.@test cs[2] == [1]
+                Test.@test cs[3] == [1.5]
+                # first-declared label kept in cs[4]; all labels kept in cs[5]
+                Test.@test cs[4] == [:s1]
+                Test.@test cs[5] == [[:s1, :s2]]
+                # dim counts unique components, not declarations
+                Test.@test CTModels.dim_state_constraints_box(m) == 1
+            end
+
+            Test.@testset "overlapping ranges" begin
+                ocp = _make_min_premodel(; state_dim=3)
+                CTModels.constraint!(
+                    ocp,
+                    :state;
+                    rg=1:2,
+                    lb=[0.0, 1.0],
+                    ub=[1.0, 2.0],
+                    label=:a,
+                )
+                CTModels.constraint!(
+                    ocp,
+                    :state;
+                    rg=2:3,
+                    lb=[0.5, 1.5],
+                    ub=[1.5, 2.5],
+                    label=:b,
+                )
+                m = (Test.@test_logs (:warn, r"component 2") CTModels.build(ocp))
+                cs = CTModels.state_constraints_box(m)
+                # 3 unique components: 1 (from :a), 2 (intersected from :a,:b), 3 (from :b)
+                Test.@test length(cs[1]) == 3
+                Test.@test cs[2] == [1, 2, 3]
+                Test.@test cs[1] == [0.0, 1.0, 1.5]  # max of lbs per component
+                Test.@test cs[3] == [1.0, 1.5, 2.5]  # min of ubs per component
+                Test.@test cs[4] == [:a, :a, :b]    # first label per component
+                Test.@test cs[5] == [[:a], [:a, :b], [:b]]
+                Test.@test CTModels.dim_state_constraints_box(m) == 3
+            end
+        end
+
+        # ====================================================================
+        # UNIT TESTS - constraint(model, label) retrieval
+        # After duplicates are kept, `constraint(m, :label)` must still return
+        # the originally declared bounds for each individual label.
+        # ====================================================================
+
+        Test.@testset "constraint(model, label) retrieval with duplicates" begin
+            # After dedup+intersection, `constraint(m, :label)` returns the
+            # **effective** (intersected) bounds, not the bounds as initially
+            # declared for that specific label. Both :s1 and :s2 target
+            # component 1, so both retrievals yield the same intersected bound.
+            ocp = _make_min_premodel(; state_dim=2)
+            CTModels.constraint!(ocp, :state; rg=1:1, lb=[0.0], ub=[2.0], label=:s1)
+            CTModels.constraint!(ocp, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2)
+            m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
+                ocp
+            ))
+
+            c_s1 = CTModels.constraint(m, :s1)
+            c_s2 = CTModels.constraint(m, :s2)
+            Test.@test c_s1[1] === :state
+            Test.@test c_s1[3] == 0.5  # effective lb = max(0.0, 0.5)
+            Test.@test c_s1[4] == 1.5  # effective ub = min(2.0, 1.5)
+            Test.@test c_s2[1] === :state
+            Test.@test c_s2[3] == 0.5
+            Test.@test c_s2[4] == 1.5
         end
 
         # NEW: lb ≤ ub validation tests

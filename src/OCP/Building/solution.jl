@@ -293,6 +293,8 @@ function build_solution(
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
+    # Convention for path/boundary duals: one column per constraint row
+    #   (indexed by declaration, matching cp[4] labels).
     fpcd = build_interpolated_function(
         path_constraints_dual,
         T_path,
@@ -302,41 +304,69 @@ function build_solution(
     )
 
     # box constraints multipliers (optional, can be nothing)
-    # Note: No expected_dim validation for box constraints because they use
-    # dim_*_constraints_box which may differ from state/control dimensions
+    # Convention for box duals: one column per primal component
+    #   (state_dimension / control_dimension / variable_dimension).
+    # Components without a bound carry a zero multiplier. This matches what
+    # CTDirect produces natively and guarantees that `dual(sol, m, :label)`
+    # can return the multiplier of the component(s) targeted by :label.
     # State box constraint duals share the state grid (T_state)
     fscbd = build_interpolated_function(
         state_constraints_lb_dual,
         T_state,
-        dim_state_constraints_box(ocp),
+        dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_x,
     )
     fscud = build_interpolated_function(
         state_constraints_ub_dual,
         T_state,
-        dim_state_constraints_box(ocp),
+        dim_x,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_x,
     )
     # Control box constraint duals share the control grid (T_control)
     # Note: use same interpolation as control
     fccbd = build_interpolated_function(
         control_constraints_lb_dual,
         T_control,
-        dim_control_constraints_box(ocp),
+        dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_u,
         interpolation=control_interpolation,
     )
     fccud = build_interpolated_function(
         control_constraints_ub_dual,
         T_control,
-        dim_control_constraints_box(ocp),
+        dim_u,
         Union{Matrix{Float64},Nothing};
         allow_nothing=true,
+        expected_dim=dim_u,
         interpolation=control_interpolation,
     )
+
+    # Variable box constraint duals are (time-independent) vectors.
+    # Enforce length == variable_dimension(ocp) when provided.
+    if !isnothing(variable_constraints_lb_dual)
+        @ensure length(variable_constraints_lb_dual) == dim_v Exceptions.IncorrectArgument(
+            "variable_constraints_lb_dual length mismatch";
+            got="length=$(length(variable_constraints_lb_dual))",
+            expected="length=$(dim_v) (= variable_dimension)",
+            suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
+            context="build_solution - validating variable dual length",
+        )
+    end
+    if !isnothing(variable_constraints_ub_dual)
+        @ensure length(variable_constraints_ub_dual) == dim_v Exceptions.IncorrectArgument(
+            "variable_constraints_ub_dual length mismatch";
+            got="length=$(length(variable_constraints_ub_dual))",
+            expected="length=$(dim_v) (= variable_dimension)",
+            suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
+            context="build_solution - validating variable dual length",
+        )
+    end
 
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
@@ -731,10 +761,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of the variable box constraints.
+Return the dimension of the variable box constraints duals.
 
 """
-function dim_variable_constraints_box(sol::Solution)::Dimension
+function dim_dual_variable_constraints_box(sol::Solution)::Dimension
     vc_lb_dual = variable_constraints_lb_dual(sol)
     return vc_lb_dual === nothing ? 0 : length(vc_lb_dual)
 end
@@ -742,23 +772,29 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of box constraints on state.
+Return the dimension of a dual value, evaluating at initial time.
+"""
+_dual_dimension(::Nothing, ::Solution)::Dimension = 0
+_dual_dimension(dual::Function, sol::Solution)::Dimension = length(dual(initial_time(sol)))
 
 """
-function dim_state_constraints_box(sol::Solution)::Dimension
-    sc_lb_dual = state_constraints_lb_dual(sol)
-    return sc_lb_dual === nothing ? 0 : state_dimension(sol)
+$(TYPEDSIGNATURES)
+
+Return the dimension of the box constraints duals on state.
+
+"""
+function dim_dual_state_constraints_box(sol::Solution)::Dimension
+    return _dual_dimension(state_constraints_lb_dual(sol), sol)
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of box constraints on control.
+Return the dimension of the box constraints duals on control.
 
 """
-function dim_control_constraints_box(sol::Solution)::Dimension
-    cc_lb_dual = control_constraints_lb_dual(sol)
-    return cc_lb_dual === nothing ? 0 : control_dimension(sol)
+function dim_dual_control_constraints_box(sol::Solution)::Dimension
+    return _dual_dimension(control_constraints_lb_dual(sol), sol)
 end
 
 """
@@ -1289,7 +1325,7 @@ $(TYPEDSIGNATURES)
 Print the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    # Résumé solveur
+    # Solver summary
     println(io, "• Solver:")
     println(io, "  ✓ Successful  : ", successful(sol))
     println(io, "  │  Status     : ", status(sol))
@@ -1298,12 +1334,12 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     println(io, "  │  Objective  : ", objective(sol))
     println(io, "  └─ Constraints violation : ", constraints_violation(sol))
 
-    # Variable (si définie)
+    # Variable (if defined)
     if variable_dimension(sol) > 0
         components = variable_components(sol)
         var_name = variable_name(sol)
         
-        # Cas simplifié: dimension 1 et nom identique
+        # Simplified case: dimension 1 and name identical
         if variable_dimension(sol) == 1 && var_name == components[1]
             println(
                 io,
@@ -1323,7 +1359,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
                 variable(sol),
             )
         end
-        if dim_variable_constraints_box(sol) > 0
+        if dim_dual_variable_constraints_box(sol) > 0 && dim_variable_constraints_box(model(sol)) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
         end
@@ -1540,20 +1576,20 @@ function _discretize_all_components(
             path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)
         ),
         "state_constraints_lb_dual" => _discretize_dual(
-            state_constraints_lb_dual(sol), T_state, dim_state_constraints_box(sol)
+            state_constraints_lb_dual(sol), T_state, dim_dual_state_constraints_box(sol)
         ),
         "state_constraints_ub_dual" => _discretize_dual(
-            state_constraints_ub_dual(sol), T_state, dim_state_constraints_box(sol)
+            state_constraints_ub_dual(sol), T_state, dim_dual_state_constraints_box(sol)
         ),
         "control_constraints_lb_dual" => _discretize_dual(
             control_constraints_lb_dual(sol),
             T_control,
-            dim_control_constraints_box(sol),
+            dim_dual_control_constraints_box(sol),
         ),
         "control_constraints_ub_dual" => _discretize_dual(
             control_constraints_ub_dual(sol),
             T_control,
-            dim_control_constraints_box(sol),
+            dim_dual_control_constraints_box(sol),
         ),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),

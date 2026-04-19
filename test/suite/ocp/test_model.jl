@@ -120,7 +120,15 @@ function test_model()
         )
 
         # build the model
-        model = CTModels.build(pre_ocp)
+        # Note: the scalar constraints (:state_scalar, :state_scalar_2, and
+        # their control/variable analogues) intentionally re-declare bounds on
+        # components already declared by :state/:control/:variable. Under the
+        # per-component uniqueness invariant, this emits one warning per
+        # duplicated component (6 warnings here). We redirect stderr to silence
+        # them so they don't pollute test output.
+        model = redirect_stderr(devnull) do
+            CTModels.build(pre_ocp)
+        end
 
         # check the type of the model
         Test.@test model isa CTModels.Model
@@ -167,6 +175,12 @@ function test_model()
         Test.@test CTModels.constraint(model, :variable_scalar_2)[1] == :variable
 
         # test the lower bounds
+        # For path/boundary constraints (NL), bounds are per-declaration and
+        # returned as declared. For state/control/variable box constraints
+        # sharing components, `constraint(m, :label)[3]` returns the
+        # **effective** (intersected) lower bound. E.g. :state_scalar declares
+        # lb=-12 on component 1 but :state already declares lb=-4 on that same
+        # component (tighter), so the effective lb is -4.
         Test.@test CTModels.constraint(model, :path)[3] == [-0, -1]
         Test.@test CTModels.constraint(model, :boundary)[3] == [-2, -3]
         Test.@test CTModels.constraint(model, :state)[3] == [-4, -5]
@@ -174,14 +188,14 @@ function test_model()
         Test.@test CTModels.constraint(model, :variable)[3] == [-8, -9]
         Test.@test CTModels.constraint(model, :path_scalar)[3] == -10
         Test.@test CTModels.constraint(model, :boundary_scalar)[3] == -11
-        Test.@test CTModels.constraint(model, :state_scalar)[3] == -12
-        Test.@test CTModels.constraint(model, :control_scalar)[3] == -13
-        Test.@test CTModels.constraint(model, :variable_scalar)[3] == -14
-        Test.@test CTModels.constraint(model, :state_scalar_2)[3] == -15
-        Test.@test CTModels.constraint(model, :control_scalar_2)[3] == -16
-        Test.@test CTModels.constraint(model, :variable_scalar_2)[3] == -17
+        Test.@test CTModels.constraint(model, :state_scalar)[3] == -4    # intersected with :state
+        Test.@test CTModels.constraint(model, :control_scalar)[3] == -6  # intersected with :control
+        Test.@test CTModels.constraint(model, :variable_scalar)[3] == -8 # intersected with :variable
+        Test.@test CTModels.constraint(model, :state_scalar_2)[3] == -5
+        Test.@test CTModels.constraint(model, :control_scalar_2)[3] == -7
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[3] == -9
 
-        # test the upper bounds
+        # test the upper bounds (same intersection logic applies)
         Test.@test CTModels.constraint(model, :path)[4] == [1, 2]
         Test.@test CTModels.constraint(model, :boundary)[4] == [3, 4]
         Test.@test CTModels.constraint(model, :state)[4] == [5, 6]
@@ -189,12 +203,12 @@ function test_model()
         Test.@test CTModels.constraint(model, :variable)[4] == [9, 10]
         Test.@test CTModels.constraint(model, :path_scalar)[4] == 11
         Test.@test CTModels.constraint(model, :boundary_scalar)[4] == 12
-        Test.@test CTModels.constraint(model, :state_scalar)[4] == 13
-        Test.@test CTModels.constraint(model, :control_scalar)[4] == 14
-        Test.@test CTModels.constraint(model, :variable_scalar)[4] == 15
-        Test.@test CTModels.constraint(model, :state_scalar_2)[4] == 16
-        Test.@test CTModels.constraint(model, :control_scalar_2)[4] == 17
-        Test.@test CTModels.constraint(model, :variable_scalar_2)[4] == 18
+        Test.@test CTModels.constraint(model, :state_scalar)[4] == 5     # intersected with :state
+        Test.@test CTModels.constraint(model, :control_scalar)[4] == 7   # intersected with :control
+        Test.@test CTModels.constraint(model, :variable_scalar)[4] == 9  # intersected with :variable
+        Test.@test CTModels.constraint(model, :state_scalar_2)[4] == 6
+        Test.@test CTModels.constraint(model, :control_scalar_2)[4] == 8
+        Test.@test CTModels.constraint(model, :variable_scalar_2)[4] == 10
 
         # print the premodel (captured, no terminal output)
         io = IOBuffer()

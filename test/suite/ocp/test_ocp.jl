@@ -85,26 +85,38 @@ function test_ocp()
             pre_constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3]
         )
 
-        # state box constraint
-        CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
-        CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; rg=1:1, lb=[3], ub=[3])
+        # state/control/variable box constraints:
+        # declare full-range bounds on components 1..2, then a tighter bound on
+        # component 2 that is consistent with the first declaration (so the
+        # per-component intersection is non-empty). After dedup:
+        #   comp 1 → lb=0, ub=1     (from first declaration)
+        #   comp 2 → lb=1, ub=1.5   (intersection: max(1, 1)=1, min(2, 1.5)=1.5)
 
-        # control box constraint
-        CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+        # state box
+        CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
         CTModels.OCP.__constraint!(
-            pre_constraints, :control, n, m, q; rg=1:1, lb=[3], ub=[3]
+            pre_constraints, :state, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
-        # variable box constraint
+        # control box
+        CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+        CTModels.OCP.__constraint!(
+            pre_constraints, :control, n, m, q; rg=2:2, lb=[1], ub=[1.5]
+        )
+
+        # variable box
         CTModels.OCP.__constraint!(
             pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2]
         )
         CTModels.OCP.__constraint!(
-            pre_constraints, :variable, n, m, q; rg=1:1, lb=[3], ub=[3]
+            pre_constraints, :variable, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
-        # build constraints
-        constraints = CTModels.build(pre_constraints)
+        # build constraints (the duplicate-on-component-2 declarations above
+        # emit one warning each, which we silence via stderr redirection).
+        constraints = redirect_stderr(devnull) do
+            CTModels.build(pre_constraints)
+        end
 
         # Model definition
         definition = quote
@@ -184,9 +196,9 @@ function test_ocp()
         # dimensions: path, boundary, variable (nonlinear), state, control, variable (box)
         Test.@test CTModels.dim_path_constraints_nl(ocp) == 3
         Test.@test CTModels.dim_boundary_constraints_nl(ocp) == 3
-        Test.@test CTModels.dim_state_constraints_box(ocp) == 3
-        Test.@test CTModels.dim_control_constraints_box(ocp) == 3
-        Test.@test CTModels.dim_variable_constraints_box(ocp) == 3
+        Test.@test CTModels.dim_state_constraints_box(ocp) == 2
+        Test.@test CTModels.dim_control_constraints_box(ocp) == 2
+        Test.@test CTModels.dim_variable_constraints_box(ocp) == 2
 
         # Get all constraints and test. Be careful, the order is not guaranteed. 
         # We will check up to permutations by sorting the results.
@@ -228,20 +240,20 @@ function test_ocp()
         boundary_cons_nl!(r, x0, xf, v)
         Test.@test sort(r) == sort([ra; rb])
 
-        # state box constraints
-        Test.@test sort(state_cons_box_lb) == [0, 1, 3]
-        Test.@test sort(state_cons_box_ub) == [1, 2, 3]
-        Test.@test sort(state_cons_box_ind) == [1, 1, 2]
+        # state box constraints (2 unique components after dedup)
+        Test.@test sort(state_cons_box_lb) == [0, 1]
+        Test.@test sort(state_cons_box_ub) == [1, 1.5]
+        Test.@test sort(state_cons_box_ind) == [1, 2]
 
         # control box constraints
-        Test.@test sort(control_cons_box_lb) == [0, 1, 3]
-        Test.@test sort(control_cons_box_ub) == [1, 2, 3]
-        Test.@test sort(control_cons_box_ind) == [1, 1, 2]
+        Test.@test sort(control_cons_box_lb) == [0, 1]
+        Test.@test sort(control_cons_box_ub) == [1, 1.5]
+        Test.@test sort(control_cons_box_ind) == [1, 2]
 
         # variable box constraints
-        Test.@test sort(variable_cons_box_lb) == [0, 1, 3]
-        Test.@test sort(variable_cons_box_ub) == [1, 2, 3]
-        Test.@test sort(variable_cons_box_ind) == [1, 1, 2]
+        Test.@test sort(variable_cons_box_lb) == [0, 1]
+        Test.@test sort(variable_cons_box_ub) == [1, 1.5]
+        Test.@test sort(variable_cons_box_ind) == [1, 2]
 
         # -------------------------------------------------------------------------- #
         # ocp with fixed times

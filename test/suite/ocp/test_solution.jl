@@ -296,8 +296,8 @@ function test_solution()
             )
             Test.@test CTModels.dim_boundary_constraints_nl(sol_bc) == 3  # 3 boundary constraints
 
-            # Test dim_variable_constraints_box
-            Test.@test CTModels.dim_variable_constraints_box(sol) == 0  # no variable constraints
+            # Test dim_dual_variable_constraints_box
+            Test.@test CTModels.dim_dual_variable_constraints_box(sol) == 0  # no variable duals
             variable_constraints_lb_dual = [1.0, 2.0]
             sol_vc = CTModels.build_solution(
                 ocp,
@@ -309,10 +309,10 @@ function test_solution()
                 kwargs...,
                 variable_constraints_lb_dual=variable_constraints_lb_dual,
             )
-            Test.@test CTModels.dim_variable_constraints_box(sol_vc) == 2  # 2 variable constraints
+            Test.@test CTModels.dim_dual_variable_constraints_box(sol_vc) == 2  # 2 variable duals
 
-            # Test dim_state_constraints_box
-            Test.@test CTModels.dim_state_constraints_box(sol) == 0  # no state constraints
+            # Test dim_dual_state_constraints_box
+            Test.@test CTModels.dim_dual_state_constraints_box(sol) == 0  # no state duals
             state_constraints_lb_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
             sol_sc = CTModels.build_solution(
                 ocp,
@@ -324,10 +324,10 @@ function test_solution()
                 kwargs...,
                 state_constraints_lb_dual=state_constraints_lb_dual,
             )
-            Test.@test CTModels.dim_state_constraints_box(sol_sc) == 2  # 2 state constraints (dim_x = 2)
+            Test.@test CTModels.dim_dual_state_constraints_box(sol_sc) == 2  # 2 state duals (dim_x = 2)
 
-            # Test dim_control_constraints_box
-            Test.@test CTModels.dim_control_constraints_box(sol) == 0  # no control constraints
+            # Test dim_dual_control_constraints_box
+            Test.@test CTModels.dim_dual_control_constraints_box(sol) == 0  # no control duals
             control_constraints_lb_dual = zeros(3, 1)
             control_constraints_lb_dual[:, 1] = [1.0, 2.0, 3.0]
             sol_cc = CTModels.build_solution(
@@ -340,7 +340,7 @@ function test_solution()
                 kwargs...,
                 control_constraints_lb_dual=control_constraints_lb_dual,
             )
-            Test.@test CTModels.dim_control_constraints_box(sol_cc) == 1  # 1 control constraint (dim_u = 1)
+            Test.@test CTModels.dim_dual_control_constraints_box(sol_cc) == 1  # 1 control dual (dim_u = 1)
         end
         Test.@testset "dual from label" begin
             path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
