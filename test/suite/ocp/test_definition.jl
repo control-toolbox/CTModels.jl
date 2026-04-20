@@ -36,7 +36,7 @@ function test_definition()
         Test.@testset "PreModel default definition is EmptyDefinition" begin
             pre = CTModels.PreModel()
             Test.@test pre.definition isa CTModels.EmptyDefinition
-            Test.@test !CTModels.OCP.__is_definition_set(pre)
+            Test.@test CTModels.OCP.__is_definition_empty(pre)
         end
 
         # ====================================================================
@@ -49,7 +49,7 @@ function test_definition()
             CTModels.definition!(pre, expr)
             Test.@test pre.definition isa CTModels.Definition
             Test.@test pre.definition.expr === expr
-            Test.@test CTModels.OCP.__is_definition_set(pre)
+            Test.@test !CTModels.OCP.__is_definition_empty(pre)
         end
 
         Test.@testset "definition! accepts AbstractDefinition directly" begin
@@ -57,14 +57,14 @@ function test_definition()
             d = CTModels.Definition(:(y = 2))
             CTModels.definition!(pre, d)
             Test.@test pre.definition === d
-            Test.@test CTModels.OCP.__is_definition_set(pre)
+            Test.@test !CTModels.OCP.__is_definition_empty(pre)
         end
 
         Test.@testset "definition! with EmptyDefinition leaves predicate false" begin
             pre = CTModels.PreModel()
             CTModels.definition!(pre, CTModels.EmptyDefinition())
             Test.@test pre.definition isa CTModels.EmptyDefinition
-            Test.@test !CTModels.OCP.__is_definition_set(pre)
+            Test.@test CTModels.OCP.__is_definition_empty(pre)
         end
 
         # ====================================================================
@@ -114,7 +114,7 @@ function test_definition()
 
             model = CTModels.build(pre)
             Test.@test CTModels.definition(model) isa CTModels.EmptyDefinition
-            Test.@test CTModels.OCP.__is_definition_set(model)
+            Test.@test CTModels.OCP.__is_definition_empty(model.definition)
             Test.@test CTModels.expression(model) isa Expr
             Test.@test CTModels.expression(model).head == :block
         end
@@ -141,7 +141,7 @@ function test_definition()
             model = CTModels.build(pre)
             Test.@test CTModels.definition(model) isa CTModels.Definition
             Test.@test CTModels.definition(model).expr === expr
-            Test.@test CTModels.OCP.__is_definition_set(model)
+            Test.@test !CTModels.OCP.__is_definition_empty(model.definition)
             Test.@test CTModels.expression(model) === expr
         end
     end

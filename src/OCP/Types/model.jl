@@ -107,67 +107,6 @@ struct Model{
     end
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since times are always set in a built [`Model`](@ref CTModels.OCP.Model).
-"""
-__is_times_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since state is always set in a built [`Model`](@ref CTModels.OCP.Model).
-"""
-__is_state_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since the control field is always structurally set in a built
-[`Model`](@ref CTModels.OCP.Model) (i.e. it is never `nothing`).
-
-Note: this does not imply a positive control dimension. The model may hold an
-[`EmptyControlModel`](@ref) when the user did not call `control!`, in which case
-`control_dimension(ocp) == 0`.
-"""
-__is_control_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since variable is always set in a built [`Model`](@ref CTModels.OCP.Model).
-"""
-__is_variable_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since dynamics is always set in a built [`Model`](@ref CTModels.OCP.Model).
-"""
-__is_dynamics_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since objective is always set in a built [`Model`](@ref CTModels.OCP.Model).
-"""
-__is_objective_set(ocp::Model)::Bool = true
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if `d` is an [`EmptyDefinition`](@ref).
-"""
-__is_definition_empty(d) = d isa EmptyDefinition
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` since definition is always structurally set in a built
-[`Model`](@ref CTModels.OCP.Model).
-"""
-__is_definition_set(ocp::Model)::Bool = true
 
 """
 $(TYPEDEF)
@@ -252,9 +191,9 @@ __is_control_empty(c) = c isa EmptyControlModel
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if a non-empty control has been set in the `PreModel`.
+Return `true` if the control field of the `PreModel` is an `EmptyControlModel`.
 """
-__is_control_set(ocp::PreModel)::Bool = !__is_control_empty(ocp.control)
+__is_control_empty(ocp::PreModel)::Bool = __is_control_empty(ocp.control)
 
 """
 $(TYPEDSIGNATURES)
@@ -266,9 +205,23 @@ __is_variable_empty(v) = v isa EmptyVariableModel
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if a non-empty variable has been set in the `PreModel`.
+Return `true` if the variable field of the `PreModel` is an `EmptyVariableModel`.
 """
-__is_variable_set(ocp::PreModel)::Bool = !__is_variable_empty(ocp.variable)
+__is_variable_empty(ocp::PreModel)::Bool = __is_variable_empty(ocp.variable)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if `d` is an [`EmptyDefinition`](@ref).
+"""
+__is_definition_empty(d) = d isa EmptyDefinition
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the definition field of the `PreModel` is an [`EmptyDefinition`](@ref).
+"""
+__is_definition_empty(ocp::PreModel)::Bool = __is_definition_empty(ocp.definition)
 
 """
 $(TYPEDSIGNATURES)
@@ -283,14 +236,6 @@ $(TYPEDSIGNATURES)
 Return `true` if objective has been set in the `PreModel`.
 """
 __is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if a non-empty definition has been set in the `PreModel`
-(i.e. [`definition!`](@ref) was called with a [`Definition`](@ref)).
-"""
-__is_definition_set(ocp::PreModel)::Bool = !__is_definition_empty(ocp.definition)
 
 """
 $(TYPEDSIGNATURES)
@@ -373,29 +318,16 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return true if the PreModel can be built into a Model.
-"""
-function __is_complete(ocp::PreModel)::Bool
-    return __is_times_set(ocp) &&
-           __is_state_set(ocp) &&
-           __is_dynamics_complete(ocp) &&
-           __is_objective_set(ocp) &&
-           __is_autonomous_set(ocp)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Return true if nothing has been set.
 """
 function __is_empty(ocp::PreModel)::Bool
     return !__is_times_set(ocp) &&
            !__is_state_set(ocp) &&
-           !__is_control_set(ocp) &&
            !__is_dynamics_set(ocp) &&
            !__is_objective_set(ocp) &&
-           !__is_definition_set(ocp) &&
-           !__is_variable_set(ocp) &&
            !__is_autonomous_set(ocp) &&
+           __is_control_empty(ocp) &&
+           __is_variable_empty(ocp) &&
+           __is_definition_empty(ocp) &&
            Base.isempty(ocp.constraints)
 end

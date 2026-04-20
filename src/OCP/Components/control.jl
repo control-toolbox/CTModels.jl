@@ -59,7 +59,7 @@ function control!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks using @ensure
-    @ensure !__is_control_set(ocp) Exceptions.PreconditionError(
+    @ensure __is_control_empty(ocp) Exceptions.PreconditionError(
         "Control already set",
         reason="control has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing control definition",

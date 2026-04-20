@@ -56,17 +56,6 @@ function test_control_zero()
             Test.@test OCP.__is_control_empty(cm) == false
         end
 
-        Test.@testset "Helper Functions - __is_control_set" begin
-            # PreModel with EmptyControlModel should return false
-            pre = OCP.PreModel()
-            Test.@test OCP.__is_control_set(pre) == false
-
-            # PreModel after control! should return true
-            pre2 = OCP.PreModel()
-            OCP.control!(pre2, 1)
-            Test.@test OCP.__is_control_set(pre2) == true
-        end
-
         # ====================================================================
         # UNIT TESTS - Phase 2: Relaxed Preconditions
         # ====================================================================

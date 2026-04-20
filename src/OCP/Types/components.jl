@@ -191,8 +191,8 @@ The methods `name`, `components`, and `dimension` are defined for this type and 
 julia> using CTModels
 
 julia> pre = CTModels.PreModel()
-julia> CTModels.OCP.__is_control_set(pre)  # false — still EmptyControlModel
-false
+julia> CTModels.OCP.__is_control_empty(pre.control)  # true — still EmptyControlModel
+true
 
 julia> CTModels.OCP.control_dimension(pre)  # 0
 0

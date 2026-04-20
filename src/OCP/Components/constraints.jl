@@ -319,7 +319,7 @@ function constraint!(
 
     # checks: control must be set for :control constraint type
     if type == :control
-        @ensure __is_control_set(ocp) Exceptions.PreconditionError(
+        @ensure !__is_control_empty(ocp) Exceptions.PreconditionError(
             "Control must be set for type=:control constraints",
             reason="control has not been defined yet but constraint type requires it",
             suggestion="Call control!(ocp, dimension) before adding :control constraints, or use a different constraint type",
@@ -328,7 +328,7 @@ function constraint!(
     end
 
     # checks: variable must be set if using type=:variable
-    @ensure (type != :variable || __is_variable_set(ocp)) Exceptions.PreconditionError(
+    @ensure (type != :variable || !__is_variable_empty(ocp)) Exceptions.PreconditionError(
         "Variable must be set for type=:variable constraints",
         reason="OCP has no variable defined but constraint type requires it",
         suggestion="Call variable!(ocp, dimension) before adding variable constraints, or use a different constraint type",

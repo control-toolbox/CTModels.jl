@@ -39,7 +39,7 @@ function variable!(
     name::T1=__variable_name(q),
     components_names::Vector{T2}=__variable_components(q, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
-    @ensure !__is_variable_set(ocp) Exceptions.PreconditionError(
+    @ensure __is_variable_empty(ocp) Exceptions.PreconditionError(
         "Variable already set",
         reason="variable has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing variable definition",

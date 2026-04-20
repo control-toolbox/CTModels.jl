@@ -44,18 +44,16 @@ function __collect_used_names(ocp::PreModel)::Vector{String}
     end
 
     # Control name and components
-    if __is_control_set(ocp)
+    if !__is_control_empty(ocp)
         push!(names, name(ocp.control))
         append!(names, components(ocp.control))
     end
 
     # Variable name and components (if not empty)
-    if __is_variable_set(ocp)
+    if !__is_variable_empty(ocp)
         var_model = ocp.variable
-        if !isa(var_model, EmptyVariableModel)
-            push!(names, name(var_model))
-            append!(names, components(var_model))
-        end
+        push!(names, name(var_model))
+        append!(names, components(var_model))
     end
 
     # Return unique names (to handle case where name == component for scalars)
@@ -103,15 +101,13 @@ function __has_name_conflict(
     if exclude_component == :state && __is_state_set(ocp)
         filter!(x -> x != name(ocp.state), existing_names)
         filter!(x -> x ∉ components(ocp.state), existing_names)
-    elseif exclude_component == :control && __is_control_set(ocp)
+    elseif exclude_component == :control && !__is_control_empty(ocp)
         filter!(x -> x != name(ocp.control), existing_names)
         filter!(x -> x ∉ components(ocp.control), existing_names)
-    elseif exclude_component == :variable && __is_variable_set(ocp)
+    elseif exclude_component == :variable && !__is_variable_empty(ocp)
         var_model = ocp.variable
-        if !isa(var_model, EmptyVariableModel)
-            filter!(x -> x != name(var_model), existing_names)
-            filter!(x -> x ∉ components(var_model), existing_names)
-        end
+        filter!(x -> x != name(var_model), existing_names)
+        filter!(x -> x ∉ components(var_model), existing_names)
     elseif exclude_component == :time && __is_times_set(ocp)
         filter!(x -> x != time_name(ocp.times), existing_names)
     end
