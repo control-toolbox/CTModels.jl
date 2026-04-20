@@ -4,7 +4,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [0.9.15] - 2026-04-18
+## [0.9.15-beta] - 2026-04-18
 
 ### Breaking Changes: Dual Dimension Function Renaming
 
