@@ -111,6 +111,9 @@ export has_fixed_initial_time, has_free_initial_time
 export has_fixed_final_time, has_free_final_time
 export is_autonomous
 export is_variable, is_control_free
+export has_variable, has_control
+export has_abstract_definition, is_abstractly_defined
+export is_nonautonomous, is_nonvariable
 export is_initial_time_fixed, is_initial_time_free
 export is_final_time_fixed, is_final_time_free
 export state_dimension, control_dimension, variable_dimension

@@ -151,6 +151,65 @@ function test_ocp_model_types()
 
             Test.@test can_build(ocp)
         end
+
+        # ========================================================================
+        # User-Facing Predicates
+        # ========================================================================
+
+        Test.@testset "User-Facing Predicates" begin
+            dyn!(r, t, x, u, v) = r .= 0
+            mayer_fn(x0, xf, v) = 0.0
+
+            function build_model(; with_variable=false, with_control=true,
+                                   autonomous=true, with_definition=false)
+                ocp = CTModels.PreModel()
+                CTModels.time!(ocp; t0=0.0, tf=1.0)
+                CTModels.state!(ocp, 2)
+                with_control && CTModels.control!(ocp, 1)
+                with_variable && CTModels.variable!(ocp, 1)
+                CTModels.dynamics!(ocp, dyn!)
+                CTModels.objective!(ocp, :min; mayer=mayer_fn)
+                with_definition && CTModels.definition!(ocp, :(ẋ = Ax + Bu))
+                CTModels.time_dependence!(ocp; autonomous=autonomous)
+                return CTModels.build(ocp)
+            end
+
+            Test.@testset "has_variable / is_nonvariable" begin
+                model = build_model(with_variable=false)
+                Test.@test !CTModels.has_variable(model)
+                Test.@test CTModels.is_nonvariable(model)
+
+                model2 = build_model(with_variable=true)
+                Test.@test CTModels.has_variable(model2)
+                Test.@test !CTModels.is_nonvariable(model2)
+            end
+
+            Test.@testset "has_control" begin
+                model = build_model(with_control=false)
+                Test.@test !CTModels.has_control(model)
+
+                model2 = build_model(with_control=true)
+                Test.@test CTModels.has_control(model2)
+            end
+
+            Test.@testset "is_nonautonomous" begin
+                model = build_model(autonomous=true)
+                Test.@test !CTModels.is_nonautonomous(model)
+
+                model2 = build_model(autonomous=false)
+                Test.@test CTModels.is_nonautonomous(model2)
+            end
+
+            Test.@testset "has_abstract_definition / is_abstractly_defined" begin
+                model = build_model(with_definition=false)
+                Test.@test !CTModels.has_abstract_definition(model)
+                Test.@test !CTModels.is_abstractly_defined(model)
+
+                model2 = build_model(with_definition=true)
+                Test.@test CTModels.has_abstract_definition(model2)
+                Test.@test CTModels.is_abstractly_defined(model2)
+            end
+        end
     end
 end
 
