@@ -473,12 +473,6 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
         suggestion="Call objective!(pre_ocp, ...) before building",
         context="build function - objective validation",
     )
-    @ensure __is_definition_set(pre_ocp) Exceptions.PreconditionError(
-        "Definition must be set before building model",
-        reason="definition has not been set yet",
-        suggestion="Call definition!(pre_ocp) before building",
-        context="build function - definition validation",
-    )
     @ensure __is_autonomous_set(pre_ocp) Exceptions.PreconditionError(
         "Time dependence must be set before building model",
         reason="autonomous status has not been defined yet",
@@ -578,6 +572,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )
@@ -599,6 +594,7 @@ function is_autonomous(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )
@@ -639,6 +635,7 @@ function state(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractStateModel}
@@ -688,6 +685,7 @@ function control(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractControlModel}
@@ -737,6 +735,7 @@ function variable(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:AbstractVariableModel}
@@ -786,6 +785,7 @@ function times(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:TimesModel}
@@ -850,6 +850,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
@@ -871,6 +872,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
@@ -893,6 +895,7 @@ function initial_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::T,
@@ -975,6 +978,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::T where {T<:Time}
@@ -996,6 +1000,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::AbstractVector{T},
@@ -1018,6 +1023,7 @@ function final_time(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
     variable::T,
@@ -1068,6 +1074,7 @@ function objective(
         <:Function,
         O,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::O where {O<:AbstractObjectiveModel}
@@ -1115,6 +1122,7 @@ function mayer(
         <:Function,
         <:MayerObjectiveModel{M},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
@@ -1136,6 +1144,7 @@ function mayer(
         <:Function,
         <:BolzaObjectiveModel{M,<:Function},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::M where {M<:Function}
@@ -1183,6 +1192,7 @@ function lagrange(
         <:Function,
         LagrangeObjectiveModel{L},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
@@ -1204,6 +1214,7 @@ function lagrange(
         <:Function,
         <:BolzaObjectiveModel{<:Function,L},
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::L where {L<:Function}
@@ -1235,6 +1246,7 @@ function dynamics(
         D,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::D where {D<:Function}
@@ -1257,6 +1269,7 @@ function get_build_examodel(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         BE,
     },
 )::BE where {BE<:Function}
@@ -1278,6 +1291,7 @@ function get_build_examodel(
         <:Function,
         <:AbstractObjectiveModel,
         <:AbstractConstraintsModel,
+        <:AbstractDefinition,
         <:Nothing,
     },
 )
@@ -1307,6 +1321,7 @@ function constraints(
         <:Function,
         <:AbstractObjectiveModel,
         C,
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::C where {C<:AbstractConstraintsModel}
@@ -1337,6 +1352,7 @@ function path_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TP where {TP<:Tuple}
@@ -1358,6 +1374,7 @@ function boundary_constraints_nl(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TB where {TB<:Tuple}
@@ -1379,6 +1396,7 @@ function state_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TS where {TS<:Tuple}
@@ -1400,6 +1418,7 @@ function control_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TC where {TC<:Tuple}
@@ -1421,6 +1440,7 @@ function variable_constraints_box(
         <:Function,
         <:AbstractObjectiveModel,
         <:ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV},
+        <:AbstractDefinition,
         <:Union{Function,Nothing},
     },
 )::TV where {TV<:Tuple}
@@ -1471,3 +1491,59 @@ Return the dimension of box constraints on variable.
 function dim_variable_constraints_box(ocp::Model)::Dimension
     return dim_variable_constraints_box(constraints(ocp))
 end
+
+# ------------------------------------------------------------------------------ #
+# Definition getters
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the model definition of the optimal control problem.
+
+# Arguments
+
+- `ocp::Model`: The built optimal control problem model.
+
+# Returns
+
+- `AbstractDefinition`: The [`Definition`](@ref) wrapping the symbolic
+  expression, or an [`EmptyDefinition`](@ref) if the user did not attach one
+  before [`build`](@ref).
+"""
+function definition(
+    ocp::Model{
+        <:TimeDependence,
+        <:TimesModel,
+        <:AbstractStateModel,
+        <:AbstractControlModel,
+        <:AbstractVariableModel,
+        <:Function,
+        <:AbstractObjectiveModel,
+        <:AbstractConstraintsModel,
+        D,
+        <:Union{Function,Nothing},
+    },
+)::D where {D<:AbstractDefinition}
+    return ocp.definition
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the symbolic expression of the model definition of a built optimal control
+problem.
+
+Delegates to [`expression`](@ref) on the underlying [`AbstractDefinition`](@ref):
+returns `d.expr` if a [`Definition`](@ref) was attached before [`build`](@ref),
+or `:(begin end)` if the definition is an [`EmptyDefinition`](@ref).
+
+# Arguments
+
+- `ocp::Model`: The built optimal control problem model.
+
+# Returns
+
+- `Expr`: The symbolic expression, or `:(begin end)` if no definition was attached.
+"""
+expression(ocp::Model)::Expr = expression(definition(ocp))

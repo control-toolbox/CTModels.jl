@@ -66,9 +66,9 @@ include("Components/times.jl")
 include("Components/dynamics.jl")
 include("Components/objective.jl")
 include("Components/constraints.jl")
+include("Components/definition.jl")
 
 # Load builders (depend on types and components)
-include("Building/definition.jl")
 include("Building/dual_model.jl")
 include("Building/discretization_utils.jl")
 include("Building/interpolation_helpers.jl")
@@ -83,6 +83,7 @@ export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
 export FixedTimeModel, FreeTimeModel, TimesModel, AbstractTimeModel
 export StateModel, ControlModel, EmptyControlModel, VariableModel, EmptyVariableModel
+export AbstractDefinition, Definition, EmptyDefinition
 export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
@@ -124,7 +125,7 @@ export dim_state_constraints_box, dim_control_constraints_box, dim_variable_cons
 export dim_dual_state_constraints_box, dim_dual_control_constraints_box, dim_dual_variable_constraints_box
 export state, control, variable, costate, objective
 export dynamics, mayer, lagrange
-export definition, dual
+export definition, expression, dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel

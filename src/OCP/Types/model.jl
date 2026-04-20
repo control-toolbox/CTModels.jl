@@ -35,7 +35,9 @@ and the types of all its components.
   once in the stored tuples, bounds are the intersection of all declared bounds,
   and every declared label is preserved in the `aliases` field of the box tuples
   (see `ConstraintsModel`).
-- `definition::Expr`: Original symbolic definition of the problem.
+- `definition::DefinitionType`: Original symbolic definition of the problem,
+  stored as a subtype of [`AbstractDefinition`](@ref) ([`Definition`](@ref) when
+  set, [`EmptyDefinition`](@ref) otherwise).
 - `build_examodel::BuildExaModelType`: Optional ExaModels builder function.
 
 # Example
@@ -56,6 +58,7 @@ struct Model{
     DynamicsModelType<:Function,
     ObjectiveModelType<:AbstractObjectiveModel,
     ConstraintsModelType<:AbstractConstraintsModel,
+    DefinitionType<:AbstractDefinition,
     BuildExaModelType<:Union{Function,Nothing},
 } <: AbstractModel
     times::TimesModelType
@@ -65,7 +68,7 @@ struct Model{
     dynamics::DynamicsModelType
     objective::ObjectiveModelType
     constraints::ConstraintsModelType
-    definition::Expr
+    definition::DefinitionType
     build_examodel::BuildExaModelType
 
     function Model{TD}(  # TD must be specified explicitly
@@ -76,7 +79,7 @@ struct Model{
         dynamics::Function,
         objective::AbstractObjectiveModel,
         constraints::AbstractConstraintsModel,
-        definition::Expr,
+        definition::AbstractDefinition,
         build_examodel::Union{Function,Nothing},
     ) where {TD<:TimeDependence}
         return new{
@@ -88,6 +91,7 @@ struct Model{
             typeof(dynamics),
             typeof(objective),
             typeof(constraints),
+            typeof(definition),
             typeof(build_examodel),
         }(
             times,
@@ -153,7 +157,15 @@ __is_objective_set(ocp::Model)::Bool = true
 """
 $(TYPEDSIGNATURES)
 
-Return `true` since definition is always set in a built [`Model`](@ref CTModels.OCP.Model).
+Return `true` if `d` is an [`EmptyDefinition`](@ref).
+"""
+__is_definition_empty(d) = d isa EmptyDefinition
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` since definition is always structurally set in a built
+[`Model`](@ref CTModels.OCP.Model).
 """
 __is_definition_set(ocp::Model)::Bool = true
 
@@ -175,7 +187,9 @@ and the model is validated before building.
 - `dynamics::Union{Function,Vector,Nothing}`: System dynamics (function or component-wise).
 - `objective::Union{AbstractObjectiveModel,Nothing}`: Cost functional.
 - `constraints::ConstraintsDictType`: Dictionary of constraints being built.
-- `definition::Union{Expr,Nothing}`: Symbolic definition expression.
+- `definition::AbstractDefinition`: Symbolic definition; defaults to
+  [`EmptyDefinition`](@ref) and becomes a [`Definition`](@ref) when
+  [`definition!`](@ref) is called with a real expression.
 - `autonomous::Union{Bool,Nothing}`: Whether the system is autonomous.
 
 # Example
@@ -196,7 +210,7 @@ julia> # Set fields incrementally...
         nothing
     objective::Union{AbstractObjectiveModel,Nothing} = nothing
     constraints::ConstraintsDictType = ConstraintsDictType()
-    definition::Union{Expr,Nothing} = nothing
+    definition::AbstractDefinition = EmptyDefinition()
     autonomous::Union{Bool,Nothing} = nothing
 end
 
@@ -273,9 +287,10 @@ __is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if definition has been set in the `PreModel`.
+Return `true` if a non-empty definition has been set in the `PreModel`
+(i.e. [`definition!`](@ref) was called with a [`Definition`](@ref)).
 """
-__is_definition_set(ocp::PreModel)::Bool = __is_set(ocp.definition)
+__is_definition_set(ocp::PreModel)::Bool = !__is_definition_empty(ocp.definition)
 
 """
 $(TYPEDSIGNATURES)
@@ -365,7 +380,6 @@ function __is_complete(ocp::PreModel)::Bool
            __is_state_set(ocp) &&
            __is_dynamics_complete(ocp) &&
            __is_objective_set(ocp) &&
-           __is_definition_set(ocp) &&
            __is_autonomous_set(ocp)
 end
 

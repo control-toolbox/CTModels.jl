@@ -36,6 +36,7 @@ using MacroTools: MacroTools
 # Import types from parent module (will be available after CTModels loads this)
 # These are forward declarations - actual types defined in OCP module
 import ..OCP: Model, PreModel, Solution, AbstractSolution
+import ..OCP: AbstractDefinition, Definition, EmptyDefinition
 
 # Import internal helpers from OCP for display
 import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent
@@ -49,8 +50,12 @@ import ..OCP:
     dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
 import ..OCP: build
 
-# Include display functions
-include("print.jl")
+# Include display functions (split by responsibility)
+include("ansi.jl")
+include("definition.jl")
+include("mathematical.jl")
+include("model.jl")
+include("pre_model.jl")
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension

@@ -119,7 +119,7 @@ function test_ocp()
         end
 
         # Model definition
-        definition = quote
+        definition = CTModels.OCP.Definition(quote
             t ∈ [0, 1], time
             x ∈ R², state
             u ∈ R, control
@@ -127,7 +127,7 @@ function test_ocp()
             x(1) == [0, 0]
             ẋ(t) == [x₂(t), u(t)]
             ∫(0.5u(t)^2) → min
-        end
+        end)
 
         build_examodel = nothing
 
@@ -402,7 +402,7 @@ function test_ocp()
         objective = CTModels.MayerObjectiveModel(mayer_user, :min)
         pre_constraints = CTModels.ConstraintsDictType()
         constraints = CTModels.build(pre_constraints)
-        definition = quote end
+        definition = CTModels.OCP.EmptyDefinition()
         ocp = CTModels.Model{CTModels.NonAutonomous}(
             times,
             state,
@@ -428,7 +428,7 @@ function test_ocp()
         objective = CTModels.MayerObjectiveModel(mayer_user, :min)
         pre_constraints = CTModels.ConstraintsDictType()
         constraints = CTModels.build(pre_constraints)
-        definition = quote end
+        definition = CTModels.OCP.EmptyDefinition()
         ocp = CTModels.Model{CTModels.NonAutonomous}(
             times,
             state,
