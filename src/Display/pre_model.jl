@@ -38,9 +38,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         vi_names = components(ocp.variable)
 
         # dependencies
-        is_variable_dependent = is_variable(ocp)
-        is_time_dependent = !is_autonomous(ocp)
-        is_control_free_ocp = is_control_free(ocp)
+        is_variable_dependent = v_dim > 0
+        is_time_dependent = !ocp.autonomous
+        is_control_free_ocp = u_dim == 0
 
         # cost
         has_a_lagrange_cost = has_lagrange_cost(ocp.objective)

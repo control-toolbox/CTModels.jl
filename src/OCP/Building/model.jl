@@ -493,7 +493,7 @@ function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     objective = pre_ocp.objective
     constraints = build(pre_ocp.constraints)
     definition = pre_ocp.definition
-    TD = is_autonomous(pre_ocp) ? Autonomous : NonAutonomous
+    TD = pre_ocp.autonomous ? Autonomous : NonAutonomous
 
     # create the model
     model = Model{TD}(
@@ -618,6 +618,114 @@ Check whether the problem is control-free (no control input).
 function is_control_free(ocp::Model)::Bool
     return control_dimension(ocp) == 0
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has optimisation variables.
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the problem has optimisation variables (variable dimension > 0), `false` otherwise.
+
+# Example
+```julia-repl
+julia> has_variable(model)  # returns true if variables are present
+```
+"""
+has_variable(ocp::Model)::Bool = is_variable(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has control input.
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the problem has control input (control dimension > 0), `false` otherwise.
+
+# Example
+```julia-repl
+julia> has_control(model)  # returns true if control is present
+```
+"""
+has_control(ocp::Model)::Bool = !is_control_free(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has an abstract definition.
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the model has a non-empty abstract definition, `false` otherwise.
+
+# Example
+```julia-repl
+julia> has_abstract_definition(model)  # returns true if definition was attached
+```
+"""
+has_abstract_definition(ocp::Model)::Bool = !__is_definition_empty(definition(ocp))
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem is abstractly defined.
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the model has a non-empty abstract definition, `false` otherwise.
+
+# Example
+```julia-repl
+julia> is_abstractly_defined(model)  # returns true if definition was attached
+```
+"""
+is_abstractly_defined(ocp::Model)::Bool = has_abstract_definition(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem is non-autonomous (time-dependent).
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the system is non-autonomous (time-dependent), `false` otherwise.
+
+# Example
+```julia-repl
+julia> is_nonautonomous(model)  # returns true if time-dependent
+```
+"""
+is_nonautonomous(ocp::Model)::Bool = !is_autonomous(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Check whether the problem has no optimisation variables.
+
+# Arguments
+- `ocp::Model`: The optimal control problem model.
+
+# Returns
+- `Bool`: `true` if the problem has no optimisation variables (variable dimension == 0), `false` otherwise.
+
+# Example
+```julia-repl
+julia> is_nonvariable(model)  # returns true if no variables
+```
+"""
+is_nonvariable(ocp::Model)::Bool = !is_variable(ocp)
 
 # State
 """

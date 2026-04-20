@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.15] - 2026-04-18
+## [0.9.15-beta] - 2026-04-18
 
 ### 🚀 Enhancements
 
@@ -60,37 +60,43 @@ expr = expression(pre.definition)  # Returns the Expr
 model = build(pre)  # Works even without definition
 ```
 
-#### Consistent Variable and Control Checking Functions
+#### User-Facing Model Predicates
 
-- **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
-- **Dual methods**: Both functions have methods for `PreModel` and `Model` types
-- **Consistent API**: These functions follow the same pattern as `is_autonomous()`
-- **Runtime dimension checks**: Unlike time dependence (type-parameterized), variable and control use runtime dimension checks
-- **Display integration**: Updated display code to use the new functions instead of inline comparisons
+- **New predicates**: Added user-friendly predicate methods for `Model` instances
+- **Exclusive to Model**: Predicates are only available for immutable `Model`, not `PreModel`
+- **Consistent naming**: Follows pattern `has_*` for presence checks, `is_*` for property checks
+- **New exports**: `has_variable`, `has_control`, `has_abstract_definition`, `is_abstractly_defined`, `is_nonautonomous`, `is_nonvariable`
 
 #### API Enhancements
 
 ```julia
 # Check if problem has optimisation variables
-is_variable(ocp::PreModel)   # Returns true if variable_dimension > 0
-is_variable(ocp::Model)     # Returns true if variable_dimension > 0
+has_variable(model)       # Alias for is_variable(model)
+is_nonvariable(model)    # Opposite of is_variable(model)
 
-# Check if problem is control-free (no control input)
-is_control_free(ocp::PreModel)   # Returns true if control_dimension == 0
-is_control_free(ocp::Model)     # Returns true if control_dimension == 0
+# Check if problem has control input
+has_control(model)        # Opposite of is_control_free(model)
+
+# Check if problem has abstract definition
+has_abstract_definition(model)      # Checks if definition is non-empty
+is_abstractly_defined(model)        # Alias for has_abstract_definition
+
+# Check time dependence
+is_nonautonomous(model)             # Opposite of is_autonomous(model)
 ```
 
 ### 📊 API Changes
 
-- **New exports**: `is_variable` and `is_control_free` are now exported from CTModels
-- **Display code**: Internal display functions now use the new checking functions instead of inline dimension comparisons
+- **Breaking**: `is_variable(ocp::PreModel)`, `is_control_free(ocp::PreModel)`, `is_autonomous(ocp::PreModel)` removed
+- **New exports**: `has_variable`, `has_control`, `has_abstract_definition`, `is_abstractly_defined`, `is_nonautonomous`, `is_nonvariable`
+- **Display code**: Internal display functions use `__is_*_empty` predicates for PreModel, public predicates for Model
 
 ### 🔧 Internal Changes
 
-- **New methods**: Added `is_variable()` and `is_control_free()` methods in `time_dependence.jl` and `model.jl`
-- **Display refactoring**: Replaced inline `v_dim > 0` with `is_variable(ocp)` in `print.jl`
-- **Display refactoring**: Replaced inline `u_dim > 0` with `!is_control_free(ocp)` in `print.jl`
-- **New tests**: Added comprehensive test suite in `test_variable_control_checks.jl` with 20 tests
+- **Predicate refactoring**: Removed `__is_*_set` methods for `Model` (only `__is_*_empty` remains)
+- **PreModel access**: Display code uses direct field access (`ocp.autonomous`) and internal predicates (`__is_variable_empty`, `__is_control_empty`)
+- **Model access**: Public predicates (`is_variable`, `is_control_free`, `is_autonomous`) work for Model only
+- **Test updates**: Migrated tests to use internal predicates for PreModel, public predicates for Model
 
 ## [0.9.14] - 2026-04-12
 

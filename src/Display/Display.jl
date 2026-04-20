@@ -39,7 +39,8 @@ import ..OCP: Model, PreModel, Solution, AbstractSolution
 import ..OCP: AbstractDefinition, Definition, EmptyDefinition
 
 # Import internal helpers from OCP for display
-import ..OCP: __is_empty, __is_definition_set, definition, __is_consistent
+import ..OCP: __is_empty, definition, __is_consistent
+import ..OCP: __is_variable_empty, __is_control_empty
 import ..OCP: state_dimension, control_dimension, variable_dimension
 import ..OCP: time_name, initial_time_name, final_time_name
 import ..OCP: dimension, name, state_name, control_name, variable_name

@@ -56,14 +56,14 @@ function time!(
         context="time! function - duplicate definition check",
     )
 
-    @ensure __is_variable_set(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
+    @ensure !__is_variable_empty(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
         "Variable must be set for free time",
         reason="variable is required when t0 or tf is free (ind0/indf provided)",
         suggestion="Call variable!(ocp, dimension) before time! with free time parameters, or use fixed times (t0, tf)",
         context="time! function - free time validation",
     )
 
-    if __is_variable_set(ocp)
+    if !__is_variable_empty(ocp)
         q = dimension(ocp.variable)
 
         @ensure isnothing(ind0) || (1 ≤ ind0 ≤ q) Exceptions.IncorrectArgument(

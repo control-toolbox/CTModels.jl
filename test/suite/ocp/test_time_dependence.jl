@@ -31,7 +31,7 @@ function test_time_dependence()
             # Set once
             CTModels.time_dependence!(ocp; autonomous=true)
             Test.@test CTModels.OCP.__is_autonomous_set(ocp)
-            Test.@test CTModels.is_autonomous(ocp) === true
+            Test.@test ocp.autonomous === true
 
             # Second call must fail
             Test.@test_throws Exceptions.PreconditionError CTModels.time_dependence!(
@@ -66,8 +66,8 @@ function test_time_dependence()
             pre_autonomous = build_premodel_with_time_dependence(true)
             pre_nonautonomous = build_premodel_with_time_dependence(false)
 
-            Test.@test CTModels.is_autonomous(pre_autonomous) === true
-            Test.@test CTModels.is_autonomous(pre_nonautonomous) === false
+            Test.@test pre_autonomous.autonomous === true
+            Test.@test pre_nonautonomous.autonomous === false
         end
     end
 end
