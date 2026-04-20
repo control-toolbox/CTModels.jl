@@ -32,39 +32,44 @@ The old function names were misleading because they returned the dimension of du
 
 The functions `dim_*_constraints_box(ocp::Model)` (for Model, not Solution) remain unchanged and still refer to constraint dimension in the model.
 
-### Non-Breaking Changes
+### Breaking Changes: PreModel Predicate Removal
 
-This release also introduces consistent variable and control checking functions without breaking existing functionality:
+The following predicate methods have been removed for `PreModel` and are now exclusive to `Model`:
 
-#### New Functions (Non-Breaking)
+- `is_autonomous(ocp::PreModel)` - removed
+- `is_variable(ocp::PreModel)` - removed
+- `is_control_free(ocp::PreModel)` - removed
 
-- **New functions**: Added `is_variable()` and `is_control_free()` for checking problem properties
-- **Dual methods**: Both functions have methods for `PreModel` and `Model` types
-- **Consistent API**: These functions follow the same pattern as `is_autonomous()`
-- **Runtime dimension checks**: Unlike time dependence (type-parameterized), variable and control use runtime dimension checks
+These methods remain available for `Model` instances.
 
-#### What Changed
+#### Migration Guide
 
 ```julia
-# New functions available (non-breaking)
-is_variable(ocp)        # Returns true if variable_dimension > 0
-is_control_free(ocp)   # Returns true if control_dimension == 0
+# Before (PreModel access)
+pre = PreModel()
+state!(pre, 2)
+control!(pre, 1)
+variable!(pre, 2)
+time_dependence!(pre; autonomous=true)
 
-# Works for both PreModel and Model
-ocp = PreModel()
-state!(ocp, 2)
-control!(ocp, 1)
-variable!(ocp, 2)
+# These no longer work:
+is_autonomous(pre)    # MethodError
+is_variable(pre)      # MethodError
+is_control_free(pre)  # MethodError
 
-is_variable(ocp)        # Returns true
-is_control_free(ocp)    # Returns false
+# After (use direct field access or internal predicates)
+pre.autonomous                      # true/false
+!CTModels.OCP.__is_variable_empty(pre)  # true/false
+CTModels.OCP.__is_control_empty(pre)    # true/false
 ```
 
-#### Migration
+#### Rationale
 
-- **No action required**: Existing code continues to work unchanged
-- **Optional enhancement**: Can use new functions for more readable code instead of inline dimension comparisons
-- **Same API**: No changes to existing user-facing API; behavior is fully backward compatible
+Predicate methods are now exclusive to immutable `Model` types to enforce a clear separation between mutable construction (`PreModel`) and immutable problem definition (`Model`). Internal predicates (`__is_*_empty`) are used for construction-time checks.
+
+#### Note
+
+The predicate methods `is_autonomous(model)`, `is_variable(model)`, and `is_control_free(model)` for `Model` remain unchanged and continue to work as before.
 
 ## [0.9.14] - 2026-04-12
 
