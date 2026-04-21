@@ -1338,16 +1338,10 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     if variable_dimension(sol) > 0
         components = variable_components(sol)
         var_name = variable_name(sol)
-        
+
         # Simplified case: dimension 1 and name identical
         if variable_dimension(sol) == 1 && var_name == components[1]
-            println(
-                io,
-                "\n• Variable: ",
-                var_name,
-                " = ",
-                variable(sol),
-            )
+            println(io, "\n• Variable: ", var_name, " = ", variable(sol))
         else
             println(
                 io,
@@ -1359,7 +1353,8 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
                 variable(sol),
             )
         end
-        if dim_dual_variable_constraints_box(sol) > 0 && dim_variable_constraints_box(model(sol)) > 0
+        if dim_dual_variable_constraints_box(sol) > 0 &&
+            dim_variable_constraints_box(model(sol)) > 0
             println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
             println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
         end

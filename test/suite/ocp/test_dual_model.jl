@@ -145,8 +145,7 @@ function test_dual_model()
             # --- State box ---
             Test.@testset "state - single full-range declaration" begin
                 ocp = _build_model_with_state_box(;
-                    state_dim=2,
-                    constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :s)],
+                    state_dim=2, constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :s)]
                 )
                 m = CTModels.build(ocp)
                 # 2 declarations → matrix must have 2 columns
@@ -160,8 +159,7 @@ function test_dual_model()
 
             Test.@testset "state - partial range not starting at 1" begin
                 ocp = _build_model_with_state_box(;
-                    state_dim=3,
-                    constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :s)],
+                    state_dim=3, constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :s)]
                 )
                 m = CTModels.build(ocp)
                 # Per-component convention: matrix has state_dim=3 columns.
@@ -178,10 +176,7 @@ function test_dual_model()
             Test.@testset "state - two labels on same component: share per-component dual" begin
                 ocp = _build_model_with_state_box(;
                     state_dim=1,
-                    constraints=[
-                        (1:1, [0.0], [2.0], :s1),
-                        (1:1, [0.5], [1.5], :s2),
-                    ],
+                    constraints=[(1:1, [0.0], [2.0], :s1), (1:1, [0.5], [1.5], :s2)],
                 )
                 m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
                     ocp
@@ -200,8 +195,7 @@ function test_dual_model()
             # --- Control box ---
             Test.@testset "control - single full-range declaration" begin
                 ocp = _build_model_with_control_box(;
-                    control_dim=2,
-                    constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :c)],
+                    control_dim=2, constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :c)]
                 )
                 m = CTModels.build(ocp)
                 lb = [1.0 10.0; 2.0 20.0; 3.0 30.0]
@@ -213,8 +207,7 @@ function test_dual_model()
 
             Test.@testset "control - partial range not starting at 1" begin
                 ocp = _build_model_with_control_box(;
-                    control_dim=3,
-                    constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :c)],
+                    control_dim=3, constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :c)]
                 )
                 m = CTModels.build(ocp)
                 # Per-component: matrix has control_dim=3 columns.
@@ -228,10 +221,7 @@ function test_dual_model()
             Test.@testset "control - two labels on same component: share per-component dual" begin
                 ocp = _build_model_with_control_box(;
                     control_dim=1,
-                    constraints=[
-                        (1:1, [0.0], [2.0], :c1),
-                        (1:1, [0.5], [1.5], :c2),
-                    ],
+                    constraints=[(1:1, [0.0], [2.0], :c1), (1:1, [0.5], [1.5], :c2)],
                 )
                 m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
                     ocp
@@ -246,8 +236,7 @@ function test_dual_model()
             # --- Variable box ---
             Test.@testset "variable - single full-range declaration" begin
                 ocp = _build_model_with_variable_box(;
-                    variable_dim=2,
-                    constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :vbl)],
+                    variable_dim=2, constraints=[(1:2, [0.0, 0.0], [1.0, 1.0], :vbl)]
                 )
                 m = CTModels.build(ocp)
                 lb = [1.0, 10.0]
@@ -259,8 +248,7 @@ function test_dual_model()
 
             Test.@testset "variable - partial range not starting at 1" begin
                 ocp = _build_model_with_variable_box(;
-                    variable_dim=3,
-                    constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :vbl)],
+                    variable_dim=3, constraints=[(2:3, [0.0, 0.0], [1.0, 1.0], :vbl)]
                 )
                 m = CTModels.build(ocp)
                 # Per-component: duals are variable_dim-sized vectors.
@@ -274,10 +262,7 @@ function test_dual_model()
             Test.@testset "variable - two labels on same component: share per-component dual" begin
                 ocp = _build_model_with_variable_box(;
                     variable_dim=1,
-                    constraints=[
-                        (1:1, [0.0], [2.0], :v1),
-                        (1:1, [0.5], [1.5], :v2),
-                    ],
+                    constraints=[(1:1, [0.0], [2.0], :v1), (1:1, [0.5], [1.5], :v2)],
                 )
                 m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
                     ocp
