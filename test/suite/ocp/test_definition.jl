@@ -109,7 +109,9 @@ function test_definition()
             CTModels.variable!(pre, 0)
             dyn!(r, t, x, u, v) = r .= 0
             CTModels.dynamics!(pre, dyn!)
-            CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
+            CTModels.objective!(
+                pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+            )
             CTModels.time_dependence!(pre; autonomous=false)
 
             model = CTModels.build(pre)
@@ -127,7 +129,9 @@ function test_definition()
             CTModels.variable!(pre, 0)
             dyn!(r, t, x, u, v) = r .= 0
             CTModels.dynamics!(pre, dyn!)
-            CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
+            CTModels.objective!(
+                pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+            )
             expr = quote
                 t ∈ [0, 1], time
                 x ∈ R, state

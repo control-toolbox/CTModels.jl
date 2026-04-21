@@ -290,12 +290,7 @@ function test_constraints()
             Test.@testset "single full-range declaration preserves order" begin
                 ocp = _make_min_premodel(; state_dim=3)
                 CTModels.constraint!(
-                    ocp,
-                    :state;
-                    rg=1:3,
-                    lb=[0.0, 1.0, 2.0],
-                    ub=[1.0, 2.0, 3.0],
-                    label=:s,
+                    ocp, :state; rg=1:3, lb=[0.0, 1.0, 2.0], ub=[1.0, 2.0, 3.0], label=:s
                 )
                 m = CTModels.build(ocp)
                 cs = CTModels.state_constraints_box(m)
@@ -323,12 +318,8 @@ function test_constraints()
 
             Test.@testset "duplicate: intersection applied, per-component uniqueness" begin
                 ocp = _make_min_premodel(; state_dim=2)
-                CTModels.constraint!(
-                    ocp, :state; rg=1:1, lb=[0.0], ub=[2.0], label=:s1
-                )
-                CTModels.constraint!(
-                    ocp, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2
-                )
+                CTModels.constraint!(ocp, :state; rg=1:1, lb=[0.0], ub=[2.0], label=:s1)
+                CTModels.constraint!(ocp, :state; rg=1:1, lb=[0.5], ub=[1.5], label=:s2)
                 # warning emitted once at build; storage holds one entry per component
                 m = (Test.@test_logs (:warn, r"Multiple bound declarations") CTModels.build(
                     ocp
@@ -348,20 +339,10 @@ function test_constraints()
             Test.@testset "overlapping ranges" begin
                 ocp = _make_min_premodel(; state_dim=3)
                 CTModels.constraint!(
-                    ocp,
-                    :state;
-                    rg=1:2,
-                    lb=[0.0, 1.0],
-                    ub=[1.0, 2.0],
-                    label=:a,
+                    ocp, :state; rg=1:2, lb=[0.0, 1.0], ub=[1.0, 2.0], label=:a
                 )
                 CTModels.constraint!(
-                    ocp,
-                    :state;
-                    rg=2:3,
-                    lb=[0.5, 1.5],
-                    ub=[1.5, 2.5],
-                    label=:b,
+                    ocp, :state; rg=2:3, lb=[0.5, 1.5], ub=[1.5, 2.5], label=:b
                 )
                 m = (Test.@test_logs (:warn, r"component 2") CTModels.build(ocp))
                 cs = CTModels.state_constraints_box(m)

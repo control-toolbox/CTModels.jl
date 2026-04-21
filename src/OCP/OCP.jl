@@ -125,7 +125,8 @@ export path_constraints_nl, boundary_constraints_nl
 export state_constraints_box, control_constraints_box, variable_constraints_box
 export dim_path_constraints_nl, dim_boundary_constraints_nl
 export dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
-export dim_dual_state_constraints_box, dim_dual_control_constraints_box, dim_dual_variable_constraints_box
+export dim_dual_state_constraints_box,
+    dim_dual_control_constraints_box, dim_dual_variable_constraints_box
 export state, control, variable, costate, objective
 export dynamics, mayer, lagrange
 export definition, expression, dual

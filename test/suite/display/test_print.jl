@@ -29,14 +29,18 @@ function test_print()
 
             Test.@testset "_print_abstract_definition returns false for EmptyDefinition" begin
                 io = IOBuffer()
-                result = CTModels.Display._print_abstract_definition(io, CTModels.EmptyDefinition())
+                result = CTModels.Display._print_abstract_definition(
+                    io, CTModels.EmptyDefinition()
+                )
                 Test.@test result == false
                 Test.@test isempty(String(take!(io)))
             end
 
             Test.@testset "_print_abstract_definition returns true for Definition" begin
                 io = IOBuffer()
-                result = CTModels.Display._print_abstract_definition(io, CTModels.Definition(:(x = 1)))
+                result = CTModels.Display._print_abstract_definition(
+                    io, CTModels.Definition(:(x = 1))
+                )
                 Test.@test result == true
                 Test.@test occursin("Abstract definition:", String(take!(io)))
             end
@@ -126,7 +130,9 @@ function test_print()
                 CTModels.variable!(pre, 0)
                 dyn!(r, t, x, u, v) = r .= 0
                 CTModels.dynamics!(pre, dyn!)
-                CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
+                CTModels.objective!(
+                    pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+                )
                 CTModels.time_dependence!(pre; autonomous=false)
 
                 model = CTModels.build(pre)
@@ -149,7 +155,9 @@ function test_print()
                 CTModels.variable!(pre, 0)
                 dyn!(r, t, x, u, v) = r .= 0
                 CTModels.dynamics!(pre, dyn!)
-                CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0)
+                CTModels.objective!(
+                    pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+                )
                 CTModels.time_dependence!(pre; autonomous=false)
 
                 io = IOBuffer()
