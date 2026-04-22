@@ -64,7 +64,9 @@ Since no symbolic definition was attached, the canonical empty expression
 
 - `Expr`: An empty block expression `:(begin end)`.
 """
-expression(::EmptyDefinition)::Expr = :(begin end)
+expression(::EmptyDefinition)::Expr = :(
+    begin end
+)
 
 """
 $(TYPEDSIGNATURES)

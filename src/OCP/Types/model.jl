@@ -107,7 +107,6 @@ struct Model{
     end
 end
 
-
 """
 $(TYPEDEF)
 

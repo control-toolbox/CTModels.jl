@@ -44,5 +44,6 @@ Display method for any [`AbstractDefinition`](@ref).
 
 Delegates to [`_print_abstract_definition`](@ref).
 """
-Base.show(io::IO, ::MIME"text/plain", d::AbstractDefinition) =
+function Base.show(io::IO, ::MIME"text/plain", d::AbstractDefinition)
     _print_abstract_definition(io, d)
+end

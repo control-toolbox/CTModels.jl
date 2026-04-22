@@ -160,8 +160,12 @@ function test_ocp_model_types()
             dyn!(r, t, x, u, v) = r .= 0
             mayer_fn(x0, xf, v) = 0.0
 
-            function build_model(; with_variable=false, with_control=true,
-                                   autonomous=true, with_definition=false)
+            function build_model(;
+                with_variable=false,
+                with_control=true,
+                autonomous=true,
+                with_definition=false,
+            )
                 ocp = CTModels.PreModel()
                 CTModels.time!(ocp; t0=0.0, tf=1.0)
                 CTModels.state!(ocp, 2)

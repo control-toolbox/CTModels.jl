@@ -136,10 +136,14 @@ function _dedup_box_constraints!(
 
     # sort by component index for readability
     perm = sortperm(new_inds)
-    resize!(inds, length(new_inds)); inds .= new_inds[perm]
-    resize!(lbs, length(new_lbs)); lbs .= new_lbs[perm]
-    resize!(ubs, length(new_ubs)); ubs .= new_ubs[perm]
-    resize!(labels, length(new_labels)); labels .= new_labels[perm]
+    resize!(inds, length(new_inds));
+    inds .= new_inds[perm]
+    resize!(lbs, length(new_lbs));
+    lbs .= new_lbs[perm]
+    resize!(ubs, length(new_ubs));
+    ubs .= new_ubs[perm]
+    resize!(labels, length(new_labels));
+    labels .= new_labels[perm]
     empty!(aliases)
     append!(aliases, new_aliases[perm])
     return nothing
