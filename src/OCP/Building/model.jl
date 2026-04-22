@@ -1391,7 +1391,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return an error (PreconditionError) since the model is not built with the :exa backend.
+Fallback method: throws a `PreconditionError` explaining that the `:exa` modeler is not available because the `Model` was assembled through the functional (macro-free) API and therefore carries no Exa builder.
 """
 function get_build_examodel(
     ::Model{
@@ -1409,10 +1409,10 @@ function get_build_examodel(
 )
     throw(
         Exceptions.PreconditionError(
-            "Cannot access dynamics";
-            reason="Model must be parsed with :exa backend first",
-            suggestion="Parse the OCP with backend=:exa before accessing dynamics",
-            context="dynamics accessor on unparsed model",
+            "The :exa modeler is not available for this model";
+            reason="this Model was built with the functional (macro-free) API (PreModel + time!/state!/control!/variable!/dynamics!/objective!/constraint! + build), which does not generate the Exa builder required by the Exa (:exa) modeler",
+            suggestion="either choose another modeler, e.g. ADNLP (:adnlp), or define the optimal control problem with the @def macro so that the Exa builder is generated",
+            context="get_build_examodel called on a Model built without an Exa builder",
         ),
     )
 end

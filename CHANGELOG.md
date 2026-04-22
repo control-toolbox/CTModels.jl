@@ -7,6 +7,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-04-22
+
+### 🚀 Enhancements
+
+#### Clarified :exa Backend Error Message
+
+- **Improved error message**: `get_build_examodel` now clearly explains that the Exa (:exa) modeler is unavailable for functional API (macro-free) models
+- **Actionable suggestions**: Error message now suggests using ADNLP (:adnlp) or the @def macro from CTParser.jl
+- **Better context**: Error reason explains the root cause (functional API does not generate Exa builder)
+- **Regression test**: Added `test_build_examodel.jl` to verify error message content
+
+### 🐛 Bug Fixes
+
+- Fixed misleading error message that incorrectly suggested "dynamics" instead of "Exa modeler"
+
+## [0.10.0] - 2026-04-20
+
+### 📦 Release
+
+- Initial stable release version (no breaking changes from 0.9.15-beta)
+
 ## [0.9.15-beta] - 2026-04-18
 
 ### 🚀 Enhancements
