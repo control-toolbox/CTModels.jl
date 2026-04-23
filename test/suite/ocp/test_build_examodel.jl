@@ -22,7 +22,7 @@ function test_build_examodel()
             CTModels.control!(ocp, 1)
 
             # Simple dynamics function
-            dynamics!(r, t, x, u, v) = (r[1] = x[2]; r[2] = u[1])
+            dynamics!(r, t, x, u, v) = (r[1]=x[2]; r[2]=u[1])
             CTModels.dynamics!(ocp, dynamics!)
 
             # Simple objective
@@ -35,7 +35,9 @@ function test_build_examodel()
             model = CTModels.build(ocp)
 
             # Attempting to get build_examodel should throw PreconditionError
-            Test.@test_throws Exceptions.PreconditionError CTModels.get_build_examodel(model)
+            Test.@test_throws Exceptions.PreconditionError CTModels.get_build_examodel(
+                model
+            )
 
             # Verify the error message contains the key information
             try
@@ -62,7 +64,7 @@ function test_build_examodel()
             CTModels.time!(ocp; t0=0.0, tf=1.0)
             CTModels.state!(ocp, 2)
             CTModels.control!(ocp, 1)
-            CTModels.dynamics!(ocp, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]))
+            CTModels.dynamics!(ocp, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u[1]))
             CTModels.objective!(ocp, :min, mayer=(x0, xf) -> xf[1]^2)
 
             # Set time dependence (required before build)
