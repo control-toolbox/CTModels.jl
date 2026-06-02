@@ -419,7 +419,7 @@ Validate and fix a time grid by ensuring it is strictly increasing.
 If the grid is not strictly increasing, it is reordered and a warning is emitted.
 """
 function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
-    if !issorted(T; lt=<)
+    if !issorted(T; lt=(<))
         # Build appropriate message based on component name
         components_with_issues = [component_name]  # TODO: Collect all components when called multiple times
 
