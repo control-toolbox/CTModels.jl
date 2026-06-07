@@ -115,7 +115,7 @@ function test_ocp()
         # build constraints (the duplicate-on-component-2 declarations above
         # emit one warning each, which we silence via stderr redirection).
         constraints = redirect_stderr(devnull) do
-            CTModels.build(pre_constraints)
+            return CTModels.build(pre_constraints)
         end
 
         # Model definition

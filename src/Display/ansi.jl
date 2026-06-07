@@ -31,7 +31,7 @@ Print text with ANSI color formatting for Documenter compatibility.
 function _print_ansi_styled(
     io, text::Union{String,Symbol,Type}, color::Symbol, bold::Bool=false
 )
-    print(io, _ansi_color(color, bold), string(text), _ansi_reset())
+    return print(io, _ansi_color(color, bold), string(text), _ansi_reset())
 end
 
 """

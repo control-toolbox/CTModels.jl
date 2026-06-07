@@ -13,7 +13,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function remove_if_exists(filename::String)
-    isfile(filename) && rm(filename)
+    return isfile(filename) && rm(filename)
 end
 
 function test_multi_grids()

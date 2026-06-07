@@ -56,7 +56,7 @@ Returns a tuple of symbols, such as:
 - `:state`, `:costate`, `:control`, `:path`, `:dual`, ...
 """
 function __description()
-    (
+    return (
         :state,
         :states,
         :costate,

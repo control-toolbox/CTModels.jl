@@ -287,5 +287,5 @@ end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
 function test_name_conflicts_integration()
-    TestNameConflictsIntegrationSimple.test_name_conflicts_integration()
+    return TestNameConflictsIntegrationSimple.test_name_conflicts_integration()
 end
