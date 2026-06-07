@@ -16,7 +16,7 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 # ============================================================================
 
 function remove_if_exists(filename::String)
-    isfile(filename) && rm(filename)
+    return isfile(filename) && rm(filename)
 end
 
 """
@@ -1248,7 +1248,7 @@ function test_export_import()
 
             # Write back without control_interpolation
             open("test_old_format.json", "w") do f
-                JSON3.write(f, json_data_without_interp)
+                return JSON3.write(f, json_data_without_interp)
             end
 
             # Import should default to :constant

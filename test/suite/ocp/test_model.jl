@@ -127,7 +127,7 @@ function test_model()
         # duplicated component (6 warnings here). We redirect stderr to silence
         # them so they don't pollute test output.
         model = redirect_stderr(devnull) do
-            CTModels.build(pre_ocp)
+            return CTModels.build(pre_ocp)
         end
 
         # check the type of the model

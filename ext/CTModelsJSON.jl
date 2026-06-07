@@ -200,7 +200,7 @@ function CTModels.export_ocp_solution(
     blob["infos_symbol_keys"] = symbol_keys
 
     open(filename * ".json", "w") do io
-        JSON3.pretty(io, blob)
+        return JSON3.pretty(io, blob)
     end
 
     return nothing

@@ -148,5 +148,5 @@ end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
 function test_initial_guess_integration()
-    TestInitialGuessIntegration.test_initial_guess_integration()
+    return TestInitialGuessIntegration.test_initial_guess_integration()
 end
