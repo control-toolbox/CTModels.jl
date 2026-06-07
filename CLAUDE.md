@@ -1,4 +1,4 @@
-# CTFlows.jl — Claude project context
+# CTModels.jl — Claude project context
 
 ## Essential rules
 
@@ -27,9 +27,9 @@
 ## Project structure (quick reference)
 
 ```text
-src/CTFlows.jl          # top-level manifest — exports nothing
+src/CTModels.jl         # top-level manifest — exports nothing
 src/<Module>/<Module>.jl  # submodule manifests
-ext/                    # weak-dependency extensions (SciML, ForwardDiff, …)
+ext/                    # weak-dependency extensions (JLD2, JSON, Plots)
 test/suite/             # tests by functionality, not by src layout
 docs/                   # Documenter.jl site
 dev/                    # philosophy, rules, planning template (versioned)
@@ -38,6 +38,4 @@ reports/                # working notes, ephemeral (gitignored in production)
 
 ## Key architecture point
 
-`Configs` already has the right model: one abstract type per noun, one trait-parameter
-per orthogonal axis, dispatch via extractor. The active refactor brings `Flows` and
-`Systems` in line with this. See `reports/dev/traits_vs_abstract_types.md`.
+CTModels focuses on the mathematical model layer for optimal control problems. It provides types and building blocks for states, controls, variables, time grids, and constraints; structures for representing numerical solutions; initial-guess management; and optional extensions for serialization and plotting.
