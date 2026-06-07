@@ -1637,7 +1637,7 @@ This format is used when `build_solution` is called with identical grids for all
 or when using the legacy single-grid signature. It ensures backward compatibility with files 
 created before the multi-grid feature was introduced.
 
-See also: [`_serialize_solution(::MultipleTimeGridModel, ...)`](@ref)
+See also: [`CTModels.OCP._serialize_solution`](@ref)
 """
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
@@ -1697,7 +1697,7 @@ components. It allows numerical schemes to use optimal discretizations for each 
 The reconstruction function `_reconstruct_solution_from_data` detects this format by checking 
 for the presence of `"time_grid_state"` key and handles it appropriately.
 
-See also: [`_serialize_solution(::UnifiedTimeGridModel, ...)`](@ref), [`build_solution`](@ref)
+See also: [`CTModels.OCP._serialize_solution`](@ref), [`CTModels.OCP.build_solution`](@ref)
 """
 function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Multiple time grids format

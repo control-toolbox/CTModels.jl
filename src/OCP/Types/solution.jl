@@ -108,7 +108,14 @@ function MultipleTimeGridModel(;
     return MultipleTimeGridModel((state=state, control=control, costate=costate, path=path))
 end
 
-# Legacy alias for backward compatibility
+"""
+Legacy type alias for [`CTModels.OCP.UnifiedTimeGridModel`](@ref).
+
+Kept for backward compatibility with code written before the multi-grid feature.
+Prefer [`CTModels.OCP.UnifiedTimeGridModel`](@ref) for new code.
+
+See also: [`CTModels.OCP.UnifiedTimeGridModel`](@ref), [`CTModels.OCP.MultipleTimeGridModel`](@ref).
+"""
 const TimeGridModel = UnifiedTimeGridModel
 
 """

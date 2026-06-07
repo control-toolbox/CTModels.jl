@@ -59,9 +59,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 asset("https://control-toolbox.org/assets/css/documentation.css"),
                 asset("https://control-toolbox.org/assets/js/documentation.js"),
             ],
-            size_threshold_ignore=[
-                joinpath("api", "api_ocp_building_public.md"),
-            ],
+            size_threshold_ignore=["api_ocp_building_public.md"],
         ),
         pages=[
             "Introduction" => "index.md",
