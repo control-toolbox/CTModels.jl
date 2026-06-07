@@ -25,7 +25,8 @@ The following are internal utilities (accessible via `Serialization.function_nam
 - `__format`: Get default format
 - `__filename_export_import`: Get default filename
 
-See also: `CTModels`, `export_ocp_solution`, `import_ocp_solution`
+See also: [`CTModels.Serialization.export_ocp_solution`](@ref),
+[`CTModels.Serialization.import_ocp_solution`](@ref).
 """
 module Serialization
 

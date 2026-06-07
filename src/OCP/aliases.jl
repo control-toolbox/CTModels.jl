@@ -1,11 +1,10 @@
 # Type aliases for CTModels
 
 """
-Type alias for a dimension. This is used to define the dimension of the state space, 
-the costate space, the control space, etc.
+Type alias for a dimension, used for the state, costate, control and variable spaces.
 
-```@example
-julia> const Dimension = Integer
+```julia
+const Dimension = Int
 ```
 """
 const Dimension = Int
@@ -13,64 +12,67 @@ const Dimension = Int
 """
 Type alias for a real number.
 
-```@example
-julia> const ctNumber = Real
+```julia
+const ctNumber = Real
 ```
 """
 const ctNumber = Real
 
 """
-Type alias for a time.
+Type alias for a (continuous) time.
 
-```@example
-julia> const Time = ctNumber
+```julia
+const Time = ctNumber
 ```
 
-See also: `ctNumber`, [`Times`](@ref CTModels.OCP.Times), `TimesDisc`.
+See also: [`CTModels.OCP.ctNumber`](@ref), [`CTModels.OCP.Times`](@ref), [`CTModels.OCP.TimesDisc`](@ref).
 """
 const Time = ctNumber
 
 """
 Type alias for a vector of real numbers.
 
-```@example
-julia> const ctVector = AbstractVector{<:ctNumber}
+```julia
+const ctVector = AbstractVector{<:ctNumber}
 ```
 
-See also: `ctNumber`.
+See also: [`CTModels.OCP.ctNumber`](@ref).
 """
 const ctVector = AbstractVector{<:ctNumber}
 
 """
 Type alias for a vector of times.
 
-```@example
-julia> const Times = AbstractVector{<:Time}
+```julia
+const Times = AbstractVector{<:Time}
 ```
 
-See also: `Time`, `TimesDisc`.
+See also: [`CTModels.OCP.Time`](@ref), [`CTModels.OCP.TimesDisc`](@ref).
 """
 const Times = AbstractVector{<:Time}
 
 """
-Type alias for a grid of times. This is used to define a discretization of time interval given to solvers.
+Type alias for a grid of times, used to discretize the time interval given to solvers.
 
-```@example
-julia> const TimesDisc = Union{Times, StepRangeLen}
+```julia
+const TimesDisc = Union{Times,StepRangeLen}
 ```
 
-See also: `Time`, [`Times`](@ref CTModels.OCP.Times).
+See also: [`CTModels.OCP.Time`](@ref), [`CTModels.OCP.Times`](@ref).
 """
 const TimesDisc = Union{Times,StepRangeLen}
 
 """
-Type alias for a dictionary of constraints. This is used to store constraints before building the model.
+Type alias for a dictionary of constraints, used to store constraints before building the model.
 
-```@example
-julia> const TimesDisc = Union{Times, StepRangeLen}
+```julia
+const ConstraintsDictType = OrderedDict{
+    Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
+}
 ```
 
-See also: `ConstraintsModel`, `PreModel` and [`Model`](@ref CTModels.OCP.Model).
+See also: [`CTModels.OCP.ConstraintsModel`](@ref), [`CTModels.OCP.PreModel`](@ref),
+[`CTModels.OCP.Model`](@ref).
 """
 const ConstraintsDictType = OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}

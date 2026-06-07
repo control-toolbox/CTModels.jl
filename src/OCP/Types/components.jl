@@ -10,7 +10,7 @@ Abstract base type representing time dependence of an optimal control problem.
 Used as a type parameter to distinguish between autonomous and non-autonomous
 systems at the type level, enabling dispatch and compile-time optimisations.
 
-See also: `Autonomous`, `NonAutonomous`.
+See also: [`CTModels.OCP.Autonomous`](@ref), [`CTModels.OCP.NonAutonomous`](@ref).
 """
 abstract type TimeDependence end
 
@@ -23,7 +23,7 @@ problem do not explicitly depend on time.
 For autonomous systems, the dynamics have the form `ẋ = f(x, u)` rather than
 `ẋ = f(t, x, u)`.
 
-See also: `TimeDependence`, `NonAutonomous`.
+See also: [`CTModels.OCP.TimeDependence`](@ref), [`CTModels.OCP.NonAutonomous`](@ref).
 """
 abstract type Autonomous<:TimeDependence end
 
@@ -35,7 +35,7 @@ problem explicitly depend on time.
 
 For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
 
-See also: `TimeDependence`, `Autonomous`.
+See also: [`CTModels.OCP.TimeDependence`](@ref), [`CTModels.OCP.Autonomous`](@ref).
 """
 abstract type NonAutonomous<:TimeDependence end
 
@@ -48,7 +48,7 @@ Abstract base type for state variable models in optimal control problems.
 Subtypes describe the state space structure including dimension, naming, and
 optionally the state trajectory itself.
 
-See also: `StateModel`, `StateModelSolution`.
+See also: [`CTModels.OCP.StateModel`](@ref), [`CTModels.OCP.StateModelSolution`](@ref).
 """
 abstract type AbstractStateModel end
 
@@ -70,6 +70,8 @@ julia> using CTModels
 
 julia> sm = CTModels.StateModel("x", ["position", "velocity"])
 ```
+
+See also: [`CTModels.OCP.AbstractStateModel`](@ref), [`CTModels.OCP.StateModelSolution`](@ref).
 """
 struct StateModel <: AbstractStateModel
     name::String
@@ -99,6 +101,8 @@ julia> sms.value(0.0)
  1.0
  0.0
 ```
+
+See also: [`CTModels.OCP.AbstractStateModel`](@ref), [`CTModels.OCP.StateModel`](@ref).
 """
 struct StateModelSolution{TS<:Function} <: AbstractStateModel
     name::String
@@ -115,7 +119,8 @@ Abstract base type for control variable models in optimal control problems.
 Subtypes describe the control space structure including dimension, naming, and
 optionally the control trajectory itself.
 
-See also: `ControlModel`, `ControlModelSolution`.
+See also: [`CTModels.OCP.ControlModel`](@ref), [`CTModels.OCP.ControlModelSolution`](@ref),
+[`CTModels.OCP.EmptyControlModel`](@ref).
 """
 abstract type AbstractControlModel end
 
@@ -137,6 +142,8 @@ julia> using CTModels
 
 julia> cm = CTModels.ControlModel("u", ["thrust", "steering"])
 ```
+
+See also: [`CTModels.OCP.AbstractControlModel`](@ref), [`CTModels.OCP.ControlModelSolution`](@ref).
 """
 struct ControlModel <: AbstractControlModel
     name::String
@@ -165,6 +172,8 @@ julia> cms.value(π/2)
 1-element Vector{Float64}:
  1.0
 ```
+
+See also: [`CTModels.OCP.AbstractControlModel`](@ref), [`CTModels.OCP.ControlModel`](@ref).
 """
 struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     name::String
@@ -211,7 +220,8 @@ Abstract base type for optimisation variable models in optimal control problems.
 Optimisation variables are decision variables that do not depend on time, such as
 free final time or unknown parameters.
 
-See also: `VariableModel`, `EmptyVariableModel`, `VariableModelSolution`.
+See also: [`CTModels.OCP.VariableModel`](@ref), [`CTModels.OCP.EmptyVariableModel`](@ref),
+[`CTModels.OCP.VariableModelSolution`](@ref).
 """
 abstract type AbstractVariableModel end
 
@@ -233,6 +243,8 @@ julia> using CTModels
 
 julia> vm = CTModels.VariableModel("v", ["final_time", "parameter"])
 ```
+
+See also: [`CTModels.OCP.AbstractVariableModel`](@ref), [`CTModels.OCP.VariableModelSolution`](@ref).
 """
 struct VariableModel <: AbstractVariableModel
     name::String
@@ -254,6 +266,8 @@ julia> using CTModels
 
 julia> evm = CTModels.EmptyVariableModel()
 ```
+
+See also: [`CTModels.OCP.AbstractVariableModel`](@ref), [`CTModels.OCP.VariableModel`](@ref).
 """
 struct EmptyVariableModel <: AbstractVariableModel end
 
@@ -277,6 +291,9 @@ julia> vms = CTModels.VariableModelSolution("v", ["tf"], 2.5)
 julia> vms.value
 2.5
 ```
+
+See also: [`CTModels.OCP.AbstractVariableModel`](@ref), [`CTModels.OCP.VariableModel`](@ref),
+[`CTModels.OCP.EmptyVariableModel`](@ref).
 """
 struct VariableModelSolution{TS<:Union{ctNumber,ctVector}} <: AbstractVariableModel
     name::String
@@ -293,7 +310,7 @@ Abstract base type for time boundary models (initial or final time).
 Subtypes represent either fixed or free time boundaries in an optimal control
 problem.
 
-See also: `FixedTimeModel`, `FreeTimeModel`.
+See also: [`CTModels.OCP.FixedTimeModel`](@ref), [`CTModels.OCP.FreeTimeModel`](@ref).
 """
 abstract type AbstractTimeModel end
 
@@ -354,7 +371,7 @@ $(TYPEDEF)
 
 Abstract base type for combined initial and final time models.
 
-See also: `TimesModel`.
+See also: [`CTModels.OCP.TimesModel`](@ref).
 """
 abstract type AbstractTimesModel end
 
@@ -394,7 +411,8 @@ Abstract base type for objective function models in optimal control problems.
 Subtypes represent different forms of the cost functional: Mayer (terminal cost),
 Lagrange (integral cost), or Bolza (both).
 
-See also: `MayerObjectiveModel`, `LagrangeObjectiveModel`, `BolzaObjectiveModel`.
+See also: [`CTModels.OCP.MayerObjectiveModel`](@ref), [`CTModels.OCP.LagrangeObjectiveModel`](@ref),
+[`CTModels.OCP.BolzaObjectiveModel`](@ref).
 """
 abstract type AbstractObjectiveModel end
 
@@ -485,7 +503,7 @@ Abstract base type for constraint models in optimal control problems.
 Subtypes store all constraint information including path constraints, boundary
 constraints, and box constraints on state, control, and variables.
 
-See also: `ConstraintsModel`.
+See also: [`CTModels.OCP.ConstraintsModel`](@ref).
 """
 abstract type AbstractConstraintsModel end
 

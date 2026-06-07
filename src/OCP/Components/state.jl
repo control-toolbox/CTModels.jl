@@ -9,48 +9,32 @@ Define the state dimension and possibly the names of each component.
 
 # Examples
 
-```@example
-julia> state!(ocp, 1)
-julia> state_dimension(ocp)
-1
-julia> state_components(ocp)
-["x"]
+Each call below starts from a fresh `PreModel` (`state!` may be used only once per
+problem). The forms illustrate the default name, a custom name, and explicit component
+names:
 
-julia> state!(ocp, 1, "y")
-julia> state_dimension(ocp)
-1
-julia> state_components(ocp)
-["y"]
+```julia-repl
+julia> using CTModels
 
-julia> state!(ocp, 2)
-julia> state_dimension(ocp)
-2
-julia> state_components(ocp)
-["x₁", "x₂"]
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 1);
 
-julia> state!(ocp, 2, :y)
-julia> state_dimension(ocp)
-2
-julia> state_components(ocp)
-["y₁", "y₂"]
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+(1, ["x"])
 
-julia> state!(ocp, 2, "y")
-julia> state_dimension(ocp)
-2
-julia> state_components(ocp)
-["y₁", "y₂"]
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2);
 
-julia> state!(ocp, 2, "y", ["u", "v"])
-julia> state_dimension(ocp)
-2
-julia> state_components(ocp)
-["u", "v"]
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+(2, ["x₁", "x₂"])
 
-julia> state!(ocp, 2, "y", [:u, :v])
-julia> state_dimension(ocp)
-2
-julia> state_components(ocp)
-["u", "v"]
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y");
+
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+(2, ["y₁", "y₂"])
+
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y", ["u", "v"]);
+
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+(2, ["u", "v"])
 ```
 
 # Throws

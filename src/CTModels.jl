@@ -1,67 +1,32 @@
 """
     CTModels
 
-Control Toolbox Models (CTModels) - A Julia package for optimal control problems.
+Mathematical model layer for optimal control problems in the
+[control-toolbox](https://github.com/control-toolbox) ecosystem.
 
-This module provides a comprehensive framework for defining, building, and solving
-optimal control problems with a modular architecture that separates concerns and
-facilitates extensibility.
+Provides types and building blocks for states, controls, variables, time grids,
+constraints, and cost functionals; structures for representing numerical solutions;
+initial-guess management; and optional extensions for serialization and plotting.
 
-# Architecture Overview
+# Modules
 
-CTModels is organized into specialized modules, each with clear responsibilities:
+| Module | Responsibility |
+|--------|---------------|
+| [`CTModels.OCP`](@ref) | Types and builders for optimal control problems and solutions |
+| [`CTModels.Utils`](@ref) | Interpolation, matrix utilities, `@ensure` validation macro |
+| [`CTModels.Display`](@ref) | `Base.show` extensions for models and solutions |
+| [`CTModels.Serialization`](@ref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
+| [`CTModels.Init`](@ref) | Initial guess construction and validation |
 
-## Core Modules
+# Extensions
 
-- **OCP**: Optimal Control Problem core
-  - Types: `Model`, `PreModel`, `Solution`, `AbstractModel`, `AbstractSolution`
-  - Components: state, control, dynamics, objective, constraints
-  - Builders: model construction and solution building
-  - Type aliases: `Dimension`, `ctNumber`, `Time`, `Times`, `TimesDisc`, `ConstraintsDictType`
+| Extension | Trigger package | Adds |
+|-----------|----------------|------|
+| `CTModelsPlots` | `Plots.jl` | `Plots.plot(sol)` and `Plots.plot!(sol)` |
+| `CTModelsJSON` | `JSON3.jl` | JSON serialization |
+| `CTModelsJLD` | `JLD2.jl` | JLD2 serialization |
 
-- **Utils**: General utilities
-  - Interpolation: `ctinterpolate`
-  - Matrix operations: `matrix2vec`
-  - Macros: `@ensure` for validation
-
-- **Display**: Formatting and visualization
-  - Text display via `Base.show` extensions
-  - Plotting stubs via `RecipesBase.plot`
-
-- **Serialization**: Import/export functionality
-  - `export_ocp_solution`, `import_ocp_solution`
-  - Format tags: `JLD2Tag`, `JSON3Tag`
-
-- **InitialGuess**: Initial guess management
-  - `initial_guess`, `build_initial_guess`, `validate_initial_guess`
-  - Types: `InitialGuess`, `PreInitialGuess`
-
-## Supporting Modules
-
-- **Options**: Configuration and options management
-- **Strategies**: Strategy patterns for optimization
-- **Orchestration**: High-level orchestration and coordination
-- **Optimization**: General optimization types and builders
-- **Modelers**: Modeler implementations (ADNLPModeler, ExaModeler)
-- **DOCP**: Discretized Optimal Control Problem types
-
-# Loading Order
-
-Modules are loaded in dependency order to ensure all types and functions are available
-when needed:
-
-1. **Foundational types** → **Utils** → **OCP** → **Display/Serialization/InitialGuess**
-2. **Supporting modules** → **Optimization** → **Modelers** → **DOCP**
-
-# Public API
-
-All exported functions and types are accessible via `CTModels.function_name()`.
-The modular architecture ensures that:
-
-- Types are defined where they belong
-- Dependencies are explicit and minimal
-- Extensions can target specific modules
-- The public API remains stable and clean
+All public symbols are accessed as `CTModels.symbol` (no top-level exports).
 """
 module CTModels
 

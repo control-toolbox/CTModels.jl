@@ -75,6 +75,16 @@ At a high level, CTModels is responsible for:
 Most of the public API is organized in a way that closely mirrors the mathematical
 objects you manipulate when formulating an optimal control problem.
 
+## Module overview
+
+| Module | Responsibility |
+|--------|---------------|
+| `CTModels.OCP` | Types and builders for optimal control problems and solutions |
+| `CTModels.Utils` | Interpolation, matrix utilities, `@ensure` validation macro |
+| `CTModels.Display` | `Base.show` extensions for models and solutions |
+| `CTModels.Serialization` | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
+| `CTModels.Init` | Initial guess construction and validation |
+
 ## Time grids and basic aliases
 
 CTModels defines a few central type aliases that appear throughout the API:

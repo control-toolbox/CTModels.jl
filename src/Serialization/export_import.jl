@@ -19,7 +19,7 @@ function import_ocp_solution(::JSON3Tag, ::AbstractModel; filename::String)
 end
 
 """
-    export_ocp_solution(sol; format=:JLD, filename="solution")
+$(TYPEDSIGNATURES)
 
 Export an optimal control solution to a file.
 
@@ -33,7 +33,7 @@ Export an optimal control solution to a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: `import_ocp_solution`
+See also: [`CTModels.Serialization.import_ocp_solution`](@ref).
 """
 function export_ocp_solution(
     sol::AbstractSolution;
@@ -58,7 +58,7 @@ function export_ocp_solution(
 end
 
 """
-    import_ocp_solution(ocp; format=:JLD, filename="solution")
+$(TYPEDSIGNATURES)
 
 Import an optimal control solution from a file.
 
@@ -75,7 +75,7 @@ Import an optimal control solution from a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: `export_ocp_solution`
+See also: [`CTModels.Serialization.export_ocp_solution`](@ref).
 """
 function import_ocp_solution(
     ocp::AbstractModel;

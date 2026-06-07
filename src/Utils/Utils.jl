@@ -21,7 +21,6 @@ The following are internal utilities (accessible via `Utils.function_name`):
 - `to_out_of_place`: Convert in-place functions to out-of-place
 - `@ensure`: Validation macro for preconditions
 
-See also: `CTModels`
 """
 module Utils
 

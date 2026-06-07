@@ -11,21 +11,27 @@ When a time is free, then, one must provide the corresponding index of the ocp v
 
 # Examples
 
-```@example
-julia> time!(ocp, t0=0,   tf=1  ) # Fixed t0 and fixed tf
-julia> time!(ocp, t0=0,   indf=2) # Fixed t0 and free  tf
-julia> time!(ocp, ind0=2, tf=1  ) # Free  t0 and fixed tf
-julia> time!(ocp, ind0=2, indf=3) # Free  t0 and free  tf
+`time!` may be used only once per problem; each form below applies to a fresh `ocp`:
+
+```julia-repl
+julia> using CTModels
+
+julia> CTModels.time!(ocp; t0=0, tf=1)     # Fixed t0 and fixed tf
+
+julia> CTModels.time!(ocp; t0=0, indf=2)   # Fixed t0 and free  tf
+
+julia> CTModels.time!(ocp; ind0=2, tf=1)   # Free  t0 and fixed tf
+
+julia> CTModels.time!(ocp; ind0=2, indf=3) # Free  t0 and free  tf
 ```
 
-When you plot a solution of an optimal control problem, the name of the time variable appears.
-By default, the name is "t".
-Consider you want to set the name of the time variable to "s".
+When a solution is plotted, the name of the time variable appears (`"t"` by default).
+To name the time variable `"s"`:
 
-```@example
-julia> time!(ocp, t0=0, tf=1, time_name="s") # time_name is a String
-# or
-julia> time!(ocp, t0=0, tf=1, time_name=:s ) # time_name is a Symbol  
+```julia-repl
+julia> CTModels.time!(ocp; t0=0, tf=1, time_name="s") # time_name as a String
+
+julia> CTModels.time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
 ```
 
 # Throws
@@ -406,7 +412,7 @@ Alias for `has_fixed_initial_time`. Check if the initial time is fixed.
 julia> is_initial_time_fixed(times)  # equivalent to has_fixed_initial_time(times)
 ```
 
-See also: `has_fixed_initial_time`, `is_initial_time_free`.
+See also: [`CTModels.OCP.has_fixed_initial_time`](@ref), [`CTModels.OCP.is_initial_time_free`](@ref).
 """
 const is_initial_time_fixed = has_fixed_initial_time
 
@@ -420,7 +426,7 @@ Alias for `has_free_initial_time`. Check if the initial time is free.
 julia> is_initial_time_free(times)  # equivalent to has_free_initial_time(times)
 ```
 
-See also: `has_free_initial_time`, `is_initial_time_fixed`.
+See also: [`CTModels.OCP.has_free_initial_time`](@ref), [`CTModels.OCP.is_initial_time_fixed`](@ref).
 """
 const is_initial_time_free = has_free_initial_time
 
@@ -434,7 +440,7 @@ Alias for `has_fixed_final_time`. Check if the final time is fixed.
 julia> is_final_time_fixed(times)  # equivalent to has_fixed_final_time(times)
 ```
 
-See also: `has_fixed_final_time`, `is_final_time_free`.
+See also: [`CTModels.OCP.has_fixed_final_time`](@ref), [`CTModels.OCP.is_final_time_free`](@ref).
 """
 const is_final_time_fixed = has_fixed_final_time
 
@@ -448,6 +454,6 @@ Alias for `has_free_final_time`. Check if the final time is free.
 julia> is_final_time_free(times)  # equivalent to has_free_final_time(times)
 ```
 
-See also: `has_free_final_time`, `is_final_time_fixed`.
+See also: [`CTModels.OCP.has_free_final_time`](@ref), [`CTModels.OCP.is_final_time_fixed`](@ref).
 """
 const is_final_time_free = has_free_final_time

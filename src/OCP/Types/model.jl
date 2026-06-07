@@ -9,7 +9,7 @@ Abstract base type for optimal control problem models.
 Subtypes represent either a fully built immutable model ([`Model`](@ref CTModels.OCP.Model)) or a
 mutable model under construction (`PreModel`).
 
-See also: [`Model`](@ref CTModels.OCP.Model), `PreModel`.
+See also: [`CTModels.OCP.Model`](@ref), [`CTModels.OCP.PreModel`](@ref).
 """
 abstract type AbstractModel end
 
@@ -241,7 +241,9 @@ $(TYPEDSIGNATURES)
 
 Return the state dimension of the `PreModel`.
 
-Throws `Exceptions.PreconditionError` if state has not been set.
+# Throws
+
+- `Exceptions.PreconditionError`: if the state has not been set yet.
 """
 function state_dimension(ocp::PreModel)::Dimension
     @ensure(

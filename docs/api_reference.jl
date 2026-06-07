@@ -62,6 +62,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             subdirectory=".",
             primary_modules=[
                 CTModels.OCP => src(
+                    joinpath("OCP", "OCP.jl"),
                     joinpath("OCP", "aliases.jl"),
                     joinpath("OCP", "Types", "components.jl"),
                     joinpath("OCP", "Types", "model.jl"),
@@ -90,6 +91,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("OCP", "Components", "dynamics.jl"),
                     joinpath("OCP", "Components", "objective.jl"),
                     joinpath("OCP", "Components", "constraints.jl"),
+                    joinpath("OCP", "Components", "definition.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
@@ -112,7 +114,6 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("OCP", "Building", "interpolation_helpers.jl"),
                     joinpath("OCP", "Building", "discretization_utils.jl"),
                     joinpath("OCP", "Building", "dual_model.jl"),
-                    joinpath("OCP", "Building", "definition.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
@@ -149,8 +150,14 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.Display =>
-                    src(joinpath("Display", "Display.jl"), joinpath("Display", "print.jl")),
+                CTModels.Display => src(
+                    joinpath("Display", "Display.jl"),
+                    joinpath("Display", "ansi.jl"),
+                    joinpath("Display", "definition.jl"),
+                    joinpath("Display", "mathematical.jl"),
+                    joinpath("Display", "model.jl"),
+                    joinpath("Display", "pre_model.jl"),
+                ),
                 CTModelsPlots =>
                     ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),
             ],
@@ -172,6 +179,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("Serialization", "Serialization.jl"),
                     joinpath("Serialization", "export_import.jl"),
                     joinpath("Serialization", "types.jl"),
+                    joinpath("Serialization", "reconstruction_helpers.jl"),
                 ),
                 CTModelsJSON => ext("CTModelsJSON.jl"),
                 CTModelsJLD => ext("CTModelsJLD.jl"),
