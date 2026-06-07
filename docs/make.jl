@@ -60,7 +60,34 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 asset("https://control-toolbox.org/assets/js/documentation.js"),
             ],
         ),
-        pages=["Introduction" => "index.md", "API Reference" => api_pages],
+        pages=[
+            "Introduction" => "index.md",
+            "Optimal control problems" => [
+                "Overview" => "model/index.md",
+                "Types and traits" => "model/types_and_traits.md",
+                "Components" => "model/components.md",
+                "Dynamics and objective" => "model/dynamics_objective.md",
+                "Constraints" => "model/constraints.md",
+                "Building a model" => "model/building.md",
+            ],
+            "Solutions" => [
+                "Overview" => "solution/index.md",
+                "Time grids" => "solution/time_grids.md",
+                "Trajectories" => "solution/trajectories.md",
+                "Duals & diagnostics" => "solution/duals.md",
+            ],
+            "Initial guesses" => [
+                "Overview" => "initial_guess/index.md",
+                "Input formats" => "initial_guess/formats.md",
+                "Validation & warm-start" => "initial_guess/validation.md",
+            ],
+            "Serialization & extensions" => [
+                "Overview" => "serialization/index.md",
+                "Export & import" => "serialization/export_import.md",
+                "Plotting" => "serialization/plotting.md",
+            ],
+            "API Reference" => api_pages,
+        ],
     )
 end
 

@@ -179,33 +179,40 @@ The documentation consists of:
 
 - **Introduction** (this page): Overview of CTModels and its role in the control-toolbox ecosystem.
 
-- **API Reference**: Complete documentation of all modules and functions:
-  - *CTModels*: Main module and exports
-  - *Utils*: Utilities (interpolation, macros, matrix operations)
-  - *OCP*: Optimal Control Problem types, components, building, and validation
-  - *Display*: Text display and printing
-  - *Serialization*: Export/import functionality
-  - *InitialGuess*: Initial guess management
-  - *Extensions*: Plots, JSON, and JLD2 extensions
+- **Developer guides** — narrative, architecture-oriented walkthroughs aimed at
+  control-toolbox contributors:
+  - [Optimal control problems](model/index.md): the `PreModel → build → Model` pipeline,
+    types & traits, components, dynamics, objective, constraints.
+  - [Solutions](solution/index.md): the `Solution` anatomy, time grids, trajectories, duals.
+  - [Initial guesses](initial_guess/index.md): the `Init` pipeline and warm-starting.
+  - [Serialization & extensions](serialization/index.md): export/import and plotting.
 
-Use the **API Reference** to look up the details of particular functions and types.
+- **API Reference**: Auto-generated, exhaustive documentation of every module and symbol
+  (public *and* private), one page per submodule and loaded extension.
+
+Use the **guides** to learn how the pieces fit together, and the **API Reference** to look up
+the details of a particular function or type.
 
 ## Quick start guide
 
 - **I want to define an optimal control problem**  
-  See **API Reference → OCP Components** for `state!`, `control!`, `dynamics!`, `objective!`, `constraint!`, etc.
-  
+  See the [Optimal control problems](model/index.md) guide for `state!`, `control!`,
+  `dynamics!`, `objective!`, `constraint!`, and `build`.
+
+- **I want to read a solution**  
+  See the [Solutions](solution/index.md) guide for `state`, `control`, `costate`, `dual`, and
+  the solver diagnostics.
+
 - **I want to build initial guesses**  
-  See **API Reference → InitialGuess** for `pre_initial_guess`, `initial_guess`, and `build_initial_guess`.
-  
-- **I want to save/load solutions**  
-  See **API Reference → Serialization** and the JSON/JLD2 extension pages for `export_ocp_solution` and `import_ocp_solution`.
-  
-- **I want to plot solution trajectories**  
-  See **API Reference → Plots Extension** for `plot(sol)` and `plot!(sol)` with `Plots.jl`.
-  
+  See the [Initial guesses](initial_guess/index.md) guide for `pre_initial_guess`,
+  `initial_guess`, and `build_initial_guess`.
+
+- **I want to save/load or plot solutions**  
+  See the [Serialization & extensions](serialization/index.md) guide for `export_ocp_solution`,
+  `import_ocp_solution`, and `plot(sol)`.
+
 - **I want to solve an optimal control problem**  
   Use [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl) which provides discretization, NLP backends, and optimization strategies.
-  
+
 - **I use OptimalControl.jl**  
   CTModels provides the underlying types and building blocks. OptimalControl.jl offers a higher-level interface.
