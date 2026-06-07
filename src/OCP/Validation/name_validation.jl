@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 """
-    __collect_used_names(ocp::PreModel)::Vector{String}
+$(TYPEDSIGNATURES)
 
 Collect all names already used in the PreModel across all components.
 
@@ -27,7 +27,7 @@ julia> __collect_used_names(ocp)
  "u"
 ```
 
-See also: `__has_name_conflict`, `__validate_name_uniqueness`
+See also: [`CTModels.OCP.__has_name_conflict`](@ref), [`CTModels.OCP.__validate_name_uniqueness`](@ref).
 """
 function __collect_used_names(ocp::PreModel)::Vector{String}
     names = String[]
@@ -61,7 +61,7 @@ function __collect_used_names(ocp::PreModel)::Vector{String}
 end
 
 """
-    __has_name_conflict(ocp::PreModel, new_name::String, exclude_component::Symbol=:none)::Bool
+$(TYPEDSIGNATURES)
 
 Check if a name conflicts with existing names in the PreModel.
 
@@ -90,7 +90,7 @@ julia> __has_name_conflict(ocp, "y", :none)
 false
 ```
 
-See also: `__collect_used_names`, `__validate_name_uniqueness`
+See also: [`CTModels.OCP.__collect_used_names`](@ref), [`CTModels.OCP.__validate_name_uniqueness`](@ref).
 """
 function __has_name_conflict(
     ocp::PreModel, new_name::String, exclude_component::Symbol=:none
@@ -116,8 +116,7 @@ function __has_name_conflict(
 end
 
 """
-    __validate_name_uniqueness(ocp::PreModel, name::String, components::Vector{String}, 
-                               component_type::Symbol)
+$(TYPEDSIGNATURES)
 
 Validate that a name and its components don't conflict with existing names.
 
@@ -147,7 +146,7 @@ julia> state!(ocp, 2, "x", ["x₁", "x₂"])
 julia> __validate_name_uniqueness(ocp, "x", ["u"], :control)  # Would throw if "x" conflicts
 ```
 
-See also: `__has_name_conflict`, `__collect_used_names`
+See also: [`CTModels.OCP.__has_name_conflict`](@ref), [`CTModels.OCP.__collect_used_names`](@ref).
 """
 function __validate_name_uniqueness(
     ocp::PreModel, name::String, components::Vector{String}, component_type::Symbol

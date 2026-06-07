@@ -183,8 +183,9 @@ reducing memory overhead. This is detected automatically.
 A legacy signature `build_solution(ocp, T, X, U, v, P; ...)` exists for single-grid solutions. 
 It internally calls this multi-grid version with `T_state = T_control = T_costate = T_path = T`.
 
-See also: `Solution`, `UnifiedTimeGridModel`, `MultipleTimeGridModel`, 
-`time_grid`, `state`, `control`, `costate`
+See also: [`CTModels.OCP.Solution`](@ref), [`CTModels.OCP.UnifiedTimeGridModel`](@ref),
+[`CTModels.OCP.MultipleTimeGridModel`](@ref), [`CTModels.OCP.time_grid`](@ref),
+[`CTModels.OCP.state`](@ref), [`CTModels.OCP.control`](@ref), [`CTModels.OCP.costate`](@ref).
 """
 function build_solution(
     ocp::Model,
@@ -608,9 +609,9 @@ $(TYPEDSIGNATURES)
 
 Return the state as a function of time.
 
-```@example
-julia> x  = state(sol)
-julia> t0 = time_grid(sol)[1]
+```julia-repl
+julia> x  = CTModels.state(sol)
+julia> t0 = CTModels.time_grid(sol)[1]
 julia> x0 = x(t0) # state at the initial time
 ```
 """
@@ -678,9 +679,9 @@ $(TYPEDSIGNATURES)
 
 Return the control as a function of time.
 
-```@example
-julia> u  = control(sol)
-julia> t0 = time_grid(sol)[1]
+```julia-repl
+julia> u  = CTModels.control(sol)
+julia> t0 = CTModels.time_grid(sol)[1]
 julia> u0 = u(t0) # control at the initial time
 ```
 """
@@ -802,8 +803,8 @@ $(TYPEDSIGNATURES)
 
 Return the variable or `nothing`.
 
-```@example
-julia> v  = variable(sol)
+```julia-repl
+julia> v = CTModels.variable(sol)
 ```
 """
 function variable(
@@ -828,9 +829,9 @@ $(TYPEDSIGNATURES)
 
 Return the costate as a function of time.
 
-```@example
-julia> p  = costate(sol)
-julia> t0 = time_grid(sol)[1]
+```julia-repl
+julia> p  = CTModels.costate(sol)
+julia> t0 = CTModels.time_grid(sol)[1]
 julia> p0 = p(t0) # costate at the initial time
 ```
 """
@@ -1636,7 +1637,7 @@ This format is used when `build_solution` is called with identical grids for all
 or when using the legacy single-grid signature. It ensures backward compatibility with files 
 created before the multi-grid feature was introduced.
 
-See also: [`_serialize_solution(::MultipleTimeGridModel, ...)`](@ref)
+See also: [`CTModels.OCP._serialize_solution`](@ref)
 """
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
@@ -1696,7 +1697,7 @@ components. It allows numerical schemes to use optimal discretizations for each 
 The reconstruction function `_reconstruct_solution_from_data` detects this format by checking 
 for the presence of `"time_grid_state"` key and handles it appropriately.
 
-See also: [`_serialize_solution(::UnifiedTimeGridModel, ...)`](@ref), [`build_solution`](@ref)
+See also: [`CTModels.OCP._serialize_solution`](@ref), [`CTModels.OCP.build_solution`](@ref)
 """
 function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Multiple time grids format

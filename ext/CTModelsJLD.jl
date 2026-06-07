@@ -1,3 +1,10 @@
+"""
+Weak-dependency extension of [`CTModels`](@ref) providing JLD2-based serialization.
+
+Loaded automatically when both `CTModels` and `JLD2` are available in the session.
+Adds methods for [`CTModels.export_ocp_solution`](@ref) and
+[`CTModels.import_ocp_solution`](@ref) dispatching on [`CTModels.JLD2Tag`](@ref).
+"""
 module CTModelsJLD
 
 using CTModels

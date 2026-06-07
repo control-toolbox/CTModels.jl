@@ -238,7 +238,7 @@ Alias for `has_mayer_cost`. Check if the objective has a Mayer (terminal) cost d
 julia> is_mayer_cost_defined(obj)  # equivalent to has_mayer_cost(obj)
 ```
 
-See also: `has_mayer_cost`, `is_lagrange_cost_defined`.
+See also: [`CTModels.OCP.has_mayer_cost`](@ref), [`CTModels.OCP.is_lagrange_cost_defined`](@ref).
 """
 const is_mayer_cost_defined = has_mayer_cost
 
@@ -252,6 +252,6 @@ Alias for `has_lagrange_cost`. Check if the objective has a Lagrange (integral) 
 julia> is_lagrange_cost_defined(obj)  # equivalent to has_lagrange_cost(obj)
 ```
 
-See also: `has_lagrange_cost`, `is_mayer_cost_defined`.
+See also: [`CTModels.OCP.has_lagrange_cost`](@ref), [`CTModels.OCP.is_mayer_cost_defined`](@ref).
 """
 const is_lagrange_cost_defined = has_lagrange_cost

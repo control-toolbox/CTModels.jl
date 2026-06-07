@@ -19,7 +19,6 @@ The following functions are exported and accessible as `CTModels.function_name()
 - `InitialGuess`: Validated initial guess with callable trajectories
 - `PreInitialGuess`: Pre-initialization container for raw data
 
-See also: `CTModels`
 """
 module Init
 

@@ -1,3 +1,10 @@
+"""
+Weak-dependency extension of [`CTModels`](@ref) providing JSON3-based serialization.
+
+Loaded automatically when both `CTModels` and `JSON3` are available in the session.
+Adds methods for [`CTModels.export_ocp_solution`](@ref) and
+[`CTModels.import_ocp_solution`](@ref) dispatching on [`CTModels.JSON3Tag`](@ref).
+"""
 module CTModelsJSON
 
 using CTModels
@@ -11,8 +18,10 @@ import CTModels.OCP: __control_interpolation
 # Private helpers for JSON matrix conversion
 # ============================================================================
 
-# Liste des champs matriciels à convertir
+"Solution fields that are always serialized as `Matrix{Float64}` and must be converted to `Vector{Vector}` for JSON3."
 const _MATRIX_FIELDS = ["state", "control", "costate"]
+
+"Solution fields that may be present (non-empty duals) and require the same `Matrix → Vector{Vector}` conversion."
 const _OPTIONAL_MATRIX_FIELDS = [
     "path_constraints_dual",
     "state_constraints_lb_dual",
