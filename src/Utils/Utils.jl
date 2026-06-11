@@ -39,6 +39,7 @@ include("interpolation.jl")
 include("matrix_utils.jl")
 
 # Export public API
+# TODO: This module will be moved to CTBase.jl (see issue #319)
 export ctinterpolate, ctinterpolate_constant, matrix2vec
 
 end
