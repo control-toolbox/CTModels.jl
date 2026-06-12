@@ -7,6 +7,8 @@ Adds methods for [`CTModels.export_ocp_solution`](@ref) and
 """
 module CTModelsJSON
 
+import CTBase.Core
+
 using CTModels
 using DocStringExtensions
 
@@ -40,14 +42,14 @@ function _convert_matrices_for_json!(blob::Dict)
     # Convert required matrix fields
     for key in _MATRIX_FIELDS
         if haskey(blob, key) && blob[key] isa Matrix
-            blob[key] = CTModels.Utils.matrix2vec(blob[key], 1)
+            blob[key] = Core.matrix2vec(blob[key], 1)
         end
     end
 
     # Convert optional matrix fields (can be nothing)
     for key in _OPTIONAL_MATRIX_FIELDS
         if haskey(blob, key) && !isnothing(blob[key]) && blob[key] isa Matrix
-            blob[key] = CTModels.Utils.matrix2vec(blob[key], 1)
+            blob[key] = Core.matrix2vec(blob[key], 1)
         end
     end
 end

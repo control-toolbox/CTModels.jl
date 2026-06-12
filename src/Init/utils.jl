@@ -33,7 +33,7 @@ Convert matrix data to vector-of-vectors format for time-grid interpolation.
 """
 function _format_init_data_for_grid(data)
     if data isa AbstractMatrix
-        return matrix2vec(data, 1)
+        return Core.matrix2vec(data, 1)
     else
         return data
     end

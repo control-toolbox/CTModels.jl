@@ -231,7 +231,7 @@ plot(sol, :control)  # Uses :steppost for constant, :path for linear
 
 ```julia
 # New constant interpolation (optional)
-interp = CTModels.ctinterpolate_constant(x, f)
+interp = CTBase.Interpolation.ctinterpolate_constant(x, f)
 
 # Enhanced interpolation helpers (backward compatible)
 fu = OCP.build_interpolated_function(U, T, dim, type; interpolation=:constant)
@@ -632,11 +632,16 @@ CTSolvers = "0.1"  # Or appropriate version
 The following modules remain in CTModels and are unchanged:
 
 - **OCP**: Core optimal control problem types and building
-- **Utils**: Utility functions and helpers  
 - **Display**: Text display and printing
 - **Serialization**: Export/import functionality
-- **InitialGuess**: Initial guess management
+- **Init**: Initial guess management (renamed from InitialGuess)
 - **Extensions**: Plots, JSON, JLD2 extensions
+
+#### Moved to CTBase
+
+The following modules have been moved to CTBase:
+
+- **Utils**: Utility functions (now in CTBase.Core and CTBase.Interpolation)
 
 #### Compatibility
 

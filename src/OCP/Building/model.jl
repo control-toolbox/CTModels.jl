@@ -119,7 +119,7 @@ function _dedup_box_constraints!(
             @warn "Multiple bound declarations for $kind component $i " *
                 "(labels: $(join(dup_labels, ", "))). " *
                 "Intersection applied: effective lb = $lb_eff, effective ub = $ub_eff."
-            @ensure lb_eff <= ub_eff Exceptions.IncorrectArgument(
+            Core.@ensure lb_eff <= ub_eff Exceptions.IncorrectArgument(
                 "Empty feasible set for $kind component $i";
                 got="max(lbs)=$lb_eff > min(ubs)=$ub_eff",
                 expected="max(lbs) ≤ min(ubs)",
@@ -447,37 +447,37 @@ julia> model = build(pre_ocp)
 ```
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
-    @ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(
         "Times must be set before building model",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(pre_ocp, t0, tf) or times!(pre_ocp, N) before building",
         context="build function - times validation",
     )
-    @ensure __is_state_set(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_state_set(pre_ocp) Exceptions.PreconditionError(
         "State must be set before building model",
         reason="state has not been defined yet",
         suggestion="Call state!(pre_ocp, dimension) before building",
         context="build function - state validation",
     )
-    @ensure __is_dynamics_set(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_dynamics_set(pre_ocp) Exceptions.PreconditionError(
         "Dynamics must be set before building model",
         reason="dynamics have not been defined yet",
         suggestion="Call dynamics!(pre_ocp, f) or partial_dynamics! before building",
         context="build function - dynamics validation",
     )
-    @ensure __is_dynamics_complete(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_dynamics_complete(pre_ocp) Exceptions.PreconditionError(
         "Dynamics must be complete before building model",
         reason="not all state components are covered by dynamics",
         suggestion="Complete dynamics definition with partial_dynamics! or use full dynamics!",
         context="build function - dynamics completeness validation",
     )
-    @ensure __is_objective_set(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_objective_set(pre_ocp) Exceptions.PreconditionError(
         "Objective must be set before building model",
         reason="objective has not been defined yet",
         suggestion="Call objective!(pre_ocp, ...) before building",
         context="build function - objective validation",
     )
-    @ensure __is_autonomous_set(pre_ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_autonomous_set(pre_ocp) Exceptions.PreconditionError(
         "Time dependence must be set before building model",
         reason="autonomous status has not been defined yet",
         suggestion="Call time_dependence!(pre_ocp, autonomous=true/false) before building",

@@ -63,7 +63,7 @@ function __constraint!(
 )
 
     # checks: the constraint must not be set before
-    @ensure(
+    Core.@ensure(
         !(label ∈ keys(ocp_constraints)),
         Exceptions.PreconditionError(
             "Constraint already exists",
@@ -74,7 +74,7 @@ function __constraint!(
     )
 
     # checks: lb and ub cannot be both nothing
-    @ensure(
+    Core.@ensure(
         !(isnothing(lb) && isnothing(ub)),
         Exceptions.PreconditionError(
             "Both bounds cannot be nothing",
@@ -89,7 +89,7 @@ function __constraint!(
     isnothing(ub) && (ub = Inf * ones(eltype(lb), length(lb)))
 
     # lb and ub must have the same length
-    @ensure(
+    Core.@ensure(
         length(lb) == length(ub),
         Exceptions.IncorrectArgument(
             "Bounds dimension mismatch",
@@ -101,7 +101,7 @@ function __constraint!(
     )
 
     # NEW: Validate lb ≤ ub element-wise
-    @ensure(
+    Core.@ensure(
         all(lb .<= ub),
         Exceptions.IncorrectArgument(
             "Invalid bounds: lower > upper",
@@ -135,7 +135,7 @@ function __constraint!(
                     ),
                 )
             end
-            @ensure(
+            Core.@ensure(
                 length(rg) == length(lb),
                 Exceptions.IncorrectArgument(
                     "Bounds dimension mismatch with implicit range",
@@ -149,7 +149,7 @@ function __constraint!(
         end
 
         (::OrdinalRange{<:Int}, ::Nothing, ::ctVector, ::ctVector) => begin
-            @ensure(
+            Core.@ensure(
                 length(rg) == length(lb),
                 Exceptions.IncorrectArgument(
                     "Range-bounds dimension mismatch with explicit range",
@@ -161,7 +161,7 @@ function __constraint!(
             )
             # check if the range is valid
             if type == :state
-                @ensure(
+                Core.@ensure(
                     all(1 .≤ rg .≤ n),
                     Exceptions.IncorrectArgument(
                         "Constraint range out of bounds",
@@ -172,7 +172,7 @@ function __constraint!(
                     ),
                 )
             elseif type == :control
-                @ensure(
+                Core.@ensure(
                     all(1 .≤ rg .≤ m),
                     Exceptions.IncorrectArgument(
                         "Constraint range out of bounds",
@@ -183,7 +183,7 @@ function __constraint!(
                     ),
                 )
             elseif type == :variable
-                @ensure(
+                Core.@ensure(
                     all(1 .≤ rg .≤ q),
                     Exceptions.IncorrectArgument(
                         "Constraint range out of bounds",
@@ -211,7 +211,7 @@ function __constraint!(
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
             # ensure that codim_f has same length as lb if codim_f is not nothing
             if codim_f !== nothing
-                @ensure(
+                Core.@ensure(
                     length(lb) == codim_f,
                     Exceptions.IncorrectArgument(
                         "Function bounds dimension mismatch",
@@ -304,13 +304,13 @@ function constraint!(
 )
 
     # checks: times and state must be set before adding constraints
-    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before adding constraints",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before adding constraints",
         context="constraint! function - state validation",
     )
-    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before adding constraints",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before adding constraints",
@@ -319,7 +319,7 @@ function constraint!(
 
     # checks: control must be set for :control constraint type
     if type == :control
-        @ensure !__is_control_empty(ocp) Exceptions.PreconditionError(
+        Core.@ensure !__is_control_empty(ocp) Exceptions.PreconditionError(
             "Control must be set for type=:control constraints",
             reason="control has not been defined yet but constraint type requires it",
             suggestion="Call control!(ocp, dimension) before adding :control constraints, or use a different constraint type",
@@ -328,7 +328,7 @@ function constraint!(
     end
 
     # checks: variable must be set if using type=:variable
-    @ensure (type != :variable || !__is_variable_empty(ocp)) Exceptions.PreconditionError(
+    Core.@ensure (type != :variable || !__is_variable_empty(ocp)) Exceptions.PreconditionError(
         "Variable must be set for type=:variable constraints",
         reason="OCP has no variable defined but constraint type requires it",
         suggestion="Call variable!(ocp, dimension) before adding variable constraints, or use a different constraint type",
@@ -724,7 +724,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
         end
         return (
             :path, # type of the constraint
-            to_out_of_place(fc!, length(indices)), # function
+            Core.to_out_of_place(fc!, length(indices)), # function
             length(indices) == 1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
             length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
         )
@@ -743,7 +743,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
         end
         return (
             :boundary, # type of the constraint
-            to_out_of_place(fc!, length(indices)),
+            Core.to_out_of_place(fc!, length(indices)),
             length(indices)==1 ? cp[1][indices[1]] : cp[1][indices], # lower bound
             length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices], # upper bound
         )

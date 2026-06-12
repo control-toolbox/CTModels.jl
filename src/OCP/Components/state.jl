@@ -57,20 +57,20 @@ function state!(
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
     # checks
-    @ensure !__is_state_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_state_set(ocp) Exceptions.PreconditionError(
         "State already set",
         reason="state has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing state definition",
         context="state! function - duplicate definition check",
     )
-    @ensure n > 0 Exceptions.IncorrectArgument(
+    Core.@ensure n > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",
         got="n=$n",
         expected="n > 0 (positive integer)",
         suggestion="Use state!(ocp, n=3) with n > 0",
         context="state!(ocp, n=$n, name=\"$name\") - validating dimension parameter",
     )
-    @ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
+    Core.@ensure size(components_names, 1) == n Exceptions.IncorrectArgument(
         "Component names count mismatch",
         got="$(size(components_names, 1)) names for dimension $n",
         expected="exactly $n component names",

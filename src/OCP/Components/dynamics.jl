@@ -20,19 +20,19 @@ if the state or times are not yet set, or if dynamics have already been set.
 Throws `Exceptions.PreconditionError` if called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
-    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before defining dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before dynamics!",
         context="dynamics! function - state validation",
     )
-    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before dynamics!",
         context="dynamics! function - times validation",
     )
-    @ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
         "Dynamics already set",
         reason="dynamics have already been defined for this OCP",
         suggestion="Create a new OCP instance or use partial_dynamics! for additional dynamics",
@@ -80,19 +80,19 @@ julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
 ```
 """
 function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothing
-    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before defining partial dynamics",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before partial dynamics!",
         context="partial_dynamics! function - state validation",
     )
-    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before defining partial dynamics",
         reason="time horizon has not been defined yet",
         suggestion="Call times!(ocp, t0, tf) or times!(ocp, N) before partial dynamics!",
         context="partial_dynamics! function - times validation",
     )
-    @ensure !__is_dynamics_complete(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_dynamics_complete(ocp) Exceptions.PreconditionError(
         "Complete dynamics already set",
         reason="dynamics have already been completely defined for this OCP",
         suggestion="Use partial_dynamics! before setting complete dynamics, or create a new OCP instance",

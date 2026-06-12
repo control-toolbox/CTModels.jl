@@ -39,14 +39,14 @@ function variable!(
     name::T1=__variable_name(q),
     components_names::Vector{T2}=__variable_components(q, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
-    @ensure __is_variable_empty(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_variable_empty(ocp) Exceptions.PreconditionError(
         "Variable already set",
         reason="variable has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing variable definition",
         context="variable! function - duplicate definition check",
     )
 
-    @ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
+    Core.@ensure (q ≤ 0) || (size(components_names, 1) == q) Exceptions.IncorrectArgument(
         "Component names count mismatch",
         got="$(size(components_names, 1)) names for dimension $q",
         expected="exactly $q component names",
@@ -54,14 +54,14 @@ function variable!(
         context="variable!(ocp, q=$q, components_names=[...]) - validating names count",
     )
 
-    @ensure !__is_objective_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_objective_set(ocp) Exceptions.PreconditionError(
         "Variable must be set before objective",
         reason="objective has already been defined but variable is not set yet",
         suggestion="Call variable!(ocp, dimension) before objective!(ocp, ...)",
         context="variable! function - objective ordering check",
     )
 
-    @ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_dynamics_set(ocp) Exceptions.PreconditionError(
         "Variable must be set before dynamics",
         reason="dynamics have already been defined but variable is not set yet",
         suggestion="Call variable!(ocp, dimension) before dynamics!(ocp, ...)",

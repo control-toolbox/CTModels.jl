@@ -21,6 +21,9 @@ The following are internal utilities (accessible via `Utils.function_name`):
 - `to_out_of_place`: Convert in-place functions to out-of-place
 - `@ensure`: Validation macro for preconditions
 
+# Note
+
+This module will be moved to CTBase.jl (see issue #319).
 """
 module Utils
 
@@ -36,6 +39,7 @@ include("interpolation.jl")
 include("matrix_utils.jl")
 
 # Export public API
+# TODO: This module will be moved to CTBase.jl (see issue #319)
 export ctinterpolate, ctinterpolate_constant, matrix2vec
 
 end

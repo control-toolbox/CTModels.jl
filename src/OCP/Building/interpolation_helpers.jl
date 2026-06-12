@@ -67,7 +67,7 @@ function _interpolate_from_data(
     # Dimension validation if expected_dim provided
     if !isnothing(expected_dim) && !isnothing(dim)
         actual_dim = size(data, 2)
-        @ensure actual_dim == dim Exceptions.IncorrectArgument(
+        Core.@ensure actual_dim == dim Exceptions.IncorrectArgument(
             "Matrix dimension mismatch",
             got="$actual_dim columns",
             expected="exactly $dim columns",
@@ -85,13 +85,13 @@ function _interpolate_from_data(
     # Standard interpolation
     N = size(data, 1)
     cols = isnothing(dim) ? (:) : (1:dim)
-    V = matrix2vec(data[:, cols], 1)
+    V = Core.matrix2vec(data[:, cols], 1)
 
     # Choose interpolation method
     if interpolation == :linear
-        return ctinterpolate(T[1:N], V)
+        return Interpolation.ctinterpolate(T[1:N], V)
     elseif interpolation == :constant
-        return ctinterpolate_constant(T[1:N], V)
+        return Interpolation.ctinterpolate_constant(T[1:N], V)
     else
         throw(
             Exceptions.IncorrectArgument(

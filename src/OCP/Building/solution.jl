@@ -351,7 +351,7 @@ function build_solution(
     # Variable box constraint duals are (time-independent) vectors.
     # Enforce length == variable_dimension(ocp) when provided.
     if !isnothing(variable_constraints_lb_dual)
-        @ensure length(variable_constraints_lb_dual) == dim_v Exceptions.IncorrectArgument(
+        Core.@ensure length(variable_constraints_lb_dual) == dim_v Exceptions.IncorrectArgument(
             "variable_constraints_lb_dual length mismatch";
             got="length=$(length(variable_constraints_lb_dual))",
             expected="length=$(dim_v) (= variable_dimension)",
@@ -360,7 +360,7 @@ function build_solution(
         )
     end
     if !isnothing(variable_constraints_ub_dual)
-        @ensure length(variable_constraints_ub_dual) == dim_v Exceptions.IncorrectArgument(
+        Core.@ensure length(variable_constraints_ub_dual) == dim_v Exceptions.IncorrectArgument(
             "variable_constraints_ub_dual length mismatch";
             got="length=$(length(variable_constraints_ub_dual))",
             expected="length=$(dim_v) (= variable_dimension)",
