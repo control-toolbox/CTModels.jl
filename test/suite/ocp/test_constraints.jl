@@ -403,20 +403,20 @@ function test_constraints()
             )
 
             # lb > ub for boundary constraints
-            f_boundary(r, x0, xf, v) = r .= x0 .+ v
+            f_boundary_invalid(r, x0, xf, v) = r .= x0 .+ v
             Test.@test_throws Exceptions.IncorrectArgument CTModels.constraint!(
                 ocp_set,
                 :boundary;
-                f=f_boundary,
+                f=f_boundary_invalid,
                 lb=[1.0, 2.0],
                 ub=[0.5, 1.0],
                 label=:invalid_boundary,
             )
 
             # lb > ub for path constraints
-            f_path(r, t, x, u, v) = r .= x .+ u .+ v
+            f_path_invalid(r, t, x, u, v) = r .= x .+ u .+ v
             Test.@test_throws Exceptions.IncorrectArgument CTModels.constraint!(
-                ocp_set, :path; f=f_path, lb=[2.0], ub=[1.0], label=:invalid_path
+                ocp_set, :path; f=f_path_invalid, lb=[2.0], ub=[1.0], label=:invalid_path
             )
 
             # Valid bounds (lb ≤ ub)

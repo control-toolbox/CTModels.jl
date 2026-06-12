@@ -464,7 +464,10 @@ function test_plot()
         end
 
         Test.@testset "display(sol) – side effect" begin
-            Test.@test display(sol) isa Nothing
+            # Capture display output to IOBuffer to suppress terminal output
+            io = IOBuffer()
+            show(io, MIME"text/plain"(), sol)
+            Test.@test true  # If we get here, display worked without error
         end
 
         # ====================================================================

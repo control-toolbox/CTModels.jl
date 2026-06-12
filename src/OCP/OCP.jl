@@ -27,6 +27,9 @@ The main exported types and functions are accessible via `CTModels.function_name
 """
 module OCP
 
+import CTBase.Core
+import CTBase.Interpolation
+
 using DocStringExtensions
 using CTBase: CTBase
 const Exceptions = CTBase.Exceptions
@@ -38,12 +41,6 @@ import Base: time
 
 # Define type aliases (moved from src/types/aliases.jl)
 include("aliases.jl")
-
-# Import macro from Utils module
-import ..Utils: @ensure
-
-# Import matrix2vec, ctinterpolate, ctinterpolate_constant and to_out_of_place from Utils for solution building
-import ..Utils: matrix2vec, ctinterpolate, ctinterpolate_constant, to_out_of_place
 
 # Load types first (no dependencies)
 include("Types/components.jl")
