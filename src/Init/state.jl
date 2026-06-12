@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Return the state function directly when provided as a function.
 """
-initial_state(::AbstractModel, state::Function) = state
+initial_state(::OCP.AbstractModel, state::Function) = state
 
 """
 $(TYPEDSIGNATURES)
@@ -15,8 +15,8 @@ Convert a scalar state value to a constant function for 1D state problems.
 
 Throws `Exceptions.IncorrectArgument` if the state dimension is not 1.
 """
-function initial_state(ocp::AbstractModel, state::Real)
-    dim = state_dimension(ocp)
+function initial_state(ocp::OCP.AbstractModel, state::Real)
+    dim = OCP.state_dimension(ocp)
     if dim == 1
         return t -> state
     else
@@ -39,8 +39,8 @@ Convert a state vector to a constant function.
 
 Throws `Exceptions.IncorrectArgument` if the vector length does not match the state dimension.
 """
-function initial_state(ocp::AbstractModel, state::Vector{<:Real})
-    dim = state_dimension(ocp)
+function initial_state(ocp::OCP.AbstractModel, state::Vector{<:Real})
+    dim = OCP.state_dimension(ocp)
     if length(state) != dim
         throw(
             Exceptions.IncorrectArgument(
@@ -62,8 +62,8 @@ Return a default state initialisation function when no state is provided.
 
 Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
 """
-function initial_state(ocp::AbstractModel, ::Nothing)
-    dim = state_dimension(ocp)
+function initial_state(ocp::OCP.AbstractModel, ::Nothing)
+    dim = OCP.state_dimension(ocp)
     if dim == 1
         return t -> 0.1
     else
@@ -78,7 +78,7 @@ Handle time-grid state initialization with (time, data) tuple.
 
 Interpolates the provided data over the time grid to create a callable function.
 """
-function initial_state(ocp::AbstractModel, state::Tuple)
+function initial_state(ocp::OCP.AbstractModel, state::Tuple)
     length(state) == 2 || throw(
         Exceptions.IncorrectArgument(
             "Time-grid state initialization must be a 2-tuple (time, data)";
@@ -99,11 +99,11 @@ $(TYPEDSIGNATURES)
 
 Return the state trajectory from an initial guess.
 """
-state(init::AbstractInitialGuess) = init.state
+OCP.state(init::AbstractInitialGuess) = init.state
 
 """
 $(TYPEDSIGNATURES)
 
 Return the state trajectory from a solution.
 """
-state(sol::AbstractSolution) = sol.state
+OCP.state(sol::OCP.AbstractSolution) = sol.state

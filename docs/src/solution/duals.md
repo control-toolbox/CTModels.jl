@@ -90,4 +90,3 @@ The [`SolverInfos`](@ref CTModels.OCP.SolverInfos) record is exposed through sca
 
 `infos(sol)` returns the `Dict{Symbol,Any}` of any extra solver-specific data. These fields
 are what [Serialization](../serialization/index.md) writes to disk alongside the trajectories.
-```

@@ -73,4 +73,3 @@ warm.state(0.5)
 
 The warm-started guess is a validated [`InitialGuess`](@ref CTModels.Init.InitialGuess), ready
 to seed the next solve.
-```

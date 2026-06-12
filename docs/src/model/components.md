@@ -93,4 +93,3 @@ end
 
 These rules guarantee that a label like `:a` resolves unambiguously to one component when
 reading a solution or a constraint.
-```

@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 
 Return the control function directly when provided as a function.
 """
-initial_control(::AbstractModel, control::Function) = control
+initial_control(::OCP.AbstractModel, control::Function) = control
 
 """
 $(TYPEDSIGNATURES)
@@ -15,8 +15,8 @@ Convert a scalar control value to a constant function for 1D control problems.
 
 Throws `Exceptions.IncorrectArgument` if the control dimension is not 1.
 """
-function initial_control(ocp::AbstractModel, control::Real)
-    dim = control_dimension(ocp)
+function initial_control(ocp::OCP.AbstractModel, control::Real)
+    dim = OCP.control_dimension(ocp)
     if dim == 0
         throw(
             Exceptions.IncorrectArgument(
@@ -49,8 +49,8 @@ Convert a control vector to a constant function.
 
 Throws `Exceptions.IncorrectArgument` if the vector length does not match the control dimension.
 """
-function initial_control(ocp::AbstractModel, control::Vector{<:Real})
-    dim = control_dimension(ocp)
+function initial_control(ocp::OCP.AbstractModel, control::Vector{<:Real})
+    dim = OCP.control_dimension(ocp)
     if dim == 0 && !isempty(control)
         throw(
             Exceptions.IncorrectArgument(
@@ -83,8 +83,8 @@ Return a default control initialisation function when no control is provided.
 Returns a constant function yielding `Float64[]` (empty) if `dim == 0`, 
 `0.1` (scalar) if `dim == 1`, or `fill(0.1, dim)` (vector) otherwise.
 """
-function initial_control(ocp::AbstractModel, ::Nothing)
-    dim = control_dimension(ocp)
+function initial_control(ocp::OCP.AbstractModel, ::Nothing)
+    dim = OCP.control_dimension(ocp)
     if dim == 0
         return t -> Float64[]
     elseif dim == 1
@@ -101,7 +101,7 @@ Handle time-grid control initialization with (time, data) tuple.
 
 Interpolates the provided data over the time grid to create a callable function.
 """
-function initial_control(ocp::AbstractModel, control::Tuple)
+function initial_control(ocp::OCP.AbstractModel, control::Tuple)
     length(control) == 2 || throw(
         Exceptions.IncorrectArgument(
             "Time-grid control initialization must be a 2-tuple (time, data)";
@@ -122,11 +122,11 @@ $(TYPEDSIGNATURES)
 
 Return the control trajectory from an initial guess.
 """
-control(init::AbstractInitialGuess) = init.control
+OCP.control(init::AbstractInitialGuess) = init.control
 
 """
 $(TYPEDSIGNATURES)
 
 Return the control trajectory from a solution.
 """
-control(sol::AbstractSolution) = sol.control
+OCP.control(sol::OCP.AbstractSolution) = sol.control

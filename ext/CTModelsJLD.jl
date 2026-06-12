@@ -7,9 +7,10 @@ Adds methods for [`CTModels.export_ocp_solution`](@ref) and
 """
 module CTModelsJLD
 
-using CTModels
-using DocStringExtensions
-using JLD2
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+
+using CTModels: CTModels
+using JLD2: JLD2
 
 """
 $(TYPEDSIGNATURES)
@@ -46,7 +47,7 @@ function CTModels.export_ocp_solution(
     data = CTModels.OCP._serialize_solution(sol)
 
     # Save only the serialized data (no more OCP model)
-    jldsave(filename * ".jld2"; solution_data=data)
+    JLD2.jldsave(filename * ".jld2"; solution_data=data)
 
     return nothing
 end
@@ -84,7 +85,7 @@ function CTModels.import_ocp_solution(
     ::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String
 )
     # Load the saved data
-    file_data = load(filename * ".jld2")
+    file_data = JLD2.load(filename * ".jld2")
     data = file_data["solution_data"]
 
     # Extract solver infos if present

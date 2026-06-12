@@ -73,4 +73,3 @@ init.control(0.25)
 
 How the dimensions are checked, and how to warm-start from a previous solution, is covered in
 [Validation & warm-start](validation.md).
-```

@@ -66,7 +66,7 @@ const TimesDisc = Union{Times,StepRangeLen}
 Type alias for a dictionary of constraints, used to store constraints before building the model.
 
 ```julia
-const ConstraintsDictType = OrderedDict{
+const ConstraintsDictType = OrderedCollections.OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
 }
 ```
@@ -74,6 +74,6 @@ const ConstraintsDictType = OrderedDict{
 See also: [`CTModels.OCP.ConstraintsModel`](@ref), [`CTModels.OCP.PreModel`](@ref),
 [`CTModels.OCP.Model`](@ref).
 """
-const ConstraintsDictType = OrderedDict{
+const ConstraintsDictType = OrderedCollections.OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}
 }

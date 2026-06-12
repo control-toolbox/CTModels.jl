@@ -101,4 +101,3 @@ method and break as soon as a third axis appears (the combinatorial explosion of
 
 This mirrors the ecosystem-wide design described in the package philosophy
 (`dev/philosophy/types-traits-interfaces.md`).
-```

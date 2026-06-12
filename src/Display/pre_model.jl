@@ -7,10 +7,10 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
+function Base.show(io::IO, ::MIME"text/plain", ocp::OCP.PreModel)
 
     # check if the problem is empty
-    __is_empty(ocp) && return nothing
+    OCP.__is_empty(ocp) && return nothing
 
     # ------------------------------------------------------------------------------ #
     # print the abstract (symbolic) definition, if any
@@ -19,23 +19,23 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
     # ------------------------------------------------------------------------------ #
     # print in mathematical form
 
-    if __is_consistent(ocp)
+    if OCP.__is_consistent(ocp)
 
         # dimensions
-        x_dim = dimension(ocp.state)
-        u_dim = dimension(ocp.control)
-        v_dim = dimension(ocp.variable)
+        x_dim = OCP.dimension(ocp.state)
+        u_dim = OCP.dimension(ocp.control)
+        v_dim = OCP.dimension(ocp.variable)
 
         # names
-        t_name = time_name(ocp.times)
-        t0_name = initial_time_name(ocp.times)
-        tf_name = final_time_name(ocp.times)
-        x_name = name(ocp.state)
-        u_name = name(ocp.control)
-        v_name = name(ocp.variable)
-        xi_names = components(ocp.state)
-        ui_names = components(ocp.control)
-        vi_names = components(ocp.variable)
+        t_name = OCP.time_name(ocp.times)
+        t0_name = OCP.initial_time_name(ocp.times)
+        tf_name = OCP.final_time_name(ocp.times)
+        x_name = OCP.name(ocp.state)
+        u_name = OCP.name(ocp.control)
+        v_name = OCP.name(ocp.variable)
+        xi_names = OCP.components(ocp.state)
+        ui_names = OCP.components(ocp.control)
+        vi_names = OCP.components(ocp.variable)
 
         # dependencies
         is_variable_dependent = v_dim > 0
@@ -43,16 +43,16 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::PreModel)
         is_control_free_ocp = u_dim == 0
 
         # cost
-        has_a_lagrange_cost = has_lagrange_cost(ocp.objective)
-        has_a_mayer_cost = has_mayer_cost(ocp.objective)
+        has_a_lagrange_cost = OCP.has_lagrange_cost(ocp.objective)
+        has_a_mayer_cost = OCP.has_mayer_cost(ocp.objective)
 
         # constraints dimensions: path, boundary, state, control, variable, boundary
-        constraints = build(ocp.constraints)
-        dim_path_cons_nl = dim_path_constraints_nl(constraints)
-        dim_boundary_cons_nl = dim_boundary_constraints_nl(constraints)
-        dim_state_cons_box = dim_state_constraints_box(constraints)
-        dim_control_cons_box = dim_control_constraints_box(constraints)
-        dim_variable_cons_box = dim_variable_constraints_box(constraints)
+        constraints = OCP.build(ocp.constraints)
+        dim_path_cons_nl = OCP.dim_path_constraints_nl(constraints)
+        dim_boundary_cons_nl = OCP.dim_boundary_constraints_nl(constraints)
+        dim_state_cons_box = OCP.dim_state_constraints_box(constraints)
+        dim_control_cons_box = OCP.dim_control_constraints_box(constraints)
+        dim_variable_cons_box = OCP.dim_variable_constraints_box(constraints)
 
         #
         some_printing = __print_mathematical_definition(
@@ -93,6 +93,6 @@ Default show method for a `PreModel`.
 
 Prints only the type name.
 """
-function Base.show_default(io::IO, ocp::PreModel)
+function Base.show_default(io::IO, ocp::OCP.PreModel)
     return print(io, typeof(ocp))
 end

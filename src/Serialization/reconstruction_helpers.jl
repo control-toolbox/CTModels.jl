@@ -47,7 +47,7 @@ function _reconstruct_solution_from_data(
 )
     # Extract control_interpolation (backward compatibility: use default method)
     control_interpolation = Symbol(
-        get(data, "control_interpolation", string(__control_interpolation()))
+        get(data, "control_interpolation", string(OCP.__control_interpolation()))
     )
 
     # Detect format and extract time grids
@@ -103,7 +103,11 @@ function _reconstruct_solution_from_data(
                 _extract_time_vector(time_grid_data)
             end
         else
-            error("Legacy format requires 'time_grid' key")
+            throw(Exceptions.ParsingError(
+                "legacy solution data is missing the 'time_grid' key";
+                location="imported solution dictionary",
+                suggestion="re-export the solution with a current CTModels version",
+            ))
         end
 
         # Reconstruct solution using legacy compatibility (will create UnifiedTimeGridModel)

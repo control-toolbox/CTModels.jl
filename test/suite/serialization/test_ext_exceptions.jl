@@ -2,6 +2,7 @@ module TestExtExceptions
 
 using Test: Test
 import CTBase.Exceptions
+import RecipesBase: RecipesBase
 using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
@@ -106,13 +107,11 @@ function test_ext_exceptions()
         # ============================================================================
         # Test plot stub with a dummy solution type
         # RecipesBase.plot is extended by CTModelsPlots for AbstractSolution
-        # If Plots is not loaded, the stub throws IncorrectArgument
-        # If Plots is loaded, it tries to convert the type and throws ErrorException
+        # If Plots is not loaded, the stub throws ExtensionError
         # ============================================================================
         Test.@testset "Plot method signature errors" begin
-            # Test that calling plot with a dummy AbstractSolution subtype uses the stub
-            # The stub should throw IncorrectArgument since Plots extension is not loaded
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.plot(
+            # The stub should throw ExtensionError since Plots extension is not loaded
+            Test.@test_throws Exceptions.ExtensionError RecipesBase.plot(
                 DummyAbstractSolution()
             )
         end

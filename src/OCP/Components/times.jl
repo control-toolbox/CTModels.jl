@@ -196,7 +196,7 @@ $(TYPEDSIGNATURES)
 
 Get the time from the fixed time model.
 """
-function time(model::FixedTimeModel{T})::T where {T<:Time}
+function Base.time(model::FixedTimeModel{T})::T where {T<:Time}
     return model.time
 end
 
@@ -237,7 +237,7 @@ Get the time from the free time model.
 
 - If the index of the time variable is not in [1, length(variable)], throw an error.
 """
-function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
+function Base.time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
     Core.@ensure 1 ≤ model.index ≤ length(variable) Exceptions.IncorrectArgument(
         "Time variable index out of bounds",
         got="index=$(model.index)",

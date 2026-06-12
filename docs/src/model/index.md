@@ -129,4 +129,3 @@ Two **orthogonal axes** shape the representation:
 
 How these axes become *traits* rather than separate types is the subject of
 [Types and traits](types_and_traits.md).
-```

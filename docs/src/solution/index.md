@@ -86,4 +86,3 @@ x = CTModels.state(sol)          # x(t) → state at time t
 
 Each accessor dispatches on a typed field, so reading a solution never inspects raw
 closures. The following pages take each group in turn.
-```
