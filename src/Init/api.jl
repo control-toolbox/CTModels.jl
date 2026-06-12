@@ -43,7 +43,7 @@ problem dimensions; use `build_initial_guess` or
 
 # Arguments
 
-- `ocp::AbstractModel`: The optimal control problem.
+- `ocp::OCP.AbstractModel`: The optimal control problem.
 - `state`: State initialisation (function `t -> x(t)`, constant, vector, or `nothing`).
 - `control`: Control initialisation (function `t -> u(t)`, constant, vector, or `nothing`).
 - `variable`: Variable initialisation (scalar, vector, or `nothing`).
@@ -61,7 +61,7 @@ julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> [1
 ```
 """
 function initial_guess(
-    ocp::AbstractModel;
+    ocp::OCP.AbstractModel;
     state::Union{Nothing,Function,Real,Vector{<:Real}}=nothing,
     control::Union{Nothing,Function,Real,Vector{<:Real}}=nothing,
     variable::Union{Nothing,Real,Vector{<:Real}}=nothing,
@@ -85,12 +85,12 @@ Supported input types:
 - `nothing` or `()`: Returns default initial guess.
 - `AbstractInitialGuess`: Validates and returns.
 - `AbstractPreInitialGuess`: Converts from pre-initialisation.
-- `AbstractSolution`: Warm-starts from a previous solution.
+- `OCP.AbstractSolution`: Warm-starts from a previous solution.
 - `NamedTuple`: Parses named fields for state, control, and variable.
 
 # Arguments
 
-- `ocp::AbstractModel`: The optimal control problem.
+- `ocp::OCP.AbstractModel`: The optimal control problem.
 - `init_data`: The initial guess data in one of the supported formats.
 
 # Returns
@@ -110,7 +110,7 @@ julia> using CTModels
 julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> [1.0]))
 ```
 """
-function build_initial_guess(ocp::AbstractModel, init_data)
+function build_initial_guess(ocp::OCP.AbstractModel, init_data)
     # Phase 1: Construction (no validation)
     init = if init_data === nothing || init_data === ()
         initial_guess(ocp)
@@ -118,7 +118,7 @@ function build_initial_guess(ocp::AbstractModel, init_data)
         init_data
     elseif init_data isa AbstractPreInitialGuess
         _initial_guess_from_preinit(ocp, init_data)
-    elseif init_data isa AbstractSolution
+    elseif init_data isa OCP.AbstractSolution
         _initial_guess_from_solution(ocp, init_data)
     elseif init_data isa NamedTuple
         _initial_guess_from_namedtuple(ocp, init_data)
@@ -149,7 +149,7 @@ explicitly on a manually constructed `InitialGuess`.
 
 # Arguments
 
-- `ocp::AbstractModel`: The optimal control problem.
+- `ocp::OCP.AbstractModel`: The optimal control problem.
 - `init::AbstractInitialGuess`: The initial guess to validate.
 
 # Returns
@@ -160,7 +160,7 @@ explicitly on a manually constructed `InitialGuess`.
 
 - `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
 """
-function validate_initial_guess(ocp::AbstractModel, init::AbstractInitialGuess)
+function validate_initial_guess(ocp::OCP.AbstractModel, init::AbstractInitialGuess)
     if init isa InitialGuess
         return _validate_initial_guess(ocp, init)
     else

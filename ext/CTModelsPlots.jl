@@ -15,7 +15,8 @@ using CTModels: CTModels
 using MLStyle: MLStyle
 import LinearAlgebra: norm
 import Plots.Measures: mm
-using Plots
+import Plots: @recipe
+using Plots: Plots
 
 include(joinpath(@__DIR__, "plot_utils.jl"))
 include(joinpath(@__DIR__, "plot_default.jl"))

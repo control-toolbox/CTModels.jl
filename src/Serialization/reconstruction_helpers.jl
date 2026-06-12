@@ -47,7 +47,7 @@ function _reconstruct_solution_from_data(
 )
     # Extract control_interpolation (backward compatibility: use default method)
     control_interpolation = Symbol(
-        get(data, "control_interpolation", string(__control_interpolation()))
+        get(data, "control_interpolation", string(OCP.__control_interpolation()))
     )
 
     # Detect format and extract time grids

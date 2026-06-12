@@ -145,12 +145,12 @@ function __plot_time!(
     if (ymin != Inf) && (ymax != -Inf) && (abs(ymax - ymin) ≤ abs(ymin) * tol)
         ymiddle = (ymin + ymax) / 2.0
         if (abs(ymiddle) < 1e-12)
-            ylims!(p, (-0.1, 0.1))
+            Plots.ylims!(p, (-0.1, 0.1))
         else
             if ymiddle > 0
-                ylims!(p, (0.9 * ymiddle, 1.1 * ymiddle))
+                Plots.ylims!(p, (0.9 * ymiddle, 1.1 * ymiddle))
             else
-                ylims!(p, (1.1 * ymiddle, 0.9 * ymiddle))
+                Plots.ylims!(p, (1.1 * ymiddle, 0.9 * ymiddle))
             end
         end
     end
@@ -240,10 +240,10 @@ function __plot_tree(node::PlotNode, depth::Int=0; kwargs...)
     #
     kwargs_plot = depth == 0 ? kwargs : ()
     ps = MLStyle.@match node.layout begin
-        :row => plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
+        :row => Plots.plot(subplots...; layout=(1, size(subplots, 1)), kwargs_plot...)
         :column =>
-            plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
-        _ => plot(subplots...; layout=node.layout, kwargs_plot...)
+            Plots.plot(subplots...; layout=(size(subplots, 1), 1), leftmargin=3mm, kwargs_plot...)
+        _ => Plots.plot(subplots...; layout=node.layout, kwargs_plot...)
     end
 
     return ps
@@ -555,7 +555,7 @@ function __plot!(
     t_label = CTModels.time_name(sol)
 
     #
-    title_font = font(10, Plots.default(:fontfamily))
+    title_font = Plots.font(10, Plots.default(:fontfamily))
     label_font_size = 10
 
     # split series attributes 
@@ -733,7 +733,7 @@ function __plot!(
             if do_decorate_state_bounds
                 cs = CTModels.state_constraints_box(model)
                 for i in 1:length(cs[1])
-                    hline!(
+                    Plots.hline!(
                         p[is + cs[2][i] - 1],
                         [cs[1][i]];
                         color=15,
@@ -743,7 +743,7 @@ function __plot!(
                         state_bounds_style...,
                         label=:none,
                     ) # lower bound
-                    hline!(
+                    Plots.hline!(
                         p[is + cs[2][i] - 1],
                         [cs[3][i]];
                         color=15,
@@ -892,7 +892,7 @@ function __plot!(
             if do_decorate_control_bounds && (control != :norm)
                 cu = CTModels.control_constraints_box(model)
                 for i in 1:length(cu[1])
-                    hline!(
+                    Plots.hline!(
                         p[iu + cu[2][i] - 1],
                         [cu[1][i]];
                         color=15,
@@ -902,7 +902,7 @@ function __plot!(
                         control_bounds_style...,
                         label=:none,
                     ) # lower bound
-                    hline!(
+                    Plots.hline!(
                         p[iu + cu[2][i] - 1],
                         [cu[3][i]];
                         color=15,
@@ -960,7 +960,7 @@ function __plot!(
                 # path constraints bounds
                 if do_decorate_path_bounds
                     for i in 1:nc
-                        hline!(
+                        Plots.hline!(
                             p[ic + i - 1],
                             [cp[1][i]];
                             color=15,
@@ -970,7 +970,7 @@ function __plot!(
                             path_bounds_style...,
                             label=:none,
                         ) # lower bound
-                        hline!(
+                        Plots.hline!(
                             p[ic + i - 1],
                             [cp[3][i]];
                             color=15,
@@ -1041,7 +1041,7 @@ function __plot!(
             end
         end
         for plt in p.subplots
-            vline!(
+            Plots.vline!(
                 plt,
                 [t0, tf];
                 color=:black,
@@ -1676,7 +1676,7 @@ function _handle_variable_variable_plot(
 
     # Dispatch based on time grid model type
     return _handle_variable_variable_plot(
-        time_grid_model(sol), sol, model, x_sym, x_idx, y_sym, y_idx, T_x, T_y
+        CTModels.time_grid_model(sol), sol, model, x_sym, x_idx, y_sym, y_idx, T_x, T_y
     )
 end
 

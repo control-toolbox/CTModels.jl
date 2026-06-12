@@ -32,23 +32,7 @@ using MLStyle: MLStyle
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
 
-# Import types from parent module (will be available after CTModels loads this)
-# These are forward declarations - actual types defined in OCP module
-import ..OCP: Model, PreModel, Solution, AbstractSolution
-import ..OCP: AbstractDefinition, Definition, EmptyDefinition
-
-# Import internal helpers from OCP for display
-import ..OCP: __is_empty, definition, __is_consistent
-import ..OCP: __is_variable_empty, __is_control_empty
-import ..OCP: state_dimension, control_dimension, variable_dimension
-import ..OCP: time_name, initial_time_name, final_time_name
-import ..OCP: dimension, name, state_name, control_name, variable_name
-import ..OCP: components, state_components, control_components, variable_components
-import ..OCP: is_autonomous, has_lagrange_cost, has_mayer_cost, is_variable, is_control_free
-import ..OCP: dim_path_constraints_nl, dim_boundary_constraints_nl
-import ..OCP:
-    dim_state_constraints_box, dim_control_constraints_box, dim_variable_constraints_box
-import ..OCP: build
+using ..OCP
 
 # Include display functions (split by responsibility)
 include(joinpath(@__DIR__, "ansi.jl"))
@@ -59,7 +43,7 @@ include(joinpath(@__DIR__, "pre_model.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
-function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
+function RecipesBase.plot(sol::OCP.AbstractSolution, description::Symbol...; kwargs...)
     throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
 end
 
