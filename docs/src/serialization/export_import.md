@@ -78,4 +78,3 @@ mechanism used when [building a solution](../solution/trajectories.md).
     `CTModels.JLD2Tag()`. The extension methods
     `export_ocp_solution(CTModels.JLD2Tag(), sol; …)` etc. are what each `ext/` file
     implements; the `format=` wrapper is the public, dependency-free entry point.
-```

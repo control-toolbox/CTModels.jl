@@ -66,4 +66,3 @@ CTModels.plot!(plt, sol; time=:normalize)
 Because the recipe reads the *typed* solution (its time grids, interpolation kind, and dual
 structure) rather than raw arrays, the same call works for unified- and multiple-grid
 solutions alike — see [Time grids](../solution/time_grids.md).
-```

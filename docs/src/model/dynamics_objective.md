@@ -87,4 +87,3 @@ ocp = CTModels.build(pre)
 Because the cost is stored as a typed object, downstream code dispatches on it (Mayer /
 Lagrange / Bolza) instead of inspecting closures — see the
 [Solutions](../solution/index.md) guide for how the objective **value** is read back.
-```

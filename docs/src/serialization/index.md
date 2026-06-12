@@ -75,4 +75,3 @@ reloaded = CTModels.import_ocp_solution(ocp; filename=base, format=:JSON)
 
 See [Export & import](export_import.md) for the formats and the resampling strategy, and
 [Plotting](plotting.md) for the Plots recipe.
-```

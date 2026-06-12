@@ -63,4 +63,3 @@ are callables of time:
 ```@example init_index
 (init.state(0.5), init.control(0.5))
 ```
-```

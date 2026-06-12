@@ -73,4 +73,3 @@ see the [Duals](../solution/duals.md) guide.
     Always pass an explicit `label`. It is the stable handle for the constraint across
     `build`, solution reconstruction, and dual extraction; auto-generated labels are harder
     to track in downstream packages.
-```

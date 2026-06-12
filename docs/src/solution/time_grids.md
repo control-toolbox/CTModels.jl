@@ -88,4 +88,3 @@ CTModels.clean_component_symbols((:states, :controls, :costate, :constraint, :du
 
 This is why box-constraint duals share the state/control grids, and path-constraint duals the
 `:path` grid — the mapping is centralised in one place rather than scattered across accessors.
-```

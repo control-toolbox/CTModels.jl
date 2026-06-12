@@ -79,4 +79,3 @@ sol_const = CTModels.build_solution(ocp, T, X, U, v, P;
 Because the interpolation kind is a stored field — not baked into an opaque closure —
 downstream code (plotting, serialization) can branch on it explicitly. The
 [Duals & diagnostics](duals.md) page covers the remaining accessors.
-```
