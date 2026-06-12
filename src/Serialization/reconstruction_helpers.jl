@@ -103,7 +103,11 @@ function _reconstruct_solution_from_data(
                 _extract_time_vector(time_grid_data)
             end
         else
-            error("Legacy format requires 'time_grid' key")
+            throw(Exceptions.ParsingError(
+                "legacy solution data is missing the 'time_grid' key";
+                location="imported solution dictionary",
+                suggestion="re-export the solution with a current CTModels version",
+            ))
         end
 
         # Reconstruct solution using legacy compatibility (will create UnifiedTimeGridModel)

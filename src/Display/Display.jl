@@ -24,11 +24,11 @@ The following are internal utilities (accessible via `Display.function_name`):
 """
 module Display
 
+import CTBase.Exceptions
+import DocStringExtensions: TYPEDSIGNATURES
+
 using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using DocStringExtensions
 using MLStyle: MLStyle
-using Base: Base
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
 
@@ -51,27 +51,17 @@ import ..OCP:
 import ..OCP: build
 
 # Include display functions (split by responsibility)
-include("ansi.jl")
-include("definition.jl")
-include("mathematical.jl")
-include("model.jl")
-include("pre_model.jl")
+include(joinpath(@__DIR__, "ansi.jl"))
+include(joinpath(@__DIR__, "definition.jl"))
+include(joinpath(@__DIR__, "mathematical.jl"))
+include(joinpath(@__DIR__, "model.jl"))
+include(joinpath(@__DIR__, "pre_model.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
 function RecipesBase.plot(sol::AbstractSolution, description::Symbol...; kwargs...)
-    throw(
-        Exceptions.IncorrectArgument(
-            "Plots extension not loaded";
-            got="plot call without Plots extension",
-            expected="Plots.jl to be loaded",
-            suggestion="Load Plots.jl with: using Plots",
-            context="RecipesBase.plot - extension availability check",
-        ),
-    )
+    throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
 end
-
-# Note: plot is not exported from Display, it will be imported and exported from CTModels
 
 # Note: Base.show methods are automatically exported by Julia
 # No explicit export needed for Base.show extensions

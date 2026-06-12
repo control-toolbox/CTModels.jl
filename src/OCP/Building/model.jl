@@ -164,7 +164,7 @@ This function processes a dictionary where each entry defines a constraint with 
 
 # Example
 ```julia-repl
-julia> constraints = OrderedDict(
+julia> constraints = OrderedCollections.OrderedDict(
     :c1 => (:path, f1, [0.0], [1.0]),
     :c2 => (:state, 1:2, [-1.0, -1.0], [1.0, 1.0])
 )

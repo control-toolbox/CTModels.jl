@@ -7,23 +7,18 @@ state, control, costate, and dual trajectories in a configurable layout.
 """
 module CTModelsPlots
 
-#
-using DocStringExtensions
-using MLStyle: MLStyle
+import CTBase.Exceptions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-#
 using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
-using CTModels
-using LinearAlgebra
-using Plots # redefine plot, plot!
-using Plots.Measures
-#import Plots: plot, plot!
+using CTModels: CTModels
+using MLStyle: MLStyle
+import LinearAlgebra: norm
+import Plots.Measures: mm
+using Plots
 
-include("plot_utils.jl")
-include("plot_default.jl")
-include("plot.jl")
-
-export plot, plot!
+include(joinpath(@__DIR__, "plot_utils.jl"))
+include(joinpath(@__DIR__, "plot_default.jl"))
+include(joinpath(@__DIR__, "plot.jl"))
 
 end

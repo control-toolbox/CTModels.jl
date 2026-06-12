@@ -38,10 +38,6 @@ using .OCP
 include(joinpath(@__DIR__, "Display", "Display.jl"))
 using .Display
 
-# Import and export plot and plot! from RecipesBase for public API
-import RecipesBase: RecipesBase, plot, plot!
-export plot, plot!
-
 # Serialization (import/export)
 include(joinpath(@__DIR__, "Serialization", "Serialization.jl"))
 using .Serialization

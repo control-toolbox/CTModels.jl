@@ -30,26 +30,18 @@ See also: [`CTModels.Serialization.export_ocp_solution`](@ref),
 """
 module Serialization
 
-using DocStringExtensions
+import CTBase.Exceptions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+
 using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
 
 import ..CTModels.OCP
-
-# Import types from parent module
 using ..OCP: AbstractModel, AbstractSolution, Solution
-
-# Import default functions from OCP
 import ..OCP: __format, __filename_export_import, __control_interpolation
 
-# Define export/import tag types
-include("types.jl")
-
-# Include serialization functions
-include("export_import.jl")
-
-# Include helper functions for multi-grid reconstruction
-include("reconstruction_helpers.jl")
+include(joinpath(@__DIR__, "types.jl"))
+include(joinpath(@__DIR__, "export_import.jl"))
+include(joinpath(@__DIR__, "reconstruction_helpers.jl"))
 
 # Export public API
 export export_ocp_solution, import_ocp_solution

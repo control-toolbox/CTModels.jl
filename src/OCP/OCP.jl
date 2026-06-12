@@ -29,47 +29,45 @@ module OCP
 
 import CTBase.Core
 import CTBase.Interpolation
+import CTBase.Exceptions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+import Parameters: @with_kw
 
-using DocStringExtensions
 using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
 using MLStyle: MLStyle
-using MacroTools
-using Parameters
-using OrderedCollections: OrderedDict
-import Base: time
+using OrderedCollections: OrderedCollections
 
 # Define type aliases (moved from src/types/aliases.jl)
-include("aliases.jl")
+include(joinpath(@__DIR__, "aliases.jl"))
 
 # Load types first (no dependencies)
-include("Types/components.jl")
-include("Types/model.jl")
-include("Types/solution.jl")
+include(joinpath(@__DIR__, "Types", "components.jl"))
+include(joinpath(@__DIR__, "Types", "model.jl"))
+include(joinpath(@__DIR__, "Types", "solution.jl"))
 
 # Load core utilities (depend on types)
-include("Core/defaults.jl")
-include("Core/time_dependence.jl")
+include(joinpath(@__DIR__, "Core", "defaults.jl"))
+include(joinpath(@__DIR__, "Core", "time_dependence.jl"))
 
 # Load validation helpers (depend on types and core)
-include("Validation/name_validation.jl")
+include(joinpath(@__DIR__, "Validation", "name_validation.jl"))
 
 # Load component functions (depend on types, core, and validation)
-include("Components/state.jl")
-include("Components/control.jl")
-include("Components/variable.jl")
-include("Components/times.jl")
-include("Components/dynamics.jl")
-include("Components/objective.jl")
-include("Components/constraints.jl")
-include("Components/definition.jl")
+include(joinpath(@__DIR__, "Components", "state.jl"))
+include(joinpath(@__DIR__, "Components", "control.jl"))
+include(joinpath(@__DIR__, "Components", "variable.jl"))
+include(joinpath(@__DIR__, "Components", "times.jl"))
+include(joinpath(@__DIR__, "Components", "dynamics.jl"))
+include(joinpath(@__DIR__, "Components", "objective.jl"))
+include(joinpath(@__DIR__, "Components", "constraints.jl"))
+include(joinpath(@__DIR__, "Components", "definition.jl"))
 
 # Load builders (depend on types and components)
-include("Building/dual_model.jl")
-include("Building/discretization_utils.jl")
-include("Building/interpolation_helpers.jl")
-include("Building/model.jl")
-include("Building/solution.jl")
+include(joinpath(@__DIR__, "Building", "dual_model.jl"))
+include(joinpath(@__DIR__, "Building", "discretization_utils.jl"))
+include(joinpath(@__DIR__, "Building", "interpolation_helpers.jl"))
+include(joinpath(@__DIR__, "Building", "model.jl"))
+include(joinpath(@__DIR__, "Building", "solution.jl"))
 
 # Export type aliases
 export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictType
@@ -100,7 +98,7 @@ export append_box_constraints!
 export constraint, constraints, name, dimension, components
 export initial_time, final_time, time_name, time_grid, times
 export initial_time_name, final_time_name
-export clean_component_symbols, time_grid_model, _serialize_solution
+export clean_component_symbols, time_grid_model
 export criterion, has_mayer_cost, has_lagrange_cost
 export is_mayer_cost_defined, is_lagrange_cost_defined
 export has_fixed_initial_time, has_free_initial_time
@@ -130,7 +128,7 @@ export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel
 export is_empty, is_empty_time_grid
-export index, time
+export index
 export model
 # Dual constraints accessors
 export path_constraints_dual, boundary_constraints_dual

@@ -24,13 +24,11 @@ module Init
 
 import CTBase.Core
 import CTBase.Interpolation
+import CTBase.Exceptions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-using DocStringExtensions
 using CTBase: CTBase
-const Exceptions = CTBase.Exceptions
 
-# Import types and aliases from OCP module
-import ..OCP: AbstractModel, AbstractSolution
 import ..OCP: AbstractModel, AbstractSolution
 
 # Import functions from OCP module
@@ -43,16 +41,16 @@ import ..OCP: has_fixed_initial_time, has_fixed_final_time
 import ..OCP: has_free_initial_time, has_free_final_time
 
 # Load types first
-include("types.jl")
+include(joinpath(@__DIR__, "types.jl"))
 
 # Load implementation by component
-include("utils.jl")      # Utilitaires de base
-include("state.jl")      # Initialisation d'état
-include("control.jl")    # Initialisation de contrôle
-include("variable.jl")   # Initialisation de variable
-include("builders.jl")   # Constructeurs
-include("validation.jl") # Validation
-include("api.jl")        # API publique
+include(joinpath(@__DIR__, "utils.jl"))
+include(joinpath(@__DIR__, "state.jl"))
+include(joinpath(@__DIR__, "control.jl"))
+include(joinpath(@__DIR__, "variable.jl"))
+include(joinpath(@__DIR__, "builders.jl"))
+include(joinpath(@__DIR__, "validation.jl"))
+include(joinpath(@__DIR__, "api.jl"))
 
 # Export public API
 export initial_guess, pre_initial_guess, build_initial_guess, validate_initial_guess

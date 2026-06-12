@@ -8,11 +8,10 @@ Adds methods for [`CTModels.export_ocp_solution`](@ref) and
 module CTModelsJSON
 
 import CTBase.Core
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-using CTModels
-using DocStringExtensions
-
-using JSON3
+using CTModels: CTModels
+using JSON3: JSON3
 
 import CTModels.OCP: __control_interpolation
 
