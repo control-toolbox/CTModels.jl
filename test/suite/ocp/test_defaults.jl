@@ -70,7 +70,7 @@ function test_defaults()
         end
 
         Test.@testset "matrix and filename defaults" begin
-            Test.@test CTModels.Utils.__matrix_dimension_storage() == 1
+            Test.@test CTBase.Core.__matrix_dimension_storage() == 1
             Test.@test CTModels.OCP.__filename_export_import() == "solution"
         end
     end

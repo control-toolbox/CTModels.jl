@@ -55,14 +55,14 @@ function time!(
     indf::Union{Int,Nothing}=nothing,
     time_name::Union{String,Symbol}=__time_name(),
 )::Nothing
-    @ensure !__is_times_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_times_set(ocp) Exceptions.PreconditionError(
         "Time already set",
         reason="time has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing time definition",
         context="time! function - duplicate definition check",
     )
 
-    @ensure !__is_variable_empty(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
+    Core.@ensure !__is_variable_empty(ocp) || (isnothing(ind0) && isnothing(indf)) Exceptions.PreconditionError(
         "Variable must be set for free time",
         reason="variable is required when t0 or tf is free (ind0/indf provided)",
         suggestion="Call variable!(ocp, dimension) before time! with free time parameters, or use fixed times (t0, tf)",
@@ -72,7 +72,7 @@ function time!(
     if !__is_variable_empty(ocp)
         q = dimension(ocp.variable)
 
-        @ensure isnothing(ind0) || (1 ≤ ind0 ≤ q) Exceptions.IncorrectArgument(
+        Core.@ensure isnothing(ind0) || (1 ≤ ind0 ≤ q) Exceptions.IncorrectArgument(
             "Initial time index out of bounds",
             got="ind0=$ind0",
             expected="index in range 1:$q",
@@ -80,7 +80,7 @@ function time!(
             context="time! with free initial time",
         )
 
-        @ensure isnothing(indf) || (1 ≤ indf ≤ q) Exceptions.IncorrectArgument(
+        Core.@ensure isnothing(indf) || (1 ≤ indf ≤ q) Exceptions.IncorrectArgument(
             "Final time index out of bounds",
             got="indf=$indf",
             expected="index in range 1:$q",
@@ -89,7 +89,7 @@ function time!(
         )
     end
 
-    @ensure isnothing(t0) || isnothing(ind0) Exceptions.IncorrectArgument(
+    Core.@ensure isnothing(t0) || isnothing(ind0) Exceptions.IncorrectArgument(
         "Conflicting initial time specification",
         got="both t0 and ind0 provided",
         expected="either t0 (fixed) or ind0 (free), not both",
@@ -97,7 +97,7 @@ function time!(
         context="time! argument validation",
     )
 
-    @ensure !(isnothing(t0) && isnothing(ind0)) Exceptions.IncorrectArgument(
+    Core.@ensure !(isnothing(t0) && isnothing(ind0)) Exceptions.IncorrectArgument(
         "Missing initial time specification",
         got="neither t0 nor ind0 provided",
         expected="either t0 (fixed) or ind0 (free)",
@@ -105,7 +105,7 @@ function time!(
         context="time! argument validation",
     )
 
-    @ensure isnothing(tf) || isnothing(indf) Exceptions.IncorrectArgument(
+    Core.@ensure isnothing(tf) || isnothing(indf) Exceptions.IncorrectArgument(
         "Conflicting final time specification",
         got="both tf and indf provided",
         expected="either tf (fixed) or indf (free), not both",
@@ -113,7 +113,7 @@ function time!(
         context="time! argument validation",
     )
 
-    @ensure !(isnothing(tf) && isnothing(indf)) Exceptions.IncorrectArgument(
+    Core.@ensure !(isnothing(tf) && isnothing(indf)) Exceptions.IncorrectArgument(
         "Missing final time specification",
         got="neither tf nor indf provided",
         expected="either tf (fixed) or indf (free)",
@@ -124,7 +124,7 @@ function time!(
     time_name = time_name isa String ? time_name : string(time_name)
 
     # NEW: Validate time_name is not empty
-    @ensure !isempty(time_name) Exceptions.IncorrectArgument(
+    Core.@ensure !isempty(time_name) Exceptions.IncorrectArgument(
         "Empty time name",
         got="empty string",
         expected="non-empty string or symbol",
@@ -133,7 +133,7 @@ function time!(
     )
 
     # NEW: Validate time_name doesn't conflict with existing names
-    @ensure !__has_name_conflict(ocp, time_name, :time) Exceptions.IncorrectArgument(
+    Core.@ensure !__has_name_conflict(ocp, time_name, :time) Exceptions.IncorrectArgument(
         "Time name conflict",
         got="time_name='$time_name'",
         expected="unique name not conflicting with: $(__collect_used_names(ocp))",
@@ -173,7 +173,7 @@ function time!(
     if initial_time isa FixedTimeModel && final_time isa FixedTimeModel
         t0_val = time(initial_time)
         tf_val = time(final_time)
-        @ensure t0_val < tf_val Exceptions.IncorrectArgument(
+        Core.@ensure t0_val < tf_val Exceptions.IncorrectArgument(
             "Invalid time interval",
             got="t0=$t0_val, tf=$tf_val (t0 ≥ tf)",
             expected="t0 < tf",
@@ -238,7 +238,7 @@ Get the time from the free time model.
 - If the index of the time variable is not in [1, length(variable)], throw an error.
 """
 function time(model::FreeTimeModel, variable::AbstractVector{T})::T where {T<:ctNumber}
-    @ensure 1 ≤ model.index ≤ length(variable) Exceptions.IncorrectArgument(
+    Core.@ensure 1 ≤ model.index ≤ length(variable) Exceptions.IncorrectArgument(
         "Time variable index out of bounds",
         got="index=$(model.index)",
         expected="index in range 1:$(length(variable))",

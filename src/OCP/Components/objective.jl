@@ -45,13 +45,13 @@ function objective!(
 )::Nothing
 
     # checks: times and state must be set before the objective
-    @ensure __is_state_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
         "State must be set before objective",
         reason="state has not been defined yet",
         suggestion="Call state!(ocp, dimension) before objective!(ocp, ...)",
         context="objective! function - state validation",
     )
-    @ensure __is_times_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure __is_times_set(ocp) Exceptions.PreconditionError(
         "Times must be set before objective",
         reason="time horizon has not been defined yet",
         suggestion="Call time!(ocp, t0, tf) before objective!(ocp, ...)",
@@ -59,7 +59,7 @@ function objective!(
     )
 
     # checks: the objective must not already be set
-    @ensure !__is_objective_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_objective_set(ocp) Exceptions.PreconditionError(
         "Objective already set",
         reason="objective has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing objective definition",
@@ -67,7 +67,7 @@ function objective!(
     )
 
     # NEW: Validate criterion (case-insensitive)
-    @ensure criterion ∈ (:min, :max, :MIN, :MAX) Exceptions.IncorrectArgument(
+    Core.@ensure criterion ∈ (:min, :max, :MIN, :MAX) Exceptions.IncorrectArgument(
         "Invalid optimization criterion",
         got=":$criterion",
         expected=":min, :max, :MIN, or :MAX",
@@ -80,7 +80,7 @@ function objective!(
         criterion in (:MIN, :MAX) ? (criterion == :MIN ? :min : :max) : criterion
 
     # checks: at least one of the two functions must be given
-    @ensure !(isnothing(mayer) && isnothing(lagrange)) Exceptions.IncorrectArgument(
+    Core.@ensure !(isnothing(mayer) && isnothing(lagrange)) Exceptions.IncorrectArgument(
         "Missing objective function",
         got="neither mayer nor lagrange provided",
         expected="at least one of mayer or lagrange function",

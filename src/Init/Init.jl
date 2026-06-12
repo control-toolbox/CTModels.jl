@@ -22,6 +22,9 @@ The following functions are exported and accessible as `CTModels.function_name()
 """
 module Init
 
+import CTBase.Core
+import CTBase.Interpolation
+
 using DocStringExtensions
 using CTBase: CTBase
 const Exceptions = CTBase.Exceptions
@@ -38,9 +41,6 @@ import ..OCP: state_components, control_components, variable_components
 import ..OCP: initial_time, final_time, time_name, time_grid
 import ..OCP: has_fixed_initial_time, has_fixed_final_time
 import ..OCP: has_free_initial_time, has_free_final_time
-
-# Import utilities from Utils module
-import ..Utils: ctinterpolate, matrix2vec
 
 # Load types first
 include("types.jl")

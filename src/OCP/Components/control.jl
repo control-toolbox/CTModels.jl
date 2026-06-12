@@ -58,21 +58,21 @@ function control!(
     components_names::Vector{T2}=__control_components(m, string(name)),
 )::Nothing where {T1<:Union{String,Symbol},T2<:Union{String,Symbol}}
 
-    # checks using @ensure
-    @ensure __is_control_empty(ocp) Exceptions.PreconditionError(
+    # checks using Core.@ensure
+    Core.@ensure __is_control_empty(ocp) Exceptions.PreconditionError(
         "Control already set",
         reason="control has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing control definition",
         context="control! function - duplicate definition check",
     )
-    @ensure m > 0 Exceptions.IncorrectArgument(
+    Core.@ensure m > 0 Exceptions.IncorrectArgument(
         "Invalid dimension: must be positive",
         got="m=$m",
         expected="m > 0 (positive integer)",
         suggestion="Use control!(ocp, m=2) with m > 0",
         context="control!(ocp, m=$m, name=\"$name\") - validating dimension parameter",
     )
-    @ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
+    Core.@ensure size(components_names, 1) == m Exceptions.IncorrectArgument(
         "Component names count mismatch",
         got="$(size(components_names, 1)) names for dimension $m",
         expected="exactly $m component names",

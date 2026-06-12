@@ -24,7 +24,7 @@ julia> time_dependence!(ocp; autonomous=true)
 ```
 """
 function time_dependence!(ocp::PreModel; autonomous::Bool)::Nothing
-    @ensure !__is_autonomous_set(ocp) Exceptions.PreconditionError(
+    Core.@ensure !__is_autonomous_set(ocp) Exceptions.PreconditionError(
         "Time dependence already set",
         reason="time dependence has already been defined for this OCP",
         suggestion="Create a new OCP instance or use the existing time dependence definition",

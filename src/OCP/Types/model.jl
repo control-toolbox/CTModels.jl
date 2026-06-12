@@ -246,7 +246,7 @@ Return the state dimension of the `PreModel`.
 - `Exceptions.PreconditionError`: if the state has not been set yet.
 """
 function state_dimension(ocp::PreModel)::Dimension
-    @ensure(
+    Core.@ensure(
         __is_state_set(ocp),
         Exceptions.PreconditionError(
             "State must be set before accessing dimension",
@@ -271,7 +271,7 @@ function __is_dynamics_complete(ocp::PreModel)::Bool
     elseif ocp.dynamics isa Function
         return true
     else # ocp.dynamics isa Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
-        @ensure(
+        Core.@ensure(
             __is_state_set(ocp),
             Exceptions.PreconditionError(
                 "State must be set before checking dynamics completeness",

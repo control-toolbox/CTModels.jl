@@ -13,7 +13,6 @@ initial-guess management; and optional extensions for serialization and plotting
 | Module | Responsibility |
 |--------|---------------|
 | [`CTModels.OCP`](@ref) | Types and builders for optimal control problems and solutions |
-| [`CTModels.Utils`](@ref) | Interpolation, matrix utilities, `@ensure` validation macro |
 | [`CTModels.Display`](@ref) | `Base.show` extensions for models and solutions |
 | [`CTModels.Serialization`](@ref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
 | [`CTModels.Init`](@ref) | Initial guess construction and validation |
@@ -29,11 +28,6 @@ initial-guess management; and optional extensions for serialization and plotting
 All public symbols are accessed as `CTModels.symbol` (no top-level exports).
 """
 module CTModels
-
-# Utils module - must load before OCP (uses @ensure macro)
-include(joinpath(@__DIR__, "Utils", "Utils.jl"))
-using .Utils
-import .Utils: @ensure
 
 # OCP module - core optimal control problem functionality
 # Contains type aliases, types, components, builders, and compatibility aliases

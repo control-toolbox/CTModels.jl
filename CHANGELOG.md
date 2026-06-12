@@ -365,7 +365,7 @@ plot(sol, :control)  # Uses :steppost for constant, :path for linear
 
 ```julia
 # New constant interpolation
-interp = CTModels.ctinterpolate_constant(x, f)  # Right-continuous steppost
+interp = CTBase.Interpolation.ctinterpolate_constant(x, f)  # Right-continuous steppost
 
 # Enhanced interpolation helpers
 fu = OCP.build_interpolated_function(U, T, dim, type; interpolation=:constant)

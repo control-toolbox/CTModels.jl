@@ -128,4 +128,3 @@ All test files are organized under `test/suite/`. Place your test file in the ap
 - `suite/plot/`: Plotting functionality tests
 - `suite/strategies/`: Strategies framework tests
 - `suite/types/`: Core type definitions tests
-- `suite/utils/`: Utility functions tests

@@ -154,7 +154,7 @@ function __validate_name_uniqueness(
     component_label = String(component_type)
 
     # 1. Name is not empty
-    @ensure !isempty(name) Exceptions.IncorrectArgument(
+    Core.@ensure !isempty(name) Exceptions.IncorrectArgument(
         "Empty $(component_label) name",
         got="empty string",
         expected="non-empty string",
@@ -163,7 +163,7 @@ function __validate_name_uniqueness(
     )
 
     # 2. Components are not empty
-    @ensure all(!isempty(c) for c in components) Exceptions.IncorrectArgument(
+    Core.@ensure all(!isempty(c) for c in components) Exceptions.IncorrectArgument(
         "Empty component name in $(component_label)",
         got="one or more empty component names",
         expected="all non-empty component names",
@@ -176,7 +176,7 @@ function __validate_name_uniqueness(
     if length(components) == 1 && components[1] == name
         # This is the default behavior for scalar components, allow it
     else
-        @ensure !(name ∈ components) Exceptions.IncorrectArgument(
+        Core.@ensure !(name ∈ components) Exceptions.IncorrectArgument(
             "$(component_label) name conflicts with component names",
             got="name='$name' appears in components=$components",
             expected="name different from all component names",
@@ -186,7 +186,7 @@ function __validate_name_uniqueness(
     end
 
     # 4. No duplicates in components
-    @ensure length(unique(components)) == length(components) Exceptions.IncorrectArgument(
+    Core.@ensure length(unique(components)) == length(components) Exceptions.IncorrectArgument(
         "Duplicate component names in $(component_label)",
         got="components=$components with duplicates",
         expected="all unique component names",
@@ -195,7 +195,7 @@ function __validate_name_uniqueness(
     )
 
     # 5. No conflicts with existing names (global uniqueness)
-    @ensure !__has_name_conflict(ocp, name, component_type) Exceptions.IncorrectArgument(
+    Core.@ensure !__has_name_conflict(ocp, name, component_type) Exceptions.IncorrectArgument(
         "$(component_label) name conflicts with existing names",
         got="name='$name'",
         expected="unique name not in: $(__collect_used_names(ocp))",
@@ -204,7 +204,7 @@ function __validate_name_uniqueness(
     )
 
     for comp_name in components
-        @ensure !__has_name_conflict(ocp, comp_name, component_type) Exceptions.IncorrectArgument(
+        Core.@ensure !__has_name_conflict(ocp, comp_name, component_type) Exceptions.IncorrectArgument(
             "$(component_label) component name conflicts with existing names",
             got="component='$comp_name'",
             expected="unique name not in: $(__collect_used_names(ocp))",

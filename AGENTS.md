@@ -26,7 +26,6 @@ src/
 │   ├── Types/          # abstract types and concrete implementations
 │   └── Validation/     # name validation and other checks
 ├── Serialization/      # export/import functionality (JLD2, JSON)
-└── Utils/              # interpolation, matrix utilities, @ensure macro
 
 ext/
 ├── CTModelsJLD.jl      # JLD2 serialization extension

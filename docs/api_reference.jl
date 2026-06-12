@@ -35,27 +35,6 @@ function generate_api_reference(src_dir::String, ext_dir::String)
 
     pages = [
         # ───────────────────────────────────────────────────────────────────
-        # Utils
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Utils => src(
-                    joinpath("Utils", "Utils.jl"),
-                    joinpath("Utils", "macros.jl"),
-                    joinpath("Utils", "interpolation.jl"),
-                    joinpath("Utils", "matrix_utils.jl"),
-                    joinpath("Utils", "function_utils.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Utils",
-            title_in_menu="Utils",
-            filename="api_utils",
-        ),
-        # ───────────────────────────────────────────────────────────────────
         # OCP - Types
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;

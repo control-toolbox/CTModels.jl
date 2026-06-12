@@ -171,7 +171,7 @@ function _build_component_function_with_time(data, time::AbstractVector)
         return t -> data
     elseif data isa AbstractVector{<:Real}
         if length(data) == length(time)
-            itp = ctinterpolate(time, data)
+            itp = Interpolation.ctinterpolate(time, data)
             return t -> itp(t)
         elseif length(data) == 1
             c = data[1]
@@ -220,7 +220,7 @@ function _build_time_dependent_init(
     data_fmt = _format_init_data_for_grid(data)
     if data_fmt isa AbstractVector{<:Real}
         if length(data_fmt) == length(time)
-            itp = ctinterpolate(time, data_fmt)
+            itp = Interpolation.ctinterpolate(time, data_fmt)
             return t -> itp(t)
         elseif length(data_fmt) == 1
             return if role === :state
@@ -243,7 +243,7 @@ function _build_time_dependent_init(
                 ),
             )
         end
-        itp = ctinterpolate(time, data_fmt)
+        itp = Interpolation.ctinterpolate(time, data_fmt)
         sample = itp(first(time))
         if !(sample isa AbstractVector) || length(sample) != dim
             throw(
