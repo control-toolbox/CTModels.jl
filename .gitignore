@@ -37,3 +37,4 @@ tmp/
 .devin/
 .reports/
 .extras/
+.claude/
