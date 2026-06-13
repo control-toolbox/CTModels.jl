@@ -27,9 +27,9 @@ function test_variable()
         # some checks
         ocp = CTModels.PreModel()
         Test.@test ocp.variable isa CTModels.EmptyVariableModel
-        Test.@test CTModels.OCP.__is_variable_empty(ocp)
+        Test.@test CTModels.Building.__is_variable_empty(ocp)
         CTModels.variable!(ocp, 1)
-        Test.@test !CTModels.OCP.__is_variable_empty(ocp)
+        Test.@test !CTModels.Building.__is_variable_empty(ocp)
 
         # variable!
         ocp = CTModels.PreModel()

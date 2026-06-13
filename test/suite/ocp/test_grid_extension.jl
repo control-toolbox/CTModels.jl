@@ -2,7 +2,7 @@ module TestGridExtension
 
 using Test: Test
 import CTBase.Exceptions
-import CTModels.OCP
+using CTModels: CTModels
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -18,28 +18,28 @@ function test_grid_extension()
             Test.@testset "Extension when grid is strict prefix" begin
                 T_ref = [0.0, 0.5, 1.0]
                 T_target = [0.0, 0.5]  # Missing last element
-                T_extended = OCP._extend_grid_to_match(T_target, T_ref, "control")
+                T_extended = CTModels.Solutions._extend_grid_to_match(T_target, T_ref, "control")
                 Test.@test T_extended == T_ref
             end
 
             Test.@testset "No extension when grids differ significantly" begin
                 T_ref = [0.0, 0.5, 1.0]
                 T_target = [0.0, 0.3, 0.6]  # Different values
-                T_extended = OCP._extend_grid_to_match(T_target, T_ref, "control")
+                T_extended = CTModels.Solutions._extend_grid_to_match(T_target, T_ref, "control")
                 Test.@test T_extended == T_target  # Unchanged
             end
 
             Test.@testset "No extension when more than one element missing" begin
                 T_ref = [0.0, 0.5, 1.0]
                 T_target = [0.0]  # Missing 2 elements
-                T_extended = OCP._extend_grid_to_match(T_target, T_ref, "control")
+                T_extended = CTModels.Solutions._extend_grid_to_match(T_target, T_ref, "control")
                 Test.@test T_extended == T_target  # Unchanged
             end
 
             Test.@testset "No extension when grids are identical" begin
                 T_ref = [0.0, 0.5, 1.0]
                 T_target = [0.0, 0.5, 1.0]  # Identical
-                T_extended = OCP._extend_grid_to_match(T_target, T_ref, "control")
+                T_extended = CTModels.Solutions._extend_grid_to_match(T_target, T_ref, "control")
                 Test.@test T_extended == T_target  # Unchanged
             end
         end
@@ -65,8 +65,8 @@ function test_grid_extension()
                 g -> !isnothing(g), [T_state, T_control, T_costate, T_path]
             )
             T_ref = non_nothing_grids[argmax(map(length, non_nothing_grids))]
-            T_control_extended = OCP._extend_grid_to_match(T_control, T_ref, "control")
-            T_costate_extended = OCP._extend_grid_to_match(T_costate, T_ref, "costate")
+            T_control_extended = CTModels.Solutions._extend_grid_to_match(T_control, T_ref, "control")
+            T_costate_extended = CTModels.Solutions._extend_grid_to_match(T_costate, T_ref, "costate")
 
             # After extension, all grids should be identical
             Test.@test T_control_extended == T_ref

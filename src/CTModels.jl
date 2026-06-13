@@ -12,7 +12,10 @@ initial-guess management; and optional extensions for serialization and plotting
 
 | Module | Responsibility |
 |--------|---------------|
-| [`CTModels.OCP`](@ref) | Types and builders for optimal control problems and solutions |
+| [`CTModels.Components`](@ref) | Foundational types: state, control, variable, times, constraints |
+| [`CTModels.Models`](@ref) | Immutable `Model` type and its accessor methods |
+| [`CTModels.Building`](@ref) | `PreModel`, component mutators, `build` |
+| [`CTModels.Solutions`](@ref) | `Solution` types, `build_solution`, dual model, interpolation |
 | [`CTModels.Display`](@ref) | `Base.show` extensions for models and solutions |
 | [`CTModels.Serialization`](@ref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
 | [`CTModels.Init`](@ref) | Initial guess construction and validation |
@@ -44,11 +47,6 @@ using .Building
 # Solutions — Solution types, build_solution, and all solution accessors
 include(joinpath(@__DIR__, "Solutions", "Solutions.jl"))
 using .Solutions
-
-# OCP — thin transitional wrapper (forwards Components/Models/Building/Solutions)
-# Will be removed once Display/Serialization/Init are adapted (Phases E–G).
-include(joinpath(@__DIR__, "OCP", "OCP.jl"))
-using .OCP
 
 # Display and visualization
 include(joinpath(@__DIR__, "Display", "Display.jl"))

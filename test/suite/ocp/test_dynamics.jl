@@ -63,7 +63,7 @@ function test_partial_dynamics()
     Test.@test r_partial == r_full
 
     # Evaluate after building
-    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp1.dynamics)
+    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp1.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -86,7 +86,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp2.dynamics)
+    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp2.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -108,7 +108,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp3.dynamics)
+    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp3.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -130,7 +130,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.OCP.__build_dynamics_from_parts(ocp4.dynamics)
+    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp4.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -202,7 +202,7 @@ function test_partial_dynamics()
     CTModels.state!(ocp_missing, 1)
     # This should succeed now that control is optional
     CTModels.dynamics!(ocp_missing, 1:1, partial_dyn_1!)
-    Test.@test CTModels.OCP.__is_dynamics_set(ocp_missing)
+    Test.@test CTModels.Building.__is_dynamics_set(ocp_missing)
 
     ocp_missing = CTModels.PreModel()
     CTModels.state!(ocp_missing, 1)
@@ -259,7 +259,7 @@ function test_full_dynamics()
     CTModels.variable!(ocp3, 1)
     # This should succeed now that control is optional
     CTModels.dynamics!(ocp3, dynamics!)
-    Test.@test CTModels.OCP.__is_dynamics_set(ocp3)
+    Test.@test CTModels.Building.__is_dynamics_set(ocp3)
 
     ######
     # 5. Error: time must be set before dynamics

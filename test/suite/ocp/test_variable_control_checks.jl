@@ -112,8 +112,8 @@ function test_variable_control_checks()
                 CTModels.control!(ocp, 1)
                 CTModels.variable!(ocp, 1)
 
-                Test.@test !CTModels.OCP.__is_variable_empty(ocp)
-                Test.@test !CTModels.OCP.__is_control_empty(ocp)
+                Test.@test !CTModels.Building.__is_variable_empty(ocp)
+                Test.@test !CTModels.Building.__is_control_empty(ocp)
             end
 
             Test.@testset "PreModel with variable only (control-free)" begin
@@ -122,8 +122,8 @@ function test_variable_control_checks()
                 CTModels.state!(ocp, 2)
                 CTModels.variable!(ocp, 1)
 
-                Test.@test !CTModels.OCP.__is_variable_empty(ocp)
-                Test.@test CTModels.OCP.__is_control_empty(ocp)
+                Test.@test !CTModels.Building.__is_variable_empty(ocp)
+                Test.@test CTModels.Building.__is_control_empty(ocp)
             end
 
             Test.@testset "PreModel with control only (no variable)" begin
@@ -132,8 +132,8 @@ function test_variable_control_checks()
                 CTModels.state!(ocp, 2)
                 CTModels.control!(ocp, 1)
 
-                Test.@test CTModels.OCP.__is_variable_empty(ocp)
-                Test.@test !CTModels.OCP.__is_control_empty(ocp)
+                Test.@test CTModels.Building.__is_variable_empty(ocp)
+                Test.@test !CTModels.Building.__is_control_empty(ocp)
             end
 
             Test.@testset "PreModel with neither variable nor control" begin
@@ -141,8 +141,8 @@ function test_variable_control_checks()
                 CTModels.time!(ocp; t0=0.0, tf=1.0)
                 CTModels.state!(ocp, 2)
 
-                Test.@test CTModels.OCP.__is_variable_empty(ocp)
-                Test.@test CTModels.OCP.__is_control_empty(ocp)
+                Test.@test CTModels.Building.__is_variable_empty(ocp)
+                Test.@test CTModels.Building.__is_control_empty(ocp)
             end
         end
 

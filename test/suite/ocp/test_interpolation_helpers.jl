@@ -3,7 +3,6 @@ module TestInterpolationHelpers
 using Test: Test
 import CTBase.Exceptions
 using CTModels: CTModels
-import CTModels.OCP
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -30,25 +29,25 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: basic functionality" begin
             # Test with Matrix and dimension extraction
-            func = OCP._interpolate_from_data(X_2d, T, 2, Matrix{Float64})
+            func = CTModels.Solutions._interpolate_from_data(X_2d, T, 2, Matrix{Float64})
             Test.@test !isnothing(func)
             Test.@test func(0.0) ≈ [1.0, 2.0]
             Test.@test func(1.0) ≈ [2.0, 3.0]
 
             # Test with Function passthrough
             test_func = t -> [t, 2t]
-            result = OCP._interpolate_from_data(test_func, T, 2, Function)
+            result = CTModels.Solutions._interpolate_from_data(test_func, T, 2, Function)
             Test.@test result === test_func
             Test.@test result(0.5) == [0.5, 1.0]
         end
 
         Test.@testset "_interpolate_from_data: nothing handling" begin
             # Test allow_nothing=true
-            result = OCP._interpolate_from_data(nothing, T, 2, Nothing; allow_nothing=true)
+            result = CTModels.Solutions._interpolate_from_data(nothing, T, 2, Nothing; allow_nothing=true)
             Test.@test isnothing(result)
 
             # Test allow_nothing=false (should throw)
-            Test.@test_throws Exceptions.IncorrectArgument OCP._interpolate_from_data(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions._interpolate_from_data(
                 nothing, T, 2, Nothing; allow_nothing=false
             )
         end
@@ -58,7 +57,7 @@ function test_interpolation_helpers()
             X_short = [1.0 2.0; 3.0 4.0]
 
             # With constant_if_two_points=true
-            func = OCP._interpolate_from_data(
+            func = CTModels.Solutions._interpolate_from_data(
                 X_short, T_short, 2, Matrix{Float64}; constant_if_two_points=true
             )
             Test.@test func(0.0) == [1.0, 2.0]
@@ -66,7 +65,7 @@ function test_interpolation_helpers()
             Test.@test func(1.0) == [1.0, 2.0]  # Constant
 
             # With constant_if_two_points=false (default)
-            func2 = OCP._interpolate_from_data(X_short, T_short, 2, Matrix{Float64})
+            func2 = CTModels.Solutions._interpolate_from_data(X_short, T_short, 2, Matrix{Float64})
             Test.@test func2(0.0) ≈ [1.0, 2.0]
             Test.@test func2(1.0) ≈ [3.0, 4.0]
             # Linear interpolation
@@ -75,23 +74,23 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: dimension validation" begin
             # Valid: matrix has exactly `expected_dim` columns (strict check)
-            func = OCP._interpolate_from_data(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
+            func = CTModels.Solutions._interpolate_from_data(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
             Test.@test !isnothing(func)
 
             # Invalid: matrix has 2 columns but expected_dim=1 (strict mismatch)
-            Test.@test_throws Exceptions.IncorrectArgument OCP._interpolate_from_data(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions._interpolate_from_data(
                 X_2d, T, 1, Matrix{Float64}; expected_dim=1
             )
 
             # Invalid: matrix has 2 columns, we expect 3
-            Test.@test_throws Exceptions.IncorrectArgument OCP._interpolate_from_data(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions._interpolate_from_data(
                 X_2d, T, 3, Matrix{Float64}; expected_dim=3
             )
         end
 
         Test.@testset "_interpolate_from_data: full matrix extraction" begin
             # dim=nothing means take all columns
-            func = OCP._interpolate_from_data(X_2d, T, nothing, Matrix{Float64})
+            func = CTModels.Solutions._interpolate_from_data(X_2d, T, nothing, Matrix{Float64})
             Test.@test func(0.0) ≈ [1.0, 2.0]
             Test.@test func(1.0) ≈ [2.0, 3.0]
         end
@@ -100,20 +99,20 @@ function test_interpolation_helpers()
             test_func = t -> [t, 2t]
 
             # dim=1: should extract scalar
-            wrapped = OCP._wrap_scalar_and_deepcopy(test_func, 1)
+            wrapped = CTModels.Solutions._wrap_scalar_and_deepcopy(test_func, 1)
             Test.@test wrapped(0.5) == 0.5  # Scalar, not vector
 
             # dim=2: should keep vector
-            wrapped = OCP._wrap_scalar_and_deepcopy(test_func, 2)
+            wrapped = CTModels.Solutions._wrap_scalar_and_deepcopy(test_func, 2)
             Test.@test wrapped(0.5) == [0.5, 1.0]  # Vector
 
             # dim=nothing: should keep vector
-            wrapped = OCP._wrap_scalar_and_deepcopy(test_func, nothing)
+            wrapped = CTModels.Solutions._wrap_scalar_and_deepcopy(test_func, nothing)
             Test.@test wrapped(0.5) == [0.5, 1.0]
         end
 
         Test.@testset "_wrap_scalar_and_deepcopy: nothing handling" begin
-            result = OCP._wrap_scalar_and_deepcopy(nothing, 1)
+            result = CTModels.Solutions._wrap_scalar_and_deepcopy(nothing, 1)
             Test.@test isnothing(result)
         end
 
@@ -122,7 +121,7 @@ function test_interpolation_helpers()
             external_var = 1.0
             test_func = t -> [external_var * t]
 
-            wrapped = OCP._wrap_scalar_and_deepcopy(test_func, 1)
+            wrapped = CTModels.Solutions._wrap_scalar_and_deepcopy(test_func, 1)
             val1 = wrapped(0.5)
 
             # Modify external variable
@@ -136,7 +135,7 @@ function test_interpolation_helpers()
 
         Test.@testset "build_interpolated_function: complete workflow" begin
             # Test state-like: required, with validation
-            fx = OCP.build_interpolated_function(
+            fx = CTModels.Solutions.build_interpolated_function(
                 X_2d, T, 2, Matrix{Float64}; expected_dim=2
             )
             Test.@test !isnothing(fx)
@@ -144,7 +143,7 @@ function test_interpolation_helpers()
             Test.@test fx(1.0) ≈ [2.0, 3.0]
 
             # Test scalar dimension
-            fx_1d = OCP.build_interpolated_function(
+            fx_1d = CTModels.Solutions.build_interpolated_function(
                 X_1d, T, 1, Matrix{Float64}; expected_dim=1
             )
             Test.@test fx_1d(0.5) isa Float64  # Scalar extraction
@@ -156,7 +155,7 @@ function test_interpolation_helpers()
             P_short = [1.0 2.0; 3.0 4.0]
 
             # With constant_if_two_points=true
-            fp = OCP.build_interpolated_function(
+            fp = CTModels.Solutions.build_interpolated_function(
                 P_short,
                 T_short,
                 2,
@@ -171,13 +170,13 @@ function test_interpolation_helpers()
 
         Test.@testset "build_interpolated_function: optional duals" begin
             # Test with nothing (allowed)
-            fdual = OCP.build_interpolated_function(
+            fdual = CTModels.Solutions.build_interpolated_function(
                 nothing, T, 2, Nothing; allow_nothing=true
             )
             Test.@test isnothing(fdual)
 
             # Test with actual data
-            fdual = OCP.build_interpolated_function(
+            fdual = CTModels.Solutions.build_interpolated_function(
                 X_2d, T, 2, Matrix{Float64}; allow_nothing=true
             )
             Test.@test !isnothing(fdual)
@@ -186,12 +185,12 @@ function test_interpolation_helpers()
 
         Test.@testset "build_interpolated_function: error cases" begin
             # Nothing not allowed
-            Test.@test_throws Exceptions.IncorrectArgument OCP.build_interpolated_function(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions.build_interpolated_function(
                 nothing, T, 2, Nothing; allow_nothing=false
             )
 
             # Dimension mismatch
-            Test.@test_throws Exceptions.IncorrectArgument OCP.build_interpolated_function(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions.build_interpolated_function(
                 X_2d, T, 3, Matrix{Float64}; expected_dim=3
             )
         end
@@ -199,7 +198,7 @@ function test_interpolation_helpers()
         Test.@testset "build_interpolated_function: function passthrough" begin
             # Test that functions are passed through correctly
             test_func = t -> [sin(t), cos(t)]
-            result = OCP.build_interpolated_function(test_func, T, 2, Function)
+            result = CTModels.Solutions.build_interpolated_function(test_func, T, 2, Function)
 
             # Should be wrapped with deepcopy but still work
             Test.@test result(0.0) ≈ [0.0, 1.0]
@@ -215,7 +214,7 @@ function test_interpolation_helpers()
             T_control = [0.0, 0.5, 1.0]
             U_control = [5.0 6.0; 4.0 5.0; 3.0 4.0]  # 3x2 matrix
 
-            fu = OCP.build_interpolated_function(
+            fu = CTModels.Solutions.build_interpolated_function(
                 U_control,
                 T_control,
                 2,
@@ -240,12 +239,12 @@ function test_interpolation_helpers()
             U_test = [1.0; 2.0; 3.0]
 
             # Linear interpolation
-            fu_linear = OCP.build_interpolated_function(
+            fu_linear = CTModels.Solutions.build_interpolated_function(
                 U_test, T_test, 1, Matrix{Float64}; interpolation=:linear
             )
 
             # Constant interpolation
-            fu_constant = OCP.build_interpolated_function(
+            fu_constant = CTModels.Solutions.build_interpolated_function(
                 U_test, T_test, 1, Matrix{Float64}; interpolation=:constant
             )
 
@@ -266,7 +265,7 @@ function test_interpolation_helpers()
             T_1d = [0.0, 0.5, 1.0]
             U_1d = [5.0; 4.0; 3.0]
 
-            fu = OCP.build_interpolated_function(
+            fu = CTModels.Solutions.build_interpolated_function(
                 U_1d, T_1d, 1, Matrix{Float64}; expected_dim=1, interpolation=:constant
             )
 
@@ -283,7 +282,7 @@ function test_interpolation_helpers()
             T_test = [0.0, 1.0]
             U_test = [1.0; 2.0]
 
-            Test.@test_throws Exceptions.IncorrectArgument OCP.build_interpolated_function(
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.Solutions.build_interpolated_function(
                 U_test, T_test, 1, Matrix{Float64}; interpolation=:invalid
             )
         end
@@ -422,19 +421,19 @@ function test_interpolation_helpers()
         Test.@testset "ControlModelSolution with interpolation field" begin
             # Test constant interpolation
             u_const = t -> [sin(t)]
-            cms_const = OCP.ControlModelSolution("u", ["u₁"], u_const, :constant)
-            Test.@test OCP.interpolation(cms_const) == :constant
-            Test.@test OCP.name(cms_const) == "u"
-            Test.@test OCP.components(cms_const) == ["u₁"]
-            Test.@test OCP.value(cms_const) === u_const
+            cms_const = CTModels.ControlModelSolution("u", ["u₁"], u_const, :constant)
+            Test.@test CTModels.interpolation(cms_const) == :constant
+            Test.@test CTModels.name(cms_const) == "u"
+            Test.@test CTModels.components(cms_const) == ["u₁"]
+            Test.@test CTModels.value(cms_const) === u_const
 
             # Test linear interpolation
             u_linear = t -> [cos(t)]
-            cms_linear = OCP.ControlModelSolution("u", ["u₁"], u_linear, :linear)
-            Test.@test OCP.interpolation(cms_linear) == :linear
-            Test.@test OCP.name(cms_linear) == "u"
-            Test.@test OCP.components(cms_linear) == ["u₁"]
-            Test.@test OCP.value(cms_linear) === u_linear
+            cms_linear = CTModels.ControlModelSolution("u", ["u₁"], u_linear, :linear)
+            Test.@test CTModels.interpolation(cms_linear) == :linear
+            Test.@test CTModels.name(cms_linear) == "u"
+            Test.@test CTModels.components(cms_linear) == ["u₁"]
+            Test.@test CTModels.value(cms_linear) === u_linear
         end
 
         # ====================================================================

@@ -25,10 +25,10 @@ function test_control()
 
         # some checks
         ocp = CTModels.PreModel()
-        Test.@test ocp.control isa CTModels.OCP.EmptyControlModel
-        Test.@test CTModels.OCP.__is_control_empty(ocp)
+        Test.@test ocp.control isa CTModels.Components.EmptyControlModel
+        Test.@test CTModels.Building.__is_control_empty(ocp)
         CTModels.control!(ocp, 1)
-        Test.@test !CTModels.OCP.__is_control_empty(ocp)
+        Test.@test !CTModels.Building.__is_control_empty(ocp)
 
         # control!
         ocp = CTModels.PreModel()

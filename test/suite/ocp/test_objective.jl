@@ -106,7 +106,7 @@ function test_objective()
         CTModels.variable!(ocp, 1)
         # This should succeed now that control is optional
         CTModels.objective!(ocp, :min, mayer=mayer)
-        Test.@test CTModels.OCP.__is_objective_set(ocp)
+        Test.@test CTModels.Building.__is_objective_set(ocp)
 
         # times not set
         ocp = CTModels.PreModel()

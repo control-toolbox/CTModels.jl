@@ -27,9 +27,9 @@ function test_state()
         # some checks
         ocp = CTModels.PreModel()
         Test.@test isnothing(ocp.state)
-        Test.@test !CTModels.OCP.__is_state_set(ocp)
+        Test.@test !CTModels.Building.__is_state_set(ocp)
         CTModels.state!(ocp, 1)
-        Test.@test CTModels.OCP.__is_state_set(ocp)
+        Test.@test CTModels.Building.__is_state_set(ocp)
 
         # state!
         ocp = CTModels.PreModel()
