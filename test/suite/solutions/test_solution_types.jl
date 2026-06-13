@@ -1,4 +1,4 @@
-module TestOCPSolutionTypes
+module TestSolutionTypes
 
 using Test: Test
 using CTModels: CTModels
@@ -6,7 +6,7 @@ using CTModels: CTModels
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-function test_ocp_solution_types()
+function test_solution_types()
     Test.@testset "OCP Solution Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
@@ -232,4 +232,4 @@ end
 end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
-test_ocp_solution_types() = TestOCPSolutionTypes.test_ocp_solution_types()
+test_solution_types() = TestSolutionTypes.test_solution_types()

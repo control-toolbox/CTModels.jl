@@ -1,4 +1,4 @@
-module TestOCPComponents
+module TestComponents
 
 using Test: Test
 using CTBase: CTBase
@@ -7,7 +7,7 @@ using CTModels: CTModels
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-function test_ocp_components()
+function test_components()
     Test.@testset "OCP Components Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
@@ -87,4 +87,4 @@ end
 end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
-test_ocp_components() = TestOCPComponents.test_ocp_components()
+test_components() = TestComponents.test_components()

@@ -1,4 +1,4 @@
-module TestOCPIntegration
+module TestBuildingExceptions
 
 using Test: Test
 using CTModels: CTModels
@@ -7,7 +7,7 @@ import CTBase.Exceptions
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-function test_ocp_exception_integration()
+function test_building_exceptions()
     Test.@testset "OCP Exception Integration" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
@@ -292,4 +292,4 @@ end
 end # module
 
 # CRITICAL: Redefine in outer scope for TestRunner
-test_ocp_integration() = TestOCPIntegration.test_ocp_exception_integration()
+test_building_exceptions() = TestBuildingExceptions.test_building_exceptions()
