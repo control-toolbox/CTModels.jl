@@ -27,15 +27,6 @@ The main exported types and functions are accessible via `CTModels.function_name
 """
 module OCP
 
-import CTBase.Core
-import CTBase.Interpolation
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import Parameters: @with_kw
-
-using CTBase: CTBase
-using MLStyle: MLStyle
-
 # Components provides all foundational types and type aliases
 using ..Components
 
@@ -45,8 +36,11 @@ using ..Models
 # Building provides PreModel, all mutators, and build/build_model
 using ..Building
 
-# Import private helpers from Building so OCP.__ accessors remain valid for tests
-# and for internal callers in solution.jl / Serialization (OCP.__format, etc.)
+# Solutions provides Solution types, build_solution, and all solution accessors
+using ..Solutions
+
+# Import private helpers from Building so OCP.__xxx remains valid for tests
+# and for any remaining callers that qualify via OCP (e.g. OCP.__format).
 import ..Building:
     __is_set,
     __is_autonomous_set,
@@ -80,46 +74,14 @@ import ..Building:
     __control_interpolation,
     __time_grid_default_component
 
-# Load types (Solution — PreModel/Model/AbstractModel come from ..Building/..Models)
-include(joinpath(@__DIR__, "Types", "solution.jl"))
-
-# Load builders (depend on types and components)
-include(joinpath(@__DIR__, "Building", "dual_model.jl"))
-include(joinpath(@__DIR__, "Building", "discretization_utils.jl"))
-include(joinpath(@__DIR__, "Building", "interpolation_helpers.jl"))
-include(joinpath(@__DIR__, "Building", "solution.jl"))
-
-# Types defined in OCP (PreModel/Model/AbstractModel from ..Building/..Models;
-# Component types from ..Components)
-export Solution, AbstractSolution
-export DualModel, AbstractDualModel
-export SolverInfos, AbstractSolverInfos
-export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
-export UnifiedTimeGridModel, MultipleTimeGridModel
-
-# Construction functions — Building exports: state!, control!, variable!, time!,
-# dynamics!, objective!, constraint!, definition!, time_dependence!, build,
-# build_model, append_box_constraints!, PreModel
-export build_solution
-
-# Accessors — solution and solver (Models/Components functions are extended, not re-exported)
-export time_grid
-export clean_component_symbols, time_grid_model
-export control_interpolation
-export dim_dual_state_constraints_box,
-    dim_dual_control_constraints_box, dim_dual_variable_constraints_box
-export costate
-export dual
-export iterations, status, message, success, successful
-export constraints_violation, infos
-export is_empty, is_empty_time_grid
-export index
-export model
-# State/control/variable solution accessors (extend Models functions — no re-export)
-# Dual constraints accessors
-export path_constraints_dual, boundary_constraints_dual
-export state_constraints_lb_dual, state_constraints_ub_dual
-export control_constraints_lb_dual, control_constraints_ub_dual
-export variable_constraints_lb_dual, variable_constraints_ub_dual
+# Import private helpers from Solutions so OCP._xxx accessors remain valid for tests.
+import ..Solutions:
+    _serialize_solution,
+    _discretize_function,
+    _discretize_dual,
+    _extend_grid_to_match,
+    _interpolate_from_data,
+    _wrap_scalar_and_deepcopy,
+    build_interpolated_function
 
 end

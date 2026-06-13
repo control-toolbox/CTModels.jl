@@ -41,7 +41,12 @@ using .Models
 include(joinpath(@__DIR__, "Building", "Building.jl"))
 using .Building
 
-# OCP module - core optimal control problem functionality
+# Solutions — Solution types, build_solution, and all solution accessors
+include(joinpath(@__DIR__, "Solutions", "Solutions.jl"))
+using .Solutions
+
+# OCP — thin transitional wrapper (forwards Components/Models/Building/Solutions)
+# Will be removed once Display/Serialization/Init are adapted (Phases E–G).
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
 
