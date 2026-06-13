@@ -42,48 +42,65 @@ using ..Components
 # Models provides AbstractModel, Model and their accessors
 using ..Models
 
-# Load types (PreModel — Model/AbstractModel come from ..Models)
-include(joinpath(@__DIR__, "Types", "model.jl"))
+# Building provides PreModel, all mutators, and build/build_model
+using ..Building
+
+# Import private helpers from Building so OCP.__ accessors remain valid for tests
+# and for internal callers in solution.jl / Serialization (OCP.__format, etc.)
+import ..Building:
+    __is_set,
+    __is_autonomous_set,
+    __is_times_set,
+    __is_state_set,
+    __is_control_empty,
+    __is_variable_empty,
+    __is_definition_empty,
+    __is_dynamics_set,
+    __is_objective_set,
+    __is_dynamics_complete,
+    __is_consistent,
+    __is_empty,
+    __collect_used_names,
+    __has_name_conflict,
+    __validate_name_uniqueness,
+    __constraint!,
+    __build_dynamics_from_parts,
+    __constraints,
+    __format,
+    __constraint_label,
+    __control_name,
+    __control_components,
+    __criterion_type,
+    __state_name,
+    __state_components,
+    __time_name,
+    __variable_name,
+    __variable_components,
+    __filename_export_import,
+    __control_interpolation,
+    __time_grid_default_component
+
+# Load types (Solution — PreModel/Model/AbstractModel come from ..Building/..Models)
 include(joinpath(@__DIR__, "Types", "solution.jl"))
-
-# Load core utilities (depend on types)
-include(joinpath(@__DIR__, "Core", "defaults.jl"))
-include(joinpath(@__DIR__, "Core", "time_dependence.jl"))
-
-# Load validation helpers (depend on types and core)
-include(joinpath(@__DIR__, "Validation", "name_validation.jl"))
-
-# Load component functions (depend on types, core, and validation)
-include(joinpath(@__DIR__, "Components", "state.jl"))
-include(joinpath(@__DIR__, "Components", "control.jl"))
-include(joinpath(@__DIR__, "Components", "variable.jl"))
-include(joinpath(@__DIR__, "Components", "times.jl"))
-include(joinpath(@__DIR__, "Components", "dynamics.jl"))
-include(joinpath(@__DIR__, "Components", "objective.jl"))
-include(joinpath(@__DIR__, "Components", "constraints.jl"))
-include(joinpath(@__DIR__, "Components", "definition.jl"))
 
 # Load builders (depend on types and components)
 include(joinpath(@__DIR__, "Building", "dual_model.jl"))
 include(joinpath(@__DIR__, "Building", "discretization_utils.jl"))
 include(joinpath(@__DIR__, "Building", "interpolation_helpers.jl"))
-include(joinpath(@__DIR__, "Building", "model.jl"))
 include(joinpath(@__DIR__, "Building", "solution.jl"))
 
-# Types defined in OCP (Model/AbstractModel come from ..Models; Component types from ..Components)
-export PreModel
+# Types defined in OCP (PreModel/Model/AbstractModel from ..Building/..Models;
+# Component types from ..Components)
 export Solution, AbstractSolution
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
 export UnifiedTimeGridModel, MultipleTimeGridModel
 
-# Construction functions
-export state!, control!, variable!
-export time!, dynamics!, objective!, constraint!
-export build_solution, build, build_model
-export definition!, time_dependence!
-export append_box_constraints!
+# Construction functions — Building exports: state!, control!, variable!, time!,
+# dynamics!, objective!, constraint!, definition!, time_dependence!, build,
+# build_model, append_box_constraints!, PreModel
+export build_solution
 
 # Accessors — solution and solver (Models/Components functions are extended, not re-exported)
 export time_grid

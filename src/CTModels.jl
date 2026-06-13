@@ -37,6 +37,10 @@ using .Components
 include(joinpath(@__DIR__, "Models", "Models.jl"))
 using .Models
 
+# Building — PreModel, all component mutators, build/build_model
+include(joinpath(@__DIR__, "Building", "Building.jl"))
+using .Building
+
 # OCP module - core optimal control problem functionality
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
