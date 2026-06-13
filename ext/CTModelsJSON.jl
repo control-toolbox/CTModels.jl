@@ -13,7 +13,7 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using CTModels: CTModels
 using JSON3: JSON3
 
-import CTModels.OCP: __control_interpolation
+import CTModels.Building: __control_interpolation
 
 # ============================================================================
 # Private helpers for JSON matrix conversion
@@ -199,7 +199,7 @@ function CTModels.export_ocp_solution(
     ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String
 )
     # Use unified serialization that handles both unified and multiple time grids
-    blob = CTModels.OCP._serialize_solution(sol)
+    blob = CTModels.Solutions._serialize_solution(sol)
 
     # Convert Matrix → Vector{Vector} for JSON (to avoid JSON3 flattening)
     _convert_matrices_for_json!(blob)

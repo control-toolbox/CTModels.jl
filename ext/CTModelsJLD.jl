@@ -44,7 +44,7 @@ function CTModels.export_ocp_solution(
     ::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String
 )
     # Serialize solution to discrete data
-    data = CTModels.OCP._serialize_solution(sol)
+    data = CTModels.Solutions._serialize_solution(sol)
 
     # Save only the serialized data (no more OCP model)
     JLD2.jldsave(filename * ".jld2"; solution_data=data)

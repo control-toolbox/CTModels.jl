@@ -47,7 +47,7 @@ function _reconstruct_solution_from_data(
 )
     # Extract control_interpolation (backward compatibility: use default method)
     control_interpolation = Symbol(
-        get(data, "control_interpolation", string(OCP.__control_interpolation()))
+        get(data, "control_interpolation", string(Building.__control_interpolation()))
     )
 
     # Detect format and extract time grids
@@ -66,7 +66,7 @@ function _reconstruct_solution_from_data(
         T_path = _extract_time_vector(data[T_path_key])
 
         # Reconstruct solution with multiple time grids
-        return OCP.build_solution(
+        return Solutions.build_solution(
             ocp,
             T_state,
             T_control,
@@ -97,7 +97,7 @@ function _reconstruct_solution_from_data(
         # Legacy format: single time grid
         T = if haskey(data, "time_grid")
             time_grid_data = data["time_grid"]
-            if time_grid_data isa OCP.TimeGridModel
+            if time_grid_data isa Solutions.TimeGridModel
                 time_grid_data.value
             else
                 _extract_time_vector(time_grid_data)
@@ -111,7 +111,7 @@ function _reconstruct_solution_from_data(
         end
 
         # Reconstruct solution using legacy compatibility (will create UnifiedTimeGridModel)
-        return OCP.build_solution(
+        return Solutions.build_solution(
             ocp,
             T,
             data["state"],

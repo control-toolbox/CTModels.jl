@@ -2,19 +2,19 @@
 
 # -----------------------------
 # to be extended by extensions
-function export_ocp_solution(::JLD2Tag, ::OCP.AbstractSolution; filename::String)
+function export_ocp_solution(::JLD2Tag, ::Solutions.AbstractSolution; filename::String)
     throw(Exceptions.ExtensionError(:JLD2; message="to export solutions to JLD2 format"))
 end
 
-function import_ocp_solution(::JLD2Tag, ::OCP.AbstractModel; filename::String)
+function import_ocp_solution(::JLD2Tag, ::Models.AbstractModel; filename::String)
     throw(Exceptions.ExtensionError(:JLD2; message="to import solutions from JLD2 format"))
 end
 
-function export_ocp_solution(::JSON3Tag, ::OCP.AbstractSolution; filename::String)
+function export_ocp_solution(::JSON3Tag, ::Solutions.AbstractSolution; filename::String)
     throw(Exceptions.ExtensionError(:JSON3; message="to export solutions to JSON format"))
 end
 
-function import_ocp_solution(::JSON3Tag, ::OCP.AbstractModel; filename::String)
+function import_ocp_solution(::JSON3Tag, ::Models.AbstractModel; filename::String)
     throw(Exceptions.ExtensionError(:JSON3; message="to import solutions from JSON format"))
 end
 
@@ -36,9 +36,9 @@ Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 See also: [`CTModels.Serialization.import_ocp_solution`](@ref).
 """
 function export_ocp_solution(
-    sol::OCP.AbstractSolution;
-    format::Symbol=OCP.__format(),
-    filename::String=OCP.__filename_export_import(),
+    sol::Solutions.AbstractSolution;
+    format::Symbol=Building.__format(),
+    filename::String=Building.__filename_export_import(),
 )
     if format == :JLD
         return export_ocp_solution(JLD2Tag(), sol; filename=filename)
@@ -78,9 +78,9 @@ Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 See also: [`CTModels.Serialization.export_ocp_solution`](@ref).
 """
 function import_ocp_solution(
-    ocp::OCP.AbstractModel;
-    format::Symbol=OCP.__format(),
-    filename::String=OCP.__filename_export_import(),
+    ocp::Models.AbstractModel;
+    format::Symbol=Building.__format(),
+    filename::String=Building.__filename_export_import(),
 )
     if format == :JLD
         return import_ocp_solution(JLD2Tag(), ocp; filename=filename)
