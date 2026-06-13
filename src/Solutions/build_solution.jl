@@ -1318,55 +1318,6 @@ function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
 end
 
-# --------------------------------------------------------------------------------------------------
-# print a solution
-"""
-$(TYPEDSIGNATURES)
-
-Print the solution.
-"""
-function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    # Solver summary
-    println(io, "• Solver:")
-    println(io, "  ✓ Successful  : ", successful(sol))
-    println(io, "  │  Status     : ", status(sol))
-    println(io, "  │  Message    : ", message(sol))
-    println(io, "  │  Iterations : ", iterations(sol))
-    println(io, "  │  Objective  : ", objective(sol))
-    println(io, "  └─ Constraints violation : ", constraints_violation(sol))
-
-    # Variable (if defined)
-    if variable_dimension(sol) > 0
-        components = variable_components(sol)
-        var_name = variable_name(sol)
-
-        # Simplified case: dimension 1 and name identical
-        if variable_dimension(sol) == 1 && var_name == components[1]
-            println(io, "\n• Variable: ", var_name, " = ", variable(sol))
-        else
-            println(
-                io,
-                "\n• Variable: ",
-                var_name,
-                " = (",
-                join(components, ", "),
-                ") = ",
-                variable(sol),
-            )
-        end
-        if dim_dual_variable_constraints_box(sol) > 0 &&
-            dim_variable_constraints_box(model(sol)) > 0
-            println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
-            println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
-        end
-    end
-
-    # Boundary constraints duals
-    if dim_boundary_constraints_nl(sol) > 0
-        println(io, "\n• Boundary duals: ", boundary_constraints_dual(sol))
-    end
-end
-
 # ============================================================================== #
 # Serialization utilities
 # ============================================================================== #
