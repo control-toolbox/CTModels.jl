@@ -32,7 +32,10 @@ using MLStyle: MLStyle
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
 
-using ..OCP
+using ..Components
+using ..Models
+using ..Building
+using ..Solutions
 
 # Include display functions (split by responsibility)
 include(joinpath(@__DIR__, "ansi.jl"))
@@ -40,10 +43,11 @@ include(joinpath(@__DIR__, "definition.jl"))
 include(joinpath(@__DIR__, "mathematical.jl"))
 include(joinpath(@__DIR__, "model.jl"))
 include(joinpath(@__DIR__, "pre_model.jl"))
+include(joinpath(@__DIR__, "solution.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
-function RecipesBase.plot(sol::OCP.AbstractSolution, description::Symbol...; kwargs...)
+function RecipesBase.plot(sol::Solutions.AbstractSolution, description::Symbol...; kwargs...)
     throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
 end
 

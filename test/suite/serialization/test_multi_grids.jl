@@ -420,7 +420,7 @@ function test_multi_grids()
             )
 
             # Serialize and check structure
-            data_uni = CTModels.OCP._serialize_solution(sol_uni)
+            data_uni = CTModels.Solutions._serialize_solution(sol_uni)
 
             # Should have legacy format keys
             Test.@test haskey(data_uni, "time_grid")
@@ -453,7 +453,7 @@ function test_multi_grids()
             )
 
             # Serialize and check structure
-            data_multi = CTModels.OCP._serialize_solution(sol_multi)
+            data_multi = CTModels.Solutions._serialize_solution(sol_multi)
 
             # Should have multi-grid format keys
             Test.@test haskey(data_multi, "time_grid_state")
@@ -573,7 +573,7 @@ function test_multi_grids()
             )
 
             # Serialize
-            data = CTModels.OCP._serialize_solution(sol_orig)
+            data = CTModels.Solutions._serialize_solution(sol_orig)
 
             # Reconstruct using helper function
             sol_reconstructed = CTModels.Serialization._reconstruct_solution_from_data(
@@ -630,7 +630,7 @@ function test_multi_grids()
             )
 
             # Serialize (should produce legacy format)
-            data = CTModels.OCP._serialize_solution(sol)
+            data = CTModels.Solutions._serialize_solution(sol)
 
             # Verify legacy format
             Test.@test haskey(data, "time_grid")

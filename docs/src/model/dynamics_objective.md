@@ -5,8 +5,8 @@ CurrentModule = CTModels
 ```
 
 With the spaces declared, two verbs supply the **equations of motion** and the **cost**:
-[`dynamics!`](@ref CTModels.OCP.dynamics!) and
-[`objective!`](@ref CTModels.OCP.objective!).
+[`dynamics!`](@ref CTModels.Building.dynamics!) and
+[`objective!`](@ref CTModels.Building.objective!).
 
 ```@example dynobj
 using CTModels
@@ -52,20 +52,20 @@ CTModels.dynamics!(pre, 2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
 
 The ranges must **tile** `1:n` without overlap; mixing the full form and the block form, or
 leaving a gap, raises an `Exceptions.PreconditionError`. The completeness check is
-[`__is_dynamics_complete`](@ref CTModels.OCP.__is_dynamics_complete), run by `build`.
+[`__is_dynamics_complete`](@ref CTModels.Building.__is_dynamics_complete), run by `build`.
 
 ## Objective
 
-[`objective!`](@ref CTModels.OCP.objective!) takes the optimisation direction
+[`objective!`](@ref CTModels.Building.objective!) takes the optimisation direction
 (`:min` or `:max`) and one or both of a **Mayer** term and a **Lagrange** term. The three
 combinations map to the three objective types of
 [Types and traits](types_and_traits.md):
 
 | Provided | Cost | Objective type |
 |---|---|---|
-| `lagrange` | ``\int_{t_0}^{t_f} f^0\,\mathrm{d}t`` | [`LagrangeObjectiveModel`](@ref CTModels.OCP.LagrangeObjectiveModel) |
-| `mayer` | ``g(x(t_0), x(t_f), v)`` | [`MayerObjectiveModel`](@ref CTModels.OCP.MayerObjectiveModel) |
-| both | Bolza: ``g + \int f^0`` | [`BolzaObjectiveModel`](@ref CTModels.OCP.BolzaObjectiveModel) |
+| `lagrange` | ``\int_{t_0}^{t_f} f^0\,\mathrm{d}t`` | [`LagrangeObjectiveModel`](@ref CTModels.Components.LagrangeObjectiveModel) |
+| `mayer` | ``g(x(t_0), x(t_f), v)`` | [`MayerObjectiveModel`](@ref CTModels.Components.MayerObjectiveModel) |
+| both | Bolza: ``g + \int f^0`` | [`BolzaObjectiveModel`](@ref CTModels.Components.BolzaObjectiveModel) |
 
 The Lagrange integrand has signature `f⁰(t, x, u, v)`; the Mayer term `g(x0, xf, v)`.
 

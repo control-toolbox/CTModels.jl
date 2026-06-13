@@ -27,12 +27,12 @@ function test_discretization_utils()
             T = [0.0, 0.5, 1.0]
 
             # With explicit dimension
-            result = CTModels.OCP._discretize_function(f_scalar, T, 1)
+            result = CTModels.Solutions._discretize_function(f_scalar, T, 1)
             Test.@test size(result) == (3, 1)
             Test.@test result ≈ [0.0; 1.0; 2.0]
 
             # With auto-detection
-            result_auto = CTModels.OCP._discretize_function(f_scalar, T)
+            result_auto = CTModels.Solutions._discretize_function(f_scalar, T)
             Test.@test result_auto ≈ result
         end
 
@@ -42,12 +42,12 @@ function test_discretization_utils()
             T = [0.0, 0.5, 1.0]
 
             # With explicit dimension
-            result = CTModels.OCP._discretize_function(f_vec, T, 2)
+            result = CTModels.Solutions._discretize_function(f_vec, T, 2)
             Test.@test size(result) == (3, 2)
             Test.@test result ≈ [0.0 0.0; 0.5 1.0; 1.0 2.0]
 
             # With auto-detection
-            result_auto = CTModels.OCP._discretize_function(f_vec, T)
+            result_auto = CTModels.Solutions._discretize_function(f_vec, T)
             Test.@test result_auto ≈ result
         end
 
@@ -56,7 +56,7 @@ function test_discretization_utils()
             T_grid = CTModels.TimeGridModel(LinRange(0.0, 1.0, 5))
             f = t -> [t, t^2]
 
-            result = CTModels.OCP._discretize_function(f, T_grid, 2)
+            result = CTModels.Solutions._discretize_function(f, T_grid, 2)
             Test.@test size(result) == (5, 2)
             Test.@test result[1, :] ≈ [0.0, 0.0]
             Test.@test result[end, :] ≈ [1.0, 1.0]
@@ -66,18 +66,18 @@ function test_discretization_utils()
             T = [0.0, 0.5, 1.0]
 
             # Dual function is nothing
-            result_nothing = CTModels.OCP._discretize_dual(nothing, T)
+            result_nothing = CTModels.Solutions._discretize_dual(nothing, T)
             Test.@test isnothing(result_nothing)
 
             # Dual function exists
             f_dual = t -> [t, 2*t]
-            result_func = CTModels.OCP._discretize_dual(f_dual, T, 2)
+            result_func = CTModels.Solutions._discretize_dual(f_dual, T, 2)
             Test.@test !isnothing(result_func)
             Test.@test size(result_func) == (3, 2)
             Test.@test result_func ≈ [0.0 0.0; 0.5 1.0; 1.0 2.0]
 
             # Auto-detection
-            result_auto = CTModels.OCP._discretize_dual(f_dual, T)
+            result_auto = CTModels.Solutions._discretize_dual(f_dual, T)
             Test.@test result_auto ≈ result_func
         end
 
@@ -85,14 +85,14 @@ function test_discretization_utils()
             # Single time point
             f = t -> [t, 2*t]
             T_single = [0.5]
-            result = CTModels.OCP._discretize_function(f, T_single, 2)
+            result = CTModels.Solutions._discretize_function(f, T_single, 2)
             Test.@test size(result) == (1, 2)
             Test.@test result ≈ [0.5 1.0]
 
             # Large dimension
             f_large = t -> ones(10) .* t
             T = [0.0, 1.0]
-            result = CTModels.OCP._discretize_function(f_large, T, 10)
+            result = CTModels.Solutions._discretize_function(f_large, T, 10)
             Test.@test size(result) == (2, 10)
             Test.@test result[1, :] ≈ zeros(10)
             Test.@test result[2, :] ≈ ones(10)
@@ -103,7 +103,7 @@ function test_discretization_utils()
             f = t -> [2.0 * t]  # Returns vector of size 1
             T = [0.0, 0.5, 1.0]
 
-            result = CTModels.OCP._discretize_function(f, T, 1)
+            result = CTModels.Solutions._discretize_function(f, T, 1)
             Test.@test size(result) == (3, 1)
             Test.@test result ≈ [0.0; 1.0; 2.0]
         end

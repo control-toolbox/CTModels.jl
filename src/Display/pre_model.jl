@@ -7,10 +7,10 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OCP.PreModel)
+function Base.show(io::IO, ::MIME"text/plain", ocp::Building.PreModel)
 
     # check if the problem is empty
-    OCP.__is_empty(ocp) && return nothing
+    Building.__is_empty(ocp) && return nothing
 
     # ------------------------------------------------------------------------------ #
     # print the abstract (symbolic) definition, if any
@@ -19,23 +19,23 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OCP.PreModel)
     # ------------------------------------------------------------------------------ #
     # print in mathematical form
 
-    if OCP.__is_consistent(ocp)
+    if Building.__is_consistent(ocp)
 
         # dimensions
-        x_dim = OCP.dimension(ocp.state)
-        u_dim = OCP.dimension(ocp.control)
-        v_dim = OCP.dimension(ocp.variable)
+        x_dim = Components.dimension(ocp.state)
+        u_dim = Components.dimension(ocp.control)
+        v_dim = Components.dimension(ocp.variable)
 
         # names
-        t_name = OCP.time_name(ocp.times)
-        t0_name = OCP.initial_time_name(ocp.times)
-        tf_name = OCP.final_time_name(ocp.times)
-        x_name = OCP.name(ocp.state)
-        u_name = OCP.name(ocp.control)
-        v_name = OCP.name(ocp.variable)
-        xi_names = OCP.components(ocp.state)
-        ui_names = OCP.components(ocp.control)
-        vi_names = OCP.components(ocp.variable)
+        t_name = Components.time_name(ocp.times)
+        t0_name = Components.initial_time_name(ocp.times)
+        tf_name = Components.final_time_name(ocp.times)
+        x_name = Components.name(ocp.state)
+        u_name = Components.name(ocp.control)
+        v_name = Components.name(ocp.variable)
+        xi_names = Components.components(ocp.state)
+        ui_names = Components.components(ocp.control)
+        vi_names = Components.components(ocp.variable)
 
         # dependencies
         is_variable_dependent = v_dim > 0
@@ -43,16 +43,16 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OCP.PreModel)
         is_control_free_ocp = u_dim == 0
 
         # cost
-        has_a_lagrange_cost = OCP.has_lagrange_cost(ocp.objective)
-        has_a_mayer_cost = OCP.has_mayer_cost(ocp.objective)
+        has_a_lagrange_cost = Components.has_lagrange_cost(ocp.objective)
+        has_a_mayer_cost = Components.has_mayer_cost(ocp.objective)
 
         # constraints dimensions: path, boundary, state, control, variable, boundary
-        constraints = OCP.build(ocp.constraints)
-        dim_path_cons_nl = OCP.dim_path_constraints_nl(constraints)
-        dim_boundary_cons_nl = OCP.dim_boundary_constraints_nl(constraints)
-        dim_state_cons_box = OCP.dim_state_constraints_box(constraints)
-        dim_control_cons_box = OCP.dim_control_constraints_box(constraints)
-        dim_variable_cons_box = OCP.dim_variable_constraints_box(constraints)
+        constraints = Building.build(ocp.constraints)
+        dim_path_cons_nl = Components.dim_path_constraints_nl(constraints)
+        dim_boundary_cons_nl = Components.dim_boundary_constraints_nl(constraints)
+        dim_state_cons_box = Components.dim_state_constraints_box(constraints)
+        dim_control_cons_box = Components.dim_control_constraints_box(constraints)
+        dim_variable_cons_box = Components.dim_variable_constraints_box(constraints)
 
         #
         some_printing = __print_mathematical_definition(
@@ -93,6 +93,6 @@ Default show method for a `PreModel`.
 
 Prints only the type name.
 """
-function Base.show_default(io::IO, ocp::OCP.PreModel)
+function Base.show_default(io::IO, ocp::Building.PreModel)
     return print(io, typeof(ocp))
 end

@@ -443,7 +443,7 @@ function test_solution_multi_grids()
             )
 
             Test.@testset "_serialize_solution" begin
-                data = CTModels.OCP._serialize_solution(sol)
+                data = CTModels.Solutions._serialize_solution(sol)
 
                 # Should have multiple time grid fields
                 Test.@test haskey(data, "time_grid_state")
@@ -526,7 +526,7 @@ function test_solution_multi_grids()
                 Test.@test CTModels.time_grid(sol) == T
 
                 # Legacy serialization format
-                data = CTModels.OCP._serialize_solution(sol)
+                data = CTModels.Solutions._serialize_solution(sol)
                 Test.@test haskey(data, "time_grid")
                 Test.@test !haskey(data, "time_grid_state")
                 Test.@test data["time_grid"] == T

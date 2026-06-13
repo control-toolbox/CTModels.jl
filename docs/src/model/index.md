@@ -4,10 +4,11 @@
 CurrentModule = CTModels
 ```
 
-The [`CTModels.OCP`](@ref CTModels.OCP) submodule is the heart of CTModels: it defines and
-builds **optimal control problems** (OCPs). An OCP is assembled incrementally into a mutable
-[`PreModel`](@ref CTModels.OCP.PreModel), then frozen into an immutable
-[`Model`](@ref CTModels.OCP.Model) by [`build`](@ref CTModels.OCP.build).
+CTModels defines and builds **optimal control problems** (OCPs) through four focused modules:
+`CTModels.Components`, `CTModels.Models`, `CTModels.Building`, and `CTModels.Solutions`.
+An OCP is assembled incrementally into a mutable
+[`PreModel`](@ref CTModels.Building.PreModel), then frozen into an immutable
+[`Model`](@ref CTModels.Models.Model) by [`build`](@ref CTModels.Building.build).
 
 CTModels builds a model through a **three-stage pipeline**:
 
@@ -16,25 +17,25 @@ PreModel  →  declare components  →  build  →  Model
 (mutable)    state!/control!/...           (immutable)
 ```
 
-The `OCP` submodule is organised by responsibility, each in its own subdirectory:
+The OCP layer is organised by responsibility across four modules:
 
 | Layer | Subdirectory | What it provides |
 |---|---|---|
-| **Types** | `OCP/Types/` | Component, model and solution types ([`StateModel`](@ref CTModels.OCP.StateModel), [`Model`](@ref CTModels.OCP.Model), …) |
-| **Core** | `OCP/Core/` | Defaults and the [`TimeDependence`](@ref CTModels.OCP.TimeDependence) trait |
+| **Types** | `OCP/Types/` | Component, model and solution types ([`StateModel`](@ref CTModels.Components.StateModel), [`Model`](@ref CTModels.Models.Model), …) |
+| **Core** | `OCP/Core/` | Defaults and the [`TimeDependence`](@ref CTModels.Components.TimeDependence) trait |
 | **Validation** | `OCP/Validation/` | Name-uniqueness checks across components |
 | **Components** | `OCP/Components/` | The `state!`, `control!`, `dynamics!`, … declaration verbs |
-| **Building** | `OCP/Building/` | [`build`](@ref CTModels.OCP.build) (model) and [`build_solution`](@ref CTModels.OCP.build_solution) |
+| **Building** | `OCP/Building/` | [`build`](@ref CTModels.Building.build) (model) and [`build_solution`](@ref CTModels.Solutions.build_solution) |
 
 ## Reading order
 
 | Page | Topic | Key symbols |
 |---|---|---|
-| [Types and traits](types_and_traits.md) | The noun/trait architecture | [`TimeDependence`](@ref CTModels.OCP.TimeDependence), `AbstractStateModel`, `Empty*` |
-| [Components](components.md) | Declaring the spaces | [`state!`](@ref CTModels.OCP.state!), [`control!`](@ref CTModels.OCP.control!), [`variable!`](@ref CTModels.OCP.variable!), [`time!`](@ref CTModels.OCP.time!) |
-| [Dynamics and objective](dynamics_objective.md) | The equations of motion and cost | [`dynamics!`](@ref CTModels.OCP.dynamics!), [`objective!`](@ref CTModels.OCP.objective!) |
-| [Constraints](constraints.md) | Path, boundary and box constraints | [`constraint!`](@ref CTModels.OCP.constraint!) |
-| [Building a model](building.md) | Freezing the `PreModel` | [`build`](@ref CTModels.OCP.build), [`Model`](@ref CTModels.OCP.Model) |
+| [Types and traits](types_and_traits.md) | The noun/trait architecture | [`TimeDependence`](@ref CTModels.Components.TimeDependence), `AbstractStateModel`, `Empty*` |
+| [Components](components.md) | Declaring the spaces | [`state!`](@ref CTModels.Building.state!), [`control!`](@ref CTModels.Building.control!), [`variable!`](@ref CTModels.Building.variable!), [`time!`](@ref CTModels.Building.time!) |
+| [Dynamics and objective](dynamics_objective.md) | The equations of motion and cost | [`dynamics!`](@ref CTModels.Building.dynamics!), [`objective!`](@ref CTModels.Building.objective!) |
+| [Constraints](constraints.md) | Path, boundary and box constraints | [`constraint!`](@ref CTModels.Building.constraint!) |
+| [Building a model](building.md) | Freezing the `PreModel` | [`build`](@ref CTModels.Building.build), [`Model`](@ref CTModels.Models.Model) |
 
 ## Qualified access
 
@@ -121,11 +122,11 @@ optimisation variable ``v \in \mathbb{R}^q`` (free final time, design parameters
 Two **orthogonal axes** shape the representation:
 
 - **Time dependence** — whether ``f``, ``f^0`` depend explicitly on ``t``
-  ([`Autonomous`](@ref CTModels.OCP.Autonomous) vs
-  [`NonAutonomous`](@ref CTModels.OCP.NonAutonomous)).
+  ([`Autonomous`](@ref CTModels.Components.Autonomous) vs
+  [`NonAutonomous`](@ref CTModels.Components.NonAutonomous)).
 - **Time structure** — whether ``t_0`` / ``t_f`` are fixed or free
-  ([`FixedTimeModel`](@ref CTModels.OCP.FixedTimeModel) vs
-  [`FreeTimeModel`](@ref CTModels.OCP.FreeTimeModel)).
+  ([`FixedTimeModel`](@ref CTModels.Components.FixedTimeModel) vs
+  [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel)).
 
 How these axes become *traits* rather than separate types is the subject of
 [Types and traits](types_and_traits.md).

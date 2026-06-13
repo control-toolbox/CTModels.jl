@@ -5,8 +5,8 @@ CurrentModule = CTModels
 ```
 
 Beyond the primal trajectories, a solution carries the **Lagrange multipliers** of the
-constraints (grouped in a [`DualModel`](@ref CTModels.OCP.DualModel)) and the **solver
-diagnostics** (a [`SolverInfos`](@ref CTModels.OCP.SolverInfos)).
+constraints (grouped in a [`DualModel`](@ref CTModels.Solutions.DualModel)) and the **solver
+diagnostics** (a [`SolverInfos`](@ref CTModels.Solutions.SolverInfos)).
 
 ## A solution with duals
 
@@ -51,7 +51,7 @@ nothing # hide
 
 ## Reading a multiplier by label
 
-[`dual`](@ref CTModels.OCP.dual) resolves a constraint `label` to its multiplier — a callable
+[`dual`](@ref CTModels.Solutions.dual) resolves a constraint `label` to its multiplier — a callable
 for time-dependent (path) constraints, a value for boundary/variable ones. The label `:con2`
 covers the **two** path rows declared with it, so its dual is the 2-vector slice:
 
@@ -61,8 +61,8 @@ d(0.5)
 ```
 
 The whole path multiplier is reached directly through the
-[`DualModel`](@ref CTModels.OCP.DualModel) accessor
-[`path_constraints_dual`](@ref CTModels.OCP.path_constraints_dual):
+[`DualModel`](@ref CTModels.Solutions.DualModel) accessor
+[`path_constraints_dual`](@ref CTModels.Solutions.path_constraints_dual):
 
 ```@example duals
 CTModels.path_constraints_dual(sol)(0.5)
@@ -78,7 +78,7 @@ CTModels.path_constraints_dual(sol)(0.5)
 
 ## Solver diagnostics
 
-The [`SolverInfos`](@ref CTModels.OCP.SolverInfos) record is exposed through scalar accessors:
+The [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) record is exposed through scalar accessors:
 
 ```@example duals
 (CTModels.iterations(sol),

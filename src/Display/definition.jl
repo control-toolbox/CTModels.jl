@@ -5,16 +5,16 @@
 """
 $(TYPEDSIGNATURES)
 
-Print an [`OCP.EmptyDefinition`](@ref): no output is produced.
+Print a [`Components.EmptyDefinition`](@ref): no output is produced.
 
 Returns `false` to indicate that nothing was printed.
 """
-_print_abstract_definition(::IO, ::OCP.EmptyDefinition)::Bool = false
+_print_abstract_definition(::IO, ::Components.EmptyDefinition)::Bool = false
 
 """
 $(TYPEDSIGNATURES)
 
-Print a [`OCP.Definition`](@ref) under an "Abstract definition:" header.
+Print a [`Components.Definition`](@ref) under an "Abstract definition:" header.
 
 Block expressions are unfolded line-by-line; other expression heads are
 printed as a single indented entry.
@@ -26,7 +26,7 @@ Returns `true` to indicate that output was produced.
 - `io::IO`: The output stream.
 - `d::Definition`: The symbolic definition to display.
 """
-function _print_abstract_definition(io::IO, d::OCP.Definition)::Bool
+function _print_abstract_definition(io::IO, d::Components.Definition)::Bool
     _print_ansi_styled(io, "Abstract definition:\n\n", :default, true)
     tab = 4
     code = MacroTools.striplines(d.expr)
@@ -40,10 +40,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display method for any [`OCP.AbstractDefinition`](@ref).
+Display method for any [`Components.AbstractDefinition`](@ref).
 
 Delegates to [`_print_abstract_definition`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", d::OCP.AbstractDefinition)
+function Base.show(io::IO, ::MIME"text/plain", d::Components.AbstractDefinition)
     return _print_abstract_definition(io, d)
 end

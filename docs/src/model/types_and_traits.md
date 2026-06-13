@@ -4,7 +4,7 @@
 CurrentModule = CTModels
 ```
 
-This page explains the **type architecture** of the [`CTModels.OCP`](@ref CTModels.OCP)
+This page explains the **type architecture** of the CTModels OCP layer
 submodule, following the package tenet:
 
 !!! note "One abstract type per *noun*, one trait-parameter per *axis*"
@@ -21,16 +21,16 @@ The pattern is uniform: a *definition* type (structure only) and a *solution* ty
 
 | Abstract type | Definition | Solution | Empty sentinel |
 |---|---|---|---|
-| [`AbstractStateModel`](@ref CTModels.OCP.AbstractStateModel) | [`StateModel`](@ref CTModels.OCP.StateModel) | [`StateModelSolution`](@ref CTModels.OCP.StateModelSolution) | — |
-| [`AbstractControlModel`](@ref CTModels.OCP.AbstractControlModel) | [`ControlModel`](@ref CTModels.OCP.ControlModel) | [`ControlModelSolution`](@ref CTModels.OCP.ControlModelSolution) | [`EmptyControlModel`](@ref CTModels.OCP.EmptyControlModel) |
-| [`AbstractVariableModel`](@ref CTModels.OCP.AbstractVariableModel) | [`VariableModel`](@ref CTModels.OCP.VariableModel) | [`VariableModelSolution`](@ref CTModels.OCP.VariableModelSolution) | [`EmptyVariableModel`](@ref CTModels.OCP.EmptyVariableModel) |
-| [`AbstractTimeModel`](@ref CTModels.OCP.AbstractTimeModel) | [`FixedTimeModel`](@ref CTModels.OCP.FixedTimeModel) / [`FreeTimeModel`](@ref CTModels.OCP.FreeTimeModel) | — | — |
-| [`AbstractObjectiveModel`](@ref CTModels.OCP.AbstractObjectiveModel) | [`MayerObjectiveModel`](@ref CTModels.OCP.MayerObjectiveModel) / [`LagrangeObjectiveModel`](@ref CTModels.OCP.LagrangeObjectiveModel) / [`BolzaObjectiveModel`](@ref CTModels.OCP.BolzaObjectiveModel) | — | — |
-| [`AbstractDefinition`](@ref CTModels.OCP.AbstractDefinition) | [`Definition`](@ref CTModels.OCP.Definition) | — | [`EmptyDefinition`](@ref CTModels.OCP.EmptyDefinition) |
+| [`AbstractStateModel`](@ref CTModels.Components.AbstractStateModel) | [`StateModel`](@ref CTModels.Components.StateModel) | [`StateModelSolution`](@ref CTModels.Components.StateModelSolution) | — |
+| [`AbstractControlModel`](@ref CTModels.Components.AbstractControlModel) | [`ControlModel`](@ref CTModels.Components.ControlModel) | [`ControlModelSolution`](@ref CTModels.Components.ControlModelSolution) | [`EmptyControlModel`](@ref CTModels.Components.EmptyControlModel) |
+| [`AbstractVariableModel`](@ref CTModels.Components.AbstractVariableModel) | [`VariableModel`](@ref CTModels.Components.VariableModel) | [`VariableModelSolution`](@ref CTModels.Components.VariableModelSolution) | [`EmptyVariableModel`](@ref CTModels.Components.EmptyVariableModel) |
+| [`AbstractTimeModel`](@ref CTModels.Components.AbstractTimeModel) | [`FixedTimeModel`](@ref CTModels.Components.FixedTimeModel) / [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel) | — | — |
+| [`AbstractObjectiveModel`](@ref CTModels.Components.AbstractObjectiveModel) | [`MayerObjectiveModel`](@ref CTModels.Components.MayerObjectiveModel) / [`LagrangeObjectiveModel`](@ref CTModels.Components.LagrangeObjectiveModel) / [`BolzaObjectiveModel`](@ref CTModels.Components.BolzaObjectiveModel) | — | — |
+| [`AbstractDefinition`](@ref CTModels.Components.AbstractDefinition) | [`Definition`](@ref CTModels.Components.Definition) | — | [`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition) |
 
 The **empty sentinel** lets dispatch stay total: a control-free problem carries an
 `EmptyControlModel` rather than a `nothing`, so accessors like
-[`control_dimension`](@ref CTModels.OCP.control_dimension) return `0` without a special case.
+[`control_dimension`](@ref CTModels.Models.control_dimension) return `0` without a special case.
 
 ```@example types
 using CTModels
@@ -38,7 +38,7 @@ using CTModels
 sm  = CTModels.StateModel("x", ["x₁", "x₂"])
 evm = CTModels.EmptyVariableModel()
 
-(CTModels.dimension(sm), CTModels.name(sm), evm isa CTModels.OCP.AbstractVariableModel)
+(CTModels.dimension(sm), CTModels.name(sm), evm isa CTModels.Components.AbstractVariableModel)
 ```
 
 ## The two trait axes
@@ -47,12 +47,12 @@ Two orthogonal yes/no axes are **not** modelled as separate types but as traits.
 
 ### Time dependence
 
-[`TimeDependence`](@ref CTModels.OCP.TimeDependence) has the two values
-[`Autonomous`](@ref CTModels.OCP.Autonomous) and
-[`NonAutonomous`](@ref CTModels.OCP.NonAutonomous). It is carried as the **first type
-parameter** of [`Model`](@ref CTModels.OCP.Model), so the distinction between
+[`TimeDependence`](@ref CTModels.Components.TimeDependence) has the two values
+[`Autonomous`](@ref CTModels.Components.Autonomous) and
+[`NonAutonomous`](@ref CTModels.Components.NonAutonomous). It is carried as the **first type
+parameter** of [`Model`](@ref CTModels.Models.Model), so the distinction between
 ``\dot{x} = f(x,u)`` and ``\dot{x} = f(t,x,u)`` is available at compile time. The extractor
-is [`is_autonomous`](@ref CTModels.OCP.is_autonomous):
+is [`is_autonomous`](@ref CTModels.Models.is_autonomous):
 
 ```@example types
 pre = CTModels.PreModel()
@@ -71,20 +71,20 @@ CTModels.is_autonomous(ocp)
 ### Time structure
 
 Whether each end of the interval is fixed or free is the **type** of the corresponding
-[`AbstractTimeModel`](@ref CTModels.OCP.AbstractTimeModel) inside the
-[`TimesModel`](@ref CTModels.OCP.TimesModel). The extractors read the structure without
+[`AbstractTimeModel`](@ref CTModels.Components.AbstractTimeModel) inside the
+[`TimesModel`](@ref CTModels.Components.TimesModel). The extractors read the structure without
 exposing the concrete type:
 
 | Question | Extractor |
 |---|---|
-| Is ``t_0`` fixed / free? | [`has_fixed_initial_time`](@ref CTModels.OCP.has_fixed_initial_time) / [`has_free_initial_time`](@ref CTModels.OCP.has_free_initial_time) |
-| Is ``t_f`` fixed / free? | [`has_fixed_final_time`](@ref CTModels.OCP.has_fixed_final_time) / [`has_free_final_time`](@ref CTModels.OCP.has_free_final_time) |
+| Is ``t_0`` fixed / free? | [`has_fixed_initial_time`](@ref CTModels.Components.has_fixed_initial_time) / [`has_free_initial_time`](@ref CTModels.Components.has_free_initial_time) |
+| Is ``t_f`` fixed / free? | [`has_fixed_final_time`](@ref CTModels.Components.has_fixed_final_time) / [`has_free_final_time`](@ref CTModels.Components.has_free_final_time) |
 
 ```@example types
 (CTModels.has_fixed_initial_time(ocp), CTModels.has_fixed_final_time(ocp))
 ```
 
-A [`FreeTimeModel`](@ref CTModels.OCP.FreeTimeModel) stores the **index** into the
+A [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel) stores the **index** into the
 optimisation variable ``v`` where the free time lives, rather than a value — see
 [Components](components.md).
 

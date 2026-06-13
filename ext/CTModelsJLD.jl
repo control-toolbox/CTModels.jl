@@ -1,5 +1,5 @@
 """
-Weak-dependency extension of [`CTModels`](@ref) providing JLD2-based serialization.
+Weak-dependency extension of CTModels providing JLD2-based serialization.
 
 Loaded automatically when both `CTModels` and `JLD2` are available in the session.
 Adds methods for [`CTModels.export_ocp_solution`](@ref) and
@@ -44,7 +44,7 @@ function CTModels.export_ocp_solution(
     ::CTModels.JLD2Tag, sol::CTModels.Solution; filename::String
 )
     # Serialize solution to discrete data
-    data = CTModels.OCP._serialize_solution(sol)
+    data = CTModels.Solutions._serialize_solution(sol)
 
     # Save only the serialized data (no more OCP model)
     JLD2.jldsave(filename * ".jld2"; solution_data=data)

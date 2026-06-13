@@ -183,9 +183,9 @@ reducing memory overhead. This is detected automatically.
 A legacy signature `build_solution(ocp, T, X, U, v, P; ...)` exists for single-grid solutions. 
 It internally calls this multi-grid version with `T_state = T_control = T_costate = T_path = T`.
 
-See also: [`CTModels.OCP.Solution`](@ref), [`CTModels.OCP.UnifiedTimeGridModel`](@ref),
-[`CTModels.OCP.MultipleTimeGridModel`](@ref), [`CTModels.OCP.time_grid`](@ref),
-[`CTModels.OCP.state`](@ref), [`CTModels.OCP.control`](@ref), [`CTModels.OCP.costate`](@ref).
+See also: [`CTModels.Solutions.Solution`](@ref), [`CTModels.Solutions.UnifiedTimeGridModel`](@ref),
+[`CTModels.Solutions.MultipleTimeGridModel`](@ref), [`CTModels.Solutions.time_grid`](@ref),
+[`CTModels.Models.state`](@ref), [`CTModels.Models.control`](@ref), [`CTModels.Solutions.costate`](@ref).
 """
 function build_solution(
     ocp::Model,
@@ -580,7 +580,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the state.
 
 """
-function state_dimension(sol::Solution)::Dimension
+function Models.state_dimension(sol::Solution)::Dimension
     return dimension(sol.state)
 end
 
@@ -590,7 +590,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the state.
 
 """
-function state_components(sol::Solution)::Vector{String}
+function Models.state_components(sol::Solution)::Vector{String}
     return components(sol.state)
 end
 
@@ -600,7 +600,7 @@ $(TYPEDSIGNATURES)
 Return the name of the state.
 
 """
-function state_name(sol::Solution)::String
+function Models.state_name(sol::Solution)::String
     return name(sol.state)
 end
 
@@ -615,7 +615,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> x0 = x(t0) # state at the initial time
 ```
 """
-function state(
+function Models.state(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -638,7 +638,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the control.
 
 """
-function control_dimension(sol::Solution)::Dimension
+function Models.control_dimension(sol::Solution)::Dimension
     return dimension(sol.control)
 end
 
@@ -648,7 +648,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the control.
 
 """
-function control_components(sol::Solution)::Vector{String}
+function Models.control_components(sol::Solution)::Vector{String}
     return components(sol.control)
 end
 
@@ -658,7 +658,7 @@ $(TYPEDSIGNATURES)
 Return the name of the control.
 
 """
-function control_name(sol::Solution)::String
+function Models.control_name(sol::Solution)::String
     return name(sol.control)
 end
 
@@ -685,7 +685,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> u0 = u(t0) # control at the initial time
 ```
 """
-function control(
+function Models.control(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -708,7 +708,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the variable.
 
 """
-function variable_dimension(sol::Solution)::Dimension
+function Models.variable_dimension(sol::Solution)::Dimension
     return dimension(sol.variable)
 end
 
@@ -718,7 +718,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the variable.
 
 """
-function variable_components(sol::Solution)::Vector{String}
+function Models.variable_components(sol::Solution)::Vector{String}
     return components(sol.variable)
 end
 
@@ -728,7 +728,7 @@ $(TYPEDSIGNATURES)
 Return the name of the variable.
 
 """
-function variable_name(sol::Solution)::String
+function Models.variable_name(sol::Solution)::String
     return name(sol.variable)
 end
 
@@ -738,7 +738,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the boundary constraints.
 
 """
-function dim_boundary_constraints_nl(sol::Solution)::Dimension
+function Components.dim_boundary_constraints_nl(sol::Solution)::Dimension
     bc_dual = boundary_constraints_dual(sol)
     return bc_dual === nothing ? 0 : length(bc_dual)
 end
@@ -749,12 +749,12 @@ $(TYPEDSIGNATURES)
 Return the dimension of the path constraints.
 
 """
-function dim_path_constraints_nl(sol::Solution)::Dimension
+function Components.dim_path_constraints_nl(sol::Solution)::Dimension
     pc_dual = path_constraints_dual(sol)
     if pc_dual === nothing
         return 0
     else
-        t0 = initial_time(sol)
+        t0 = Components.initial_time(sol)
         return length(pc_dual(t0))
     end
 end
@@ -807,7 +807,7 @@ Return the variable or `nothing`.
 julia> v = CTModels.variable(sol)
 ```
 """
-function variable(
+function Models.variable(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -858,7 +858,7 @@ $(TYPEDSIGNATURES)
 Return the name of the initial time.
 
 """
-function initial_time_name(sol::Solution)::String
+function Components.initial_time_name(sol::Solution)::String
     return name(initial(sol.times))
 end
 
@@ -868,7 +868,7 @@ $(TYPEDSIGNATURES)
 Return the name of the final time.
 
 """
-function final_time_name(sol::Solution)::String
+function Components.final_time_name(sol::Solution)::String
     return name(final(sol.times))
 end
 
@@ -878,7 +878,7 @@ $(TYPEDSIGNATURES)
 Return the name of the time component.
 
 """
-function time_name(sol::Solution)::String
+function Components.time_name(sol::Solution)::String
     return time_name(sol.times)
 end
 
@@ -888,7 +888,7 @@ $(TYPEDSIGNATURES)
 
 Return the initial time of the solution.
 """
-function initial_time(sol::Solution)::Real
+function Components.initial_time(sol::Solution)::Real
     return initial_time(sol.times)
 end
 
@@ -897,7 +897,7 @@ $(TYPEDSIGNATURES)
 
 Return the final time of the solution.
 """
-function final_time(sol::Solution)::Real
+function Components.final_time(sol::Solution)::Real
     return final_time(sol.times)
 end
 
@@ -906,7 +906,7 @@ $(TYPEDSIGNATURES)
 
 Check if the initial time is fixed.
 """
-function has_fixed_initial_time(sol::Solution)::Bool
+function Components.has_fixed_initial_time(sol::Solution)::Bool
     return has_fixed_initial_time(sol.times)
 end
 
@@ -915,7 +915,7 @@ $(TYPEDSIGNATURES)
 
 Check if the initial time is free.
 """
-function has_free_initial_time(sol::Solution)::Bool
+function Components.has_free_initial_time(sol::Solution)::Bool
     return has_free_initial_time(sol.times)
 end
 
@@ -924,7 +924,7 @@ $(TYPEDSIGNATURES)
 
 Check if the final time is fixed.
 """
-function has_fixed_final_time(sol::Solution)::Bool
+function Components.has_fixed_final_time(sol::Solution)::Bool
     return has_fixed_final_time(sol.times)
 end
 
@@ -933,7 +933,7 @@ $(TYPEDSIGNATURES)
 
 Check if the final time is free.
 """
-function has_free_final_time(sol::Solution)::Bool
+function Components.has_free_final_time(sol::Solution)::Bool
     return has_free_final_time(sol.times)
 end
 
@@ -943,7 +943,7 @@ $(TYPEDSIGNATURES)
 Return the times model.
 
 """
-function times(
+function Models.times(
     sol::Solution{
         <:AbstractTimeGridModel,
         TM,
@@ -1117,7 +1117,7 @@ $(TYPEDSIGNATURES)
 Return the objective value.
 
 """
-function objective(
+function Models.objective(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -1316,55 +1316,6 @@ Return the upper bound dual of the variable constraints.
 """
 function variable_constraints_ub_dual(sol::Solution)
     return variable_constraints_ub_dual(dual_model(sol))
-end
-
-# --------------------------------------------------------------------------------------------------
-# print a solution
-"""
-$(TYPEDSIGNATURES)
-
-Print the solution.
-"""
-function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    # Solver summary
-    println(io, "• Solver:")
-    println(io, "  ✓ Successful  : ", successful(sol))
-    println(io, "  │  Status     : ", status(sol))
-    println(io, "  │  Message    : ", message(sol))
-    println(io, "  │  Iterations : ", iterations(sol))
-    println(io, "  │  Objective  : ", objective(sol))
-    println(io, "  └─ Constraints violation : ", constraints_violation(sol))
-
-    # Variable (if defined)
-    if variable_dimension(sol) > 0
-        components = variable_components(sol)
-        var_name = variable_name(sol)
-
-        # Simplified case: dimension 1 and name identical
-        if variable_dimension(sol) == 1 && var_name == components[1]
-            println(io, "\n• Variable: ", var_name, " = ", variable(sol))
-        else
-            println(
-                io,
-                "\n• Variable: ",
-                var_name,
-                " = (",
-                join(components, ", "),
-                ") = ",
-                variable(sol),
-            )
-        end
-        if dim_dual_variable_constraints_box(sol) > 0 &&
-            dim_variable_constraints_box(model(sol)) > 0
-            println(io, "  │  Var dual (lb) : ", variable_constraints_lb_dual(sol))
-            println(io, "  └─ Var dual (ub) : ", variable_constraints_ub_dual(sol))
-        end
-    end
-
-    # Boundary constraints duals
-    if dim_boundary_constraints_nl(sol) > 0
-        println(io, "\n• Boundary duals: ", boundary_constraints_dual(sol))
-    end
 end
 
 # ============================================================================== #
@@ -1637,7 +1588,7 @@ This format is used when `build_solution` is called with identical grids for all
 or when using the legacy single-grid signature. It ensures backward compatibility with files 
 created before the multi-grid feature was introduced.
 
-See also: [`CTModels.OCP._serialize_solution`](@ref)
+See also: [`CTModels.Solutions._serialize_solution`](@ref)
 """
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
@@ -1697,7 +1648,7 @@ components. It allows numerical schemes to use optimal discretizations for each 
 The reconstruction function `_reconstruct_solution_from_data` detects this format by checking 
 for the presence of `"time_grid_state"` key and handles it appropriately.
 
-See also: [`CTModels.OCP._serialize_solution`](@ref), [`CTModels.OCP.build_solution`](@ref)
+See also: [`CTModels.Solutions._serialize_solution`](@ref), [`CTModels.Solutions.build_solution`](@ref)
 """
 function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Multiple time grids format

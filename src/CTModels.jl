@@ -12,7 +12,10 @@ initial-guess management; and optional extensions for serialization and plotting
 
 | Module | Responsibility |
 |--------|---------------|
-| [`CTModels.OCP`](@ref) | Types and builders for optimal control problems and solutions |
+| [`CTModels.Components`](@ref) | Foundational types: state, control, variable, times, constraints |
+| [`CTModels.Models`](@ref) | Immutable `Model` type and its accessor methods |
+| [`CTModels.Building`](@ref) | `PreModel`, component mutators, `build` |
+| [`CTModels.Solutions`](@ref) | `Solution` types, `build_solution`, dual model, interpolation |
 | [`CTModels.Display`](@ref) | `Base.show` extensions for models and solutions |
 | [`CTModels.Serialization`](@ref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
 | [`CTModels.Init`](@ref) | Initial guess construction and validation |
@@ -29,10 +32,21 @@ All public symbols are accessed as `CTModels.symbol` (no top-level exports).
 """
 module CTModels
 
-# OCP module - core optimal control problem functionality
-# Contains type aliases, types, components, builders, and compatibility aliases
-include(joinpath(@__DIR__, "OCP", "OCP.jl"))
-using .OCP
+# Components — foundational types shared by all submodules
+include(joinpath(@__DIR__, "Components", "Components.jl"))
+using .Components
+
+# Models — immutable Model type and its accessor methods
+include(joinpath(@__DIR__, "Models", "Models.jl"))
+using .Models
+
+# Building — PreModel, all component mutators, build/build_model
+include(joinpath(@__DIR__, "Building", "Building.jl"))
+using .Building
+
+# Solutions — Solution types, build_solution, and all solution accessors
+include(joinpath(@__DIR__, "Solutions", "Solutions.jl"))
+using .Solutions
 
 # Display and visualization
 include(joinpath(@__DIR__, "Display", "Display.jl"))

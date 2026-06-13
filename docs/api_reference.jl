@@ -35,92 +35,96 @@ function generate_api_reference(src_dir::String, ext_dir::String)
 
     pages = [
         # ───────────────────────────────────────────────────────────────────
-        # OCP - Types
+        # Components — foundational types and basic accessors
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.OCP => src(
-                    joinpath("OCP", "OCP.jl"),
-                    joinpath("OCP", "aliases.jl"),
-                    joinpath("OCP", "Types", "components.jl"),
-                    joinpath("OCP", "Types", "model.jl"),
-                    joinpath("OCP", "Types", "solution.jl"),
+                CTModels.Components => src(
+                    joinpath("Components", "types.jl"),
+                    joinpath("Components", "aliases.jl"),
+                    joinpath("Components", "accessors.jl"),
+                    joinpath("Components", "times_accessors.jl"),
+                    joinpath("Components", "objective_accessors.jl"),
+                    joinpath("Components", "constraints_accessors.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="OCP - Types",
-            title_in_menu="OCP Types",
+            title="Components",
+            title_in_menu="Components",
             filename="api_ocp_types",
         ),
         # ───────────────────────────────────────────────────────────────────
-        # OCP - Components
+        # Models — AbstractModel, Model and its accessors
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.OCP => src(
-                    joinpath("OCP", "Components", "state.jl"),
-                    joinpath("OCP", "Components", "control.jl"),
-                    joinpath("OCP", "Components", "variable.jl"),
-                    joinpath("OCP", "Components", "times.jl"),
-                    joinpath("OCP", "Components", "dynamics.jl"),
-                    joinpath("OCP", "Components", "objective.jl"),
-                    joinpath("OCP", "Components", "constraints.jl"),
-                    joinpath("OCP", "Components", "definition.jl"),
+                CTModels.Models => src(
+                    joinpath("Models", "model.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="OCP - Components",
-            title_in_menu="OCP Components",
+            title="Models",
+            title_in_menu="Models",
             filename="api_ocp_components",
         ),
         # ───────────────────────────────────────────────────────────────────
-        # OCP - Building
+        # Building — PreModel, mutators, build
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.OCP => src(
-                    joinpath("OCP", "Building", "model.jl"),
-                    joinpath("OCP", "Building", "solution.jl"),
-                    joinpath("OCP", "Building", "interpolation_helpers.jl"),
-                    joinpath("OCP", "Building", "discretization_utils.jl"),
-                    joinpath("OCP", "Building", "dual_model.jl"),
+                CTModels.Building => src(
+                    joinpath("Building", "pre_model.jl"),
+                    joinpath("Building", "state.jl"),
+                    joinpath("Building", "control.jl"),
+                    joinpath("Building", "variable.jl"),
+                    joinpath("Building", "times.jl"),
+                    joinpath("Building", "dynamics.jl"),
+                    joinpath("Building", "objective.jl"),
+                    joinpath("Building", "constraints.jl"),
+                    joinpath("Building", "definition.jl"),
+                    joinpath("Building", "time_dependence.jl"),
+                    joinpath("Building", "build.jl"),
+                    joinpath("Building", "defaults.jl"),
+                    joinpath("Building", "name_validation.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="OCP - Building",
-            title_in_menu="OCP Building",
+            title="Building",
+            title_in_menu="Building",
             filename="api_ocp_building",
         ),
         # ───────────────────────────────────────────────────────────────────
-        # OCP - Core & Validation
+        # Solutions — Solution types, build_solution, duals
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTModels.OCP => src(
-                    joinpath("OCP", "Core", "defaults.jl"),
-                    joinpath("OCP", "Core", "time_dependence.jl"),
-                    joinpath("OCP", "Validation", "name_validation.jl"),
+                CTModels.Solutions => src(
+                    joinpath("Solutions", "solution_types.jl"),
+                    joinpath("Solutions", "build_solution.jl"),
+                    joinpath("Solutions", "dual_model.jl"),
+                    joinpath("Solutions", "interpolation_helpers.jl"),
+                    joinpath("Solutions", "discretization_utils.jl"),
                 ),
             ],
             external_modules_to_document=[CTModels],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="OCP - Core & Validation",
-            title_in_menu="OCP Core",
+            title="Solutions",
+            title_in_menu="Solutions",
             filename="api_ocp_core",
         ),
         # ───────────────────────────────────────────────────────────────────
@@ -136,6 +140,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("Display", "mathematical.jl"),
                     joinpath("Display", "model.jl"),
                     joinpath("Display", "pre_model.jl"),
+                    joinpath("Display", "solution.jl"),
                 ),
                 CTModelsPlots =>
                     ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),

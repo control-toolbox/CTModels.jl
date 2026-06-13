@@ -25,7 +25,8 @@ Type alias for a (continuous) time.
 const Time = ctNumber
 ```
 
-See also: [`CTModels.OCP.ctNumber`](@ref), [`CTModels.OCP.Times`](@ref), [`CTModels.OCP.TimesDisc`](@ref).
+See also: [`CTModels.Components.ctNumber`](@ref), [`CTModels.Components.Times`](@ref),
+[`CTModels.Components.TimesDisc`](@ref).
 """
 const Time = ctNumber
 
@@ -36,7 +37,7 @@ Type alias for a vector of real numbers.
 const ctVector = AbstractVector{<:ctNumber}
 ```
 
-See also: [`CTModels.OCP.ctNumber`](@ref).
+See also: [`CTModels.Components.ctNumber`](@ref).
 """
 const ctVector = AbstractVector{<:ctNumber}
 
@@ -47,7 +48,7 @@ Type alias for a vector of times.
 const Times = AbstractVector{<:Time}
 ```
 
-See also: [`CTModels.OCP.Time`](@ref), [`CTModels.OCP.TimesDisc`](@ref).
+See also: [`CTModels.Components.Time`](@ref), [`CTModels.Components.TimesDisc`](@ref).
 """
 const Times = AbstractVector{<:Time}
 
@@ -58,7 +59,7 @@ Type alias for a grid of times, used to discretize the time interval given to so
 const TimesDisc = Union{Times,StepRangeLen}
 ```
 
-See also: [`CTModels.OCP.Time`](@ref), [`CTModels.OCP.Times`](@ref).
+See also: [`CTModels.Components.Time`](@ref), [`CTModels.Components.Times`](@ref).
 """
 const TimesDisc = Union{Times,StepRangeLen}
 
@@ -71,8 +72,7 @@ const ConstraintsDictType = OrderedCollections.OrderedDict{
 }
 ```
 
-See also: [`CTModels.OCP.ConstraintsModel`](@ref), [`CTModels.OCP.PreModel`](@ref),
-[`CTModels.OCP.Model`](@ref).
+See also: [`CTModels.Components.ConstraintsModel`](@ref).
 """
 const ConstraintsDictType = OrderedCollections.OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}

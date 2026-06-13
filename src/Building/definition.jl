@@ -44,41 +44,5 @@ function definition!(ocp::PreModel, definition::AbstractDefinition)::Nothing
     return nothing
 end
 
-# ------------------------------------------------------------------------------ #
-# EXPRESSION GETTERS
-# ------------------------------------------------------------------------------ #
-
-"""
-$(TYPEDSIGNATURES)
-
-Return an empty block expression for an [`EmptyDefinition`](@ref).
-
-Since no symbolic definition was attached, the canonical empty expression
-`:(begin end)` (equivalent to `quote end`) is returned.
-
-# Arguments
-
-- `::EmptyDefinition`: The empty definition sentinel.
-
-# Returns
-
-- `Expr`: An empty block expression `:(begin end)`.
-"""
-expression(::EmptyDefinition)::Expr = :(
-    begin end
-)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the symbolic expression wrapped by a [`Definition`](@ref).
-
-# Arguments
-
-- `d::Definition`: The definition holding the symbolic expression.
-
-# Returns
-
-- `Expr`: The `Expr` value stored in `d.expr`.
-"""
-expression(d::Definition)::Expr = d.expr
+# expression() getters for Definition/EmptyDefinition are now in
+# src/Components/accessors.jl.

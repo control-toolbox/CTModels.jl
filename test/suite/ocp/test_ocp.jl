@@ -67,21 +67,21 @@ function test_ocp()
 
         # path constraint
         f_path_a(r, t, x, u, v) = r .= x .+ u .+ v .+ t
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2]
         )
         f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3]
         )
 
         # boundary constraint
         f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :boundary, n, m, q; f=f_boundary_a, lb=[0, 1], ub=[1, 2]
         )
         f_boundary_b(r, x0, xf, v) = r .= x0[1] - 1.0 + v[1] * (xf[1] - x0[1])
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :boundary, n, m, q; f=f_boundary_b, lb=[3], ub=[3]
         )
 
@@ -93,22 +93,22 @@ function test_ocp()
         #   comp 2 → lb=1, ub=1.5   (intersection: max(1, 1)=1, min(2, 1.5)=1.5)
 
         # state box
-        CTModels.OCP.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
+        CTModels.Building.__constraint!(
             pre_constraints, :state, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
         # control box
-        CTModels.OCP.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+        CTModels.Building.__constraint!(
             pre_constraints, :control, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
         # variable box
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2]
         )
-        CTModels.OCP.__constraint!(
+        CTModels.Building.__constraint!(
             pre_constraints, :variable, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
@@ -119,7 +119,7 @@ function test_ocp()
         end
 
         # Model definition
-        definition = CTModels.OCP.Definition(quote
+        definition = CTModels.Components.Definition(quote
             t ∈ [0, 1], time
             x ∈ R², state
             u ∈ R, control
@@ -402,7 +402,7 @@ function test_ocp()
         objective = CTModels.MayerObjectiveModel(mayer_user, :min)
         pre_constraints = CTModels.ConstraintsDictType()
         constraints = CTModels.build(pre_constraints)
-        definition = CTModels.OCP.EmptyDefinition()
+        definition = CTModels.Components.EmptyDefinition()
         ocp = CTModels.Model{CTModels.NonAutonomous}(
             times,
             state,
@@ -428,7 +428,7 @@ function test_ocp()
         objective = CTModels.MayerObjectiveModel(mayer_user, :min)
         pre_constraints = CTModels.ConstraintsDictType()
         constraints = CTModels.build(pre_constraints)
-        definition = CTModels.OCP.EmptyDefinition()
+        definition = CTModels.Components.EmptyDefinition()
         ocp = CTModels.Model{CTModels.NonAutonomous}(
             times,
             state,

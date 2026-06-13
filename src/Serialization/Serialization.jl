@@ -35,7 +35,10 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTBase: CTBase
 
-using ..OCP
+using ..Components
+using ..Models
+using ..Building
+using ..Solutions
 
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "export_import.jl"))

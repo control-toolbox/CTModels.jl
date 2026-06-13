@@ -5,7 +5,7 @@ CurrentModule = CTModels
 ```
 
 When `Plots` is loaded, the `CTModelsPlots` extension adds a recipe so a
-[`Solution`](@ref CTModels.OCP.Solution) can be drawn directly with `plot` / `plot!`. The
+[`Solution`](@ref CTModels.Solutions.Solution) can be drawn directly with `plot` / `plot!`. The
 recipe lays out the state, control, costate (and, when present, path constraints and their
 duals) on a shared time axis.
 
@@ -35,7 +35,7 @@ nothing # hide
 ## Default plot
 
 ```@example plt
-CTModels.plot(sol)
+Plots.plot(sol)
 ```
 
 ## Layout and control options
@@ -50,7 +50,7 @@ displayed:
 | `time` | `:default` / `:normalize` | physical time, or rescaled to ``[0, 1]`` |
 
 ```@example plt
-CTModels.plot(sol; layout=:split, control=:all)
+Plots.plot(sol; layout=:split, control=:all)
 ```
 
 ## Overlaying solutions
@@ -59,8 +59,9 @@ CTModels.plot(sol; layout=:split, control=:all)
 axes:
 
 ```@example plt
-plt = CTModels.plot(sol)
-CTModels.plot!(plt, sol; time=:normalize)
+plt = Plots.plot(sol)
+Plots.plot!(plt, sol; time=:normalize)
+plt
 ```
 
 Because the recipe reads the *typed* solution (its time grids, interpolation kind, and dual

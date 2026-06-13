@@ -4,7 +4,7 @@
 CurrentModule = CTModels
 ```
 
-[`constraint!`](@ref CTModels.OCP.constraint!) adds one constraint at a time to the
+[`constraint!`](@ref CTModels.Building.constraint!) adds one constraint at a time to the
 pre-model. The first positional argument is the **kind**; the keywords give the bounds, the
 function or range, and a `label` used later to read back the constraint and its dual.
 
@@ -48,8 +48,8 @@ ocp = CTModels.build(pre)
 
 ## Reading constraints back
 
-On the built [`Model`](@ref CTModels.OCP.Model), the constraints are grouped in a
-[`ConstraintsModel`](@ref CTModels.OCP.ConstraintsModel) and queried by dimension or by label:
+On the built [`Model`](@ref CTModels.Models.Model), the constraints are grouped in a
+[`ConstraintsModel`](@ref CTModels.Components.ConstraintsModel) and queried by dimension or by label:
 
 ```@example cons
 (CTModels.dim_path_constraints_nl(ocp),
@@ -61,11 +61,11 @@ On the built [`Model`](@ref CTModels.OCP.Model), the constraints are grouped in 
 
 ## Labels and aliases
 
-Before building, constraints live in a [`ConstraintsDictType`](@ref CTModels.OCP.ConstraintsDictType)
+Before building, constraints live in a [`ConstraintsDictType`](@ref CTModels.Components.ConstraintsDictType)
 keyed by `label`. Box constraints obey a **per-component uniqueness invariant**: if several
 declarations touch the same component, their bounds are intersected and **all** their labels
-are kept as *aliases*. This is what lets [`constraint`](@ref CTModels.OCP.constraint) and
-[`dual`](@ref CTModels.OCP.dual) resolve any of the original labels to the merged component —
+are kept as *aliases*. This is what lets [`constraint`](@ref CTModels.Models.constraint) and
+[`dual`](@ref CTModels.Solutions.dual) resolve any of the original labels to the merged component —
 see the [Duals](../solution/duals.md) guide.
 
 !!! note "One declaration, one label"
