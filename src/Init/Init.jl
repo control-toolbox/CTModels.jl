@@ -29,7 +29,9 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTBase: CTBase
 
-using ..OCP
+using ..Components
+using ..Models
+using ..Solutions
 
 # Load types first
 include(joinpath(@__DIR__, "types.jl"))

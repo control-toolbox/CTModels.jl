@@ -8,23 +8,23 @@ Internal validation of an `InitialGuess`.
 
 Samples the state and control functions at a test time and verifies dimensions.
 """
-function _validate_initial_guess(ocp::OCP.AbstractModel, init::InitialGuess)
+function _validate_initial_guess(ocp::Models.AbstractModel, init::InitialGuess)
     # Dimensions from the OCP
-    xdim = OCP.state_dimension(ocp)
-    udim = OCP.control_dimension(ocp)
-    vdim = OCP.variable_dimension(ocp)
+    xdim = Models.state_dimension(ocp)
+    udim = Models.control_dimension(ocp)
+    vdim = Models.variable_dimension(ocp)
 
     # Sample evaluation time; for autonomous/non-autonomous problems
     # the shape of x(t), u(t) is independent of t.
-    v0 = OCP.variable(init)
-    tsample = if OCP.has_fixed_initial_time(ocp)
-        OCP.initial_time(ocp)
+    v0 = Models.variable(init)
+    tsample = if Components.has_fixed_initial_time(ocp)
+        Components.initial_time(ocp)
     else
-        OCP.initial_time(ocp, v0)
+        Components.initial_time(ocp, v0)
     end
 
     # State
-    x0 = OCP.state(init)(tsample)
+    x0 = Models.state(init)(tsample)
     if xdim == 1
         if !(x0 isa Real) && !(x0 isa AbstractVector && length(x0) == 1)
             throw(
@@ -52,7 +52,7 @@ function _validate_initial_guess(ocp::OCP.AbstractModel, init::InitialGuess)
     end
 
     # Control
-    u0 = OCP.control(init)(tsample)
+    u0 = Models.control(init)(tsample)
     if udim == 1
         if !(u0 isa Real) && !(u0 isa AbstractVector && length(u0) == 1)
             throw(
@@ -142,45 +142,45 @@ Extracts state, control, and variable trajectories from the solution.
 Dimensional consistency is checked against the solution metadata; final
 validation against the OCP is performed by `build_initial_guess`.
 """
-function _initial_guess_from_solution(ocp::OCP.AbstractModel, sol::OCP.AbstractSolution)
+function _initial_guess_from_solution(ocp::Models.AbstractModel, sol::Solutions.AbstractSolution)
     # Basic dimensional consistency checks
-    if OCP.state_dimension(ocp) != OCP.state_dimension(sol.model)
+    if Models.state_dimension(ocp) != Models.state_dimension(sol.model)
         throw(
             Exceptions.IncorrectArgument(
                 "Warm start state dimension mismatch";
-                got="solution with state dimension $(OCP.state_dimension(sol.model))",
-                expected="state dimension $(OCP.state_dimension(ocp))",
+                got="solution with state dimension $(Models.state_dimension(sol.model))",
+                expected="state dimension $(Models.state_dimension(ocp))",
                 suggestion="Ensure the solution comes from a problem with matching state dimension",
                 context="warm start from solution",
             ),
         )
     end
-    if OCP.control_dimension(ocp) != OCP.control_dimension(sol.model)
+    if Models.control_dimension(ocp) != Models.control_dimension(sol.model)
         throw(
             Exceptions.IncorrectArgument(
                 "Warm start control dimension mismatch";
-                got="solution with control dimension $(OCP.control_dimension(sol.model))",
-                expected="control dimension $(OCP.control_dimension(ocp))",
+                got="solution with control dimension $(Models.control_dimension(sol.model))",
+                expected="control dimension $(Models.control_dimension(ocp))",
                 suggestion="Ensure the solution comes from a problem with matching control dimension",
                 context="warm start from solution",
             ),
         )
     end
-    if OCP.variable_dimension(ocp) != OCP.variable_dimension(sol.model)
+    if Models.variable_dimension(ocp) != Models.variable_dimension(sol.model)
         throw(
             Exceptions.IncorrectArgument(
                 "Warm start variable dimension mismatch";
-                got="solution with variable dimension $(OCP.variable_dimension(sol.model))",
-                expected="variable dimension $(OCP.variable_dimension(ocp))",
+                got="solution with variable dimension $(Models.variable_dimension(sol.model))",
+                expected="variable dimension $(Models.variable_dimension(ocp))",
                 suggestion="Ensure the solution comes from a problem with matching variable dimension",
                 context="warm start from solution",
             ),
         )
     end
 
-    state_fun = OCP.state(sol)
-    control_fun = OCP.control(sol)
-    variable_val = OCP.variable(sol)
+    state_fun = Models.state(sol)
+    control_fun = Models.control(sol)
+    variable_val = Models.variable(sol)
 
     return InitialGuess(state_fun, control_fun, variable_val)
 end
@@ -194,15 +194,15 @@ Parses keys for state, control, variable (by name or component) and constructs
 the appropriate initialisation functions. Validation against the OCP is
 performed by `build_initial_guess`.
 """
-function _initial_guess_from_namedtuple(ocp::OCP.AbstractModel, init_data::NamedTuple)
+function _initial_guess_from_namedtuple(ocp::Models.AbstractModel, init_data::NamedTuple)
     # Names and component maps from the OCP
-    s_name_sym = Symbol(OCP.state_name(ocp))
-    u_name_sym = Symbol(OCP.control_name(ocp))
-    v_name_sym = Symbol(OCP.variable_name(ocp))
+    s_name_sym = Symbol(Models.state_name(ocp))
+    u_name_sym = Symbol(Models.control_name(ocp))
+    v_name_sym = Symbol(Models.variable_name(ocp))
 
-    s_comp_syms = Symbol.(OCP.state_components(ocp))
-    u_comp_syms = Symbol.(OCP.control_components(ocp))
-    v_comp_syms = Symbol.(OCP.variable_components(ocp))
+    s_comp_syms = Symbol.(Models.state_components(ocp))
+    u_comp_syms = Symbol.(Models.control_components(ocp))
+    v_comp_syms = Symbol.(Models.variable_components(ocp))
 
     s_comp_index = Dict(sym => i for (i, sym) in enumerate(s_comp_syms))
     u_comp_index = Dict(sym => i for (i, sym) in enumerate(u_comp_syms))
@@ -374,7 +374,7 @@ function _initial_guess_from_namedtuple(ocp::OCP.AbstractModel, init_data::Named
         if isempty(variable_comp)
             initial_variable(ocp, variable_block)
         else
-            vdim = OCP.variable_dimension(ocp)
+            vdim = Models.variable_dimension(ocp)
             if vdim == 0
                 throw(
                     Exceptions.IncorrectArgument(
@@ -509,7 +509,7 @@ Build an initial guess from a pre-initialisation object.
 Converts raw data into functions and trajectories. Validation against the OCP
 is performed by `build_initial_guess`.
 """
-function _initial_guess_from_preinit(ocp::OCP.AbstractModel, pre::PreInitialGuess)
+function _initial_guess_from_preinit(ocp::Models.AbstractModel, pre::PreInitialGuess)
     x = initial_state(ocp, pre.state)
     u = initial_control(ocp, pre.control)
     v = initial_variable(ocp, pre.variable)
