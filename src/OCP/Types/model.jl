@@ -1,111 +1,7 @@
 # ------------------------------------------------------------------------------ #
-# Continuous-time OCP model types (Model, PreModel and consistency helpers)
+# PreModel and consistency helpers
+# (AbstractModel and struct Model are now in src/Models/model.jl)
 # ------------------------------------------------------------------------------ #
-"""
-$(TYPEDEF)
-
-Abstract base type for optimal control problem models.
-
-Subtypes represent either a fully built immutable model ([`Model`](@ref CTModels.OCP.Model)) or a
-mutable model under construction (`PreModel`).
-
-See also: [`CTModels.OCP.Model`](@ref), [`CTModels.OCP.PreModel`](@ref).
-"""
-abstract type AbstractModel end
-
-"""
-$(TYPEDEF)
-
-Immutable optimal control problem model containing all problem components.
-
-A `Model` is created from a `PreModel` once all required fields have been
-set. It is parameterised by the time dependence type (`Autonomous` or `NonAutonomous`)
-and the types of all its components.
-
-# Fields
-
-- `times::TimesModelType`: Initial and final time specification.
-- `state::StateModelType`: State variable structure (name, components).
-- `control::ControlModelType`: Control variable structure (name, components).
-- `variable::VariableModelType`: Optimisation variable structure (may be empty).
-- `dynamics::DynamicsModelType`: System dynamics function `(t, x, u, v) -> ẋ`.
-- `objective::ObjectiveModelType`: Cost functional (Mayer, Lagrange, or Bolza).
-- `constraints::ConstraintsModelType`: All problem constraints. Box constraints
-  satisfy the per-component uniqueness invariant: each component appears at most
-  once in the stored tuples, bounds are the intersection of all declared bounds,
-  and every declared label is preserved in the `aliases` field of the box tuples
-  (see `ConstraintsModel`).
-- `definition::DefinitionType`: Original symbolic definition of the problem,
-  stored as a subtype of [`AbstractDefinition`](@ref) ([`Definition`](@ref) when
-  set, [`EmptyDefinition`](@ref) otherwise).
-- `build_examodel::BuildExaModelType`: Optional ExaModels builder function.
-
-# Example
-
-```julia-repl
-julia> using CTModels
-
-julia> # Models are typically created via the @def macro or PreModel
-julia> ocp = CTModels.Model  # Type reference
-```
-"""
-struct Model{
-    TD<:TimeDependence,
-    TimesModelType<:AbstractTimesModel,
-    StateModelType<:AbstractStateModel,
-    ControlModelType<:AbstractControlModel,
-    VariableModelType<:AbstractVariableModel,
-    DynamicsModelType<:Function,
-    ObjectiveModelType<:AbstractObjectiveModel,
-    ConstraintsModelType<:AbstractConstraintsModel,
-    DefinitionType<:AbstractDefinition,
-    BuildExaModelType<:Union{Function,Nothing},
-} <: AbstractModel
-    times::TimesModelType
-    state::StateModelType
-    control::ControlModelType
-    variable::VariableModelType
-    dynamics::DynamicsModelType
-    objective::ObjectiveModelType
-    constraints::ConstraintsModelType
-    definition::DefinitionType
-    build_examodel::BuildExaModelType
-
-    function Model{TD}(  # TD must be specified explicitly
-        times::AbstractTimesModel,
-        state::AbstractStateModel,
-        control::AbstractControlModel,
-        variable::AbstractVariableModel,
-        dynamics::Function,
-        objective::AbstractObjectiveModel,
-        constraints::AbstractConstraintsModel,
-        definition::AbstractDefinition,
-        build_examodel::Union{Function,Nothing},
-    ) where {TD<:TimeDependence}
-        return new{
-            TD,
-            typeof(times),
-            typeof(state),
-            typeof(control),
-            typeof(variable),
-            typeof(dynamics),
-            typeof(objective),
-            typeof(constraints),
-            typeof(definition),
-            typeof(build_examodel),
-        }(
-            times,
-            state,
-            control,
-            variable,
-            dynamics,
-            objective,
-            constraints,
-            definition,
-            build_examodel,
-        )
-    end
-end
 
 """
 $(TYPEDEF)
@@ -245,7 +141,7 @@ Return the state dimension of the `PreModel`.
 
 - `Exceptions.PreconditionError`: if the state has not been set yet.
 """
-function state_dimension(ocp::PreModel)::Dimension
+function Models.state_dimension(ocp::PreModel)::Dimension
     Core.@ensure(
         __is_state_set(ocp),
         Exceptions.PreconditionError(

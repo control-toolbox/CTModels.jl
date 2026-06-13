@@ -16,7 +16,7 @@ function _validate_initial_guess(ocp::OCP.AbstractModel, init::InitialGuess)
 
     # Sample evaluation time; for autonomous/non-autonomous problems
     # the shape of x(t), u(t) is independent of t.
-    v0 = variable(init)
+    v0 = OCP.variable(init)
     tsample = if OCP.has_fixed_initial_time(ocp)
         OCP.initial_time(ocp)
     else
@@ -24,7 +24,7 @@ function _validate_initial_guess(ocp::OCP.AbstractModel, init::InitialGuess)
     end
 
     # State
-    x0 = state(init)(tsample)
+    x0 = OCP.state(init)(tsample)
     if xdim == 1
         if !(x0 isa Real) && !(x0 isa AbstractVector && length(x0) == 1)
             throw(
@@ -52,7 +52,7 @@ function _validate_initial_guess(ocp::OCP.AbstractModel, init::InitialGuess)
     end
 
     # Control
-    u0 = control(init)(tsample)
+    u0 = OCP.control(init)(tsample)
     if udim == 1
         if !(u0 isa Real) && !(u0 isa AbstractVector && length(u0) == 1)
             throw(

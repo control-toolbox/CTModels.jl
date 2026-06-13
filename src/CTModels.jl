@@ -33,6 +33,10 @@ module CTModels
 include(joinpath(@__DIR__, "Components", "Components.jl"))
 using .Components
 
+# Models — immutable Model type and its accessor methods
+include(joinpath(@__DIR__, "Models", "Models.jl"))
+using .Models
+
 # OCP module - core optimal control problem functionality
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
