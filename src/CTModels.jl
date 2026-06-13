@@ -29,8 +29,11 @@ All public symbols are accessed as `CTModels.symbol` (no top-level exports).
 """
 module CTModels
 
+# Components — foundational types shared by all submodules
+include(joinpath(@__DIR__, "Components", "Components.jl"))
+using .Components
+
 # OCP module - core optimal control problem functionality
-# Contains type aliases, types, components, builders, and compatibility aliases
 include(joinpath(@__DIR__, "OCP", "OCP.jl"))
 using .OCP
 

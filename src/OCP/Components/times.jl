@@ -200,15 +200,6 @@ function Base.time(model::FixedTimeModel{T})::T where {T<:Time}
     return model.time
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Get the name of the time from the fixed time model.
-"""
-function name(model::FixedTimeModel{<:Time})::String
-    return model.name
-end
-
 # From FreeTimeModel
 """
 $(TYPEDSIGNATURES)
@@ -217,15 +208,6 @@ Get the index of the time variable from the free time model.
 """
 function index(model::FreeTimeModel)::Int
     return model.index
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Get the name of the time from the free time model.
-"""
-function name(model::FreeTimeModel)::String
-    return model.name
 end
 
 """

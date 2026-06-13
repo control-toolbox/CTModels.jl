@@ -35,13 +35,11 @@ import Parameters: @with_kw
 
 using CTBase: CTBase
 using MLStyle: MLStyle
-using OrderedCollections: OrderedCollections
 
-# Define type aliases (moved from src/types/aliases.jl)
-include(joinpath(@__DIR__, "aliases.jl"))
+# Components provides all foundational types and type aliases
+using ..Components
 
-# Load types first (no dependencies)
-include(joinpath(@__DIR__, "Types", "components.jl"))
+# Load types (Model, PreModel — Component types come from ..Components)
 include(joinpath(@__DIR__, "Types", "model.jl"))
 include(joinpath(@__DIR__, "Types", "solution.jl"))
 
@@ -69,33 +67,23 @@ include(joinpath(@__DIR__, "Building", "interpolation_helpers.jl"))
 include(joinpath(@__DIR__, "Building", "model.jl"))
 include(joinpath(@__DIR__, "Building", "solution.jl"))
 
-# Export type aliases
-export Dimension, ctNumber, Time, ctVector, Times, TimesDisc, ConstraintsDictType
-
-# Export main API - Types
+# Types defined in OCP (Component types come from ..Components — no re-export needed)
 export Model, PreModel, AbstractModel
 export Solution, AbstractSolution
-export FixedTimeModel, FreeTimeModel, TimesModel, AbstractTimeModel
-export StateModel, ControlModel, EmptyControlModel, VariableModel, EmptyVariableModel
-export AbstractDefinition, Definition, EmptyDefinition
-export MayerObjectiveModel, LagrangeObjectiveModel, BolzaObjectiveModel
 export DualModel, AbstractDualModel
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
 export UnifiedTimeGridModel, MultipleTimeGridModel
-export Autonomous, NonAutonomous
-export ConstraintsModel
 
-# Export main API - Construction functions
+# Construction functions
 export state!, control!, variable!
 export time!, dynamics!, objective!, constraint!
 export build_solution, build, build_model
 export definition!, time_dependence!
-# Constraint utilities
 export append_box_constraints!
 
-# Export main API - Accessors
-export constraint, constraints, name, dimension, components
+# Accessors — time and model structure
+export constraint, constraints
 export initial_time, final_time, time_name, time_grid, times
 export initial_time_name, final_time_name
 export clean_component_symbols, time_grid_model
@@ -123,7 +111,7 @@ export dim_dual_state_constraints_box,
     dim_dual_control_constraints_box, dim_dual_variable_constraints_box
 export state, control, variable, costate, objective
 export dynamics, mayer, lagrange
-export definition, expression, dual
+export definition, dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
 export get_build_examodel

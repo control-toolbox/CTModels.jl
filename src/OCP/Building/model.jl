@@ -1659,4 +1659,4 @@ or `:(begin end)` if the definition is an [`EmptyDefinition`](@ref).
 
 - `Expr`: The symbolic expression, or `:(begin end)` if no definition was attached.
 """
-expression(ocp::Model)::Expr = expression(definition(ocp))
+Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
