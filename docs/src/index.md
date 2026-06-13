@@ -24,41 +24,13 @@ It provides the **mathematical model layer** for optimal control problems:
     to provide tools to model and solve optimal control problems with ordinary differential equations
     by direct and indirect methods, both on CPU and GPU.
 
-!!! warning
+!!! note "Qualified access"
+    CTModels exports **no symbols** at the package level. Every public symbol is accessed via its full qualified path, e.g. `CTModels.Building.state!`, `CTModels.Init.initial_guess`, or `CTModels.Serialization.export_ocp_solution`. This makes the origin of every symbol explicit at every call site and prevents namespace collisions between packages.
 
-    In some examples in the documentation, private methods are shown without the module prefix.
-    This is done for the sake of clarity and readability.
+    Downstream packages (e.g. [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl)) may re-export selected symbols for convenience.
 
-    ```julia-repl
-    julia> using CTModels
-    julia> x = 1
-    julia> private_fun(x) # throws an error
-    ```
-
-    This should instead be written as:
-
-    ```julia-repl
-    julia> using CTModels
-    julia> x = 1
-    julia> CTModels.private_fun(x)
-    ```
-
-    If the method is re-exported by another package,
-
-    ```julia
-    module OptimalControl
-        import CTModels: private_fun
-        export private_fun
-    end
-    ```
-
-    then there is no need to prefix it with the original module name:
-
-    ```julia-repl
-    julia> using OptimalControl
-    julia> x = 1
-    julia> private_fun(x)
-    ```
+!!! tip "Ask DeepWiki"
+    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTModels.jl) offers an interactive, AI-generated overview of this codebase. Answers may be inaccurate — use this reference documentation as the source of truth.
 
 ## What CTModels provides
 
