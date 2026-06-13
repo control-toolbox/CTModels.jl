@@ -13,7 +13,7 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using CTModels: CTModels
 using JSON3: JSON3
 
-import CTModels.Building: __control_interpolation
+import CTModels.Building
 
 # ============================================================================
 # Private helpers for JSON matrix conversion
@@ -343,7 +343,7 @@ function CTModels.import_ocp_solution(
         "variable_constraints_lb_dual" => variable_constraints_lb_dual,
         "variable_constraints_ub_dual" => variable_constraints_ub_dual,
         "control_interpolation" =>
-            get(blob, "control_interpolation", string(__control_interpolation())),
+            get(blob, "control_interpolation", string(CTModels.Building.__control_interpolation())),
     )
 
     # Add time grid data (format detection handled by helper)
