@@ -128,14 +128,32 @@ function test_model()
         # warnings are emitted; redirect_stderr(devnull) suppresses them from
         # the test output.
         model = Test.@test_logs(
-            (:warn, r"Multiple bound declarations for state component 1 \(labels: state, state_scalar\)"),
-            (:warn, r"Multiple bound declarations for state component 2 \(labels: state, state_scalar_2\)"),
-            (:warn, r"Multiple bound declarations for control component 1 \(labels: control, control_scalar\)"),
-            (:warn, r"Multiple bound declarations for control component 2 \(labels: control, control_scalar_2\)"),
-            (:warn, r"Multiple bound declarations for variable component 1 \(labels: variable, variable_scalar\)"),
-            (:warn, r"Multiple bound declarations for variable component 2 \(labels: variable, variable_scalar_2\)"),
+            (
+                :warn,
+                r"Multiple bound declarations for state component 1 \(labels: state, state_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for state component 2 \(labels: state, state_scalar_2\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for control component 1 \(labels: control, control_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for control component 2 \(labels: control, control_scalar_2\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for variable component 1 \(labels: variable, variable_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for variable component 2 \(labels: variable, variable_scalar_2\)",
+            ),
             redirect_stderr(devnull) do
-                CTModels.build(pre_ocp)
+                return CTModels.build(pre_ocp)
             end
         )
 
@@ -152,12 +170,15 @@ function test_model()
 
         # test the functions
         Test.@test CTModels.constraint(model, :path)[2](t, x, u, v) == x .+ u .+ v .+ t
-        Test.@test CTModels.constraint(model, :boundary)[2](x0, xf, v) == x0 .+ v .* (xf .- x0)
+        Test.@test CTModels.constraint(model, :boundary)[2](x0, xf, v) ==
+            x0 .+ v .* (xf .- x0)
         Test.@test CTModels.constraint(model, :state)[2](t, x, u, v) == x
         Test.@test CTModels.constraint(model, :control)[2](t, x, u, v) == u
         Test.@test CTModels.constraint(model, :variable)[2](x0, xf, v) == v
-        Test.@test CTModels.constraint(model, :path_scalar)[2](t, x, u, v) == x[1] + u[1] + v[1] + t
-        Test.@test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) == x0[1] + v[1] * (xf[1] - x0[1])
+        Test.@test CTModels.constraint(model, :path_scalar)[2](t, x, u, v) ==
+            x[1] + u[1] + v[1] + t
+        Test.@test CTModels.constraint(model, :boundary_scalar)[2](x0, xf, v) ==
+            x0[1] + v[1] * (xf[1] - x0[1])
         Test.@test CTModels.constraint(model, :state_scalar)[2](t, x, u, v) == x[1]
         Test.@test CTModels.constraint(model, :control_scalar)[2](t, x, u, v) == u[1]
         Test.@test CTModels.constraint(model, :variable_scalar)[2](x0, xf, v) == v[1]
@@ -219,7 +240,7 @@ function test_model()
         # print the premodel (captured, no terminal output)
         redirect_stderr(devnull) do
             io = IOBuffer()
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
 
         # -------------------------------------------------------------------------- #
@@ -236,7 +257,7 @@ function test_model()
         CTModels.time_dependence!(pre_ocp; autonomous=false)
         io = IOBuffer()
         redirect_stderr(devnull) do
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
 
         #
@@ -251,7 +272,7 @@ function test_model()
         CTModels.time_dependence!(pre_ocp; autonomous=true)
         io = IOBuffer()
         redirect_stderr(devnull) do
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
     end
 end
