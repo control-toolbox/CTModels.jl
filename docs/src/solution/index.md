@@ -4,13 +4,13 @@
 CurrentModule = CTModels
 ```
 
-A [`Solution`](@ref CTModels.OCP.Solution) is the immutable container returned to the user
+A [`Solution`](@ref CTModels.Solutions.Solution) is the immutable container returned to the user
 once a solver has run. It bundles the **primal trajectories** (state, control, costate), the
 **optimisation variable**, the **objective value**, the **dual variables**, and the
 **solver diagnostics** — all behind a uniform accessor surface.
 
 CTModels does **not** solve OCPs; a `Solution` is assembled from raw numerical arrays by
-[`build_solution`](@ref CTModels.OCP.build_solution), the bridge an NLP backend calls.
+[`build_solution`](@ref CTModels.Solutions.build_solution), the bridge an NLP backend calls.
 
 ```
 model + numerical arrays (T, X, U, v, P, duals, infos)
@@ -24,9 +24,9 @@ model + numerical arrays (T, X, U, v, P, duals, infos)
 
 | Page | Topic | Key symbols |
 |---|---|---|
-| [Time grids](time_grids.md) | One grid or several | [`UnifiedTimeGridModel`](@ref CTModels.OCP.UnifiedTimeGridModel), [`MultipleTimeGridModel`](@ref CTModels.OCP.MultipleTimeGridModel) |
-| [Trajectories](trajectories.md) | Reading primal data | [`state`](@ref CTModels.OCP.state), [`control`](@ref CTModels.OCP.control), [`costate`](@ref CTModels.OCP.costate) |
-| [Duals & diagnostics](duals.md) | Multipliers and solver status | [`dual`](@ref CTModels.OCP.dual), [`DualModel`](@ref CTModels.OCP.DualModel), [`SolverInfos`](@ref CTModels.OCP.SolverInfos) |
+| [Time grids](time_grids.md) | One grid or several | [`UnifiedTimeGridModel`](@ref CTModels.Solutions.UnifiedTimeGridModel), [`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel) |
+| [Trajectories](trajectories.md) | Reading primal data | [`state`](@ref CTModels.Models.state), [`control`](@ref CTModels.Models.control), [`costate`](@ref CTModels.Solutions.costate) |
+| [Duals & diagnostics](duals.md) | Multipliers and solver status | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel), [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) |
 
 ## Minimal end-to-end example
 
@@ -78,11 +78,11 @@ x = CTModels.state(sol)          # x(t) → state at time t
 
 | Field group | Accessor(s) | Stored as |
 |---|---|---|
-| time grid | [`time_grid`](@ref CTModels.OCP.time_grid) | [`AbstractTimeGridModel`](@ref CTModels.OCP.AbstractTimeGridModel) |
-| state / control / costate | [`state`](@ref CTModels.OCP.state), [`control`](@ref CTModels.OCP.control), [`costate`](@ref CTModels.OCP.costate) | callables `t → …` |
-| variable / objective | [`variable`](@ref CTModels.OCP.variable), [`objective`](@ref CTModels.OCP.objective) | value |
-| duals | [`dual`](@ref CTModels.OCP.dual), [`DualModel`](@ref CTModels.OCP.DualModel) | callables / vectors |
-| diagnostics | [`iterations`](@ref CTModels.OCP.iterations), [`status`](@ref CTModels.OCP.status), [`successful`](@ref CTModels.OCP.successful) | [`SolverInfos`](@ref CTModels.OCP.SolverInfos) |
+| time grid | [`time_grid`](@ref CTModels.Solutions.time_grid) | [`AbstractTimeGridModel`](@ref CTModels.Solutions.AbstractTimeGridModel) |
+| state / control / costate | [`state`](@ref CTModels.Models.state), [`control`](@ref CTModels.Models.control), [`costate`](@ref CTModels.Solutions.costate) | callables `t → …` |
+| variable / objective | [`variable`](@ref CTModels.Models.variable), [`objective`](@ref CTModels.Models.objective) | value |
+| duals | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel) | callables / vectors |
+| diagnostics | [`iterations`](@ref CTModels.Solutions.iterations), [`status`](@ref CTModels.Solutions.status), [`successful`](@ref CTModels.Solutions.successful) | [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) |
 
 Each accessor dispatches on a typed field, so reading a solution never inspects raw
 closures. The following pages take each group in turn.

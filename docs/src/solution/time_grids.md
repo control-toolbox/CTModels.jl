@@ -10,9 +10,9 @@ representation automatically.
 
 | Type | When | Stores |
 |---|---|---|
-| [`UnifiedTimeGridModel`](@ref CTModels.OCP.UnifiedTimeGridModel) | all components share a grid | a single vector |
-| [`MultipleTimeGridModel`](@ref CTModels.OCP.MultipleTimeGridModel) | state/control/costate/path differ | a named tuple of grids |
-| [`EmptyTimeGridModel`](@ref CTModels.OCP.EmptyTimeGridModel) | no discretisation yet | nothing |
+| [`UnifiedTimeGridModel`](@ref CTModels.Solutions.UnifiedTimeGridModel) | all components share a grid | a single vector |
+| [`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel) | state/control/costate/path differ | a named tuple of grids |
+| [`EmptyTimeGridModel`](@ref CTModels.Solutions.EmptyTimeGridModel) | no discretisation yet | nothing |
 
 ```@example grids
 using CTModels
@@ -31,8 +31,8 @@ nothing # hide
 
 ## One shared grid
 
-When the four grids passed to [`build_solution`](@ref CTModels.OCP.build_solution) are
-identical, CTModels collapses them into a [`UnifiedTimeGridModel`](@ref CTModels.OCP.UnifiedTimeGridModel)
+When the four grids passed to [`build_solution`](@ref CTModels.Solutions.build_solution) are
+identical, CTModels collapses them into a [`UnifiedTimeGridModel`](@ref CTModels.Solutions.UnifiedTimeGridModel)
 to save memory:
 
 ```@example grids
@@ -52,8 +52,8 @@ sol_u = CTModels.build_solution(ocp, T, T, T, T, X, U, Float64[], P;
 ## One grid per component
 
 Passing different grids for state, control, costate and path yields a
-[`MultipleTimeGridModel`](@ref CTModels.OCP.MultipleTimeGridModel); each component is then
-queried by name through [`time_grid`](@ref CTModels.OCP.time_grid):
+[`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel); each component is then
+queried by name through [`time_grid`](@ref CTModels.Solutions.time_grid):
 
 ```@example grids
 T_state   = collect(range(0.0, 1.0; length=101))
@@ -80,7 +80,7 @@ sol_m = CTModels.build_solution(ocp, T_state, T_control, T_costate, T_path,
 
 `time_grid(sol, :states)`, `time_grid(sol, :duals)`, … accept many synonyms. They are
 normalised to the four canonical grids (`:state`, `:control`, `:costate`, `:path`) by
-[`clean_component_symbols`](@ref CTModels.OCP.clean_component_symbols):
+[`clean_component_symbols`](@ref CTModels.Solutions.clean_component_symbols):
 
 ```@example grids
 CTModels.clean_component_symbols((:states, :controls, :costate, :constraint, :duals))

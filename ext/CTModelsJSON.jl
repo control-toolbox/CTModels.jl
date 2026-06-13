@@ -1,5 +1,5 @@
 """
-Weak-dependency extension of [`CTModels`](@ref) providing JSON3-based serialization.
+Weak-dependency extension of CTModels providing JSON3-based serialization.
 
 Loaded automatically when both `CTModels` and `JSON3` are available in the session.
 Adds methods for [`CTModels.export_ocp_solution`](@ref) and

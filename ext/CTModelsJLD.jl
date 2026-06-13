@@ -1,5 +1,5 @@
 """
-Weak-dependency extension of [`CTModels`](@ref) providing JLD2-based serialization.
+Weak-dependency extension of CTModels providing JLD2-based serialization.
 
 Loaded automatically when both `CTModels` and `JLD2` are available in the session.
 Adds methods for [`CTModels.export_ocp_solution`](@ref) and

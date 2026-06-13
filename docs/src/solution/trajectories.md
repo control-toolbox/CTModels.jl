@@ -10,11 +10,11 @@ variable and the objective.
 
 | Accessor | Returns | Shape |
 |---|---|---|
-| [`state`](@ref CTModels.OCP.state) | `x(t)` | callable → ``\mathbb{R}^n`` |
-| [`control`](@ref CTModels.OCP.control) | `u(t)` | callable → ``\mathbb{R}^m`` |
-| [`costate`](@ref CTModels.OCP.costate) | `p(t)` | callable → ``\mathbb{R}^n`` |
-| [`variable`](@ref CTModels.OCP.variable) | `v` | value |
-| [`objective`](@ref CTModels.OCP.objective) | optimal cost | scalar |
+| [`state`](@ref CTModels.Models.state) | `x(t)` | callable → ``\mathbb{R}^n`` |
+| [`control`](@ref CTModels.Models.control) | `u(t)` | callable → ``\mathbb{R}^m`` |
+| [`costate`](@ref CTModels.Solutions.costate) | `p(t)` | callable → ``\mathbb{R}^n`` |
+| [`variable`](@ref CTModels.Models.variable) | `v` | value |
+| [`objective`](@ref CTModels.Models.objective) | optimal cost | scalar |
 
 ```@example traj
 using CTModels
@@ -63,9 +63,9 @@ p = CTModels.costate(sol)
 
 State and costate are interpolated **linearly**. The control may instead be **piecewise
 constant** — typical of direct collocation — selected by the `control_interpolation` keyword
-of [`build_solution`](@ref CTModels.OCP.build_solution) (`:linear` or `:constant`). The choice
+of [`build_solution`](@ref CTModels.Solutions.build_solution) (`:linear` or `:constant`). The choice
 is recorded and read back with
-[`control_interpolation`](@ref CTModels.OCP.control_interpolation):
+[`control_interpolation`](@ref CTModels.Solutions.control_interpolation):
 
 ```@example traj
 sol_const = CTModels.build_solution(ocp, T, X, U, v, P;

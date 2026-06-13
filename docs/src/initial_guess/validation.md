@@ -7,10 +7,11 @@ CurrentModule = CTModels
 [`build_initial_guess`](@ref CTModels.Init.build_initial_guess) always ends with a dimension
 check against the model. The check can also be invoked on its own with
 [`validate_initial_guess`](@ref CTModels.Init.validate_initial_guess), and a guess can be
-**warm-started** from a previous [`Solution`](@ref CTModels.OCP.Solution).
+**warm-started** from a previous [`Solution`](@ref CTModels.Solutions.Solution).
 
 ```@example val
 using CTModels
+import CTBase
 
 pre = CTModels.PreModel()
 CTModels.variable!(pre, 0)
@@ -45,13 +46,13 @@ of the wrong length is refused:
 try
     CTModels.build_initial_guess(ocp, (state = t -> [0.0],))   # 1 ≠ 2 states
 catch e
-    (e isa CTModels.OCP.Exceptions.IncorrectArgument, :rejected)
+    (e isa CTBase.Exceptions.IncorrectArgument, :rejected)
 end
 ```
 
 ## Warm-start from a solution
 
-Passing a [`Solution`](@ref CTModels.OCP.Solution) reuses its trajectories as the new guess —
+Passing a [`Solution`](@ref CTModels.Solutions.Solution) reuses its trajectories as the new guess —
 the standard *warm-start*. The state/control dimensions must match between the solution's model
 and the target model.
 

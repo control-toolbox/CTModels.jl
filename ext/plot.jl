@@ -1142,7 +1142,7 @@ $(TYPEDSIGNATURES)
 
 Modify Plot `p` with the optimal control solution `sol`.
 
-See [`plot`](@ref plot(::CTModels.Solution)) for full behavior and keyword arguments.
+See [`plot`](@ref plot(::CTModels.Solutions.Solution)) for full behavior and keyword arguments.
 """
 function Plots.plot!(
     p::Plots.Plot,
@@ -1230,7 +1230,7 @@ $(TYPEDSIGNATURES)
 
 Modify Plot `current()` with the optimal control solution `sol`.
 
-See [`plot`](@ref plot(::CTModels.Solution)) for full behavior and keyword arguments.
+See [`plot`](@ref plot(::CTModels.Solutions.Solution)) for full behavior and keyword arguments.
 """
 function Plots.plot!(
     sol::CTModels.Solution,

@@ -9,7 +9,7 @@ $(TYPEDEF)
 Mutable optimal control problem model under construction.
 
 A `PreModel` is used to incrementally define an optimal control problem before
-building it into an immutable [`Model`](@ref CTModels.OCP.Model). Fields can be set in any order
+building it into an immutable [`Model`](@ref CTModels.Models.Model). Fields can be set in any order
 and the model is validated before building.
 
 # Fields

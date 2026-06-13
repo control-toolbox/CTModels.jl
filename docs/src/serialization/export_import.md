@@ -5,9 +5,9 @@ CurrentModule = CTModels
 ```
 
 [`export_ocp_solution`](@ref CTModels.Serialization.export_ocp_solution) writes a
-[`Solution`](@ref CTModels.OCP.Solution) to disk;
+[`Solution`](@ref CTModels.Solutions.Solution) to disk;
 [`import_ocp_solution`](@ref CTModels.Serialization.import_ocp_solution) reads it back, given
-the [`Model`](@ref CTModels.OCP.Model) it belongs to. Two formats are available, each behind its
+the [`Model`](@ref CTModels.Models.Model) it belongs to. Two formats are available, each behind its
 extension:
 
 | `format` | Extension | File |

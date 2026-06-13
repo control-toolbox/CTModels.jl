@@ -20,7 +20,7 @@ raw data ──► pre_initial_guess / initial_guess ──► InitialGuess (unv
 
 [`build_initial_guess`](@ref CTModels.Init.build_initial_guess) is the **single entry point**
 that does both: it accepts many input formats, converts them, and validates dimensions against
-the [`Model`](@ref CTModels.OCP.Model).
+the [`Model`](@ref CTModels.Models.Model).
 
 ## Reading order
 
@@ -36,7 +36,7 @@ the [`Model`](@ref CTModels.OCP.Model).
 | `nothing` / `()` | default guess |
 | [`InitialGuess`](@ref CTModels.Init.InitialGuess) | validated as-is |
 | [`PreInitialGuess`](@ref CTModels.Init.PreInitialGuess) | converted, then validated |
-| [`Solution`](@ref CTModels.OCP.Solution) | warm-start from a previous solve |
+| [`Solution`](@ref CTModels.Solutions.Solution) | warm-start from a previous solve |
 | `NamedTuple` | `(state=…, control=…, variable=…)` |
 
 ## Minimal example

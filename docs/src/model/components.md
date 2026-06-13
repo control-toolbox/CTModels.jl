@@ -5,18 +5,19 @@ CurrentModule = CTModels
 ```
 
 The four declaration verbs populate the spaces of the problem on a
-[`PreModel`](@ref CTModels.OCP.PreModel). Each may be called **once**; calling it twice, or
+[`PreModel`](@ref CTModels.Building.PreModel). Each may be called **once**; calling it twice, or
 with inconsistent dimensions, raises a structured exception.
 
 | Verb | Declares | Stores into `pre.…` |
 |---|---|---|
-| [`state!`](@ref CTModels.OCP.state!) | state space ``x \in \mathbb{R}^n`` | `pre.state` |
-| [`control!`](@ref CTModels.OCP.control!) | control space ``u \in \mathbb{R}^m`` | `pre.control` |
-| [`variable!`](@ref CTModels.OCP.variable!) | optimisation variable ``v \in \mathbb{R}^q`` | `pre.variable` |
-| [`time!`](@ref CTModels.OCP.time!) | the interval ``[t_0, t_f]`` | `pre.times` |
+| [`state!`](@ref CTModels.Building.state!) | state space ``x \in \mathbb{R}^n`` | `pre.state` |
+| [`control!`](@ref CTModels.Building.control!) | control space ``u \in \mathbb{R}^m`` | `pre.control` |
+| [`variable!`](@ref CTModels.Building.variable!) | optimisation variable ``v \in \mathbb{R}^q`` | `pre.variable` |
+| [`time!`](@ref CTModels.Building.time!) | the interval ``[t_0, t_f]`` | `pre.times` |
 
 ```@example components
 using CTModels
+import CTBase
 pre = CTModels.PreModel()
 nothing # hide
 ```
@@ -41,9 +42,9 @@ CTModels.components(pre.control)
 
 ## The optimisation variable
 
-[`variable!`](@ref CTModels.OCP.variable!) declares the time-independent decision variable
+[`variable!`](@ref CTModels.Building.variable!) declares the time-independent decision variable
 ``v`` (free final time, design parameters, …). A dimension of `0` means *no variable*:
-`pre.variable` then stays an [`EmptyVariableModel`](@ref CTModels.OCP.EmptyVariableModel).
+`pre.variable` then stays an [`EmptyVariableModel`](@ref CTModels.Components.EmptyVariableModel).
 
 ```@example components
 CTModels.variable!(pre, 2, "v")
@@ -52,7 +53,7 @@ CTModels.variable!(pre, 2, "v")
 
 ## Time: fixed and free ends
 
-[`time!`](@ref CTModels.OCP.time!) sets the interval. Each end is either **fixed** (a value
+[`time!`](@ref CTModels.Building.time!) sets the interval. Each end is either **fixed** (a value
 `t0=`/`tf=`) or **free** (an index `ind0=`/`indf=` into ``v``, optimised by the solver).
 
 ```@example components
@@ -72,7 +73,7 @@ CTModels.time!(pre2; t0=0.0, indf=2)
 ```
 
 For a free time the value is read from ``v``, hence
-[`final_time`](@ref CTModels.OCP.final_time) takes the variable vector. See
+[`final_time`](@ref CTModels.Components.final_time) takes the variable vector. See
 [Types and traits](types_and_traits.md) for the `Fixed`/`Free` distinction.
 
 ## Naming rules
@@ -87,7 +88,7 @@ CTModels.state!(pre3, 2, "x", ["a", "b"])
 try
     CTModels.control!(pre3, 1, "a")   # "a" already names a state component
 catch e
-    e isa CTModels.OCP.Exceptions.IncorrectArgument
+    e isa CTBase.Exceptions.IncorrectArgument
 end
 ```
 

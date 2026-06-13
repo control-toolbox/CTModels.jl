@@ -550,8 +550,8 @@ objective!(pre_ocp, :mayer, (x0, xf) -> xf[1]^2)
 ocp = build_model(pre_ocp)
 ```
 
-See also: [`CTModels.OCP.build`](@ref), [`CTModels.OCP.PreModel`](@ref),
-[`CTModels.OCP.Model`](@ref), [`CTModels.OCP.time_dependence!`](@ref).
+See also: [`CTModels.Building.build`](@ref), [`CTModels.Building.PreModel`](@ref),
+[`CTModels.Models.Model`](@ref), [`CTModels.Building.time_dependence!`](@ref).
 """
 function build_model(pre_ocp::PreModel; build_examodel=nothing)::Model
     return build(pre_ocp; build_examodel=build_examodel)

@@ -9,8 +9,8 @@ Abstract base type for time grid models used in optimal control solutions.
 
 Subtypes store the discretised time points at which the solution is evaluated.
 
-See also: [`CTModels.OCP.UnifiedTimeGridModel`](@ref), [`CTModels.OCP.MultipleTimeGridModel`](@ref),
-[`CTModels.OCP.EmptyTimeGridModel`](@ref).
+See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@ref), [`CTModels.Solutions.MultipleTimeGridModel`](@ref),
+[`CTModels.Solutions.EmptyTimeGridModel`](@ref).
 """
 abstract type AbstractTimeGridModel end
 
@@ -109,12 +109,12 @@ function MultipleTimeGridModel(;
 end
 
 """
-Legacy type alias for [`CTModels.OCP.UnifiedTimeGridModel`](@ref).
+Legacy type alias for [`CTModels.Solutions.UnifiedTimeGridModel`](@ref).
 
 Kept for backward compatibility with code written before the multi-grid feature.
-Prefer [`CTModels.OCP.UnifiedTimeGridModel`](@ref) for new code.
+Prefer [`CTModels.Solutions.UnifiedTimeGridModel`](@ref) for new code.
 
-See also: [`CTModels.OCP.UnifiedTimeGridModel`](@ref), [`CTModels.OCP.MultipleTimeGridModel`](@ref).
+See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@ref), [`CTModels.Solutions.MultipleTimeGridModel`](@ref).
 """
 const TimeGridModel = UnifiedTimeGridModel
 
@@ -239,7 +239,7 @@ Abstract base type for solver information associated with an optimal control sol
 
 Subtypes store metadata about the numerical solution process.
 
-See also: [`CTModels.OCP.SolverInfos`](@ref).
+See also: [`CTModels.Solutions.SolverInfos`](@ref).
 """
 abstract type AbstractSolverInfos end
 
@@ -285,7 +285,7 @@ Abstract base type for dual variable models in optimal control solutions.
 
 Subtypes store Lagrange multipliers (dual variables) associated with constraints.
 
-See also: [`CTModels.OCP.DualModel`](@ref).
+See also: [`CTModels.Solutions.DualModel`](@ref).
 """
 abstract type AbstractDualModel end
 
@@ -345,7 +345,7 @@ Abstract base type for optimal control problem solutions.
 Subtypes store the complete solution including primal trajectories, dual variables,
 and solver information.
 
-See also: [`CTModels.OCP.Solution`](@ref).
+See also: [`CTModels.Solutions.Solution`](@ref).
 """
 abstract type AbstractSolution end
 

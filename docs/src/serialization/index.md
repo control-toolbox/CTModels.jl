@@ -10,7 +10,7 @@ when the trigger package is present.
 
 | Extension | Trigger package | Adds |
 |---|---|---|
-| `CTModelsJSON` | `JSON3` | JSON export/import of a [`Solution`](@ref CTModels.OCP.Solution) |
+| `CTModelsJSON` | `JSON3` | JSON export/import of a [`Solution`](@ref CTModels.Solutions.Solution) |
 | `CTModelsJLD` | `JLD2` | JLD2 (binary) export/import |
 | `CTModelsPlots` | `Plots` | `Plots.plot(sol)` / `Plots.plot!(sol)` |
 

@@ -27,7 +27,7 @@ julia> __collect_used_names(ocp)
  "u"
 ```
 
-See also: [`CTModels.OCP.__has_name_conflict`](@ref), [`CTModels.OCP.__validate_name_uniqueness`](@ref).
+See also: [`CTModels.Building.__has_name_conflict`](@ref), [`CTModels.Building.__validate_name_uniqueness`](@ref).
 """
 function __collect_used_names(ocp::PreModel)::Vector{String}
     names = String[]
@@ -90,7 +90,7 @@ julia> __has_name_conflict(ocp, "y", :none)
 false
 ```
 
-See also: [`CTModels.OCP.__collect_used_names`](@ref), [`CTModels.OCP.__validate_name_uniqueness`](@ref).
+See also: [`CTModels.Building.__collect_used_names`](@ref), [`CTModels.Building.__validate_name_uniqueness`](@ref).
 """
 function __has_name_conflict(
     ocp::PreModel, new_name::String, exclude_component::Symbol=:none
@@ -146,7 +146,7 @@ julia> state!(ocp, 2, "x", ["x₁", "x₂"])
 julia> __validate_name_uniqueness(ocp, "x", ["u"], :control)  # Would throw if "x" conflicts
 ```
 
-See also: [`CTModels.OCP.__has_name_conflict`](@ref), [`CTModels.OCP.__collect_used_names`](@ref).
+See also: [`CTModels.Building.__has_name_conflict`](@ref), [`CTModels.Building.__collect_used_names`](@ref).
 """
 function __validate_name_uniqueness(
     ocp::PreModel, name::String, components::Vector{String}, component_type::Symbol

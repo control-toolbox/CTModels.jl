@@ -1,5 +1,5 @@
 """
-Weak-dependency extension of [`CTModels`](@ref) providing Plots.jl recipes.
+Weak-dependency extension of CTModels providing Plots.jl recipes.
 
 Loaded automatically when both `CTModels` and `Plots` are available in the session.
 Extends `Plots.plot` and `Plots.plot!` to accept a `CTModels.Solution`, rendering

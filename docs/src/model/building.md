@@ -4,26 +4,26 @@
 CurrentModule = CTModels
 ```
 
-[`build`](@ref CTModels.OCP.build) turns a fully-declared, mutable
-[`PreModel`](@ref CTModels.OCP.PreModel) into an **immutable**
-[`Model`](@ref CTModels.OCP.Model). `build_model` is an alias of `build`.
+[`build`](@ref CTModels.Building.build) turns a fully-declared, mutable
+[`PreModel`](@ref CTModels.Building.PreModel) into an **immutable**
+[`Model`](@ref CTModels.Models.Model). `build_model` is an alias of `build`.
 
 ## Prerequisites
 
 Before building, the pre-model must be **consistent**: times, state, complete dynamics,
 objective and the time-dependence flag must all be set. The check is
-[`__is_consistent`](@ref CTModels.OCP.__is_consistent); `build` raises a structured error if
+[`__is_consistent`](@ref CTModels.Building.__is_consistent); `build` raises a structured error if
 a piece is missing. Control and variable are optional — their absence is represented by the
-[`EmptyControlModel`](@ref CTModels.OCP.EmptyControlModel) /
-[`EmptyVariableModel`](@ref CTModels.OCP.EmptyVariableModel) sentinels.
+[`EmptyControlModel`](@ref CTModels.Components.EmptyControlModel) /
+[`EmptyVariableModel`](@ref CTModels.Components.EmptyVariableModel) sentinels.
 
 Two extra declarations complete the problem:
 
-- [`time_dependence!`](@ref CTModels.OCP.time_dependence!) — marks the system
-  `autonomous=true|false` (sets the [`TimeDependence`](@ref CTModels.OCP.TimeDependence) trait);
-- [`definition!`](@ref CTModels.OCP.definition!) — *optional* — attaches the symbolic
-  problem definition (a Julia `Expr`) as a [`Definition`](@ref CTModels.OCP.Definition);
-  without it the model carries an [`EmptyDefinition`](@ref CTModels.OCP.EmptyDefinition).
+- [`time_dependence!`](@ref CTModels.Building.time_dependence!) — marks the system
+  `autonomous=true|false` (sets the [`TimeDependence`](@ref CTModels.Components.TimeDependence) trait);
+- [`definition!`](@ref CTModels.Building.definition!) — *optional* — attaches the symbolic
+  problem definition (a Julia `Expr`) as a [`Definition`](@ref CTModels.Components.Definition);
+  without it the model carries an [`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition).
 
 ```@example building
 using CTModels
