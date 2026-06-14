@@ -286,6 +286,43 @@ function test_dual_model()
             Test.@test_throws Exceptions.IncorrectArgument Solutions.dual(sol, m, :nonexistent)
         end
     end
+
+    Test.@testset "DualSlice and BoxDualDiff" verbose=VERBOSE showtiming=SHOWTIMING begin
+
+        Test.@testset "DualSlice — scalar index" begin
+            duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
+            f = Solutions.DualSlice(duals_fn, 2)
+            Test.@test f isa Function
+            Test.@test f(1.0) == 20.0
+            Test.@test f(1.0) isa Real
+            Test.@test contains(repr(f), "DualSlice")
+            Test.@test contains(repr(MIME("text/plain"), f), "DualSlice")
+        end
+
+        Test.@testset "DualSlice — vector index" begin
+            duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
+            f = Solutions.DualSlice(duals_fn, [1, 3])
+            Test.@test f isa Function
+            Test.@test f(1.0) == [10.0, 30.0]
+            Test.@test f(1.0) isa AbstractVector
+        end
+
+        Test.@testset "BoxDualDiff — scalar index" begin
+            f = Solutions.BoxDualDiff(t -> [1.0, 2.0, 3.0], t -> [0.5, 0.5, 0.5], 2)
+            Test.@test f isa Function
+            Test.@test f(0.0) == 1.5
+            Test.@test f(0.0) isa Real
+            Test.@test contains(repr(f), "BoxDualDiff")
+            Test.@test contains(repr(MIME("text/plain"), f), "BoxDualDiff")
+        end
+
+        Test.@testset "BoxDualDiff — vector index" begin
+            f = Solutions.BoxDualDiff(t -> [1.0, 2.0, 3.0], t -> [0.5, 0.5, 0.5], [1, 3])
+            Test.@test f isa Function
+            Test.@test f(0.0) == [0.5, 2.5]
+            Test.@test f(0.0) isa AbstractVector
+        end
+    end
 end
 
 end # module
