@@ -22,7 +22,7 @@ using MarkdownAST: MarkdownAST
 Draft = false
 ```
 =#
-draft = true  # Draft mode: if true, @example blocks in markdown are not executed
+draft = false  # Draft mode: if true, @example blocks in markdown are not executed
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Load extensions
