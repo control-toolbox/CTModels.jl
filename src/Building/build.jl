@@ -3,7 +3,7 @@ $(TYPEDSIGNATURES)
 
 Append box constraint data to the provided flat vectors.
 
-This is an internal helper used by `build(::ConstraintsDictType)`. It simply
+This is an internal helper used by [`CTModels.Building.build`](@ref). It simply
 accumulates declarations. Deduplication (one entry per component with
 intersection semantics) and associated warnings are handled later by
 [`CTModels.Building._dedup_box_constraints!`](@ref).
@@ -20,7 +20,7 @@ intersection semantics) and associated warnings are handled later by
 
 # Notes
 - Modifies `inds`, `lbs`, `ubs`, `labels` in-place.
-- No deduplication or warning emitted here; see `_dedup_box_constraints!`.
+- No deduplication or warning emitted here; see [`CTModels.Building._dedup_box_constraints!`](@ref).
 
 # Returns
 - `Nothing`
@@ -54,7 +54,7 @@ After this function returns, the vectors satisfy the invariant:
 
 A `@warn` is emitted once for each duplicated component, listing all contributing
 labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
-`IncorrectArgument` is thrown.
+`CTBase.Exceptions.IncorrectArgument` is thrown.
 
 # Arguments
 - `inds`, `lbs`, `ubs`, `labels`: in-place flat vectors produced by successive
@@ -65,7 +65,7 @@ labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
   "variable") used in diagnostic messages.
 
 # Throws
-- `Exceptions.IncorrectArgument` if the intersection of declared bounds is
+- `CTBase.Exceptions.IncorrectArgument` if the intersection of declared bounds is
   empty for some component.
 
 # Returns
@@ -158,27 +158,33 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Constructs a `ConstraintsModel` from a dictionary of constraints.
+Constructs a [`CTModels.Components.ConstraintsModel`](@ref) from a dictionary of constraints.
 
-This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured `ConstraintsModel`.
+This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured [`CTModels.Components.ConstraintsModel`](@ref).
 
 # Arguments
-- `constraints::ConstraintsDictType`: A dictionary mapping constraint labels to tuples of the form `(type, function_or_range, lower_bound, upper_bound)`.
+- `constraints::CTModels.Components.ConstraintsDictType`: A dictionary mapping constraint labels to tuples of the form `(type, function_or_range, lower_bound, upper_bound)`.
 
 # Returns
-- `ConstraintsModel`: A structured model encapsulating all provided constraints.
+- `CTModels.Components.ConstraintsModel`: A structured model encapsulating all provided constraints.
 
 # Example
-```julia-repl
-julia> constraints = OrderedCollections.OrderedDict(
+```julia
+using CTModels.Building
+using OrderedCollections
+
+f1(t, x, u, v) = x[1]
+constraints = OrderedDict(
     :c1 => (:path, f1, [0.0], [1.0]),
     :c2 => (:state, 1:2, [-1.0, -1.0], [1.0, 1.0])
 )
-julia> model = build(constraints)
+model = build(constraints)
 ```
 
 # Throws
-- `Exceptions.IncorrectArgument`: If an unknown constraint type is encountered
+- `CTBase.Exceptions.IncorrectArgument`: If an unknown constraint type is encountered
+
+See also: [`CTModels.Building.append_box_constraints!`](@ref), [`CTModels.Building._dedup_box_constraints!`](@ref)
 """
 function build(constraints::ConstraintsDictType)::ConstraintsModel
     LocalNumber = Float64
@@ -298,24 +304,9 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
         constraints_dimensions::Vector{Int},
         constraints_functions::Function...,
     )
-        let
-            # Create local copies of the inputs to capture them safely
-            cn = constraints_number
-            cd = constraints_dimensions
-            cf = constraints_functions
-
-            function path_cons_nl!(val, t, x, u, v)
-                j = 1
-                for i in 1:cn
-                    li = cd[i]
-                    cf[i](@view(val[j:(j + li - 1)]), t, x, u, v)
-                    j += li
-                end
-                return nothing
-            end
-
-            return path_cons_nl!
-        end
+        return CompositeConstraint{:path}(
+            constraints_number, constraints_dimensions, constraints_functions
+        )
     end
 
     function make_boundary_cons_nl(
@@ -332,18 +323,9 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
         constraints_dimensions::Vector{Int},
         constraints_functions::Function...,
     )
-        let cfs = constraints_functions
-            function boundary_cons_nl!(val, x0, xf, v)
-                j = 1
-                for i in 1:constraints_number
-                    li = constraints_dimensions[i]
-                    cfs[i](@view(val[j:(j + li - 1)]), x0, xf, v)
-                    j += li
-                end
-                return nothing
-            end
-            return boundary_cons_nl!
-        end
+        return CompositeConstraint{:boundary}(
+            constraints_number, constraints_dimensions, constraints_functions
+        )
     end
 
     path_cons_nl! = make_path_cons_nl(
@@ -417,50 +399,54 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Converts a mutable `PreModel` into an immutable `Model`.
+Converts a mutable [`CTModels.Building.PreModel`](@ref) into an immutable [`CTModels.Models.Model`](@ref).
 
-This function finalizes a pre-defined optimal control problem (`PreModel`) by verifying that all
-necessary components (times, state, dynamics, objective) are set. It then constructs a `Model`
+This function finalizes a pre-defined optimal control problem ([`CTModels.Building.PreModel`](@ref)) by verifying that all
+necessary components (times, state, dynamics, objective) are set. It then constructs a [`CTModels.Models.Model`](@ref)
 instance, incorporating optional components like control, variable, and constraints.
 
 !!! note
-    Control is **optional**: calling `control!` is not required. When omitted, the model is
-    built with `control_dimension == 0` (an `EmptyControlModel`). This is useful for problems
+    Control is **optional**: calling [`CTModels.Building.control!`](@ref) is not required. When omitted, the model is
+    built with `control_dimension == 0` (an [`CTModels.Models.EmptyControlModel`](@ref)). This is useful for problems
     where the dynamics depend only on the state, such as pure state-space systems.
 
 # Arguments
-- `pre_ocp::PreModel`: The pre-defined optimal control problem to be finalized.
+- `pre_ocp::CTModels.Building.PreModel`: The pre-defined optimal control problem to be finalized.
+- `build_examodel=nothing`: Optional ExaModel builder function for GPU acceleration.
 
 # Returns
-- `Model`: A fully constructed model ready for solving.
+- `CTModels.Models.Model`: A fully constructed model ready for solving.
 
 # Example without control
-```julia-repl
-julia> pre_ocp = PreModel()
-julia> times!(pre_ocp, 0.0, 1.0, 100)
-julia> state!(pre_ocp, 2, "x", ["x1", "x2"])
-julia> dynamics!(pre_ocp, (t, x, u) -> [-x[2], x[1]])
-julia> objective!(pre_ocp, :min, mayer=(x0, xf) -> xf[1]^2)
-julia> model = build(pre_ocp)
-julia> control_dimension(model)  # 0
+```julia
+using CTModels.Building
+
+pre_ocp = PreModel()
+times!(pre_ocp, 0.0, 1.0, 100)
+state!(pre_ocp, 2, "x", ["x1", "x2"])
+dynamics!(pre_ocp, (t, x, u) -> [-x[2], x[1]])
+objective!(pre_ocp, :min, mayer=(x0, xf) -> xf[1]^2)
+model = build(pre_ocp)
+CTModels.Models.control_dimension(model)  # 0
 ```
 
 # Example with control
-```julia-repl
-julia> pre_ocp = PreModel()
-julia> times!(pre_ocp, 0.0, 1.0, 100)
-julia> state!(pre_ocp, 2, "x", ["x1", "x2"])
-julia> control!(pre_ocp, 1, "u", ["u1"])
-julia> dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
-julia> model = build(pre_ocp)
+```julia
+using CTModels.Building
+
+pre_ocp = PreModel()
+times!(pre_ocp, 0.0, 1.0, 100)
+state!(pre_ocp, 2, "x", ["x1", "x2"])
+control!(pre_ocp, 1, "u", ["u1"])
+dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
+model = build(pre_ocp)
 ```
 
 # Throws
-- `Exceptions.PreconditionError`: If times, state, dynamics, objective, or time dependence are not set
-- `Exceptions.PreconditionError`: If dynamics are incomplete
+- `CTBase.Exceptions.PreconditionError`: If times, state, dynamics, objective, or time dependence are not set
+- `CTBase.Exceptions.PreconditionError`: If dynamics are incomplete
 
-# Returns
-- `Model`: A fully constructed model ready for solving.
+See also: [`CTModels.Building.build_model`](@ref), [`CTModels.Building.PreModel`](@ref), [`CTModels.Models.Model`](@ref)
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     Core.@ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(
@@ -536,23 +522,23 @@ $(TYPEDSIGNATURES)
 
 Build a complete optimal control problem model from a pre-model.
 
-This function is an alias for `build(pre_ocp; build_examodel=build_examodel)` and constructs
-a fully validated `Model` from a `PreModel` by extracting and organizing all components
+This function is an alias for [`CTModels.Building.build`](@ref) and constructs
+a fully validated [`CTModels.Models.Model`](@ref) from a [`CTModels.Building.PreModel`](@ref) by extracting and organizing all components
 (times, state, control, variable, dynamics, objective, constraints).
 
 # Arguments
-- `pre_ocp::PreModel`: The pre-model containing all problem components
+- `pre_ocp::CTModels.Building.PreModel`: The pre-model containing all problem components
 - `build_examodel=nothing`: Optional ExaModel builder function for GPU acceleration
 
 # Returns
-- `Model`: A complete, validated optimal control problem model
+- `CTModels.Models.Model`: A complete, validated optimal control problem model
 
 # Throws
-- `Exceptions.PreconditionError`: If time dependence has not been set via `time_dependence!`
+- `CTBase.Exceptions.PreconditionError`: If time dependence has not been set via [`CTModels.Building.time_dependence!`](@ref)
 
 # Example
 ```julia
-using CTModels
+using CTModels.Building
 
 # Create and configure a pre-model
 pre_ocp = PreModel()

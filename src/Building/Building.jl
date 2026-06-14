@@ -2,7 +2,7 @@
     Building
 
 Building module for CTModels — assembles [`CTModels.Building.PreModel`](@ref) (mutable problem under
-construction), all component mutators, and the `build` / `build_model` functions
+construction), all component mutators, and the [`CTModels.Building.build`](@ref) / [`CTModels.Building.build_model`](@ref) functions
 that convert a finished [`CTModels.Building.PreModel`](@ref) into an immutable [`CTModels.Models.Model`](@ref).
 
 # Organisation
@@ -46,6 +46,7 @@ include(joinpath(@__DIR__, "dynamics.jl"))
 include(joinpath(@__DIR__, "objective.jl"))
 include(joinpath(@__DIR__, "constraints.jl"))
 include(joinpath(@__DIR__, "definition.jl"))
+include(joinpath(@__DIR__, "constraint_composers.jl"))
 include(joinpath(@__DIR__, "build.jl"))
 
 # PreModel type
