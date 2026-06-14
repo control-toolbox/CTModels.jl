@@ -151,11 +151,10 @@ function _build_component_function_without_time(data)
     if data isa Function
         return data
     elseif data isa Real
-        return t -> data
+        return ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == 1
-            c = data[1]
-            return t -> c
+            return ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(
@@ -199,14 +198,12 @@ function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
         return data
     elseif data isa Real
-        return t -> data
+        return ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == length(time)
-            itp = Interpolation.ctinterpolate(time, data)
-            return t -> itp(t)
+            return Interpolation.ctinterpolate(time, data)
         elseif length(data) == 1
-            c = data[1]
-            return t -> c
+            return ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(
@@ -261,8 +258,7 @@ function _build_time_dependent_init(
     data_fmt = _format_init_data_for_grid(data)
     if data_fmt isa AbstractVector{<:Real}
         if length(data_fmt) == length(time)
-            itp = Interpolation.ctinterpolate(time, data_fmt)
-            return t -> itp(t)
+            return Interpolation.ctinterpolate(time, data_fmt)
         elseif length(data_fmt) == 1
             return if role === :state
                 initial_state(ocp, data_fmt)
@@ -297,7 +293,7 @@ function _build_time_dependent_init(
                 ),
             )
         end
-        return t -> itp(t)
+        return itp
     else
         throw(
             Exceptions.IncorrectArgument(

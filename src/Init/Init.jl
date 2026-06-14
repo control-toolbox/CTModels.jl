@@ -56,6 +56,9 @@ using ..Components
 using ..Models
 using ..Solutions
 
+# Callable structs for time-function representations
+include(joinpath(@__DIR__, "functors.jl"))
+
 # Load types first
 include(joinpath(@__DIR__, "types.jl"))
 
