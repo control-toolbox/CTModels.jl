@@ -645,9 +645,80 @@ function test_multi_grids()
         end
 
         # ====================================================================
-        # TODO: Add JSON tests once matrix dimension issues are fixed
-        # TODO: Add tests with path_constraints_dual on multi-grids
+        # Test 12: Backward Compatibility - Legacy key time_grid_dual → time_grid_path
+        # The JSON importer supports the old "time_grid_dual" key name that was
+        # used before the rename to "time_grid_path".
         # ====================================================================
+
+        Test.@testset "JSON backward compat: time_grid_dual key" begin
+            T_state = collect(LinRange(0.0, 1.0, 11))
+            T_control = collect(LinRange(0.0, 1.0, 6))
+            T_costate = collect(LinRange(0.0, 1.0, 11))
+            T_path = collect(LinRange(0.0, 1.0, 9))
+
+            X_func = Models.state(sol_unified)
+            U_func = Models.control(sol_unified)
+            P_func = Solutions.costate(sol_unified)
+
+            sol_multi = Solutions.build_solution(
+                ocp,
+                T_state,
+                T_control,
+                T_costate,
+                T_path,
+                X_func,
+                U_func,
+                v,
+                P_func;
+                objective=Solutions.objective(sol_unified),
+                iterations=Solutions.iterations(sol_unified),
+                constraints_violation=Solutions.constraints_violation(sol_unified),
+                message=Solutions.message(sol_unified),
+                status=Solutions.status(sol_unified),
+                successful=Solutions.successful(sol_unified),
+            )
+
+            # Export to JSON — produces "time_grid_path" key in the blob
+            Serialization.export_ocp_solution(
+                sol_multi; filename="compat_tgd_test", format=:JSON
+            )
+
+            # Simulate a legacy file by renaming time_grid_path → time_grid_dual
+            json_string = read("compat_tgd_test.json", String)
+            blob = JSON3.read(json_string)
+            Test.@test haskey(blob, "time_grid_path")
+
+            legacy_data = Dict{String,Any}()
+            for (k, val) in blob
+                key_str = string(k)
+                if key_str == "time_grid_path"
+                    legacy_data["time_grid_dual"] = val
+                else
+                    legacy_data[key_str] = val
+                end
+            end
+            open("compat_tgd_legacy.json", "w") do f
+                JSON3.write(f, legacy_data)
+            end
+
+            # Import from legacy file — should transparently map time_grid_dual
+            sol_reimported = Serialization.import_ocp_solution(
+                ocp; filename="compat_tgd_legacy", format=:JSON
+            )
+
+            # Verify the solution round-tripped correctly
+            Test.@test Solutions.time_grid_model(sol_reimported) isa
+                Solutions.MultipleTimeGridModel
+            Test.@test Solutions.time_grid(sol_reimported, :state) ≈ T_state atol = 1e-10
+            Test.@test Solutions.time_grid(sol_reimported, :control) ≈ T_control atol = 1e-10
+            Test.@test Solutions.time_grid(sol_reimported, :costate) ≈ T_costate atol = 1e-10
+            Test.@test Solutions.time_grid(sol_reimported, :dual) ≈ T_path atol = 1e-10
+            Test.@test Solutions.objective(sol_reimported) ≈
+                Solutions.objective(sol_unified) atol = 1e-8
+
+            remove_if_exists("compat_tgd_test.json")
+            remove_if_exists("compat_tgd_legacy.json")
+        end
     end
 end
 

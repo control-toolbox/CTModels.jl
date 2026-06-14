@@ -170,6 +170,63 @@ function test_print()
                 Test.@test occursin("optimal control problem is of the form:", s)
             end
         end
+
+        # ====================================================================
+        # INTEGRATION TESTS - Display variants
+        # ====================================================================
+
+        Test.@testset "Model Display - autonomous variant" begin
+            Test.@testset "show(Model) autonomous labels output correctly" begin
+                pre = Building.PreModel()
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 0)
+                dyn!(r, x, u, v) = r .= 0
+                Building.dynamics!(pre, dyn!)
+                Building.objective!(
+                    pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+                )
+                Building.time_dependence!(pre; autonomous=true)
+
+                model = Building.build(pre)
+
+                io = IOBuffer()
+                show(io, MIME"text/plain"(), model)
+                s = String(take!(io))
+
+                Test.@test occursin("autonomous", s)
+                Test.@test !occursin("non autonomous", s)
+                Test.@test occursin("optimal control problem is of the form:", s)
+            end
+        end
+
+        Test.@testset "Model Display - with optimisation variable" begin
+            Test.@testset "show(Model) with variable mentions v in output" begin
+                pre = Building.PreModel()
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 2, "v", ["v1", "v2"])
+                dyn!(r, t, x, u, v) = r .= 0
+                Building.dynamics!(pre, dyn!)
+                Building.objective!(
+                    pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
+                )
+                Building.time_dependence!(pre; autonomous=false)
+
+                model = Building.build(pre)
+
+                io = IOBuffer()
+                show(io, MIME"text/plain"(), model)
+                s = String(take!(io))
+
+                # "v" appears in the "where" clause for variable-dependent problems
+                Test.@test occursin("v", s)
+                Test.@test occursin("optimal control problem is of the form:", s)
+                Test.@test occursin("non autonomous", s)
+            end
+        end
     end
 end
 
