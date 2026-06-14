@@ -1540,18 +1540,14 @@ The function returns an exception if the label is not found in the model.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.path_constraints_nl`](@ref).
 """
-function constraint(model::Model, label::Symbol)::Tuple # not type stable
+function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple element types depend on the runtime label value
 
     # check if the label is in the path constraints
     cp = Components.path_constraints_nl(model)
     labels = cp[4] # vector of labels
     if label in labels
         indices = findall(x -> x == label, labels)
-        fc! = (r, t, x, u, v) -> begin
-            r_ = zeros(length(cp[1]))
-            cp[2](r_, t, x, u, v)
-            r .= r_[indices]
-        end
+        fc! = SubPathConstraint(cp, length(cp[1]), indices)
         return (
             :path,
             Core.to_out_of_place(fc!, length(indices)),
@@ -1565,11 +1561,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     labels = cp[4]
     if label in labels
         indices = findall(x -> x == label, labels)
-        fc! = (r, x0, xf, v) -> begin
-            r_ = zeros(length(cp[1]))
-            cp[2](r_, x0, xf, v)
-            r .= r_[indices]
-        end
+        fc! = SubBoundaryConstraint(cp, length(cp[1]), indices)
         return (
             :boundary,
             Core.to_out_of_place(fc!, length(indices)),
@@ -1579,11 +1571,11 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     end
 
     # Box constraints: each box tuple has the form (lb, ind, ub, labels, aliases)
-    function _lookup_box(cp)
+    function _lookup_box(cp, lbl)
         aliases = cp[5]
         idxs = Int[]
         for k in eachindex(aliases)
-            if label in aliases[k]
+            if lbl in aliases[k]
                 push!(idxs, k)
             end
         end
@@ -1592,15 +1584,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
 
     # state box
     cp = Components.state_constraints_box(model)
-    idxs = _lookup_box(cp)
+    idxs = _lookup_box(cp, label)
     if !isempty(idxs)
-        component_idxs = cp[2][idxs]
-        fc = (_, x, _, _) -> begin
-            length(component_idxs) == 1 ? x[component_idxs[1]] : x[component_idxs]
-        end
+        cidx = length(idxs) == 1 ? cp[2][idxs[1]] : cp[2][idxs]
         return (
             :state,
-            fc,
+            BoxProjection{:state}(cidx),
             length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
             length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )
@@ -1608,15 +1597,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
 
     # control box
     cp = Components.control_constraints_box(model)
-    idxs = _lookup_box(cp)
+    idxs = _lookup_box(cp, label)
     if !isempty(idxs)
-        component_idxs = cp[2][idxs]
-        fc = (_, _, u, _) -> begin
-            length(component_idxs) == 1 ? u[component_idxs[1]] : u[component_idxs]
-        end
+        cidx = length(idxs) == 1 ? cp[2][idxs[1]] : cp[2][idxs]
         return (
             :control,
-            fc,
+            BoxProjection{:control}(cidx),
             length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
             length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )
@@ -1624,15 +1610,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
 
     # variable box
     cp = Components.variable_constraints_box(model)
-    idxs = _lookup_box(cp)
+    idxs = _lookup_box(cp, label)
     if !isempty(idxs)
-        component_idxs = cp[2][idxs]
-        fc = (_, _, v) -> begin
-            length(component_idxs) == 1 ? v[component_idxs[1]] : v[component_idxs]
-        end
+        cidx = length(idxs) == 1 ? cp[2][idxs[1]] : cp[2][idxs]
         return (
             :variable,
-            fc,
+            BoxProjection{:variable}(cidx),
             length(idxs) == 1 ? cp[1][idxs[1]] : cp[1][idxs],
             length(idxs) == 1 ? cp[3][idxs[1]] : cp[3][idxs],
         )

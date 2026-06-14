@@ -484,6 +484,62 @@ function test_model()
             Test.@test (@allocated Models.variable_dimension(m)) == 0
         end
     end
+
+    Test.@testset "BoxProjection, SubPathConstraint, SubBoundaryConstraint" verbose=VERBOSE showtiming=SHOWTIMING begin
+
+        Test.@testset "BoxProjection{:state} — scalar" begin
+            f = Models.BoxProjection{:state}(2)
+            Test.@test f isa Function
+            Test.@test f(nothing, [10.0, 20.0, 30.0], nothing, nothing) == 20.0
+            Test.@test f(nothing, [10.0, 20.0, 30.0], nothing, nothing) isa Real
+            Test.@test contains(repr(f), "BoxProjection")
+            Test.@test contains(repr(MIME("text/plain"), f), "BoxProjection")
+        end
+
+        Test.@testset "BoxProjection{:state} — vector" begin
+            f = Models.BoxProjection{:state}([1, 3])
+            Test.@test f isa Function
+            Test.@test f(nothing, [10.0, 20.0, 30.0], nothing, nothing) == [10.0, 30.0]
+            Test.@test f(nothing, [10.0, 20.0, 30.0], nothing, nothing) isa AbstractVector
+        end
+
+        Test.@testset "BoxProjection{:control} — scalar" begin
+            f = Models.BoxProjection{:control}(1)
+            Test.@test f isa Function
+            Test.@test f(nothing, nothing, [5.0, 6.0], nothing) == 5.0
+        end
+
+        Test.@testset "BoxProjection{:variable} — scalar" begin
+            f = Models.BoxProjection{:variable}(2)
+            Test.@test f isa Function
+            Test.@test f(nothing, nothing, [7.0, 8.0]) == 8.0
+        end
+
+        Test.@testset "SubPathConstraint" begin
+            # stub cp tuple: (lb, fun!, ub, labels, aliases)
+            # fun!(r, t, x, u, v) fills r with [t, x[1], u[1]]
+            _cp_fun!(r, t, x, u, _) = (r[1] = t; r[2] = x[1]; r[3] = u[1])
+            cp = ([0.0, 0.0, 0.0], _cp_fun!, [1.0, 1.0, 1.0], [:a, :b, :c], [])
+            f = Models.SubPathConstraint(cp, 3, [2, 3])
+            r = zeros(2)
+            f(r, 0.5, [3.0], [7.0], nothing)
+            Test.@test f isa Function
+            Test.@test r == [3.0, 7.0]
+            Test.@test contains(repr(f), "SubPathConstraint")
+            Test.@test contains(repr(MIME("text/plain"), f), "SubPathConstraint")
+        end
+
+        Test.@testset "SubBoundaryConstraint" begin
+            _cp_fun!(r, x0, xf, _) = (r[1] = x0[1]; r[2] = xf[1])
+            cp = ([0.0, 0.0], _cp_fun!, [1.0, 1.0], [:a, :b], [])
+            f = Models.SubBoundaryConstraint(cp, 2, [2])
+            r = zeros(1)
+            f(r, [2.0], [9.0], nothing)
+            Test.@test f isa Function
+            Test.@test r == [9.0]
+            Test.@test contains(repr(f), "SubBoundaryConstraint")
+        end
+    end
 end
 
 end # module

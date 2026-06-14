@@ -10,13 +10,13 @@ solvers by providing starting trajectories for state, control, and variables.
 # Organisation
 
 - **types.jl**: Abstract and concrete initial guess types ([`CTModels.Init.InitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref))
-- **utils.jl**: Time grid and data formatting helpers ([`_format_time_grid`](@ref), [`_format_init_data_for_grid`](@ref))
-- **state.jl**: State initialisation functions ([`initial_state`](@ref))
-- **control.jl**: Control initialisation functions ([`initial_control`](@ref))
-- **variable.jl**: Variable initialisation functions ([`initial_variable`](@ref))
-- **builders.jl**: Component-level and time-grid builders ([`_build_block_with_components`](@ref), [`_build_time_dependent_init`](@ref))
-- **validation.jl**: Validation and construction from various formats ([`_validate_initial_guess`](@ref), [`_initial_guess_from_solution`](@ref))
-- **api.jl**: Public API for initial guess construction ([`initial_guess`](@ref), [`build_initial_guess`](@ref), [`validate_initial_guess`](@ref))
+- **utils.jl**: Time grid and data formatting helpers ([`CTModels.Init._format_time_grid`](@ref), [`CTModels.Init._format_init_data_for_grid`](@ref))
+- **state.jl**: State initialisation functions ([`CTModels.Init.initial_state`](@ref))
+- **control.jl**: Control initialisation functions ([`CTModels.Init.initial_control`](@ref))
+- **variable.jl**: Variable initialisation functions ([`CTModels.Init.initial_variable`](@ref))
+- **builders.jl**: Component-level and time-grid builders ([`CTModels.Init._build_block_with_components`](@ref), [`CTModels.Init._build_time_dependent_init`](@ref))
+- **validation.jl**: Validation and construction from various formats ([`CTModels.Init._validate_initial_guess`](@ref), [`CTModels.Init._initial_guess_from_solution`](@ref))
+- **api.jl**: Public API for initial guess construction ([`CTModels.Init.initial_guess`](@ref), [`CTModels.Init.build_initial_guess`](@ref), [`CTModels.Init.validate_initial_guess`](@ref))
 
 # Public API
 
@@ -41,7 +41,7 @@ The following functions are exported and accessible as `CTModels.function_name()
 
 External: `CTBase.Core`, `CTBase.Interpolation`, `CTBase.Exceptions`.
 
-See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Solutions`, `CTModels.Building`.
+See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref), [`CTModels.Solutions`](@ref), [`CTModels.Building`](@ref).
 """
 module Init
 
@@ -64,6 +64,7 @@ include(joinpath(@__DIR__, "utils.jl"))
 include(joinpath(@__DIR__, "state.jl"))
 include(joinpath(@__DIR__, "control.jl"))
 include(joinpath(@__DIR__, "variable.jl"))
+include(joinpath(@__DIR__, "init_functors.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
 include(joinpath(@__DIR__, "validation.jl"))
 include(joinpath(@__DIR__, "api.jl"))

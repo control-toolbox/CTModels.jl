@@ -74,6 +74,7 @@ import ..Building:
     __filename_export_import
 
 include(joinpath(@__DIR__, "solution_types.jl"))
+include(joinpath(@__DIR__, "dual_functors.jl"))
 include(joinpath(@__DIR__, "dual_model.jl"))
 include(joinpath(@__DIR__, "discretization_utils.jl"))
 include(joinpath(@__DIR__, "interpolation_helpers.jl"))

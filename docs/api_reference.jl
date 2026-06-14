@@ -64,6 +64,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             subdirectory=".",
             primary_modules=[
                 CTModels.Models => src(
+                    joinpath("Models", "constraint_functors.jl"),
                     joinpath("Models", "model.jl"),
                 ),
             ],
@@ -82,6 +83,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             subdirectory=".",
             primary_modules=[
                 CTModels.Building => src(
+                    joinpath("Building", "constraint_composers.jl"),
                     joinpath("Building", "pre_model.jl"),
                     joinpath("Building", "state.jl"),
                     joinpath("Building", "control.jl"),
@@ -113,6 +115,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             primary_modules=[
                 CTModels.Solutions => src(
                     joinpath("Solutions", "solution_types.jl"),
+                    joinpath("Solutions", "dual_functors.jl"),
                     joinpath("Solutions", "build_solution.jl"),
                     joinpath("Solutions", "dual_model.jl"),
                     joinpath("Solutions", "interpolation_helpers.jl"),
@@ -185,6 +188,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                     joinpath("Init", "Init.jl"),
                     joinpath("Init", "types.jl"),
                     joinpath("Init", "api.jl"),
+                    joinpath("Init", "init_functors.jl"),
                     joinpath("Init", "builders.jl"),
                     joinpath("Init", "state.jl"),
                     joinpath("Init", "control.jl"),

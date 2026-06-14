@@ -9,6 +9,12 @@ import CTModels.Models: Models
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+# Module-level stubs for CompositeConstraint tests (world-age safe)
+_path_stub1!(r, _, x, u, _)    = (r[1] = x[1] + u[1])
+_path_stub2!(r, t, x, _, _)    = (r[1] = x[2]; r[2] = t)
+_boundary_stub1!(r, x0, _, _)  = (r[1] = x0[1])
+_boundary_stub2!(r, _, xf, _)  = (r[1] = xf[1])
+
 # Top-level helper (module-level to avoid world-age issues)
 """
     _make_min_premodel(; state_dim, control_dim=1, variable_dim=0)
@@ -428,6 +434,49 @@ function test_constraints()
             Test.@test_nowarn Building.constraint!(
                 ocp_set, :state, lb=[0.5, 1.5], ub=[0.5, 1.5], label=:equality_state
             )
+        end
+
+        # ====================================================================
+        # UNIT TESTS - CompositeConstraint callable struct
+        # ====================================================================
+
+        # Top-level stubs (module-level, world-age safe)
+        # (defined at module top-level below)
+
+        Test.@testset "CompositeConstraint{:path} — two functions" begin
+            f = Building.CompositeConstraint{:path}(2, [1, 2], (_path_stub1!, _path_stub2!))
+            val = zeros(3)
+            f(val, 0.5, [3.0, 4.0], [7.0], nothing)
+            Test.@test f isa Function
+            Test.@test val[1] ≈ 3.0 + 7.0         # stub1: x[1] + u[1]
+            Test.@test val[2:3] ≈ [4.0, 0.5]      # stub2: [x[2], t]
+            Test.@test contains(repr(f), "CompositeConstraint")
+            Test.@test contains(repr(f), ":path")
+            Test.@test contains(repr(MIME("text/plain"), f), "CompositeConstraint")
+        end
+
+        Test.@testset "CompositeConstraint{:boundary} — two functions" begin
+            f = Building.CompositeConstraint{:boundary}(2, [1, 1], (_boundary_stub1!, _boundary_stub2!))
+            val = zeros(2)
+            f(val, [2.0], [5.0], nothing)
+            Test.@test f isa Function
+            Test.@test val[1] ≈ 2.0   # stub1: x0[1]
+            Test.@test val[2] ≈ 5.0   # stub2: xf[1]
+            Test.@test contains(repr(f), "CompositeConstraint")
+            Test.@test contains(repr(f), ":boundary")
+            Test.@test contains(repr(MIME("text/plain"), f), "CompositeConstraint")
+        end
+
+        Test.@testset "CompositeConstraint{:boundary} — concrete fields (no capture-by-ref bug)" begin
+            dims_orig = [1, 1]
+            f = Building.CompositeConstraint{:boundary}(2, dims_orig, (_boundary_stub1!, _boundary_stub2!))
+            dims_orig[1] = 99  # mutate the original after construction
+            val = zeros(2)
+            f(val, [2.0], [5.0], nothing)
+            # If fields were captured by reference, dims_orig[1]=99 would corrupt the loop.
+            # Correct behaviour: dims field is the value passed at construction time.
+            Test.@test val[1] ≈ 2.0
+            Test.@test val[2] ≈ 5.0
         end
     end
 end

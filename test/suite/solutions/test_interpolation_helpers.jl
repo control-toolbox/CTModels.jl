@@ -91,18 +91,19 @@ function test_interpolation_helpers()
         end
 
         Test.@testset "_wrap_scalar_and_deepcopy: scalar extraction" begin
-            test_func = t -> [t, 2t]
+            test_func_1d = t -> [t]       # 1-element vector: dim=1 → scalar extraction
+            test_func_2d = t -> [t, 2t]  # 2-element vector: dim=2 → vector pass-through
 
-            # dim=1: should extract scalar
-            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func, 1)
+            # dim=1: extracts scalar via `only` (requires length == 1)
+            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func_1d, 1)
             Test.@test wrapped(0.5) == 0.5  # Scalar, not vector
 
-            # dim=2: should keep vector
-            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func, 2)
+            # dim=2: keeps vector via `identity`
+            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func_2d, 2)
             Test.@test wrapped(0.5) == [0.5, 1.0]  # Vector
 
-            # dim=nothing: should keep vector
-            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func, nothing)
+            # dim=nothing: keeps vector via `identity`
+            wrapped = Solutions._wrap_scalar_and_deepcopy(test_func_2d, nothing)
             Test.@test wrapped(0.5) == [0.5, 1.0]
         end
 

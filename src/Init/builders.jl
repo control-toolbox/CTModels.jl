@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 Build an initialisation function combining block-level and component-level data.
 
 # Arguments
-- `ocp::Models.AbstractModel`: The optimal control problem.
+- `ocp::CTModels.Models.AbstractModel`: The optimal control problem.
 - `role::Symbol`: The component role (`:state` or `:control`).
 - `block_data`: Block-level initialisation data.
 - `comp_data::Dict{Int,Any}`: Component-level initialisation data indexed by component.
@@ -16,7 +16,9 @@ Build an initialisation function combining block-level and component-level data.
 - `Function`: A combined initialisation function that merges block and component data.
 
 # Throws
-- `Exceptions.IncorrectArgument`: If dimensions are incompatible or component indices are out of bounds.
+- `CTBase.Exceptions.IncorrectArgument`: If dimensions are incompatible or component indices are out of bounds.
+
+See also: [`CTModels.Init.MergedTrajectory`](@ref), [`CTModels.Init.initial_state`](@ref), [`CTModels.Init.initial_control`](@ref)
 """
 function _build_block_with_components(
     ocp::Models.AbstractModel, role::Symbol, block_data, comp_data::Dict{Int,Any}
@@ -52,63 +54,7 @@ function _build_block_with_components(
         comp_funs[i] = _build_component_function(data)
     end
 
-    return t -> begin
-        base_val = base_fun(t)
-        vec = if dim == 1
-            if base_val isa AbstractVector
-                copy(base_val)
-            else
-                [base_val]
-            end
-        else
-            if (base_val isa AbstractVector && length(base_val) != dim) ||
-                (!(base_val isa AbstractVector) && dim != 1)
-                throw(
-                    Exceptions.IncorrectArgument(
-                        "Block-level $role initialization has incompatible dimension";
-                        got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
-                        expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
-                        suggestion="Ensure the $role function returns the correct dimension",
-                        context="block-level $role initialization",
-                    ),
-                )
-            end
-            collect(base_val)
-        end
-
-        for (i, fi) in comp_funs
-            val = fi(t)
-            val_scalar = if val isa AbstractVector
-                if length(val) != 1
-                    throw(
-                        Exceptions.IncorrectArgument(
-                            "Component-level initialization must return scalar or length-1 vector";
-                            got="vector of length $(length(val)) for $role component $i",
-                            expected="scalar or length-1 vector",
-                            suggestion="Ensure the function for component $i returns a single value",
-                            context="component-level $role initialization",
-                        ),
-                    )
-                end
-                val[1]
-            else
-                val
-            end
-            if !(1 <= i <= dim)
-                throw(
-                    Exceptions.IncorrectArgument(
-                        "Component index out of bounds";
-                        got="index $i for $role",
-                        expected="index between 1 and $dim",
-                        suggestion="Use a valid component index in range 1:$dim",
-                        context="component-level $role initialization",
-                    ),
-                )
-            end
-            vec[i] = val_scalar
-        end
-        return dim == 1 ? vec[1] : vec
-    end
+    return MergedTrajectory(base_fun, comp_funs, dim, role)
 end
 
 """
@@ -121,6 +67,8 @@ Build a component-level initialisation function from data.
 
 # Returns
 - `Function`: A component initialisation function.
+
+See also: [`CTModels.Init._build_component_function_without_time`](@ref), [`CTModels.Init._build_component_function_with_time`](@ref)
 """
 function _build_component_function(data)
     # Support (time, data) tuples for per-component time grids
@@ -145,17 +93,18 @@ Build a component function from time-independent data (scalar, vector, or functi
 - `Function`: A component initialisation function.
 
 # Throws
-- `Exceptions.IncorrectArgument`: If the data type is unsupported or vector length is invalid.
+- `CTBase.Exceptions.IncorrectArgument`: If the data type is unsupported or vector length is invalid.
+
+See also: [`CTModels.Components.ConstantInTime`](@ref)
 """
 function _build_component_function_without_time(data)
     if data isa Function
         return data
     elseif data isa Real
-        return t -> data
+        return Components.ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == 1
-            c = data[1]
-            return t -> c
+            return Components.ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(
@@ -193,20 +142,20 @@ Build a component function from data with an associated time grid.
 - `Function`: A component initialisation function with time interpolation.
 
 # Throws
-- `Exceptions.IncorrectArgument`: If the data type is unsupported or time-grid mismatch occurs.
+- `CTBase.Exceptions.IncorrectArgument`: If the data type is unsupported or time-grid mismatch occurs.
+
+See also: [`CTModels.Components.ConstantInTime`](@ref), [`CTBase.Interpolation.ctinterpolate`](@extref)
 """
 function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
         return data
     elseif data isa Real
-        return t -> data
+        return Components.ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == length(time)
-            itp = Interpolation.ctinterpolate(time, data)
-            return t -> itp(t)
+            return Interpolation.ctinterpolate(time, data)
         elseif length(data) == 1
-            c = data[1]
-            return t -> c
+            return Components.ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(
@@ -237,7 +186,7 @@ $(TYPEDSIGNATURES)
 Build a time-dependent initialisation function from data and a time grid.
 
 # Arguments
-- `ocp::Models.AbstractModel`: The optimal control problem.
+- `ocp::CTModels.Models.AbstractModel`: The optimal control problem.
 - `role::Symbol`: The component role (`:state` or `:control`).
 - `data`: The data to interpolate (function, vector, or vector-of-vectors).
 - `time::AbstractVector`: The time grid.
@@ -246,7 +195,9 @@ Build a time-dependent initialisation function from data and a time grid.
 - `Function`: An interpolated initialisation function `t -> value(t)`.
 
 # Throws
-- `Exceptions.IncorrectArgument`: If data type is unsupported or dimensions/time-grid mismatch occurs.
+- `CTBase.Exceptions.IncorrectArgument`: If data type is unsupported or dimensions/time-grid mismatch occurs.
+
+See also: [`CTBase.Interpolation.ctinterpolate`](@extref), [`CTModels.Init.initial_state`](@ref), [`CTModels.Init.initial_control`](@ref)
 """
 function _build_time_dependent_init(
     ocp::Models.AbstractModel, role::Symbol, data, time::AbstractVector
@@ -261,8 +212,7 @@ function _build_time_dependent_init(
     data_fmt = _format_init_data_for_grid(data)
     if data_fmt isa AbstractVector{<:Real}
         if length(data_fmt) == length(time)
-            itp = Interpolation.ctinterpolate(time, data_fmt)
-            return t -> itp(t)
+            return Interpolation.ctinterpolate(time, data_fmt)
         elseif length(data_fmt) == 1
             return if role === :state
                 initial_state(ocp, data_fmt)
@@ -297,7 +247,7 @@ function _build_time_dependent_init(
                 ),
             )
         end
-        return t -> itp(t)
+        return itp
     else
         throw(
             Exceptions.IncorrectArgument(

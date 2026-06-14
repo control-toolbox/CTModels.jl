@@ -40,24 +40,17 @@ function dual(sol::Solution, model::Model, label::Symbol)
     cp = path_constraints_nl(model)
     labels = cp[4] # vector of labels
     if label in labels
-        # get all the indices of the label
         indices = findall(x -> x == label, labels)
-        # get the corresponding dual values
         duals = path_constraints_dual(sol)
-        if length(indices) == 1
-            return t -> duals(t)[indices[1]]
-        else
-            return t -> duals(t)[indices]
-        end
+        idx = length(indices) == 1 ? indices[1] : indices
+        return DualSlice(duals, idx)
     end
 
     # check if the label is in the boundary constraints
     cp = boundary_constraints_nl(model)
     labels = cp[4] # vector of labels
     if label in labels
-        # get all the indices of the label
         indices = findall(x -> x == label, labels)
-        # get the corresponding dual values
         duals = boundary_constraints_dual(sol)
         if length(indices) == 1
             return duals[indices[1]]
@@ -69,11 +62,11 @@ function dual(sol::Solution, model::Model, label::Symbol)
     # Box constraints: resolve `label` via the `aliases` field (cp[5]) of each
     # box tuple. `cp[2][k]` gives the primal component index for row `k`, which
     # is used to slice the per-component dual matrix/vector.
-    function _box_idxs(cp)
+    function _box_idxs(cp, lbl)
         aliases = cp[5]
         out = Int[]
         for k in eachindex(aliases)
-            if label in aliases[k]
+            if lbl in aliases[k]
                 push!(out, cp[2][k])
             end
         end
@@ -82,35 +75,27 @@ function dual(sol::Solution, model::Model, label::Symbol)
 
     # state box
     cp = state_constraints_box(model)
-    idxs = _box_idxs(cp)
+    idxs = _box_idxs(cp, label)
     if !isempty(idxs)
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
-        if length(idxs) == 1
-            i = idxs[1]
-            return t -> (duals_lb(t)[i] - duals_ub(t)[i])
-        else
-            return t -> (duals_lb(t)[idxs] - duals_ub(t)[idxs])
-        end
+        idx = length(idxs) == 1 ? idxs[1] : idxs
+        return BoxDualDiff(duals_lb, duals_ub, idx)
     end
 
     # control box
     cp = control_constraints_box(model)
-    idxs = _box_idxs(cp)
+    idxs = _box_idxs(cp, label)
     if !isempty(idxs)
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
-        if length(idxs) == 1
-            i = idxs[1]
-            return t -> (duals_lb(t)[i] - duals_ub(t)[i])
-        else
-            return t -> (duals_lb(t)[idxs] - duals_ub(t)[idxs])
-        end
+        idx = length(idxs) == 1 ? idxs[1] : idxs
+        return BoxDualDiff(duals_lb, duals_ub, idx)
     end
 
     # variable box
     cp = variable_constraints_box(model)
-    idxs = _box_idxs(cp)
+    idxs = _box_idxs(cp, label)
     if !isempty(idxs)
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)

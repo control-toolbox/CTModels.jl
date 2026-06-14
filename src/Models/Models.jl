@@ -36,6 +36,7 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using ..Components
 
+include(joinpath(@__DIR__, "constraint_functors.jl"))
 include(joinpath(@__DIR__, "model.jl"))
 
 # Types

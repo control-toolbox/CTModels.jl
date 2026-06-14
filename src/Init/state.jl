@@ -35,7 +35,7 @@ Convert a scalar state value to a constant function for 1D state problems.
 function initial_state(ocp::Models.AbstractModel, state::Real)
     dim = Models.state_dimension(ocp)
     if dim == 1
-        return t -> state
+        return Components.ConstantInTime(state)
     else
         throw(
             Exceptions.IncorrectArgument(
@@ -77,7 +77,7 @@ function initial_state(ocp::Models.AbstractModel, state::Vector{<:Real})
             ),
         )
     end
-    return t -> state
+    return Components.ConstantInTime(state)
 end
 
 """
@@ -95,9 +95,9 @@ Return a default state initialisation function when no state is provided.
 function initial_state(ocp::Models.AbstractModel, ::Nothing)
     dim = Models.state_dimension(ocp)
     if dim == 1
-        return t -> 0.1
+        return Components.ConstantInTime(0.1)
     else
-        return t -> fill(0.1, dim)
+        return Components.ConstantInTime(fill(0.1, dim))
     end
 end
 
