@@ -27,7 +27,7 @@ Get the index of the time variable from the free time model.
 # Returns
 - `Int`: The index into the optimisation variable.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.Base.time`](@ref).
+See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.initial_time`](@ref).
 """
 function index(model::FreeTimeModel)::Int
     return model.index

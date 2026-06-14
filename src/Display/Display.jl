@@ -34,7 +34,7 @@ The following are internal utilities (accessible via `Display.function_name`):
 
 External: `MLStyle`, `RecipesBase`, `MacroTools`.
 
-See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref), [`CTModels.Building`](@ref), [`CTModels.Solutions`](@ref).
+See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Building`, `CTModels.Solutions`.
 """
 module Display
 

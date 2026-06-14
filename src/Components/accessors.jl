@@ -409,7 +409,7 @@ Get the name of the time from the fixed time model.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Components.Base.time`](@ref).
+See also: [`CTModels.Components.initial_time`](@ref).
 """
 function name(model::FixedTimeModel{<:Time})::String
     return model.name
@@ -423,7 +423,7 @@ Get the name of the time from the free time model.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Components.index`](@ref), [`CTModels.Components.Base.time`](@ref).
+See also: [`CTModels.Components.index`](@ref), [`CTModels.Components.initial_time`](@ref).
 """
 function name(model::FreeTimeModel)::String
     return model.name

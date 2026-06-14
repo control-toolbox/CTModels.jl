@@ -829,7 +829,7 @@ Return the dimension of the boundary constraints.
 # Returns
 - `Dimension`: The boundary constraints dimension.
 
-See also: [`CTModels.Models.boundary_constraints_nl`](@ref), [`CTModels.Models.dim_path_constraints_nl`](@ref).
+See also: [`CTModels.Components.boundary_constraints_nl`](@ref), [`CTModels.Components.dim_path_constraints_nl`](@ref).
 """
 function Components.dim_boundary_constraints_nl(sol::Solution)::Dimension
     bc_dual = boundary_constraints_dual(sol)
@@ -847,7 +847,7 @@ Return the dimension of the path constraints.
 # Returns
 - `Dimension`: The path constraints dimension.
 
-See also: [`CTModels.Models.path_constraints_nl`](@ref), [`CTModels.Models.dim_boundary_constraints_nl`](@ref).
+See also: [`CTModels.Components.path_constraints_nl`](@ref), [`CTModels.Components.dim_boundary_constraints_nl`](@ref).
 """
 function Components.dim_path_constraints_nl(sol::Solution)::Dimension
     pc_dual = path_constraints_dual(sol)
@@ -1011,7 +1011,7 @@ Return the name of the initial time.
 # Returns
 - `String`: The initial time name.
 
-See also: [`CTModels.Models.final_time_name`](@ref), [`CTModels.Models.time_name`](@ref).
+See also: [`CTModels.Components.final_time_name`](@ref), [`CTModels.Components.time_name`](@ref).
 """
 function Components.initial_time_name(sol::Solution)::String
     return name(initial(sol.times))
@@ -1028,7 +1028,7 @@ Return the name of the final time.
 # Returns
 - `String`: The final time name.
 
-See also: [`CTModels.Models.initial_time_name`](@ref), [`CTModels.Models.time_name`](@ref).
+See also: [`CTModels.Components.initial_time_name`](@ref), [`CTModels.Components.time_name`](@ref).
 """
 function Components.final_time_name(sol::Solution)::String
     return name(final(sol.times))
@@ -1045,7 +1045,7 @@ Return the name of the time component.
 # Returns
 - `String`: The time component name.
 
-See also: [`CTModels.Models.initial_time_name`](@ref), [`CTModels.Models.final_time_name`](@ref).
+See also: [`CTModels.Components.initial_time_name`](@ref), [`CTModels.Components.final_time_name`](@ref).
 """
 function Components.time_name(sol::Solution)::String
     return time_name(sol.times)
@@ -1063,7 +1063,7 @@ Return the initial time of the solution.
 # Returns
 - `Real`: The initial time.
 
-See also: [`CTModels.Models.final_time`](@ref), [`CTModels.Models.initial_time_name`](@ref).
+See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.initial_time_name`](@ref).
 """
 function Components.initial_time(sol::Solution)::Real
     return initial_time(sol.times)
@@ -1080,7 +1080,7 @@ Return the final time of the solution.
 # Returns
 - `Real`: The final time.
 
-See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time_name`](@ref).
+See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time_name`](@ref).
 """
 function Components.final_time(sol::Solution)::Real
     return final_time(sol.times)
@@ -1097,7 +1097,7 @@ Check if the initial time is fixed.
 # Returns
 - `Bool`: `true` if the initial time is fixed, `false` otherwise.
 
-See also: [`CTModels.Models.has_free_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
 """
 function Components.has_fixed_initial_time(sol::Solution)::Bool
     return has_fixed_initial_time(sol.times)
@@ -1114,7 +1114,7 @@ Check if the initial time is free.
 # Returns
 - `Bool`: `true` if the initial time is free, `false` otherwise.
 
-See also: [`CTModels.Models.has_fixed_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
+See also: [`CTModels.Components.has_fixed_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
 """
 function Components.has_free_initial_time(sol::Solution)::Bool
     return has_free_initial_time(sol.times)
@@ -1131,7 +1131,7 @@ Check if the final time is fixed.
 # Returns
 - `Bool`: `true` if the final time is fixed, `false` otherwise.
 
-See also: [`CTModels.Models.has_free_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 function Components.has_fixed_final_time(sol::Solution)::Bool
     return has_fixed_final_time(sol.times)
@@ -1148,7 +1148,7 @@ Check if the final time is free.
 # Returns
 - `Bool`: `true` if the final time is free, `false` otherwise.
 
-See also: [`CTModels.Models.has_fixed_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
+See also: [`CTModels.Components.has_fixed_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 function Components.has_free_final_time(sol::Solution)::Bool
     return has_free_final_time(sol.times)
@@ -1165,7 +1165,7 @@ Return the times model.
 # Returns
 - `TM`: The times model.
 
-See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 function Models.times(
     sol::Solution{

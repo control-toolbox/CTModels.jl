@@ -41,7 +41,7 @@ The following functions are exported and accessible as `CTModels.function_name()
 
 External: `CTBase.Core`, `CTBase.Interpolation`, `CTBase.Exceptions`.
 
-See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref), [`CTModels.Solutions`](@ref), [`CTModels.Building`](@ref).
+See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Solutions`, `CTModels.Building`.
 """
 module Init
 
