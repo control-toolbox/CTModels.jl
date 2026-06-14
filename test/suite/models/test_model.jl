@@ -2,6 +2,7 @@ module TestOCPModel
 
 import Test: Test
 import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
 import CTModels.Building: Building
 import CTModels.Models: Models
 
@@ -245,6 +246,242 @@ function test_model()
         io = IOBuffer()
         redirect_stderr(devnull) do
             show(io, MIME"text/plain"(), pre_ocp)
+        end
+
+        # ====================================================================
+        # UNIT TESTS - is_autonomous / derived trait getters
+        # ====================================================================
+
+        Test.@testset "is_autonomous and derived traits" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+
+            pre_a = Building.PreModel()
+            Building.time!(pre_a; t0=0.0, tf=1.0)
+            Building.state!(pre_a, 1)
+            Building.control!(pre_a, 1)
+            Building.dynamics!(pre_a, _dyn!)
+            Building.objective!(pre_a, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre_a, quote end)
+            Building.time_dependence!(pre_a; autonomous=true)
+            m_aut = Building.build(pre_a)
+
+            pre_na = Building.PreModel()
+            Building.time!(pre_na; t0=0.0, tf=1.0)
+            Building.state!(pre_na, 1)
+            Building.control!(pre_na, 1)
+            Building.dynamics!(pre_na, _dyn!)
+            Building.objective!(pre_na, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre_na, quote end)
+            Building.time_dependence!(pre_na; autonomous=false)
+            m_na = Building.build(pre_na)
+
+            Test.@test Models.is_autonomous(m_aut) == true
+            Test.@test Models.is_nonautonomous(m_aut) == false
+            Test.@test Models.is_autonomous(m_na) == false
+            Test.@test Models.is_nonautonomous(m_na) == true
+
+            # Variable / control presence
+            pre_v = Building.PreModel()
+            Building.time!(pre_v; t0=0.0, tf=1.0)
+            Building.state!(pre_v, 2)
+            Building.variable!(pre_v, 2)
+            Building.dynamics!(pre_v, _dyn!)
+            Building.objective!(pre_v, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre_v, quote end)
+            Building.time_dependence!(pre_v; autonomous=false)
+            m_noctl = Building.build(pre_v)
+
+            Test.@test Models.has_variable(m_na) == false
+            Test.@test Models.has_control(m_na) == true
+            Test.@test Models.has_variable(m_noctl) == true
+            Test.@test Models.is_control_free(m_noctl) == true
+            Test.@test Models.has_control(m_noctl) == false
+        end
+
+        # ====================================================================
+        # UNIT TESTS - initial_time / final_time branches
+        # ====================================================================
+
+        Test.@testset "initial_time / final_time fixed" begin
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.5, tf=3.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            Test.@test Components.has_fixed_initial_time(m) == true
+            Test.@test Components.has_fixed_final_time(m) == true
+            Test.@test Components.initial_time(m) ≈ 0.5
+            Test.@test Components.final_time(m) ≈ 3.0
+        end
+
+        Test.@testset "initial_time / final_time free (vector)" begin
+            pre = Building.PreModel()
+            Building.variable!(pre, 2, "v", ["t0", "tf"])
+            Building.time!(pre; ind0=1, indf=2)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            Test.@test Components.has_free_initial_time(m) == true
+            Test.@test Components.has_free_final_time(m) == true
+            Test.@test Components.initial_time(m, [0.3, 2.5]) ≈ 0.3
+            Test.@test Components.final_time(m, [0.3, 2.5]) ≈ 2.5
+        end
+
+        Test.@testset "initial_time / final_time free (scalar)" begin
+            pre = Building.PreModel()
+            Building.variable!(pre, 1, "v", ["tf"])
+            Building.time!(pre; t0=0.0, indf=1)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            Test.@test Components.final_time(m, 2.0) ≈ 2.0
+        end
+
+        # ====================================================================
+        # ERROR TESTS - mayer / lagrange stubs on wrong objective type
+        # ====================================================================
+
+        Test.@testset "mayer / lagrange stubs" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+
+            # Model with Lagrange only → Components.mayer throws
+            pre_lag = Building.PreModel()
+            Building.time!(pre_lag; t0=0.0, tf=1.0)
+            Building.state!(pre_lag, 1)
+            Building.control!(pre_lag, 1)
+            Building.dynamics!(pre_lag, _dyn!)
+            Building.objective!(pre_lag, :min; lagrange=(t, x, u, v) -> u[1]^2)
+            Building.definition!(pre_lag, quote end)
+            Building.time_dependence!(pre_lag; autonomous=false)
+            m_lag = Building.build(pre_lag)
+
+            Test.@test_throws Exceptions.PreconditionError Components.mayer(m_lag)
+            Test.@test Components.has_mayer_cost(m_lag) == false
+            Test.@test Components.has_lagrange_cost(m_lag) == true
+
+            # Model with Mayer only → Components.lagrange throws
+            pre_may = Building.PreModel()
+            Building.time!(pre_may; t0=0.0, tf=1.0)
+            Building.state!(pre_may, 1)
+            Building.control!(pre_may, 1)
+            Building.dynamics!(pre_may, _dyn!)
+            Building.objective!(pre_may, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre_may, quote end)
+            Building.time_dependence!(pre_may; autonomous=false)
+            m_may = Building.build(pre_may)
+
+            Test.@test_throws Exceptions.PreconditionError Components.lagrange(m_may)
+            Test.@test Components.has_lagrange_cost(m_may) == false
+            Test.@test Components.has_mayer_cost(m_may) == true
+        end
+
+        # ====================================================================
+        # ERROR TESTS - get_build_examodel stub
+        # ====================================================================
+
+        Test.@testset "get_build_examodel stub" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)  # build_examodel = nothing
+
+            Test.@test_throws Exceptions.PreconditionError Models.get_build_examodel(m)
+        end
+
+        # ====================================================================
+        # ERROR TESTS - constraint label not found
+        # ====================================================================
+
+        Test.@testset "constraint label not found" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            Test.@test_throws Exceptions.IncorrectArgument Models.constraint(m, :nonexistent)
+        end
+
+        # ====================================================================
+        # QUALITY - @inferred on parametric getters
+        # ====================================================================
+
+        Test.@testset "@inferred parametric getters" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 2, "x", ["x1", "x2"])
+            Building.control!(pre, 1, "u", ["u"])
+            Building.variable!(pre, 1, "v", ["v"])
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            Test.@test_nowarn Test.@inferred Models.state(m)
+            Test.@test_nowarn Test.@inferred Models.control(m)
+            Test.@test_nowarn Test.@inferred Models.variable(m)
+            Test.@test_nowarn Test.@inferred Models.times(m)
+            Test.@test_nowarn Test.@inferred Models.state_dimension(m)
+            Test.@test_nowarn Test.@inferred Models.control_dimension(m)
+            Test.@test_nowarn Test.@inferred Models.variable_dimension(m)
+            Test.@test_nowarn Test.@inferred Models.is_autonomous(m)
+        end
+
+        # ====================================================================
+        # QUALITY - @allocated == 0 on hot dimension accessors
+        # ====================================================================
+
+        Test.@testset "@allocated dimension accessors" begin
+            _dyn!(r, _t, x, _u, _v) = (r .= x)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 2)
+            Building.control!(pre, 1)
+            Building.dynamics!(pre, _dyn!)
+            Building.objective!(pre, :min; mayer=(x0, xf, v) -> 0.0)
+            Building.definition!(pre, quote end)
+            Building.time_dependence!(pre; autonomous=false)
+            m = Building.build(pre)
+
+            # Warmup (triggers compilation)
+            _ = Models.state_dimension(m)
+            _ = Models.control_dimension(m)
+            _ = Models.variable_dimension(m)
+
+            Test.@test (@allocated Models.state_dimension(m)) == 0
+            Test.@test (@allocated Models.control_dimension(m)) == 0
+            Test.@test (@allocated Models.variable_dimension(m)) == 0
         end
     end
 end

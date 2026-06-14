@@ -1,6 +1,7 @@
 module TestOCPDualModel
 
 import Test: Test
+import CTBase.Exceptions: Exceptions
 import CTModels.Building: Building
 import CTModels.Models: Models
 import CTModels.Solutions: Solutions
@@ -267,6 +268,22 @@ function test_dual_model()
                 Test.@test Solutions.dual(sol, m, :v1) ≈ 1.0
                 Test.@test Solutions.dual(sol, m, :v2) ≈ 1.0
             end
+        end
+
+        # ====================================================================
+        # ERROR TESTS - dual() with unknown label
+        # ====================================================================
+
+        Test.@testset "dual() label not found → IncorrectArgument" begin
+            ocp = _build_model_with_state_box(;
+                state_dim=1, constraints=[(1:1, [0.0], [1.0], :known)]
+            )
+            m = Building.build(ocp)
+            lb = reshape([1.0, 2.0, 3.0], 3, 1)
+            ub = zeros(3, 1)
+            sol = _make_solution(m; state_dim=1, state_lb=lb, state_ub=ub)
+
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.dual(sol, m, :nonexistent)
         end
     end
 end

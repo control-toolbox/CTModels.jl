@@ -140,6 +140,25 @@ function test_initial_guess_validation()
             )
         end
 
+        Test.@testset "dimension validation - scalar variable on vdim=0 problem" begin
+            ocp = DummyOCP1DNoVar()
+
+            init_bad = Init.InitialGuess(t -> 0.1, t -> 0.1, 0.5)
+
+            Test.@test_throws Exceptions.IncorrectArgument Init.validate_initial_guess(
+                ocp, init_bad
+            )
+        end
+
+        Test.@testset "NamedTuple error - variable block on problem without variable" begin
+            ocp = DummyOCP1DNoVar()
+
+            # block-level :variable=0.5 on a vdim=0 problem → initial_variable throws immediately
+            Test.@test_throws Exceptions.IncorrectArgument Init.build_initial_guess(
+                ocp, (variable=0.5,)
+            )
+        end
+
         Test.@testset "warm-start from AbstractSolution" begin
             ocp = DummyOCP1DVar()
 
