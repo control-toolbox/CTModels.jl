@@ -6,7 +6,15 @@ $(TYPEDSIGNATURES)
 
 Return a scalar variable value for 1D variable problems.
 
-Throws `Exceptions.IncorrectArgument` if the variable dimension is not 1.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `variable::Real`: The scalar variable value.
+
+# Returns
+- `Real`: The variable value.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the variable dimension is not 1 or is 0.
 """
 function initial_variable(ocp::Models.AbstractModel, variable::Real)
     dim = Models.variable_dimension(ocp)
@@ -40,7 +48,15 @@ $(TYPEDSIGNATURES)
 
 Return a variable vector.
 
-Throws `Exceptions.IncorrectArgument` if the vector length does not match the variable dimension.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `variable::Vector{<:Real}`: The variable vector.
+
+# Returns
+- `Vector{<:Real}`: The variable vector unchanged.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the vector length does not match the variable dimension.
 """
 function initial_variable(ocp::Models.AbstractModel, variable::Vector{<:Real})
     dim = Models.variable_dimension(ocp)
@@ -64,7 +80,12 @@ $(TYPEDSIGNATURES)
 
 Return a default variable initialisation when no variable is provided.
 
-Returns an empty vector if `dim == 0`, `0.1` if `dim == 1`, or `fill(0.1, dim)` otherwise.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `::Nothing`: Indicates no variable provided.
+
+# Returns
+- `Union{Vector{<:Real}, Real}`: An empty vector if `dim == 0`, `0.1` if `dim == 1`, or `fill(0.1, dim)` otherwise.
 """
 function initial_variable(ocp::Models.AbstractModel, ::Nothing)
     dim = Models.variable_dimension(ocp)
@@ -82,7 +103,17 @@ $(TYPEDSIGNATURES)
 
 Handle time-grid variable initialization with (time, data) tuple.
 
-Interpolates the provided data over the time grid to create a callable function.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `variable::Tuple`: A 2-tuple `(time, data)` for time-grid interpolation.
+
+# Returns
+- `Function`: An interpolated function `t -> v(t)`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
+
+See also: [`CTModels.Init._build_time_dependent_init`](@ref).
 """
 function initial_variable(ocp::Models.AbstractModel, variable::Tuple)
     length(variable) == 2 || throw(
@@ -104,5 +135,11 @@ end
 $(TYPEDSIGNATURES)
 
 Return the variable value from an initial guess.
+
+# Arguments
+- `init::AbstractInitialGuess`: The initial guess.
+
+# Returns
+- `Union{Real, Vector{<:Real}}`: The variable value (scalar or vector).
 """
 Models.variable(init::AbstractInitialGuess) = init.variable

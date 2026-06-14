@@ -9,7 +9,7 @@ $(TYPEDEF)
 Mutable optimal control problem model under construction.
 
 A `PreModel` is used to incrementally define an optimal control problem before
-building it into an immutable [`Model`](@ref CTModels.Models.Model). Fields can be set in any order
+building it into an immutable [`CTModels.Models.Model`](@ref). Fields can be set in any order
 and the model is validated before building.
 
 # Fields
@@ -22,7 +22,7 @@ and the model is validated before building.
 - `objective::Union{AbstractObjectiveModel,Nothing}`: Cost functional.
 - `constraints::ConstraintsDictType`: Dictionary of constraints being built.
 - `definition::AbstractDefinition`: Symbolic definition; defaults to
-  [`EmptyDefinition`](@ref) and becomes a [`Definition`](@ref) when
+  [`CTModels.Components.EmptyDefinition`](@ref) and becomes a [`CTModels.Components.Definition`](@ref) when
   [`definition!`](@ref) is called with a real expression.
 - `autonomous::Union{Bool,Nothing}`: Whether the system is autonomous.
 
@@ -52,6 +52,9 @@ end
 $(TYPEDSIGNATURES)
 
 Return `true` if `x` is not `nothing`.
+
+# Returns
+- `Bool`
 """
 __is_set(x) = !isnothing(x)
 
@@ -59,6 +62,9 @@ __is_set(x) = !isnothing(x)
 $(TYPEDSIGNATURES)
 
 Return `true` if the autonomous flag has been set in the `PreModel`.
+
+# Returns
+- `Bool`
 """
 __is_autonomous_set(ocp::PreModel)::Bool = __is_set(ocp.autonomous)
 
@@ -66,6 +72,9 @@ __is_autonomous_set(ocp::PreModel)::Bool = __is_set(ocp.autonomous)
 $(TYPEDSIGNATURES)
 
 Return `true` if times have been set in the `PreModel`.
+
+# Returns
+- `Bool`
 """
 __is_times_set(ocp::PreModel)::Bool = __is_set(ocp.times)
 
@@ -73,6 +82,9 @@ __is_times_set(ocp::PreModel)::Bool = __is_set(ocp.times)
 $(TYPEDSIGNATURES)
 
 Return `true` if state has been set in the `PreModel`.
+
+# Returns
+- `Bool`
 """
 __is_state_set(ocp::PreModel)::Bool = __is_set(ocp.state)
 
@@ -80,6 +92,9 @@ __is_state_set(ocp::PreModel)::Bool = __is_set(ocp.state)
 $(TYPEDSIGNATURES)
 
 Return `true` if `c` is an `EmptyControlModel`.
+
+# Returns
+- `Bool`
 """
 __is_control_empty(c) = c isa EmptyControlModel
 
@@ -87,6 +102,9 @@ __is_control_empty(c) = c isa EmptyControlModel
 $(TYPEDSIGNATURES)
 
 Return `true` if the control field of the `PreModel` is an `EmptyControlModel`.
+
+# Returns
+- `Bool`
 """
 __is_control_empty(ocp::PreModel)::Bool = __is_control_empty(ocp.control)
 
@@ -94,6 +112,9 @@ __is_control_empty(ocp::PreModel)::Bool = __is_control_empty(ocp.control)
 $(TYPEDSIGNATURES)
 
 Return `true` if `v` is an `EmptyVariableModel`.
+
+# Returns
+- `Bool`
 """
 __is_variable_empty(v) = v isa EmptyVariableModel
 
@@ -101,20 +122,29 @@ __is_variable_empty(v) = v isa EmptyVariableModel
 $(TYPEDSIGNATURES)
 
 Return `true` if the variable field of the `PreModel` is an `EmptyVariableModel`.
+
+# Returns
+- `Bool`
 """
 __is_variable_empty(ocp::PreModel)::Bool = __is_variable_empty(ocp.variable)
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if `d` is an [`EmptyDefinition`](@ref).
+Return `true` if `d` is an [`CTModels.Components.EmptyDefinition`](@ref).
+
+# Returns
+- `Bool`
 """
 __is_definition_empty(d) = d isa EmptyDefinition
 
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if the definition field of the `PreModel` is an [`EmptyDefinition`](@ref).
+Return `true` if the definition field of the `PreModel` is an [`CTModels.Components.EmptyDefinition`](@ref).
+
+# Returns
+- `Bool`
 """
 __is_definition_empty(ocp::PreModel)::Bool = __is_definition_empty(ocp.definition)
 
@@ -122,6 +152,9 @@ __is_definition_empty(ocp::PreModel)::Bool = __is_definition_empty(ocp.definitio
 $(TYPEDSIGNATURES)
 
 Return `true` if dynamics have been set in the `PreModel`.
+
+# Returns
+- `Bool`
 """
 __is_dynamics_set(ocp::PreModel)::Bool = __is_set(ocp.dynamics)
 
@@ -129,6 +162,9 @@ __is_dynamics_set(ocp::PreModel)::Bool = __is_set(ocp.dynamics)
 $(TYPEDSIGNATURES)
 
 Return `true` if objective has been set in the `PreModel`.
+
+# Returns
+- `Bool`
 """
 __is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
 
@@ -136,6 +172,9 @@ __is_objective_set(ocp::PreModel)::Bool = __is_set(ocp.objective)
 $(TYPEDSIGNATURES)
 
 Return the state dimension of the `PreModel`.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to query.
 
 # Throws
 
@@ -160,6 +199,12 @@ $(TYPEDSIGNATURES)
 Return `true` if dynamics cover all state components in the `PreModel`.
 
 For component-wise dynamics, checks that all state indices are covered.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to check.
+
+# Returns
+- `Bool`
 """
 function __is_dynamics_complete(ocp::PreModel)::Bool
     if isnothing(ocp.dynamics)
@@ -203,6 +248,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return true if all the required fields are set in the PreModel.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to check.
+
+# Returns
+- `Bool`
 """
 function __is_consistent(ocp::PreModel)::Bool
     return __is_times_set(ocp) &&
@@ -216,6 +267,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return true if nothing has been set.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to check.
+
+# Returns
+- `Bool`
 """
 function __is_empty(ocp::PreModel)::Bool
     return !__is_times_set(ocp) &&

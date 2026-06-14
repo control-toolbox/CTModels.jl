@@ -15,6 +15,40 @@ and all solution accessors (trajectories, duals, solver metadata).
   `Base.show(::Solution)` (temporary — moves to Display in Phase E),
   `_serialize_solution` (temporary — moves to Serialization in Phase F).
 
+# Public API
+
+Exported types:
+- `AbstractSolution`, `Solution`
+- `AbstractTimeGridModel`, `UnifiedTimeGridModel`, `MultipleTimeGridModel`, `EmptyTimeGridModel`
+- `AbstractDualModel`, `DualModel`
+- `AbstractSolverInfos`, `SolverInfos`
+
+Exported functions:
+- `build_solution`: Main constructor for solutions
+- `clean_component_symbols`: Clean and validate component symbols
+- `is_empty`: Check if time grid is empty
+- `time_grid_model`: Get time grid model from solution
+- `dual`: Get dual by label
+- `path_constraints_dual`, `boundary_constraints_dual`: Dual accessors
+- `state_constraints_lb_dual`, `state_constraints_ub_dual`: State dual accessors
+- `control_constraints_lb_dual`, `control_constraints_ub_dual`: Control dual accessors
+- `variable_constraints_lb_dual`, `variable_constraints_ub_dual`: Variable dual accessors
+
+# Dependencies
+
+- CTBase: Core types and exceptions
+- CTModels.Components: Model components
+- CTModels.Models: Model types and accessors
+- CTBase.Components: Time and state components
+- Interpolations.jl: Trajectory interpolation
+- LinearAlgebra: Vector operations
+
+# See also
+
+- [`CTModels.Models`](@ref): Model types and building
+- [`CTModels.Components`](@ref): Model components
+- [`CTModels.Building`](@ref): Model construction
+- [`CTModels.Serialization`](@ref): Solution import/export
 """
 module Solutions
 

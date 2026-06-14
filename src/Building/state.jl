@@ -7,6 +7,12 @@ Define the state dimension and possibly the names of each component.
 
     You must use state! only once to set the state dimension.
 
+# Arguments
+- `ocp::PreModel`: The optimal control problem model.
+- `n::Dimension`: The state dimension (number of state components).
+- `name::Union{String,Symbol}` (optional): The name of the state variable (default: "x").
+- `components_names::Vector{<:Union{String,Symbol}}` (optional): Names of the state components (default: automatically generated).
+
 # Examples
 
 Each call below starts from a fresh `PreModel` (`state!` may be used only once per
@@ -16,24 +22,24 @@ names:
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 1);
+julia> ocp = PreModel(); state!(ocp, 1);
 
-julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+julia> state_dimension(ocp), state_components(ocp)
 (1, ["x"])
 
-julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2);
+julia> ocp = PreModel(); state!(ocp, 2);
 
-julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+julia> state_dimension(ocp), state_components(ocp)
 (2, ["x₁", "x₂"])
 
-julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y");
+julia> ocp = PreModel(); state!(ocp, 2, "y");
 
-julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+julia> state_dimension(ocp), state_components(ocp)
 (2, ["y₁", "y₂"])
 
-julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y", ["u", "v"]);
+julia> ocp = PreModel(); state!(ocp, 2, "y", ["u", "v"]);
 
-julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
+julia> state_dimension(ocp), state_components(ocp)
 (2, ["u", "v"])
 ```
 
@@ -48,6 +54,11 @@ julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 - `Exceptions.IncorrectArgument`: If component names contain duplicates
 - `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
 - `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.control!`](@ref), [`CTModels.Building.variable!`](@ref), [`CTModels.Building.time!`](@ref), [`CTModels.Components.state_dimension`](@ref).
 """
 function state!(
     ocp::PreModel,

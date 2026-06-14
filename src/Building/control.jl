@@ -16,25 +16,27 @@ This function sets the control dimension and optionally allows specifying the co
 
 # Examples
 ```julia-repl
-julia> control!(ocp, 1)
+julia> using CTModels
+
+julia> ocp = PreModel(); control!(ocp, 1)
 julia> control_dimension(ocp)
 1
 julia> control_components(ocp)
 ["u"]
 
-julia> control!(ocp, 1, "v")
+julia> ocp = PreModel(); control!(ocp, 1, "v")
 julia> control_components(ocp)
 ["v"]
 
-julia> control!(ocp, 2)
+julia> ocp = PreModel(); control!(ocp, 2)
 julia> control_components(ocp)
 ["u₁", "u₂"]
 
-julia> control!(ocp, 2, :v)
+julia> ocp = PreModel(); control!(ocp, 2, :v)
 julia> control_components(ocp)
 ["v₁", "v₂"]
 
-julia> control!(ocp, 2, "v", ["a", "b"])
+julia> ocp = PreModel(); control!(ocp, 2, "v", ["a", "b"])
 julia> control_components(ocp)
 ["a", "b"]
 ```
@@ -50,6 +52,11 @@ julia> control_components(ocp)
 - `Exceptions.IncorrectArgument`: If component names contain duplicates
 - `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components
 - `Exceptions.IncorrectArgument`: If any component name conflicts with existing names
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.variable!`](@ref), [`CTModels.Building.dynamics!`](@ref), [`CTModels.Components.control_dimension`](@ref).
 """
 function control!(
     ocp::PreModel,

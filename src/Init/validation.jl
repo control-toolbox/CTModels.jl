@@ -6,7 +6,15 @@ $(TYPEDSIGNATURES)
 
 Internal validation of an `InitialGuess`.
 
-Samples the state and control functions at a test time and verifies dimensions.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `init::InitialGuess`: The initial guess to validate.
+
+# Returns
+- `InitialGuess`: The validated initial guess.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If dimensions or types are incompatible.
 """
 function _validate_initial_guess(ocp::Models.AbstractModel, init::InitialGuess)
     # Dimensions from the OCP
@@ -138,9 +146,15 @@ $(TYPEDSIGNATURES)
 
 Build an initial guess from a previous solution (warm start).
 
-Extracts state, control, and variable trajectories from the solution.
-Dimensional consistency is checked against the solution metadata; final
-validation against the OCP is performed by `build_initial_guess`.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `sol::Solutions.AbstractSolution`: The previous solution.
+
+# Returns
+- `InitialGuess`: An initial guess constructed from the solution.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If dimensions do not match between the problem and solution.
 """
 function _initial_guess_from_solution(ocp::Models.AbstractModel, sol::Solutions.AbstractSolution)
     # Basic dimensional consistency checks
@@ -190,9 +204,15 @@ $(TYPEDSIGNATURES)
 
 Build an initial guess from a `NamedTuple`.
 
-Parses keys for state, control, variable (by name or component) and constructs
-the appropriate initialisation functions. Validation against the OCP is
-performed by `build_initial_guess`.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `init_data::NamedTuple`: The initial guess data with named fields.
+
+# Returns
+- `InitialGuess`: An initial guess constructed from the NamedTuple.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If keys are invalid, dimensions mismatch, or specifications are duplicated.
 """
 function _initial_guess_from_namedtuple(ocp::Models.AbstractModel, init_data::NamedTuple)
     # Names and component maps from the OCP
@@ -506,8 +526,12 @@ $(TYPEDSIGNATURES)
 
 Build an initial guess from a pre-initialisation object.
 
-Converts raw data into functions and trajectories. Validation against the OCP
-is performed by `build_initial_guess`.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `pre::PreInitialGuess`: The pre-initialisation container.
+
+# Returns
+- `InitialGuess`: An initial guess constructed from the pre-initialisation data.
 """
 function _initial_guess_from_preinit(ocp::Models.AbstractModel, pre::PreInitialGuess)
     x = initial_state(ocp, pre.state)

@@ -5,26 +5,30 @@
 """
 $(TYPEDSIGNATURES)
 
-Print a [`Components.EmptyDefinition`](@ref): no output is produced.
+Print a [`CTModels.Components.EmptyDefinition`](@ref): no output is produced.
 
-Returns `false` to indicate that nothing was printed.
+# Returns
+- `Bool`: `false` to indicate that nothing was printed.
 """
 _print_abstract_definition(::IO, ::Components.EmptyDefinition)::Bool = false
 
 """
 $(TYPEDSIGNATURES)
 
-Print a [`Components.Definition`](@ref) under an "Abstract definition:" header.
+Print a [`CTModels.Components.Definition`](@ref) under an "Abstract definition:" header.
 
 Block expressions are unfolded line-by-line; other expression heads are
 printed as a single indented entry.
-
-Returns `true` to indicate that output was produced.
 
 # Arguments
 
 - `io::IO`: The output stream.
 - `d::Definition`: The symbolic definition to display.
+
+# Returns
+- `Bool`: `true` to indicate that output was produced.
+
+See also: [`CTModels.Display.__print`](@ref).
 """
 function _print_abstract_definition(io::IO, d::Components.Definition)::Bool
     _print_ansi_styled(io, "Abstract definition:\n\n", :default, true)
@@ -40,9 +44,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display method for any [`Components.AbstractDefinition`](@ref).
+Display method for any [`CTModels.Components.AbstractDefinition`](@ref).
 
 Delegates to [`_print_abstract_definition`](@ref).
+
+# Returns
+- `Nothing`: Prints to `io` and returns nothing.
+
+See also: [`CTModels.Display._print_abstract_definition`](@ref).
 """
 function Base.show(io::IO, ::MIME"text/plain", d::Components.AbstractDefinition)
     return _print_abstract_definition(io, d)

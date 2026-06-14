@@ -16,8 +16,10 @@ This function registers a named variable (e.g. "state", "control", or other) to 
 
 # Examples
 ```julia-repl
-julia> variable!(ocp, 1, "v")
-julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
+julia> using CTModels
+
+julia> ocp = PreModel(); variable!(ocp, 1, "v")
+julia> ocp = PreModel(); variable!(ocp, 2, "v", ["v₁", "v₂"])
 ```
 
 # Throws
@@ -32,6 +34,11 @@ julia> variable!(ocp, 2, "v", ["v₁", "v₂"])
 - `Exceptions.IncorrectArgument`: If component names contain duplicates (when q > 0)
 - `Exceptions.IncorrectArgument`: If name conflicts with existing names in other components (when q > 0)
 - `Exceptions.IncorrectArgument`: If any component name conflicts with existing names (when q > 0)
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.control!`](@ref), [`CTModels.Components.variable_dimension`](@ref).
 """
 function variable!(
     ocp::PreModel,

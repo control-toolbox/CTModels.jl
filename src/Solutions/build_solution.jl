@@ -579,6 +579,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the state.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The state dimension.
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_components`](@ref).
 """
 function Models.state_dimension(sol::Solution)::Dimension
     return dimension(sol.state)
@@ -589,6 +596,13 @@ $(TYPEDSIGNATURES)
 
 Return the names of the components of the state.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Vector{String}`: The state component names.
+
+See also: [`CTModels.Models.state_dimension`](@ref), [`CTModels.Models.state_name`](@ref).
 """
 function Models.state_components(sol::Solution)::Vector{String}
     return components(sol.state)
@@ -599,6 +613,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the state.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The state name.
+
+See also: [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function Models.state_name(sol::Solution)::String
     return name(sol.state)
@@ -609,11 +630,20 @@ $(TYPEDSIGNATURES)
 
 Return the state as a function of time.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `TS`: The state function `t -> x(t)`.
+
+# Example
 ```julia-repl
 julia> x  = CTModels.state(sol)
 julia> t0 = CTModels.time_grid(sol)[1]
 julia> x0 = x(t0) # state at the initial time
 ```
+
+See also: [`CTModels.Models.state_dimension`](@ref), [`CTModels.Models.state_components`](@ref).
 """
 function Models.state(
     sol::Solution{
@@ -637,6 +667,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the control.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The control dimension.
+
+See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_components`](@ref).
 """
 function Models.control_dimension(sol::Solution)::Dimension
     return dimension(sol.control)
@@ -647,6 +684,13 @@ $(TYPEDSIGNATURES)
 
 Return the names of the components of the control.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Vector{String}`: The control component names.
+
+See also: [`CTModels.Models.control_dimension`](@ref), [`CTModels.Models.control_name`](@ref).
 """
 function Models.control_components(sol::Solution)::Vector{String}
     return components(sol.control)
@@ -657,6 +701,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the control.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The control name.
+
+See also: [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function Models.control_name(sol::Solution)::String
     return name(sol.control)
@@ -667,8 +718,13 @@ $(TYPEDSIGNATURES)
 
 Return the interpolation type of the control.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
 # Returns
 - `Symbol`: The interpolation type (`:constant` or `:linear`).
+
+See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_interpolation(sol::Solution)::Symbol
     return interpolation(sol.control)
@@ -679,11 +735,20 @@ $(TYPEDSIGNATURES)
 
 Return the control as a function of time.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `TS`: The control function `t -> u(t)`.
+
+# Example
 ```julia-repl
 julia> u  = CTModels.control(sol)
 julia> t0 = CTModels.time_grid(sol)[1]
 julia> u0 = u(t0) # control at the initial time
 ```
+
+See also: [`CTModels.Models.control_dimension`](@ref), [`CTModels.Models.control_components`](@ref).
 """
 function Models.control(
     sol::Solution{
@@ -707,6 +772,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the variable.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The variable dimension.
+
+See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
 function Models.variable_dimension(sol::Solution)::Dimension
     return dimension(sol.variable)
@@ -717,6 +789,13 @@ $(TYPEDSIGNATURES)
 
 Return the names of the components of the variable.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Vector{String}`: The variable component names.
+
+See also: [`CTModels.Models.variable_dimension`](@ref), [`CTModels.Models.variable_name`](@ref).
 """
 function Models.variable_components(sol::Solution)::Vector{String}
     return components(sol.variable)
@@ -727,6 +806,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the variable.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The variable name.
+
+See also: [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function Models.variable_name(sol::Solution)::String
     return name(sol.variable)
@@ -737,6 +823,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The boundary constraints dimension.
+
+See also: [`CTModels.Models.boundary_constraints_nl`](@ref), [`CTModels.Models.dim_path_constraints_nl`](@ref).
 """
 function Components.dim_boundary_constraints_nl(sol::Solution)::Dimension
     bc_dual = boundary_constraints_dual(sol)
@@ -748,6 +841,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the path constraints.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The path constraints dimension.
+
+See also: [`CTModels.Models.path_constraints_nl`](@ref), [`CTModels.Models.dim_boundary_constraints_nl`](@ref).
 """
 function Components.dim_path_constraints_nl(sol::Solution)::Dimension
     pc_dual = path_constraints_dual(sol)
@@ -764,6 +864,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the variable box constraints duals.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The variable box constraints duals dimension.
+
+See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@ref), [`CTModels.Solutions.variable_constraints_ub_dual`](@ref).
 """
 function dim_dual_variable_constraints_box(sol::Solution)::Dimension
     vc_lb_dual = variable_constraints_lb_dual(sol)
@@ -774,6 +881,15 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dimension of a dual value, evaluating at initial time.
+
+# Arguments
+- `dual::Union{Nothing, Function}`: The dual function or nothing.
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The dual dimension (0 if dual is nothing).
+
+See also: [`CTModels.Solutions.dim_dual_state_constraints_box`](@ref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@ref).
 """
 _dual_dimension(::Nothing, ::Solution)::Dimension = 0
 _dual_dimension(dual::Function, sol::Solution)::Dimension = length(dual(initial_time(sol)))
@@ -783,6 +899,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the box constraints duals on state.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The state box constraints duals dimension.
+
+See also: [`CTModels.Solutions.state_constraints_lb_dual`](@ref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@ref).
 """
 function dim_dual_state_constraints_box(sol::Solution)::Dimension
     return _dual_dimension(state_constraints_lb_dual(sol), sol)
@@ -793,6 +916,13 @@ $(TYPEDSIGNATURES)
 
 Return the dimension of the box constraints duals on control.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Dimension`: The control box constraints duals dimension.
+
+See also: [`CTModels.Solutions.control_constraints_lb_dual`](@ref), [`CTModels.Solutions.dim_dual_state_constraints_box`](@ref).
 """
 function dim_dual_control_constraints_box(sol::Solution)::Dimension
     return _dual_dimension(control_constraints_lb_dual(sol), sol)
@@ -803,9 +933,18 @@ $(TYPEDSIGNATURES)
 
 Return the variable or `nothing`.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `TS`: The variable value (number or vector), or `nothing`.
+
+# Example
 ```julia-repl
 julia> v = CTModels.variable(sol)
 ```
+
+See also: [`CTModels.Models.variable_dimension`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
 function Models.variable(
     sol::Solution{
@@ -829,11 +968,20 @@ $(TYPEDSIGNATURES)
 
 Return the costate as a function of time.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Co`: The costate function `t -> λ(t)`.
+
+# Example
 ```julia-repl
 julia> p  = CTModels.costate(sol)
 julia> t0 = CTModels.time_grid(sol)[1]
 julia> p0 = p(t0) # costate at the initial time
 ```
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Solutions.dual`](@ref).
 """
 function costate(
     sol::Solution{
@@ -857,6 +1005,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the initial time.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The initial time name.
+
+See also: [`CTModels.Models.final_time_name`](@ref), [`CTModels.Models.time_name`](@ref).
 """
 function Components.initial_time_name(sol::Solution)::String
     return name(initial(sol.times))
@@ -867,6 +1022,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the final time.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The final time name.
+
+See also: [`CTModels.Models.initial_time_name`](@ref), [`CTModels.Models.time_name`](@ref).
 """
 function Components.final_time_name(sol::Solution)::String
     return name(final(sol.times))
@@ -877,6 +1039,13 @@ $(TYPEDSIGNATURES)
 
 Return the name of the time component.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `String`: The time component name.
+
+See also: [`CTModels.Models.initial_time_name`](@ref), [`CTModels.Models.final_time_name`](@ref).
 """
 function Components.time_name(sol::Solution)::String
     return time_name(sol.times)
@@ -887,6 +1056,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the initial time of the solution.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Real`: The initial time.
+
+See also: [`CTModels.Models.final_time`](@ref), [`CTModels.Models.initial_time_name`](@ref).
 """
 function Components.initial_time(sol::Solution)::Real
     return initial_time(sol.times)
@@ -896,6 +1073,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the final time of the solution.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Real`: The final time.
+
+See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time_name`](@ref).
 """
 function Components.final_time(sol::Solution)::Real
     return final_time(sol.times)
@@ -905,6 +1090,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the initial time is fixed.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Bool`: `true` if the initial time is fixed, `false` otherwise.
+
+See also: [`CTModels.Models.has_free_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
 """
 function Components.has_fixed_initial_time(sol::Solution)::Bool
     return has_fixed_initial_time(sol.times)
@@ -914,6 +1107,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the initial time is free.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Bool`: `true` if the initial time is free, `false` otherwise.
+
+See also: [`CTModels.Models.has_fixed_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
 """
 function Components.has_free_initial_time(sol::Solution)::Bool
     return has_free_initial_time(sol.times)
@@ -923,6 +1124,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the final time is fixed.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Bool`: `true` if the final time is fixed, `false` otherwise.
+
+See also: [`CTModels.Models.has_free_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 function Components.has_fixed_final_time(sol::Solution)::Bool
     return has_fixed_final_time(sol.times)
@@ -932,6 +1141,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the final time is free.
+
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `Bool`: `true` if the final time is free, `false` otherwise.
+
+See also: [`CTModels.Models.has_fixed_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 function Components.has_free_final_time(sol::Solution)::Bool
     return has_free_final_time(sol.times)
@@ -942,6 +1159,13 @@ $(TYPEDSIGNATURES)
 
 Return the times model.
 
+# Arguments
+- `sol::Solution`: The optimal control solution.
+
+# Returns
+- `TM`: The times model.
+
+See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 function Models.times(
     sol::Solution{
@@ -965,6 +1189,13 @@ $(TYPEDSIGNATURES)
 
 Return the time grid for solutions with unified time grid.
 
+# Arguments
+- `sol::Solution`: The optimal control solution with unified time grid.
+
+# Returns
+- `T`: The unified time grid.
+
+See also: [`CTModels.Solutions.time_grid(sol, component)`](@ref), [`CTModels.Models.times`](@ref).
 """
 function time_grid(
     sol::Solution{

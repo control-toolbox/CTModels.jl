@@ -6,6 +6,15 @@
 $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
+
+Displays the abstract (symbolic) definition if present, followed by the
+mathematical formulation of the optimal control problem (if consistent).
+
+# Returns
+- `Nothing`: Prints to `io` and returns nothing.
+
+See also: [`CTModels.Display.__print_mathematical_definition`](@ref),
+[`CTModels.Display._print_abstract_definition`](@ref).
 """
 function Base.show(io::IO, ::MIME"text/plain", ocp::Building.PreModel)
 
@@ -89,9 +98,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default show method for a `PreModel`.
+Default show method for a [`CTModels.Building.PreModel`](@ref).
 
 Prints only the type name.
+
+# Returns
+- `Nothing`: Prints to `io` and returns nothing.
 """
 function Base.show_default(io::IO, ocp::Building.PreModel)
     return print(io, typeof(ocp))

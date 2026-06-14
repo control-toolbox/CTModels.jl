@@ -5,6 +5,15 @@
 $(TYPEDSIGNATURES)
 
 Return the control function directly when provided as a function.
+
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem (unused).
+- `control::Function`: The control function `t -> u(t)`.
+
+# Returns
+- `Function`: The control function unchanged.
+
+See also: [`CTModels.Init.initial_control`](@ref) for other input types.
 """
 initial_control(::Models.AbstractModel, control::Function) = control
 
@@ -13,7 +22,15 @@ $(TYPEDSIGNATURES)
 
 Convert a scalar control value to a constant function for 1D control problems.
 
-Throws `Exceptions.IncorrectArgument` if the control dimension is not 1.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `control::Real`: The scalar control value.
+
+# Returns
+- `Function`: A constant function `t -> control`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the control dimension is not 1 or is 0.
 """
 function initial_control(ocp::Models.AbstractModel, control::Real)
     dim = Models.control_dimension(ocp)
@@ -47,7 +64,15 @@ $(TYPEDSIGNATURES)
 
 Convert a control vector to a constant function.
 
-Throws `Exceptions.IncorrectArgument` if the vector length does not match the control dimension.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `control::Vector{<:Real}`: The control vector.
+
+# Returns
+- `Function`: A constant function `t -> control`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the vector length does not match the control dimension.
 """
 function initial_control(ocp::Models.AbstractModel, control::Vector{<:Real})
     dim = Models.control_dimension(ocp)
@@ -80,8 +105,13 @@ $(TYPEDSIGNATURES)
 
 Return a default control initialisation function when no control is provided.
 
-Returns a constant function yielding `Float64[]` (empty) if `dim == 0`, 
-`0.1` (scalar) if `dim == 1`, or `fill(0.1, dim)` (vector) otherwise.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `::Nothing`: Indicates no control provided.
+
+# Returns
+- `Function`: A constant function yielding `Float64[]` (empty) if `dim == 0`,
+  `0.1` (scalar) if `dim == 1`, or `fill(0.1, dim)` (vector) otherwise.
 """
 function initial_control(ocp::Models.AbstractModel, ::Nothing)
     dim = Models.control_dimension(ocp)
@@ -99,7 +129,17 @@ $(TYPEDSIGNATURES)
 
 Handle time-grid control initialization with (time, data) tuple.
 
-Interpolates the provided data over the time grid to create a callable function.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `control::Tuple`: A 2-tuple `(time, data)` for time-grid interpolation.
+
+# Returns
+- `Function`: An interpolated function `t -> u(t)`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
+
+See also: [`CTModels.Init._build_time_dependent_init`](@ref).
 """
 function initial_control(ocp::Models.AbstractModel, control::Tuple)
     length(control) == 2 || throw(
@@ -121,6 +161,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return the control trajectory from an initial guess.
+
+# Arguments
+- `init::AbstractInitialGuess`: The initial guess.
+
+# Returns
+- `Function`: The control function `t -> u(t)`.
 """
 Models.control(init::AbstractInitialGuess) = init.control
 
@@ -128,5 +174,11 @@ Models.control(init::AbstractInitialGuess) = init.control
 $(TYPEDSIGNATURES)
 
 Return the control trajectory from a solution.
+
+# Arguments
+- `sol::Solutions.AbstractSolution`: The solution.
+
+# Returns
+- `Function`: The control function `t -> u(t)`.
 """
 Models.control(sol::Solutions.AbstractSolution) = sol.control

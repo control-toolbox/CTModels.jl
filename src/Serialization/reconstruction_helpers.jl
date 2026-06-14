@@ -31,6 +31,8 @@ Reconstruct a solution from imported data, detecting the format (single vs multi
 ```julia-repl
 julia> sol = _reconstruct_solution_from_data(ocp, data)
 ```
+
+See also: [`_extract_time_vector`](@ref).
 """
 function _reconstruct_solution_from_data(
     ocp,
@@ -152,6 +154,8 @@ Extract time vector from various data formats.
 # Notes
 - Handles both Vector{Float64} and Matrix{Float64} (single column) formats
 - Used by JSON and JLD2 importers to normalize time grid data
+
+See also: [`_reconstruct_solution_from_data`](@ref).
 """
 function _extract_time_vector(time_data)
     if time_data isa Vector{Float64}

@@ -17,9 +17,38 @@ output are suppressed:
 - The "where" clause lists only `x` (and `v` if variable-dependent).
 - Box constraints on control are not listed.
 
+# Arguments
+
+- `io::IO`: The output stream.
+- `some_printing::Bool`: Whether content has already been printed.
+- `x_dim::Int`: State dimension.
+- `u_dim::Int`: Control dimension.
+- `v_dim::Int`: Variable dimension.
+- `t_name::String`: Time variable name.
+- `t0_name::String`: Initial time name.
+- `tf_name::String`: Final time name.
+- `x_name::String`: State variable name.
+- `u_name::String`: Control variable name.
+- `v_name::String`: Variable name.
+- `xi_names::Vector{String}`: State component names.
+- `ui_names::Vector{String}`: Control component names.
+- `vi_names::Vector{String}`: Variable component names.
+- `is_variable_dependent::Bool`: Whether the problem depends on variables.
+- `is_time_dependent::Bool`: Whether the problem is non-autonomous.
+- `is_control_free_ocp::Bool`: Whether the problem has no control input.
+- `has_a_lagrange_cost::Bool`: Whether the problem has a Lagrange cost.
+- `has_a_mayer_cost::Bool`: Whether the problem has a Mayer cost.
+- `dim_path_cons_nl::Int`: Dimension of nonlinear path constraints.
+- `dim_boundary_cons_nl::Int`: Dimension of nonlinear boundary constraints.
+- `dim_state_cons_box::Int`: Dimension of state box constraints.
+- `dim_control_cons_box::Int`: Dimension of control box constraints.
+- `dim_variable_cons_box::Int`: Dimension of variable box constraints.
+
 # Returns
 
 - `Bool`: `true` if something was printed.
+
+See also: [`CTModels.Display._print_abstract_definition`](@ref).
 """
 function __print_mathematical_definition(
     io::IO,

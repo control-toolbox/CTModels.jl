@@ -6,7 +6,7 @@ Append box constraint data to the provided flat vectors.
 This is an internal helper used by `build(::ConstraintsDictType)`. It simply
 accumulates declarations. Deduplication (one entry per component with
 intersection semantics) and associated warnings are handled later by
-`_dedup_box_constraints!`.
+[`CTModels.Building._dedup_box_constraints!`](@ref).
 
 # Arguments
 - `inds::Vector{Int}`: Vector of component indices to append to.
@@ -21,6 +21,9 @@ intersection semantics) and associated warnings are handled later by
 # Notes
 - Modifies `inds`, `lbs`, `ubs`, `labels` in-place.
 - No deduplication or warning emitted here; see `_dedup_box_constraints!`.
+
+# Returns
+- `Nothing`
 """
 function append_box_constraints!(inds, lbs, ubs, labels, rg, lb, ub, label)
     append!(inds, rg)
@@ -55,7 +58,7 @@ labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
 
 # Arguments
 - `inds`, `lbs`, `ubs`, `labels`: in-place flat vectors produced by successive
-  calls to [`append_box_constraints!`](@ref).
+  calls to [`CTModels.Building.append_box_constraints!`](@ref).
 - `aliases`: in-place empty `Vector{Vector{Symbol}}` to be populated with the
   per-component list of all declaring labels.
 - `kind::String`: human-readable descriptor (e.g. "state", "control",
@@ -64,6 +67,9 @@ labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
 # Throws
 - `Exceptions.IncorrectArgument` if the intersection of declared bounds is
   empty for some component.
+
+# Returns
+- `Nothing`
 """
 function _dedup_box_constraints!(
     inds::Vector{Int},
@@ -170,6 +176,9 @@ julia> constraints = OrderedCollections.OrderedDict(
 )
 julia> model = build(constraints)
 ```
+
+# Throws
+- `Exceptions.IncorrectArgument`: If an unknown constraint type is encountered
 """
 function build(constraints::ConstraintsDictType)::ConstraintsModel
     LocalNumber = Float64
@@ -445,6 +454,13 @@ julia> control!(pre_ocp, 1, "u", ["u1"])
 julia> dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
 julia> model = build(pre_ocp)
 ```
+
+# Throws
+- `Exceptions.PreconditionError`: If times, state, dynamics, objective, or time dependence are not set
+- `Exceptions.PreconditionError`: If dynamics are incomplete
+
+# Returns
+- `Model`: A fully constructed model ready for solving.
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     Core.@ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(

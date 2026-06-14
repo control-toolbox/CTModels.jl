@@ -16,8 +16,8 @@ Set the full dynamics of the optimal control problem `ocp` using the function `f
 This function assigns `f` as the complete dynamics of the system. It throws an error
 if the state or times are not yet set, or if dynamics have already been set.
 
-# Errors
-Throws `Exceptions.PreconditionError` if called out of order or in an invalid state.
+# Throws
+- `Exceptions.PreconditionError`: If called out of order or in an invalid state.
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
     Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
@@ -67,15 +67,22 @@ This function appends the tuple `(rg, f)` to the list of partial dynamics. It en
 that the specified indices are not already covered and that the system is in a valid
 configuration for adding partial dynamics.
 
-# Errors
-Throws `Exceptions.PreconditionError` if:
-- The state or times are not yet set.
-- The dynamics are already defined completely.
-- Any index in `rg` overlaps with an existing dynamics range.
+# Throws
+- `Exceptions.PreconditionError`: If the state or times are not yet set
+- `Exceptions.PreconditionError`: If the dynamics are already defined completely
+- `Exceptions.PreconditionError`: If any index in `rg` overlaps with an existing dynamics range
+- `Exceptions.IncorrectArgument`: If an index in `rg` is out of bounds
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.time_dependence!`](@ref), [`CTModels.Building.objective!`](@ref), [`CTModels.Building.constraint!`](@ref).
 
 # Example
 ```julia-repl
-julia> dynamics!(ocp, 1:2, (out, t, x, u, v) -> out .= x[1:2] .+ u[1:2])
+julia> using CTModels
+
+julia> ocp = PreModel(); dynamics!(ocp, 1:2, (out, t, x, u, v) -> out .= x[1:2] .+ u[1:2])
 julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
 ```
 """
@@ -168,16 +175,23 @@ This is equivalent to calling:
 julia> dynamics!(ocp, i:i, f)
 ```
 
-# Errors
-Throws the same errors as the range-based method if:
-- The model is not properly initialized.
-- The index `i` overlaps with existing dynamics.
-- A full dynamics function is already defined.
+# Throws
+- `Exceptions.PreconditionError`: If the model is not properly initialized
+- `Exceptions.PreconditionError`: If the index `i` overlaps with existing dynamics
+- `Exceptions.PreconditionError`: If a full dynamics function is already defined
+- `Exceptions.IncorrectArgument`: If the index `i` is out of bounds
 
 # Example
 ```julia-repl
-julia> dynamics!(ocp, 3, (out, t, x, u, v) -> out[1] = x[3]^2 + u[1])
+julia> using CTModels
+
+julia> ocp = PreModel(); dynamics!(ocp, 3, (out, t, x, u, v) -> out[1] = x[3]^2 + u[1])
 ```
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.dynamics!`](@ref) (range-based version).
 """
 function dynamics!(ocp::PreModel, i::Integer, f::Function)::Nothing
     return dynamics!(ocp, i:i, f)

@@ -143,7 +143,9 @@ Return the dual function associated with the nonlinear path constraints.
 - `model::DualModel`: A model including dual variables for path constraints.
 
 # Returns
-A function mapping time `t` to the vector of dual values, or `nothing` if not set.
+- `PC_Dual`: A function mapping time `t` to the vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.boundary_constraints_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
 """
 function path_constraints_dual(
     model::DualModel{
@@ -169,7 +171,9 @@ Return the dual vector associated with the boundary constraints.
 - `model::DualModel`: A model including dual variables for boundary constraints.
 
 # Returns
-A vector of dual values, or `nothing` if not set.
+- `BC_Dual`: A vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.path_constraints_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
 """
 function boundary_constraints_dual(
     model::DualModel{
@@ -195,7 +199,9 @@ Return the dual function associated with the lower bounds of state constraints.
 - `model::DualModel`: A model including dual variables for state lower bounds.
 
 # Returns
-A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+- `SC_LB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.state_constraints_ub_dual`](@ref), [`CTModels.Solutions.control_constraints_lb_dual`](@ref).
 """
 function state_constraints_lb_dual(
     model::DualModel{
@@ -221,7 +227,9 @@ Return the dual function associated with the upper bounds of state constraints.
 - `model::DualModel`: A model including dual variables for state upper bounds.
 
 # Returns
-A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+- `SC_UB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.state_constraints_lb_dual`](@ref), [`CTModels.Solutions.control_constraints_ub_dual`](@ref).
 """
 function state_constraints_ub_dual(
     model::DualModel{
@@ -247,7 +255,9 @@ Return the dual function associated with the lower bounds of control constraints
 - `model::DualModel`: A model including dual variables for control lower bounds.
 
 # Returns
-A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+- `CC_LB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.control_constraints_ub_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
 """
 function control_constraints_lb_dual(
     model::DualModel{
@@ -273,7 +283,9 @@ Return the dual function associated with the upper bounds of control constraints
 - `model::DualModel`: A model including dual variables for control upper bounds.
 
 # Returns
-A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+- `CC_UB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.control_constraints_lb_dual`](@ref), [`CTModels.Solutions.state_constraints_ub_dual`](@ref).
 """
 function control_constraints_ub_dual(
     model::DualModel{
@@ -299,7 +311,9 @@ Return the dual vector associated with the lower bounds of variable constraints.
 - `model::DualModel`: A model including dual variables for variable lower bounds.
 
 # Returns
-A vector of dual values, or `nothing` if not set.
+- `VC_LB_Dual`: A vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.variable_constraints_ub_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
 """
 function variable_constraints_lb_dual(
     model::DualModel{
@@ -325,7 +339,9 @@ Return the dual vector associated with the upper bounds of variable constraints.
 - `model::DualModel`: A model including dual variables for variable upper bounds.
 
 # Returns
-A vector of dual values, or `nothing` if not set.
+- `VC_UB_Dual`: A vector of dual values, or `nothing` if not set.
+
+See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@ref), [`CTModels.Solutions.state_constraints_ub_dual`](@ref).
 """
 function variable_constraints_ub_dual(
     model::DualModel{

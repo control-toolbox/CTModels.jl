@@ -6,6 +6,14 @@
 $(TYPEDSIGNATURES)
 
 Print the solution.
+
+Displays the solver summary (status, iterations, objective, constraints violation),
+the optimisation variable (if defined), and boundary constraint duals (if present).
+
+# Returns
+- `Nothing`: Prints to `io` and returns nothing.
+
+See also: [`CTModels.Display.Base.show`](@ref) for Model and PreModel.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solutions.Solution)
     # Solver summary

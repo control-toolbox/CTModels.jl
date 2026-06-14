@@ -6,7 +6,17 @@ $(TYPEDSIGNATURES)
 
 Build an initialisation function combining block-level and component-level data.
 
-Merges a base initialisation with per-component overrides.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `role::Symbol`: The component role (`:state` or `:control`).
+- `block_data`: Block-level initialisation data.
+- `comp_data::Dict{Int,Any}`: Component-level initialisation data indexed by component.
+
+# Returns
+- `Function`: A combined initialisation function that merges block and component data.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If dimensions are incompatible or component indices are out of bounds.
 """
 function _build_block_with_components(
     ocp::Models.AbstractModel, role::Symbol, block_data, comp_data::Dict{Int,Any}
@@ -106,7 +116,11 @@ $(TYPEDSIGNATURES)
 
 Build a component-level initialisation function from data.
 
-Handles both time-dependent `(time, data)` tuples and time-independent data.
+# Arguments
+- `data`: The component data (time-dependent tuple or time-independent data).
+
+# Returns
+- `Function`: A component initialisation function.
 """
 function _build_component_function(data)
     # Support (time, data) tuples for per-component time grids
@@ -123,6 +137,15 @@ end
 $(TYPEDSIGNATURES)
 
 Build a component function from time-independent data (scalar, vector, or function).
+
+# Arguments
+- `data`: The time-independent data (function, scalar, or vector).
+
+# Returns
+- `Function`: A component initialisation function.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the data type is unsupported or vector length is invalid.
 """
 function _build_component_function_without_time(data)
     if data isa Function
@@ -162,7 +185,15 @@ $(TYPEDSIGNATURES)
 
 Build a component function from data with an associated time grid.
 
-Interpolates vector data over the time grid.
+# Arguments
+- `data`: The component data (function, scalar, or vector).
+- `time::AbstractVector`: The time grid for interpolation.
+
+# Returns
+- `Function`: A component initialisation function with time interpolation.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the data type is unsupported or time-grid mismatch occurs.
 """
 function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
@@ -205,7 +236,17 @@ $(TYPEDSIGNATURES)
 
 Build a time-dependent initialisation function from data and a time grid.
 
-Interpolates the provided data over the time grid to create a callable function.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `role::Symbol`: The component role (`:state` or `:control`).
+- `data`: The data to interpolate (function, vector, or vector-of-vectors).
+- `time::AbstractVector`: The time grid.
+
+# Returns
+- `Function`: An interpolated initialisation function `t -> value(t)`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If data type is unsupported or dimensions/time-grid mismatch occurs.
 """
 function _build_time_dependent_init(
     ocp::Models.AbstractModel, role::Symbol, data, time::AbstractVector

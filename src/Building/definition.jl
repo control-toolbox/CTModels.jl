@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 
 Set the model definition of the optimal control problem from a raw `Expr`.
 
-The expression is wrapped in a [`Definition`](@ref) and stored on the pre-model.
+The expression is wrapped in a [`CTModels.Components.Definition`](@ref) and stored on the pre-model.
 
 # Arguments
 
@@ -27,8 +27,8 @@ end
 $(TYPEDSIGNATURES)
 
 Set the model definition of the optimal control problem from an existing
-[`AbstractDefinition`](@ref) value (either a [`Definition`](@ref) or an
-[`EmptyDefinition`](@ref)).
+[`CTModels.Components.AbstractDefinition`](@ref) value (either a [`CTModels.Components.Definition`](@ref) or an
+[`CTModels.Components.EmptyDefinition`](@ref)).
 
 # Arguments
 

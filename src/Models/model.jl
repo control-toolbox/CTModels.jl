@@ -99,6 +99,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return `true` for an autonomous model.
+
+# Arguments
+- `::Model{Autonomous,...}`: An autonomous model.
+
+# Returns
+- `Bool`: `true`.
+
+See also: [`CTModels.Models.is_nonautonomous`](@ref).
 """
 function is_autonomous(
     ::Model{
@@ -121,6 +129,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return `false` for a non-autonomous model.
+
+# Arguments
+- `::Model{NonAutonomous,...}`: A non-autonomous model.
+
+# Returns
+- `Bool`: `false`.
+
+See also: [`CTModels.Models.is_autonomous`](@ref).
 """
 function is_autonomous(
     ::Model{
@@ -143,6 +159,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check whether the problem has optimisation variables.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has optimisation variables, `false` otherwise.
+
+See also: [`CTModels.Models.is_nonvariable`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function is_variable(ocp::Model)::Bool
     return variable_dimension(ocp) > 0
@@ -152,6 +176,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check whether the problem is control-free (no control input).
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has no control input, `false` otherwise.
+
+See also: [`CTModels.Models.has_control`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function is_control_free(ocp::Model)::Bool
     return control_dimension(ocp) == 0
@@ -161,6 +193,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check whether the problem has optimisation variables.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has optimisation variables, `false` otherwise.
+
+See also: [`CTModels.Models.is_variable`](@ref).
 """
 has_variable(ocp::Model)::Bool = is_variable(ocp)
 
@@ -168,6 +208,14 @@ has_variable(ocp::Model)::Bool = is_variable(ocp)
 $(TYPEDSIGNATURES)
 
 Check whether the problem has control input.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has control input, `false` otherwise.
+
+See also: [`CTModels.Models.is_control_free`](@ref).
 """
 has_control(ocp::Model)::Bool = !is_control_free(ocp)
 
@@ -175,6 +223,14 @@ has_control(ocp::Model)::Bool = !is_control_free(ocp)
 $(TYPEDSIGNATURES)
 
 Check whether the problem has an abstract definition.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has an abstract definition, `false` otherwise.
+
+See also: [`CTModels.Models.is_abstractly_defined`](@ref), [`CTModels.Models.definition`](@ref).
 """
 has_abstract_definition(ocp::Model)::Bool = !(definition(ocp) isa EmptyDefinition)
 
@@ -182,6 +238,14 @@ has_abstract_definition(ocp::Model)::Bool = !(definition(ocp) isa EmptyDefinitio
 $(TYPEDSIGNATURES)
 
 Check whether the problem is abstractly defined.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem is abstractly defined, `false` otherwise.
+
+See also: [`CTModels.Models.has_abstract_definition`](@ref).
 """
 is_abstractly_defined(ocp::Model)::Bool = has_abstract_definition(ocp)
 
@@ -189,6 +253,14 @@ is_abstractly_defined(ocp::Model)::Bool = has_abstract_definition(ocp)
 $(TYPEDSIGNATURES)
 
 Check whether the problem is non-autonomous (time-dependent).
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem is non-autonomous, `false` otherwise.
+
+See also: [`CTModels.Models.is_autonomous`](@ref).
 """
 is_nonautonomous(ocp::Model)::Bool = !is_autonomous(ocp)
 
@@ -196,6 +268,14 @@ is_nonautonomous(ocp::Model)::Bool = !is_autonomous(ocp)
 $(TYPEDSIGNATURES)
 
 Check whether the problem has no optimisation variables.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the problem has no optimisation variables, `false` otherwise.
+
+See also: [`CTModels.Models.is_variable`](@ref).
 """
 is_nonvariable(ocp::Model)::Bool = !is_variable(ocp)
 
@@ -207,6 +287,14 @@ is_nonvariable(ocp::Model)::Bool = !is_variable(ocp)
 $(TYPEDSIGNATURES)
 
 Return the state struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `T`: The state model.
+
+See also: [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function state(
     ocp::Model{
@@ -229,6 +317,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the name of the state.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The state name.
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function state_name(ocp::Model)::String
     return name(state(ocp))
@@ -238,6 +334,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the names of the components of the state.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Vector{String}`: The state component names.
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function state_components(ocp::Model)::Vector{String}
     return components(state(ocp))
@@ -247,6 +351,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the state dimension.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The state dimension.
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref).
 """
 function state_dimension(ocp::Model)::Dimension
     return dimension(state(ocp))
@@ -260,6 +372,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the control struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `T`: The control model.
+
+See also: [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control(
     ocp::Model{
@@ -282,6 +402,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the name of the control.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The control name.
+
+See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_name(ocp::Model)::String
     return name(control(ocp))
@@ -291,6 +419,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the names of the components of the control.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Vector{String}`: The control component names.
+
+See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_components(ocp::Model)::Vector{String}
     return components(control(ocp))
@@ -300,6 +436,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the control dimension.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The control dimension.
+
+See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref).
 """
 function control_dimension(ocp::Model)::Dimension
     return dimension(control(ocp))
@@ -313,6 +457,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the variable struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `T`: The variable model.
+
+See also: [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function variable(
     ocp::Model{
@@ -335,6 +487,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the name of the variable.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The variable name.
+
+See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function variable_name(ocp::Model)::String
     return name(variable(ocp))
@@ -344,6 +504,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the names of the components of the variable.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Vector{String}`: The variable component names.
+
+See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function variable_components(ocp::Model)::Vector{String}
     return components(variable(ocp))
@@ -353,6 +521,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the variable dimension.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The variable dimension.
+
+See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
 function variable_dimension(ocp::Model)::Dimension
     return dimension(variable(ocp))
@@ -366,6 +542,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the times struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `T`: The times model.
+
+See also: [`CTModels.Models.time_name`](@ref), [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 function times(
     ocp::Model{
@@ -388,6 +572,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the name of the time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The time name.
+
+See also: [`CTModels.Models.times`](@ref), [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 Components.time_name(ocp::Model)::String = Components.time_name(times(ocp))
 
@@ -395,6 +587,14 @@ Components.time_name(ocp::Model)::String = Components.time_name(times(ocp))
 $(TYPEDSIGNATURES)
 
 Return the name of the initial time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The initial time name.
+
+See also: [`CTModels.Models.times`](@ref), [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 Components.initial_time_name(ocp::Model)::String = Components.initial_time_name(times(ocp))
 
@@ -402,6 +602,14 @@ Components.initial_time_name(ocp::Model)::String = Components.initial_time_name(
 $(TYPEDSIGNATURES)
 
 Return the name of the final time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `String`: The final time name.
+
+See also: [`CTModels.Models.times`](@ref), [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 Components.final_time_name(ocp::Model)::String = Components.final_time_name(times(ocp))
 
@@ -441,6 +649,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the initial time, for a fixed initial time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with fixed initial time.
+
+# Returns
+- `T`: The initial time value.
+
+See also: [`CTModels.Models.final_time`](@ref), [`CTModels.Models.has_fixed_initial_time`](@ref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -463,6 +679,15 @@ end
 $(TYPEDSIGNATURES)
 
 Return the initial time, for a free initial time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with free initial time.
+- `variable::AbstractVector{T}`: The variable vector.
+
+# Returns
+- `T`: The initial time value.
+
+See also: [`CTModels.Models.final_time`](@ref), [`CTModels.Models.has_free_initial_time`](@ref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -486,6 +711,15 @@ end
 $(TYPEDSIGNATURES)
 
 Return the initial time, for a free initial time (scalar variable).
+
+# Arguments
+- `ocp::Model`: The optimal control problem with free initial time.
+- `variable::T`: The variable scalar.
+
+# Returns
+- `T`: The initial time value.
+
+See also: [`CTModels.Models.final_time`](@ref), [`CTModels.Models.has_free_initial_time`](@ref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -541,6 +775,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the final time, for a fixed final time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with fixed final time.
+
+# Returns
+- `T`: The final time value.
+
+See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.has_fixed_final_time`](@ref).
 """
 function Components.final_time(
     ocp::Model{
@@ -563,6 +805,15 @@ end
 $(TYPEDSIGNATURES)
 
 Return the final time, for a free final time.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with free final time.
+- `variable::AbstractVector{T}`: The variable vector.
+
+# Returns
+- `T`: The final time value.
+
+See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.has_free_final_time`](@ref).
 """
 function Components.final_time(
     ocp::Model{
@@ -586,6 +837,15 @@ end
 $(TYPEDSIGNATURES)
 
 Return the final time, for a free final time (scalar variable).
+
+# Arguments
+- `ocp::Model`: The optimal control problem with free final time.
+- `variable::T`: The variable scalar.
+
+# Returns
+- `T`: The final time value.
+
+See also: [`CTModels.Models.initial_time`](@ref), [`CTModels.Models.has_free_final_time`](@ref).
 """
 function Components.final_time(
     ocp::Model{
@@ -609,6 +869,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the initial time is fixed.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the initial time is fixed, `false` otherwise.
+
+See also: [`CTModels.Models.has_free_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
 """
 Components.has_fixed_initial_time(ocp::Model)::Bool =
     Components.has_fixed_initial_time(times(ocp))
@@ -617,6 +885,14 @@ Components.has_fixed_initial_time(ocp::Model)::Bool =
 $(TYPEDSIGNATURES)
 
 Check if the initial time is free.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the initial time is free, `false` otherwise.
+
+See also: [`CTModels.Models.has_fixed_initial_time`](@ref), [`CTModels.Models.initial_time`](@ref).
 """
 Components.has_free_initial_time(ocp::Model)::Bool =
     Components.has_free_initial_time(times(ocp))
@@ -625,6 +901,14 @@ Components.has_free_initial_time(ocp::Model)::Bool =
 $(TYPEDSIGNATURES)
 
 Check if the final time is fixed.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the final time is fixed, `false` otherwise.
+
+See also: [`CTModels.Models.has_free_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 Components.has_fixed_final_time(ocp::Model)::Bool =
     Components.has_fixed_final_time(times(ocp))
@@ -633,6 +917,14 @@ Components.has_fixed_final_time(ocp::Model)::Bool =
 $(TYPEDSIGNATURES)
 
 Check if the final time is free.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the final time is free, `false` otherwise.
+
+See also: [`CTModels.Models.has_fixed_final_time`](@ref), [`CTModels.Models.final_time`](@ref).
 """
 Components.has_free_final_time(ocp::Model)::Bool =
     Components.has_free_final_time(times(ocp))
@@ -645,6 +937,14 @@ Components.has_free_final_time(ocp::Model)::Bool =
 $(TYPEDSIGNATURES)
 
 Return the objective struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `O`: The objective model.
+
+See also: [`CTModels.Models.criterion`](@ref), [`CTModels.Models.mayer`](@ref), [`CTModels.Models.lagrange`](@ref).
 """
 function objective(
     ocp::Model{
@@ -667,6 +967,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the type of criterion (:min or :max).
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Symbol`: The criterion type (`:min` or `:max`).
+
+See also: [`CTModels.Models.objective`](@ref), [`CTModels.Models.mayer`](@ref), [`CTModels.Models.lagrange`](@ref).
 """
 Components.criterion(ocp::Model)::Symbol = Components.criterion(objective(ocp))
 
@@ -690,6 +998,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the Mayer cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with Mayer objective.
+
+# Returns
+- `M`: The Mayer cost function.
+
+See also: [`CTModels.Models.objective`](@ref), [`CTModels.Models.lagrange`](@ref), [`CTModels.Models.has_mayer_cost`](@ref).
 """
 function Components.mayer(
     ocp::Model{
@@ -712,6 +1028,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the Mayer cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with Bolza objective (Mayer + Lagrange).
+
+# Returns
+- `M`: The Mayer cost function.
+
+See also: [`CTModels.Models.objective`](@ref), [`CTModels.Models.lagrange`](@ref), [`CTModels.Models.has_mayer_cost`](@ref).
 """
 function Components.mayer(
     ocp::Model{
@@ -734,6 +1058,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the model has a Mayer cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the model has a Mayer cost, `false` otherwise.
+
+See also: [`CTModels.Models.mayer`](@ref), [`CTModels.Models.has_lagrange_cost`](@ref).
 """
 Components.has_mayer_cost(ocp::Model)::Bool = Components.has_mayer_cost(objective(ocp))
 
@@ -757,6 +1089,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the Lagrange cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with Lagrange objective.
+
+# Returns
+- `L`: The Lagrange cost function.
+
+See also: [`CTModels.Models.objective`](@ref), [`CTModels.Models.mayer`](@ref), [`CTModels.Models.has_lagrange_cost`](@ref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -779,6 +1119,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the Lagrange cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with Bolza objective (Mayer + Lagrange).
+
+# Returns
+- `L`: The Lagrange cost function.
+
+See also: [`CTModels.Models.objective`](@ref), [`CTModels.Models.mayer`](@ref), [`CTModels.Models.has_lagrange_cost`](@ref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -801,6 +1149,14 @@ end
 $(TYPEDSIGNATURES)
 
 Check if the model has a Lagrange cost.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the model has a Lagrange cost, `false` otherwise.
+
+See also: [`CTModels.Models.lagrange`](@ref), [`CTModels.Models.has_mayer_cost`](@ref).
 """
 Components.has_lagrange_cost(ocp::Model)::Bool =
     Components.has_lagrange_cost(objective(ocp))
@@ -813,6 +1169,14 @@ Components.has_lagrange_cost(ocp::Model)::Bool =
 $(TYPEDSIGNATURES)
 
 Return the dynamics.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `D`: The dynamics function.
+
+See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.control`](@ref).
 """
 function dynamics(
     ocp::Model{
@@ -839,6 +1203,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the build_examodel.
+
+# Arguments
+- `ocp::Model`: The optimal control problem with ExaModels builder.
+
+# Returns
+- `BE`: The ExaModels builder function.
+
+See also: [`CTModels.Models.dynamics`](@ref).
 """
 function get_build_examodel(
     ocp::Model{
@@ -894,6 +1266,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the constraints struct.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `C`: The constraints model.
+
+See also: [`CTModels.Models.isempty_constraints`](@ref), [`CTModels.Models.constraint`](@ref).
 """
 function constraints(
     ocp::Model{
@@ -916,6 +1296,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return true if the model has no constraints.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Bool`: `true` if the model has no constraints, `false` otherwise.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.constraint`](@ref).
 """
 function isempty_constraints(ocp::Model)::Bool
     return Base.isempty(constraints(ocp))
@@ -925,6 +1313,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the nonlinear path constraints.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Function`: The nonlinear path constraints function.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.boundary_constraints_nl`](@ref).
 """
 Components.path_constraints_nl(ocp::Model) =
     Components.path_constraints_nl(constraints(ocp))
@@ -933,6 +1329,14 @@ Components.path_constraints_nl(ocp::Model) =
 $(TYPEDSIGNATURES)
 
 Return the nonlinear boundary constraints.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Function`: The nonlinear boundary constraints function.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.path_constraints_nl`](@ref).
 """
 Components.boundary_constraints_nl(ocp::Model) =
     Components.boundary_constraints_nl(constraints(ocp))
@@ -941,6 +1345,14 @@ Components.boundary_constraints_nl(ocp::Model) =
 $(TYPEDSIGNATURES)
 
 Return the box constraints on state.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `BoxConstraints`: The box constraints on state.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.control_constraints_box`](@ref).
 """
 Components.state_constraints_box(ocp::Model) =
     Components.state_constraints_box(constraints(ocp))
@@ -949,6 +1361,14 @@ Components.state_constraints_box(ocp::Model) =
 $(TYPEDSIGNATURES)
 
 Return the box constraints on control.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `BoxConstraints`: The box constraints on control.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.state_constraints_box`](@ref).
 """
 Components.control_constraints_box(ocp::Model) =
     Components.control_constraints_box(constraints(ocp))
@@ -957,6 +1377,14 @@ Components.control_constraints_box(ocp::Model) =
 $(TYPEDSIGNATURES)
 
 Return the box constraints on variable.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `BoxConstraints`: The box constraints on variable.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.state_constraints_box`](@ref).
 """
 Components.variable_constraints_box(ocp::Model) =
     Components.variable_constraints_box(constraints(ocp))
@@ -965,6 +1393,14 @@ Components.variable_constraints_box(ocp::Model) =
 $(TYPEDSIGNATURES)
 
 Return the dimension of nonlinear path constraints.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The dimension of nonlinear path constraints.
+
+See also: [`CTModels.Models.path_constraints_nl`](@ref), [`CTModels.Models.dim_boundary_constraints_nl`](@ref).
 """
 Components.dim_path_constraints_nl(ocp::Model)::Dimension =
     Components.dim_path_constraints_nl(constraints(ocp))
@@ -973,6 +1409,14 @@ Components.dim_path_constraints_nl(ocp::Model)::Dimension =
 $(TYPEDSIGNATURES)
 
 Return the dimension of the boundary constraints.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The dimension of boundary constraints.
+
+See also: [`CTModels.Models.boundary_constraints_nl`](@ref), [`CTModels.Models.dim_path_constraints_nl`](@ref).
 """
 Components.dim_boundary_constraints_nl(ocp::Model)::Dimension =
     Components.dim_boundary_constraints_nl(constraints(ocp))
@@ -981,6 +1425,14 @@ Components.dim_boundary_constraints_nl(ocp::Model)::Dimension =
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on state.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The dimension of box constraints on state.
+
+See also: [`CTModels.Models.state_constraints_box`](@ref), [`CTModels.Models.dim_control_constraints_box`](@ref).
 """
 Components.dim_state_constraints_box(ocp::Model)::Dimension =
     Components.dim_state_constraints_box(constraints(ocp))
@@ -989,6 +1441,14 @@ Components.dim_state_constraints_box(ocp::Model)::Dimension =
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on control.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The dimension of box constraints on control.
+
+See also: [`CTModels.Models.control_constraints_box`](@ref), [`CTModels.Models.dim_state_constraints_box`](@ref).
 """
 Components.dim_control_constraints_box(ocp::Model)::Dimension =
     Components.dim_control_constraints_box(constraints(ocp))
@@ -997,6 +1457,14 @@ Components.dim_control_constraints_box(ocp::Model)::Dimension =
 $(TYPEDSIGNATURES)
 
 Return the dimension of box constraints on variable.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Dimension`: The dimension of box constraints on variable.
+
+See also: [`CTModels.Models.variable_constraints_box`](@ref), [`CTModels.Models.dim_state_constraints_box`](@ref).
 """
 Components.dim_variable_constraints_box(ocp::Model)::Dimension =
     Components.dim_variable_constraints_box(constraints(ocp))
@@ -1009,6 +1477,14 @@ Components.dim_variable_constraints_box(ocp::Model)::Dimension =
 $(TYPEDSIGNATURES)
 
 Return the model definition.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `D`: The model definition.
+
+See also: [`CTModels.Models.expression`](@ref).
 """
 function definition(
     ocp::Model{
@@ -1031,6 +1507,14 @@ end
 $(TYPEDSIGNATURES)
 
 Return the symbolic expression of the model definition.
+
+# Arguments
+- `ocp::Model`: The optimal control problem.
+
+# Returns
+- `Expr`: The symbolic expression of the model definition.
+
+See also: [`CTModels.Models.definition`](@ref).
 """
 Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
 
@@ -1046,6 +1530,15 @@ Get a labelled constraint from the model. Returns a tuple of the form
 `lb` is the lower bound and `ub` is the upper bound.
 
 The function returns an exception if the label is not found in the model.
+
+# Arguments
+- `model::Model`: The optimal control problem.
+- `label::Symbol`: The constraint label.
+
+# Returns
+- `Tuple`: A tuple of the form `(type, f, lb, ub)`.
+
+See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.path_constraints_nl`](@ref).
 """
 function constraint(model::Model, label::Symbol)::Tuple # not type stable
 

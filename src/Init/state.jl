@@ -5,6 +5,15 @@
 $(TYPEDSIGNATURES)
 
 Return the state function directly when provided as a function.
+
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem (unused).
+- `state::Function`: The state function `t -> x(t)`.
+
+# Returns
+- `Function`: The state function unchanged.
+
+See also: [`CTModels.Init.initial_state`](@ref) for other input types.
 """
 initial_state(::Models.AbstractModel, state::Function) = state
 
@@ -13,7 +22,15 @@ $(TYPEDSIGNATURES)
 
 Convert a scalar state value to a constant function for 1D state problems.
 
-Throws `Exceptions.IncorrectArgument` if the state dimension is not 1.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `state::Real`: The scalar state value.
+
+# Returns
+- `Function`: A constant function `t -> state`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the state dimension is not 1.
 """
 function initial_state(ocp::Models.AbstractModel, state::Real)
     dim = Models.state_dimension(ocp)
@@ -37,7 +54,15 @@ $(TYPEDSIGNATURES)
 
 Convert a state vector to a constant function.
 
-Throws `Exceptions.IncorrectArgument` if the vector length does not match the state dimension.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `state::Vector{<:Real}`: The state vector.
+
+# Returns
+- `Function`: A constant function `t -> state`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the vector length does not match the state dimension.
 """
 function initial_state(ocp::Models.AbstractModel, state::Vector{<:Real})
     dim = Models.state_dimension(ocp)
@@ -60,7 +85,12 @@ $(TYPEDSIGNATURES)
 
 Return a default state initialisation function when no state is provided.
 
-Returns a constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `::Nothing`: Indicates no state provided.
+
+# Returns
+- `Function`: A constant function yielding `0.1` (scalar) or `fill(0.1, dim)` (vector).
 """
 function initial_state(ocp::Models.AbstractModel, ::Nothing)
     dim = Models.state_dimension(ocp)
@@ -76,7 +106,17 @@ $(TYPEDSIGNATURES)
 
 Handle time-grid state initialization with (time, data) tuple.
 
-Interpolates the provided data over the time grid to create a callable function.
+# Arguments
+- `ocp::Models.AbstractModel`: The optimal control problem.
+- `state::Tuple`: A 2-tuple `(time, data)` for time-grid interpolation.
+
+# Returns
+- `Function`: An interpolated function `t -> x(t)`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
+
+See also: [`CTModels.Init._build_time_dependent_init`](@ref).
 """
 function initial_state(ocp::Models.AbstractModel, state::Tuple)
     length(state) == 2 || throw(
@@ -98,6 +138,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return the state trajectory from an initial guess.
+
+# Arguments
+- `init::AbstractInitialGuess`: The initial guess.
+
+# Returns
+- `Function`: The state function `t -> x(t)`.
 """
 Models.state(init::AbstractInitialGuess) = init.state
 
@@ -105,5 +151,11 @@ Models.state(init::AbstractInitialGuess) = init.state
 $(TYPEDSIGNATURES)
 
 Return the state trajectory from a solution.
+
+# Arguments
+- `sol::Solutions.AbstractSolution`: The solution.
+
+# Returns
+- `Function`: The state function `t -> x(t)`.
 """
 Models.state(sol::Solutions.AbstractSolution) = sol.state

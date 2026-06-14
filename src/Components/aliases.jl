@@ -6,6 +6,8 @@ Type alias for a dimension, used for the state, costate, control and variable sp
 ```julia
 const Dimension = Int
 ```
+
+See also: [`CTModels.Components.ctNumber`](@ref).
 """
 const Dimension = Int
 
@@ -15,6 +17,8 @@ Type alias for a real number.
 ```julia
 const ctNumber = Real
 ```
+
+See also: [`CTModels.Components.Dimension`](@ref), [`CTModels.Components.Time`](@ref), [`CTModels.Components.ctVector`](@ref).
 """
 const ctNumber = Real
 
@@ -37,7 +41,7 @@ Type alias for a vector of real numbers.
 const ctVector = AbstractVector{<:ctNumber}
 ```
 
-See also: [`CTModels.Components.ctNumber`](@ref).
+See also: [`CTModels.Components.ctNumber`](@ref), [`CTModels.Components.Dimension`](@ref).
 """
 const ctVector = AbstractVector{<:ctNumber}
 

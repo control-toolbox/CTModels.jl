@@ -20,13 +20,15 @@ Set the objective of the optimal control problem.
 # Examples
 
 ```julia-repl
+julia> using CTModels
+
 julia> function mayer(x0, xf, v)
            return x0[1] + xf[1] + v[1]
        end
 julia> function lagrange(t, x, u, v)
            return x[1] + u[1] + v[1]
        end
-julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
+julia> ocp = PreModel(); objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 ```
 
 # Throws
@@ -36,6 +38,11 @@ julia> objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
 - `Exceptions.PreconditionError`: If objective has already been set
 - `Exceptions.IncorrectArgument`: If criterion is not :min, :max, :MIN, or :MAX
 - `Exceptions.IncorrectArgument`: If neither mayer nor lagrange function is provided
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.dynamics!`](@ref), [`CTModels.Building.state!`](@ref), [`CTModels.Building.time!`](@ref).
 """
 function objective!(
     ocp::PreModel,
