@@ -481,16 +481,14 @@ function test_plot()
             )
 
             # layout/control
-            Test.@test Plots.plot(sol_pc; layout=:group, control=:components) isa
-                Plots.Plot
+            Test.@test Plots.plot(sol_pc; layout=:group, control=:components) isa Plots.Plot
             Test.@test Plots.plot(sol_pc; layout=:group, control=:norm) isa Plots.Plot
             Test.@test Plots.plot(sol_pc; layout=:group, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument Plots.plot(
                 sol_pc; layout=:group, control=:wrong_choice
             )
 
-            Test.@test Plots.plot(sol_pc; layout=:split, control=:components) isa
-                Plots.Plot
+            Test.@test Plots.plot(sol_pc; layout=:split, control=:components) isa Plots.Plot
             Test.@test Plots.plot(sol_pc; layout=:split, control=:norm) isa Plots.Plot
             Test.@test Plots.plot(sol_pc; layout=:split, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument Plots.plot(
@@ -518,18 +516,15 @@ function test_plot()
             plt = Plots.plot(sol_pc; layout=:group, control=:components)
             Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:components) isa
                 Plots.Plot
-            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:norm) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:norm) isa Plots.Plot
 
             plt = Plots.plot(sol_pc; layout=:group, control=:norm)
             Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:components) isa
                 Plots.Plot
-            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:norm) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:norm) isa Plots.Plot
 
             plt = Plots.plot(sol_pc; layout=:group, control=:all)
-            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:all) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:group, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument Plots.plot!(
                 plt, sol_pc; layout=:group, control=:wrong_choice
             )
@@ -537,18 +532,15 @@ function test_plot()
             plt = Plots.plot(sol_pc; layout=:split, control=:components)
             Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:components) isa
                 Plots.Plot
-            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:norm) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:norm) isa Plots.Plot
 
             plt = Plots.plot(sol_pc; layout=:split, control=:norm)
             Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:components) isa
                 Plots.Plot
-            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:norm) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:norm) isa Plots.Plot
 
             plt = Plots.plot(sol_pc; layout=:split, control=:all)
-            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:all) isa
-                Plots.Plot
+            Test.@test Plots.plot!(plt, sol_pc; layout=:split, control=:all) isa Plots.Plot
             Test.@test_throws Exceptions.IncorrectArgument Plots.plot!(
                 plt, sol_pc; layout=:split, control=:wrong_choice
             )
