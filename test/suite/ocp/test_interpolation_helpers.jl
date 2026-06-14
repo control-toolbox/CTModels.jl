@@ -43,7 +43,9 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: nothing handling" begin
             # Test allow_nothing=true
-            result = CTModels.Solutions._interpolate_from_data(nothing, T, 2, Nothing; allow_nothing=true)
+            result = CTModels.Solutions._interpolate_from_data(
+                nothing, T, 2, Nothing; allow_nothing=true
+            )
             Test.@test isnothing(result)
 
             # Test allow_nothing=false (should throw)
@@ -65,7 +67,9 @@ function test_interpolation_helpers()
             Test.@test func(1.0) == [1.0, 2.0]  # Constant
 
             # With constant_if_two_points=false (default)
-            func2 = CTModels.Solutions._interpolate_from_data(X_short, T_short, 2, Matrix{Float64})
+            func2 = CTModels.Solutions._interpolate_from_data(
+                X_short, T_short, 2, Matrix{Float64}
+            )
             Test.@test func2(0.0) ≈ [1.0, 2.0]
             Test.@test func2(1.0) ≈ [3.0, 4.0]
             # Linear interpolation
@@ -74,7 +78,9 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: dimension validation" begin
             # Valid: matrix has exactly `expected_dim` columns (strict check)
-            func = CTModels.Solutions._interpolate_from_data(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
+            func = CTModels.Solutions._interpolate_from_data(
+                X_2d, T, 2, Matrix{Float64}; expected_dim=2
+            )
             Test.@test !isnothing(func)
 
             # Invalid: matrix has 2 columns but expected_dim=1 (strict mismatch)
@@ -90,7 +96,9 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: full matrix extraction" begin
             # dim=nothing means take all columns
-            func = CTModels.Solutions._interpolate_from_data(X_2d, T, nothing, Matrix{Float64})
+            func = CTModels.Solutions._interpolate_from_data(
+                X_2d, T, nothing, Matrix{Float64}
+            )
             Test.@test func(0.0) ≈ [1.0, 2.0]
             Test.@test func(1.0) ≈ [2.0, 3.0]
         end
@@ -198,7 +206,9 @@ function test_interpolation_helpers()
         Test.@testset "build_interpolated_function: function passthrough" begin
             # Test that functions are passed through correctly
             test_func = t -> [sin(t), cos(t)]
-            result = CTModels.Solutions.build_interpolated_function(test_func, T, 2, Function)
+            result = CTModels.Solutions.build_interpolated_function(
+                test_func, T, 2, Function
+            )
 
             # Should be wrapped with deepcopy but still work
             Test.@test result(0.0) ≈ [0.0, 1.0]

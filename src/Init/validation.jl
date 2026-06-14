@@ -142,7 +142,9 @@ Extracts state, control, and variable trajectories from the solution.
 Dimensional consistency is checked against the solution metadata; final
 validation against the OCP is performed by `build_initial_guess`.
 """
-function _initial_guess_from_solution(ocp::Models.AbstractModel, sol::Solutions.AbstractSolution)
+function _initial_guess_from_solution(
+    ocp::Models.AbstractModel, sol::Solutions.AbstractSolution
+)
     # Basic dimensional consistency checks
     if Models.state_dimension(ocp) != Models.state_dimension(sol.model)
         throw(

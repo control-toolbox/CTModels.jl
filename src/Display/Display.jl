@@ -47,7 +47,9 @@ include(joinpath(@__DIR__, "solution.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
-function RecipesBase.plot(sol::Solutions.AbstractSolution, description::Symbol...; kwargs...)
+function RecipesBase.plot(
+    sol::Solutions.AbstractSolution, description::Symbol...; kwargs...
+)
     throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
 end
 

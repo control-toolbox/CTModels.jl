@@ -93,13 +93,17 @@ function test_ocp()
         #   comp 2 → lb=1, ub=1.5   (intersection: max(1, 1)=1, min(2, 1.5)=1.5)
 
         # state box
-        CTModels.Building.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
+        CTModels.Building.__constraint!(
+            pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2]
+        )
         CTModels.Building.__constraint!(
             pre_constraints, :state, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
 
         # control box
-        CTModels.Building.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
+        CTModels.Building.__constraint!(
+            pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2]
+        )
         CTModels.Building.__constraint!(
             pre_constraints, :control, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )

@@ -926,40 +926,45 @@ $(TYPEDSIGNATURES)
 
 Return the nonlinear path constraints.
 """
-Components.path_constraints_nl(ocp::Model) =
-    Components.path_constraints_nl(constraints(ocp))
+function Components.path_constraints_nl(ocp::Model)
+    return Components.path_constraints_nl(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Return the nonlinear boundary constraints.
 """
-Components.boundary_constraints_nl(ocp::Model) =
-    Components.boundary_constraints_nl(constraints(ocp))
+function Components.boundary_constraints_nl(ocp::Model)
+    return Components.boundary_constraints_nl(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Return the box constraints on state.
 """
-Components.state_constraints_box(ocp::Model) =
-    Components.state_constraints_box(constraints(ocp))
+function Components.state_constraints_box(ocp::Model)
+    return Components.state_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Return the box constraints on control.
 """
-Components.control_constraints_box(ocp::Model) =
-    Components.control_constraints_box(constraints(ocp))
+function Components.control_constraints_box(ocp::Model)
+    return Components.control_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Return the box constraints on variable.
 """
-Components.variable_constraints_box(ocp::Model) =
-    Components.variable_constraints_box(constraints(ocp))
+function Components.variable_constraints_box(ocp::Model)
+    return Components.variable_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1102,9 +1107,10 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     idxs = _lookup_box(cp)
     if !isempty(idxs)
         component_idxs = cp[2][idxs]
-        fc = (_, x, _, _) -> begin
-            length(component_idxs) == 1 ? x[component_idxs[1]] : x[component_idxs]
-        end
+        fc =
+            (_, x, _, _) -> begin
+                length(component_idxs) == 1 ? x[component_idxs[1]] : x[component_idxs]
+            end
         return (
             :state,
             fc,
@@ -1118,9 +1124,10 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     idxs = _lookup_box(cp)
     if !isempty(idxs)
         component_idxs = cp[2][idxs]
-        fc = (_, _, u, _) -> begin
-            length(component_idxs) == 1 ? u[component_idxs[1]] : u[component_idxs]
-        end
+        fc =
+            (_, _, u, _) -> begin
+                length(component_idxs) == 1 ? u[component_idxs[1]] : u[component_idxs]
+            end
         return (
             :control,
             fc,
@@ -1134,9 +1141,10 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable
     idxs = _lookup_box(cp)
     if !isempty(idxs)
         component_idxs = cp[2][idxs]
-        fc = (_, _, v) -> begin
-            length(component_idxs) == 1 ? v[component_idxs[1]] : v[component_idxs]
-        end
+        fc =
+            (_, _, v) -> begin
+                length(component_idxs) == 1 ? v[component_idxs[1]] : v[component_idxs]
+            end
         return (
             :variable,
             fc,

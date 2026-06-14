@@ -62,11 +62,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         # ───────────────────────────────────────────────────────────────────
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[
-                CTModels.Models => src(
-                    joinpath("Models", "model.jl"),
-                ),
-            ],
+            primary_modules=[CTModels.Models => src(joinpath("Models", "model.jl"))],
             external_modules_to_document=[CTModels],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
