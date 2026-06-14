@@ -251,6 +251,61 @@ function test_initial_guess_builders()
             Test.@test x[1] ≈ sin(0.5)
             Test.@test x[2] ≈ cos(0.5)
         end
+
+        # ====================================================================
+        # UNIT TESTS - MergedTrajectory callable struct
+        # ====================================================================
+
+        Test.@testset "MergedTrajectory — dim=1 scalar base, one override" begin
+            base = _ -> 0.0
+            comps = Dict{Int,Function}(1 => t -> sin(t))
+            f = Init.MergedTrajectory(base, comps, 1, :state)
+            Test.@test f isa Function
+            Test.@test f(0.5) ≈ sin(0.5)
+            Test.@test f(0.5) isa Real
+            Test.@test contains(repr(f), "MergedTrajectory")
+            Test.@test contains(repr(MIME("text/plain"), f), "MergedTrajectory")
+        end
+
+        Test.@testset "MergedTrajectory — dim=2 vector base, one override" begin
+            base = _ -> [1.0, 2.0]
+            comps = Dict{Int,Function}(2 => _ -> 9.0)
+            f = Init.MergedTrajectory(base, comps, 2, :state)
+            Test.@test f isa Function
+            result = f(0.0)
+            Test.@test result isa AbstractVector
+            Test.@test result[1] ≈ 1.0
+            Test.@test result[2] ≈ 9.0
+        end
+
+        Test.@testset "MergedTrajectory — no overrides (empty comps, early return)" begin
+            base = _ -> [3.0, 4.0]
+            comps = Dict{Int,Function}()
+            f = Init.MergedTrajectory(base, comps, 2, :control)
+            Test.@test f isa Function
+            Test.@test f(1.0) == [3.0, 4.0]
+        end
+
+        Test.@testset "MergedTrajectory — error: block dimension mismatch" begin
+            base = _ -> [1.0, 2.0, 3.0]   # length 3 but dim=2
+            comps = Dict{Int,Function}()
+            f = Init.MergedTrajectory(base, comps, 2, :state)
+            Test.@test_throws Exceptions.IncorrectArgument f(0.0)
+        end
+
+        Test.@testset "MergedTrajectory — error: component index out of bounds" begin
+            base = _ -> [1.0, 2.0]
+            comps = Dict{Int,Function}(5 => _ -> 0.0)   # index 5 > dim=2
+            f = Init.MergedTrajectory(base, comps, 2, :state)
+            Test.@test_throws Exceptions.IncorrectArgument f(0.0)
+        end
+
+        Test.@testset "MergedTrajectory — error: component returns vector length > 1" begin
+            base = _ -> [1.0, 2.0]
+            comps = Dict{Int,Function}(1 => _ -> [0.0, 0.0])   # length 2 not allowed
+            f = Init.MergedTrajectory(base, comps, 2, :state)
+            Test.@test_throws Exceptions.IncorrectArgument f(0.0)
+        end
     end
 end
 
