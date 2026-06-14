@@ -1,7 +1,11 @@
 module TestTypes
 
-using Test: Test
-using CTModels: CTModels
+import Test: Test
+import CTModels.Components: Components
+import CTModels.Models: Models
+import CTModels.Solutions: Solutions
+import CTModels.Building: Building
+import CTModels.Init: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -10,36 +14,28 @@ function test_types()
     Test.@testset "CTModels.jl Type System Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for CTModels type system functionality
-        end
-
-        # ====================================================================
         # UNIT TESTS - OCP Model and Solution Core Types
         # ====================================================================
 
         Test.@testset "OCP model and solution core types" begin
             # Abstract/model hierarchy
-            Test.@test isabstracttype(CTModels.AbstractModel)
-            Test.@test CTModels.Model <: CTModels.AbstractModel
-            Test.@test CTModels.PreModel <: CTModels.AbstractModel
+            Test.@test isabstracttype(Models.AbstractModel)
+            Test.@test Models.Model <: Models.AbstractModel
+            Test.@test Building.PreModel <: Models.AbstractModel
 
             # Solution hierarchy
-            Test.@test isabstracttype(CTModels.AbstractSolution)
-            Test.@test CTModels.Solution <: CTModels.AbstractSolution
+            Test.@test isabstracttype(Solutions.AbstractSolution)
+            Test.@test Solutions.Solution <: Solutions.AbstractSolution
 
             # Time grid and dual/infos hierarchy
-            Test.@test isabstracttype(CTModels.AbstractTimeGridModel)
-            Test.@test CTModels.TimeGridModel <: CTModels.AbstractTimeGridModel
+            Test.@test isabstracttype(Solutions.AbstractTimeGridModel)
+            Test.@test Solutions.TimeGridModel <: Solutions.AbstractTimeGridModel
 
-            Test.@test isabstracttype(CTModels.AbstractDualModel)
-            Test.@test CTModels.DualModel <: CTModels.AbstractDualModel
+            Test.@test isabstracttype(Solutions.AbstractDualModel)
+            Test.@test Solutions.DualModel <: Solutions.AbstractDualModel
 
-            Test.@test isabstracttype(CTModels.AbstractSolverInfos)
-            Test.@test CTModels.SolverInfos <: CTModels.AbstractSolverInfos
+            Test.@test isabstracttype(Solutions.AbstractSolverInfos)
+            Test.@test Solutions.SolverInfos <: Solutions.AbstractSolverInfos
         end
 
         # ====================================================================
@@ -47,11 +43,11 @@ function test_types()
         # ====================================================================
 
         Test.@testset "Initial guess core types" begin
-            Test.@test isabstracttype(CTModels.AbstractInitialGuess)
-            Test.@test CTModels.InitialGuess <: CTModels.AbstractInitialGuess
+            Test.@test isabstracttype(Init.AbstractInitialGuess)
+            Test.@test Init.InitialGuess <: Init.AbstractInitialGuess
 
-            Test.@test isabstracttype(CTModels.AbstractPreInitialGuess)
-            Test.@test CTModels.PreInitialGuess <: CTModels.AbstractPreInitialGuess
+            Test.@test isabstracttype(Init.AbstractPreInitialGuess)
+            Test.@test Init.PreInitialGuess <: Init.AbstractPreInitialGuess
         end
     end
 end

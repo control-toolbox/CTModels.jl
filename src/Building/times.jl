@@ -9,6 +9,14 @@ When a time is free, then, one must provide the corresponding index of the ocp v
 
     You must use time! only once to set either the initial or the final time, or both.
 
+# Arguments
+- `ocp::PreModel`: The optimal control problem model.
+- `t0::Union{Time,Nothing}` (keyword): The initial time (fixed). Must not be provided with `ind0`.
+- `tf::Union{Time,Nothing}` (keyword): The final time (fixed). Must not be provided with `indf`.
+- `ind0::Union{Int,Nothing}` (keyword): The variable index for free initial time. Must not be provided with `t0`.
+- `indf::Union{Int,Nothing}` (keyword): The variable index for free final time. Must not be provided with `tf`.
+- `time_name::Union{String,Symbol}` (keyword): The name of the time variable (default: "t").
+
 # Examples
 
 `time!` may be used only once per problem; each form below applies to a fresh `ocp`:
@@ -16,22 +24,24 @@ When a time is free, then, one must provide the corresponding index of the ocp v
 ```julia-repl
 julia> using CTModels
 
-julia> CTModels.time!(ocp; t0=0, tf=1)     # Fixed t0 and fixed tf
+julia> ocp = PreModel(); time!(ocp; t0=0, tf=1)     # Fixed t0 and fixed tf
 
-julia> CTModels.time!(ocp; t0=0, indf=2)   # Fixed t0 and free  tf
+julia> ocp = PreModel(); time!(ocp; t0=0, indf=2)   # Fixed t0 and free  tf
 
-julia> CTModels.time!(ocp; ind0=2, tf=1)   # Free  t0 and fixed tf
+julia> ocp = PreModel(); time!(ocp; ind0=2, tf=1)   # Free  t0 and fixed tf
 
-julia> CTModels.time!(ocp; ind0=2, indf=3) # Free  t0 and free  tf
+julia> ocp = PreModel(); time!(ocp; ind0=2, indf=3) # Free  t0 and free  tf
 ```
 
 When a solution is plotted, the name of the time variable appears (`"t"` by default).
 To name the time variable `"s"`:
 
 ```julia-repl
-julia> CTModels.time!(ocp; t0=0, tf=1, time_name="s") # time_name as a String
+julia> using CTModels
 
-julia> CTModels.time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
+julia> ocp = PreModel(); time!(ocp; t0=0, tf=1, time_name="s") # time_name as a String
+
+julia> ocp = PreModel(); time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
 ```
 
 # Throws
@@ -46,6 +56,11 @@ julia> CTModels.time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
 - `Exceptions.IncorrectArgument`: If time_name is empty
 - `Exceptions.IncorrectArgument`: If time_name conflicts with existing names
 - `Exceptions.IncorrectArgument`: If t0 ≥ tf (when both are fixed)
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.time_dependence!`](@ref), [`CTModels.Components.time_name`](@ref).
 """
 function time!(
     ocp::PreModel;

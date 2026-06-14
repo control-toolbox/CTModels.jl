@@ -1,9 +1,12 @@
 module TestPlot
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
-using Plots: Plots
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import Plots: Plots
+import CTModels: CTModels
+import CTModels.Components: Components
+import CTModels.Models: Models
+import CTModels.Solutions: Solutions
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -11,33 +14,25 @@ import .TestProblems
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-struct FakeModelDoPlot{N} <: CTModels.AbstractModel end
+struct FakeModelDoPlot{N} <: Models.AbstractModel end
 
-struct FakeSolutionDoPlot{N} <: CTModels.AbstractSolution
+struct FakeSolutionDoPlot{N} <: Solutions.AbstractSolution
     ocp::FakeModelDoPlot{N}
     pcd
 end
 
-CTModels.dim_path_constraints_nl(::FakeModelDoPlot{N}) where {N} = N
-CTModels.dim_path_constraints_nl(sol::FakeSolutionDoPlot{N}) where {N} = N
-CTModels.path_constraints_dual(sol::FakeSolutionDoPlot) = sol.pcd
-CTModels.model(sol::FakeSolutionDoPlot) = sol.ocp
-CTModels.state_dimension(::FakeSolutionDoPlot) = 2
-CTModels.control_dimension(::FakeSolutionDoPlot) = 1
+Components.dim_path_constraints_nl(::FakeModelDoPlot{N}) where {N} = N
+Components.dim_path_constraints_nl(sol::FakeSolutionDoPlot{N}) where {N} = N
+Solutions.path_constraints_dual(sol::FakeSolutionDoPlot) = sol.pcd
+Solutions.model(sol::FakeSolutionDoPlot) = sol.ocp
+Models.state_dimension(::FakeSolutionDoPlot) = 2
+Models.control_dimension(::FakeSolutionDoPlot) = 1
 
 function test_plot()
     Test.@testset "Plotting Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Plotting Helper Functions
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for plotting functionality
-        end
-
-        # ====================================================================
-        # UNIT TESTS - Helper Logic
         # ====================================================================
 
         # Resolve the plotting extension module to access internal helpers.
@@ -165,7 +160,7 @@ function test_plot()
 
             sz_components = plots_ext.__size_plot(
                 fake,
-                CTModels.model(fake),
+                Solutions.model(fake),
                 :components,
                 :group,
                 desc...;
@@ -179,7 +174,7 @@ function test_plot()
 
             sz_all = plots_ext.__size_plot(
                 fake,
-                CTModels.model(fake),
+                Solutions.model(fake),
                 :all,
                 :group,
                 desc...;
@@ -197,7 +192,7 @@ function test_plot()
             fake_state = FakeSolutionDoPlot(FakeModelDoPlot{0}(), nothing)
             sz_state = plots_ext.__size_plot(
                 fake_state,
-                CTModels.model(fake_state),
+                Solutions.model(fake_state),
                 :components,
                 :split,
                 :state;
@@ -213,7 +208,7 @@ function test_plot()
             fake_control = FakeSolutionDoPlot(FakeModelDoPlot{0}(), nothing)
             sz_control = plots_ext.__size_plot(
                 fake_control,
-                CTModels.model(fake_control),
+                Solutions.model(fake_control),
                 :norm,
                 :split,
                 :control;
@@ -229,7 +224,7 @@ function test_plot()
             fake_full = FakeSolutionDoPlot(FakeModelDoPlot{2}(), nothing)
             sz_full = plots_ext.__size_plot(
                 fake_full,
-                CTModels.model(fake_full),
+                Solutions.model(fake_full),
                 :components,
                 :split,
                 :state,
@@ -246,7 +241,7 @@ function test_plot()
             # Invalid control keyword should throw
             Test.@test_throws Exceptions.IncorrectArgument plots_ext.__size_plot(
                 fake_state,
-                CTModels.model(fake_state),
+                Solutions.model(fake_state),
                 :wrong_choice,
                 :split,
                 :state;

@@ -30,6 +30,9 @@ Export an optimal control solution to a file.
 - `format::Symbol=:JLD`: Export format, either `:JLD` or `:JSON`.
 - `filename::String="solution"`: Base filename (extension added automatically).
 
+# Returns
+- `Nothing`: This function writes to a file and returns nothing.
+
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 

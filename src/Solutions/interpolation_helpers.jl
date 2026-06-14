@@ -31,6 +31,8 @@ Internal helper to create an interpolated function from discrete data.
 
 # Notes
 This is a low-level helper. Use `build_interpolated_function` for the complete workflow.
+
+See also: [`CTModels.Solutions.build_interpolated_function`](@ref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@ref).
 """
 function _interpolate_from_data(
     data,
@@ -132,6 +134,8 @@ param_x = 999.0
 # Without deepcopy: sol.state(0.5) would return [499.5] (uses new param_x)
 # With deepcopy: sol.state(0.5) returns [0.5] (uses original param_x value)
 ```
+
+See also: [`CTModels.Solutions._interpolate_from_data`](@ref), [`CTModels.Solutions.build_interpolated_function`](@ref).
 """
 function _wrap_scalar_and_deepcopy(func, dim::Union{Int,Nothing})
     if isnothing(func)
@@ -187,6 +191,8 @@ fscbd = build_interpolated_function(state_constraints_lb_dual, T, dim_x,
                                     Union{Matrix{Float64},Nothing};
                                     allow_nothing=true)
 ```
+
+See also: [`CTModels.Solutions._interpolate_from_data`](@ref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@ref).
 """
 function build_interpolated_function(
     data,

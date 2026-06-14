@@ -7,18 +7,41 @@ This module provides types and functions for constructing and managing initial
 guesses for optimal control problems. Initial guesses help warm-start numerical
 solvers by providing starting trajectories for state, control, and variables.
 
+# Organisation
+
+- **types.jl**: Abstract and concrete initial guess types ([`CTModels.Init.InitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref))
+- **utils.jl**: Time grid and data formatting helpers ([`_format_time_grid`](@ref), [`_format_init_data_for_grid`](@ref))
+- **state.jl**: State initialisation functions ([`initial_state`](@ref))
+- **control.jl**: Control initialisation functions ([`initial_control`](@ref))
+- **variable.jl**: Variable initialisation functions ([`initial_variable`](@ref))
+- **builders.jl**: Component-level and time-grid builders ([`_build_block_with_components`](@ref), [`_build_time_dependent_init`](@ref))
+- **validation.jl**: Validation and construction from various formats ([`_validate_initial_guess`](@ref), [`_initial_guess_from_solution`](@ref))
+- **api.jl**: Public API for initial guess construction ([`initial_guess`](@ref), [`build_initial_guess`](@ref), [`validate_initial_guess`](@ref))
+
 # Public API
 
 The following functions are exported and accessible as `CTModels.function_name()`:
 
 - `initial_guess`: Construct a validated initial guess
 - `pre_initial_guess`: Create a pre-initialization object
+- `build_initial_guess`: Build and validate an initial guess from various formats
+- `validate_initial_guess`: Validate an initial guess against a problem
+- `initial_state`: State initialisation helper
+- `initial_control`: Control initialisation helper
+- `initial_variable`: Variable initialisation helper
 
 # Types
 
-- `InitialGuess`: Validated initial guess with callable trajectories
-- `PreInitialGuess`: Pre-initialization container for raw data
+- [`CTModels.Init.InitialGuess`](@ref): Validated initial guess with callable trajectories
+- [`CTModels.Init.PreInitialGuess`](@ref): Pre-initialization container for raw data
+- [`CTModels.Init.AbstractInitialGuess`](@ref): Abstract base type for initial guesses
+- [`CTModels.Init.AbstractPreInitialGuess`](@ref): Abstract base type for pre-initialization data
 
+# Dependencies
+
+External: `CTBase.Core`, `CTBase.Interpolation`, `CTBase.Exceptions`.
+
+See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Solutions`, `CTModels.Building`.
 """
 module Init
 

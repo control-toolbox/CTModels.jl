@@ -26,6 +26,8 @@ julia> using CTModels
 
 julia> pre = CTModels.pre_initial_guess(state=t -> [0.0, 0.0], control=t -> [1.0])
 ```
+
+See also: [`CTModels.Init.initial_guess`](@ref), [`CTModels.Init.build_initial_guess`](@ref).
 """
 function pre_initial_guess(; state=nothing, control=nothing, variable=nothing)
     return PreInitialGuess(state, control, variable)
@@ -59,6 +61,8 @@ julia> using CTModels
 
 julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> [1.0])
 ```
+
+See also: [`CTModels.Init.build_initial_guess`](@ref), [`CTModels.Init.validate_initial_guess`](@ref).
 """
 function initial_guess(
     ocp::Models.AbstractModel;
@@ -109,6 +113,8 @@ julia> using CTModels
 
 julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> [1.0]))
 ```
+
+See also: [`CTModels.Init.initial_guess`](@ref), [`CTModels.Init.validate_initial_guess`](@ref).
 """
 function build_initial_guess(ocp::Models.AbstractModel, init_data)
     # Phase 1: Construction (no validation)
@@ -159,6 +165,8 @@ explicitly on a manually constructed `InitialGuess`.
 # Throws
 
 - `Exceptions.IncorrectArgument`: If dimensions do not match the problem definition.
+
+See also: [`CTModels.Init.build_initial_guess`](@ref), [`CTModels.Init.initial_guess`](@ref).
 """
 function validate_initial_guess(ocp::Models.AbstractModel, init::AbstractInitialGuess)
     if init isa InitialGuess

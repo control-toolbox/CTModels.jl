@@ -14,14 +14,20 @@ Set the time dependence of the optimal control problem `ocp`.
 This function sets the `autonomous` field of the model to indicate whether the system's dynamics
 explicitly depend on time. It can only be called once.
 
-# Errors
-Throws `Exceptions.PreconditionError` if the time dependence has already been set.
+# Throws
+- `Exceptions.PreconditionError`: If the time dependence has already been set.
 
 # Example
 ```julia-repl
-julia> ocp = PreModel(...)
-julia> time_dependence!(ocp; autonomous=true)
+julia> using CTModels
+
+julia> ocp = PreModel(); time_dependence!(ocp; autonomous=true)
 ```
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.time!`](@ref), [`CTModels.Building.dynamics!`](@ref).
 """
 function time_dependence!(ocp::PreModel; autonomous::Bool)::Nothing
     Core.@ensure !__is_autonomous_set(ocp) Exceptions.PreconditionError(

@@ -1,38 +1,54 @@
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value for the constraints.
+Return the default value for the constraints.
+
+# Returns
+- `Nothing`
 """
 __constraints() = nothing
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the format of the file to be used for export and import.
+Return the default format of the file to be used for export and import.
+
+# Returns
+- `Symbol`: The format symbol (`:JLD`).
 """
 __format() = :JLD
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the label of a constraint.
-A unique value is given to each constraint using the `gensym` function and prefixing by `:unnamed`.
+Return a unique label for a constraint using `gensym` with prefix `:unnamed`.
+
+# Returns
+- `Symbol`: A unique constraint label.
 """
 __constraint_label() = gensym(:unnamed)
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the control.
-The default value is `"u"`.
+Return the default name of the control variable.
+
+# Returns
+- `String`: The default control name (`"u"`).
 """
 __control_name()::String = "u"
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the controls.
-The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
+Return the default component names for a control variable of dimension `m`.
+
+# Arguments
+- `m::Dimension`: The control dimension.
+- `name::String`: The base name for components.
+
+# Returns
+- `Vector{String}`: Component names (single element for m=1, subscripted for m>1).
 """
 __control_components(m::Dimension, name::String)::Vector{String} =
     m > 1 ? [name * CTBase.ctindices(i) for i in range(1, m)] : [name]
@@ -40,25 +56,34 @@ __control_components(m::Dimension, name::String)::Vector{String} =
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the type of criterion. Either :min or :max.
-The default value is `:min`.
-The other possible criterion type is `:max`.
+Return the default optimization criterion type.
+
+# Returns
+- `Symbol`: The criterion type (`:min` for minimization).
 """
 __criterion_type() = :min
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the name of the state.
-The default value is `"x"`.
+Return the default name of the state variable.
+
+# Returns
+- `String`: The default state name (`"x"`).
 """
 __state_name()::String = "x"
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the states.
-The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
+Return the default component names for a state variable of dimension `n`.
+
+# Arguments
+- `n::Dimension`: The state dimension.
+- `name::String`: The base name for components.
+
+# Returns
+- `Vector{String}`: Component names (single element for n=1, subscripted for n>1).
 """
 __state_components(n::Dimension, name::String)::Vector{String} =
     n > 1 ? [name * CTBase.ctindices(i) for i in range(1, n)] : [name]
@@ -66,16 +91,23 @@ __state_components(n::Dimension, name::String)::Vector{String} =
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the name of the time.
-The default value is `t`.
+Return the default name of the time variable.
+
+# Returns
+- `String`: The default time name (`"t"`).
 """
 __time_name()::String = "t"
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the variables.
-The default value is `"v"`.
+Return the default name for optimization variables.
+
+# Arguments
+- `q::Dimension`: The variable dimension.
+
+# Returns
+- `String`: The variable name (`"v"` for q>0, empty string for q=0).
 """
 function __variable_name(q::Dimension)::String
     return q > 0 ? "v" : ""
@@ -84,8 +116,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the names of the variables.
-The default value is `["v"]` for a one dimensional variable, and `["v₁", "v₂", ...]` for a multi dimensional variable.
+Return the default component names for a variable of dimension `q`.
+
+# Arguments
+- `q::Dimension`: The variable dimension.
+- `name::String`: The base name for components.
+
+# Returns
+- `Vector{String}`: Component names (empty for q=0, single element for q=1, subscripted for q>1).
 """
 function __variable_components(q::Dimension, name::String)::Vector{String}
     if q == 0
@@ -100,16 +138,18 @@ $(TYPEDSIGNATURES)
 
 Return the default filename (without extension) for exporting and importing solutions.
 
-The default value is `"solution"`.
+# Returns
+- `String`: The default filename (`"solution"`).
 """
 __filename_export_import() = "solution"
 
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the control interpolation type.
-The default value is `:constant` for piecewise constant interpolation (direct methods).
-The other possible value is `:linear` for piecewise linear interpolation (indirect methods).
+Return the default control interpolation type.
+
+# Returns
+- `Symbol`: The interpolation type (`:constant` for piecewise constant, `:linear` for piecewise linear).
 """
 __control_interpolation()::Symbol = :constant
 
@@ -118,7 +158,7 @@ $(TYPEDSIGNATURES)
 
 Return the default component for time grid access in multiple time grid solutions.
 
-The default value is `:state` since the state trajectory is typically the most
-commonly accessed component in optimal control problems.
+# Returns
+- `Symbol`: The default component (`:state`).
 """
 __time_grid_default_component()::Symbol = :state

@@ -6,6 +6,12 @@ Serialization module for CTModels.
 This module provides functions for importing and exporting optimal control
 solutions to various formats (JLD2, JSON).
 
+# Organisation
+
+- **types.jl**: Abstract and concrete types for format tags ([`CTModels.Serialization.AbstractTag`](@ref), [`CTModels.Serialization.JLD2Tag`](@ref), [`CTModels.Serialization.JSON3Tag`](@ref))
+- **export_import.jl**: Public API for export/import ([`CTModels.Serialization.export_ocp_solution`](@ref), [`CTModels.Serialization.import_ocp_solution`](@ref))
+- **reconstruction_helpers.jl**: Internal helpers for solution reconstruction ([`_reconstruct_solution_from_data`](@ref), [`_extract_time_vector`](@ref))
+
 # Public API
 
 The following functions are exported and accessible as `CTModels.function_name()`:

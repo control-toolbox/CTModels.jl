@@ -5,6 +5,15 @@
 $(TYPEDSIGNATURES)
 
 Normalise time grid data to a vector format.
+
+# Arguments
+- `time_data`: The time grid data (vector, array, or `nothing`).
+
+# Returns
+- `Union{Nothing, AbstractVector}`: The normalised time grid as a vector, or `nothing`.
+
+# Throws
+- `Exceptions.IncorrectArgument`: If the time grid type is invalid.
 """
 function _format_time_grid(time_data)
     if time_data === nothing
@@ -30,6 +39,12 @@ end
 $(TYPEDSIGNATURES)
 
 Convert matrix data to vector-of-vectors format for time-grid interpolation.
+
+# Arguments
+- `data`: The data to format (matrix or other format).
+
+# Returns
+- `Union{AbstractVector, Any}`: The formatted data as vector-of-vectors, or the original data.
 """
 function _format_init_data_for_grid(data)
     if data isa AbstractMatrix

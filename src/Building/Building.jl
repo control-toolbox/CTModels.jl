@@ -1,21 +1,22 @@
 """
     Building
 
-Building module for CTModels — assembles `PreModel` (mutable problem under
+Building module for CTModels — assembles [`CTModels.Building.PreModel`](@ref) (mutable problem under
 construction), all component mutators, and the `build` / `build_model` functions
-that convert a finished `PreModel` into an immutable `Model`.
+that convert a finished [`CTModels.Building.PreModel`](@ref) into an immutable [`CTModels.Models.Model`](@ref).
 
 # Organisation
 
 - **defaults.jl**: default names, labels, and criterion for mutators.
-- **pre_model.jl**: `PreModel` struct and `__is_*` consistency helpers.
-- **time_dependence.jl**: `time_dependence!` mutator.
+- **pre_model.jl**: [`CTModels.Building.PreModel`](@ref) struct and `__is_*` consistency helpers.
+- **time_dependence.jl**: [`CTModels.Building.time_dependence!`](@ref) mutator.
 - **name_validation.jl**: `__validate_name_uniqueness` and friends.
 - **state.jl / control.jl / variable.jl / times.jl**: component mutators.
 - **dynamics.jl / objective.jl / constraints.jl / definition.jl**: remaining mutators.
-- **build.jl**: `append_box_constraints!`, `build(ConstraintsDictType)`,
-  `build(PreModel)`, `build_model`.
+- **build.jl**: [`CTModels.Building.append_box_constraints!`](@ref), [`CTModels.Building.build`](@ref)([`CTModels.Components.ConstraintsDictType`](@ref)),
+  [`CTModels.Building.build`](@ref)([`CTModels.Building.PreModel`](@ref)), [`CTModels.Building.build_model`](@ref).
 
+See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref).
 """
 module Building
 

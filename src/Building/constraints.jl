@@ -3,7 +3,7 @@ $(TYPEDSIGNATURES)
 
 Add a constraint to a dictionary of constraints.
 
-## Arguments
+# Arguments
 
 - `ocp_constraints`: The dictionary of constraints to which the constraint will be added.
 - `type`: The type of the constraint. It can be `:state`, `:control`, `:variable`, `:boundary`, or `:path`.
@@ -16,7 +16,7 @@ Add a constraint to a dictionary of constraints.
 - `ub`: The upper bound of the constraint. It can be a number or a vector.
 - `label`: The label of the constraint. It must be unique in the dictionary of constraints.
 
-## Requirements
+# Requirements
 
 - The constraint must not be set before.
 - The lower bound `lb` and the upper bound `ub` cannot be both `nothing`.
@@ -40,7 +40,7 @@ If `f` is provided, then:
 - `f` must be a function that returns a vector of the same dimension as the constraint.
 - `lb` and `ub` must be of the same dimension as the output of `f`, when provided.
 
-## Example
+# Example
 
 ```julia-repl
 # Example of adding a state constraint
@@ -255,9 +255,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a constraint to a pre-model. See [__constraint!](@ref) for more details.
+Add a constraint to a pre-model. See [`CTModels.Building.__constraint!`](@ref) for more details.
 
-## Arguments
+# Arguments
 
 - `ocp`: The pre-model to which the constraint will be added.
 - `type`: The type of the constraint. It can be `:state`, `:control`, `:variable`, `:boundary`, or `:path`.
@@ -267,12 +267,11 @@ Add a constraint to a pre-model. See [__constraint!](@ref) for more details.
 - `ub`: The upper bound of the constraint. It can be a number or a vector.
 - `label`: The label of the constraint. It must be unique in the pre-model.
 
-## Example
-
+# Example
 ```julia-repl
-# Example of adding a control constraint to a pre-model
-julia> ocp = PreModel()
-julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_constraint)
+julia> using CTModels
+
+julia> ocp = PreModel(); constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_constraint)
 ```
 
 # Throws
@@ -286,6 +285,11 @@ julia> constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_con
 - `Exceptions.IncorrectArgument`: If lb and ub have different lengths
 - `Exceptions.IncorrectArgument`: If lb > ub element-wise
 - `Exceptions.IncorrectArgument`: If dimensions don't match expected sizes
+
+# Returns
+- `Nothing`
+
+See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.control!`](@ref), [`CTModels.Building.variable!`](@ref).
 
 !!! note
     Control is only required for `type == :control` constraints. All other types
@@ -360,6 +364,9 @@ end
     as_vector(::Nothing) -> Nothing
 
 Return `nothing` unchanged.
+
+# Returns
+- `Nothing`
 """
 as_vector(::Nothing) = nothing
 
@@ -367,6 +374,19 @@ as_vector(::Nothing) = nothing
     as_vector(x::T) -> Vector{T} where {T<:ctNumber}
 
 Wrap a scalar number into a single-element vector.
+
+# Arguments
+- `x::T`: A scalar number.
+
+# Returns
+- `Vector{T}`: A single-element vector containing `x`.
+
+# Example
+```julia-repl
+julia> as_vector(1.0)
+1-element Vector{Float64}:
+ 1.0
+```
 """
 (as_vector(x::T)::Vector{T}) where {T<:ctNumber} = [x]
 
@@ -374,6 +394,21 @@ Wrap a scalar number into a single-element vector.
     as_vector(x::AbstractVector{T}) -> AbstractVector{T} where {T<:ctNumber}
 
 Return a vector unchanged.
+
+# Arguments
+- `x::AbstractVector{T}`: A vector of numbers.
+
+# Returns
+- `AbstractVector{T}`: The input vector unchanged.
+
+# Example
+```julia-repl
+julia> as_vector([1.0, 2.0, 3.0])
+3-element Vector{Float64}:
+ 1.0
+ 2.0
+ 3.0
+```
 """
 as_vector(x::AbstractVector{T}) where {T<:ctNumber} = x
 
@@ -381,6 +416,9 @@ as_vector(x::AbstractVector{T}) where {T<:ctNumber} = x
     as_range(::Nothing) -> Nothing
 
 Return `nothing` unchanged.
+
+# Returns
+- `Nothing`
 """
 as_range(::Nothing) = nothing
 
@@ -388,6 +426,18 @@ as_range(::Nothing) = nothing
     as_range(r::Int) -> UnitRange{Int}
 
 Convert a scalar integer to a single-element range `r:r`.
+
+# Arguments
+- `r::Int`: An integer index.
+
+# Returns
+- `UnitRange{Int}`: A range containing only `r`.
+
+# Example
+```julia-repl
+julia> as_range(3)
+3:3
+```
 """
 as_range(r::T) where {T<:Int} = r:r
 
@@ -395,6 +445,18 @@ as_range(r::T) where {T<:Int} = r:r
     as_range(r::OrdinalRange{Int}) -> OrdinalRange{Int}
 
 Return an ordinal range unchanged.
+
+# Arguments
+- `r::OrdinalRange{Int}`: A range of integers.
+
+# Returns
+- `OrdinalRange{Int}`: The input range unchanged.
+
+# Example
+```julia-repl
+julia> as_range(1:5)
+1:5
+```
 """
 as_range(r::OrdinalRange{T}) where {T<:Int} = r
 

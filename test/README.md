@@ -26,16 +26,16 @@ julia --project -e 'using Pkg; Pkg.test("CTModels")'
 
 You can run specific test files or groups using the `test_args` argument. The argument supports glob-style patterns.
 
-**Run all tests in the `ocp` directory:**
+**Run all tests in the `building` directory:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/ocp/*"])'
+julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/building/*"])'
 ```
 
 **Run specific test files:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/ocp/test_constraints", "suite/ocp/test_dynamics"])'
+julia --project -e 'using Pkg; Pkg.test("CTModels"; test_args=["suite/building/test_constraints", "suite/building/test_dynamics"])'
 ```
 
 ### Running All Tests (Including Optional/Long Tests)
@@ -69,20 +69,22 @@ julia --project=@. -e 'using Pkg; Pkg.test("CTModels"; coverage=true); include("
 - **File Name:** Must follow the pattern `test_<name>.jl` (e.g., `test_dynamics.jl`).
 - **Entry Function:** The file **MUST** contain a function named `test_<name>()` (matching the filename) that serves as the entry point.
 
-**Example (`test/suite/ocp/test_dynamics.jl`):**
+**Example (`test/suite/building/test_dynamics.jl`):**
 
 ```julia
 module TestDynamics # namespace isolation
 
-using Test
-using CTModels
-using Main.TestProblems # Access shared test helpers
+using Test: Test
+using CTModels: CTModels
 
-# Define structs at top-level (crucial!)
-struct MyDummyModel end
+const VERBOSE    = isdefined(Main, :TestData) ? Main.TestData.VERBOSE    : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
+
+# Define structs at top-level (crucial! world-age issues otherwise)
+struct FakeDynModel <: CTModels.AbstractModel end
 
 function test_dynamics()
-    @testset "Dynamics Tests" begin
+    Test.@testset "Dynamics Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
         # Your tests here
     end
 end
@@ -113,18 +115,15 @@ All helper methods, mocks, and structs must be defined at the **top-level** of t
 
 ### Directory Structure
 
-All test files are organized under `test/suite/`. Place your test file in the appropriate subdirectory based on functionality:
+All test files are organized under `test/suite/`. Place your test file in the appropriate subdirectory based on functionality (groups align with the package's submodules):
 
-- `suite/docp/`: DOCP (Discretized Optimal Control Problem) module tests
-- `suite/init/`: Initial guess and initialization tests
-- `suite/integration/`: End-to-end integration tests
-- `suite/io/`: Import/Export functionality tests
-- `suite/meta/`: Meta tests (Aqua.jl quality checks, etc.)
-- `suite/modelers/`: Modelers (ADNLPModeler, ExaModeler) tests
-- `suite/ocp/`: Optimal Control Problem definitions and components
-- `suite/optimization/`: Optimization module (builders, contracts, etc.)
-- `suite/options/`: Options system tests
-- `suite/orchestration/`: Orchestration layer tests
-- `suite/plot/`: Plotting functionality tests
-- `suite/strategies/`: Strategies framework tests
-- `suite/types/`: Core type definitions tests
+- `suite/components/`: Shared types, aliases, accessors, time-dependence traits (`CTModels.Components`)
+- `suite/models/`: Immutable `Model` type, readers, user-facing predicates (`CTModels.Models`)
+- `suite/building/`: `PreModel`, mutators, validation, defaults, `build` (`CTModels.Building`)
+- `suite/solutions/`: `Solution`, time grids, dual model, interpolation (`CTModels.Solutions`)
+- `suite/init/`: Initial guess construction, validation, API (`CTModels.Init`)
+- `suite/serialization/`: Import/export to disk (JLD2, JSON) (`CTModels.Serialization`)
+- `suite/display/`: Pretty-printing of models and solutions (`CTModels.Display`)
+- `suite/extensions/`: Weak-dependency extension tests (e.g. Plots)
+- `suite/integration/`: End-to-end tests spanning multiple modules
+- `suite/meta/`: Aqua.jl code-quality checks, export verification, type hierarchy

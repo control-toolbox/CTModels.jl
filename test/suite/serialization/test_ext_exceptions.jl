@@ -1,9 +1,11 @@
 module TestExtExceptions
 
-using Test: Test
-import CTBase.Exceptions
+import Test: Test
+import CTBase.Exceptions: Exceptions
 import RecipesBase: RecipesBase
-using CTModels: CTModels
+import CTModels.Serialization: Serialization
+import CTModels.Solutions: Solutions
+import CTModels.Models: Models
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -13,23 +15,15 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy tags for testing stubs - these won't be overridden by extensions
 # because extensions only override for JLD2Tag and JSON3Tag specifically
-struct DummyJLD2Tag <: CTModels.AbstractTag end
-struct DummyJSON3Tag <: CTModels.AbstractTag end
+struct DummyJLD2Tag <: Serialization.AbstractTag end
+struct DummyJSON3Tag <: Serialization.AbstractTag end
 
 # Dummy solution and model types for testing serialization stubs
-struct DummyAbstractSolution <: CTModels.AbstractSolution end
-struct DummyAbstractModel <: CTModels.AbstractModel end
+struct DummyAbstractSolution <: Solutions.AbstractSolution end
+struct DummyAbstractModel <: Models.AbstractModel end
 
 function test_ext_exceptions()
     Test.@testset "Extension Exceptions Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-
-        # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for extension exceptions functionality
-        end
 
         # ====================================================================
         # UNIT TESTS - Extension Exception Handling
@@ -40,10 +34,10 @@ function test_ext_exceptions()
         # Test IncorrectArgument for unknown format
         # ============================================================================
         Test.@testset "IncorrectArgument for unknown format" begin
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.export_ocp_solution(
+            Test.@test_throws Exceptions.IncorrectArgument Serialization.export_ocp_solution(
                 sol; format=:dummy
             )
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.import_ocp_solution(
+            Test.@test_throws Exceptions.IncorrectArgument Serialization.import_ocp_solution(
                 ocp; format=:dummy
             )
         end
@@ -57,11 +51,11 @@ function test_ext_exceptions()
             dummy_sol = DummyAbstractSolution()
             dummy_ocp = DummyAbstractModel()
 
-            Test.@test_throws Exceptions.ExtensionError CTModels.export_ocp_solution(
-                CTModels.JLD2Tag(), dummy_sol; filename="test"
+            Test.@test_throws Exceptions.ExtensionError Serialization.export_ocp_solution(
+                Serialization.JLD2Tag(), dummy_sol; filename="test"
             )
-            Test.@test_throws Exceptions.ExtensionError CTModels.import_ocp_solution(
-                CTModels.JLD2Tag(), dummy_ocp; filename="test"
+            Test.@test_throws Exceptions.ExtensionError Serialization.import_ocp_solution(
+                Serialization.JLD2Tag(), dummy_ocp; filename="test"
             )
         end
 
@@ -69,11 +63,11 @@ function test_ext_exceptions()
             dummy_sol = DummyAbstractSolution()
             dummy_ocp = DummyAbstractModel()
 
-            Test.@test_throws Exceptions.ExtensionError CTModels.export_ocp_solution(
-                CTModels.JSON3Tag(), dummy_sol; filename="test"
+            Test.@test_throws Exceptions.ExtensionError Serialization.export_ocp_solution(
+                Serialization.JSON3Tag(), dummy_sol; filename="test"
             )
-            Test.@test_throws Exceptions.ExtensionError CTModels.import_ocp_solution(
-                CTModels.JSON3Tag(), dummy_ocp; filename="test"
+            Test.@test_throws Exceptions.ExtensionError Serialization.import_ocp_solution(
+                Serialization.JSON3Tag(), dummy_ocp; filename="test"
             )
         end
 
@@ -85,21 +79,21 @@ function test_ext_exceptions()
         # ============================================================================
         Test.@testset "Stub dispatch for export_ocp_solution" begin
             # Test that calling with our dummy tag triggers MethodError
-            # Note: The actual stubs are defined for JLD2Tag/JSON3Tag, 
+            # Note: The actual stubs are defined for JLD2Tag/JSON3Tag,
             # but method dispatch should fail for unknown tag types
-            Test.@test_throws MethodError CTModels.export_ocp_solution(
+            Test.@test_throws MethodError Serialization.export_ocp_solution(
                 DummyJLD2Tag(), sol; filename="test"
             )
-            Test.@test_throws MethodError CTModels.export_ocp_solution(
+            Test.@test_throws MethodError Serialization.export_ocp_solution(
                 DummyJSON3Tag(), sol; filename="test"
             )
         end
 
         Test.@testset "Stub dispatch for import_ocp_solution" begin
-            Test.@test_throws MethodError CTModels.import_ocp_solution(
+            Test.@test_throws MethodError Serialization.import_ocp_solution(
                 DummyJLD2Tag(), ocp; filename="test"
             )
-            Test.@test_throws MethodError CTModels.import_ocp_solution(
+            Test.@test_throws MethodError Serialization.import_ocp_solution(
                 DummyJSON3Tag(), ocp; filename="test"
             )
         end
@@ -120,8 +114,8 @@ function test_ext_exceptions()
         # Test method signature errors
         # ============================================================================
         Test.@testset "Method signature errors" begin
-            Test.@test_throws MethodError CTModels.export_ocp_solution()
-            Test.@test_throws MethodError CTModels.import_ocp_solution()
+            Test.@test_throws MethodError Serialization.export_ocp_solution()
+            Test.@test_throws MethodError Serialization.import_ocp_solution()
         end
     end
 end

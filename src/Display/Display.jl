@@ -6,12 +6,21 @@ Display and formatting module for CTModels.
 This module provides functions for displaying and formatting optimal control
 problems and solutions in human-readable formats.
 
+# Organisation
+
+- **ansi.jl**: ANSI helpers and generic Expr printing ([`_ansi_color`](@ref), [`_print_ansi_styled`](@ref))
+- **definition.jl**: Abstract (symbolic) definition printing ([`_print_abstract_definition`](@ref))
+- **mathematical.jl**: Mathematical definition printing ([`__print_mathematical_definition`](@ref))
+- **model.jl**: Display for [`CTModels.Models.Model`](@ref)
+- **pre_model.jl**: Display for [`CTModels.Building.PreModel`](@ref)
+- **solution.jl**: Display for [`CTModels.Solutions.Solution`](@ref)
+
 # Public API
 
 The following functions are exported and accessible via `Base.show`:
 
-- `Base.show(io::IO, ::MIME"text/plain", ocp::Model)`: Display an optimal control problem
-- `Base.show(io::IO, ::MIME"text/plain", sol::Solution)`: Display a solution
+- `Base.show(io::IO, ::MIME"text/plain", ocp::CTModels.Models.Model)`: Display an optimal control problem
+- `Base.show(io::IO, ::MIME"text/plain", sol::CTModels.Solutions.Solution)`: Display a solution
 
 # Private API
 
@@ -21,6 +30,11 @@ The following are internal utilities (accessible via `Display.function_name`):
 - `__print_abstract_definition`: Print abstract OCP definition
 - `__print_mathematical_definition`: Print mathematical OCP formulation
 
+# Dependencies
+
+External: `MLStyle`, `RecipesBase`, `MacroTools`.
+
+See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Building`, `CTModels.Solutions`.
 """
 module Display
 

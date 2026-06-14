@@ -12,7 +12,8 @@ Abstract base type representing time dependence of an optimal control problem.
 Used as a type parameter to distinguish between autonomous and non-autonomous
 systems at the type level, enabling dispatch and compile-time optimisations.
 
-See also: [`CTModels.Components.Autonomous`](@ref), [`CTModels.Components.NonAutonomous`](@ref).
+See also: [`CTModels.Components.Autonomous`](@ref), [`CTModels.Components.NonAutonomous`](@ref),
+[`CTModels.Components.TimesModel`](@ref).
 """
 abstract type TimeDependence end
 
@@ -25,7 +26,8 @@ problem do not explicitly depend on time.
 For autonomous systems, the dynamics have the form `ẋ = f(x, u)` rather than
 `ẋ = f(t, x, u)`.
 
-See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.NonAutonomous`](@ref).
+See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.NonAutonomous`](@ref),
+[`CTModels.Components.TimesModel`](@ref).
 """
 abstract type Autonomous<:TimeDependence end
 
@@ -37,7 +39,8 @@ problem explicitly depend on time.
 
 For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
 
-See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.Autonomous`](@ref).
+See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.Autonomous`](@ref),
+[`CTModels.Components.TimesModel`](@ref).
 """
 abstract type NonAutonomous<:TimeDependence end
 
@@ -50,7 +53,8 @@ Abstract base type for state variable models in optimal control problems.
 Subtypes describe the state space structure including dimension, naming, and
 optionally the state trajectory itself.
 
-See also: [`CTModels.Components.StateModel`](@ref), [`CTModels.Components.StateModelSolution`](@ref).
+See also: [`CTModels.Components.StateModel`](@ref), [`CTModels.Components.StateModelSolution`](@ref),
+[`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 abstract type AbstractStateModel end
 
@@ -65,7 +69,8 @@ problem definition.
 - `name::String`: Display name for the state variable (e.g., `"x"`).
 - `components::Vector{String}`: Names of individual state components (e.g., `["x₁", "x₂"]`).
 
-See also: [`CTModels.Components.AbstractStateModel`](@ref), [`CTModels.Components.StateModelSolution`](@ref).
+See also: [`CTModels.Components.AbstractStateModel`](@ref), [`CTModels.Components.StateModelSolution`](@ref),
+[`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 struct StateModel <: AbstractStateModel
     name::String
@@ -83,7 +88,8 @@ State model for a solved optimal control problem, including the state trajectory
 - `components::Vector{String}`: Names of individual state components.
 - `value::TS`: A function `t -> x(t)` returning the state vector at time `t`.
 
-See also: [`CTModels.Components.AbstractStateModel`](@ref), [`CTModels.Components.StateModel`](@ref).
+See also: [`CTModels.Components.AbstractStateModel`](@ref), [`CTModels.Components.StateModel`](@ref),
+[`CTModels.Components.value`](@ref).
 """
 struct StateModelSolution{TS<:Function} <: AbstractStateModel
     name::String
@@ -98,7 +104,7 @@ $(TYPEDEF)
 Abstract base type for control variable models in optimal control problems.
 
 See also: [`CTModels.Components.ControlModel`](@ref), [`CTModels.Components.ControlModelSolution`](@ref),
-[`CTModels.Components.EmptyControlModel`](@ref).
+[`CTModels.Components.EmptyControlModel`](@ref), [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 abstract type AbstractControlModel end
 
@@ -113,7 +119,8 @@ control problem definition.
 - `name::String`: Display name for the control variable (e.g., `"u"`).
 - `components::Vector{String}`: Names of individual control components (e.g., `["u₁", "u₂"]`).
 
-See also: [`CTModels.Components.AbstractControlModel`](@ref), [`CTModels.Components.ControlModelSolution`](@ref).
+See also: [`CTModels.Components.AbstractControlModel`](@ref), [`CTModels.Components.ControlModelSolution`](@ref),
+[`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 struct ControlModel <: AbstractControlModel
     name::String
@@ -131,7 +138,8 @@ Represents the control trajectory in a solution.
 - `value::TS`: A function `t -> u(t)` returning the control vector at time `t`.
 - `interpolation::Symbol`: Interpolation type (`:constant` or `:linear`).
 
-See also: [`CTModels.Components.AbstractControlModel`](@ref), [`CTModels.Components.ControlModel`](@ref).
+See also: [`CTModels.Components.AbstractControlModel`](@ref), [`CTModels.Components.ControlModel`](@ref),
+[`CTModels.Components.value`](@ref), [`CTModels.Components.interpolation`](@ref).
 """
 struct ControlModelSolution{TS<:Function} <: AbstractControlModel
     name::String
@@ -145,7 +153,7 @@ $(TYPEDEF)
 
 Sentinel type representing the absence of a control input in an optimal control problem.
 
-See also: [`CTModels.Components.ControlModel`](@ref).
+See also: [`CTModels.Components.ControlModel`](@ref), [`CTModels.Components.AbstractControlModel`](@ref).
 """
 struct EmptyControlModel <: AbstractControlModel end
 
@@ -156,7 +164,7 @@ $(TYPEDEF)
 Abstract base type for optimisation variable models in optimal control problems.
 
 See also: [`CTModels.Components.VariableModel`](@ref), [`CTModels.Components.EmptyVariableModel`](@ref),
-[`CTModels.Components.VariableModelSolution`](@ref).
+[`CTModels.Components.VariableModelSolution`](@ref), [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 abstract type AbstractVariableModel end
 
@@ -170,7 +178,8 @@ Variable model describing the structure of the optimisation variable.
 - `name::String`: Display name for the variable (e.g., `"v"`).
 - `components::Vector{String}`: Names of individual variable components.
 
-See also: [`CTModels.Components.AbstractVariableModel`](@ref), [`CTModels.Components.VariableModelSolution`](@ref).
+See also: [`CTModels.Components.AbstractVariableModel`](@ref), [`CTModels.Components.VariableModelSolution`](@ref),
+[`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
 """
 struct VariableModel <: AbstractVariableModel
     name::String
@@ -197,7 +206,8 @@ Variable model for a solved optimal control problem, including the variable valu
 - `components::Vector{String}`: Names of individual variable components.
 - `value::TS`: The optimisation variable value (scalar or vector).
 
-See also: [`CTModels.Components.AbstractVariableModel`](@ref), [`CTModels.Components.VariableModel`](@ref).
+See also: [`CTModels.Components.AbstractVariableModel`](@ref), [`CTModels.Components.VariableModel`](@ref),
+[`CTModels.Components.value`](@ref).
 """
 struct VariableModelSolution{TS<:Union{ctNumber,ctVector}} <: AbstractVariableModel
     name::String
@@ -211,7 +221,8 @@ $(TYPEDEF)
 
 Abstract base type for time boundary models (initial or final time).
 
-See also: [`CTModels.Components.FixedTimeModel`](@ref), [`CTModels.Components.FreeTimeModel`](@ref).
+See also: [`CTModels.Components.FixedTimeModel`](@ref), [`CTModels.Components.FreeTimeModel`](@ref),
+[`CTModels.Components.TimesModel`](@ref), [`CTModels.Components.time_name`](@ref).
 """
 abstract type AbstractTimeModel end
 
@@ -224,6 +235,9 @@ Time model representing a fixed (known) time boundary.
 
 - `time::T`: The fixed time value.
 - `name::String`: Display name for this time (e.g., `"t₀"` or `"tf"`).
+
+See also: [`CTModels.Components.AbstractTimeModel`](@ref), [`CTModels.Components.FreeTimeModel`](@ref),
+[`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 struct FixedTimeModel{T<:Time} <: AbstractTimeModel
     time::T
@@ -241,6 +255,9 @@ The actual time value is stored in the optimisation variable at the given index.
 
 - `index::Int`: Index into the optimisation variable where this time is stored.
 - `name::String`: Display name for this time (e.g., `"tf"`).
+
+See also: [`CTModels.Components.AbstractTimeModel`](@ref), [`CTModels.Components.FixedTimeModel`](@ref),
+[`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 struct FreeTimeModel <: AbstractTimeModel
     index::Int
@@ -252,7 +269,8 @@ $(TYPEDEF)
 
 Abstract base type for combined initial and final time models.
 
-See also: [`CTModels.Components.TimesModel`](@ref).
+See also: [`CTModels.Components.TimesModel`](@ref), [`CTModels.Components.FixedTimeModel`](@ref),
+[`CTModels.Components.FreeTimeModel`](@ref).
 """
 abstract type AbstractTimesModel end
 
@@ -266,6 +284,9 @@ Combined model for initial and final times in an optimal control problem.
 - `initial::TI`: The initial time model (fixed or free).
 - `final::TF`: The final time model (fixed or free).
 - `time_name::String`: Display name for the time variable (e.g., `"t"`).
+
+See also: [`CTModels.Components.AbstractTimesModel`](@ref), [`CTModels.Components.FixedTimeModel`](@ref),
+[`CTModels.Components.FreeTimeModel`](@ref), [`CTModels.Components.initial`](@ref), [`CTModels.Components.final`](@ref).
 """
 struct TimesModel{TI<:AbstractTimeModel,TF<:AbstractTimeModel} <: AbstractTimesModel
     initial::TI
@@ -280,7 +301,8 @@ $(TYPEDEF)
 Abstract base type for objective function models in optimal control problems.
 
 See also: [`CTModels.Components.MayerObjectiveModel`](@ref),
-[`CTModels.Components.LagrangeObjectiveModel`](@ref), [`CTModels.Components.BolzaObjectiveModel`](@ref).
+[`CTModels.Components.LagrangeObjectiveModel`](@ref), [`CTModels.Components.BolzaObjectiveModel`](@ref),
+[`CTModels.Components.criterion`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
 abstract type AbstractObjectiveModel end
 
@@ -293,6 +315,9 @@ Objective model with only a Mayer (terminal) cost: `g(x(t₀), x(tf), v)`.
 
 - `mayer::TM`: The Mayer cost function `(x0, xf, v) -> g(x0, xf, v)`.
 - `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+See also: [`CTModels.Components.AbstractObjectiveModel`](@ref), [`CTModels.Components.LagrangeObjectiveModel`](@ref),
+[`CTModels.Components.BolzaObjectiveModel`](@ref), [`CTModels.Components.mayer`](@ref).
 """
 struct MayerObjectiveModel{TM<:Function} <: AbstractObjectiveModel
     mayer::TM
@@ -308,6 +333,9 @@ Objective model with only a Lagrange (integral) cost: `∫ f⁰(t, x, u, v) dt`.
 
 - `lagrange::TL`: The Lagrange integrand `(t, x, u, v) -> f⁰(t, x, u, v)`.
 - `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+See also: [`CTModels.Components.AbstractObjectiveModel`](@ref), [`CTModels.Components.MayerObjectiveModel`](@ref),
+[`CTModels.Components.BolzaObjectiveModel`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
 struct LagrangeObjectiveModel{TL<:Function} <: AbstractObjectiveModel
     lagrange::TL
@@ -325,6 +353,9 @@ Objective model with both Mayer and Lagrange costs (Bolza form):
 - `mayer::TM`: The Mayer cost function.
 - `lagrange::TL`: The Lagrange integrand.
 - `criterion::Symbol`: Optimisation direction, either `:min` or `:max`.
+
+See also: [`CTModels.Components.AbstractObjectiveModel`](@ref), [`CTModels.Components.MayerObjectiveModel`](@ref),
+[`CTModels.Components.LagrangeObjectiveModel`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
 struct BolzaObjectiveModel{TM<:Function,TL<:Function} <: AbstractObjectiveModel
     mayer::TM
@@ -340,7 +371,8 @@ $(TYPEDEF)
 
 Abstract base type for constraint models in optimal control problems.
 
-See also: [`CTModels.Components.ConstraintsModel`](@ref).
+See also: [`CTModels.Components.ConstraintsModel`](@ref), [`CTModels.Components.path_constraints_nl`](@ref),
+[`CTModels.Components.state_constraints_box`](@ref).
 """
 abstract type AbstractConstraintsModel end
 
@@ -356,6 +388,9 @@ Container for all constraints in an optimal control problem.
 - `state_box::TS`: Tuple of box constraints on state variables `(lb, ind, ub, labels, aliases)`.
 - `control_box::TC`: Tuple of box constraints on control variables (same structure).
 - `variable_box::TV`: Tuple of box constraints on optimisation variables (same structure).
+
+See also: [`CTModels.Components.AbstractConstraintsModel`](@ref), [`CTModels.Components.path_constraints_nl`](@ref),
+[`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Components.control_constraints_box`](@ref).
 """
 struct ConstraintsModel{TP<:Tuple,TB<:Tuple,TS<:Tuple,TC<:Tuple,TV<:Tuple} <:
        AbstractConstraintsModel
@@ -374,7 +409,8 @@ $(TYPEDEF)
 
 Abstract base type for the symbolic definition attached to an optimal control problem.
 
-See also: [`CTModels.Components.Definition`](@ref), [`CTModels.Components.EmptyDefinition`](@ref).
+See also: [`CTModels.Components.Definition`](@ref), [`CTModels.Components.EmptyDefinition`](@ref),
+[`CTModels.Components.expression`](@ref).
 """
 abstract type AbstractDefinition end
 
@@ -383,7 +419,8 @@ $(TYPEDEF)
 
 Sentinel type representing the absence of a symbolic definition.
 
-See also: [`CTModels.Components.AbstractDefinition`](@ref), [`CTModels.Components.Definition`](@ref).
+See also: [`CTModels.Components.AbstractDefinition`](@ref), [`CTModels.Components.Definition`](@ref),
+[`CTModels.Components.expression`](@ref).
 """
 struct EmptyDefinition <: AbstractDefinition end
 
@@ -397,7 +434,8 @@ optimal control problem (typically produced by the `@def` DSL).
 
 - `expr::Expr`: The symbolic expression defining the problem.
 
-See also: [`CTModels.Components.AbstractDefinition`](@ref), [`CTModels.Components.EmptyDefinition`](@ref).
+See also: [`CTModels.Components.AbstractDefinition`](@ref), [`CTModels.Components.EmptyDefinition`](@ref),
+[`CTModels.Components.expression`](@ref).
 """
 struct Definition <: AbstractDefinition
     expr::Expr
