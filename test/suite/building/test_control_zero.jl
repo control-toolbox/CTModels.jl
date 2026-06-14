@@ -1,12 +1,16 @@
 module TestControlZero
 
-using Test: Test
-import CTBase.Exceptions
-import CTModels.Init
-using CTModels: CTModels
-using Plots: Plots
-using JLD2: JLD2
-using JSON3: JSON3
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
+import CTModels.Building: Building
+import CTModels.Models: Models
+import CTModels.Solutions: Solutions
+import CTModels.Init: Init
+import CTModels.Serialization: Serialization
+import Plots: Plots
+import JLD2: JLD2
+import JSON3: JSON3
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -19,16 +23,16 @@ function test_control_zero()
         # ====================================================================
 
         Test.@testset "EmptyControlModel - Type and Construction" begin
-            ecm = CTModels.EmptyControlModel()
-            Test.@test ecm isa CTModels.EmptyControlModel
-            Test.@test ecm isa CTModels.AbstractControlModel
+            ecm = Components.EmptyControlModel()
+            Test.@test ecm isa Components.EmptyControlModel
+            Test.@test ecm isa Components.AbstractControlModel
         end
 
         Test.@testset "EmptyControlModel - Getters" begin
-            ecm = CTModels.EmptyControlModel()
-            Test.@test CTModels.name(ecm) == ""
-            Test.@test CTModels.components(ecm) == String[]
-            Test.@test CTModels.dimension(ecm) == 0
+            ecm = Components.EmptyControlModel()
+            Test.@test Components.name(ecm) == ""
+            Test.@test Components.components(ecm) == String[]
+            Test.@test Components.dimension(ecm) == 0
         end
 
         # ====================================================================
@@ -36,9 +40,9 @@ function test_control_zero()
         # ====================================================================
 
         Test.@testset "PreModel - Default Control" begin
-            pre = CTModels.PreModel()
-            Test.@test pre.control isa CTModels.EmptyControlModel
-            Test.@test CTModels.dimension(pre.control) == 0
+            pre = Building.PreModel()
+            Test.@test pre.control isa Components.EmptyControlModel
+            Test.@test Components.dimension(pre.control) == 0
         end
 
         # ====================================================================
@@ -47,12 +51,12 @@ function test_control_zero()
 
         Test.@testset "Helper Functions - __is_control_empty" begin
             # EmptyControlModel should be empty
-            ecm = CTModels.EmptyControlModel()
-            Test.@test CTModels.Building.__is_control_empty(ecm) == true
+            ecm = Components.EmptyControlModel()
+            Test.@test Building.__is_control_empty(ecm) == true
 
             # ControlModel should not be empty
-            cm = CTModels.ControlModel("u", ["u₁"])
-            Test.@test CTModels.Building.__is_control_empty(cm) == false
+            cm = Components.ControlModel("u", ["u₁"])
+            Test.@test Building.__is_control_empty(cm) == false
         end
 
         # ====================================================================
@@ -61,58 +65,58 @@ function test_control_zero()
 
         Test.@testset "dynamics! without control" begin
             # Should not throw error when control is not set
-            pre = CTModels.PreModel()
-            CTModels.state!(pre, 2)
-            CTModels.time!(pre, t0=0, tf=1)
+            pre = Building.PreModel()
+            Building.state!(pre, 2)
+            Building.time!(pre, t0=0, tf=1)
 
             # This should work without calling control!
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            Test.@test CTModels.Building.__is_dynamics_set(pre)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Test.@test Building.__is_dynamics_set(pre)
         end
 
         Test.@testset "objective! without control" begin
             # Should not throw error when control is not set
-            pre = CTModels.PreModel()
-            CTModels.state!(pre, 2)
-            CTModels.time!(pre, t0=0, tf=1)
+            pre = Building.PreModel()
+            Building.state!(pre, 2)
+            Building.time!(pre, t0=0, tf=1)
 
             # This should work without calling control!
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            Test.@test CTModels.Building.__is_objective_set(pre)
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Test.@test Building.__is_objective_set(pre)
         end
 
         Test.@testset "constraint! - boundary type without control" begin
             # Boundary constraints should work without control
-            pre = CTModels.PreModel()
-            CTModels.state!(pre, 2)
-            CTModels.time!(pre, t0=0, tf=1)
+            pre = Building.PreModel()
+            Building.state!(pre, 2)
+            Building.time!(pre, t0=0, tf=1)
 
             # This should work without calling control!
-            CTModels.constraint!(pre, :boundary, f=(x0, xf) -> x0[1], lb=0, ub=0)
+            Building.constraint!(pre, :boundary, f=(x0, xf) -> x0[1], lb=0, ub=0)
             Test.@test length(pre.constraints) == 1
         end
 
         Test.@testset "constraint! - path type without control" begin
             # Path constraints should work without control (e.g., state-only path constraints)
-            pre = CTModels.PreModel()
-            CTModels.state!(pre, 2)
-            CTModels.time!(pre, t0=0, tf=1)
+            pre = Building.PreModel()
+            Building.state!(pre, 2)
+            Building.time!(pre, t0=0, tf=1)
 
             # This should work without calling control!
-            CTModels.constraint!(pre, :path, f=(t, x, u) -> x[1], lb=0, ub=1)
+            Building.constraint!(pre, :path, f=(t, x, u) -> x[1], lb=0, ub=1)
             Test.@test length(pre.constraints) == 1
         end
 
         Test.@testset "constraint! - control type requires control" begin
             # Only :control type constraints require control to be set
-            pre = CTModels.PreModel()
-            CTModels.state!(pre, 2)
-            CTModels.time!(pre, t0=0, tf=1)
+            pre = Building.PreModel()
+            Building.state!(pre, 2)
+            Building.time!(pre, t0=0, tf=1)
 
             # This should throw a PreconditionError because control is not set
             exception_thrown = false
             try
-                CTModels.constraint!(pre, :control, rg=1, lb=-1, ub=1)
+                Building.constraint!(pre, :control, rg=1, lb=-1, ub=1)
             catch e
                 exception_thrown = true
                 Test.@test e isa Exceptions.PreconditionError
@@ -126,20 +130,20 @@ function test_control_zero()
 
         Test.@testset "build() - Model without control" begin
             # Build a complete Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
 
             # This should work without calling control!
-            model = CTModels.build(pre)
-            Test.@test model isa CTModels.Model
-            Test.@test CTModels.control_dimension(model) == 0
-            Test.@test CTModels.control_name(model) == ""
-            Test.@test CTModels.control_components(model) == String[]
+            model = Building.build(pre)
+            Test.@test model isa Models.Model
+            Test.@test Models.control_dimension(model) == 0
+            Test.@test Models.control_name(model) == ""
+            Test.@test Models.control_components(model) == String[]
         end
 
         # ====================================================================
@@ -148,14 +152,14 @@ function test_control_zero()
 
         Test.@testset "Display - Model without control" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Test that display works without error
             io = IOBuffer()
@@ -174,14 +178,14 @@ function test_control_zero()
 
         Test.@testset "Init - initial_control with nothing" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Test that initial_control with nothing returns empty vector function
             u_init = Init.initial_control(model, nothing)
@@ -191,14 +195,14 @@ function test_control_zero()
 
         Test.@testset "Init - initial_control with scalar throws error" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # This should throw an error
             exception_thrown = false
@@ -213,14 +217,14 @@ function test_control_zero()
 
         Test.@testset "Init - initial_control with non-empty vector throws error" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # This should throw an error
             exception_thrown = false
@@ -235,14 +239,14 @@ function test_control_zero()
 
         Test.@testset "Init - initial_guess without control" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Test that initial_guess works without control
             init = Init.initial_guess(model)
@@ -256,12 +260,12 @@ function test_control_zero()
 
         Test.@testset "Validation - Name conflicts without control" begin
             # Build a PreModel without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2, "x", ["x1", "x2"])
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2, "x", ["x1", "x2"])
 
             # Verify that control names are not collected
-            used_names = CTModels.Building.__collect_used_names(pre)
+            used_names = Building.__collect_used_names(pre)
             Test.@test "t" ∈ used_names  # time should be present
             Test.@test "x" ∈ used_names  # state should be present
             Test.@test "x1" ∈ used_names
@@ -269,10 +273,10 @@ function test_control_zero()
             Test.@test !("u" ∈ used_names)  # control should NOT be present
 
             # Should be able to use "u" as a state component name since control is not set
-            pre2 = CTModels.PreModel()
-            CTModels.time!(pre2, t0=0, tf=1)
-            CTModels.state!(pre2, 2, "x", ["u", "v"])  # "u" is allowed as state component
-            Test.@test CTModels.Building.__is_state_set(pre2)
+            pre2 = Building.PreModel()
+            Building.time!(pre2, t0=0, tf=1)
+            Building.state!(pre2, 2, "x", ["u", "v"])  # "u" is allowed as state component
+            Test.@test Building.__is_state_set(pre2)
         end
 
         # ====================================================================
@@ -281,14 +285,14 @@ function test_control_zero()
 
         Test.@testset "Serialization - Solution building without control" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Create a solution without control
             T = collect(range(0, 1, length=10))
@@ -297,7 +301,7 @@ function test_control_zero()
             p_data = hcat(cos.(T), -sin.(T))  # (10, 2) matrix
             v_data = Float64[]
 
-            sol = CTModels.build_solution(
+            sol = Solutions.build_solution(
                 model,
                 T,
                 T,
@@ -316,15 +320,15 @@ function test_control_zero()
             )
 
             # Test that control_dimension is 0
-            Test.@test CTModels.control_dimension(sol) == 0
+            Test.@test Models.control_dimension(sol) == 0
 
             # Test that control function returns empty vector
-            u_func = CTModels.control(sol)
+            u_func = Models.control(sol)
             Test.@test u_func(0.5) == Float64[]
 
             # Test that solution properties are correct
-            Test.@test CTModels.state_dimension(sol) == 2
-            Test.@test CTModels.objective(sol) == 1.0
+            Test.@test Models.state_dimension(sol) == 2
+            Test.@test Models.objective(sol) == 1.0
         end
 
         # ====================================================================
@@ -333,14 +337,14 @@ function test_control_zero()
 
         Test.@testset "Plotting - Verify subplot count without control" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Create a solution without control
             T = collect(range(0, 1, length=10))
@@ -349,7 +353,7 @@ function test_control_zero()
             p_data = hcat(cos.(T), -sin.(T))
             v_data = Float64[]
 
-            sol = CTModels.build_solution(
+            sol = Solutions.build_solution(
                 model,
                 T,
                 T,
@@ -394,14 +398,14 @@ function test_control_zero()
 
         Test.@testset "Init - initial_control with empty vector accepted" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             # Empty vector should be accepted when dim=0
             u_init = Init.initial_control(model, Float64[])
@@ -414,18 +418,18 @@ function test_control_zero()
         # ====================================================================
 
         Test.@testset "build() - Model without control but with variable" begin
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.variable!(pre, 1)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
-            Test.@test CTModels.control_dimension(model) == 0
-            Test.@test CTModels.variable_dimension(model) == 1
-            Test.@test CTModels.state_dimension(model) == 2
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.variable!(pre, 1)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
+            Test.@test Models.control_dimension(model) == 0
+            Test.@test Models.variable_dimension(model) == 1
+            Test.@test Models.state_dimension(model) == 2
         end
 
         # ====================================================================
@@ -433,15 +437,15 @@ function test_control_zero()
         # ====================================================================
 
         Test.@testset "Display - Model without control but with variable" begin
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.variable!(pre, 1)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.variable!(pre, 1)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf, v) -> xf[1]^2 + v[1])
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             io = IOBuffer()
             Test.@test_nowarn show(io, MIME"text/plain"(), model)
@@ -462,14 +466,14 @@ function test_control_zero()
 
         Test.@testset "Serialization - Round-trip JSON export/import" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             T = collect(range(0, 1, length=10))
             x_data = hcat(sin.(T), cos.(T))
@@ -477,7 +481,7 @@ function test_control_zero()
             p_data = hcat(cos.(T), -sin.(T))
             v_data = Float64[]
 
-            sol = CTModels.build_solution(
+            sol = Solutions.build_solution(
                 model,
                 T,
                 T,
@@ -497,16 +501,16 @@ function test_control_zero()
 
             mktempdir() do dir
                 filename = joinpath(dir, "sol_zero_ctrl")
-                CTModels.export_ocp_solution(sol; format=:JSON, filename=filename)
-                sol2 = CTModels.import_ocp_solution(model; format=:JSON, filename=filename)
+                Serialization.export_ocp_solution(sol; format=:JSON, filename=filename)
+                sol2 = Serialization.import_ocp_solution(model; format=:JSON, filename=filename)
 
-                Test.@test CTModels.control_dimension(sol2) == 0
-                Test.@test CTModels.state_dimension(sol2) == 2
-                Test.@test CTModels.objective(sol2) ≈ CTModels.objective(sol) atol=1e-10
-                Test.@test CTModels.iterations(sol2) == CTModels.iterations(sol)
-                Test.@test CTModels.successful(sol2) == CTModels.successful(sol)
+                Test.@test Models.control_dimension(sol2) == 0
+                Test.@test Models.state_dimension(sol2) == 2
+                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol=1e-10
+                Test.@test Solutions.iterations(sol2) == Solutions.iterations(sol)
+                Test.@test Solutions.successful(sol2) == Solutions.successful(sol)
                 # Control function should return empty vector after round-trip
-                Test.@test CTModels.control(sol2)(0.5) == Float64[]
+                Test.@test Models.control(sol2)(0.5) == Float64[]
             end
         end
 
@@ -516,14 +520,14 @@ function test_control_zero()
 
         Test.@testset "Serialization - Round-trip JLD2 export/import" begin
             # Build a Model without control
-            pre = CTModels.PreModel()
-            CTModels.time!(pre, t0=0, tf=1)
-            CTModels.state!(pre, 2)
-            CTModels.dynamics!(pre, (x, u) -> [x[2], -x[1]])
-            CTModels.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
-            CTModels.time_dependence!(pre, autonomous=false)
-            CTModels.definition!(pre, quote end)
-            model = CTModels.build(pre)
+            pre = Building.PreModel()
+            Building.time!(pre, t0=0, tf=1)
+            Building.state!(pre, 2)
+            Building.dynamics!(pre, (x, u) -> [x[2], -x[1]])
+            Building.objective!(pre, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.time_dependence!(pre, autonomous=false)
+            Building.definition!(pre, quote end)
+            model = Building.build(pre)
 
             T = collect(range(0, 1, length=10))
             x_data = hcat(sin.(T), cos.(T))
@@ -531,7 +535,7 @@ function test_control_zero()
             p_data = hcat(cos.(T), -sin.(T))
             v_data = Float64[]
 
-            sol = CTModels.build_solution(
+            sol = Solutions.build_solution(
                 model,
                 T,
                 T,
@@ -551,16 +555,16 @@ function test_control_zero()
 
             mktempdir() do dir
                 filename = joinpath(dir, "sol_zero_ctrl")
-                CTModels.export_ocp_solution(sol; format=:JLD, filename=filename)
-                sol2 = CTModels.import_ocp_solution(model; format=:JLD, filename=filename)
+                Serialization.export_ocp_solution(sol; format=:JLD, filename=filename)
+                sol2 = Serialization.import_ocp_solution(model; format=:JLD, filename=filename)
 
-                Test.@test CTModels.control_dimension(sol2) == 0
-                Test.@test CTModels.state_dimension(sol2) == 2
-                Test.@test CTModels.objective(sol2) ≈ CTModels.objective(sol) atol=1e-10
-                Test.@test CTModels.iterations(sol2) == CTModels.iterations(sol)
-                Test.@test CTModels.successful(sol2) == CTModels.successful(sol)
+                Test.@test Models.control_dimension(sol2) == 0
+                Test.@test Models.state_dimension(sol2) == 2
+                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol=1e-10
+                Test.@test Solutions.iterations(sol2) == Solutions.iterations(sol)
+                Test.@test Solutions.successful(sol2) == Solutions.successful(sol)
                 # Control function should return empty vector after round-trip
-                Test.@test CTModels.control(sol2)(0.5) == Float64[]
+                Test.@test Models.control(sol2)(0.5) == Float64[]
             end
         end
     end

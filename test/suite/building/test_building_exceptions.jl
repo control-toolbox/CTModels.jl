@@ -1,8 +1,9 @@
 module TestBuildingExceptions
 
-using Test: Test
-using CTModels: CTModels
-import CTBase.Exceptions
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
+import CTModels.Building: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -11,28 +12,20 @@ function test_building_exceptions()
     Test.@testset "OCP Exception Integration" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Exception Types
-        # ====================================================================
-
-        Test.@testset "Exception Types" begin
-            # Test exception type definitions
-        end
-
-        # ====================================================================
         # INTEGRATION TESTS
         # ====================================================================
         Test.@testset "State! Exceptions" begin
             # Test duplicate state definition
-            ocp = CTModels.PreModel()
-            CTModels.state!(ocp, 2)
+            ocp = Building.PreModel()
+            Building.state!(ocp, 2)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.state!(ocp, 3)
+                Building.state!(ocp, 3)
             end
 
             # Verify exception content
             try
-                CTModels.state!(ocp, 3)
+                Building.state!(ocp, 3)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "State already set"
@@ -47,17 +40,17 @@ function test_building_exceptions()
 
         Test.@testset "Control! Exceptions" begin
             # Test duplicate control definition
-            ocp = CTModels.PreModel()
-            CTModels.state!(ocp, 2)
-            CTModels.control!(ocp, 1)
+            ocp = Building.PreModel()
+            Building.state!(ocp, 2)
+            Building.control!(ocp, 1)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.control!(ocp, 2)
+                Building.control!(ocp, 2)
             end
 
             # Verify exception content
             try
-                CTModels.control!(ocp, 2)
+                Building.control!(ocp, 2)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Control already set"
@@ -72,21 +65,21 @@ function test_building_exceptions()
 
         Test.@testset "Variable! Exceptions" begin
             # Test variable ordering violations
-            ocp = CTModels.PreModel()
-            CTModels.state!(ocp, 2)
-            CTModels.control!(ocp, 1)
-            CTModels.time!(ocp, t0=0, tf=1)
+            ocp = Building.PreModel()
+            Building.state!(ocp, 2)
+            Building.control!(ocp, 1)
+            Building.time!(ocp, t0=0, tf=1)
 
             # Set objective first (should fail)
-            CTModels.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
+            Building.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.variable!(ocp, 1)
+                Building.variable!(ocp, 1)
             end
 
             # Verify exception content
             try
-                CTModels.variable!(ocp, 1)
+                Building.variable!(ocp, 1)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Variable must be set before objective"
@@ -103,17 +96,17 @@ function test_building_exceptions()
 
         Test.@testset "Times! Exceptions" begin
             # Test duplicate time definition
-            ocp = CTModels.PreModel()
-            CTModels.state!(ocp, 2)
-            CTModels.time!(ocp, t0=0, tf=1)
+            ocp = Building.PreModel()
+            Building.state!(ocp, 2)
+            Building.time!(ocp, t0=0, tf=1)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.time!(ocp, t0=1, tf=2)
+                Building.time!(ocp, t0=1, tf=2)
             end
 
             # Verify exception content
             try
-                CTModels.time!(ocp, t0=1, tf=2)
+                Building.time!(ocp, t0=1, tf=2)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Time already set"
@@ -128,15 +121,15 @@ function test_building_exceptions()
 
         Test.@testset "Objective! Exceptions" begin
             # Test objective without prerequisites
-            ocp = CTModels.PreModel()
+            ocp = Building.PreModel()
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
+                Building.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             end
 
             # Verify exception content (should be state validation first)
             try
-                CTModels.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
+                Building.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "State must be set before objective"
@@ -151,9 +144,9 @@ function test_building_exceptions()
             end
 
             # Test with state set but not times (control is now optional)
-            CTModels.state!(ocp, 2)
+            Building.state!(ocp, 2)
             try
-                CTModels.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
+                Building.objective!(ocp, :min, mayer=(x0, xf, v) -> x0[1])
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Times must be set before objective"
@@ -167,15 +160,15 @@ function test_building_exceptions()
 
         Test.@testset "Dynamics! Exceptions" begin
             # Test dynamics without prerequisites
-            ocp = CTModels.PreModel()
+            ocp = Building.PreModel()
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.dynamics!(ocp, (out, t, x, u, v) -> out .= x)
+                Building.dynamics!(ocp, (out, t, x, u, v) -> out .= x)
             end
 
             # Verify exception content
             try
-                CTModels.dynamics!(ocp, (out, t, x, u, v) -> out .= x)
+                Building.dynamics!(ocp, (out, t, x, u, v) -> out .= x)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "State must be set before defining dynamics"
@@ -190,19 +183,19 @@ function test_building_exceptions()
             end
 
             # Test duplicate dynamics
-            ocp2 = CTModels.PreModel()
-            CTModels.state!(ocp2, 2)
-            CTModels.control!(ocp2, 1)
-            CTModels.time!(ocp2, t0=0, tf=1)
-            CTModels.dynamics!(ocp2, (out, t, x, u, v) -> out .= x)
+            ocp2 = Building.PreModel()
+            Building.state!(ocp2, 2)
+            Building.control!(ocp2, 1)
+            Building.time!(ocp2, t0=0, tf=1)
+            Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= x)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
+                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
             end
 
             # Verify duplicate dynamics exception
             try
-                CTModels.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
+                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Dynamics already set"
@@ -214,15 +207,15 @@ function test_building_exceptions()
 
         Test.@testset "Constraint! Exceptions" begin
             # Test constraint without prerequisites
-            ocp = CTModels.PreModel()
+            ocp = Building.PreModel()
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.constraint!(ocp, :state, lb=[0], ub=[1])
+                Building.constraint!(ocp, :state, lb=[0], ub=[1])
             end
 
             # Verify exception content
             try
-                CTModels.constraint!(ocp, :state, lb=[0], ub=[1])
+                Building.constraint!(ocp, :state, lb=[0], ub=[1])
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "State must be set before adding constraints"
@@ -237,19 +230,19 @@ function test_building_exceptions()
             end
 
             # Test duplicate constraint
-            ocp2 = CTModels.PreModel()
-            CTModels.state!(ocp2, 2)
-            CTModels.control!(ocp2, 1)
-            CTModels.time!(ocp2, t0=0, tf=1)
-            CTModels.constraint!(ocp2, :state, lb=[0, 0], ub=[1, 1], label=:test)
+            ocp2 = Building.PreModel()
+            Building.state!(ocp2, 2)
+            Building.control!(ocp2, 1)
+            Building.time!(ocp2, t0=0, tf=1)
+            Building.constraint!(ocp2, :state, lb=[0, 0], ub=[1, 1], label=:test)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                CTModels.constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
+                Building.constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             end
 
             # Verify duplicate constraint exception
             try
-                CTModels.constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
+                Building.constraint!(ocp2, :state, lb=[0, 0], ub=[2, 2], label=:test)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Constraint already exists"
@@ -260,19 +253,19 @@ function test_building_exceptions()
         end
 
         Test.@testset "IncorrectArgument in Constraints" begin
-            ocp = CTModels.PreModel()
-            CTModels.state!(ocp, 2)
-            CTModels.control!(ocp, 1)
-            CTModels.time!(ocp, t0=0, tf=1)
+            ocp = Building.PreModel()
+            Building.state!(ocp, 2)
+            Building.control!(ocp, 1)
+            Building.time!(ocp, t0=0, tf=1)
 
             # Test bounds dimension mismatch
             Test.@test_throws Exceptions.IncorrectArgument begin
-                CTModels.constraint!(ocp, :state, lb=[0, 1], ub=[2])  # Different lengths
+                Building.constraint!(ocp, :state, lb=[0, 1], ub=[2])  # Different lengths
             end
 
             # Verify exception content
             try
-                CTModels.constraint!(ocp, :state, lb=[0, 1], ub=[2])
+                Building.constraint!(ocp, :state, lb=[0, 1], ub=[2])
             catch e
                 Test.@test e isa Exceptions.IncorrectArgument
                 Test.@test e.msg == "Bounds dimension mismatch"

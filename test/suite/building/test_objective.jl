@@ -1,8 +1,9 @@
 module TestOCPObjective
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
+import CTModels.Building: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -11,227 +12,220 @@ function test_objective()
     Test.@testset "Objective Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for objective functionality
-        end
-
-        # ====================================================================
         # UNIT TESTS - Objective Models
         # ====================================================================
 
-        # is concretetype    
-        Test.@test isconcretetype(CTModels.MayerObjectiveModel{Function}) # MayerObjectiveModel
-        Test.@test isconcretetype(CTModels.LagrangeObjectiveModel{Function}) # LagrangeObjectiveModel
-        Test.@test isconcretetype(CTModels.BolzaObjectiveModel{Function,Function}) # BolzaObjectiveModel
+        # is concretetype
+        Test.@test isconcretetype(Components.MayerObjectiveModel{Function})
+        Test.@test isconcretetype(Components.LagrangeObjectiveModel{Function})
+        Test.@test isconcretetype(Components.BolzaObjectiveModel{Function,Function})
 
         # Functions
         mayer(x0, xf, v) = x0 .+ xf .+ v
         lagrange(t, x, u, v) = t .+ x .+ u .+ v
 
         # MayerObjectiveModel
-        objective = CTModels.MayerObjectiveModel(mayer, :min)
-        Test.@test CTModels.mayer(objective) == mayer
-        Test.@test CTModels.criterion(objective) == :min
-        Test.@test CTModels.has_mayer_cost(objective) == true
-        Test.@test CTModels.has_lagrange_cost(objective) == false
+        objective = Components.MayerObjectiveModel(mayer, :min)
+        Test.@test Components.mayer(objective) == mayer
+        Test.@test Components.criterion(objective) == :min
+        Test.@test Components.has_mayer_cost(objective) == true
+        Test.@test Components.has_lagrange_cost(objective) == false
 
         # LagrangeObjectiveModel
-        objective = CTModels.LagrangeObjectiveModel(lagrange, :max)
-        Test.@test CTModels.lagrange(objective) == lagrange
-        Test.@test CTModels.criterion(objective) == :max
-        Test.@test CTModels.has_mayer_cost(objective) == false
-        Test.@test CTModels.has_lagrange_cost(objective) == true
+        objective = Components.LagrangeObjectiveModel(lagrange, :max)
+        Test.@test Components.lagrange(objective) == lagrange
+        Test.@test Components.criterion(objective) == :max
+        Test.@test Components.has_mayer_cost(objective) == false
+        Test.@test Components.has_lagrange_cost(objective) == true
 
         # BolzaObjectiveModel
-        objective = CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
-        Test.@test CTModels.mayer(objective) == mayer
-        Test.@test CTModels.lagrange(objective) == lagrange
-        Test.@test CTModels.criterion(objective) == :min
-        Test.@test CTModels.has_mayer_cost(objective) == true
-        Test.@test CTModels.has_lagrange_cost(objective) == true
+        objective = Components.BolzaObjectiveModel(mayer, lagrange, :min)
+        Test.@test Components.mayer(objective) == mayer
+        Test.@test Components.lagrange(objective) == lagrange
+        Test.@test Components.criterion(objective) == :min
+        Test.@test Components.has_mayer_cost(objective) == true
+        Test.@test Components.has_lagrange_cost(objective) == true
 
         # from PreModel with Mayer objective
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        CTModels.objective!(ocp, :min; mayer=mayer)
-        Test.@test ocp.objective == CTModels.MayerObjectiveModel(mayer, :min)
-        Test.@test CTModels.criterion(ocp.objective) == :min
-        Test.@test CTModels.has_mayer_cost(ocp.objective) == true
-        Test.@test CTModels.has_lagrange_cost(ocp.objective) == false
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Building.objective!(ocp, :min; mayer=mayer)
+        Test.@test ocp.objective == Components.MayerObjectiveModel(mayer, :min)
+        Test.@test Components.criterion(ocp.objective) == :min
+        Test.@test Components.has_mayer_cost(ocp.objective) == true
+        Test.@test Components.has_lagrange_cost(ocp.objective) == false
 
         # from PreModel with Lagrange objective
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        CTModels.objective!(ocp, :max; lagrange=lagrange)
-        Test.@test ocp.objective == CTModels.LagrangeObjectiveModel(lagrange, :max)
-        Test.@test CTModels.criterion(ocp.objective) == :max
-        Test.@test CTModels.has_mayer_cost(ocp.objective) == false
-        Test.@test CTModels.has_lagrange_cost(ocp.objective) == true
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Building.objective!(ocp, :max; lagrange=lagrange)
+        Test.@test ocp.objective == Components.LagrangeObjectiveModel(lagrange, :max)
+        Test.@test Components.criterion(ocp.objective) == :max
+        Test.@test Components.has_mayer_cost(ocp.objective) == false
+        Test.@test Components.has_lagrange_cost(ocp.objective) == true
 
         # from PreModel with Bolza objective
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        CTModels.objective!(ocp; mayer=mayer, lagrange=lagrange) # default criterion is :min
-        Test.@test ocp.objective == CTModels.BolzaObjectiveModel(mayer, lagrange, :min)
-        Test.@test CTModels.criterion(ocp.objective) == :min
-        Test.@test CTModels.has_mayer_cost(ocp.objective) == true
-        Test.@test CTModels.has_lagrange_cost(ocp.objective) == true
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Building.objective!(ocp; mayer=mayer, lagrange=lagrange) # default criterion is :min
+        Test.@test ocp.objective == Components.BolzaObjectiveModel(mayer, lagrange, :min)
+        Test.@test Components.criterion(ocp.objective) == :min
+        Test.@test Components.has_mayer_cost(ocp.objective) == true
+        Test.@test Components.has_lagrange_cost(ocp.objective) == true
 
-        # exceptions
+        # ====================================================================
+        # ERROR TESTS
+        # ====================================================================
+
         # state not set
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        Test.@test_throws Exceptions.PreconditionError CTModels.objective!(
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Test.@test_throws Exceptions.PreconditionError Building.objective!(
             ocp, :min, mayer=mayer
         )
 
         # control is now optional - this should succeed
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        # This should succeed now that control is optional
-        CTModels.objective!(ocp, :min, mayer=mayer)
-        Test.@test CTModels.Building.__is_objective_set(ocp)
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Building.objective!(ocp, :min, mayer=mayer)
+        Test.@test Building.__is_objective_set(ocp)
 
         # times not set
-        ocp = CTModels.PreModel()
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        Test.@test_throws Exceptions.PreconditionError CTModels.objective!(
+        ocp = Building.PreModel()
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Test.@test_throws Exceptions.PreconditionError Building.objective!(
             ocp, :min, mayer=mayer
         )
 
         # objective already set
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        CTModels.objective!(ocp, :min; mayer=mayer)
-        Test.@test_throws Exceptions.PreconditionError CTModels.objective!(
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Building.objective!(ocp, :min; mayer=mayer)
+        Test.@test_throws Exceptions.PreconditionError Building.objective!(
             ocp, :min, mayer=mayer
         )
 
         # variable set after the objective
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.objective!(ocp, :min; mayer=mayer)
-        Test.@test_throws Exceptions.PreconditionError CTModels.variable!(ocp, 1)
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.objective!(ocp, :min; mayer=mayer)
+        Test.@test_throws Exceptions.PreconditionError Building.variable!(ocp, 1)
 
         # no function given
-        ocp = CTModels.PreModel()
-        CTModels.time!(ocp; t0=0.0, tf=10.0)
-        CTModels.state!(ocp, 1)
-        CTModels.control!(ocp, 1)
-        CTModels.variable!(ocp, 1)
-        Test.@test_throws Exceptions.IncorrectArgument CTModels.objective!(ocp, :min)
+        ocp = Building.PreModel()
+        Building.time!(ocp; t0=0.0, tf=10.0)
+        Building.state!(ocp, 1)
+        Building.control!(ocp, 1)
+        Building.variable!(ocp, 1)
+        Test.@test_throws Exceptions.IncorrectArgument Building.objective!(ocp, :min)
 
-        # NEW: Criterion validation tests
+        # Criterion validation
         Test.@testset "objective! - Criterion validation" begin
             # Invalid criterion
-            ocp = CTModels.PreModel()
-            CTModels.time!(ocp; t0=0.0, tf=10.0)
-            CTModels.state!(ocp, 1)
-            CTModels.control!(ocp, 1)
-            CTModels.variable!(ocp, 1)
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.objective!(
+            ocp = Building.PreModel()
+            Building.time!(ocp; t0=0.0, tf=10.0)
+            Building.state!(ocp, 1)
+            Building.control!(ocp, 1)
+            Building.variable!(ocp, 1)
+            Test.@test_throws Exceptions.IncorrectArgument Building.objective!(
                 ocp, :invalid, mayer=mayer
             )
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.objective!(
+            Test.@test_throws Exceptions.IncorrectArgument Building.objective!(
                 ocp, :optimize, mayer=mayer
             )
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.objective!(
+            Test.@test_throws Exceptions.IncorrectArgument Building.objective!(
                 ocp, :Minimize, mayer=mayer
-            )  # not in accepted list
+            )
 
             # Valid criteria (lowercase)
-            ocp2 = CTModels.PreModel()
-            CTModels.time!(ocp2; t0=0.0, tf=10.0)
-            CTModels.state!(ocp2, 1)
-            CTModels.control!(ocp2, 1)
-            CTModels.variable!(ocp2, 1)
-            Test.@test_nowarn CTModels.objective!(ocp2, :min, mayer=mayer)
-            Test.@test CTModels.criterion(ocp2.objective) == :min
+            ocp2 = Building.PreModel()
+            Building.time!(ocp2; t0=0.0, tf=10.0)
+            Building.state!(ocp2, 1)
+            Building.control!(ocp2, 1)
+            Building.variable!(ocp2, 1)
+            Test.@test_nowarn Building.objective!(ocp2, :min, mayer=mayer)
+            Test.@test Components.criterion(ocp2.objective) == :min
 
-            ocp3 = CTModels.PreModel()
-            CTModels.time!(ocp3; t0=0.0, tf=10.0)
-            CTModels.state!(ocp3, 1)
-            CTModels.control!(ocp3, 1)
-            CTModels.variable!(ocp3, 1)
-            Test.@test_nowarn CTModels.objective!(ocp3, :max, lagrange=lagrange)
-            Test.@test CTModels.criterion(ocp3.objective) == :max
+            ocp3 = Building.PreModel()
+            Building.time!(ocp3; t0=0.0, tf=10.0)
+            Building.state!(ocp3, 1)
+            Building.control!(ocp3, 1)
+            Building.variable!(ocp3, 1)
+            Test.@test_nowarn Building.objective!(ocp3, :max, lagrange=lagrange)
+            Test.@test Components.criterion(ocp3.objective) == :max
 
             # Valid criteria (uppercase - case-insensitive)
-            ocp4 = CTModels.PreModel()
-            CTModels.time!(ocp4; t0=0.0, tf=10.0)
-            CTModels.state!(ocp4, 1)
-            CTModels.control!(ocp4, 1)
-            CTModels.variable!(ocp4, 1)
-            Test.@test_nowarn CTModels.objective!(ocp4, :MIN, mayer=mayer)
-            Test.@test CTModels.criterion(ocp4.objective) == :min  # normalized to lowercase
+            ocp4 = Building.PreModel()
+            Building.time!(ocp4; t0=0.0, tf=10.0)
+            Building.state!(ocp4, 1)
+            Building.control!(ocp4, 1)
+            Building.variable!(ocp4, 1)
+            Test.@test_nowarn Building.objective!(ocp4, :MIN, mayer=mayer)
+            Test.@test Components.criterion(ocp4.objective) == :min
 
-            ocp5 = CTModels.PreModel()
-            CTModels.time!(ocp5; t0=0.0, tf=10.0)
-            CTModels.state!(ocp5, 1)
-            CTModels.control!(ocp5, 1)
-            CTModels.variable!(ocp5, 1)
-            Test.@test_nowarn CTModels.objective!(ocp5, :MAX, lagrange=lagrange)
-            Test.@test CTModels.criterion(ocp5.objective) == :max  # normalized to lowercase
+            ocp5 = Building.PreModel()
+            Building.time!(ocp5; t0=0.0, tf=10.0)
+            Building.state!(ocp5, 1)
+            Building.control!(ocp5, 1)
+            Building.variable!(ocp5, 1)
+            Test.@test_nowarn Building.objective!(ocp5, :MAX, lagrange=lagrange)
+            Test.@test Components.criterion(ocp5.objective) == :max
         end
 
-        # ========================================================================
-        # Test naming consistency aliases (issue #169)
-        # ========================================================================
+        # ====================================================================
+        # UNIT TESTS - Cost aliases
+        # ====================================================================
 
-        Test.@testset "cost aliases" verbose = VERBOSE showtiming = SHOWTIMING begin
-            # Functions (different names to avoid warnings)
+        Test.@testset "cost aliases" verbose=VERBOSE showtiming=SHOWTIMING begin
             mayer_alias(x0, xf, v) = x0 .+ xf .+ v
             lagrange_alias(t, x, u, v) = t .+ x .+ u .+ v
 
             # MayerObjectiveModel
-            obj_mayer = CTModels.MayerObjectiveModel(mayer_alias, :min)
-            Test.@test CTModels.is_mayer_cost_defined(obj_mayer) ==
-                CTModels.has_mayer_cost(obj_mayer)
-            Test.@test CTModels.is_lagrange_cost_defined(obj_mayer) ==
-                CTModels.has_lagrange_cost(obj_mayer)
-            Test.@test CTModels.is_mayer_cost_defined(obj_mayer) === true
-            Test.@test CTModels.is_lagrange_cost_defined(obj_mayer) === false
+            obj_mayer = Components.MayerObjectiveModel(mayer_alias, :min)
+            Test.@test Components.is_mayer_cost_defined(obj_mayer) ==
+                Components.has_mayer_cost(obj_mayer)
+            Test.@test Components.is_lagrange_cost_defined(obj_mayer) ==
+                Components.has_lagrange_cost(obj_mayer)
+            Test.@test Components.is_mayer_cost_defined(obj_mayer) === true
+            Test.@test Components.is_lagrange_cost_defined(obj_mayer) === false
 
             # LagrangeObjectiveModel
-            obj_lagrange = CTModels.LagrangeObjectiveModel(lagrange_alias, :max)
-            Test.@test CTModels.is_mayer_cost_defined(obj_lagrange) ==
-                CTModels.has_mayer_cost(obj_lagrange)
-            Test.@test CTModels.is_lagrange_cost_defined(obj_lagrange) ==
-                CTModels.has_lagrange_cost(obj_lagrange)
-            Test.@test CTModels.is_mayer_cost_defined(obj_lagrange) === false
-            Test.@test CTModels.is_lagrange_cost_defined(obj_lagrange) === true
+            obj_lagrange = Components.LagrangeObjectiveModel(lagrange_alias, :max)
+            Test.@test Components.is_mayer_cost_defined(obj_lagrange) ==
+                Components.has_mayer_cost(obj_lagrange)
+            Test.@test Components.is_lagrange_cost_defined(obj_lagrange) ==
+                Components.has_lagrange_cost(obj_lagrange)
+            Test.@test Components.is_mayer_cost_defined(obj_lagrange) === false
+            Test.@test Components.is_lagrange_cost_defined(obj_lagrange) === true
 
             # BolzaObjectiveModel
-            obj_bolza = CTModels.BolzaObjectiveModel(mayer_alias, lagrange_alias, :min)
-            Test.@test CTModels.is_mayer_cost_defined(obj_bolza) ==
-                CTModels.has_mayer_cost(obj_bolza)
-            Test.@test CTModels.is_lagrange_cost_defined(obj_bolza) ==
-                CTModels.has_lagrange_cost(obj_bolza)
-            Test.@test CTModels.is_mayer_cost_defined(obj_bolza) === true
-            Test.@test CTModels.is_lagrange_cost_defined(obj_bolza) === true
+            obj_bolza = Components.BolzaObjectiveModel(mayer_alias, lagrange_alias, :min)
+            Test.@test Components.is_mayer_cost_defined(obj_bolza) ==
+                Components.has_mayer_cost(obj_bolza)
+            Test.@test Components.is_lagrange_cost_defined(obj_bolza) ==
+                Components.has_lagrange_cost(obj_bolza)
+            Test.@test Components.is_mayer_cost_defined(obj_bolza) === true
+            Test.@test Components.is_lagrange_cost_defined(obj_bolza) === true
         end
     end
 end

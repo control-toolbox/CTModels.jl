@@ -1,7 +1,9 @@
 module TestOCPDefinition
 
-using Test: Test
-using CTModels: CTModels
+import Test: Test
+import CTModels.Components: Components
+import CTModels.Models: Models
+import CTModels.Building: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -15,16 +17,16 @@ function test_definition()
 
         Test.@testset "AbstractDefinition hierarchy" begin
             Test.@testset "EmptyDefinition construction" begin
-                d = CTModels.EmptyDefinition()
-                Test.@test d isa CTModels.EmptyDefinition
-                Test.@test d isa CTModels.AbstractDefinition
+                d = Components.EmptyDefinition()
+                Test.@test d isa Components.EmptyDefinition
+                Test.@test d isa Components.AbstractDefinition
             end
 
             Test.@testset "Definition construction and field access" begin
                 expr = :(x = 1)
-                d = CTModels.Definition(expr)
-                Test.@test d isa CTModels.Definition
-                Test.@test d isa CTModels.AbstractDefinition
+                d = Components.Definition(expr)
+                Test.@test d isa Components.Definition
+                Test.@test d isa Components.AbstractDefinition
                 Test.@test d.expr === expr
             end
         end
@@ -34,9 +36,9 @@ function test_definition()
         # ====================================================================
 
         Test.@testset "PreModel default definition is EmptyDefinition" begin
-            pre = CTModels.PreModel()
-            Test.@test pre.definition isa CTModels.EmptyDefinition
-            Test.@test CTModels.Building.__is_definition_empty(pre)
+            pre = Building.PreModel()
+            Test.@test pre.definition isa Components.EmptyDefinition
+            Test.@test Building.__is_definition_empty(pre)
         end
 
         # ====================================================================
@@ -44,27 +46,27 @@ function test_definition()
         # ====================================================================
 
         Test.@testset "definition! auto-wraps Expr into Definition" begin
-            pre = CTModels.PreModel()
+            pre = Building.PreModel()
             expr = :(x = 1)
-            CTModels.definition!(pre, expr)
-            Test.@test pre.definition isa CTModels.Definition
+            Building.definition!(pre, expr)
+            Test.@test pre.definition isa Components.Definition
             Test.@test pre.definition.expr === expr
-            Test.@test !CTModels.Building.__is_definition_empty(pre)
+            Test.@test !Building.__is_definition_empty(pre)
         end
 
         Test.@testset "definition! accepts AbstractDefinition directly" begin
-            pre = CTModels.PreModel()
-            d = CTModels.Definition(:(y = 2))
-            CTModels.definition!(pre, d)
+            pre = Building.PreModel()
+            d = Components.Definition(:(y = 2))
+            Building.definition!(pre, d)
             Test.@test pre.definition === d
-            Test.@test !CTModels.Building.__is_definition_empty(pre)
+            Test.@test !Building.__is_definition_empty(pre)
         end
 
         Test.@testset "definition! with EmptyDefinition leaves predicate false" begin
-            pre = CTModels.PreModel()
-            CTModels.definition!(pre, CTModels.EmptyDefinition())
-            Test.@test pre.definition isa CTModels.EmptyDefinition
-            Test.@test CTModels.Building.__is_definition_empty(pre)
+            pre = Building.PreModel()
+            Building.definition!(pre, Components.EmptyDefinition())
+            Test.@test pre.definition isa Components.EmptyDefinition
+            Test.@test Building.__is_definition_empty(pre)
         end
 
         # ====================================================================
@@ -72,29 +74,29 @@ function test_definition()
         # ====================================================================
 
         Test.@testset "expression on EmptyDefinition returns empty block Expr" begin
-            e = CTModels.expression(CTModels.EmptyDefinition())
+            e = Components.expression(Components.EmptyDefinition())
             Test.@test e isa Expr
             Test.@test e.head == :block
         end
 
         Test.@testset "expression on Definition returns wrapped expr" begin
             expr = :(x = 1)
-            e = CTModels.expression(CTModels.Definition(expr))
+            e = Components.expression(Components.Definition(expr))
             Test.@test e === expr
         end
 
         Test.@testset "expression on EmptyDefinition via field returns empty block" begin
-            pre = CTModels.PreModel()
-            e = CTModels.expression(pre.definition)
+            pre = Building.PreModel()
+            e = Components.expression(pre.definition)
             Test.@test e isa Expr
             Test.@test e.head == :block
         end
 
         Test.@testset "expression on Definition via field returns expr" begin
-            pre = CTModels.PreModel()
+            pre = Building.PreModel()
             expr = :(x = 1)
-            CTModels.definition!(pre, expr)
-            Test.@test CTModels.expression(pre.definition) === expr
+            Building.definition!(pre, expr)
+            Test.@test Components.expression(pre.definition) === expr
         end
 
         # ====================================================================
@@ -102,34 +104,34 @@ function test_definition()
         # ====================================================================
 
         Test.@testset "build without definition → Model holds EmptyDefinition" begin
-            pre = CTModels.PreModel()
-            CTModels.time!(pre; t0=0.0, tf=1.0)
-            CTModels.state!(pre, 1)
-            CTModels.control!(pre, 1)
-            CTModels.variable!(pre, 0)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            Building.variable!(pre, 0)
             dyn!(r, t, x, u, v) = r .= 0
-            CTModels.dynamics!(pre, dyn!)
-            CTModels.objective!(
+            Building.dynamics!(pre, dyn!)
+            Building.objective!(
                 pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
             )
-            CTModels.time_dependence!(pre; autonomous=false)
+            Building.time_dependence!(pre; autonomous=false)
 
-            model = CTModels.build(pre)
-            Test.@test CTModels.definition(model) isa CTModels.EmptyDefinition
-            Test.@test CTModels.Building.__is_definition_empty(model.definition)
-            Test.@test CTModels.expression(model) isa Expr
-            Test.@test CTModels.expression(model).head == :block
+            model = Building.build(pre)
+            Test.@test Models.definition(model) isa Components.EmptyDefinition
+            Test.@test Building.__is_definition_empty(model.definition)
+            Test.@test Components.expression(model) isa Expr
+            Test.@test Components.expression(model).head == :block
         end
 
         Test.@testset "build with definition → Model holds Definition with correct expr" begin
-            pre = CTModels.PreModel()
-            CTModels.time!(pre; t0=0.0, tf=1.0)
-            CTModels.state!(pre, 1)
-            CTModels.control!(pre, 1)
-            CTModels.variable!(pre, 0)
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            Building.variable!(pre, 0)
             dyn!(r, t, x, u, v) = r .= 0
-            CTModels.dynamics!(pre, dyn!)
-            CTModels.objective!(
+            Building.dynamics!(pre, dyn!)
+            Building.objective!(
                 pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
             )
             expr = quote
@@ -139,14 +141,14 @@ function test_definition()
                 ẋ(t) == u(t)
                 ∫(0.5u(t)^2) → min
             end
-            CTModels.definition!(pre, expr)
-            CTModels.time_dependence!(pre; autonomous=false)
+            Building.definition!(pre, expr)
+            Building.time_dependence!(pre; autonomous=false)
 
-            model = CTModels.build(pre)
-            Test.@test CTModels.definition(model) isa CTModels.Definition
-            Test.@test CTModels.definition(model).expr === expr
-            Test.@test !CTModels.Building.__is_definition_empty(model.definition)
-            Test.@test CTModels.expression(model) === expr
+            model = Building.build(pre)
+            Test.@test Models.definition(model) isa Components.Definition
+            Test.@test Models.definition(model).expr === expr
+            Test.@test !Building.__is_definition_empty(model.definition)
+            Test.@test Components.expression(model) === expr
         end
     end
 end

@@ -1,8 +1,9 @@
 module TestBuildExamodel
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Building: Building
+import CTModels.Models: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -16,32 +17,32 @@ function test_build_examodel()
 
         Test.@testset "get_build_examodel error on functional API model" begin
             # Build a minimal OCP using the functional (macro-free) API
-            ocp = CTModels.PreModel()
-            CTModels.time!(ocp; t0=0.0, tf=1.0)
-            CTModels.state!(ocp, 2)
-            CTModels.control!(ocp, 1)
+            ocp = Building.PreModel()
+            Building.time!(ocp; t0=0.0, tf=1.0)
+            Building.state!(ocp, 2)
+            Building.control!(ocp, 1)
 
             # Simple dynamics function
             dynamics!(r, t, x, u, v) = (r[1]=x[2]; r[2]=u[1])
-            CTModels.dynamics!(ocp, dynamics!)
+            Building.dynamics!(ocp, dynamics!)
 
             # Simple objective
-            CTModels.objective!(ocp, :min, mayer=(x0, xf) -> xf[1]^2)
+            Building.objective!(ocp, :min, mayer=(x0, xf) -> xf[1]^2)
 
             # Set time dependence (required before build)
-            CTModels.time_dependence!(ocp, autonomous=true)
+            Building.time_dependence!(ocp, autonomous=true)
 
             # Build without build_examodel (functional API)
-            model = CTModels.build(ocp)
+            model = Building.build(ocp)
 
             # Attempting to get build_examodel should throw PreconditionError
-            Test.@test_throws Exceptions.PreconditionError CTModels.get_build_examodel(
+            Test.@test_throws Exceptions.PreconditionError Models.get_build_examodel(
                 model
             )
 
             # Verify the error message contains the key information
             try
-                CTModels.get_build_examodel(model)
+                Models.get_build_examodel(model)
                 Test.@test false  # Should not reach here
             catch err
                 Test.@test err isa Exceptions.PreconditionError
@@ -60,26 +61,26 @@ function test_build_examodel()
 
         Test.@testset "Functional API workflow integration" begin
             # Build a complete OCP using functional API
-            ocp = CTModels.PreModel()
-            CTModels.time!(ocp; t0=0.0, tf=1.0)
-            CTModels.state!(ocp, 2)
-            CTModels.control!(ocp, 1)
-            CTModels.dynamics!(ocp, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u[1]))
-            CTModels.objective!(ocp, :min, mayer=(x0, xf) -> xf[1]^2)
+            ocp = Building.PreModel()
+            Building.time!(ocp; t0=0.0, tf=1.0)
+            Building.state!(ocp, 2)
+            Building.control!(ocp, 1)
+            Building.dynamics!(ocp, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u[1]))
+            Building.objective!(ocp, :min, mayer=(x0, xf) -> xf[1]^2)
 
             # Set time dependence (required before build)
-            CTModels.time_dependence!(ocp, autonomous=true)
+            Building.time_dependence!(ocp, autonomous=true)
 
             # Build without build_examodel
-            model = CTModels.build(ocp)
+            model = Building.build(ocp)
 
             # Verify model is built but has no Exa builder
-            Test.@test model isa CTModels.Model
+            Test.@test model isa Models.Model
             Test.@test model.build_examodel === nothing
 
             # Verify get_build_examodel throws informative error
             try
-                CTModels.get_build_examodel(model)
+                Models.get_build_examodel(model)
                 Test.@test false  # Should not reach here
             catch err
                 Test.@test err isa Exceptions.PreconditionError

@@ -1,7 +1,9 @@
 module TestPrint
 
-using Test: Test
-using CTModels: CTModels
+import Test: Test
+import CTModels.Components: Components
+import CTModels.Building: Building
+import CTModels.Display: Display
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -16,12 +18,12 @@ function test_print()
         Test.@testset "AbstractDefinition display" begin
             Test.@testset "show(EmptyDefinition) produces no output" begin
                 io = IOBuffer()
-                show(io, MIME"text/plain"(), CTModels.EmptyDefinition())
+                show(io, MIME"text/plain"(), Components.EmptyDefinition())
                 Test.@test isempty(String(take!(io)))
             end
 
             Test.@testset "show(Definition) prints header" begin
-                d = CTModels.Definition(:(x = 1))
+                d = Components.Definition(:(x = 1))
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), d)
                 Test.@test occursin("Abstract definition:", String(take!(io)))
@@ -29,8 +31,8 @@ function test_print()
 
             Test.@testset "_print_abstract_definition returns false for EmptyDefinition" begin
                 io = IOBuffer()
-                result = CTModels.Display._print_abstract_definition(
-                    io, CTModels.EmptyDefinition()
+                result = Display._print_abstract_definition(
+                    io, Components.EmptyDefinition()
                 )
                 Test.@test result == false
                 Test.@test isempty(String(take!(io)))
@@ -38,8 +40,8 @@ function test_print()
 
             Test.@testset "_print_abstract_definition returns true for Definition" begin
                 io = IOBuffer()
-                result = CTModels.Display._print_abstract_definition(
-                    io, CTModels.Definition(:(x = 1))
+                result = Display._print_abstract_definition(
+                    io, Components.Definition(:(x = 1))
                 )
                 Test.@test result == true
                 Test.@test occursin("Abstract definition:", String(take!(io)))
@@ -52,30 +54,30 @@ function test_print()
 
         Test.@testset "PreModel Display" begin
             Test.@testset "show(PreModel) prints abstract and mathematical definitions" begin
-                pre = CTModels.PreModel()
+                pre = Building.PreModel()
 
                 # Minimal consistent problem
-                CTModels.time!(pre; t0=0.0, tf=1.0)
-                CTModels.state!(pre, 1, "x", ["x"])
-                CTModels.control!(pre, 1, "u", ["u"])
-                CTModels.variable!(pre, 0)
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 0)
 
                 dyn!(r, t, x, u, v) = r .= 0
-                CTModels.dynamics!(pre, dyn!)
+                Building.dynamics!(pre, dyn!)
 
                 mayer(x0, xf, v) = 0.0
                 lagrange(t, x, u, v) = 0.0
-                CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+                Building.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
 
                 def_expr = quote
                     t ∈ [0, 1], time
                     x ∈ R, state
                     u ∈ R, control
-                    ẋ(t) == u(t)
+                    ẋ(t) == u(t)
                     ∫(0.5u(t)^2) → min
                 end
-                CTModels.definition!(pre, def_expr)
-                CTModels.time_dependence!(pre; autonomous=false)
+                Building.definition!(pre, def_expr)
+                Building.time_dependence!(pre; autonomous=false)
 
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), pre)
@@ -88,31 +90,31 @@ function test_print()
 
         Test.@testset "Model Display" begin
             Test.@testset "show(Model) prints abstract and mathematical definitions" begin
-                pre = CTModels.PreModel()
+                pre = Building.PreModel()
 
-                CTModels.time!(pre; t0=0.0, tf=1.0)
-                CTModels.state!(pre, 1, "x", ["x"])
-                CTModels.control!(pre, 1, "u", ["u"])
-                CTModels.variable!(pre, 0)
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 0)
 
                 dyn!(r, t, x, u, v) = r .= 0
-                CTModels.dynamics!(pre, dyn!)
+                Building.dynamics!(pre, dyn!)
 
                 mayer(x0, xf, v) = 0.0
                 lagrange(t, x, u, v) = 0.0
-                CTModels.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
+                Building.objective!(pre, :min; mayer=mayer, lagrange=lagrange)
 
                 def_expr = quote
                     t ∈ [0, 1], time
                     x ∈ R, state
                     u ∈ R, control
-                    ẋ(t) == u(t)
+                    ẋ(t) == u(t)
                     ∫(0.5u(t)^2) → min
                 end
-                CTModels.definition!(pre, def_expr)
-                CTModels.time_dependence!(pre; autonomous=false)
+                Building.definition!(pre, def_expr)
+                Building.time_dependence!(pre; autonomous=false)
 
-                model = CTModels.build(pre)
+                model = Building.build(pre)
 
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), model)
@@ -123,19 +125,19 @@ function test_print()
             end
 
             Test.@testset "show(Model) without definition omits abstract header" begin
-                pre = CTModels.PreModel()
-                CTModels.time!(pre; t0=0.0, tf=1.0)
-                CTModels.state!(pre, 1, "x", ["x"])
-                CTModels.control!(pre, 1, "u", ["u"])
-                CTModels.variable!(pre, 0)
+                pre = Building.PreModel()
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 0)
                 dyn!(r, t, x, u, v) = r .= 0
-                CTModels.dynamics!(pre, dyn!)
-                CTModels.objective!(
+                Building.dynamics!(pre, dyn!)
+                Building.objective!(
                     pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
                 )
-                CTModels.time_dependence!(pre; autonomous=false)
+                Building.time_dependence!(pre; autonomous=false)
 
-                model = CTModels.build(pre)
+                model = Building.build(pre)
 
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), model)
@@ -148,17 +150,17 @@ function test_print()
 
         Test.@testset "PreModel Display - without definition" begin
             Test.@testset "show(PreModel) without definition omits abstract header" begin
-                pre = CTModels.PreModel()
-                CTModels.time!(pre; t0=0.0, tf=1.0)
-                CTModels.state!(pre, 1, "x", ["x"])
-                CTModels.control!(pre, 1, "u", ["u"])
-                CTModels.variable!(pre, 0)
+                pre = Building.PreModel()
+                Building.time!(pre; t0=0.0, tf=1.0)
+                Building.state!(pre, 1, "x", ["x"])
+                Building.control!(pre, 1, "u", ["u"])
+                Building.variable!(pre, 0)
                 dyn!(r, t, x, u, v) = r .= 0
-                CTModels.dynamics!(pre, dyn!)
-                CTModels.objective!(
+                Building.dynamics!(pre, dyn!)
+                Building.objective!(
                     pre, :min; mayer=(x0, xf, v) -> 0.0, lagrange=(t, x, u, v) -> 0.0
                 )
-                CTModels.time_dependence!(pre; autonomous=false)
+                Building.time_dependence!(pre; autonomous=false)
 
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), pre)

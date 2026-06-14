@@ -1,8 +1,9 @@
 module TestInitialGuessIntegration
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Models: Models
+import CTModels.Init: Init
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 import .TestProblems
@@ -14,14 +15,6 @@ function test_initial_guess_integration()
     Test.@testset "Initial Guess Integration Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for initial guess integration functionality
-        end
-
-        # ====================================================================
         # INTEGRATION TESTS - Real OCP Problems
         # ====================================================================
 
@@ -31,25 +24,25 @@ function test_initial_guess_integration()
 
             # Test with NamedTuple on real problem
             init_named = (state=[0.05, 0.1], control=[0.1], variable=Float64[])
-            ig = CTModels.build_initial_guess(ocp, init_named)
-            Test.@test ig isa CTModels.AbstractInitialGuess
-            CTModels.validate_initial_guess(ocp, ig)
+            ig = Init.build_initial_guess(ocp, init_named)
+            Test.@test ig isa Init.AbstractInitialGuess
+            Init.validate_initial_guess(ocp, ig)
 
             # Verify values
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x isa AbstractVector
             Test.@test length(x) == 2
             Test.@test x[1] ≈ 0.05
             Test.@test x[2] ≈ 0.1
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u isa AbstractVector
             Test.@test length(u) == 1
             Test.@test u[1] ≈ 0.1
 
             # Test with incorrect state dimension (should throw)
             bad_named = (state=[0.1, 0.2, 0.3], control=[0.1], variable=Float64[])
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.build_initial_guess(
+            Test.@test_throws Exceptions.IncorrectArgument Init.build_initial_guess(
                 ocp, bad_named
             )
         end
@@ -60,16 +53,16 @@ function test_initial_guess_integration()
 
             # Test with functions
             init_nt = (state=t -> [sin(t), cos(t)], control=t -> [t])
-            ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractInitialGuess
-            CTModels.validate_initial_guess(ocp, ig)
+            ig = Init.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa Init.AbstractInitialGuess
+            Init.validate_initial_guess(ocp, ig)
 
             # Verify functions work correctly
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ sin(0.5)
             Test.@test x[2] ≈ cos(0.5)
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u[1] ≈ 0.5
         end
 
@@ -83,16 +76,16 @@ function test_initial_guess_integration()
             control_data = [[0.0], [0.5], [1.0]]
 
             init_nt = (state=(time, state_data), control=(time, control_data))
-            ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractInitialGuess
-            CTModels.validate_initial_guess(ocp, ig)
+            ig = Init.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa Init.AbstractInitialGuess
+            Init.validate_initial_guess(ocp, ig)
 
             # Verify interpolation works
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ 0.5
             Test.@test x[2] ≈ 0.5
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u[1] ≈ 0.5
         end
 
@@ -101,20 +94,20 @@ function test_initial_guess_integration()
             ocp = beam_data.ocp
 
             # Create PreInit
-            pre = CTModels.pre_initial_guess(state=t -> [0.1, 0.2], control=t -> [0.5])
+            pre = Init.pre_initial_guess(state=t -> [0.1, 0.2], control=t -> [0.5])
 
             # Build and validate
-            ig = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig isa CTModels.AbstractInitialGuess
-            validated = CTModels.validate_initial_guess(ocp, ig)
+            ig = Init.build_initial_guess(ocp, pre)
+            Test.@test ig isa Init.AbstractInitialGuess
+            validated = Init.validate_initial_guess(ocp, ig)
             Test.@test validated === ig
 
             # Verify values
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ 0.1
             Test.@test x[2] ≈ 0.2
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u[1] ≈ 0.5
         end
 
@@ -130,16 +123,16 @@ function test_initial_guess_integration()
             state_data = [[0.0, 0.0], [1.0, 1.0]]
 
             init_nt = (state=(time, state_data), control=t -> [sin(t)])
-            ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.AbstractInitialGuess
-            CTModels.validate_initial_guess(ocp, ig)
+            ig = Init.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa Init.AbstractInitialGuess
+            Init.validate_initial_guess(ocp, ig)
 
             # Verify both time-grid (state) and function (control) work
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x isa AbstractVector
             Test.@test length(x) == 2
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u[1] ≈ sin(0.5)
         end
     end

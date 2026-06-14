@@ -1,62 +1,55 @@
 module TestInitialGuessBuilders
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Models: Models
+import CTModels.Init: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy OCPs for testing
-struct DummyOCP1DNoVar <: CTModels.AbstractModel end
-CTModels.state_dimension(::DummyOCP1DNoVar) = 1
-CTModels.control_dimension(::DummyOCP1DNoVar) = 1
-CTModels.variable_dimension(::DummyOCP1DNoVar) = 0
-CTModels.has_fixed_initial_time(::DummyOCP1DNoVar) = true
-CTModels.initial_time(::DummyOCP1DNoVar) = 0.0
-CTModels.state_name(::DummyOCP1DNoVar) = "x"
-CTModels.state_components(::DummyOCP1DNoVar) = ["x"]
-CTModels.control_name(::DummyOCP1DNoVar) = "u"
-CTModels.control_components(::DummyOCP1DNoVar) = ["u"]
-CTModels.variable_name(::DummyOCP1DNoVar) = "v"
-CTModels.variable_components(::DummyOCP1DNoVar) = String[]
+struct DummyOCP1DNoVar <: Models.AbstractModel end
+Models.state_dimension(::DummyOCP1DNoVar) = 1
+Models.control_dimension(::DummyOCP1DNoVar) = 1
+Models.variable_dimension(::DummyOCP1DNoVar) = 0
+Models.has_fixed_initial_time(::DummyOCP1DNoVar) = true
+Models.initial_time(::DummyOCP1DNoVar) = 0.0
+Models.state_name(::DummyOCP1DNoVar) = "x"
+Models.state_components(::DummyOCP1DNoVar) = ["x"]
+Models.control_name(::DummyOCP1DNoVar) = "u"
+Models.control_components(::DummyOCP1DNoVar) = ["u"]
+Models.variable_name(::DummyOCP1DNoVar) = "v"
+Models.variable_components(::DummyOCP1DNoVar) = String[]
 
-struct DummyOCP2DNoVar <: CTModels.AbstractModel end
-CTModels.state_dimension(::DummyOCP2DNoVar) = 2
-CTModels.control_dimension(::DummyOCP2DNoVar) = 1
-CTModels.variable_dimension(::DummyOCP2DNoVar) = 0
-CTModels.has_fixed_initial_time(::DummyOCP2DNoVar) = true
-CTModels.initial_time(::DummyOCP2DNoVar) = 0.0
-CTModels.state_name(::DummyOCP2DNoVar) = "x"
-CTModels.state_components(::DummyOCP2DNoVar) = ["x1", "x2"]
-CTModels.control_name(::DummyOCP2DNoVar) = "u"
-CTModels.control_components(::DummyOCP2DNoVar) = ["u"]
-CTModels.variable_name(::DummyOCP2DNoVar) = "v"
-CTModels.variable_components(::DummyOCP2DNoVar) = String[]
+struct DummyOCP2DNoVar <: Models.AbstractModel end
+Models.state_dimension(::DummyOCP2DNoVar) = 2
+Models.control_dimension(::DummyOCP2DNoVar) = 1
+Models.variable_dimension(::DummyOCP2DNoVar) = 0
+Models.has_fixed_initial_time(::DummyOCP2DNoVar) = true
+Models.initial_time(::DummyOCP2DNoVar) = 0.0
+Models.state_name(::DummyOCP2DNoVar) = "x"
+Models.state_components(::DummyOCP2DNoVar) = ["x1", "x2"]
+Models.control_name(::DummyOCP2DNoVar) = "u"
+Models.control_components(::DummyOCP2DNoVar) = ["u"]
+Models.variable_name(::DummyOCP2DNoVar) = "v"
+Models.variable_components(::DummyOCP2DNoVar) = String[]
 
-struct DummyOCP1D2Control <: CTModels.AbstractModel end
-CTModels.state_dimension(::DummyOCP1D2Control) = 1
-CTModels.control_dimension(::DummyOCP1D2Control) = 2
-CTModels.variable_dimension(::DummyOCP1D2Control) = 0
-CTModels.has_fixed_initial_time(::DummyOCP1D2Control) = true
-CTModels.initial_time(::DummyOCP1D2Control) = 0.0
-CTModels.state_name(::DummyOCP1D2Control) = "x"
-CTModels.state_components(::DummyOCP1D2Control) = ["x"]
-CTModels.control_name(::DummyOCP1D2Control) = "u"
-CTModels.control_components(::DummyOCP1D2Control) = ["u1", "u2"]
-CTModels.variable_name(::DummyOCP1D2Control) = "v"
-CTModels.variable_components(::DummyOCP1D2Control) = String[]
+struct DummyOCP1D2Control <: Models.AbstractModel end
+Models.state_dimension(::DummyOCP1D2Control) = 1
+Models.control_dimension(::DummyOCP1D2Control) = 2
+Models.variable_dimension(::DummyOCP1D2Control) = 0
+Models.has_fixed_initial_time(::DummyOCP1D2Control) = true
+Models.initial_time(::DummyOCP1D2Control) = 0.0
+Models.state_name(::DummyOCP1D2Control) = "x"
+Models.state_components(::DummyOCP1D2Control) = ["x"]
+Models.control_name(::DummyOCP1D2Control) = "u"
+Models.control_components(::DummyOCP1D2Control) = ["u1", "u2"]
+Models.variable_name(::DummyOCP1D2Control) = "v"
+Models.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
     Test.@testset "Initial Guess Builders Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-
-        # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for initial guess builders functionality
-        end
 
         # ====================================================================
         # UNIT TESTS - Builder Functions
@@ -70,17 +63,17 @@ function test_initial_guess_builders()
             control_samples = [1.0, 0.5, 0.0]
 
             init_nt = (state=(time, state_samples), control=(time, control_samples))
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
             # Verify interpolation works
-            x_fun = CTModels.state(ig)
+            x_fun = Models.state(ig)
             Test.@test x_fun(0.0) ≈ 0.0
             Test.@test x_fun(0.5) ≈ 0.5
             Test.@test x_fun(1.0) ≈ 1.0
 
-            u_fun = CTModels.control(ig)
+            u_fun = Models.control(ig)
             Test.@test u_fun(0.0) ≈ 1.0
             Test.@test u_fun(0.5) ≈ 0.5
             Test.@test u_fun(1.0) ≈ 0.0
@@ -101,12 +94,12 @@ function test_initial_guess_builders()
             state_matrix = [0.0 1.0; 0.5 1.5; 1.0 2.0]
 
             init_nt = (state=(time, state_matrix),)
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
             # Verify state function
-            x_fun = CTModels.state(ig)
+            x_fun = Models.state(ig)
             x0 = x_fun(0.0)
             Test.@test x0 isa AbstractVector
             Test.@test length(x0) == 2
@@ -125,15 +118,15 @@ function test_initial_guess_builders()
             control_samples = [[1.0], [0.5], [0.0]]
 
             # Create PreInit with time-grid tuples
-            pre = CTModels.pre_initial_guess(
+            pre = Init.pre_initial_guess(
                 state=(time, state_samples), control=(time, control_samples)
             )
 
-            ig = CTModels.build_initial_guess(ocp, pre)
-            Test.@test ig isa CTModels.InitialGuess
+            ig = Init.build_initial_guess(ocp, pre)
+            Test.@test ig isa Init.InitialGuess
 
             # Verify interpolation
-            x_fun = CTModels.state(ig)
+            x_fun = Models.state(ig)
             x1_val = x_fun(1.0)
             Test.@test x1_val isa AbstractVector
             Test.@test isapprox(x1_val[1], 1.0; atol=1e-12)
@@ -144,11 +137,11 @@ function test_initial_guess_builders()
 
             # Init only via components x1, x2
             init_nt = (x1=0.0, x2=1.0)
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x isa AbstractVector
             Test.@test length(x) == 2
             Test.@test x[1] ≈ 0.0
@@ -160,10 +153,10 @@ function test_initial_guess_builders()
             time = [0.0, 1.0]
             init_nt = (x1=(time, [0.0, 1.0]), x2=(time, [1.0, 2.0]))
 
-            ig = CTModels.build_initial_guess(ocp, init_nt)
-            Test.@test ig isa CTModels.InitialGuess
+            ig = Init.build_initial_guess(ocp, init_nt)
+            Test.@test ig isa Init.InitialGuess
 
-            x_fun = CTModels.state(ig)
+            x_fun = Models.state(ig)
             x0 = x_fun(0.0)
             Test.@test x0[1] ≈ 0.0
             Test.@test x0[2] ≈ 1.0
@@ -177,11 +170,11 @@ function test_initial_guess_builders()
             ocp = DummyOCP1D2Control()
 
             init_nt = (u1=0.0, u2=1.0)
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u isa AbstractVector
             Test.@test length(u) == 2
             Test.@test u[1] ≈ 0.0
@@ -193,11 +186,11 @@ function test_initial_guess_builders()
             time = [0.0, 1.0]
 
             init_nt = (u1=(time, [0.0, 1.0]), u2=(time, [1.0, 2.0]))
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
-            u_fun = CTModels.control(ig)
+            u_fun = Models.control(ig)
             u0 = u_fun(0.0)
             Test.@test u0[1] ≈ 0.0
             Test.@test u0[2] ≈ 1.0
@@ -212,9 +205,9 @@ function test_initial_guess_builders()
 
             # Specify x1 via component, x2 gets default
             init_nt = (x1=0.5,)
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ 0.5
             Test.@test x[2] ≈ 0.1  # default value
         end
@@ -232,16 +225,16 @@ function test_initial_guess_builders()
             u_data = [0.0, 0.5, 1.0]
 
             init_nt = (x1=(time, x1_data), x2=(time, x2_data), u=(time, u_data))
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
             # Verify all components
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ 0.5
             Test.@test x[2] ≈ 1.5
 
-            u = CTModels.control(ig)(0.5)
+            u = Models.control(ig)(0.5)
             Test.@test u ≈ 0.5
         end
 
@@ -250,11 +243,11 @@ function test_initial_guess_builders()
 
             # Use functions for components
             init_nt = (x1=t -> sin(t), x2=t -> cos(t))
-            ig = CTModels.build_initial_guess(ocp, init_nt)
+            ig = Init.build_initial_guess(ocp, init_nt)
 
-            Test.@test ig isa CTModels.InitialGuess
+            Test.@test ig isa Init.InitialGuess
 
-            x = CTModels.state(ig)(0.5)
+            x = Models.state(ig)(0.5)
             Test.@test x[1] ≈ sin(0.5)
             Test.@test x[2] ≈ cos(0.5)
         end

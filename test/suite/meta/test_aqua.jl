@@ -1,8 +1,8 @@
 module TestAqua
 
-using Test: Test
-using CTModels: CTModels
-using Aqua: Aqua
+import Test: Test
+import CTModels: CTModels
+import Aqua: Aqua
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

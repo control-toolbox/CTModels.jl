@@ -1,8 +1,8 @@
 module TestOCPDynamics
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Building: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -29,11 +29,11 @@ function test_partial_dynamics()
     # 1. Setup common parameters and helper for test evaluations
     ######
     n_states = 3
-    ocp = CTModels.PreModel()
-    CTModels.time!(ocp; t0=0.0, tf=1.0)
-    CTModels.state!(ocp, n_states)
-    CTModels.control!(ocp, 1)
-    CTModels.variable!(ocp, 1)
+    ocp = Building.PreModel()
+    Building.time!(ocp; t0=0.0, tf=1.0)
+    Building.state!(ocp, n_states)
+    Building.control!(ocp, 1)
+    Building.variable!(ocp, 1)
 
     # Dummy variables for evaluating dynamics
     r = zeros(n_states)
@@ -46,9 +46,9 @@ function test_partial_dynamics()
     # 2. Add index-by-index in order, then evaluate vs full function
     ######
     ocp1 = deepcopy(ocp)
-    CTModels.dynamics!(ocp1, 1:1, partial_dyn_1!)
-    CTModels.dynamics!(ocp1, 2:2, partial_dyn_2!)
-    CTModels.dynamics!(ocp1, 3:3, partial_dyn_3!)
+    Building.dynamics!(ocp1, 1:1, partial_dyn_1!)
+    Building.dynamics!(ocp1, 2:2, partial_dyn_2!)
+    Building.dynamics!(ocp1, 3:3, partial_dyn_3!)
     Test.@test length(ocp1.dynamics) == n_states
 
     # Evaluate partial dynamics and collect result vector
@@ -63,7 +63,7 @@ function test_partial_dynamics()
     Test.@test r_partial == r_full
 
     # Evaluate after building
-    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp1.dynamics)
+    f_from_parts! = Building.__build_dynamics_from_parts(ocp1.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -72,9 +72,9 @@ function test_partial_dynamics()
     # 3. Add index-by-index out of order, then evaluate vs full function
     ######
     ocp2 = deepcopy(ocp)
-    CTModels.dynamics!(ocp2, 3:3, partial_dyn_3!)
-    CTModels.dynamics!(ocp2, 1:1, partial_dyn_1!)
-    CTModels.dynamics!(ocp2, 2:2, partial_dyn_2!)
+    Building.dynamics!(ocp2, 3:3, partial_dyn_3!)
+    Building.dynamics!(ocp2, 1:1, partial_dyn_1!)
+    Building.dynamics!(ocp2, 2:2, partial_dyn_2!)
     Test.@test length(ocp2.dynamics) == n_states
 
     r_partial = zeros(n_states)
@@ -86,7 +86,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp2.dynamics)
+    f_from_parts! = Building.__build_dynamics_from_parts(ocp2.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -95,8 +95,8 @@ function test_partial_dynamics()
     # 4. Add by ranges in order, evaluate vs full function
     ######
     ocp3 = deepcopy(ocp)
-    CTModels.dynamics!(ocp3, 1:2, partial_dyn_12!)
-    CTModels.dynamics!(ocp3, 3:3, partial_dyn_3!)
+    Building.dynamics!(ocp3, 1:2, partial_dyn_12!)
+    Building.dynamics!(ocp3, 3:3, partial_dyn_3!)
     Test.@test length(ocp3.dynamics) == 2
 
     r_partial = zeros(n_states)
@@ -108,7 +108,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp3.dynamics)
+    f_from_parts! = Building.__build_dynamics_from_parts(ocp3.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -117,8 +117,8 @@ function test_partial_dynamics()
     # 5. Add by ranges out of order, evaluate vs full function
     ######
     ocp4 = deepcopy(ocp)
-    CTModels.dynamics!(ocp4, 2:3, partial_dyn_23!)
-    CTModels.dynamics!(ocp4, 1:1, partial_dyn_1!)
+    Building.dynamics!(ocp4, 2:3, partial_dyn_23!)
+    Building.dynamics!(ocp4, 1:1, partial_dyn_1!)
     Test.@test length(ocp4.dynamics) == 2
 
     r_partial = zeros(n_states)
@@ -130,7 +130,7 @@ function test_partial_dynamics()
     full_dynamics!(r_full, t, x, u, v)
     Test.@test r_partial == r_full
 
-    f_from_parts! = CTModels.Building.__build_dynamics_from_parts(ocp4.dynamics)
+    f_from_parts! = Building.__build_dynamics_from_parts(ocp4.dynamics)
     r_partial = zeros(n_states)
     f_from_parts!(r_partial, t, x, u, v)
     Test.@test r_partial == r_full
@@ -139,24 +139,24 @@ function test_partial_dynamics()
     # 6. Error: start with adding index or range then add full dynamics function -> error
     ######
     ocp5 = deepcopy(ocp)
-    CTModels.dynamics!(ocp5, 1:1, partial_dyn_1!)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp5, full_dynamics!)
+    Building.dynamics!(ocp5, 1:1, partial_dyn_1!)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp5, full_dynamics!)
 
     ocp6 = deepcopy(ocp)
-    CTModels.dynamics!(ocp6, 1:2, (r, t, x, u, v)->(r[1]=0; r[2]=0))
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp6, full_dynamics!)
+    Building.dynamics!(ocp6, 1:2, (r, t, x, u, v)->(r[1]=0; r[2]=0))
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp6, full_dynamics!)
 
     ######
     # 7. Error: add index out of range (< 1 or > n_states)
     ######
     ocp7 = deepcopy(ocp)
-    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+    Test.@test_throws Exceptions.IncorrectArgument Building.dynamics!(
         ocp7, 0:0, partial_dyn_1!
     )
-    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+    Test.@test_throws Exceptions.IncorrectArgument Building.dynamics!(
         ocp7, -1:-1, partial_dyn_1!
     )
-    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+    Test.@test_throws Exceptions.IncorrectArgument Building.dynamics!(
         ocp7, (n_states + 1):(n_states + 1), partial_dyn_1!
     )
 
@@ -164,7 +164,7 @@ function test_partial_dynamics()
     # 8. Error: add range with at least one index out of range
     ######
     ocp8 = deepcopy(ocp)
-    Test.@test_throws Exceptions.IncorrectArgument CTModels.dynamics!(
+    Test.@test_throws Exceptions.IncorrectArgument Building.dynamics!(
         ocp8, (n_states):(n_states + 1), partial_dyn_1!
     )
 
@@ -172,8 +172,8 @@ function test_partial_dynamics()
     # 9. Error: add twice the same index in one range
     ######
     ocp9 = deepcopy(ocp)
-    CTModels.dynamics!(ocp9, 2:2, partial_dyn_1!)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+    Building.dynamics!(ocp9, 2:2, partial_dyn_1!)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
         ocp9, 1:2, partial_dyn_1!
     )
 
@@ -181,43 +181,42 @@ function test_partial_dynamics()
     # 10. Error: add twice the same index in two different ranges
     ######
     ocp10 = deepcopy(ocp)
-    CTModels.dynamics!(ocp10, 1:2, (r, t, x, u, v) -> (r[1]=t; r[2]=u[1]))
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+    Building.dynamics!(ocp10, 1:2, (r, t, x, u, v) -> (r[1]=t; r[2]=u[1]))
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
         ocp10, 2:3, (r, t, x, u, v) -> (r[2]=0; r[3]=0)
     )
 
     ######
     # 11. Error: prerequisite checks for partial dynamics (missing state, control, times)
     ######
-    ocp_missing = CTModels.PreModel()
-    CTModels.time!(ocp_missing; t0=0.0, tf=10.0)
-    CTModels.control!(ocp_missing, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+    ocp_missing = Building.PreModel()
+    Building.time!(ocp_missing; t0=0.0, tf=10.0)
+    Building.control!(ocp_missing, 1)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
         ocp_missing, 1:1, partial_dyn_1!
     )
 
     # Control is now optional, so this should NOT throw an error
-    ocp_missing = CTModels.PreModel()
-    CTModels.time!(ocp_missing; t0=0.0, tf=10.0)
-    CTModels.state!(ocp_missing, 1)
-    # This should succeed now that control is optional
-    CTModels.dynamics!(ocp_missing, 1:1, partial_dyn_1!)
-    Test.@test CTModels.Building.__is_dynamics_set(ocp_missing)
+    ocp_missing = Building.PreModel()
+    Building.time!(ocp_missing; t0=0.0, tf=10.0)
+    Building.state!(ocp_missing, 1)
+    Building.dynamics!(ocp_missing, 1:1, partial_dyn_1!)
+    Test.@test Building.__is_dynamics_set(ocp_missing)
 
-    ocp_missing = CTModels.PreModel()
-    CTModels.state!(ocp_missing, 1)
-    CTModels.control!(ocp_missing, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+    ocp_missing = Building.PreModel()
+    Building.state!(ocp_missing, 1)
+    Building.control!(ocp_missing, 1)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
         ocp_missing, 1:1, partial_dyn_1!
     )
 
     # variable must NOT be set after dynamics
-    ocp_variable = CTModels.PreModel()
-    CTModels.time!(ocp_variable; t0=0.0, tf=10.0)
-    CTModels.state!(ocp_variable, 3)
-    CTModels.control!(ocp_variable, 1)
-    CTModels.dynamics!(ocp_variable, 1:3, full_dynamics!)
-    Test.@test_throws Exceptions.PreconditionError CTModels.variable!(ocp_variable, 1)
+    ocp_variable = Building.PreModel()
+    Building.time!(ocp_variable; t0=0.0, tf=10.0)
+    Building.state!(ocp_variable, 3)
+    Building.control!(ocp_variable, 1)
+    Building.dynamics!(ocp_variable, 1:3, full_dynamics!)
+    Test.@test_throws Exceptions.PreconditionError Building.variable!(ocp_variable, 1)
 end
 
 function test_full_dynamics()
@@ -228,93 +227,84 @@ function test_full_dynamics()
     ######
     # 1. Success case: full dynamics set properly
     ######
-    ocp = CTModels.PreModel()
-    CTModels.time!(ocp; t0=0.0, tf=10.0)
-    CTModels.state!(ocp, 1)
-    CTModels.control!(ocp, 1)
-    CTModels.variable!(ocp, 1)
-    CTModels.dynamics!(ocp, dynamics!)
+    ocp = Building.PreModel()
+    Building.time!(ocp; t0=0.0, tf=10.0)
+    Building.state!(ocp, 1)
+    Building.control!(ocp, 1)
+    Building.variable!(ocp, 1)
+    Building.dynamics!(ocp, dynamics!)
     Test.@test ocp.dynamics == dynamics!
 
     ######
     # 2. Error: set full dynamics twice not allowed
     ######
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp, dynamics!)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp, dynamics!)
 
     ######
     # 3. Error: state must be set before dynamics
     ######
-    ocp2 = CTModels.PreModel()
-    CTModels.time!(ocp2; t0=0.0, tf=10.0)
-    CTModels.control!(ocp2, 1)
-    CTModels.variable!(ocp2, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp2, dynamics!)
+    ocp2 = Building.PreModel()
+    Building.time!(ocp2; t0=0.0, tf=10.0)
+    Building.control!(ocp2, 1)
+    Building.variable!(ocp2, 1)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp2, dynamics!)
 
     ######
     # 4. Control is now optional - this should succeed
     ######
-    ocp3 = CTModels.PreModel()
-    CTModels.time!(ocp3; t0=0.0, tf=10.0)
-    CTModels.state!(ocp3, 1)
-    CTModels.variable!(ocp3, 1)
-    # This should succeed now that control is optional
-    CTModels.dynamics!(ocp3, dynamics!)
-    Test.@test CTModels.Building.__is_dynamics_set(ocp3)
+    ocp3 = Building.PreModel()
+    Building.time!(ocp3; t0=0.0, tf=10.0)
+    Building.state!(ocp3, 1)
+    Building.variable!(ocp3, 1)
+    Building.dynamics!(ocp3, dynamics!)
+    Test.@test Building.__is_dynamics_set(ocp3)
 
     ######
     # 5. Error: time must be set before dynamics
     ######
-    ocp4 = CTModels.PreModel()
-    CTModels.state!(ocp4, 1)
-    CTModels.control!(ocp4, 1)
-    CTModels.variable!(ocp4, 1)
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp4, dynamics!)
+    ocp4 = Building.PreModel()
+    Building.state!(ocp4, 1)
+    Building.control!(ocp4, 1)
+    Building.variable!(ocp4, 1)
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp4, dynamics!)
 
     ######
     # 6. Error: variable must NOT be set after dynamics
     ######
-    ocp5 = CTModels.PreModel()
-    CTModels.time!(ocp5; t0=0.0, tf=10.0)
-    CTModels.state!(ocp5, 1)
-    CTModels.control!(ocp5, 1)
-    CTModels.dynamics!(ocp5, dynamics!)
-    Test.@test_throws Exceptions.PreconditionError CTModels.variable!(ocp5, 1)
+    ocp5 = Building.PreModel()
+    Building.time!(ocp5; t0=0.0, tf=10.0)
+    Building.state!(ocp5, 1)
+    Building.control!(ocp5, 1)
+    Building.dynamics!(ocp5, dynamics!)
+    Test.@test_throws Exceptions.PreconditionError Building.variable!(ocp5, 1)
 
     ######
     # 7. Error: mixing full dynamics and partial dynamics not allowed
     ######
-    ocp6 = CTModels.PreModel()
-    CTModels.time!(ocp6; t0=0.0, tf=10.0)
-    CTModels.state!(ocp6, 2)
-    CTModels.control!(ocp6, 1)
-    CTModels.variable!(ocp6, 1)
-    CTModels.dynamics!(ocp6, dynamics!)
+    ocp6 = Building.PreModel()
+    Building.time!(ocp6; t0=0.0, tf=10.0)
+    Building.state!(ocp6, 2)
+    Building.control!(ocp6, 1)
+    Building.variable!(ocp6, 1)
+    Building.dynamics!(ocp6, dynamics!)
 
     # Attempt to add partial dynamics after full dynamics -> error
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
         ocp6, 1:1, (r, t, x, u, v)->(r[1]=0)
     )
 
     # New ocp for partial dynamics first, then full -> error
-    ocp7 = CTModels.PreModel()
-    CTModels.time!(ocp7; t0=0.0, tf=10.0)
-    CTModels.state!(ocp7, 2)
-    CTModels.control!(ocp7, 1)
-    CTModels.variable!(ocp7, 1)
-    CTModels.dynamics!(ocp7, 1:1, (r, t, x, u, v)->(r[1]=0))
-    Test.@test_throws Exceptions.PreconditionError CTModels.dynamics!(ocp7, dynamics!)
+    ocp7 = Building.PreModel()
+    Building.time!(ocp7; t0=0.0, tf=10.0)
+    Building.state!(ocp7, 2)
+    Building.control!(ocp7, 1)
+    Building.variable!(ocp7, 1)
+    Building.dynamics!(ocp7, 1:1, (r, t, x, u, v)->(r[1]=0))
+    Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp7, dynamics!)
 end
 
 function test_dynamics()
     Test.@testset "Dynamics Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-
-        # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for dynamics functionality
-        end
 
         # ====================================================================
         # UNIT TESTS - Full Dynamics

@@ -1,48 +1,43 @@
 module TestCTModelsTop
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
+import CTModels.Models: Models
+import CTModels.Solutions: Solutions
+import CTModels.Serialization: Serialization
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-struct CTMDummySol <: CTModels.AbstractSolution end
-struct CTMDummyModelTop <: CTModels.AbstractModel end
+struct CTMDummySol <: Solutions.AbstractSolution end
+struct CTMDummyModelTop <: Models.AbstractModel end
 
 function test_CTModels()
     Test.@testset "CTModels.jl Top-Level Module Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-
-        # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for CTModels top-level functionality
-        end
 
         # ====================================================================
         # UNIT TESTS - Basic Aliases and Tags
         # ====================================================================
 
         Test.@testset "type aliases and tags" begin
-            Test.@test CTModels.Dimension == Int
-            Test.@test CTModels.ctNumber == Real
-            Test.@test CTModels.Time === CTModels.ctNumber
+            Test.@test Components.Dimension == Int
+            Test.@test Components.ctNumber == Real
+            Test.@test Components.Time === Components.ctNumber
 
             # For parametric aliases, test mutual <: rather than strict identity
-            Test.@test CTModels.ctVector <: AbstractVector{<:CTModels.ctNumber}
-            Test.@test AbstractVector{<:CTModels.ctNumber} <: CTModels.ctVector
+            Test.@test Components.ctVector <: AbstractVector{<:Components.ctNumber}
+            Test.@test AbstractVector{<:Components.ctNumber} <: Components.ctVector
 
-            Test.@test CTModels.Times <: AbstractVector{<:CTModels.Time}
-            Test.@test AbstractVector{<:CTModels.Time} <: CTModels.Times
+            Test.@test Components.Times <: AbstractVector{<:Components.Time}
+            Test.@test AbstractVector{<:Components.Time} <: Components.Times
 
-            Test.@test CTModels.JLD2Tag <: CTModels.AbstractTag
-            Test.@test CTModels.JSON3Tag <: CTModels.AbstractTag
+            Test.@test Serialization.JLD2Tag <: Serialization.AbstractTag
+            Test.@test Serialization.JSON3Tag <: Serialization.AbstractTag
 
             # Aliases towards CTSolvers usage
-            Test.@test CTModels.AbstractModel === CTModels.AbstractModel
-            Test.@test CTModels.AbstractSolution === CTModels.AbstractSolution
+            Test.@test Models.AbstractModel === Models.AbstractModel
+            Test.@test Solutions.AbstractSolution === Solutions.AbstractSolution
         end
 
         # ====================================================================
@@ -54,10 +49,10 @@ function test_CTModels()
             ocp = CTMDummyModelTop()
 
             # Unknown format should trigger an IncorrectArgument without touching extensions.
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.export_ocp_solution(
+            Test.@test_throws Exceptions.IncorrectArgument Serialization.export_ocp_solution(
                 sol; format=:FOO
             )
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.import_ocp_solution(
+            Test.@test_throws Exceptions.IncorrectArgument Serialization.import_ocp_solution(
                 ocp; format=:FOO
             )
         end

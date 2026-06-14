@@ -1,8 +1,8 @@
 module TestOCPTimeDependence
 
-using Test: Test
-import CTBase.Exceptions
-using CTModels: CTModels
+import Test: Test
+import CTBase.Exceptions: Exceptions
+import CTModels.Building: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -11,55 +11,47 @@ function test_time_dependence()
     Test.@testset "Time Dependence Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for time dependence functionality
-        end
-
-        # ====================================================================
         # UNIT TESTS - Time Dependence Functions
         # ====================================================================
 
         Test.@testset "time_dependence! basic behavior" begin
-            ocp = CTModels.PreModel()
+            ocp = Building.PreModel()
 
             # Initially not set
-            Test.@test !CTModels.Building.__is_autonomous_set(ocp)
+            Test.@test !Building.__is_autonomous_set(ocp)
 
             # Set once
-            CTModels.time_dependence!(ocp; autonomous=true)
-            Test.@test CTModels.Building.__is_autonomous_set(ocp)
+            Building.time_dependence!(ocp; autonomous=true)
+            Test.@test Building.__is_autonomous_set(ocp)
             Test.@test ocp.autonomous === true
 
             # Second call must fail
-            Test.@test_throws Exceptions.PreconditionError CTModels.time_dependence!(
+            Test.@test_throws Exceptions.PreconditionError Building.time_dependence!(
                 ocp; autonomous=false
             )
         end
 
-        # ========================================================================
-        # Integration-style tests – fake OCPs with different time dependence
-        # ========================================================================
+        # ====================================================================
+        # INTEGRATION TESTS
+        # ====================================================================
 
         Test.@testset "fake OCP time dependence flag" begin
             function build_premodel_with_time_dependence(flag::Bool)
-                ocp = CTModels.PreModel()
-                CTModels.time!(ocp; t0=0.0, tf=1.0)
-                CTModels.state!(ocp, 1)
-                CTModels.control!(ocp, 1)
-                CTModels.variable!(ocp, 0)
+                ocp = Building.PreModel()
+                Building.time!(ocp; t0=0.0, tf=1.0)
+                Building.state!(ocp, 1)
+                Building.control!(ocp, 1)
+                Building.variable!(ocp, 0)
 
                 dyn!(r, t, x, u, v) = r .= 0
-                CTModels.dynamics!(ocp, dyn!)
+                Building.dynamics!(ocp, dyn!)
 
                 mayer(x0, xf, v) = 0.0
                 lagrange(t, x, u, v) = 0.0
-                CTModels.objective!(ocp, :min; mayer=mayer, lagrange=lagrange)
+                Building.objective!(ocp, :min; mayer=mayer, lagrange=lagrange)
 
-                CTModels.definition!(ocp, quote end)
-                CTModels.time_dependence!(ocp; autonomous=flag)
+                Building.definition!(ocp, quote end)
+                Building.time_dependence!(ocp; autonomous=flag)
                 return ocp
             end
 

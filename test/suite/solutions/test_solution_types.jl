@@ -1,7 +1,9 @@
 module TestSolutionTypes
 
-using Test: Test
-using CTModels: CTModels
+import Test: Test
+import CTModels.Components: Components
+import CTModels.Models: Models
+import CTModels.Solutions: Solutions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -10,28 +12,20 @@ function test_solution_types()
     Test.@testset "OCP Solution Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for OCP solution types functionality
-        end
-
-        # ====================================================================
         # UNIT TESTS - Core Solution Types
         # ====================================================================
 
         Test.@testset "TimeGridModel and is_empty" begin
-            grid = CTModels.TimeGridModel([0.0, 0.5, 1.0])
-            empty_grid = CTModels.EmptyTimeGridModel()
+            grid = Solutions.TimeGridModel([0.0, 0.5, 1.0])
+            empty_grid = Solutions.EmptyTimeGridModel()
 
-            Test.@test CTModels.is_empty(empty_grid)
-            Test.@test !CTModels.is_empty(grid)
+            Test.@test Solutions.is_empty(empty_grid)
+            Test.@test !Solutions.is_empty(grid)
         end
 
         Test.@testset "SolverInfos structure" begin
             extra_infos = Dict(:foo => 1, :bar => "x")
-            infos = CTModels.SolverInfos(10, :ok, "message", true, 1e-3, extra_infos)
+            infos = Solutions.SolverInfos(10, :ok, "message", true, 1e-3, extra_infos)
 
             Test.@test infos.iterations == 10
             Test.@test infos.status == :ok
@@ -39,7 +33,7 @@ function test_solution_types()
             Test.@test infos.successful
             Test.@test infos.constraints_violation ≈ 1e-3
             Test.@test infos.infos === extra_infos
-            Test.@test infos isa CTModels.AbstractSolverInfos
+            Test.@test infos isa Solutions.AbstractSolverInfos
         end
 
         Test.@testset "DualModel structure" begin
@@ -52,7 +46,7 @@ function test_solution_types()
             vc_lb = [5.0]
             vc_ub = [6.0]
 
-            dual = CTModels.DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub)
+            dual = Solutions.DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub)
 
             Test.@test dual.path_constraints_dual === pc
             Test.@test dual.boundary_constraints_dual === bc
@@ -65,29 +59,29 @@ function test_solution_types()
         end
 
         Test.@testset "Solution structure and empty time grid" begin
-            times = CTModels.TimesModel(
-                CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(1.0, "t_f"), "t"
+            times = Components.TimesModel(
+                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
             )
-            state = CTModels.StateModel("x", ["x"])
-            control = CTModels.ControlModel("u", ["u"])
-            variable = CTModels.VariableModel("v", ["v"])
+            state = Components.StateModel("x", ["x"])
+            control = Components.ControlModel("u", ["u"])
+            variable = Components.VariableModel("v", ["v"])
 
             costate_fun = t -> [0.0]
             objective_val = 0.0
 
-            dual = CTModels.DualModel(
+            dual = Solutions.DualModel(
                 nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing
             )
 
-            infos = CTModels.SolverInfos(0, :unknown, "", false, 0.0, Dict{Symbol,Any}())
+            infos = Solutions.SolverInfos(0, :unknown, "", false, 0.0, Dict{Symbol,Any}())
 
             dynamics = (r, t, x, u, v) -> nothing
-            objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
-            constraints = CTModels.ConstraintsModel((), (), (), (), ())
-            definition = CTModels.Components.EmptyDefinition()
+            objective = Components.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
+            constraints = Components.ConstraintsModel((), (), (), (), ())
+            definition = Components.EmptyDefinition()
             build_examodel = nothing
 
-            model = CTModels.Model{CTModels.Autonomous}(
+            model = Models.Model{Components.Autonomous}(
                 times,
                 state,
                 control,
@@ -99,10 +93,10 @@ function test_solution_types()
                 build_examodel,
             )
 
-            grid_full = CTModels.TimeGridModel([0.0, 0.5, 1.0])
-            grid_empty = CTModels.EmptyTimeGridModel()
+            grid_full = Solutions.TimeGridModel([0.0, 0.5, 1.0])
+            grid_empty = Solutions.EmptyTimeGridModel()
 
-            sol_full = CTModels.Solution(
+            sol_full = Solutions.Solution(
                 grid_full,
                 times,
                 state,
@@ -115,7 +109,7 @@ function test_solution_types()
                 infos,
             )
 
-            sol_empty = CTModels.Solution(
+            sol_empty = Solutions.Solution(
                 grid_empty,
                 times,
                 state,
@@ -129,7 +123,7 @@ function test_solution_types()
             )
 
             # Type parameters should reflect the underlying component types
-            Test.@test sol_full isa CTModels.Solution{
+            Test.@test sol_full isa Solutions.Solution{
                 typeof(grid_full),
                 typeof(times),
                 typeof(state),
@@ -142,7 +136,7 @@ function test_solution_types()
                 typeof(infos),
             }
 
-            Test.@test sol_empty isa CTModels.Solution{
+            Test.@test sol_empty isa Solutions.Solution{
                 typeof(grid_empty),
                 typeof(times),
                 typeof(state),
@@ -155,8 +149,8 @@ function test_solution_types()
                 typeof(infos),
             }
 
-            Test.@test !CTModels.is_empty_time_grid(sol_full)
-            Test.@test CTModels.is_empty_time_grid(sol_empty)
+            Test.@test !Solutions.is_empty_time_grid(sol_full)
+            Test.@test Solutions.is_empty_time_grid(sol_empty)
         end
 
         # ========================================================================
@@ -164,29 +158,29 @@ function test_solution_types()
         # ========================================================================
 
         Test.@testset "fake Solution summary" begin
-            times = CTModels.TimesModel(
-                CTModels.FixedTimeModel(0.0, "t₀"), CTModels.FixedTimeModel(1.0, "t_f"), "t"
+            times = Components.TimesModel(
+                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
             )
-            state = CTModels.StateModel("x", ["x"])
-            control = CTModels.ControlModel("u", ["u"])
-            variable = CTModels.VariableModel("v", ["v"])
+            state = Components.StateModel("x", ["x"])
+            control = Components.ControlModel("u", ["u"])
+            variable = Components.VariableModel("v", ["v"])
 
             costate_fun = t -> [0.0]
             objective_val = 42.0
 
-            dual = CTModels.DualModel(
+            dual = Solutions.DualModel(
                 nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing
             )
 
-            infos = CTModels.SolverInfos(15, :converged, "ok", true, 0.0, Dict(:nit => 15))
+            infos = Solutions.SolverInfos(15, :converged, "ok", true, 0.0, Dict(:nit => 15))
 
             dynamics = (r, t, x, u, v) -> nothing
-            objective = CTModels.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
-            constraints = CTModels.ConstraintsModel((), (), (), (), ())
-            definition = CTModels.Components.EmptyDefinition()
+            objective = Components.MayerObjectiveModel((x0, xf, v) -> 0.0, :min)
+            constraints = Components.ConstraintsModel((), (), (), (), ())
+            definition = Components.EmptyDefinition()
             build_examodel = nothing
 
-            model = CTModels.Model{CTModels.Autonomous}(
+            model = Models.Model{Components.Autonomous}(
                 times,
                 state,
                 control,
@@ -198,8 +192,8 @@ function test_solution_types()
                 build_examodel,
             )
 
-            grid = CTModels.TimeGridModel([0.0, 1.0])
-            sol = CTModels.Solution(
+            grid = Solutions.TimeGridModel([0.0, 1.0])
+            sol = Solutions.Solution(
                 grid,
                 times,
                 state,

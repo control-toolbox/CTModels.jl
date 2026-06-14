@@ -1,21 +1,13 @@
 module TestInitialGuessTypes
 
-using Test: Test
-using CTModels: CTModels
+import Test: Test
+import CTModels.Init: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_types()
     Test.@testset "Initial Guess Types Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-
-        # ====================================================================
-        # UNIT TESTS - Abstract Types
-        # ====================================================================
-
-        Test.@testset "Abstract Types" begin
-            # Pure unit tests for initial guess types functionality
-        end
 
         # ====================================================================
         # UNIT TESTS - Core Initial Guess Types
@@ -26,14 +18,14 @@ function test_initial_guess_types()
             control_fun = t -> [-t]
             variable_vec = [1.0, 2.0]
 
-            ig = CTModels.InitialGuess(state_fun, control_fun, variable_vec)
+            ig = Init.InitialGuess(state_fun, control_fun, variable_vec)
 
             Test.@test ig.state === state_fun
             Test.@test ig.control === control_fun
             Test.@test ig.variable === variable_vec
 
             # Type parameters should reflect the concrete field types
-            Test.@test ig isa CTModels.InitialGuess{
+            Test.@test ig isa Init.InitialGuess{
                 typeof(state_fun),typeof(control_fun),typeof(variable_vec)
             }
         end
@@ -43,7 +35,7 @@ function test_initial_guess_types()
             su = :control_spec
             sv = :variable_spec
 
-            pre = CTModels.PreInitialGuess(sx, su, sv)
+            pre = Init.PreInitialGuess(sx, su, sv)
 
             Test.@test pre.state === sx
             Test.@test pre.control === su
@@ -59,7 +51,7 @@ function test_initial_guess_types()
             control_fun = t -> -3t
             variable_val = 1.23
 
-            ig = CTModels.InitialGuess(state_fun, control_fun, variable_val)
+            ig = Init.InitialGuess(state_fun, control_fun, variable_val)
 
             # Simple fake consumer that only relies on the fields of the type
             function consume_initial_guess(ig_local)
