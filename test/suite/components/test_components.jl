@@ -105,6 +105,32 @@ function test_components()
             Test.@test contains(repr(MIME("text/plain"), f_scalar), "ConstantInTime")
         end
 
+        Test.@testset "CoercedTrajectory" begin
+            # Scalar extraction (coerce = only)
+            f = Components.CoercedTrajectory(t -> [2t], only)
+            Test.@test f(0.5) == 1.0
+            Test.@test f(0.5) isa Real
+            Test.@test f(0.0) == 0.0
+
+            # Vector pass-through (coerce = identity)
+            g = Components.CoercedTrajectory(t -> [t, 2t], identity)
+            Test.@test g(0.5) == [0.5, 1.0]
+            Test.@test g(0.5) isa AbstractVector
+
+            # <: Function compatibility
+            Test.@test f isa Function
+            Test.@test g isa Function
+
+            # only validates length == 1 (should throw if inner returns length > 1)
+            h = Components.CoercedTrajectory(t -> [1.0, 2.0], only)
+            Test.@test_throws ArgumentError h(0.0)
+
+            # show
+            Test.@test contains(repr(f), "CoercedTrajectory")
+            Test.@test contains(repr(MIME("text/plain"), f), "CoercedTrajectory")
+            Test.@test contains(repr(MIME("text/plain"), f), "only")
+        end
+
         Test.@testset "objective and constraints models" begin
             mayer_f  = (x0, xf, _v) -> x0[1] + xf[1]
             lagrange_f = (_t, _x, u, _v) -> u[1]^2

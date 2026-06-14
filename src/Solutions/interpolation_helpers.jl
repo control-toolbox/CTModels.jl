@@ -110,20 +110,23 @@ end
 """
     _wrap_scalar_and_deepcopy(func, dim)
 
-Internal helper to wrap a function with scalar extraction and deepcopy.
+Internal helper to wrap a function with scalar extraction and deepcopy, returning a
+[`CTModels.Components.CoercedTrajectory`](@ref).
 
 # Arguments
 - `func`: Function or callable to wrap (or nothing)
-- `dim`: Dimension of output (1 = scalar extraction, otherwise vector)
+- `dim`: Dimension of output (1 = scalar extraction via `only`, otherwise `identity`)
 
 # Returns
-- Wrapped function with deepcopy and scalar extraction if dim==1
-- nothing if func is nothing
+- `Components.CoercedTrajectory(deepcopy(func), coerce)` where `coerce` is `only`
+  (dim==1) or `identity` (otherwise)
+- `nothing` if func is nothing
 
 # Notes
-Deepcopy is ESSENTIAL because Julia closures capture variable REFERENCES, not values.
-Without deepcopy, modifications to external variables after solution creation would
-affect the solution.
+`deepcopy` is applied to `func` before storing it in the struct. This is essential
+for closures supplied by the user: Julia closures capture variable REFERENCES, not
+values, so without `deepcopy`, modifying external variables after solution creation
+would affect the solution.
 
 Example:
 ```julia
@@ -138,13 +141,9 @@ param_x = 999.0
 See also: [`CTModels.Solutions._interpolate_from_data`](@ref), [`CTModels.Solutions.build_interpolated_function`](@ref).
 """
 function _wrap_scalar_and_deepcopy(func, dim::Union{Int,Nothing})
-    if isnothing(func)
-        return nothing
-    elseif !isnothing(dim) && dim == 1
-        return deepcopy(t -> func(t)[1])
-    else
-        return deepcopy(t -> func(t))
-    end
+    isnothing(func) && return nothing
+    coerce = (!isnothing(dim) && dim == 1) ? only : identity
+    return Components.CoercedTrajectory(deepcopy(func), coerce)
 end
 
 """
