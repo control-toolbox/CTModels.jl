@@ -31,6 +31,7 @@ import CTBase.Exceptions
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using OrderedCollections: OrderedCollections
 
+include(joinpath(@__DIR__, "functors.jl"))
 include(joinpath(@__DIR__, "aliases.jl"))
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "accessors.jl"))

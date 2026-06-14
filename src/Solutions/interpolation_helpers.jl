@@ -81,7 +81,7 @@ function _interpolate_from_data(
     # Special case: constant function for 2-point grids
     if constant_if_two_points && length(T) == 2
         cols = isnothing(dim) ? (:) : (1:dim)
-        return t -> data[1, cols]
+        return Components.ConstantInTime(data[1, cols])
     end
 
     # Standard interpolation

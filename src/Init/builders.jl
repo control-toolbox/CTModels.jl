@@ -151,10 +151,10 @@ function _build_component_function_without_time(data)
     if data isa Function
         return data
     elseif data isa Real
-        return ConstantInTime(data)
+        return Components.ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == 1
-            return ConstantInTime(data[1])
+            return Components.ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(
@@ -198,12 +198,12 @@ function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
         return data
     elseif data isa Real
-        return ConstantInTime(data)
+        return Components.ConstantInTime(data)
     elseif data isa AbstractVector{<:Real}
         if length(data) == length(time)
             return Interpolation.ctinterpolate(time, data)
         elseif length(data) == 1
-            return ConstantInTime(data[1])
+            return Components.ConstantInTime(data[1])
         else
             throw(
                 Exceptions.IncorrectArgument(

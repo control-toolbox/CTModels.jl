@@ -46,29 +46,6 @@ function test_initial_guess_types()
         # INTEGRATION TESTS - Fake Consumer of Initial Guesses
         # ====================================================================
 
-        # ====================================================================
-        # UNIT TESTS - ConstantInTime functor
-        # ====================================================================
-
-        Test.@testset "ConstantInTime" begin
-            f_scalar = Init.ConstantInTime(1.0)
-            Test.@test f_scalar(0.0)  == 1.0
-            Test.@test f_scalar(0.5)  == 1.0
-            Test.@test f_scalar(42.0) == 1.0
-
-            f_vec = Init.ConstantInTime([1.0, 2.0])
-            Test.@test f_vec(0.0)  == [1.0, 2.0]
-            Test.@test f_vec(99.9) == [1.0, 2.0]
-
-            # Satisfies <: Function constraint used in InitialGuess
-            Test.@test f_scalar isa Function
-            Test.@test f_vec    isa Function
-
-            # show
-            Test.@test contains(repr(f_scalar), "ConstantInTime")
-            Test.@test contains(repr(MIME("text/plain"), f_scalar), "ConstantInTime")
-        end
-
         Test.@testset "fake consumer of InitialGuess" begin
             state_fun = t -> 2t
             control_fun = t -> -3t

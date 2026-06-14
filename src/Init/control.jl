@@ -45,7 +45,7 @@ function initial_control(ocp::Models.AbstractModel, control::Real)
             ),
         )
     elseif dim == 1
-        return ConstantInTime(control)
+        return Components.ConstantInTime(control)
     else
         throw(
             Exceptions.IncorrectArgument(
@@ -97,7 +97,7 @@ function initial_control(ocp::Models.AbstractModel, control::Vector{<:Real})
             ),
         )
     end
-    return ConstantInTime(control)
+    return Components.ConstantInTime(control)
 end
 
 """
@@ -116,11 +116,11 @@ Return a default control initialisation function when no control is provided.
 function initial_control(ocp::Models.AbstractModel, ::Nothing)
     dim = Models.control_dimension(ocp)
     if dim == 0
-        return ConstantInTime(Float64[])
+        return Components.ConstantInTime(Float64[])
     elseif dim == 1
-        return ConstantInTime(0.1)
+        return Components.ConstantInTime(0.1)
     else
-        return ConstantInTime(fill(0.1, dim))
+        return Components.ConstantInTime(fill(0.1, dim))
     end
 end
 

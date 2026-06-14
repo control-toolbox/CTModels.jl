@@ -88,6 +88,23 @@ function test_components()
             Test.@test Components.time_name(times) == "t"
         end
 
+        Test.@testset "ConstantInTime" begin
+            f_scalar = Components.ConstantInTime(1.0)
+            Test.@test f_scalar(0.0)  == 1.0
+            Test.@test f_scalar(0.5)  == 1.0
+            Test.@test f_scalar(42.0) == 1.0
+
+            f_vec = Components.ConstantInTime([1.0, 2.0])
+            Test.@test f_vec(0.0)  == [1.0, 2.0]
+            Test.@test f_vec(99.9) == [1.0, 2.0]
+
+            Test.@test f_scalar isa Function
+            Test.@test f_vec    isa Function
+
+            Test.@test contains(repr(f_scalar), "ConstantInTime")
+            Test.@test contains(repr(MIME("text/plain"), f_scalar), "ConstantInTime")
+        end
+
         Test.@testset "objective and constraints models" begin
             mayer_f  = (x0, xf, _v) -> x0[1] + xf[1]
             lagrange_f = (_t, _x, u, _v) -> u[1]^2
