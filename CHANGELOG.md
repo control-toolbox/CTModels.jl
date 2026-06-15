@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2026-06-15
+
+### 📦 Dependencies
+
+#### CTBase Compatibility Update
+
+- **Updated CTBase compatibility**: Extended support from CTBase 0.18, 0.19 to CTBase 0.18, 0.20
+- **No breaking changes**: Full backward compatibility maintained with CTBase 0.18 and 0.19
+- **Forward compatibility**: Now compatible with CTBase 0.20
+
 ## [0.10.1] - 2026-04-22
 
 ### 🚀 Enhancements
