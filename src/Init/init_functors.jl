@@ -2,110 +2,40 @@
 # Helpers and callable struct for block+component trajectory merging (Famille C)
 # ------------------------------------------------------------------------------
 
-"""
-$(TYPEDSIGNATURES)
+# Dispatched helpers — replace `isa AbstractVector` checks with Julia dispatch so
+# the compiler can specialise statically when the return type of `base` is known.
 
-Coerce block-level base value to a vector of the correct dimension.
+# For dim == 1: normalise any base value to a length-1 vector (no length check).
+_wrap_1d(v::AbstractVector) = copy(v)
+_wrap_1d(v)                 = [v]
 
-# Arguments
-- `base_val`: The base value from the block-level trajectory.
-- `dim::Int`: Expected dimension.
-- `role::Symbol`: Component role (`:state` or `:control`).
-
-# Returns
-- `Vector`: Coerced vector of correct dimension.
-
-# Throws
-- `CTBase.Exceptions.IncorrectArgument`: If dimension is incompatible.
-"""
-function _coerce_base(base_val, dim::Int, role::Symbol)
-    if dim == 1
-        if base_val isa AbstractVector
-            return copy(base_val)
-        else
-            return [base_val]
-        end
-    else
-        if (base_val isa AbstractVector && length(base_val) != dim) ||
-            (!(base_val isa AbstractVector) && dim != 1)
-            throw(
-                Exceptions.IncorrectArgument(
-                    "Block-level $role initialization has incompatible dimension";
-                    got="$(base_val isa AbstractVector ? "vector of length $(length(base_val))" : "scalar")",
-                    expected="$(dim == 1 ? "scalar or length-1 vector" : "vector of length $dim")",
-                    suggestion="Ensure the $role function returns the correct dimension",
-                    context="block-level $role initialization",
-                ),
-            )
-        end
-        return collect(base_val)
-    end
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Extract scalar value from component-level initialization result.
-
-# Arguments
-- `val`: The component value.
-- `role::Symbol`: Component role (`:state` or `:control`).
-- `i::Int`: Component index.
-
-# Returns
-- `Real`: Scalar value.
-
-# Throws
-- `CTBase.Exceptions.IncorrectArgument`: If value is not scalar or length-1 vector.
-"""
-function _component_scalar(val, role::Symbol, i::Int)
-    if val isa AbstractVector
-        if length(val) != 1
-            throw(
-                Exceptions.IncorrectArgument(
-                    "Component-level initialization must return scalar or length-1 vector";
-                    got="vector of length $(length(val)) for $role component $i",
-                    expected="scalar or length-1 vector",
-                    suggestion="Ensure the function for component $i returns a single value",
-                    context="component-level $role initialization",
-                ),
-            )
-        end
-        return val[1]
-    else
-        return val
-    end
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Validate that component index is within bounds.
-
-# Arguments
-- `i::Int`: Component index to check.
-- `dim::Int`: Total dimension.
-- `role::Symbol`: Component role (`:state` or `:control`).
-
-# Returns
-- `Nothing`
-
-# Throws
-- `CTBase.Exceptions.IncorrectArgument`: If index is out of bounds.
-"""
-function _check_component_index(i::Int, dim::Int, role::Symbol)
-    if !(1 <= i <= dim)
+# For dim > 1: check that `v` has the expected length, then collect.
+# The scalar overload always throws because a scalar cannot fill a dim>1 vector.
+function _coerce_base(v::AbstractVector, dim::Int, role::Symbol)
+    if length(v) != dim
         throw(
             Exceptions.IncorrectArgument(
-                "Component index out of bounds";
-                got="index $i for $role",
-                expected="index between 1 and $dim",
-                suggestion="Use a valid component index in range 1:$dim",
-                context="component-level $role initialization",
+                "Block-level $role initialization has incompatible dimension";
+                got="vector of length $(length(v))",
+                expected="vector of length $dim",
+                suggestion="Ensure the $role function returns the correct dimension",
+                context="block-level $role initialization",
             ),
         )
     end
-    return nothing
+    return collect(v)
+end
+
+function _coerce_base(_, dim::Int, role::Symbol)
+    throw(
+        Exceptions.IncorrectArgument(
+            "Block-level $role initialization has incompatible dimension";
+            got="scalar",
+            expected="vector of length $dim",
+            suggestion="Ensure the $role function returns the correct dimension",
+            context="block-level $role initialization",
+        ),
+    )
 end
 
 # ------------------------------------------------------------------------------
@@ -117,11 +47,11 @@ Callable struct merging a block-level trajectory `base` with sparse component-le
 overrides `comps`: `f(t)` evaluates `base(t)`, normalises to a vector, applies each
 component override, and returns a scalar (`dim == 1`) or a vector.
 
-Dimension validation and component validation are delegated to helper functions
-([`CTModels.Init._coerce_base`](@ref), [`CTModels.Init._component_scalar`](@ref), [`CTModels.Init._check_component_index`](@ref)) — SRP/DRY refactor.
-
 `base::F` is a concrete type parameter, replacing the former `base_fun::Function`
 abstract capture. `comps::C` stores the `Dict{Int,Function}` override map.
+
+Component index bounds are validated at construction, not at call time, so the call
+method stays allocation-free beyond what `base` and the component functions allocate.
 
 Replaces the anonymous closure `t -> begin … end` (57 lines) produced inside
 [`CTModels.Init._build_block_with_components`](@ref) in `builders.jl`.
@@ -145,15 +75,41 @@ f(0.5)   # returns [0.0, sin(0.5)]
 """
 struct MergedTrajectory{F,C} <: Function
     base::F
-    comps::C       # Dict{Int,Function} — limit noted in plan
+    comps::C       # Dict{Int,Function}
     dim::Int
     role::Symbol
+
+    function MergedTrajectory{F,C}(
+        base::F, comps::C, dim::Int, role::Symbol
+    ) where {F,C}
+        for i in keys(comps)
+            if !(1 <= i <= dim)
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Component index out of bounds";
+                        got="index $i for $role",
+                        expected="index between 1 and $dim",
+                        suggestion="Use a valid component index in range 1:$dim",
+                        context="component-level $role initialization",
+                    ),
+                )
+            end
+        end
+        return new(base, comps, dim, role)
+    end
 end
+
+MergedTrajectory(base::F, comps::C, dim::Int, role::Symbol) where {F,C} =
+    MergedTrajectory{F,C}(base, comps, dim, role)
 
 """
 $(TYPEDSIGNATURES)
 
 Call method for merged trajectory: evaluates base trajectory and applies component overrides.
+
+Component index bounds are validated once at construction. The dimension of the base
+trajectory and the scalar/vector shape of each component override are validated here
+(at call time), since they depend on the functions' return values.
 
 # Arguments
 - `f::CTModels.Init.MergedTrajectory`: The merged trajectory.
@@ -163,10 +119,26 @@ Call method for merged trajectory: evaluates base trajectory and applies compone
 - `Real` or `Vector`: Scalar or vector depending on dimension.
 """
 function (f::MergedTrajectory)(t)
-    vec = _coerce_base(f.base(t), f.dim, f.role)
+    base_val = f.base(t)
+    vec = f.dim == 1 ? _wrap_1d(base_val) : _coerce_base(base_val, f.dim, f.role)
     for (i, fi) in f.comps
-        _check_component_index(i, f.dim, f.role)
-        vec[i] = _component_scalar(fi(t), f.role, i)
+        val = fi(t)
+        if val isa AbstractVector
+            if length(val) != 1
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Component-level initialization must return scalar or length-1 vector";
+                        got="vector of length $(length(val)) for $(f.role) component $i",
+                        expected="scalar or length-1 vector",
+                        suggestion="Ensure the function for component $i returns a single value",
+                        context="component-level $(f.role) initialization",
+                    ),
+                )
+            end
+            vec[i] = only(val)
+        else
+            vec[i] = val
+        end
     end
     return f.dim == 1 ? vec[1] : vec
 end
