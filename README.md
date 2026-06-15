@@ -9,7 +9,7 @@ The CTModels.jl package is part of the [control-toolbox ecosystem](https://githu
 
 | **Category** | **Badge** |
 |-----------------------|-----------|
-| **Documentation** | [![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://control-toolbox.org/CTModels.jl/stable/) [![Dev Docs](https://img.shields.io/badge/docs-dev-8A2BE2.svg)](https://control-toolbox.org/CTModels.jl/dev/) |
+| **Documentation** | [![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://control-toolbox.org/CTModels.jl/stable/) [![Dev Docs](https://img.shields.io/badge/docs-dev-8A2BE2.svg)](https://control-toolbox.org/CTModels.jl/dev/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTModels.jl) |
 | **CI / Build** | [![Build Status](https://github.com/control-toolbox/CTModels.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/control-toolbox/CTModels.jl/actions/workflows/CI.yml?query=branch%3Amain) |
 | **Test Coverage** | [![Coverage](https://codecov.io/gh/control-toolbox/CTModels.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/control-toolbox/CTModels.jl) |
 | **Package Evaluation** | [![PkgEval](https://img.shields.io/badge/Julia-package-purple)](https://juliahub.com/ui/Packages/General/CTModels) [![Dependencies](https://juliahub.com/docs/General/CTModels/stable/deps.svg)](https://juliahub.com/ui/Packages/General/CTModels?t=2) |
