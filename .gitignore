@@ -38,3 +38,4 @@ tmp/
 .reports/
 .extras/
 .claude/
+.coverage/
