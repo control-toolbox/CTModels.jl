@@ -30,13 +30,13 @@ end
 (f::ConstantInTime)(::Real) = f.value
 
 function Base.show(io::IO, f::ConstantInTime)
-    print(io, "ConstantInTime(", f.value, ")")
+    return print(io, "ConstantInTime(", f.value, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::ConstantInTime{V}) where {V}
     print(io, "ConstantInTime")
     print(io, "\n  value: ", f.value)
-    print(io, "\n  type:  ", V)
+    return print(io, "\n  type:  ", V)
 end
 
 # ------------------------------------------------------------------------------
@@ -75,11 +75,11 @@ end
 (f::CoercedTrajectory)(t) = f.coerce(f.inner(t))
 
 function Base.show(io::IO, f::CoercedTrajectory)
-    print(io, "CoercedTrajectory(", nameof(f.coerce), ")")
+    return print(io, "CoercedTrajectory(", nameof(f.coerce), ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::CoercedTrajectory{F,C}) where {F,C}
     print(io, "CoercedTrajectory")
     print(io, "\n  inner:  ", nameof(typeof(f.inner)))
-    print(io, "\n  coerce: ", nameof(f.coerce))
+    return print(io, "\n  coerce: ", nameof(f.coerce))
 end

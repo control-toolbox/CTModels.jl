@@ -23,13 +23,13 @@ end
 (f::DualSlice)(t) = f.duals(t)[f.idx]
 
 function Base.show(io::IO, f::DualSlice)
-    print(io, "DualSlice(", nameof(typeof(f.duals)), ", ", f.idx, ")")
+    return print(io, "DualSlice(", nameof(typeof(f.duals)), ", ", f.idx, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::DualSlice{D,I}) where {D,I}
     print(io, "DualSlice")
     print(io, "\n  duals: ", nameof(typeof(f.duals)))
-    print(io, "\n  idx:   ", f.idx)
+    return print(io, "\n  idx:   ", f.idx)
 end
 
 # ------------------------------------------------------------------------------
@@ -55,12 +55,21 @@ end
 (f::BoxDualDiff)(t) = f.lb(t)[f.idx] - f.ub(t)[f.idx]
 
 function Base.show(io::IO, f::BoxDualDiff)
-    print(io, "BoxDualDiff(", nameof(typeof(f.lb)), ", ", nameof(typeof(f.ub)), ", ", f.idx, ")")
+    return print(
+        io,
+        "BoxDualDiff(",
+        nameof(typeof(f.lb)),
+        ", ",
+        nameof(typeof(f.ub)),
+        ", ",
+        f.idx,
+        ")",
+    )
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::BoxDualDiff{DL,DU,I}) where {DL,DU,I}
     print(io, "BoxDualDiff")
     print(io, "\n  lb:  ", nameof(typeof(f.lb)))
     print(io, "\n  ub:  ", nameof(typeof(f.ub)))
-    print(io, "\n  idx: ", f.idx)
+    return print(io, "\n  idx: ", f.idx)
 end

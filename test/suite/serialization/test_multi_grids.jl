@@ -159,7 +159,9 @@ function test_multi_grids()
             )
 
             # Export
-            Serialization.export_ocp_solution(sol_multi; filename="multi_grid_test", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol_multi; filename="multi_grid_test", format=:JLD
+            )
 
             # Import
             sol_reloaded = Serialization.import_ocp_solution(
@@ -185,8 +187,7 @@ function test_multi_grids()
                 Test.@test Models.state(sol_reloaded)(t) ≈ Models.state(sol_multi)(t) atol=1e-8
             end
             for t in T_control
-                Test.@test Models.control(sol_reloaded)(t) ≈
-                    Models.control(sol_multi)(t) atol=1e-8
+                Test.@test Models.control(sol_reloaded)(t) ≈ Models.control(sol_multi)(t) atol=1e-8
             end
 
             remove_if_exists("multi_grid_test.jld2")
@@ -584,7 +585,8 @@ function test_multi_grids()
             Test.@test Solutions.time_grid(sol_reconstructed, :control) ≈ T_control
             Test.@test Solutions.time_grid(sol_reconstructed, :costate) ≈ T_costate
             Test.@test Solutions.time_grid(sol_reconstructed, :dual) ≈ T_path
-            Test.@test Solutions.objective(sol_reconstructed) ≈ Solutions.objective(sol_orig)
+            Test.@test Solutions.objective(sol_reconstructed) ≈
+                Solutions.objective(sol_orig)
         end
 
         # ====================================================================
@@ -698,7 +700,7 @@ function test_multi_grids()
                 end
             end
             open("compat_tgd_legacy.json", "w") do f
-                JSON3.write(f, legacy_data)
+                return JSON3.write(f, legacy_data)
             end
 
             # Import from legacy file — should transparently map time_grid_dual
@@ -710,8 +712,10 @@ function test_multi_grids()
             Test.@test Solutions.time_grid_model(sol_reimported) isa
                 Solutions.MultipleTimeGridModel
             Test.@test Solutions.time_grid(sol_reimported, :state) ≈ T_state atol = 1e-10
-            Test.@test Solutions.time_grid(sol_reimported, :control) ≈ T_control atol = 1e-10
-            Test.@test Solutions.time_grid(sol_reimported, :costate) ≈ T_costate atol = 1e-10
+            Test.@test Solutions.time_grid(sol_reimported, :control) ≈ T_control atol =
+                1e-10
+            Test.@test Solutions.time_grid(sol_reimported, :costate) ≈ T_costate atol =
+                1e-10
             Test.@test Solutions.time_grid(sol_reimported, :dual) ≈ T_path atol = 1e-10
             Test.@test Solutions.objective(sol_reimported) ≈
                 Solutions.objective(sol_unified) atol = 1e-8

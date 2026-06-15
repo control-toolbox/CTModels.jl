@@ -283,12 +283,13 @@ function test_dual_model()
             ub = zeros(3, 1)
             sol = _make_solution(m; state_dim=1, state_lb=lb, state_ub=ub)
 
-            Test.@test_throws Exceptions.IncorrectArgument Solutions.dual(sol, m, :nonexistent)
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.dual(
+                sol, m, :nonexistent
+            )
         end
     end
 
     Test.@testset "DualSlice and BoxDualDiff" verbose=VERBOSE showtiming=SHOWTIMING begin
-
         Test.@testset "DualSlice — scalar index" begin
             duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
             f = Solutions.DualSlice(duals_fn, 2)

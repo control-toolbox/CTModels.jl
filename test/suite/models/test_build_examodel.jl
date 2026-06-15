@@ -36,9 +36,7 @@ function test_build_examodel()
             model = Building.build(ocp)
 
             # Attempting to get build_examodel should throw PreconditionError
-            Test.@test_throws Exceptions.PreconditionError Models.get_build_examodel(
-                model
-            )
+            Test.@test_throws Exceptions.PreconditionError Models.get_build_examodel(model)
 
             # Verify the error message contains the key information
             try

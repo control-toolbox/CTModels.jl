@@ -60,8 +60,13 @@ function test_CTModels()
 
             # Type aliases
             for sym in [
-                :Dimension, :ctNumber, :Time, :ctVector, :Times,
-                :TimesDisc, :ConstraintsDictType,
+                :Dimension,
+                :ctNumber,
+                :Time,
+                :ctVector,
+                :Times,
+                :TimesDisc,
+                :ConstraintsDictType,
             ]
                 Test.@test sym in exported
             end
@@ -78,24 +83,31 @@ function test_CTModels()
 
             # Control
             for sym in [
-                :AbstractControlModel, :ControlModel,
-                :ControlModelSolution, :EmptyControlModel,
+                :AbstractControlModel,
+                :ControlModel,
+                :ControlModelSolution,
+                :EmptyControlModel,
             ]
                 Test.@test sym in exported
             end
 
             # Variable
             for sym in [
-                :AbstractVariableModel, :VariableModel,
-                :VariableModelSolution, :EmptyVariableModel,
+                :AbstractVariableModel,
+                :VariableModel,
+                :VariableModelSolution,
+                :EmptyVariableModel,
             ]
                 Test.@test sym in exported
             end
 
             # Time models
             for sym in [
-                :AbstractTimeModel, :FixedTimeModel, :FreeTimeModel,
-                :AbstractTimesModel, :TimesModel,
+                :AbstractTimeModel,
+                :FixedTimeModel,
+                :FreeTimeModel,
+                :AbstractTimesModel,
+                :TimesModel,
             ]
                 Test.@test sym in exported
             end
@@ -103,7 +115,9 @@ function test_CTModels()
             # Objective
             for sym in [
                 :AbstractObjectiveModel,
-                :MayerObjectiveModel, :LagrangeObjectiveModel, :BolzaObjectiveModel,
+                :MayerObjectiveModel,
+                :LagrangeObjectiveModel,
+                :BolzaObjectiveModel,
             ]
                 Test.@test sym in exported
             end
@@ -125,32 +139,50 @@ function test_CTModels()
 
             # Time model accessors
             for sym in [
-                :index, :initial, :final,
-                :time_name, :initial_time_name, :final_time_name,
-                :initial_time, :final_time,
-                :has_fixed_initial_time, :has_free_initial_time,
-                :has_fixed_final_time, :has_free_final_time,
-                :is_initial_time_fixed, :is_initial_time_free,
-                :is_final_time_fixed, :is_final_time_free,
+                :index,
+                :initial,
+                :final,
+                :time_name,
+                :initial_time_name,
+                :final_time_name,
+                :initial_time,
+                :final_time,
+                :has_fixed_initial_time,
+                :has_free_initial_time,
+                :has_fixed_final_time,
+                :has_free_final_time,
+                :is_initial_time_fixed,
+                :is_initial_time_free,
+                :is_final_time_fixed,
+                :is_final_time_free,
             ]
                 Test.@test sym in exported
             end
 
             # Objective accessors
             for sym in [
-                :criterion, :mayer, :lagrange,
-                :has_mayer_cost, :has_lagrange_cost,
-                :is_mayer_cost_defined, :is_lagrange_cost_defined,
+                :criterion,
+                :mayer,
+                :lagrange,
+                :has_mayer_cost,
+                :has_lagrange_cost,
+                :is_mayer_cost_defined,
+                :is_lagrange_cost_defined,
             ]
                 Test.@test sym in exported
             end
 
             # Constraints accessors
             for sym in [
-                :path_constraints_nl, :boundary_constraints_nl,
-                :state_constraints_box, :control_constraints_box, :variable_constraints_box,
-                :dim_path_constraints_nl, :dim_boundary_constraints_nl,
-                :dim_state_constraints_box, :dim_control_constraints_box,
+                :path_constraints_nl,
+                :boundary_constraints_nl,
+                :state_constraints_box,
+                :control_constraints_box,
+                :variable_constraints_box,
+                :dim_path_constraints_nl,
+                :dim_boundary_constraints_nl,
+                :dim_state_constraints_box,
+                :dim_control_constraints_box,
                 :dim_variable_constraints_box,
             ]
                 Test.@test sym in exported

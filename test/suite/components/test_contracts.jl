@@ -83,9 +83,7 @@ function test_contracts()
             # Contract — all concrete subtypes also satisfy the contract
             Test.@test check_state_contract(Components.StateModel("y", ["y1"]))
             xf = t -> [sin(t)]
-            Test.@test check_state_contract(
-                Components.StateModelSolution("x", ["x1"], xf)
-            )
+            Test.@test check_state_contract(Components.StateModelSolution("x", ["x1"], xf))
         end
 
         # ====================================================================
@@ -167,9 +165,7 @@ function test_contracts()
             Test.@test_throws Exceptions.PreconditionError Components.initial_time(
                 fm, [0.0]
             )
-            Test.@test_throws Exceptions.PreconditionError Components.final_time(
-                fm, [1.0]
-            )
+            Test.@test_throws Exceptions.PreconditionError Components.final_time(fm, [1.0])
         end
     end
 end

@@ -56,9 +56,7 @@ function test_initial_guess_variable()
             result = Init.initial_variable(ocp, [0.0, 1.0])
             Test.@test result == [0.0, 1.0]
 
-            Test.@test_throws Exceptions.IncorrectArgument Init.initial_variable(
-                ocp, [0.0]
-            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.initial_variable(ocp, [0.0])
         end
 
         Test.@testset "initial_variable with Nothing" begin

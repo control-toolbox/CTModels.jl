@@ -90,16 +90,16 @@ function test_components()
 
         Test.@testset "ConstantInTime" begin
             f_scalar = Components.ConstantInTime(1.0)
-            Test.@test f_scalar(0.0)  == 1.0
-            Test.@test f_scalar(0.5)  == 1.0
+            Test.@test f_scalar(0.0) == 1.0
+            Test.@test f_scalar(0.5) == 1.0
             Test.@test f_scalar(42.0) == 1.0
 
             f_vec = Components.ConstantInTime([1.0, 2.0])
-            Test.@test f_vec(0.0)  == [1.0, 2.0]
+            Test.@test f_vec(0.0) == [1.0, 2.0]
             Test.@test f_vec(99.9) == [1.0, 2.0]
 
             Test.@test f_scalar isa Function
-            Test.@test f_vec    isa Function
+            Test.@test f_vec isa Function
 
             Test.@test contains(repr(f_scalar), "ConstantInTime")
             Test.@test contains(repr(MIME("text/plain"), f_scalar), "ConstantInTime")
@@ -132,12 +132,12 @@ function test_components()
         end
 
         Test.@testset "objective and constraints models" begin
-            mayer_f  = (x0, xf, _v) -> x0[1] + xf[1]
+            mayer_f = (x0, xf, _v) -> x0[1] + xf[1]
             lagrange_f = (_t, _x, u, _v) -> u[1]^2
 
-            mayer   = Components.MayerObjectiveModel(mayer_f, :min)
+            mayer = Components.MayerObjectiveModel(mayer_f, :min)
             lagrange = Components.LagrangeObjectiveModel(lagrange_f, :max)
-            bolza   = Components.BolzaObjectiveModel(mayer_f, lagrange_f, :min)
+            bolza = Components.BolzaObjectiveModel(mayer_f, lagrange_f, :min)
 
             Test.@test Components.criterion(mayer) == :min
             Test.@test Components.criterion(lagrange) == :max
