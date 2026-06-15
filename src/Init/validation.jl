@@ -156,7 +156,9 @@ Build an initial guess from a previous solution (warm start).
 # Throws
 - `Exceptions.IncorrectArgument`: If dimensions do not match between the problem and solution.
 """
-function _initial_guess_from_solution(ocp::Models.AbstractModel, sol::Solutions.AbstractSolution)
+function _initial_guess_from_solution(
+    ocp::Models.AbstractModel, sol::Solutions.AbstractSolution
+)
     # Basic dimensional consistency checks
     if Models.state_dimension(ocp) != Models.state_dimension(sol.model)
         throw(

@@ -441,7 +441,9 @@ Return an empty block expression for an [`CTModels.Components.EmptyDefinition`](
 
 See also: [`CTModels.Components.expression`](@ref).
 """
-expression(::EmptyDefinition)::Expr = :(begin end)
+expression(::EmptyDefinition)::Expr = :(
+    begin end
+)
 
 """
 $(TYPEDSIGNATURES)

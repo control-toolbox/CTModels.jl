@@ -60,7 +60,9 @@ function test_solution_types()
 
         Test.@testset "Solution structure and empty time grid" begin
             times = Components.TimesModel(
-                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
+                Components.FixedTimeModel(0.0, "t₀"),
+                Components.FixedTimeModel(1.0, "t_f"),
+                "t",
             )
             state = Components.StateModel("x", ["x"])
             control = Components.ControlModel("u", ["u"])
@@ -159,7 +161,9 @@ function test_solution_types()
 
         Test.@testset "fake Solution summary" begin
             times = Components.TimesModel(
-                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
+                Components.FixedTimeModel(0.0, "t₀"),
+                Components.FixedTimeModel(1.0, "t_f"),
+                "t",
             )
             state = Components.StateModel("x", ["x"])
             control = Components.ControlModel("u", ["u"])

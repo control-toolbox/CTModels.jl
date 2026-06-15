@@ -129,11 +129,7 @@ function test_initial_guess_validation()
         Test.@testset "dimension validation - incorrect variable dimension" begin
             ocp = DummyOCP1DVar()
 
-            init_bad = Init.InitialGuess(
-                t -> 0.1,
-                t -> 0.1,
-                [0.1, 0.2],
-            )
+            init_bad = Init.InitialGuess(t -> 0.1, t -> 0.1, [0.1, 0.2])
 
             Test.@test_throws Exceptions.IncorrectArgument Init.validate_initial_guess(
                 ocp, init_bad

@@ -502,7 +502,9 @@ function test_control_zero()
             mktempdir() do dir
                 filename = joinpath(dir, "sol_zero_ctrl")
                 Serialization.export_ocp_solution(sol; format=:JSON, filename=filename)
-                sol2 = Serialization.import_ocp_solution(model; format=:JSON, filename=filename)
+                sol2 = Serialization.import_ocp_solution(
+                    model; format=:JSON, filename=filename
+                )
 
                 Test.@test Models.control_dimension(sol2) == 0
                 Test.@test Models.state_dimension(sol2) == 2
@@ -556,7 +558,9 @@ function test_control_zero()
             mktempdir() do dir
                 filename = joinpath(dir, "sol_zero_ctrl")
                 Serialization.export_ocp_solution(sol; format=:JLD, filename=filename)
-                sol2 = Serialization.import_ocp_solution(model; format=:JLD, filename=filename)
+                sol2 = Serialization.import_ocp_solution(
+                    model; format=:JLD, filename=filename
+                )
 
                 Test.@test Models.control_dimension(sol2) == 0
                 Test.@test Models.state_dimension(sol2) == 2

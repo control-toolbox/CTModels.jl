@@ -23,7 +23,9 @@ function test_model_types()
 
         Test.@testset "__is_* predicates on Model" begin
             times = Components.TimesModel(
-                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
+                Components.FixedTimeModel(0.0, "t₀"),
+                Components.FixedTimeModel(1.0, "t_f"),
+                "t",
             )
             state = Components.StateModel("x", ["x"])
             control = Components.ControlModel("u", ["u"])
@@ -78,7 +80,9 @@ function test_model_types()
             Test.@test Building.__is_definition_empty(ocp)
 
             times = Components.TimesModel(
-                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
+                Components.FixedTimeModel(0.0, "t₀"),
+                Components.FixedTimeModel(1.0, "t_f"),
+                "t",
             )
             state = Components.StateModel("x", ["x"])
             control = Components.ControlModel("u", ["u"])
@@ -125,7 +129,9 @@ function test_model_types()
             Test.@test !can_build(empty_ocp)
 
             times = Components.TimesModel(
-                Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(1.0, "t_f"), "t"
+                Components.FixedTimeModel(0.0, "t₀"),
+                Components.FixedTimeModel(1.0, "t_f"),
+                "t",
             )
             state = Components.StateModel("x", ["x"])
             control = Components.ControlModel("u", ["u"])

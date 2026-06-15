@@ -42,8 +42,9 @@ struct CompositeConstraint{Sig,CS} <: Function
     funs::CS          # concrete tuple of the N functions
 end
 
-CompositeConstraint{Sig}(n, dims, funs) where {Sig} =
-    CompositeConstraint{Sig,typeof(funs)}(n, copy(dims), funs)
+function CompositeConstraint{Sig}(n, dims, funs) where {Sig}
+    return CompositeConstraint{Sig,typeof(funs)}(n, copy(dims), funs)
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -102,7 +103,7 @@ $(TYPEDSIGNATURES)
 Compact string representation of [`CTModels.Building.CompositeConstraint`](@ref).
 """
 function Base.show(io::IO, f::CompositeConstraint{Sig,CS}) where {Sig,CS}
-    print(io, "CompositeConstraint{:", Sig, "}(n=", f.n, ", dims=", f.dims, ")")
+    return print(io, "CompositeConstraint{:", Sig, "}(n=", f.n, ", dims=", f.dims, ")")
 end
 
 """
@@ -116,5 +117,5 @@ function Base.show(
     print(io, "CompositeConstraint")
     print(io, "\n  sig:  :", Sig)
     print(io, "\n  n:    ", f.n)
-    print(io, "\n  dims: ", f.dims)
+    return print(io, "\n  dims: ", f.dims)
 end

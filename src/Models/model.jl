@@ -1322,8 +1322,9 @@ Return the nonlinear path constraints.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.boundary_constraints_nl`](@ref).
 """
-Components.path_constraints_nl(ocp::Model) =
-    Components.path_constraints_nl(constraints(ocp))
+function Components.path_constraints_nl(ocp::Model)
+    return Components.path_constraints_nl(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1338,8 +1339,9 @@ Return the nonlinear boundary constraints.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.path_constraints_nl`](@ref).
 """
-Components.boundary_constraints_nl(ocp::Model) =
-    Components.boundary_constraints_nl(constraints(ocp))
+function Components.boundary_constraints_nl(ocp::Model)
+    return Components.boundary_constraints_nl(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1354,8 +1356,9 @@ Return the box constraints on state.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.control_constraints_box`](@ref).
 """
-Components.state_constraints_box(ocp::Model) =
-    Components.state_constraints_box(constraints(ocp))
+function Components.state_constraints_box(ocp::Model)
+    return Components.state_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1370,8 +1373,9 @@ Return the box constraints on control.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.state_constraints_box`](@ref).
 """
-Components.control_constraints_box(ocp::Model) =
-    Components.control_constraints_box(constraints(ocp))
+function Components.control_constraints_box(ocp::Model)
+    return Components.control_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1386,8 +1390,9 @@ Return the box constraints on variable.
 
 See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.state_constraints_box`](@ref).
 """
-Components.variable_constraints_box(ocp::Model) =
-    Components.variable_constraints_box(constraints(ocp))
+function Components.variable_constraints_box(ocp::Model)
+    return Components.variable_constraints_box(constraints(ocp))
+end
 
 """
 $(TYPEDSIGNATURES)

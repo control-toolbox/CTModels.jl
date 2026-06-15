@@ -31,7 +31,7 @@ Get the nonlinear path constraints from the model.
 See also: [`CTModels.Components.boundary_constraints_nl`](@ref), [`CTModels.Components.dim_path_constraints_nl`](@ref).
 """
 function path_constraints_nl(
-    model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple},
+    model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple}
 ) where {TP}
     return model.path_nl
 end
@@ -47,7 +47,7 @@ Get the nonlinear boundary constraints from the model.
 See also: [`CTModels.Components.path_constraints_nl`](@ref), [`CTModels.Components.dim_boundary_constraints_nl`](@ref).
 """
 function boundary_constraints_nl(
-    model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple},
+    model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple}
 ) where {TB}
     return model.boundary_nl
 end
@@ -63,7 +63,7 @@ Get the state box constraints from the model.
 See also: [`CTModels.Components.control_constraints_box`](@ref), [`CTModels.Components.dim_state_constraints_box`](@ref).
 """
 function state_constraints_box(
-    model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple},
+    model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple}
 ) where {TS}
     return model.state_box
 end
@@ -79,7 +79,7 @@ Get the control box constraints from the model.
 See also: [`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Components.dim_control_constraints_box`](@ref).
 """
 function control_constraints_box(
-    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple},
+    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple}
 ) where {TC}
     return model.control_box
 end
@@ -95,7 +95,7 @@ Get the variable box constraints from the model.
 See also: [`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Components.dim_variable_constraints_box`](@ref).
 """
 function variable_constraints_box(
-    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV},
+    model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV}
 ) where {TV}
     return model.variable_box
 end

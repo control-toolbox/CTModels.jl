@@ -5,7 +5,7 @@ import CTBase.Exceptions: Exceptions
 import CTModels.Components: Components
 import CTModels.Building: Building
 
-const VERBOSE    = isdefined(Main, :TestData) ? Main.TestData.VERBOSE    : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_dedup()
@@ -16,11 +16,11 @@ function test_dedup()
         # ====================================================================
 
         Test.@testset "empty inds → aliases cleared" begin
-            inds   = Int[]
-            lbs    = Float64[]
-            ubs    = Float64[]
+            inds = Int[]
+            lbs = Float64[]
+            ubs = Float64[]
             labels = Symbol[]
-            aliases = Vector{Symbol}[[  :existing]]  # non-empty going in
+            aliases = Vector{Symbol}[[:existing]]  # non-empty going in
 
             Building._dedup_box_constraints!(inds, lbs, ubs, labels, aliases, "state")
 
@@ -29,9 +29,9 @@ function test_dedup()
         end
 
         Test.@testset "single declaration → no warning, no dedup" begin
-            inds   = [2]
-            lbs    = [0.0]
-            ubs    = [1.0]
+            inds = [2]
+            lbs = [0.0]
+            ubs = [1.0]
             labels = [:a]
             aliases = Vector{Symbol}[]
 
@@ -49,9 +49,9 @@ function test_dedup()
         Test.@testset "duplicates → intersection bounds + @warn" begin
             # Component 1 declared by :a (lb=0,ub=2) and :b (lb=1,ub=3)
             # Effective: lb=max(0,1)=1, ub=min(2,3)=2
-            inds   = [1, 1]
-            lbs    = [0.0, 1.0]
-            ubs    = [2.0, 3.0]
+            inds = [1, 1]
+            lbs = [0.0, 1.0]
+            ubs = [2.0, 3.0]
             labels = [:a, :b]
             aliases = Vector{Symbol}[]
 
@@ -68,24 +68,26 @@ function test_dedup()
 
         Test.@testset "empty intersection → IncorrectArgument" begin
             # Component 1: lb=5, ub=3 after intersection → infeasible
-            inds   = [1, 1]
-            lbs    = [5.0, 0.0]
-            ubs    = [10.0, 3.0]
+            inds = [1, 1]
+            lbs = [5.0, 0.0]
+            ubs = [10.0, 3.0]
             labels = [:x, :y]
             aliases = Vector{Symbol}[]
 
             Test.@test_throws Exceptions.IncorrectArgument begin
                 redirect_stderr(devnull) do
-                    Building._dedup_box_constraints!(inds, lbs, ubs, labels, aliases, "state")
+                    return Building._dedup_box_constraints!(
+                        inds, lbs, ubs, labels, aliases, "state"
+                    )
                 end
             end
         end
 
         Test.@testset "sorting by component index" begin
             # Declare component 3 first, then 1 → result must be sorted [1, 3]
-            inds   = [3, 1]
-            lbs    = [0.0, -1.0]
-            ubs    = [4.0,  2.0]
+            inds = [3, 1]
+            lbs = [0.0, -1.0]
+            ubs = [4.0, 2.0]
             labels = [:c3, :c1]
             aliases = Vector{Symbol}[]
 
@@ -101,9 +103,9 @@ function test_dedup()
         Test.@testset "multiple components, one duplicated" begin
             # Component 1: declared once by :a
             # Component 2: declared by :b (lb=0,ub=1) and :c (lb=0.5,ub=2) → intersection lb=0.5,ub=1
-            inds   = [1, 2, 2]
-            lbs    = [-1.0, 0.0, 0.5]
-            ubs    = [ 1.0, 1.0, 2.0]
+            inds = [1, 2, 2]
+            lbs = [-1.0, 0.0, 0.5]
+            ubs = [1.0, 1.0, 2.0]
             labels = [:a, :b, :c]
             aliases = Vector{Symbol}[]
 
@@ -113,7 +115,7 @@ function test_dedup()
 
             Test.@test inds == [1, 2]
             Test.@test lbs ≈ [-1.0, 0.5]
-            Test.@test ubs ≈ [ 1.0, 1.0]
+            Test.@test ubs ≈ [1.0, 1.0]
             Test.@test aliases[1] == [:a]
             Test.@test aliases[2] == [:b, :c]
         end
@@ -130,7 +132,6 @@ function test_dedup()
 
             Test.@test_throws Exceptions.IncorrectArgument Building.build(constraints)
         end
-
     end
 end
 

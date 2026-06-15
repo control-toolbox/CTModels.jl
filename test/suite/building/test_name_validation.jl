@@ -119,9 +119,7 @@ function test_name_validation()
 
             # Name == component (single component) - should PASS
             ocp = Building.PreModel()
-            Test.@test_nowarn Building.__validate_name_uniqueness(
-                ocp, "x", ["x"], :state
-            )
+            Test.@test_nowarn Building.__validate_name_uniqueness(ocp, "x", ["x"], :state)
 
             # Duplicate components
             ocp = Building.PreModel()

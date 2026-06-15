@@ -46,9 +46,7 @@ function test_initial_guess_control()
             Test.@test result(0.0) == 0.5
 
             ocp_2d = DummyOCP2D()
-            Test.@test_throws Exceptions.IncorrectArgument Init.initial_control(
-                ocp_2d, 0.5
-            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.initial_control(ocp_2d, 0.5)
         end
 
         Test.@testset "initial_control with Vector" begin

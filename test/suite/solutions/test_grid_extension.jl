@@ -65,8 +65,12 @@ function test_grid_extension()
                 g -> !isnothing(g), [T_state, T_control, T_costate, T_path]
             )
             T_ref = non_nothing_grids[argmax(map(length, non_nothing_grids))]
-            T_control_extended = Solutions._extend_grid_to_match(T_control, T_ref, "control")
-            T_costate_extended = Solutions._extend_grid_to_match(T_costate, T_ref, "costate")
+            T_control_extended = Solutions._extend_grid_to_match(
+                T_control, T_ref, "control"
+            )
+            T_costate_extended = Solutions._extend_grid_to_match(
+                T_costate, T_ref, "costate"
+            )
 
             # After extension, all grids should be identical
             Test.@test T_control_extended == T_ref

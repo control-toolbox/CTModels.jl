@@ -198,9 +198,7 @@ function test_initial_guess_api()
             ocp = DummyOCP1DNoVar()
 
             # Unsupported type should throw
-            Test.@test_throws Exceptions.IncorrectArgument Init.build_initial_guess(
-                ocp, 42
-            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.build_initial_guess(ocp, 42)
             Test.@test_throws Exceptions.IncorrectArgument Init.build_initial_guess(
                 ocp, "invalid"
             )

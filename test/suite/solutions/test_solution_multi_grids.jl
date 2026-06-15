@@ -195,7 +195,8 @@ function test_solution_multi_grids()
                     successful=true,
                 )
 
-                Test.@test Solutions.time_grid_model(sol) isa Solutions.MultipleTimeGridModel
+                Test.@test Solutions.time_grid_model(sol) isa
+                    Solutions.MultipleTimeGridModel
                 Test.@test Solutions.time_grid(sol, :state) == T_state
                 Test.@test Solutions.time_grid(sol, :control) == T_control
                 Test.@test Solutions.time_grid(sol, :costate) == T_costate
@@ -233,7 +234,8 @@ function test_solution_multi_grids()
                     successful=true,
                 )
 
-                Test.@test Solutions.time_grid_model(sol) isa Solutions.MultipleTimeGridModel
+                Test.@test Solutions.time_grid_model(sol) isa
+                    Solutions.MultipleTimeGridModel
                 Test.@test Solutions.time_grid(sol, :state) == T_state
                 Test.@test Solutions.time_grid(sol, :control) == T_control
                 Test.@test Solutions.time_grid(sol, :costate) == T_costate
