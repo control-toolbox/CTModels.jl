@@ -279,7 +279,9 @@ function test_export_import()
         Test.@testset "JSON round-trip: TestProblems.solution_example (function)" begin
             ocp, sol = TestProblems.solution_example(; fun=true)
 
-            Serialization.export_ocp_solution(sol; filename="solution_test_fun", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="solution_test_fun", format=:JSON
+            )
             sol_reloaded = Serialization.import_ocp_solution(
                 ocp; filename="solution_test_fun", format=:JSON
             )
@@ -463,7 +465,9 @@ function test_export_import()
         Test.@testset "JSON import: all fields reconstructed" begin
             ocp, sol = TestProblems.solution_example_dual()
 
-            Serialization.export_ocp_solution(sol; filename="solution_import_test", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="solution_import_test", format=:JSON
+            )
             sol_reloaded = Serialization.import_ocp_solution(
                 ocp; filename="solution_import_test", format=:JSON
             )
@@ -483,8 +487,7 @@ function test_export_import()
                 1e-10
 
             # Metadata: dimensions, names, components and time labels
-            Test.@test Models.state_dimension(sol_reloaded) ==
-                Models.state_dimension(sol)
+            Test.@test Models.state_dimension(sol_reloaded) == Models.state_dimension(sol)
             Test.@test Models.control_dimension(sol_reloaded) ==
                 Models.control_dimension(sol)
             Test.@test Models.variable_dimension(sol_reloaded) ==
@@ -494,8 +497,7 @@ function test_export_import()
             Test.@test Models.control_name(sol_reloaded) == Models.control_name(sol)
             Test.@test Models.variable_name(sol_reloaded) == Models.variable_name(sol)
 
-            Test.@test Models.state_components(sol_reloaded) ==
-                Models.state_components(sol)
+            Test.@test Models.state_components(sol_reloaded) == Models.state_components(sol)
             Test.@test Models.control_components(sol_reloaded) ==
                 Models.control_components(sol)
             Test.@test Models.variable_components(sol_reloaded) ==
@@ -633,7 +635,9 @@ function test_export_import()
             # TestProblems.solution_example has no duals
             ocp, sol = TestProblems.solution_example()
 
-            Serialization.export_ocp_solution(sol; filename="solution_no_duals", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="solution_no_duals", format=:JSON
+            )
 
             # Read raw JSON
             json_string = read("solution_no_duals.json", String)
@@ -706,7 +710,9 @@ function test_export_import()
             Test.@test Solutions.infos(sol)[:tolerance] == 1e-6
 
             # Export and import
-            Serialization.export_ocp_solution(sol; filename="solution_with_infos", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="solution_with_infos", format=:JSON
+            )
             sol_reloaded = Serialization.import_ocp_solution(
                 ocp; filename="solution_with_infos", format=:JSON
             )
@@ -740,13 +746,17 @@ function test_export_import()
             ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
-            Serialization.export_ocp_solution(sol0; filename="idempotence_json_1", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol0; filename="idempotence_json_1", format=:JSON
+            )
             sol1 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_json_1", format=:JSON
             )
 
             # Second cycle: sol1 → export → import → sol2
-            Serialization.export_ocp_solution(sol1; filename="idempotence_json_2", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol1; filename="idempotence_json_2", format=:JSON
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_json_2", format=:JSON
             )
@@ -763,19 +773,25 @@ function test_export_import()
             ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle
-            Serialization.export_ocp_solution(sol0; filename="idempotence_json_t1", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol0; filename="idempotence_json_t1", format=:JSON
+            )
             sol1 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_json_t1", format=:JSON
             )
 
             # Second cycle
-            Serialization.export_ocp_solution(sol1; filename="idempotence_json_t2", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol1; filename="idempotence_json_t2", format=:JSON
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_json_t2", format=:JSON
             )
 
             # Third cycle
-            Serialization.export_ocp_solution(sol2; filename="idempotence_json_t3", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol2; filename="idempotence_json_t3", format=:JSON
+            )
             sol3 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_json_t3", format=:JSON
             )
@@ -894,13 +910,17 @@ function test_export_import()
             ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle: sol0 → export → import → sol1
-            Serialization.export_ocp_solution(sol0; filename="idempotence_jld_1", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol0; filename="idempotence_jld_1", format=:JLD
+            )
             sol1 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_jld_1", format=:JLD
             )
 
             # Second cycle: sol1 → export → import → sol2
-            Serialization.export_ocp_solution(sol1; filename="idempotence_jld_2", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol1; filename="idempotence_jld_2", format=:JLD
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_jld_2", format=:JLD
             )
@@ -917,19 +937,25 @@ function test_export_import()
             ocp, sol0 = TestProblems.solution_example_dual()
 
             # First cycle
-            Serialization.export_ocp_solution(sol0; filename="idempotence_jld_t1", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol0; filename="idempotence_jld_t1", format=:JLD
+            )
             sol1 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_jld_t1", format=:JLD
             )
 
             # Second cycle
-            Serialization.export_ocp_solution(sol1; filename="idempotence_jld_t2", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol1; filename="idempotence_jld_t2", format=:JLD
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_jld_t2", format=:JLD
             )
 
             # Third cycle
-            Serialization.export_ocp_solution(sol2; filename="idempotence_jld_t3", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol2; filename="idempotence_jld_t3", format=:JLD
+            )
             sol3 = Serialization.import_ocp_solution(
                 ocp; filename="idempotence_jld_t3", format=:JLD
             )
@@ -978,7 +1004,9 @@ function test_export_import()
             ocp, sol = TestProblems.solution_example()
 
             # Export to JSON
-            Serialization.export_ocp_solution(sol; filename="stack_investigation", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="stack_investigation", format=:JSON
+            )
 
             # Read and observe what stack() returns
             json_string = read("stack_investigation.json", String)
@@ -1217,7 +1245,9 @@ function test_export_import()
             )
 
             # Export to JSON (will not include control_interpolation field)
-            Serialization.export_ocp_solution(sol_old; filename="test_old_format", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol_old; filename="test_old_format", format=:JSON
+            )
 
             # Manually remove control_interpolation from JSON to simulate old format
             json_string = read("test_old_format.json", String)
@@ -1284,7 +1314,9 @@ function test_export_import()
             )
 
             # Export to JLD2
-            Serialization.export_ocp_solution(sol_linear; filename="test_mixed_jld", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol_linear; filename="test_mixed_jld", format=:JLD
+            )
             sol_jld_reloaded = Serialization.import_ocp_solution(
                 ocp; filename="test_mixed_jld", format=:JLD
             )

@@ -46,8 +46,12 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solutions.Solution)
         end
         if Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
             Components.dim_variable_constraints_box(Solutions.model(sol)) > 0
-            println(io, "  │  Var dual (lb) : ", Solutions.variable_constraints_lb_dual(sol))
-            println(io, "  └─ Var dual (ub) : ", Solutions.variable_constraints_ub_dual(sol))
+            println(
+                io, "  │  Var dual (lb) : ", Solutions.variable_constraints_lb_dual(sol)
+            )
+            println(
+                io, "  └─ Var dual (ub) : ", Solutions.variable_constraints_ub_dual(sol)
+            )
         end
     end
 

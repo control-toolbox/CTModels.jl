@@ -65,9 +65,7 @@ function test_ocp()
             pre_constraints, :path, n, m, q; f=f_path_a, lb=[0, 1], ub=[1, 2]
         )
         f_path_b(r, t, x, u, v) = r .= x[1] + u[1] + v[1] + t
-        Building.__constraint!(
-            pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3]
-        )
+        Building.__constraint!(pre_constraints, :path, n, m, q; f=f_path_b, lb=[3], ub=[3])
 
         # boundary constraint
         f_boundary_a(r, x0, xf, v) = r .= x0 .+ v .* (xf .- x0)
@@ -88,20 +86,14 @@ function test_ocp()
 
         # state box
         Building.__constraint!(pre_constraints, :state, n, m, q; lb=[0, 1], ub=[1, 2])
-        Building.__constraint!(
-            pre_constraints, :state, n, m, q; rg=2:2, lb=[1], ub=[1.5]
-        )
+        Building.__constraint!(pre_constraints, :state, n, m, q; rg=2:2, lb=[1], ub=[1.5])
 
         # control box
         Building.__constraint!(pre_constraints, :control, n, m, q; lb=[0, 1], ub=[1, 2])
-        Building.__constraint!(
-            pre_constraints, :control, n, m, q; rg=2:2, lb=[1], ub=[1.5]
-        )
+        Building.__constraint!(pre_constraints, :control, n, m, q; rg=2:2, lb=[1], ub=[1.5])
 
         # variable box
-        Building.__constraint!(
-            pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2]
-        )
+        Building.__constraint!(pre_constraints, :variable, n, m, q; lb=[0, 1], ub=[1, 2])
         Building.__constraint!(
             pre_constraints, :variable, n, m, q; rg=2:2, lb=[1], ub=[1.5]
         )
@@ -252,7 +244,9 @@ function test_ocp()
         # -------------------------------------------------------------------------- #
         # ocp with fixed times
         times = Components.TimesModel(
-            Components.FixedTimeModel(0.0, "t₀"), Components.FixedTimeModel(10.0, "t_f"), "t"
+            Components.FixedTimeModel(0.0, "t₀"),
+            Components.FixedTimeModel(10.0, "t_f"),
+            "t",
         )
         ocp = Models.Model{Components.NonAutonomous}(
             times,

@@ -122,14 +122,32 @@ function test_model()
         # warnings are emitted; redirect_stderr(devnull) suppresses them from
         # the test output.
         model = Test.@test_logs(
-            (:warn, r"Multiple bound declarations for state component 1 \(labels: state, state_scalar\)"),
-            (:warn, r"Multiple bound declarations for state component 2 \(labels: state, state_scalar_2\)"),
-            (:warn, r"Multiple bound declarations for control component 1 \(labels: control, control_scalar\)"),
-            (:warn, r"Multiple bound declarations for control component 2 \(labels: control, control_scalar_2\)"),
-            (:warn, r"Multiple bound declarations for variable component 1 \(labels: variable, variable_scalar\)"),
-            (:warn, r"Multiple bound declarations for variable component 2 \(labels: variable, variable_scalar_2\)"),
+            (
+                :warn,
+                r"Multiple bound declarations for state component 1 \(labels: state, state_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for state component 2 \(labels: state, state_scalar_2\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for control component 1 \(labels: control, control_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for control component 2 \(labels: control, control_scalar_2\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for variable component 1 \(labels: variable, variable_scalar\)",
+            ),
+            (
+                :warn,
+                r"Multiple bound declarations for variable component 2 \(labels: variable, variable_scalar_2\)",
+            ),
             redirect_stderr(devnull) do
-                Building.build(pre_ocp)
+                return Building.build(pre_ocp)
             end
         )
 
@@ -146,12 +164,15 @@ function test_model()
 
         # test the functions
         Test.@test Models.constraint(model, :path)[2](t, x, u, v) == x .+ u .+ v .+ t
-        Test.@test Models.constraint(model, :boundary)[2](x0, xf, v) == x0 .+ v .* (xf .- x0)
+        Test.@test Models.constraint(model, :boundary)[2](x0, xf, v) ==
+            x0 .+ v .* (xf .- x0)
         Test.@test Models.constraint(model, :state)[2](t, x, u, v) == x
         Test.@test Models.constraint(model, :control)[2](t, x, u, v) == u
         Test.@test Models.constraint(model, :variable)[2](x0, xf, v) == v
-        Test.@test Models.constraint(model, :path_scalar)[2](t, x, u, v) == x[1] + u[1] + v[1] + t
-        Test.@test Models.constraint(model, :boundary_scalar)[2](x0, xf, v) == x0[1] + v[1] * (xf[1] - x0[1])
+        Test.@test Models.constraint(model, :path_scalar)[2](t, x, u, v) ==
+            x[1] + u[1] + v[1] + t
+        Test.@test Models.constraint(model, :boundary_scalar)[2](x0, xf, v) ==
+            x0[1] + v[1] * (xf[1] - x0[1])
         Test.@test Models.constraint(model, :state_scalar)[2](t, x, u, v) == x[1]
         Test.@test Models.constraint(model, :control_scalar)[2](t, x, u, v) == u[1]
         Test.@test Models.constraint(model, :variable_scalar)[2](x0, xf, v) == v[1]
@@ -213,7 +234,7 @@ function test_model()
         # print the premodel (captured, no terminal output)
         redirect_stderr(devnull) do
             io = IOBuffer()
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
 
         # -------------------------------------------------------------------------- #
@@ -230,7 +251,7 @@ function test_model()
         Building.time_dependence!(pre_ocp; autonomous=false)
         io = IOBuffer()
         redirect_stderr(devnull) do
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
 
         #
@@ -245,7 +266,7 @@ function test_model()
         Building.time_dependence!(pre_ocp; autonomous=true)
         io = IOBuffer()
         redirect_stderr(devnull) do
-            show(io, MIME"text/plain"(), pre_ocp)
+            return show(io, MIME"text/plain"(), pre_ocp)
         end
 
         # ====================================================================
@@ -428,7 +449,9 @@ function test_model()
             Building.time_dependence!(pre; autonomous=false)
             m = Building.build(pre)
 
-            Test.@test_throws Exceptions.IncorrectArgument Models.constraint(m, :nonexistent)
+            Test.@test_throws Exceptions.IncorrectArgument Models.constraint(
+                m, :nonexistent
+            )
         end
 
         # ====================================================================
@@ -486,7 +509,6 @@ function test_model()
     end
 
     Test.@testset "BoxProjection, SubPathConstraint, SubBoundaryConstraint" verbose=VERBOSE showtiming=SHOWTIMING begin
-
         Test.@testset "BoxProjection{:state} — scalar" begin
             f = Models.BoxProjection{:state}(2)
             Test.@test f isa Function
@@ -518,7 +540,7 @@ function test_model()
         Test.@testset "SubPathConstraint" begin
             # stub cp tuple: (lb, fun!, ub, labels, aliases)
             # fun!(r, t, x, u, v) fills r with [t, x[1], u[1]]
-            _cp_fun!(r, t, x, u, _) = (r[1] = t; r[2] = x[1]; r[3] = u[1])
+            _cp_fun!(r, t, x, u, _) = (r[1]=t; r[2]=x[1]; r[3]=u[1])
             cp = ([0.0, 0.0, 0.0], _cp_fun!, [1.0, 1.0, 1.0], [:a, :b, :c], [])
             f = Models.SubPathConstraint(cp, 3, [2, 3])
             r = zeros(2)
@@ -530,7 +552,7 @@ function test_model()
         end
 
         Test.@testset "SubBoundaryConstraint" begin
-            _cp_fun!(r, x0, xf, _) = (r[1] = x0[1]; r[2] = xf[1])
+            _cp_fun!(r, x0, xf, _) = (r[1]=x0[1]; r[2]=xf[1])
             cp = ([0.0, 0.0], _cp_fun!, [1.0, 1.0], [:a, :b], [])
             f = Models.SubBoundaryConstraint(cp, 2, [2])
             r = zeros(1)

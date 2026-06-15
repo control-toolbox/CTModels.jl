@@ -27,13 +27,13 @@ function (f::SubPathConstraint)(r, t, x, u, v)
 end
 
 function Base.show(io::IO, f::SubPathConstraint)
-    print(io, "SubPathConstraint(n=", f.n, ", indices=", f.indices, ")")
+    return print(io, "SubPathConstraint(n=", f.n, ", indices=", f.indices, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::SubPathConstraint{CP,I}) where {CP,I}
     print(io, "SubPathConstraint")
     print(io, "\n  n:       ", f.n)
-    print(io, "\n  indices: ", f.indices)
+    return print(io, "\n  indices: ", f.indices)
 end
 
 # ------------------------------------------------------------------------------
@@ -63,13 +63,13 @@ function (f::SubBoundaryConstraint)(r, x0, xf, v)
 end
 
 function Base.show(io::IO, f::SubBoundaryConstraint)
-    print(io, "SubBoundaryConstraint(n=", f.n, ", indices=", f.indices, ")")
+    return print(io, "SubBoundaryConstraint(n=", f.n, ", indices=", f.indices, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::SubBoundaryConstraint{CP,I}) where {CP,I}
     print(io, "SubBoundaryConstraint")
     print(io, "\n  n:       ", f.n)
-    print(io, "\n  indices: ", f.indices)
+    return print(io, "\n  indices: ", f.indices)
 end
 
 # ------------------------------------------------------------------------------
@@ -95,16 +95,18 @@ end
 
 BoxProjection{Slot}(cidx) where {Slot} = BoxProjection{Slot,typeof(cidx)}(cidx)
 
-(f::BoxProjection{:state})(_, x, _, _)   = x[f.cidx]
+(f::BoxProjection{:state})(_, x, _, _) = x[f.cidx]
 (f::BoxProjection{:control})(_, _, u, _) = u[f.cidx]
-(f::BoxProjection{:variable})(_, _, v)   = v[f.cidx]
+(f::BoxProjection{:variable})(_, _, v) = v[f.cidx]
 
 function Base.show(io::IO, f::BoxProjection{Slot,CIDX}) where {Slot,CIDX}
-    print(io, "BoxProjection{:", Slot, "}(", f.cidx, ")")
+    return print(io, "BoxProjection{:", Slot, "}(", f.cidx, ")")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", f::BoxProjection{Slot,CIDX}) where {Slot,CIDX}
+function Base.show(
+    io::IO, ::MIME"text/plain", f::BoxProjection{Slot,CIDX}
+) where {Slot,CIDX}
     print(io, "BoxProjection")
     print(io, "\n  slot: :", Slot)
-    print(io, "\n  cidx: ", f.cidx)
+    return print(io, "\n  cidx: ", f.cidx)
 end

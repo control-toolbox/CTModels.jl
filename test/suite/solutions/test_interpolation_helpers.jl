@@ -38,7 +38,9 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: nothing handling" begin
             # Test allow_nothing=true
-            result = Solutions._interpolate_from_data(nothing, T, 2, Nothing; allow_nothing=true)
+            result = Solutions._interpolate_from_data(
+                nothing, T, 2, Nothing; allow_nothing=true
+            )
             Test.@test isnothing(result)
 
             # Test allow_nothing=false (should throw)
@@ -69,7 +71,9 @@ function test_interpolation_helpers()
 
         Test.@testset "_interpolate_from_data: dimension validation" begin
             # Valid: matrix has exactly `expected_dim` columns (strict check)
-            func = Solutions._interpolate_from_data(X_2d, T, 2, Matrix{Float64}; expected_dim=2)
+            func = Solutions._interpolate_from_data(
+                X_2d, T, 2, Matrix{Float64}; expected_dim=2
+            )
             Test.@test !isnothing(func)
 
             # Invalid: matrix has 2 columns but expected_dim=1 (strict mismatch)

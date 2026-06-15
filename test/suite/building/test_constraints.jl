@@ -10,10 +10,10 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Module-level stubs for CompositeConstraint tests (world-age safe)
-_path_stub1!(r, _, x, u, _)    = (r[1] = x[1] + u[1])
-_path_stub2!(r, t, x, _, _)    = (r[1] = x[2]; r[2] = t)
-_boundary_stub1!(r, x0, _, _)  = (r[1] = x0[1])
-_boundary_stub2!(r, _, xf, _)  = (r[1] = xf[1])
+_path_stub1!(r, _, x, u, _) = (r[1] = x[1] + u[1])
+_path_stub2!(r, t, x, _, _) = (r[1]=x[2]; r[2]=t)
+_boundary_stub1!(r, x0, _, _) = (r[1] = x0[1])
+_boundary_stub2!(r, _, xf, _) = (r[1] = xf[1])
 
 # Top-level helper (module-level to avoid world-age issues)
 """
@@ -456,7 +456,9 @@ function test_constraints()
         end
 
         Test.@testset "CompositeConstraint{:boundary} — two functions" begin
-            f = Building.CompositeConstraint{:boundary}(2, [1, 1], (_boundary_stub1!, _boundary_stub2!))
+            f = Building.CompositeConstraint{:boundary}(
+                2, [1, 1], (_boundary_stub1!, _boundary_stub2!)
+            )
             val = zeros(2)
             f(val, [2.0], [5.0], nothing)
             Test.@test f isa Function
@@ -469,7 +471,9 @@ function test_constraints()
 
         Test.@testset "CompositeConstraint{:boundary} — concrete fields (no capture-by-ref bug)" begin
             dims_orig = [1, 1]
-            f = Building.CompositeConstraint{:boundary}(2, dims_orig, (_boundary_stub1!, _boundary_stub2!))
+            f = Building.CompositeConstraint{:boundary}(
+                2, dims_orig, (_boundary_stub1!, _boundary_stub2!)
+            )
             dims_orig[1] = 99  # mutate the original after construction
             val = zeros(2)
             f(val, [2.0], [5.0], nothing)

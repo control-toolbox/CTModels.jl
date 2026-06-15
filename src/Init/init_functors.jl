@@ -177,7 +177,16 @@ $(TYPEDSIGNATURES)
 Compact string representation of [`CTModels.Init.MergedTrajectory`](@ref).
 """
 function Base.show(io::IO, f::MergedTrajectory{F,C}) where {F,C}
-    print(io, "MergedTrajectory(dim=", f.dim, ", role=:", f.role, ", ncomps=", length(f.comps), ")")
+    return print(
+        io,
+        "MergedTrajectory(dim=",
+        f.dim,
+        ", role=:",
+        f.role,
+        ", ncomps=",
+        length(f.comps),
+        ")",
+    )
 end
 
 """
@@ -189,5 +198,5 @@ function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,C}) where {
     print(io, "MergedTrajectory")
     print(io, "\n  role:   :", f.role)
     print(io, "\n  dim:    ", f.dim)
-    print(io, "\n  ncomps: ", length(f.comps))
+    return print(io, "\n  ncomps: ", length(f.comps))
 end
