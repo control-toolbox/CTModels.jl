@@ -296,7 +296,7 @@ Return the state struct.
 
 See also: [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
-function state(
+function Components.state(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -381,7 +381,7 @@ Return the control struct.
 
 See also: [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
-function control(
+function Components.control(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -466,7 +466,7 @@ Return the variable struct.
 
 See also: [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
-function variable(
+function Components.variable(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -551,7 +551,7 @@ Return the times struct.
 
 See also: [`CTModels.Components.time_name`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
-function times(
+function Components.times(
     ocp::Model{
         <:TimeDependence,
         T,
@@ -946,7 +946,7 @@ Return the objective struct.
 
 See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
-function objective(
+function Components.objective(
     ocp::Model{
         <:TimeDependence,
         <:AbstractTimesModel,
