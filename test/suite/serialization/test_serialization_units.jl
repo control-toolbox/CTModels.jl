@@ -185,7 +185,7 @@ function test_serialization_units()
         end
 
         # ==============================================================================
-        # C.4 — Pinning du type reconstruit après import
+        # C.4 — Pinning of reconstructed type after import
         # ==============================================================================
 
         Test.@testset "Reconstructed solution: unified time_grid_model pinning" begin
@@ -233,7 +233,7 @@ function test_serialization_units()
         end
 
         # ==============================================================================
-        # C.5 — Round-trip des duals issus de DualSlice / BoxDualDiff
+        # C.5 — Round-trip of duals from DualSlice / BoxDualDiff
         # ==============================================================================
 
         Test.@testset "Round-trip: duals from DualSlice/BoxDualDiff (JSON)" begin
