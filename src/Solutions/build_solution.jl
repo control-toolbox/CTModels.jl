@@ -645,7 +645,7 @@ julia> x0 = x(t0) # state at the initial time
 
 See also: [`CTModels.Models.state_dimension`](@ref), [`CTModels.Models.state_components`](@ref).
 """
-function Models.state(
+function Components.state(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -750,7 +750,7 @@ julia> u0 = u(t0) # control at the initial time
 
 See also: [`CTModels.Models.control_dimension`](@ref), [`CTModels.Models.control_components`](@ref).
 """
-function Models.control(
+function Components.control(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -946,7 +946,7 @@ julia> v = CTModels.variable(sol)
 
 See also: [`CTModels.Models.variable_dimension`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
-function Models.variable(
+function Components.variable(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -983,7 +983,7 @@ julia> p0 = p(t0) # costate at the initial time
 
 See also: [`CTModels.Models.state`](@ref), [`CTModels.Solutions.dual`](@ref).
 """
-function costate(
+function Components.costate(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,
@@ -1167,7 +1167,7 @@ Return the times model.
 
 See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
-function Models.times(
+function Components.times(
     sol::Solution{
         <:AbstractTimeGridModel,
         TM,
@@ -1197,7 +1197,7 @@ Return the time grid for solutions with unified time grid.
 
 See also: [`CTModels.Solutions.time_grid(sol, component)`](@ref), [`CTModels.Models.times`](@ref).
 """
-function time_grid(
+function Components.time_grid(
     sol::Solution{
         <:UnifiedTimeGridModel{T},
         <:AbstractTimesModel,
@@ -1244,7 +1244,7 @@ julia> time_grid(sol, :costate) # Maps to :state grid
 julia> time_grid(sol, :dual)    # Maps to :path grid
 ```
 """
-function time_grid(
+function Components.time_grid(
     sol::Solution{
         <:UnifiedTimeGridModel{T},
         <:AbstractTimesModel,
@@ -1306,7 +1306,7 @@ julia> time_grid(sol, :costate) # Maps to state time grid
 julia> time_grid(sol, :dual)    # Maps to path time grid
 ```
 """
-function time_grid(
+function Components.time_grid(
     sol::Solution{
         <:MultipleTimeGridModel,
         <:AbstractTimesModel,
@@ -1348,7 +1348,7 @@ $(TYPEDSIGNATURES)
 Return the objective value.
 
 """
-function Models.objective(
+function Components.objective(
     sol::Solution{
         <:AbstractTimeGridModel,
         <:AbstractTimesModel,

@@ -90,13 +90,11 @@ export UnifiedTimeGridModel, MultipleTimeGridModel
 # build_solution constructor
 export build_solution
 
-# Solution accessors
-export time_grid
+# Solution accessors — costate/time_grid owned by Components
 export clean_component_symbols, time_grid_model
 export control_interpolation
 export dim_dual_state_constraints_box,
     dim_dual_control_constraints_box, dim_dual_variable_constraints_box
-export costate
 export dual
 export iterations, status, message, success, successful
 export constraints_violation, infos
