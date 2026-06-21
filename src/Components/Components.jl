@@ -34,6 +34,7 @@ using OrderedCollections: OrderedCollections
 include(joinpath(@__DIR__, "functors.jl"))
 include(joinpath(@__DIR__, "aliases.jl"))
 include(joinpath(@__DIR__, "types.jl"))
+include(joinpath(@__DIR__, "accessors_api.jl"))
 include(joinpath(@__DIR__, "accessors.jl"))
 include(joinpath(@__DIR__, "times_accessors.jl"))
 include(joinpath(@__DIR__, "objective_accessors.jl"))
@@ -70,6 +71,9 @@ export AbstractDefinition, EmptyDefinition, Definition
 
 # Component accessor functions (name/dim/value/etc.)
 export name, components, dimension, value, interpolation, expression
+
+# Shared high-level component accessors (state/costate, control, variable, objective, times axis)
+export state, control, variable, objective, costate, times, time_grid
 
 # Time model accessors
 export index, initial, final
