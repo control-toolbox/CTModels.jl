@@ -7,6 +7,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0-beta] - 2026-06-21
+
+### 🚀 Enhancements
+
+#### Simplified Solution Reconstruction API
+
+- **Simplified `_reconstruct_solution_from_data`**: All duals and `control_interpolation` are now read directly from the imported data dictionary instead of being passed as optional arguments
+- **Cleaner API**: Removed 9 optional arguments, making the function signature simpler and less error-prone
+- **Better maintainability**: All required data must be present in the imported dictionary, ensuring consistency
+- **Improved documentation**: Updated docstrings to reflect the new simplified API
+
+#### Added Unit Tests for Serialization
+
+- **New test file**: `test_serialization_units.jl` with focused unit tests for serialization helpers
+- **Coverage**: Tests for `_discretize_function`, `_discretize_dual`, `_serialize_solution`, and `_reconstruct_solution_from_data`
+- **Round-trip verification**: Tests for duals from DualSlice/BoxDualDiff in both JSON and JLD2 formats
+- **Type pinning tests**: Verify that reconstructed solutions preserve correct time grid model types
+
+### 🐛 Bug Fixes
+
+- **Fixed control_interpolation handling**: Now consistently read from data dictionary instead of using default fallback
+- **Fixed dual reconstruction**: All duals are now properly reconstructed from imported data
+
+### 💥 Breaking Changes
+
+#### Removed Legacy `time_grid_dual` Key Support
+
+- **Removed compatibility**: Dropped support for the legacy `time_grid_dual` key name in multi-grid solution imports
+- **Required key**: Multi-grid solutions now require the `time_grid_path` key (current standard)
+- **Impact**: Solution files exported with very old versions using `time_grid_dual` will no longer import
+
+#### Migration Guide
+
+```julia
+# Before: Legacy files with time_grid_dual key could be imported
+sol = Serialization.import_ocp_solution(ocp; filename="legacy_solution", format=:JSON)
+# This would transparently map time_grid_dual → time_grid_path
+
+# After: Legacy files with time_grid_dual will raise KeyError
+# Re-export the solution with a current CTModels version to use time_grid_path
+```
+
+#### Rationale
+
+The `time_grid_dual` key was only needed for backward compatibility with very old exports (pre-0.9.x). Removing this legacy support simplifies the codebase and reduces maintenance burden while ensuring all current solutions use the standardized `time_grid_path` key.
+
 ## [0.10.3-beta] - 2026-06-15
 
 ### 📦 Dependencies

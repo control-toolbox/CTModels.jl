@@ -4,6 +4,29 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.11.0-beta] - 2026-06-21
+
+### Breaking Changes: Removed Legacy `time_grid_dual` Key Support
+
+- **Removed compatibility**: Dropped support for the legacy `time_grid_dual` key name in multi-grid solution imports
+- **Required key**: Multi-grid solutions now require the `time_grid_path` key (current standard)
+- **Impact**: Solution files exported with very old versions using `time_grid_dual` will no longer import
+
+#### Migration Guide
+
+```julia
+# Before: Legacy files with time_grid_dual key could be imported
+sol = Serialization.import_ocp_solution(ocp; filename="legacy_solution", format=:JSON)
+# This would transparently map time_grid_dual → time_grid_path
+
+# After: Legacy files with time_grid_dual will raise KeyError
+# Re-export the solution with a current CTModels version to use time_grid_path
+```
+
+#### Rationale
+
+The `time_grid_dual` key was only needed for backward compatibility with very old exports (pre-0.9.x). Removing this legacy support simplifies the codebase and reduces maintenance burden while ensuring all current solutions use the standardized `time_grid_path` key.
+
 ## [0.9.15-beta] - 2026-04-18
 
 ### Breaking Changes: Dual Dimension Function Renaming
