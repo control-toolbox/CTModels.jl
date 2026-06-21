@@ -296,8 +296,9 @@ function test_initial_guess_builders()
         Test.@testset "MergedTrajectory — error: component index out of bounds" begin
             base = _ -> [1.0, 2.0]
             comps = Dict{Int,Function}(5 => _ -> 0.0)   # index 5 > dim=2
-            f = Init.MergedTrajectory(base, comps, 2, :state)
-            Test.@test_throws Exceptions.IncorrectArgument f(0.0)
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, comps, 2, :state
+            )
         end
 
         Test.@testset "MergedTrajectory — error: component returns vector length > 1" begin
