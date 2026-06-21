@@ -231,7 +231,7 @@ function compare_solutions(
         return false
     end
 
-    vcubd1 = Solutions.variable_constraints_ub_dual(sol2)
+    vcubd1 = Solutions.variable_constraints_ub_dual(sol1)
     vcubd2 = Solutions.variable_constraints_ub_dual(sol2)
     if isnothing(vcubd1) != isnothing(vcubd2)
         return false
@@ -1217,64 +1217,31 @@ function test_export_import()
             remove_if_exists("test_linear_interp.jld2")
         end
 
-        Test.@testset "Control interpolation backward compatibility" verbose = VERBOSE showtiming =
+        Test.@testset "Missing control_interpolation raises ParsingError" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Components.time_grid(sol_base)
 
-            # Extract trajectories
-            x = Components.state(sol_base)
-            u = Components.control(sol_base)
-            p = Components.costate(sol_base)
-            v = Components.variable(sol_base)
-
-            # Create solution without control_interpolation (old format)
-            sol_old = Solutions.build_solution(
-                ocp,
-                Vector{Float64}(T),
-                x,
-                u,
-                isa(v, Number) ? [v] : v,
-                p;
-                objective=Solutions.objective(sol_base),
-                iterations=Solutions.iterations(sol_base),
-                constraints_violation=Solutions.constraints_violation(sol_base),
-                message=Solutions.message(sol_base),
-                status=Solutions.status(sol_base),
-                successful=Solutions.successful(sol_base),
-            )
-
-            # Export to JSON (will not include control_interpolation field)
+            # Export a valid solution
             Serialization.export_ocp_solution(
-                sol_old; filename="test_old_format", format=:JSON
+                sol_base; filename="test_missing_interp", format=:JSON
             )
 
-            # Manually remove control_interpolation from JSON to simulate old format
-            json_string = read("test_old_format.json", String)
+            # Simulate a legacy file by removing control_interpolation from JSON
+            json_string = read("test_missing_interp.json", String)
             json_data = JSON3.read(json_string)
-
-            # Create new JSON without control_interpolation field
-            json_data_without_interp = Dict{String,Any}()
-            for (key, value) in json_data
-                if key != "control_interpolation"
-                    json_data_without_interp[string(key)] = value
-                end
+            json_without = Dict{String,Any}(
+                string(k) => v for (k, v) in json_data if string(k) != "control_interpolation"
+            )
+            open("test_missing_interp.json", "w") do f
+                return JSON3.write(f, json_without)
             end
 
-            # Write back without control_interpolation
-            open("test_old_format.json", "w") do f
-                return JSON3.write(f, json_data_without_interp)
-            end
-
-            # Import should default to :constant
-            sol_old_reloaded = Serialization.import_ocp_solution(
-                ocp; filename="test_old_format", format=:JSON
+            # Import must now raise a KeyError (missing required field)
+            Test.@test_throws KeyError Serialization.import_ocp_solution(
+                ocp; filename="test_missing_interp", format=:JSON
             )
 
-            # Verify backward compatibility (defaults to :constant)
-            Test.@test Solutions.control_interpolation(sol_old_reloaded) == :constant
-
-            remove_if_exists("test_old_format.json")
+            remove_if_exists("test_missing_interp.json")
         end
 
         Test.@testset "Control interpolation mixed format compatibility" verbose = VERBOSE showtiming =

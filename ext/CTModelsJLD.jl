@@ -88,27 +88,9 @@ function CTModels.import_ocp_solution(
     file_data = JLD2.load(filename * ".jld2")
     data = file_data["solution_data"]
 
-    # Extract solver infos if present
-    infos = if haskey(data, "infos")
-        data["infos"]
-    else
-        Dict{Symbol,Any}()
-    end
+    infos = get(data, "infos", Dict{Symbol,Any}())
 
-    # Reconstruct solution using helper function (handles both single and multiple time grids)
-    sol = CTModels.Serialization._reconstruct_solution_from_data(
-        ocp,
-        data;
-        path_constraints_dual=data["path_constraints_dual"],
-        boundary_constraints_dual=data["boundary_constraints_dual"],
-        state_constraints_lb_dual=data["state_constraints_lb_dual"],
-        state_constraints_ub_dual=data["state_constraints_ub_dual"],
-        control_constraints_lb_dual=data["control_constraints_lb_dual"],
-        control_constraints_ub_dual=data["control_constraints_ub_dual"],
-        variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
-        variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
-        infos=infos,
-    )
+    sol = CTModels.Serialization._reconstruct_solution_from_data(ocp, data; infos=infos)
 
     return sol
 end
