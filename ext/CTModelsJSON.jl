@@ -13,7 +13,6 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using CTModels: CTModels
 using JSON3: JSON3
 
-import CTModels.Building
 
 # ============================================================================
 # Private helpers for JSON matrix conversion
@@ -281,48 +280,17 @@ function CTModels.import_ocp_solution(
     json_string = read(filename * ".json", String)
     blob = JSON3.read(json_string)
 
-    # Convert JSON arrays (Vector{Vector}) back to Matrix{Float64}
-    X = _json_to_matrix(blob["state"])
-    U = _json_to_matrix(blob["control"])
-    P = _json_to_matrix(blob["costate"])
-
-    # Convert optional dual matrices
-    path_constraints_dual = _json_to_optional_matrix(blob["path_constraints_dual"])
-    state_constraints_lb_dual = _json_to_optional_matrix(blob["state_constraints_lb_dual"])
-    state_constraints_ub_dual = _json_to_optional_matrix(blob["state_constraints_ub_dual"])
-    control_constraints_lb_dual = _json_to_optional_matrix(
-        blob["control_constraints_lb_dual"]
-    )
-    control_constraints_ub_dual = _json_to_optional_matrix(
-        blob["control_constraints_ub_dual"]
-    )
-
-    # get dual of boundary constraints: no conversion needed
-    boundary_constraints_dual = blob["boundary_constraints_dual"]
-    if !isnothing(boundary_constraints_dual)
-        boundary_constraints_dual = Vector{Float64}(boundary_constraints_dual)
-    end
-
-    # get variable constraints dual: no conversion needed
-    variable_constraints_lb_dual = blob["variable_constraints_lb_dual"]
-    if !isnothing(variable_constraints_lb_dual)
-        variable_constraints_lb_dual = Vector{Float64}(blob["variable_constraints_lb_dual"])
-    end
-    variable_constraints_ub_dual = blob["variable_constraints_ub_dual"]
-    if !isnothing(variable_constraints_ub_dual)
-        variable_constraints_ub_dual = Vector{Float64}(blob["variable_constraints_ub_dual"])
-    end
-
-    # get additional solver infos with Symbol type restoration
+    # Restore Symbol types in infos (JSON3 deserializes all strings; metadata tracks which were Symbols)
     symbol_keys_raw = get(blob, "infos_symbol_keys", String[])
-    symbol_keys = collect(String, symbol_keys_raw)  # Convert JSON3.Array/empty array to Vector{String}
-    infos = if haskey(blob, "infos")
-        _deserialize_infos(blob["infos"], symbol_keys)
-    else
+    symbol_keys = collect(String, symbol_keys_raw)
+    infos = haskey(blob, "infos") ? _deserialize_infos(blob["infos"], symbol_keys) :
         Dict{Symbol,Any}()
-    end
 
-    # Create data dictionary compatible with helper function
+    # Build data dictionary: convert JSON arrays back to the types expected by the helper
+    bcd = blob["boundary_constraints_dual"]
+    vclbd = blob["variable_constraints_lb_dual"]
+    vcubd = blob["variable_constraints_ub_dual"]
+
     data = Dict{String,Any}(
         "objective" => blob.objective,
         "iterations" => blob.iterations,
@@ -330,59 +298,32 @@ function CTModels.import_ocp_solution(
         "message" => blob.message,
         "status" => blob.status,
         "successful" => blob.successful,
-        "state" => X,
-        "control" => U,
+        "state" => _json_to_matrix(blob["state"]),
+        "control" => _json_to_matrix(blob["control"]),
+        "costate" => _json_to_matrix(blob["costate"]),
         "variable" => Vector{Float64}(blob.variable),
-        "costate" => P,
-        "path_constraints_dual" => path_constraints_dual,
-        "boundary_constraints_dual" => boundary_constraints_dual,
-        "state_constraints_lb_dual" => state_constraints_lb_dual,
-        "state_constraints_ub_dual" => state_constraints_ub_dual,
-        "control_constraints_lb_dual" => control_constraints_lb_dual,
-        "control_constraints_ub_dual" => control_constraints_ub_dual,
-        "variable_constraints_lb_dual" => variable_constraints_lb_dual,
-        "variable_constraints_ub_dual" => variable_constraints_ub_dual,
-        "control_interpolation" => get(
-            blob,
-            "control_interpolation",
-            string(CTModels.Building.__control_interpolation()),
-        ),
+        "path_constraints_dual" => _json_to_optional_matrix(blob["path_constraints_dual"]),
+        "boundary_constraints_dual" => isnothing(bcd) ? nothing : Vector{Float64}(bcd),
+        "state_constraints_lb_dual" => _json_to_optional_matrix(blob["state_constraints_lb_dual"]),
+        "state_constraints_ub_dual" => _json_to_optional_matrix(blob["state_constraints_ub_dual"]),
+        "control_constraints_lb_dual" => _json_to_optional_matrix(blob["control_constraints_lb_dual"]),
+        "control_constraints_ub_dual" => _json_to_optional_matrix(blob["control_constraints_ub_dual"]),
+        "variable_constraints_lb_dual" => isnothing(vclbd) ? nothing : Vector{Float64}(vclbd),
+        "variable_constraints_ub_dual" => isnothing(vcubd) ? nothing : Vector{Float64}(vcubd),
+        "control_interpolation" => blob["control_interpolation"],
     )
 
-    # Add time grid data (format detection handled by helper)
+    # Time grid: multi-grid format (4 separate grids) or unified format (single time_grid)
     if haskey(blob, "time_grid_state")
-        # Multiple time grids format
         data["time_grid_state"] = blob.time_grid_state
         data["time_grid_control"] = blob.time_grid_control
-        # Support time_grid_costate (backward compatibility: if missing, will use T_state in reconstruction)
-        if haskey(blob, "time_grid_costate")
-            data["time_grid_costate"] = blob.time_grid_costate
-        end
-        # Support both new (time_grid_path) and legacy (time_grid_dual) keys
-        if haskey(blob, "time_grid_path")
-            data["time_grid_path"] = blob.time_grid_path
-        elseif haskey(blob, "time_grid_dual")
-            data["time_grid_path"] = blob.time_grid_dual
-        end
+        data["time_grid_costate"] = blob.time_grid_costate
+        data["time_grid_path"] = blob.time_grid_path
     else
-        # Legacy format: single time grid
         data["time_grid"] = blob.time_grid
     end
 
-    # Reconstruct solution using helper function (handles both single and multiple time grids)
-    return CTModels.Serialization._reconstruct_solution_from_data(
-        ocp,
-        data;
-        path_constraints_dual=path_constraints_dual,
-        boundary_constraints_dual=boundary_constraints_dual,
-        state_constraints_lb_dual=state_constraints_lb_dual,
-        state_constraints_ub_dual=state_constraints_ub_dual,
-        control_constraints_lb_dual=control_constraints_lb_dual,
-        control_constraints_ub_dual=control_constraints_ub_dual,
-        variable_constraints_lb_dual=variable_constraints_lb_dual,
-        variable_constraints_ub_dual=variable_constraints_ub_dual,
-        infos=infos,
-    )
+    return CTModels.Serialization._reconstruct_solution_from_data(ocp, data; infos=infos)
 end
 
 end

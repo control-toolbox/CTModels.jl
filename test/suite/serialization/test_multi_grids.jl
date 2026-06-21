@@ -566,17 +566,7 @@ function test_multi_grids()
 
             # Reconstruct using helper function
             sol_reconstructed = Serialization._reconstruct_solution_from_data(
-                ocp,
-                data;
-                path_constraints_dual=data["path_constraints_dual"],
-                boundary_constraints_dual=data["boundary_constraints_dual"],
-                state_constraints_lb_dual=data["state_constraints_lb_dual"],
-                state_constraints_ub_dual=data["state_constraints_ub_dual"],
-                control_constraints_lb_dual=data["control_constraints_lb_dual"],
-                control_constraints_ub_dual=data["control_constraints_ub_dual"],
-                variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
-                variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
-                infos=get(data, "infos", Dict{Symbol,Any}()),
+                ocp, data; infos=get(data, "infos", Dict{Symbol,Any}())
             )
 
             # Verify reconstruction
@@ -626,18 +616,10 @@ function test_multi_grids()
             Test.@test haskey(data, "time_grid")
             Test.@test !haskey(data, "time_grid_state")
 
-            # Reconstruct from legacy format
+            # Reconstruct from unified format
             sol_from_legacy = Serialization._reconstruct_solution_from_data(
                 ocp,
                 data;
-                path_constraints_dual=data["path_constraints_dual"],
-                boundary_constraints_dual=data["boundary_constraints_dual"],
-                state_constraints_lb_dual=data["state_constraints_lb_dual"],
-                state_constraints_ub_dual=data["state_constraints_ub_dual"],
-                control_constraints_lb_dual=data["control_constraints_lb_dual"],
-                control_constraints_ub_dual=data["control_constraints_ub_dual"],
-                variable_constraints_lb_dual=data["variable_constraints_lb_dual"],
-                variable_constraints_ub_dual=data["variable_constraints_ub_dual"],
                 infos=get(data, "infos", Dict{Symbol,Any}()),
             )
 
@@ -648,12 +630,11 @@ function test_multi_grids()
         end
 
         # ====================================================================
-        # Test 12: Backward Compatibility - Legacy key time_grid_dual → time_grid_path
-        # The JSON importer supports the old "time_grid_dual" key name that was
-        # used before the rename to "time_grid_path".
+        # Test 12: Missing required time grid keys raise a KeyError
+        # The legacy "time_grid_dual" key is no longer supported.
         # ====================================================================
 
-        Test.@testset "JSON backward compat: time_grid_dual key" begin
+        Test.@testset "JSON missing time_grid_path raises KeyError" begin
             T_state = collect(LinRange(0.0, 1.0, 11))
             T_control = collect(LinRange(0.0, 1.0, 6))
             T_costate = collect(LinRange(0.0, 1.0, 11))
@@ -681,48 +662,30 @@ function test_multi_grids()
                 successful=Solutions.successful(sol_unified),
             )
 
-            # Export to JSON — produces "time_grid_path" key in the blob
+            # Export to JSON — produces "time_grid_path" key
             Serialization.export_ocp_solution(
-                sol_multi; filename="compat_tgd_test", format=:JSON
+                sol_multi; filename="missing_tgp_test", format=:JSON
             )
+            Test.@test isfile("missing_tgp_test.json")
 
-            # Simulate a legacy file by renaming time_grid_path → time_grid_dual
-            json_string = read("compat_tgd_test.json", String)
+            # Simulate a file with the old key name (time_grid_dual) instead of time_grid_path
+            json_string = read("missing_tgp_test.json", String)
             blob = JSON3.read(json_string)
-            Test.@test haskey(blob, "time_grid_path")
-
-            legacy_data = Dict{String,Any}()
-            for (k, val) in blob
-                key_str = string(k)
-                if key_str == "time_grid_path"
-                    legacy_data["time_grid_dual"] = val
-                else
-                    legacy_data[key_str] = val
-                end
-            end
-            open("compat_tgd_legacy.json", "w") do f
+            legacy_data = Dict{String,Any}(
+                string(k) => v for (k, v) in blob if string(k) != "time_grid_path"
+            )
+            legacy_data["time_grid_dual"] = blob["time_grid_path"]  # old name
+            open("missing_tgp_legacy.json", "w") do f
                 return JSON3.write(f, legacy_data)
             end
 
-            # Import from legacy file — should transparently map time_grid_dual
-            sol_reimported = Serialization.import_ocp_solution(
-                ocp; filename="compat_tgd_legacy", format=:JSON
+            # Import from file with old key must raise a KeyError (required key absent)
+            Test.@test_throws KeyError Serialization.import_ocp_solution(
+                ocp; filename="missing_tgp_legacy", format=:JSON
             )
 
-            # Verify the solution round-tripped correctly
-            Test.@test Solutions.time_grid_model(sol_reimported) isa
-                Solutions.MultipleTimeGridModel
-            Test.@test Components.time_grid(sol_reimported, :state) ≈ T_state atol = 1e-10
-            Test.@test Components.time_grid(sol_reimported, :control) ≈ T_control atol =
-                1e-10
-            Test.@test Components.time_grid(sol_reimported, :costate) ≈ T_costate atol =
-                1e-10
-            Test.@test Components.time_grid(sol_reimported, :dual) ≈ T_path atol = 1e-10
-            Test.@test Solutions.objective(sol_reimported) ≈
-                Solutions.objective(sol_unified) atol = 1e-8
-
-            remove_if_exists("compat_tgd_test.json")
-            remove_if_exists("compat_tgd_legacy.json")
+            remove_if_exists("missing_tgp_test.json")
+            remove_if_exists("missing_tgp_legacy.json")
         end
     end
 end

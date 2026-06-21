@@ -6,68 +6,52 @@ $(TYPEDSIGNATURES)
 
 Reconstruct a solution from imported data, detecting the format (single vs multiple time grids).
 
+Duals and `control_interpolation` are read from `data`. Only `infos` is accepted as a
+keyword argument because its deserialization is format-specific (JSON restores `Symbol` types).
+
 # Arguments
 - `ocp`: The optimal control problem model
-- `data`: Dictionary containing the imported solution data
-- `path_constraints_dual`: Optional path constraints dual function
-- `boundary_constraints_dual`: Optional boundary constraints dual function
-- `state_constraints_lb_dual`: Optional state constraints lower bound dual function
-- `state_constraints_ub_dual`: Optional state constraints upper bound dual function
-- `control_constraints_lb_dual`: Optional control constraints lower bound dual function
-- `control_constraints_ub_dual`: Optional control constraints upper bound dual function
-- `variable_constraints_lb_dual`: Optional variable constraints lower bound dual function
-- `variable_constraints_ub_dual`: Optional variable constraints upper bound dual function
-- `infos`: Optional solver information
+- `data`: Dictionary containing the imported solution data, including all dual fields and
+  `control_interpolation`
+
+# Keyword Arguments
+- `infos`: Solver information dictionary (`Dict{Symbol,Any}`). Passed explicitly because
+  JSON deserialization must restore `Symbol` types before calling this helper.
 
 # Returns
 - `Solution`: Reconstructed solution with appropriate time grid model
 
 # Notes
 - If `time_grid_state` key exists, assumes multiple time grid format
-- Otherwise, uses legacy single time grid format
-- Handles both raw vectors and TimeGridModel objects for legacy format
+- Otherwise, uses the current unified format (single `time_grid` key)
 
 # Example
 ```julia-repl
-julia> sol = _reconstruct_solution_from_data(ocp, data)
+julia> sol = _reconstruct_solution_from_data(ocp, data; infos=infos)
 ```
 
 See also: [`_extract_time_vector`](@ref).
 """
-function _reconstruct_solution_from_data(
-    ocp,
-    data;
-    path_constraints_dual=nothing,
-    boundary_constraints_dual=nothing,
-    state_constraints_lb_dual=nothing,
-    state_constraints_ub_dual=nothing,
-    control_constraints_lb_dual=nothing,
-    control_constraints_ub_dual=nothing,
-    variable_constraints_lb_dual=nothing,
-    variable_constraints_ub_dual=nothing,
-    infos=nothing,
-)
-    # Extract control_interpolation (backward compatibility: use default method)
-    control_interpolation = Symbol(
-        get(data, "control_interpolation", string(Building.__control_interpolation()))
-    )
+function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
+    control_interpolation = Symbol(data["control_interpolation"])
+
+    path_constraints_dual = data["path_constraints_dual"]
+    boundary_constraints_dual = data["boundary_constraints_dual"]
+    state_constraints_lb_dual = data["state_constraints_lb_dual"]
+    state_constraints_ub_dual = data["state_constraints_ub_dual"]
+    control_constraints_lb_dual = data["control_constraints_lb_dual"]
+    control_constraints_ub_dual = data["control_constraints_ub_dual"]
+    variable_constraints_lb_dual = data["variable_constraints_lb_dual"]
+    variable_constraints_ub_dual = data["variable_constraints_ub_dual"]
 
     # Detect format and extract time grids
     if haskey(data, "time_grid_state")
         # Multiple time grids format
         T_state = _extract_time_vector(data["time_grid_state"])
         T_control = _extract_time_vector(data["time_grid_control"])
-        # Backward compatibility: if time_grid_costate is missing, use T_state
-        T_costate = if haskey(data, "time_grid_costate")
-            _extract_time_vector(data["time_grid_costate"])
-        else
-            T_state
-        end
-        # Support both new (time_grid_path) and legacy (time_grid_dual) keys
-        T_path_key = haskey(data, "time_grid_path") ? "time_grid_path" : "time_grid_dual"
-        T_path = _extract_time_vector(data[T_path_key])
+        T_costate = _extract_time_vector(data["time_grid_costate"])
+        T_path = _extract_time_vector(data["time_grid_path"])
 
-        # Reconstruct solution with multiple time grids
         return Solutions.build_solution(
             ocp,
             T_state,
@@ -96,25 +80,18 @@ function _reconstruct_solution_from_data(
             control_interpolation=control_interpolation,
         )
     else
-        # Legacy format: single time grid
-        T = if haskey(data, "time_grid")
-            time_grid_data = data["time_grid"]
-            if time_grid_data isa Solutions.TimeGridModel
-                time_grid_data.value
-            else
-                _extract_time_vector(time_grid_data)
-            end
-        else
+        # Current unified format: single time grid
+        if !haskey(data, "time_grid")
             throw(
                 Exceptions.ParsingError(
-                    "legacy solution data is missing the 'time_grid' key";
+                    "solution data is missing the 'time_grid' key";
                     location="imported solution dictionary",
                     suggestion="re-export the solution with a current CTModels version",
                 ),
             )
         end
+        T = _extract_time_vector(data["time_grid"])
 
-        # Reconstruct solution using legacy compatibility (will create UnifiedTimeGridModel)
         return Solutions.build_solution(
             ocp,
             T,
