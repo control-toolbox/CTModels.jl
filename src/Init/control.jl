@@ -168,7 +168,7 @@ Return the control trajectory from an initial guess.
 # Returns
 - `Function`: The control function `t -> u(t)`.
 """
-Models.control(init::AbstractInitialGuess) = init.control
+Components.control(init::AbstractInitialGuess) = init.control
 
 """
 $(TYPEDSIGNATURES)
@@ -181,4 +181,4 @@ Return the control trajectory from a solution.
 # Returns
 - `Function`: The control function `t -> u(t)`.
 """
-Models.control(sol::Solutions.AbstractSolution) = sol.control
+Components.control(sol::Solutions.AbstractSolution) = sol.control
