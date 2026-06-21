@@ -4,6 +4,7 @@ import Test: Test
 import JLD2: JLD2
 import JSON3: JSON3
 import CTBase.Exceptions: Exceptions
+import CTModels.Components: Components
 import CTModels.Models: Models
 import CTModels.Solutions: Solutions
 import CTModels.Serialization: Serialization
@@ -29,11 +30,11 @@ function test_multi_grids()
         ocp, sol_unified = TestProblems.solution_example()
 
         # Extract data from unified solution
-        T_unified = Solutions.time_grid(sol_unified)
-        X = Models.state(sol_unified).(T_unified)
-        U = Models.control(sol_unified).(T_unified)
-        P = Solutions.costate(sol_unified).(T_unified)
-        v = Models.variable(sol_unified)
+        T_unified = Components.time_grid(sol_unified)
+        X = Components.state(sol_unified).(T_unified)
+        U = Components.control(sol_unified).(T_unified)
+        P = Components.costate(sol_unified).(T_unified)
+        v = Components.variable(sol_unified)
 
         # Convert to matrices
         X_mat = hcat([x for x in X]...)'
@@ -49,9 +50,9 @@ function test_multi_grids()
             T = collect(LinRange(0.0, 1.0, 11))
 
             # Use functions (simpler and more robust)
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol = Solutions.build_solution(
                 ocp,
@@ -75,7 +76,7 @@ function test_multi_grids()
             Test.@test Solutions.time_grid_model(sol) isa Solutions.UnifiedTimeGridModel
 
             # time_grid without argument should work
-            T_retrieved = Solutions.time_grid(sol)
+            T_retrieved = Components.time_grid(sol)
             Test.@test T_retrieved ≈ T
         end
 
@@ -91,9 +92,9 @@ function test_multi_grids()
             T_path = collect(LinRange(0.0, 1.0, 21))      # Fine grid
 
             # Use functions instead of matrices (simpler)
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_multi = Solutions.build_solution(
                 ocp,
@@ -118,10 +119,10 @@ function test_multi_grids()
                 Solutions.MultipleTimeGridModel
 
             # time_grid with component should work
-            Test.@test Solutions.time_grid(sol_multi, :state) ≈ T_state
-            Test.@test Solutions.time_grid(sol_multi, :control) ≈ T_control
-            Test.@test Solutions.time_grid(sol_multi, :costate) ≈ T_costate
-            Test.@test Solutions.time_grid(sol_multi, :dual) ≈ T_path
+            Test.@test Components.time_grid(sol_multi, :state) ≈ T_state
+            Test.@test Components.time_grid(sol_multi, :control) ≈ T_control
+            Test.@test Components.time_grid(sol_multi, :costate) ≈ T_costate
+            Test.@test Components.time_grid(sol_multi, :dual) ≈ T_path
         end
 
         # ====================================================================
@@ -136,9 +137,9 @@ function test_multi_grids()
             T_path = collect(LinRange(0.0, 1.0, 21))
             # T_path same as T_state for this test
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_multi = Solutions.build_solution(
                 ocp,
@@ -173,21 +174,21 @@ function test_multi_grids()
                 Solutions.MultipleTimeGridModel
 
             # Verify grids are preserved
-            Test.@test Solutions.time_grid(sol_reloaded, :state) ≈ T_state
-            Test.@test Solutions.time_grid(sol_reloaded, :control) ≈ T_control
-            Test.@test Solutions.time_grid(sol_reloaded, :costate) ≈ T_costate
-            Test.@test Solutions.time_grid(sol_reloaded, :dual) ≈ T_path
+            Test.@test Components.time_grid(sol_reloaded, :state) ≈ T_state
+            Test.@test Components.time_grid(sol_reloaded, :control) ≈ T_control
+            Test.@test Components.time_grid(sol_reloaded, :costate) ≈ T_costate
+            Test.@test Components.time_grid(sol_reloaded, :dual) ≈ T_path
 
             # Verify data integrity
             Test.@test Solutions.objective(sol_reloaded) ≈ Solutions.objective(sol_multi)
-            Test.@test Models.variable(sol_reloaded) ≈ Models.variable(sol_multi)
+            Test.@test Components.variable(sol_reloaded) ≈ Components.variable(sol_multi)
 
             # Verify trajectories at their respective grids
             for t in T_state
-                Test.@test Models.state(sol_reloaded)(t) ≈ Models.state(sol_multi)(t) atol=1e-8
+                Test.@test Components.state(sol_reloaded)(t) ≈ Components.state(sol_multi)(t) atol=1e-8
             end
             for t in T_control
-                Test.@test Models.control(sol_reloaded)(t) ≈ Models.control(sol_multi)(t) atol=1e-8
+                Test.@test Components.control(sol_reloaded)(t) ≈ Components.control(sol_multi)(t) atol=1e-8
             end
 
             remove_if_exists("multi_grid_test.jld2")
@@ -204,9 +205,9 @@ function test_multi_grids()
             T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_multi = Solutions.build_solution(
                 ocp,
@@ -227,12 +228,12 @@ function test_multi_grids()
             )
 
             # time_grid without component should return state grid (default behavior)
-            Test.@test Solutions.time_grid(sol_multi) == T_state
-            Test.@test Solutions.time_grid(sol_multi) ==
-                Solutions.time_grid(sol_multi, :state)
+            Test.@test Components.time_grid(sol_multi) == T_state
+            Test.@test Components.time_grid(sol_multi) ==
+                Components.time_grid(sol_multi, :state)
 
             # Invalid component should throw error
-            Test.@test_throws Exceptions.IncorrectArgument Solutions.time_grid(
+            Test.@test_throws Exceptions.IncorrectArgument Components.time_grid(
                 sol_multi, :invalid
             )
         end
@@ -248,9 +249,9 @@ function test_multi_grids()
             T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_multi = Solutions.build_solution(
                 ocp,
@@ -271,13 +272,13 @@ function test_multi_grids()
             )
 
             # Test plural forms work
-            Test.@test Solutions.time_grid(sol_multi, :states) ≈ T_state
-            Test.@test Solutions.time_grid(sol_multi, :controls) ≈ T_control
-            Test.@test Solutions.time_grid(sol_multi, :costates) ≈ T_costate
+            Test.@test Components.time_grid(sol_multi, :states) ≈ T_state
+            Test.@test Components.time_grid(sol_multi, :controls) ≈ T_control
+            Test.@test Components.time_grid(sol_multi, :costates) ≈ T_costate
 
             # Test path/dual equivalence
-            Test.@test Solutions.time_grid(sol_multi, :path) ≈ T_path
-            Test.@test Solutions.time_grid(sol_multi, :dual) ≈ T_path
+            Test.@test Components.time_grid(sol_multi, :path) ≈ T_path
+            Test.@test Components.time_grid(sol_multi, :dual) ≈ T_path
         end
 
         # ====================================================================
@@ -290,9 +291,9 @@ function test_multi_grids()
             T_control = collect(LinRange(0.0, 1.0, 11))
             T_costate = collect(LinRange(0.0, 1.0, 11))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol = Solutions.build_solution(
                 ocp,
@@ -314,7 +315,7 @@ function test_multi_grids()
 
             # Should still work (uses T_state for dual)
             Test.@test Solutions.time_grid_model(sol) isa Solutions.UnifiedTimeGridModel
-            Test.@test Solutions.time_grid(sol) ≈ T_state
+            Test.@test Components.time_grid(sol) ≈ T_state
         end
 
         # ====================================================================
@@ -325,9 +326,9 @@ function test_multi_grids()
             # When all grids are identical, should optimize to UnifiedTimeGridModel
             T = collect(LinRange(0.0, 1.0, 11))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             # Pass same grid 4 times
             sol = Solutions.build_solution(
@@ -350,7 +351,7 @@ function test_multi_grids()
 
             # Should detect and optimize to UnifiedTimeGridModel
             Test.@test Solutions.time_grid_model(sol) isa Solutions.UnifiedTimeGridModel
-            Test.@test Solutions.time_grid(sol) ≈ T
+            Test.@test Components.time_grid(sol) ≈ T
 
             # Now with different grids
             T_control_diff = collect(LinRange(0.0, 1.0, 6))
@@ -376,8 +377,8 @@ function test_multi_grids()
             # Should use MultipleTimeGridModel
             Test.@test Solutions.time_grid_model(sol_multi) isa
                 Solutions.MultipleTimeGridModel
-            Test.@test Solutions.time_grid(sol_multi, :state) ≈ T
-            Test.@test Solutions.time_grid(sol_multi, :control) ≈ T_control_diff
+            Test.@test Components.time_grid(sol_multi, :state) ≈ T
+            Test.@test Components.time_grid(sol_multi, :control) ≈ T_control_diff
         end
 
         # ====================================================================
@@ -387,9 +388,9 @@ function test_multi_grids()
         Test.@testset "Serialization structure" begin
             # Test UnifiedTimeGridModel serialization
             T = collect(LinRange(0.0, 1.0, 11))
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_uni = Solutions.build_solution(
                 ocp,
@@ -463,9 +464,9 @@ function test_multi_grids()
         # ====================================================================
 
         Test.@testset "Extreme grid sizes" begin
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             # Very different grid sizes
             T_state_large = collect(LinRange(0.0, 1.0, 1001))  # Fine grid
@@ -496,10 +497,10 @@ function test_multi_grids()
                 Solutions.MultipleTimeGridModel
 
             # Verify grids
-            Test.@test length(Solutions.time_grid(sol_extreme, :state)) == 1001
-            Test.@test length(Solutions.time_grid(sol_extreme, :control)) == 11
-            Test.@test Solutions.time_grid(sol_extreme, :state) ≈ T_state_large
-            Test.@test Solutions.time_grid(sol_extreme, :control) ≈ T_control_small
+            Test.@test length(Components.time_grid(sol_extreme, :state)) == 1001
+            Test.@test length(Components.time_grid(sol_extreme, :control)) == 11
+            Test.@test Components.time_grid(sol_extreme, :state) ≈ T_state_large
+            Test.@test Components.time_grid(sol_extreme, :control) ≈ T_control_small
 
             # Minimum grid size (2 points)
             T_min = collect(LinRange(0.0, 1.0, 2))
@@ -524,7 +525,7 @@ function test_multi_grids()
 
             # Should work with minimum grid
             Test.@test Solutions.time_grid_model(sol_min) isa Solutions.UnifiedTimeGridModel
-            Test.@test length(Solutions.time_grid(sol_min)) == 2
+            Test.@test length(Components.time_grid(sol_min)) == 2
         end
 
         # ====================================================================
@@ -538,9 +539,9 @@ function test_multi_grids()
             T_costate = collect(LinRange(0.0, 1.0, 16))
             T_path = collect(LinRange(0.0, 1.0, 21))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_orig = Solutions.build_solution(
                 ocp,
@@ -581,10 +582,10 @@ function test_multi_grids()
             # Verify reconstruction
             Test.@test Solutions.time_grid_model(sol_reconstructed) isa
                 Solutions.MultipleTimeGridModel
-            Test.@test Solutions.time_grid(sol_reconstructed, :state) ≈ T_state
-            Test.@test Solutions.time_grid(sol_reconstructed, :control) ≈ T_control
-            Test.@test Solutions.time_grid(sol_reconstructed, :costate) ≈ T_costate
-            Test.@test Solutions.time_grid(sol_reconstructed, :dual) ≈ T_path
+            Test.@test Components.time_grid(sol_reconstructed, :state) ≈ T_state
+            Test.@test Components.time_grid(sol_reconstructed, :control) ≈ T_control
+            Test.@test Components.time_grid(sol_reconstructed, :costate) ≈ T_costate
+            Test.@test Components.time_grid(sol_reconstructed, :dual) ≈ T_path
             Test.@test Solutions.objective(sol_reconstructed) ≈
                 Solutions.objective(sol_orig)
         end
@@ -596,9 +597,9 @@ function test_multi_grids()
         Test.@testset "Legacy format detection" begin
             # Create a legacy-format data structure (single time_grid)
             T = collect(LinRange(0.0, 1.0, 11))
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol = Solutions.build_solution(
                 ocp,
@@ -643,7 +644,7 @@ function test_multi_grids()
             # Should create UnifiedTimeGridModel from legacy format
             Test.@test Solutions.time_grid_model(sol_from_legacy) isa
                 Solutions.UnifiedTimeGridModel
-            Test.@test Solutions.time_grid(sol_from_legacy) ≈ T
+            Test.@test Components.time_grid(sol_from_legacy) ≈ T
         end
 
         # ====================================================================
@@ -658,9 +659,9 @@ function test_multi_grids()
             T_costate = collect(LinRange(0.0, 1.0, 11))
             T_path = collect(LinRange(0.0, 1.0, 9))
 
-            X_func = Models.state(sol_unified)
-            U_func = Models.control(sol_unified)
-            P_func = Solutions.costate(sol_unified)
+            X_func = Components.state(sol_unified)
+            U_func = Components.control(sol_unified)
+            P_func = Components.costate(sol_unified)
 
             sol_multi = Solutions.build_solution(
                 ocp,
@@ -711,12 +712,12 @@ function test_multi_grids()
             # Verify the solution round-tripped correctly
             Test.@test Solutions.time_grid_model(sol_reimported) isa
                 Solutions.MultipleTimeGridModel
-            Test.@test Solutions.time_grid(sol_reimported, :state) ≈ T_state atol = 1e-10
-            Test.@test Solutions.time_grid(sol_reimported, :control) ≈ T_control atol =
+            Test.@test Components.time_grid(sol_reimported, :state) ≈ T_state atol = 1e-10
+            Test.@test Components.time_grid(sol_reimported, :control) ≈ T_control atol =
                 1e-10
-            Test.@test Solutions.time_grid(sol_reimported, :costate) ≈ T_costate atol =
+            Test.@test Components.time_grid(sol_reimported, :costate) ≈ T_costate atol =
                 1e-10
-            Test.@test Solutions.time_grid(sol_reimported, :dual) ≈ T_path atol = 1e-10
+            Test.@test Components.time_grid(sol_reimported, :dual) ≈ T_path atol = 1e-10
             Test.@test Solutions.objective(sol_reimported) ≈
                 Solutions.objective(sol_unified) atol = 1e-8
 
