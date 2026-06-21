@@ -619,7 +619,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access.
 """
 function Components.initial_time(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get initial time with this function";
             reason="This model type does not support direct initial time access",
@@ -635,7 +635,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access with variable.
 """
 function Components.initial_time(::AbstractModel, ::AbstractVector)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get initial time with this function";
             reason="This model type does not support initial time access with variable",
@@ -745,7 +745,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access.
 """
 function Components.final_time(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get final time with this function";
             reason="This model type does not support direct final time access",
@@ -761,7 +761,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access with variable.
 """
 function Components.final_time(::AbstractModel, ::AbstractVector)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get final time with this function";
             reason="This model type does not support final time access with variable",
@@ -984,7 +984,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Mayer cost on a model without one.
 """
 function Components.mayer(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot access Mayer cost";
             reason="This OCP has no Mayer objective defined",
@@ -1075,7 +1075,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Lagrange cost on a model without one.
 """
 function Components.lagrange(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot access Lagrange cost";
             reason="This OCP has no Lagrange objective defined",
@@ -1248,7 +1248,7 @@ function get_build_examodel(
         <:Nothing,
     },
 )
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "The :exa modeler is not available for this model";
             reason="this Model was built with the functional (macro-free) API (PreModel + time!/state!/control!/variable!/dynamics!/objective!/constraint! + build), which does not generate the Exa builder required by the Exa (:exa) modeler",
@@ -1626,7 +1626,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
         )
     end
 
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "Constraint label not found";
             got="label :$label",
