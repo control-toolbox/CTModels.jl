@@ -24,7 +24,7 @@ function _validate_initial_guess(ocp::Models.AbstractModel, init::InitialGuess)
 
     # Sample evaluation time; for autonomous/non-autonomous problems
     # the shape of x(t), u(t) is independent of t.
-    v0 = Models.variable(init)
+    v0 = Components.variable(init)
     tsample = if Components.has_fixed_initial_time(ocp)
         Components.initial_time(ocp)
     else
@@ -32,7 +32,7 @@ function _validate_initial_guess(ocp::Models.AbstractModel, init::InitialGuess)
     end
 
     # State
-    x0 = Models.state(init)(tsample)
+    x0 = Components.state(init)(tsample)
     if xdim == 1
         if !(x0 isa Real) && !(x0 isa AbstractVector && length(x0) == 1)
             throw(
@@ -60,7 +60,7 @@ function _validate_initial_guess(ocp::Models.AbstractModel, init::InitialGuess)
     end
 
     # Control
-    u0 = Models.control(init)(tsample)
+    u0 = Components.control(init)(tsample)
     if udim == 1
         if !(u0 isa Real) && !(u0 isa AbstractVector && length(u0) == 1)
             throw(
@@ -194,9 +194,9 @@ function _initial_guess_from_solution(
         )
     end
 
-    state_fun = Models.state(sol)
-    control_fun = Models.control(sol)
-    variable_val = Models.variable(sol)
+    state_fun = Components.state(sol)
+    control_fun = Components.control(sol)
+    variable_val = Components.variable(sol)
 
     return InitialGuess(state_fun, control_fun, variable_val)
 end

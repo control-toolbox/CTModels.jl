@@ -142,4 +142,4 @@ Return the variable value from an initial guess.
 # Returns
 - `Union{Real, Vector{<:Real}}`: The variable value (scalar or vector).
 """
-Models.variable(init::AbstractInitialGuess) = init.variable
+Components.variable(init::AbstractInitialGuess) = init.variable

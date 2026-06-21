@@ -22,7 +22,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solutions.Solution)
     println(io, "  │  Status     : ", Solutions.status(sol))
     println(io, "  │  Message    : ", Solutions.message(sol))
     println(io, "  │  Iterations : ", Solutions.iterations(sol))
-    println(io, "  │  Objective  : ", Models.objective(sol))
+    println(io, "  │  Objective  : ", Components.objective(sol))
     println(io, "  └─ Constraints violation : ", Solutions.constraints_violation(sol))
 
     # Variable (if defined)
@@ -32,7 +32,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solutions.Solution)
 
         # Simplified case: dimension 1 and name identical
         if Models.variable_dimension(sol) == 1 && var_name == components[1]
-            println(io, "\n• Variable: ", var_name, " = ", Models.variable(sol))
+            println(io, "\n• Variable: ", var_name, " = ", Components.variable(sol))
         else
             println(
                 io,
@@ -41,7 +41,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solutions.Solution)
                 " = (",
                 join(components, ", "),
                 ") = ",
-                Models.variable(sol),
+                Components.variable(sol),
             )
         end
         if Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
