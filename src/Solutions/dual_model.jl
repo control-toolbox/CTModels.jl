@@ -108,7 +108,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
     end
 
     # throw an exception if the label is not found
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "Label not found in model";
             got="label=$label",

@@ -145,7 +145,7 @@ Return the state trajectory from an initial guess.
 # Returns
 - `Function`: The state function `t -> x(t)`.
 """
-Models.state(init::AbstractInitialGuess) = init.state
+Components.state(init::AbstractInitialGuess) = init.state
 
 """
 $(TYPEDSIGNATURES)
@@ -158,4 +158,4 @@ Return the state trajectory from a solution.
 # Returns
 - `Function`: The state function `t -> x(t)`.
 """
-Models.state(sol::Solutions.AbstractSolution) = sol.state
+Components.state(sol::Solutions.AbstractSolution) = sol.state

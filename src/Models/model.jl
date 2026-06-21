@@ -296,7 +296,7 @@ Return the state struct.
 
 See also: [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
-function state(
+function Components.state(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -381,7 +381,7 @@ Return the control struct.
 
 See also: [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
-function control(
+function Components.control(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -466,7 +466,7 @@ Return the variable struct.
 
 See also: [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
-function variable(
+function Components.variable(
     ocp::Model{
         <:TimeDependence,
         <:TimesModel,
@@ -551,7 +551,7 @@ Return the times struct.
 
 See also: [`CTModels.Components.time_name`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
-function times(
+function Components.times(
     ocp::Model{
         <:TimeDependence,
         T,
@@ -619,7 +619,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access.
 """
 function Components.initial_time(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get initial time with this function";
             reason="This model type does not support direct initial time access",
@@ -635,7 +635,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported initial time access with variable.
 """
 function Components.initial_time(::AbstractModel, ::AbstractVector)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get initial time with this function";
             reason="This model type does not support initial time access with variable",
@@ -745,7 +745,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access.
 """
 function Components.final_time(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get final time with this function";
             reason="This model type does not support direct final time access",
@@ -761,7 +761,7 @@ $(TYPEDSIGNATURES)
 Throw an error for unsupported final time access with variable.
 """
 function Components.final_time(::AbstractModel, ::AbstractVector)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot get final time with this function";
             reason="This model type does not support final time access with variable",
@@ -946,7 +946,7 @@ Return the objective struct.
 
 See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
-function objective(
+function Components.objective(
     ocp::Model{
         <:TimeDependence,
         <:AbstractTimesModel,
@@ -984,7 +984,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Mayer cost on a model without one.
 """
 function Components.mayer(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot access Mayer cost";
             reason="This OCP has no Mayer objective defined",
@@ -1075,7 +1075,7 @@ $(TYPEDSIGNATURES)
 Throw an error when accessing Lagrange cost on a model without one.
 """
 function Components.lagrange(::AbstractModel)
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "Cannot access Lagrange cost";
             reason="This OCP has no Lagrange objective defined",
@@ -1248,7 +1248,7 @@ function get_build_examodel(
         <:Nothing,
     },
 )
-    throw(
+    return throw(
         Exceptions.PreconditionError(
             "The :exa modeler is not available for this model";
             reason="this Model was built with the functional (macro-free) API (PreModel + time!/state!/control!/variable!/dynamics!/objective!/constraint! + build), which does not generate the Exa builder required by the Exa (:exa) modeler",
@@ -1626,7 +1626,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
         )
     end
 
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "Constraint label not found";
             got="label :$label",

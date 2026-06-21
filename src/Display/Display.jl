@@ -64,7 +64,7 @@ include(joinpath(@__DIR__, "solution.jl"))
 function RecipesBase.plot(
     sol::Solutions.AbstractSolution, description::Symbol...; kwargs...
 )
-    throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
+    return throw(Exceptions.ExtensionError(:Plots; message="to plot solutions"))
 end
 
 # Note: Base.show methods are automatically exported by Julia

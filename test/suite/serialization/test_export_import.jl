@@ -133,32 +133,32 @@ function compare_solutions(
     end
 
     # Compare time grid
-    T1 = Solutions.time_grid(sol1)
-    T2 = Solutions.time_grid(sol2)
+    T1 = Components.time_grid(sol1)
+    T2 = Components.time_grid(sol2)
     if !isapprox(T1, T2; atol=atol_numerical)
         return false
     end
 
     # Compare variable
-    v1 = Models.variable(sol1)
-    v2 = Models.variable(sol2)
+    v1 = Components.variable(sol1)
+    v2 = Components.variable(sol2)
     if !isapprox(v1, v2; atol=atol_numerical)
         return false
     end
 
     # Compare trajectories at time grid points
     if !compare_trajectories(
-        Models.state(sol1), Models.state(sol2), T1; atol=atol_trajectories
+        Components.state(sol1), Components.state(sol2), T1; atol=atol_trajectories
     )
         return false
     end
     if !compare_trajectories(
-        Models.control(sol1), Models.control(sol2), T1; atol=atol_trajectories
+        Components.control(sol1), Components.control(sol2), T1; atol=atol_trajectories
     )
         return false
     end
     if !compare_trajectories(
-        Solutions.costate(sol1), Solutions.costate(sol2), T1; atol=atol_trajectories
+        Components.costate(sol1), Components.costate(sol2), T1; atol=atol_trajectories
     )
         return false
     end
@@ -360,13 +360,13 @@ function test_export_import()
             Test.@test blob["successful"] == Solutions.successful(sol)
 
             # Verify time_grid
-            T_orig = Solutions.time_grid(sol)
+            T_orig = Components.time_grid(sol)
             T_json = Vector{Float64}(blob["time_grid"])
             Test.@test length(T_json) == length(T_orig)
             Test.@test T_json ≈ T_orig atol = 1e-10
 
             # Verify variable
-            v_orig = Models.variable(sol)
+            v_orig = Components.variable(sol)
             v_json = if isempty(blob["variable"])
                 Float64[]
             else
@@ -377,7 +377,7 @@ function test_export_import()
             # Verify state discretization
             state_json = blob["state"]
             Test.@test length(state_json) == length(T_orig)
-            x_func = Models.state(sol)
+            x_func = Components.state(sol)
             for (i, t) in enumerate(T_orig)
                 x_expected = x_func(t)
                 # After fix: state_json[i] is always a vector (even for 1D states)
@@ -392,7 +392,7 @@ function test_export_import()
             # Verify control discretization
             control_json = blob["control"]
             Test.@test length(control_json) == length(T_orig)
-            u_func = Models.control(sol)
+            u_func = Components.control(sol)
             for (i, t) in enumerate(T_orig)
                 u_expected = u_func(t)
                 # After fix: control_json[i] is always a vector (even for 1D controls)
@@ -407,7 +407,7 @@ function test_export_import()
             # Verify costate discretization
             costate_json = blob["costate"]
             Test.@test length(costate_json) == length(T_orig)
-            p_func = Solutions.costate(sol)
+            p_func = Components.costate(sol)
             for (i, t) in enumerate(T_orig)
                 p_expected = p_func(t)
                 # After fix: costate_json[i] is always a vector
@@ -483,7 +483,7 @@ function test_export_import()
             Test.@test Solutions.successful(sol_reloaded) == Solutions.successful(sol)
 
             # Time grid
-            Test.@test Solutions.time_grid(sol_reloaded) ≈ Solutions.time_grid(sol) atol =
+            Test.@test Components.time_grid(sol_reloaded) ≈ Components.time_grid(sol) atol =
                 1e-10
 
             # Metadata: dimensions, names, components and time labels
@@ -510,26 +510,26 @@ function test_export_import()
             Test.@test Components.time_name(sol_reloaded) == Components.time_name(sol)
 
             # Variable
-            Test.@test Models.variable(sol_reloaded) ≈ Models.variable(sol) atol = 1e-10
+            Test.@test Components.variable(sol_reloaded) ≈ Components.variable(sol) atol = 1e-10
 
             # State at sample times
-            T = Solutions.time_grid(sol)
-            x_orig = Models.state(sol)
-            x_reload = Models.state(sol_reloaded)
+            T = Components.time_grid(sol)
+            x_orig = Components.state(sol)
+            x_reload = Components.state(sol_reloaded)
             for t in T
                 Test.@test x_reload(t) ≈ x_orig(t) atol = 1e-8
             end
 
             # Control at sample times
-            u_orig = Models.control(sol)
-            u_reload = Models.control(sol_reloaded)
+            u_orig = Components.control(sol)
+            u_reload = Components.control(sol_reloaded)
             for t in T
                 Test.@test u_reload(t) ≈ u_orig(t) atol = 1e-8
             end
 
             # Costate at sample times
-            p_orig = Solutions.costate(sol)
-            p_reload = Solutions.costate(sol_reloaded)
+            p_orig = Components.costate(sol)
+            p_reload = Components.costate(sol_reloaded)
             for t in T
                 Test.@test p_reload(t) ≈ p_orig(t) atol = 1e-8
             end
@@ -672,13 +672,13 @@ function test_export_import()
         Test.@testset "JSON: solver infos dict preserved" begin
             # Create a solution with custom infos
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Build a new solution with custom infos
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             custom_infos = Dict{Symbol,Any}(
                 :solver_name => "TestSolver",
@@ -834,13 +834,13 @@ function test_export_import()
         Test.@testset "JSON idempotence: with complex infos" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Build solution with complex infos
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             complex_infos = Dict{Symbol,Any}(
                 :solver_name => "TestSolver",
@@ -1046,13 +1046,13 @@ function test_export_import()
         Test.@testset "Control interpolation preservation: JSON" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Extract trajectories
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             # Test with constant interpolation (default)
             sol_constant = Solutions.build_solution(
@@ -1113,8 +1113,8 @@ function test_export_import()
             Test.@test Solutions.control_interpolation(sol_linear_reloaded) == :linear
 
             # Verify control behavior is preserved (linear vs constant)
-            u_const = Models.control(sol_constant_reloaded)
-            u_linear = Models.control(sol_linear_reloaded)
+            u_const = Components.control(sol_constant_reloaded)
+            u_linear = Components.control(sol_linear_reloaded)
 
             # At midpoint, linear should differ from constant
             if length(T) >= 2
@@ -1133,13 +1133,13 @@ function test_export_import()
         Test.@testset "Control interpolation preservation: JLD2" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Extract trajectories
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             # Test with constant interpolation (default)
             sol_constant = Solutions.build_solution(
@@ -1200,8 +1200,8 @@ function test_export_import()
             Test.@test Solutions.control_interpolation(sol_linear_reloaded) == :linear
 
             # Verify control behavior is preserved (linear vs constant)
-            u_const = Models.control(sol_constant_reloaded)
-            u_linear = Models.control(sol_linear_reloaded)
+            u_const = Components.control(sol_constant_reloaded)
+            u_linear = Components.control(sol_linear_reloaded)
 
             # At midpoint, linear should differ from constant
             if length(T) >= 2
@@ -1220,13 +1220,13 @@ function test_export_import()
         Test.@testset "Control interpolation backward compatibility" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Extract trajectories
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             # Create solution without control_interpolation (old format)
             sol_old = Solutions.build_solution(
@@ -1280,13 +1280,13 @@ function test_export_import()
         Test.@testset "Control interpolation mixed format compatibility" verbose = VERBOSE showtiming =
             SHOWTIMING begin
             ocp, sol_base = TestProblems.solution_example()
-            T = Solutions.time_grid(sol_base)
+            T = Components.time_grid(sol_base)
 
             # Extract trajectories
-            x = Models.state(sol_base)
-            u = Models.control(sol_base)
-            p = Solutions.costate(sol_base)
-            v = Models.variable(sol_base)
+            x = Components.state(sol_base)
+            u = Components.control(sol_base)
+            p = Components.costate(sol_base)
+            v = Components.variable(sol_base)
 
             # Create solution with linear interpolation
             sol_linear = Solutions.build_solution(
@@ -1327,9 +1327,9 @@ function test_export_import()
             Test.@test Solutions.control_interpolation(sol_jld_reloaded) == :linear
 
             # Verify control functions behave identically
-            u_orig = Models.control(sol_linear)
-            u_json = Models.control(sol_json_reloaded)
-            u_jld = Models.control(sol_jld_reloaded)
+            u_orig = Components.control(sol_linear)
+            u_json = Components.control(sol_json_reloaded)
+            u_jld = Components.control(sol_jld_reloaded)
 
             for t in T[1:min(end, 3)]  # Test first few points
                 Test.@test u_orig(t) ≈ u_json(t) atol=1e-10

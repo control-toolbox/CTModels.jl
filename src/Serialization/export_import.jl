@@ -3,19 +3,27 @@
 # -----------------------------
 # to be extended by extensions
 function export_ocp_solution(::JLD2Tag, ::Solutions.AbstractSolution; filename::String)
-    throw(Exceptions.ExtensionError(:JLD2; message="to export solutions to JLD2 format"))
+    return throw(
+        Exceptions.ExtensionError(:JLD2; message="to export solutions to JLD2 format")
+    )
 end
 
 function import_ocp_solution(::JLD2Tag, ::Models.AbstractModel; filename::String)
-    throw(Exceptions.ExtensionError(:JLD2; message="to import solutions from JLD2 format"))
+    return throw(
+        Exceptions.ExtensionError(:JLD2; message="to import solutions from JLD2 format")
+    )
 end
 
 function export_ocp_solution(::JSON3Tag, ::Solutions.AbstractSolution; filename::String)
-    throw(Exceptions.ExtensionError(:JSON3; message="to export solutions to JSON format"))
+    return throw(
+        Exceptions.ExtensionError(:JSON3; message="to export solutions to JSON format")
+    )
 end
 
 function import_ocp_solution(::JSON3Tag, ::Models.AbstractModel; filename::String)
-    throw(Exceptions.ExtensionError(:JSON3; message="to import solutions from JSON format"))
+    return throw(
+        Exceptions.ExtensionError(:JSON3; message="to import solutions from JSON format")
+    )
 end
 
 """

@@ -50,8 +50,8 @@ export is_variable, is_nonvariable, is_control_free
 export has_variable, has_control
 export has_abstract_definition, is_abstractly_defined
 
-# Component field accessors (return sub-model structs)
-export state, control, variable, times, objective, constraints, dynamics, definition
+# Component field accessors (return sub-model structs) — state/control/variable/times/objective owned by Components
+export constraints, dynamics, definition
 
 # Named accessors on state/control/variable
 export state_name, state_components, state_dimension
