@@ -4,6 +4,18 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.12.0-beta] - 2026-06-22
+
+### No Breaking Changes
+
+This release includes dependency updates without breaking existing functionality.
+
+#### Dependency Updates
+
+- **Updated CTBase compatibility**: Extended support to CTBase 0.21
+- **No breaking changes**: Full backward compatibility maintained with previous CTBase versions
+- **Forward compatibility**: Now compatible with CTBase 0.21
+
 ## [0.11.0-beta] - 2026-06-21
 
 ### Breaking Changes: Removed Legacy `time_grid_dual` Key Support
