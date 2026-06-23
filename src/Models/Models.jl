@@ -32,6 +32,10 @@ module Models
 
 import CTBase.Core
 import CTBase.Exceptions
+import CTBase.Traits
+# Time/variable-dependence predicates are generic functions owned by CTBase.Traits;
+# CTModels only provides the `Model` trait contract (see model.jl) and re-exports them.
+import CTBase.Traits: is_autonomous, is_nonautonomous, is_variable, is_nonvariable, has_variable
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using ..Components
