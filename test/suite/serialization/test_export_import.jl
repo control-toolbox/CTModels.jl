@@ -510,7 +510,8 @@ function test_export_import()
             Test.@test Components.time_name(sol_reloaded) == Components.time_name(sol)
 
             # Variable
-            Test.@test Components.variable(sol_reloaded) ≈ Components.variable(sol) atol = 1e-10
+            Test.@test Components.variable(sol_reloaded) ≈ Components.variable(sol) atol =
+                1e-10
 
             # State at sample times
             T = Components.time_grid(sol)
@@ -1230,7 +1231,8 @@ function test_export_import()
             json_string = read("test_missing_interp.json", String)
             json_data = JSON3.read(json_string)
             json_without = Dict{String,Any}(
-                string(k) => v for (k, v) in json_data if string(k) != "control_interpolation"
+                string(k) => v for
+                (k, v) in json_data if string(k) != "control_interpolation"
             )
             open("test_missing_interp.json", "w") do f
                 return JSON3.write(f, json_without)

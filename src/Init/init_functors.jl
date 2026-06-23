@@ -7,7 +7,7 @@
 
 # For dim == 1: normalise any base value to a length-1 vector (no length check).
 _wrap_1d(v::AbstractVector) = copy(v)
-_wrap_1d(v)                 = [v]
+_wrap_1d(v) = [v]
 
 # For dim > 1: check that `v` has the expected length, then collect.
 # The scalar overload always throws because a scalar cannot fill a dim>1 vector.
@@ -27,7 +27,7 @@ function _coerce_base(v::AbstractVector, dim::Int, role::Symbol)
 end
 
 function _coerce_base(_, dim::Int, role::Symbol)
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "Block-level $role initialization has incompatible dimension";
             got="scalar",
@@ -79,9 +79,7 @@ struct MergedTrajectory{F,C} <: Function
     dim::Int
     role::Symbol
 
-    function MergedTrajectory{F,C}(
-        base::F, comps::C, dim::Int, role::Symbol
-    ) where {F,C}
+    function MergedTrajectory{F,C}(base::F, comps::C, dim::Int, role::Symbol) where {F,C}
         for i in keys(comps)
             if !(1 <= i <= dim)
                 throw(
@@ -99,8 +97,9 @@ struct MergedTrajectory{F,C} <: Function
     end
 end
 
-MergedTrajectory(base::F, comps::C, dim::Int, role::Symbol) where {F,C} =
-    MergedTrajectory{F,C}(base, comps, dim, role)
+function MergedTrajectory(base::F, comps::C, dim::Int, role::Symbol) where {F,C}
+    return MergedTrajectory{F,C}(base, comps, dim, role)
+end
 
 """
 $(TYPEDSIGNATURES)
