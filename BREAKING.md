@@ -4,6 +4,25 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.13.0-beta] - 2026-06-24
+
+### No Breaking Changes
+
+This release includes dependency updates and internal trait migration without breaking existing functionality.
+
+#### Dependency Updates
+
+- **Updated CTBase compatibility**: Extended support to CTBase 0.22
+- **No breaking changes**: Full backward compatibility maintained with previous CTBase versions
+- **Forward compatibility**: Now compatible with CTBase 0.22
+
+#### Internal Trait Migration
+
+- **Time-dependence types**: `TimeDependence`, `Autonomous`, and `NonAutonomous` are now imported from `CTBase.Traits`
+- **Predicate migration**: `is_autonomous`, `is_nonautonomous`, `is_variable`, `is_nonvariable`, and `has_variable` are now owned by `CTBase.Traits`
+- **Re-exported for compatibility**: All predicates are re-exported from `CTModels.Components` and `CTModels.Models` for backward compatibility
+- **No user action required**: Existing code continues to work unchanged
+
 ## [0.12.0-beta] - 2026-06-22
 
 ### No Breaking Changes

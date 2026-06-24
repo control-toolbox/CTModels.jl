@@ -7,6 +7,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0-beta] - 2026-06-24
+
+### 📦 Dependencies
+
+#### CTBase Compatibility Update
+
+- **Updated CTBase compatibility**: Extended support to CTBase 0.22
+- **No breaking changes**: Full backward compatibility maintained with previous CTBase versions
+- **Forward compatibility**: Now compatible with CTBase 0.22
+
+### 🔧 Internal Changes
+
+#### Trait Types Migration to CTBase.Traits
+
+- **Time-dependence types**: `TimeDependence`, `Autonomous`, and `NonAutonomous` are now imported from `CTBase.Traits` instead of being defined locally
+- **Predicate migration**: `is_autonomous`, `is_nonautonomous`, `is_variable`, `is_nonvariable`, and `has_variable` are now generic functions owned by `CTBase.Traits`
+- **Model trait contract**: `Model` now implements the trait contract with `has_time_dependence_trait(::Model) = true` and `time_dependence(::Model{TD}) = TD`
+- **Variable dependence**: `variable_dependence(ocp)` now dispatches on the *type* of the variable model (`EmptyVariableModel ⟹ Fixed`, otherwise `NonFixed`)
+- **Type stability**: Removes `is_variable`↔`variable_dependence` recursion for improved type stability
+- **Backward compatibility**: All predicates are re-exported from `CTBase.Traits` for seamless migration
+- **Control-specific**: `is_control_free` and `has_control` remain in CTModels (control-specific)
+
 ## [0.12.0-beta] - 2026-06-22
 
 ### 📦 Dependencies
