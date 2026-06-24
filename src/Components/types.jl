@@ -4,45 +4,9 @@
 #  constraints, definitions)
 # ------------------------------------------------------------------------------ #
 
-"""
-$(TYPEDEF)
-
-Abstract base type representing time dependence of an optimal control problem.
-
-Used as a type parameter to distinguish between autonomous and non-autonomous
-systems at the type level, enabling dispatch and compile-time optimisations.
-
-See also: [`CTModels.Components.Autonomous`](@ref), [`CTModels.Components.NonAutonomous`](@ref),
-[`CTModels.Components.TimesModel`](@ref).
-"""
-abstract type TimeDependence end
-
-"""
-$(TYPEDEF)
-
-Type tag indicating that the dynamics and other functions of an optimal control
-problem do not explicitly depend on time.
-
-For autonomous systems, the dynamics have the form `ẋ = f(x, u)` rather than
-`ẋ = f(t, x, u)`.
-
-See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.NonAutonomous`](@ref),
-[`CTModels.Components.TimesModel`](@ref).
-"""
-abstract type Autonomous<:TimeDependence end
-
-"""
-$(TYPEDEF)
-
-Type tag indicating that the dynamics and other functions of an optimal control
-problem explicitly depend on time.
-
-For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
-
-See also: [`CTModels.Components.TimeDependence`](@ref), [`CTModels.Components.Autonomous`](@ref),
-[`CTModels.Components.TimesModel`](@ref).
-"""
-abstract type NonAutonomous<:TimeDependence end
+# TimeDependence / Autonomous / NonAutonomous are now defined in `CTBase.Traits`
+# and imported into this module (see Components.jl). They remain exported from
+# `CTModels.Components` for backward compatibility.
 
 # ------------------------------------------------------------------------------ #
 """

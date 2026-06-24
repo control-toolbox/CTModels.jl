@@ -28,6 +28,7 @@ module Components
 
 import CTBase.Core
 import CTBase.Exceptions
+import CTBase.Traits: TimeDependence, Autonomous, NonAutonomous
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using OrderedCollections: OrderedCollections
 

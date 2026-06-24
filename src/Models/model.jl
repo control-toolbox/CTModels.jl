@@ -95,82 +95,28 @@ end
 # Getters — time dependence
 # ------------------------------------------------------------------------------ #
 
-"""
-$(TYPEDSIGNATURES)
+# ------------------------------------------------------------------------------ #
+# Trait contract — time & variable dependence
+#
+# CTModels no longer defines the boolean predicates `is_autonomous`,
+# `is_nonautonomous`, `is_variable`, `is_nonvariable`, `has_variable`: these are
+# generic functions owned by `CTBase.Traits`. A `Model` only declares that it has
+# the traits and reports the trait values; the predicates then follow generically.
+#
+# - time dependence is read from the `TD` type parameter,
+# - variable dependence is read from the *type* of the variable model
+#   (`EmptyVariableModel` ⟹ Fixed, any other ⟹ NonFixed) — not from the dimension.
+# ------------------------------------------------------------------------------ #
 
-Return `true` for an autonomous model.
+Traits.has_time_dependence_trait(::Model) = true
 
-# Arguments
-- `::Model{Autonomous,...}`: An autonomous model.
+Traits.time_dependence(::Model{TD}) where {TD} = TD
 
-# Returns
-- `Bool`: `true`.
+Traits.has_variable_dependence_trait(::Model) = true
 
-See also: [`CTModels.Models.is_nonautonomous`](@ref).
-"""
-function is_autonomous(
-    ::Model{
-        Autonomous,
-        <:TimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:Function,
-        <:AbstractObjectiveModel,
-        <:AbstractConstraintsModel,
-        <:AbstractDefinition,
-        <:Union{Function,Nothing},
-    },
-)
-    return true
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `false` for a non-autonomous model.
-
-# Arguments
-- `::Model{NonAutonomous,...}`: A non-autonomous model.
-
-# Returns
-- `Bool`: `false`.
-
-See also: [`CTModels.Models.is_autonomous`](@ref).
-"""
-function is_autonomous(
-    ::Model{
-        NonAutonomous,
-        <:TimesModel,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:Function,
-        <:AbstractObjectiveModel,
-        <:AbstractConstraintsModel,
-        <:AbstractDefinition,
-        <:Union{Function,Nothing},
-    },
-)
-    return false
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Check whether the problem has optimisation variables.
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem has optimisation variables, `false` otherwise.
-
-See also: [`CTModels.Models.is_nonvariable`](@ref), [`CTModels.Models.variable_dimension`](@ref).
-"""
-function is_variable(ocp::Model)::Bool
-    return variable_dimension(ocp) > 0
-end
+Traits.variable_dependence(ocp::Model) = _variable_dependence(ocp.variable)
+_variable_dependence(::EmptyVariableModel) = Traits.Fixed
+_variable_dependence(::AbstractVariableModel) = Traits.NonFixed
 
 """
 $(TYPEDSIGNATURES)
@@ -188,21 +134,6 @@ See also: [`CTModels.Models.has_control`](@ref), [`CTModels.Models.control_dimen
 function is_control_free(ocp::Model)::Bool
     return control_dimension(ocp) == 0
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Check whether the problem has optimisation variables.
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem has optimisation variables, `false` otherwise.
-
-See also: [`CTModels.Models.is_variable`](@ref).
-"""
-has_variable(ocp::Model)::Bool = is_variable(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -248,36 +179,6 @@ Check whether the problem is abstractly defined.
 See also: [`CTModels.Models.has_abstract_definition`](@ref).
 """
 is_abstractly_defined(ocp::Model)::Bool = has_abstract_definition(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Check whether the problem is non-autonomous (time-dependent).
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem is non-autonomous, `false` otherwise.
-
-See also: [`CTModels.Models.is_autonomous`](@ref).
-"""
-is_nonautonomous(ocp::Model)::Bool = !is_autonomous(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Check whether the problem has no optimisation variables.
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem has no optimisation variables, `false` otherwise.
-
-See also: [`CTModels.Models.is_variable`](@ref).
-"""
-is_nonvariable(ocp::Model)::Bool = !is_variable(ocp)
 
 # ------------------------------------------------------------------------------ #
 # Getters — State
