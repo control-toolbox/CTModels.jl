@@ -25,7 +25,7 @@ CTModelsPlots = "Plots"
 
 [compat]
 Aqua = "0.8"
-CTBase = "0.22, 0.23"
+CTBase = "0.23"
 DocStringExtensions = "0.9"
 JLD2 = "0.6"
 JSON3 = "1"
