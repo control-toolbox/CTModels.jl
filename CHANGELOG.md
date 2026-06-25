@@ -7,6 +7,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.2-beta] - 2026-06-25
+
+### 📦 Dependencies
+
+#### CTBase Compatibility Update
+
+- **Widened CTBase compatibility**: Extended support to CTBase 0.24
+- **No breaking changes**: Full backward compatibility maintained with previous CTBase versions
+- **Forward compatibility**: Now compatible with CTBase 0.24
+- **Note**: CTBase 0.24 adds the Differentiation submodule; CTModels is source-compatible with no code changes required
+
+#### Test Environment Robustness
+
+- **Weakdeps mirrored to [extras]**: JLD2, JSON3, and Plots dependencies mirrored into `[extras]` section for improved test environment robustness
+- **No user impact**: Existing code continues to work unchanged
+
 ## [0.13.1-beta] - 2026-06-25
 
 ### 📦 Dependencies

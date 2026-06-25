@@ -4,6 +4,19 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.13.2-beta] - 2026-06-25
+
+### No Breaking Changes
+
+This release widens CTBase compatibility to include 0.24 without any code changes.
+
+#### Dependency Updates
+
+- **Widened CTBase compatibility**: Extended support to CTBase 0.24
+- **No breaking changes**: Full backward compatibility maintained
+- **No user action required**: Existing code continues to work unchanged
+- **Note**: CTBase 0.24 adds the Differentiation submodule; CTModels is source-compatible
+
 ## [0.13.1-beta] - 2026-06-25
 
 ### No Breaking Changes
