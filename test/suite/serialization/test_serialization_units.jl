@@ -203,7 +203,7 @@ function test_serialization_units()
             p = Components.costate(sol2)
             for t in T[1:min(end, 5)]
                 Test.@test x(t) isa AbstractVector
-                Test.@test u(t) isa Union{Number, AbstractVector}
+                Test.@test u(t) isa Union{Number,AbstractVector}
                 Test.@test p(t) isa AbstractVector
             end
         end
@@ -217,7 +217,12 @@ function test_serialization_units()
             v = Components.variable(sol_base)
 
             sol_linear = Solutions.build_solution(
-                ocp, Vector{Float64}(T), x, u, v, p;
+                ocp,
+                Vector{Float64}(T),
+                x,
+                u,
+                v,
+                p;
                 objective=Solutions.objective(sol_base),
                 iterations=Solutions.iterations(sol_base),
                 constraints_violation=Solutions.constraints_violation(sol_base),
@@ -244,7 +249,9 @@ function test_serialization_units()
             Test.@test !isnothing(pcd)
 
             # Export and re-import
-            Serialization.export_ocp_solution(sol; filename="dual_functor_test", format=:JSON)
+            Serialization.export_ocp_solution(
+                sol; filename="dual_functor_test", format=:JSON
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="dual_functor_test", format=:JSON
             )
@@ -264,7 +271,9 @@ function test_serialization_units()
             ocp, sol = TestProblems.solution_example_dual()
             pcd = Solutions.path_constraints_dual(sol)
 
-            Serialization.export_ocp_solution(sol; filename="dual_functor_jld_test", format=:JLD)
+            Serialization.export_ocp_solution(
+                sol; filename="dual_functor_jld_test", format=:JLD
+            )
             sol2 = Serialization.import_ocp_solution(
                 ocp; filename="dual_functor_jld_test", format=:JLD
             )
@@ -278,7 +287,6 @@ function test_serialization_units()
 
             isfile("dual_functor_jld_test.jld2") && rm("dual_functor_jld_test.jld2")
         end
-
     end
 end
 

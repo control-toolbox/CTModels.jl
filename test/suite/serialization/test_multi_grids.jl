@@ -185,10 +185,12 @@ function test_multi_grids()
 
             # Verify trajectories at their respective grids
             for t in T_state
-                Test.@test Components.state(sol_reloaded)(t) ≈ Components.state(sol_multi)(t) atol=1e-8
+                Test.@test Components.state(sol_reloaded)(t) ≈
+                    Components.state(sol_multi)(t) atol=1e-8
             end
             for t in T_control
-                Test.@test Components.control(sol_reloaded)(t) ≈ Components.control(sol_multi)(t) atol=1e-8
+                Test.@test Components.control(sol_reloaded)(t) ≈
+                    Components.control(sol_multi)(t) atol=1e-8
             end
 
             remove_if_exists("multi_grid_test.jld2")
@@ -618,9 +620,7 @@ function test_multi_grids()
 
             # Reconstruct from unified format
             sol_from_legacy = Serialization._reconstruct_solution_from_data(
-                ocp,
-                data;
-                infos=get(data, "infos", Dict{Symbol,Any}()),
+                ocp, data; infos=get(data, "infos", Dict{Symbol,Any}())
             )
 
             # Should create UnifiedTimeGridModel from legacy format

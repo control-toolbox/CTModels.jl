@@ -13,7 +13,6 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using CTModels: CTModels
 using JSON3: JSON3
 
-
 # ============================================================================
 # Private helpers for JSON matrix conversion
 # ============================================================================
@@ -283,8 +282,11 @@ function CTModels.import_ocp_solution(
     # Restore Symbol types in infos (JSON3 deserializes all strings; metadata tracks which were Symbols)
     symbol_keys_raw = get(blob, "infos_symbol_keys", String[])
     symbol_keys = collect(String, symbol_keys_raw)
-    infos = haskey(blob, "infos") ? _deserialize_infos(blob["infos"], symbol_keys) :
+    infos = if haskey(blob, "infos")
+        _deserialize_infos(blob["infos"], symbol_keys)
+    else
         Dict{Symbol,Any}()
+    end
 
     # Build data dictionary: convert JSON arrays back to the types expected by the helper
     bcd = blob["boundary_constraints_dual"]
@@ -304,12 +306,18 @@ function CTModels.import_ocp_solution(
         "variable" => Vector{Float64}(blob.variable),
         "path_constraints_dual" => _json_to_optional_matrix(blob["path_constraints_dual"]),
         "boundary_constraints_dual" => isnothing(bcd) ? nothing : Vector{Float64}(bcd),
-        "state_constraints_lb_dual" => _json_to_optional_matrix(blob["state_constraints_lb_dual"]),
-        "state_constraints_ub_dual" => _json_to_optional_matrix(blob["state_constraints_ub_dual"]),
-        "control_constraints_lb_dual" => _json_to_optional_matrix(blob["control_constraints_lb_dual"]),
-        "control_constraints_ub_dual" => _json_to_optional_matrix(blob["control_constraints_ub_dual"]),
-        "variable_constraints_lb_dual" => isnothing(vclbd) ? nothing : Vector{Float64}(vclbd),
-        "variable_constraints_ub_dual" => isnothing(vcubd) ? nothing : Vector{Float64}(vcubd),
+        "state_constraints_lb_dual" =>
+            _json_to_optional_matrix(blob["state_constraints_lb_dual"]),
+        "state_constraints_ub_dual" =>
+            _json_to_optional_matrix(blob["state_constraints_ub_dual"]),
+        "control_constraints_lb_dual" =>
+            _json_to_optional_matrix(blob["control_constraints_lb_dual"]),
+        "control_constraints_ub_dual" =>
+            _json_to_optional_matrix(blob["control_constraints_ub_dual"]),
+        "variable_constraints_lb_dual" =>
+            isnothing(vclbd) ? nothing : Vector{Float64}(vclbd),
+        "variable_constraints_ub_dual" =>
+            isnothing(vcubd) ? nothing : Vector{Float64}(vcubd),
         "control_interpolation" => blob["control_interpolation"],
     )
 
