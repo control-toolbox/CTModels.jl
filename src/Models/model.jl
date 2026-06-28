@@ -96,16 +96,20 @@ end
 # ------------------------------------------------------------------------------ #
 
 # ------------------------------------------------------------------------------ #
-# Trait contract — time & variable dependence
+# Trait contract — time, variable & control dependence
 #
 # CTModels no longer defines the boolean predicates `is_autonomous`,
-# `is_nonautonomous`, `is_variable`, `is_nonvariable`, `has_variable`: these are
-# generic functions owned by `CTBase.Traits`. A `Model` only declares that it has
-# the traits and reports the trait values; the predicates then follow generically.
+# `is_nonautonomous`, `is_variable`, `is_nonvariable`, `has_variable`,
+# `is_control_free`, `has_control`: these are generic functions owned by
+# `CTBase.Traits`. A `Model` only declares that it has the traits and reports the
+# trait values; the predicates then follow generically.
 #
 # - time dependence is read from the `TD` type parameter,
 # - variable dependence is read from the *type* of the variable model
-#   (`EmptyVariableModel` ⟹ Fixed, any other ⟹ NonFixed) — not from the dimension.
+#   (`EmptyVariableModel` ⟹ Fixed, any other ⟹ NonFixed) — not from the dimension,
+# - control dependence is read from the *type* of the control model
+#   (`EmptyControlModel` ⟹ ControlFree, any other ⟹ WithControl) — not from the
+#   dimension.
 # ------------------------------------------------------------------------------ #
 
 Traits.has_time_dependence_trait(::Model) = true
@@ -118,37 +122,11 @@ Traits.variable_dependence(ocp::Model) = _variable_dependence(ocp.variable)
 _variable_dependence(::EmptyVariableModel) = Traits.Fixed
 _variable_dependence(::AbstractVariableModel) = Traits.NonFixed
 
-"""
-$(TYPEDSIGNATURES)
+Traits.has_control_dependence_trait(::Model) = true
 
-Check whether the problem is control-free (no control input).
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem has no control input, `false` otherwise.
-
-See also: [`CTModels.Models.has_control`](@ref), [`CTModels.Models.control_dimension`](@ref).
-"""
-function is_control_free(ocp::Model)::Bool
-    return control_dimension(ocp) == 0
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Check whether the problem has control input.
-
-# Arguments
-- `ocp::Model`: The optimal control problem.
-
-# Returns
-- `Bool`: `true` if the problem has control input, `false` otherwise.
-
-See also: [`CTModels.Models.is_control_free`](@ref).
-"""
-has_control(ocp::Model)::Bool = !is_control_free(ocp)
+Traits.control_dependence(ocp::Model) = _control_dependence(ocp.control)
+_control_dependence(::EmptyControlModel) = Traits.ControlFree
+_control_dependence(::AbstractControlModel) = Traits.WithControl
 
 """
 $(TYPEDSIGNATURES)
