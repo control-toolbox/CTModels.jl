@@ -7,6 +7,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0-beta] - 2026-06-28
+
+### ✨ New Features
+
+- **Control-dependence trait on `Model`**: `Model` now implements the
+  `CTBase.Traits.ControlDependence` contract (`has_control_dependence_trait` /
+  `control_dependence`), reporting `ControlFree` for an `EmptyControlModel` and
+  `WithControl` otherwise — read from the control model **type**, not the dimension.
+  This enables trait-based dispatch on control presence in downstream packages (e.g.
+  CTFlows routing `Flow(ocp)`).
+
+### 🔄 Refactoring
+
+- **`is_control_free` / `has_control` migrated to `CTBase.Traits`**: these predicates are
+  now generic functions owned by `CTBase.Traits`; CTModels re-exports them (so
+  `CTModels.Models.is_control_free` / `has_control` keep working unchanged). As a result
+  `is_control_free` is now **type-stable** (derived from the control model type instead of
+  `control_dimension(ocp) == 0`).
+
+### 📦 Dependencies
+
+- **CTBase compat bumped to `0.26`** (adds the `ControlDependence` trait family). Docs
+  environment compat bumped accordingly.
+
+### 📚 Documentation
+
+- Added a *Control dependence* subsection to the model *Types and traits* guide.
+
+### ✅ Compatibility
+
+- **No breaking changes**: the predicate names and behaviour are preserved via re-export.
+  See [BREAKING.md](BREAKING.md).
+
 ## [0.13.3-beta] - 2026-06-26
 
 ### 📦 Dependencies

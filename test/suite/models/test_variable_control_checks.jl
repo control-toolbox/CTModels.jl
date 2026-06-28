@@ -1,6 +1,7 @@
 module TestVariableControlChecks
 
 import Test: Test
+import CTBase.Traits: Traits
 import CTModels.Building: Building
 import CTModels.Models: Models
 
@@ -78,6 +79,9 @@ function test_variable_control_checks()
 
                 model = Building.build(ocp)
                 Test.@test Models.is_control_free(model) === false
+                Test.@test Models.has_control(model) === true
+                Test.@test Traits.control_dependence(model) === Traits.WithControl
+                Test.@test Traits.has_control_dependence_trait(model) === true
             end
 
             Test.@testset "Model without control" begin
@@ -98,6 +102,9 @@ function test_variable_control_checks()
 
                 model = Building.build(ocp)
                 Test.@test Models.is_control_free(model) === true
+                Test.@test Models.has_control(model) === false
+                Test.@test Traits.control_dependence(model) === Traits.ControlFree
+                Test.@test Traits.has_control_dependence_trait(model) === true
             end
         end
 
@@ -153,7 +160,7 @@ function test_variable_control_checks()
 
         Test.@testset "Exports Verification" begin
             Test.@testset "Exported Functions" begin
-                for f in (:is_variable, :is_control_free)
+                for f in (:is_variable, :is_control_free, :has_control)
                     Test.@test isdefined(Models, f)
                 end
             end

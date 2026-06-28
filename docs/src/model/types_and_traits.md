@@ -41,9 +41,9 @@ evm = CTModels.EmptyVariableModel()
 (CTModels.dimension(sm), CTModels.name(sm), evm isa CTModels.Components.AbstractVariableModel)
 ```
 
-## The two trait axes
+## The trait axes
 
-Two orthogonal yes/no axes are **not** modelled as separate types but as traits.
+Orthogonal yes/no axes are **not** modelled as separate types but as traits.
 
 ### Time dependence
 
@@ -67,6 +67,25 @@ ocp = CTModels.build(pre)
 
 CTModels.is_autonomous(ocp)
 ```
+
+### Control dependence
+
+Whether the problem carries a control input is the **type** of the
+[`AbstractControlModel`](@ref CTModels.Components.AbstractControlModel) inside the
+[`Model`](@ref CTModels.Models.Model): an
+[`EmptyControlModel`](@ref CTModels.Components.EmptyControlModel) means *control-free*, any
+other control model means *with control*. This is exposed through the
+`CTBase.Traits.ControlDependence` axis (values `ControlFree` / `WithControl`), shared
+ecosystem-wide, with the extractors [`is_control_free`](@ref CTModels.Models.is_control_free)
+and [`has_control`](@ref CTModels.Models.has_control):
+
+```@example types
+(CTModels.is_control_free(ocp), CTModels.has_control(ocp))
+```
+
+Like time dependence, the predicates are generic functions owned by `CTBase.Traits`; the
+`Model` only declares the trait and reports its value (read from the control model type, not
+from the control dimension).
 
 ### Time structure
 

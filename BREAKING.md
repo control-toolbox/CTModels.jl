@@ -4,6 +4,24 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.14.0-beta] - 2026-06-28
+
+### No Breaking Changes
+
+This release adds the control-dependence trait on `Model` and migrates the
+`is_control_free` / `has_control` predicates to `CTBase.Traits`.
+
+#### Additive / Compatibility
+
+- **`is_control_free` / `has_control`**: now generic functions owned by `CTBase.Traits`,
+  re-exported by CTModels. `CTModels.Models.is_control_free(ocp)` and
+  `CTModels.Models.has_control(ocp)` keep working unchanged; behaviour is preserved
+  (`is_control_free` is now additionally type-stable).
+- **New trait contract on `Model`**: `has_control_dependence_trait` / `control_dependence`
+  return `ControlFree` / `WithControl`. Purely additive.
+- **CTBase compat**: bumped to `0.26`.
+- **No user action required**.
+
 ## [0.13.2-beta] - 2026-06-25
 
 ### No Breaking Changes
