@@ -22,24 +22,24 @@ names:
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = PreModel(); state!(ocp, 1);
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 1);
 
-julia> state_dimension(ocp), state_components(ocp)
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 (1, ["x"])
 
-julia> ocp = PreModel(); state!(ocp, 2);
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2);
 
-julia> state_dimension(ocp), state_components(ocp)
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 (2, ["x₁", "x₂"])
 
-julia> ocp = PreModel(); state!(ocp, 2, "y");
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y");
 
-julia> state_dimension(ocp), state_components(ocp)
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 (2, ["y₁", "y₂"])
 
-julia> ocp = PreModel(); state!(ocp, 2, "y", ["u", "v"]);
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "y", ["u", "v"]);
 
-julia> state_dimension(ocp), state_components(ocp)
+julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 (2, ["u", "v"])
 ```
 

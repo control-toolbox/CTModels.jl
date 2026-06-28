@@ -1,45 +1,31 @@
-# to run the documentation generation:
-# julia --project=. docs/make.jl
+# to run the documentation generation: julia --project=. docs/make.jl
+# to serve the documentation (option 1 — handles clean URLs natively):
+#   npx serve docs/build/1 --listen 5173
+# to serve the documentation (option 2 — Julia only):
+#   julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1", single_page=true)'
+# note: single_page=true is required so that reloading /getting-started serves the correct HTML
 pushfirst!(LOAD_PATH, joinpath(@__DIR__))
 pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
 using Documenter
+using DocumenterVitepress
 using CTModels
 using CTBase
-using Plots
-using JSON3
-using JLD2
 using Markdown
 using MarkdownAST: MarkdownAST
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
-# if draft is true, then the julia code from .md is not executed
-# to disable the draft mode in a specific markdown file, use the following:
-#=
-```@meta
-Draft = false
-```
-=#
-draft = false  # Draft mode: if true, @example blocks in markdown are not executed
+draft = false # Draft mode: if true, @example blocks in markdown are not executed
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Load extensions
+# Extensions
 # ═══════════════════════════════════════════════════════════════════════════════
-const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
-const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
-const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 
 if !isnothing(DocumenterReference)
     DocumenterReference.reset_config!()
-end
-
-Modules = [Plots, CTModelsPlots, CTModelsJSON, CTModelsJLD]
-for Module in Modules
-    isnothing(DocMeta.getdocmeta(Module, :DocTestSetup)) &&
-        DocMeta.setdocmeta!(Module, :DocTestSetup, :(using $Module); recursive=true)
 end
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -61,40 +47,35 @@ with_api_reference(src_dir, ext_dir) do api_pages
         remotes=nothing,
         warnonly=[:cross_references],
         sitename="CTModels.jl",
-        format=Documenter.HTML(;
-            repolink="https://" * repo_url,
-            prettyurls=false,
-            assets=[
-                asset("https://control-toolbox.org/assets/css/documentation.css"),
-                asset("https://control-toolbox.org/assets/js/documentation.js"),
-            ],
-            size_threshold_ignore=["api_ocp_building_public.md"],
+        format=DocumenterVitepress.MarkdownVitepress(;
+            repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
         ),
         pages=[
-            "Introduction" => "index.md",
-            "Optimal control problems" => [
-                "Overview" => "model/index.md",
-                "Types and traits" => "model/types_and_traits.md",
-                "Components" => "model/components.md",
-                "Dynamics and objective" => "model/dynamics_objective.md",
-                "Constraints" => "model/constraints.md",
-                "Building a model" => "model/building.md",
+            # index.md is the VitePress root — not listed here
+            "Getting Started" => "getting-started.md",
+            "OCP Model" => [
+                "Overview"             => "model/index.md",
+                "Types & Traits"       => "model/types_and_traits.md",
+                "Components"           => "model/components.md",
+                "Dynamics & Objective" => "model/dynamics_objective.md",
+                "Constraints"          => "model/constraints.md",
+                "Building a Model"     => "model/building.md",
             ],
             "Solutions" => [
-                "Overview" => "solution/index.md",
-                "Time grids" => "solution/time_grids.md",
-                "Trajectories" => "solution/trajectories.md",
-                "Duals & diagnostics" => "solution/duals.md",
+                "Overview"            => "solution/index.md",
+                "Time Grids"          => "solution/time_grids.md",
+                "Trajectories"        => "solution/trajectories.md",
+                "Duals & Diagnostics" => "solution/duals.md",
             ],
-            "Initial guesses" => [
-                "Overview" => "initial_guess/index.md",
-                "Input formats" => "initial_guess/formats.md",
-                "Validation & warm-start" => "initial_guess/validation.md",
+            "Initial Guesses" => [
+                "Overview"      => "initial_guess/index.md",
+                "Input Formats" => "initial_guess/formats.md",
+                "Validation"    => "initial_guess/validation.md",
             ],
-            "Serialization & extensions" => [
-                "Overview" => "serialization/index.md",
-                "Export & import" => "serialization/export_import.md",
-                "Plotting" => "serialization/plotting.md",
+            "Extensions" => [
+                "Overview"       => "serialization/index.md",
+                "Export & Import" => "serialization/export_import.md",
+                "Plotting"       => "serialization/plotting.md",
             ],
             "API Reference" => api_pages,
         ],
@@ -102,4 +83,13 @@ with_api_reference(src_dir, ext_dir) do api_pages
 end
 
 # ═══════════════════════════════════════════════════════════════════════════════
-deploydocs(; repo=repo_url * ".git", devbranch="main")
+# Deploy documentation to GitHub Pages
+# ═══════════════════════════════════════════════════════════════════════════════
+bases_file = joinpath(@__DIR__, "build", "bases.txt")
+if isfile(bases_file)
+    DocumenterVitepress.deploydocs(;
+        repo=repo_url * ".git", devbranch="main", push_preview=true
+    )
+else
+    @info "Skipping deployment: no bases were built (prerelease with existing higher stable release)."
+end

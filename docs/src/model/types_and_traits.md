@@ -118,5 +118,5 @@ method and break as soon as a third axis appears (the combinatorial explosion of
 - the public surface stays the *nouns* (`StateModel`, `Model`, …) and the *extractors*
   (`is_autonomous`, `has_free_final_time`), never the raw parameters.
 
-This mirrors the ecosystem-wide design described in the package philosophy
-(`dev/philosophy/types-traits-interfaces.md`).
+This mirrors the ecosystem-wide design described in the
+[control-toolbox Handbook](https://github.com/control-toolbox/Handbook/blob/main/PHILOSOPHY.md).

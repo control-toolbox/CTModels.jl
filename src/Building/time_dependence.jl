@@ -3,29 +3,26 @@ $(TYPEDSIGNATURES)
 
 Set the time dependence of the optimal control problem `ocp`.
 
+Must be called exactly once, after declaring the spaces and dynamics but before
+calling [`CTModels.Building.build`](@ref).
+
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
-- `autonomous::Bool`: Indicates whether the system is autonomous (`true`) or time-dependent (`false`).
-
-# Preconditions
-- The time dependence must not have been set previously.
-
-# Behavior
-This function sets the `autonomous` field of the model to indicate whether the system's dynamics
-explicitly depend on time. It can only be called once.
-
-# Throws
-- `Exceptions.PreconditionError`: If the time dependence has already been set.
-
-# Example
-```julia-repl
-julia> using CTModels
-
-julia> ocp = PreModel(); time_dependence!(ocp; autonomous=true)
-```
+- `autonomous::Bool`: `true` for an autonomous system ``\\dot{x}=f(x,u,v)``,
+  `false` for a non-autonomous system ``\\dot{x}=f(t,x,u,v)``.
 
 # Returns
 - `Nothing`
+
+# Throws
+- `Exceptions.PreconditionError`: If time dependence has already been set.
+
+# Examples
+```julia-repl
+julia> using CTModels
+
+julia> ocp = CTModels.PreModel(); CTModels.time_dependence!(ocp; autonomous=true);
+```
 
 See also: [`CTModels.Building.time!`](@ref), [`CTModels.Building.dynamics!`](@ref).
 """

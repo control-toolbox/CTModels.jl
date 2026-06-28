@@ -91,15 +91,11 @@ Construct a `MultipleTimeGridModel` with keyword arguments for each component ti
 
 # Example
 ```julia-repl
-julia> T_state = LinRange(0, 1, 101)
-julia> T_control = LinRange(0, 1, 51)
-julia> T_costate = LinRange(0, 1, 76)
-julia> mtgm = MultipleTimeGridModel(
-    state=T_state, 
-    control=T_control, 
-    costate=T_costate,
-    path=T_state
-)
+julia> using CTModels
+
+julia> T_s = LinRange(0, 1, 101); T_u = LinRange(0, 1, 51); T_p = LinRange(0, 1, 76);
+
+julia> mtgm = CTModels.MultipleTimeGridModel(state=T_s, control=T_u, costate=T_p, path=T_s);
 ```
 """
 function MultipleTimeGridModel(;
@@ -123,25 +119,14 @@ $(TYPEDSIGNATURES)
 
 Clean and standardize component symbols for time grid access.
 
-# Behavior
-- Maps all component symbols to their canonical time grid: `:state`, `:control`, `:costate`, or `:path`.
-- `:costate`, `:costates` map to `:costate` (costate has its own grid).
-- `:dual`, `:duals`, `:constraint`, `:constraints`, `:cons` map to `:path`.
-- `:state_box_constraint(s)` maps to `:state`.
-- `:control_box_constraint(s)` maps to `:control`.
-- Removes duplicate symbols.
+Maps `:states`→`:state`, `:duals`→`:path`, `:costate`→`:costate`, etc.
+Duplicates are removed and the result is a canonical `Tuple{Symbol...}`.
 
 # Arguments
-- `description`: A tuple of symbols passed by the user, typically from time grid access.
+- `description`: Tuple of component symbols from the caller.
 
 # Returns
-- A cleaned `Tuple{Symbol...}` of unique, standardized symbols.
-
-# Example
-```julia-repl
-julia> clean_component_symbols((:states, :controls, :costate, :constraint, :duals))
-# → (:state, :control, :costate, :path)
-```
+- `Tuple{Symbol...}`: Cleaned, unique, canonical symbols.
 """
 function clean_component_symbols(description)
     # map all component symbols to their canonical time grid

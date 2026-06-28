@@ -43,9 +43,11 @@ If `f` is provided, then:
 # Example
 
 ```julia-repl
-# Example of adding a state constraint
-julia> ocp_constraints = Dict()
-julia> __constraint!(ocp_constraints, :state, 3, 2, 1, lb=[0.0], ub=[1.0], label=:my_constraint)
+julia> using CTModels
+
+julia> ocp_constraints = CTModels.Components.ConstraintsDictType()
+
+julia> CTModels.Building.__constraint!(ocp_constraints, :state, 3, 2, 1; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:x_box);
 ```
 """
 function __constraint!(
@@ -267,11 +269,15 @@ Add a constraint to a pre-model. See [`CTModels.Building.__constraint!`](@ref) f
 - `ub`: The upper bound of the constraint. It can be a number or a vector.
 - `label`: The label of the constraint. It must be unique in the pre-model.
 
-# Example
+# Examples
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = PreModel(); constraint!(ocp, :control, rg=1:2, lb=[0.0], ub=[1.0], label=:control_constraint)
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 0); CTModels.time!(ocp; t0=0, tf=1);
+
+julia> CTModels.state!(ocp, 2); CTModels.control!(ocp, 2);
+
+julia> CTModels.constraint!(ocp, :control; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:u_box);
 ```
 
 # Throws

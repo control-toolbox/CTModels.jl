@@ -1229,19 +1229,17 @@ Return the time grid for a specific component.
 # Returns
 - `TimesDisc`: The time grid for the specified component
 
-# Behavior
-- For `UnifiedTimeGridModel`: Returns the unique time grid for any component
-- For `MultipleTimeGridModel`: Returns the specific time grid for the component
+Returns the unique time grid for any component (all components share the same grid).
 
 # Throws
-- `IncorrectArgument`: If component is not one of the valid symbols
+- `IncorrectArgument`: If component is not one of the valid symbols.
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)   # Works for both unified and multiple grids
-julia> time_grid(sol, :control) # Works for both unified and multiple grids
-julia> time_grid(sol, :costate) # Maps to :state grid
-julia> time_grid(sol, :dual)    # Maps to :path grid
+julia> CTModels.time_grid(sol, :state)   # unified grid
+julia> CTModels.time_grid(sol, :control) # same unified grid
+julia> CTModels.time_grid(sol, :costate) # :costate → :state mapping
+julia> CTModels.time_grid(sol, :dual)    # :dual → :path mapping
 ```
 """
 function Components.time_grid(
@@ -1296,14 +1294,14 @@ Return the time grid for a specific component in solutions with multiple time gr
 - `TimesDisc`: The time grid for the specified component
 
 # Throws
-- `IncorrectArgument`: If component is not one of the valid symbols
+- `IncorrectArgument`: If component is not one of the valid symbols.
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)   # Get state time grid
-julia> time_grid(sol, :control) # Get control time grid
-julia> time_grid(sol, :costate) # Maps to state time grid
-julia> time_grid(sol, :dual)    # Maps to path time grid
+julia> CTModels.time_grid(sol, :state)   # state time grid
+julia> CTModels.time_grid(sol, :control) # control time grid
+julia> CTModels.time_grid(sol, :costate) # :costate → :state
+julia> CTModels.time_grid(sol, :dual)    # :dual → :path
 ```
 """
 function Components.time_grid(

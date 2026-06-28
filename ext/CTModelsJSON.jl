@@ -188,8 +188,9 @@ The exported JSON includes the time grid, state, control, costate, objective, so
 
 # Example
 ```julia-repl
-julia> using JSON3
-julia> export_ocp_solution(JSON3Tag(), sol; filename="mysolution")
+julia> using JSON3, CTModels
+
+julia> CTModels.export_ocp_solution(CTModels.JSON3Tag(), sol; filename="mysolution")
 # → creates "mysolution.json"
 ```
 """
@@ -269,8 +270,9 @@ Handles both vector and matrix encodings of signals. If dual fields are missing 
 
 # Example
 ```julia-repl
-julia> using JSON3
-julia> sol = import_ocp_solution(JSON3Tag(), model; filename="mysolution")
+julia> using JSON3, CTModels
+
+julia> sol = CTModels.import_ocp_solution(CTModels.JSON3Tag(), model; filename="mysolution")
 ```
 """
 function CTModels.import_ocp_solution(

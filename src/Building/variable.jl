@@ -18,8 +18,9 @@ This function registers a named variable (e.g. "state", "control", or other) to 
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = PreModel(); variable!(ocp, 1, "v")
-julia> ocp = PreModel(); variable!(ocp, 2, "v", ["v₁", "v₂"])
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 1, "v");
+
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 2, "v", ["v₁", "v₂"]);
 ```
 
 # Throws

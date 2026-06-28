@@ -78,8 +78,8 @@ For a free time the value is read from ``v``, hence
 
 ## Naming rules
 
-Names must be **unique across all components** of the problem. The validation
-([`OCP/Validation/`](building.md)) rejects empty names, duplicates within a declaration, and
+Names must be **unique across all components** of the problem. The validation in
+[`CTModels.Building`](@ref CTModels.Building) (see [`__validate_name_uniqueness`](@ref CTModels.Building.__validate_name_uniqueness)) rejects empty names, duplicates within a declaration, and
 collisions with names already declared elsewhere:
 
 ```@example components

@@ -24,24 +24,20 @@ When a time is free, then, one must provide the corresponding index of the ocp v
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = PreModel(); time!(ocp; t0=0, tf=1)     # Fixed t0 and fixed tf
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 0); CTModels.time!(ocp; t0=0, tf=1)   # Fixed t0 and fixed tf
 
-julia> ocp = PreModel(); time!(ocp; t0=0, indf=2)   # Fixed t0 and free  tf
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 2); CTModels.time!(ocp; t0=0, indf=2) # Fixed t0 and free  tf
 
-julia> ocp = PreModel(); time!(ocp; ind0=2, tf=1)   # Free  t0 and fixed tf
-
-julia> ocp = PreModel(); time!(ocp; ind0=2, indf=3) # Free  t0 and free  tf
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 2); CTModels.time!(ocp; ind0=1, tf=1) # Free  t0 and fixed tf
 ```
 
 When a solution is plotted, the name of the time variable appears (`"t"` by default).
 To name the time variable `"s"`:
 
 ```julia-repl
-julia> using CTModels
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 0); CTModels.time!(ocp; t0=0, tf=1, time_name="s") # time_name as a String
 
-julia> ocp = PreModel(); time!(ocp; t0=0, tf=1, time_name="s") # time_name as a String
-
-julia> ocp = PreModel(); time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
+julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 0); CTModels.time!(ocp; t0=0, tf=1, time_name=:s)  # time_name as a Symbol
 ```
 
 # Throws

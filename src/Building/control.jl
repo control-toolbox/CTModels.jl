@@ -18,26 +18,24 @@ This function sets the control dimension and optionally allows specifying the co
 ```julia-repl
 julia> using CTModels
 
-julia> ocp = PreModel(); control!(ocp, 1)
-julia> control_dimension(ocp)
-1
-julia> control_components(ocp)
-["u"]
+julia> ocp = CTModels.PreModel(); CTModels.control!(ocp, 1);
 
-julia> ocp = PreModel(); control!(ocp, 1, "v")
-julia> control_components(ocp)
+julia> CTModels.control_dimension(ocp), CTModels.control_components(ocp)
+(1, ["u"])
+
+julia> ocp = CTModels.PreModel(); CTModels.control!(ocp, 1, "v");
+
+julia> CTModels.control_components(ocp)
 ["v"]
 
-julia> ocp = PreModel(); control!(ocp, 2)
-julia> control_components(ocp)
+julia> ocp = CTModels.PreModel(); CTModels.control!(ocp, 2);
+
+julia> CTModels.control_components(ocp)
 ["u₁", "u₂"]
 
-julia> ocp = PreModel(); control!(ocp, 2, :v)
-julia> control_components(ocp)
-["v₁", "v₂"]
+julia> ocp = CTModels.PreModel(); CTModels.control!(ocp, 2, "v", ["a", "b"]);
 
-julia> ocp = PreModel(); control!(ocp, 2, "v", ["a", "b"])
-julia> control_components(ocp)
+julia> CTModels.control_components(ocp)
 ["a", "b"]
 ```
 

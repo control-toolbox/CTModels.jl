@@ -12,20 +12,19 @@ An OCP is assembled incrementally into a mutable
 
 CTModels builds a model through a **three-stage pipeline**:
 
-```
+```text
 PreModel  →  declare components  →  build  →  Model
 (mutable)    state!/control!/...           (immutable)
 ```
 
 The OCP layer is organised by responsibility across four modules:
 
-| Layer | Subdirectory | What it provides |
+| Module | Directory | What it provides |
 |---|---|---|
-| **Types** | `OCP/Types/` | Component, model and solution types ([`StateModel`](@ref CTModels.Components.StateModel), [`Model`](@ref CTModels.Models.Model), …) |
-| **Core** | `OCP/Core/` | Defaults and the [`TimeDependence`](@ref CTModels.Components.TimeDependence) trait |
-| **Validation** | `OCP/Validation/` | Name-uniqueness checks across components |
-| **Components** | `OCP/Components/` | The `state!`, `control!`, `dynamics!`, … declaration verbs |
-| **Building** | `OCP/Building/` | [`build`](@ref CTModels.Building.build) (model) and [`build_solution`](@ref CTModels.Solutions.build_solution) |
+| `CTModels.Components` | `src/Components/` | Component types ([`StateModel`](@ref CTModels.Components.StateModel), [`TimeDependence`](@ref CTModels.Components.TimeDependence), …) and their accessors |
+| `CTModels.Models` | `src/Models/` | Immutable [`Model`](@ref CTModels.Models.Model) type and all model accessor methods |
+| `CTModels.Building` | `src/Building/` | [`PreModel`](@ref CTModels.Building.PreModel), declaration verbs (`state!`, `control!`, …), name validation, [`build`](@ref CTModels.Building.build) |
+| `CTModels.Solutions` | `src/Solutions/` | [`build_solution`](@ref CTModels.Solutions.build_solution), solution types, dual model, interpolation |
 
 ## Reading order
 

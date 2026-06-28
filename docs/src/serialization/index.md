@@ -1,4 +1,4 @@
-# Serialization & extensions
+# Extensions
 
 ```@meta
 CurrentModule = CTModels
@@ -20,7 +20,7 @@ live in the core; their **implementations** live in the extension. Until the tri
 loaded, calling a wrapper raises a descriptive `CTBase.ExtensionError` — the core never hard-
 depends on JSON3, JLD2 or Plots.
 
-```
+```text
 core wrapper ──(trigger pkg loaded?)──► extension method
      │                  │
 export_ocp_solution    no ─► CTBase.ExtensionError

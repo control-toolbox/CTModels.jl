@@ -51,7 +51,10 @@ objects you manipulate when formulating an optimal control problem.
 
 | Module | Responsibility |
 |--------|---------------|
-| `CTModels.OCP` | Types and builders for optimal control problems and solutions |
+| `CTModels.Components` | Foundational types: state, control, variable, times, constraints |
+| `CTModels.Models` | Immutable `Model` type and its accessor methods |
+| `CTModels.Building` | `PreModel`, component mutators (`state!`, `control!`, …), `build` |
+| `CTModels.Solutions` | `Solution` types, `build_solution`, dual model, interpolation |
 | `CTModels.Display` | `Base.show` extensions for models and solutions |
 | `CTModels.Serialization` | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
 | `CTModels.Init` | Initial guess construction and validation |

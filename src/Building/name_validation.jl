@@ -16,10 +16,11 @@ Returns a vector containing:
 # Example
 
 ```julia-repl
-julia> ocp = PreModel()
-julia> state!(ocp, 2, "x", ["x₁", "x₂"])
-julia> control!(ocp, 1, "u")
-julia> __collect_used_names(ocp)
+julia> using CTModels
+
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "x", ["x₁", "x₂"]); CTModels.control!(ocp, 1, "u");
+
+julia> CTModels.Building.__collect_used_names(ocp)
 4-element Vector{String}:
  "x"
  "x₁"
@@ -81,12 +82,14 @@ excluding the component's own current names from the check.
 # Example
 
 ```julia-repl
-julia> ocp = PreModel()
-julia> state!(ocp, 2, "x", ["x₁", "x₂"])
-julia> __has_name_conflict(ocp, "x", :none)
+julia> using CTModels
+
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "x", ["x₁", "x₂"]);
+
+julia> CTModels.Building.__has_name_conflict(ocp, "x", :none)
 true
 
-julia> __has_name_conflict(ocp, "y", :none)
+julia> CTModels.Building.__has_name_conflict(ocp, "y", :none)
 false
 ```
 
@@ -141,9 +144,11 @@ Performs comprehensive validation:
 # Example
 
 ```julia-repl
-julia> ocp = PreModel()
-julia> state!(ocp, 2, "x", ["x₁", "x₂"])
-julia> __validate_name_uniqueness(ocp, "x", ["u"], :control)  # Would throw if "x" conflicts
+julia> using CTModels
+
+julia> ocp = CTModels.PreModel(); CTModels.state!(ocp, 2, "x", ["x₁", "x₂"]);
+
+julia> CTModels.Building.__validate_name_uniqueness(ocp, "y", ["u"], :control)  # "y" is unique: succeeds
 ```
 
 See also: [`CTModels.Building.__has_name_conflict`](@ref), [`CTModels.Building.__collect_used_names`](@ref).
