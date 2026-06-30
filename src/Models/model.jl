@@ -505,7 +505,7 @@ Return the name of the initial time.
 # Returns
 - `String`: The initial time name.
 
-See also: [`CTModels.Models.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 Components.initial_time_name(ocp::Model)::String = Components.initial_time_name(times(ocp))
 
@@ -520,7 +520,7 @@ Return the name of the final time.
 # Returns
 - `String`: The final time name.
 
-See also: [`CTModels.Models.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 Components.final_time_name(ocp::Model)::String = Components.final_time_name(times(ocp))
 
