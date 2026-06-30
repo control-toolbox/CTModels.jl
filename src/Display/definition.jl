@@ -31,7 +31,8 @@ printed as a single indented entry.
 See also: [`CTModels.Display.__print`](@ref).
 """
 function _print_abstract_definition(io::IO, d::Components.Definition)::Bool
-    _print_ansi_styled(io, "Abstract definition:\n\n", :default, true)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.emphasis, "Abstract definition:\n\n", fmt.reset)
     tab = 4
     code = MacroTools.striplines(d.expr)
     MLStyle.@match code.head begin

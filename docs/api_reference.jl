@@ -93,6 +93,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Solutions", "dual_model.jl"),
                 joinpath("Solutions", "interpolation_helpers.jl"),
                 joinpath("Solutions", "discretization_utils.jl"),
+                joinpath("Solutions", "show.jl"),
             ),
         ),
         (
@@ -106,7 +107,6 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Display", "mathematical.jl"),
                 joinpath("Display", "model.jl"),
                 joinpath("Display", "pre_model.jl"),
-                joinpath("Display", "solution.jl"),
             ),
         ),
         (
@@ -135,6 +135,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Init", "variable.jl"),
                 joinpath("Init", "validation.jl"),
                 joinpath("Init", "utils.jl"),
+                joinpath("Init", "show.jl"),
             ),
         ),
     ]

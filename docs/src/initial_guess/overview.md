@@ -55,7 +55,6 @@ CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 
 init = CTModels.build_initial_guess(ocp, (state=t -> [0.0, 0.0], control=t -> [0.1]))
-nothing # hide
 ```
 
 The result is a validated [`InitialGuess`](@ref CTModels.Init.InitialGuess) whose components
