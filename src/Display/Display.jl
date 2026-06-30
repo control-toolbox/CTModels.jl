@@ -8,19 +8,17 @@ problems and solutions in human-readable formats.
 
 # Organisation
 
-- **ansi.jl**: ANSI helpers and generic Expr printing ([`_ansi_color`](@ref), [`_print_ansi_styled`](@ref))
+- **ansi.jl**: Generic Expr printing ([`__print`](@ref))
 - **definition.jl**: Abstract (symbolic) definition printing ([`_print_abstract_definition`](@ref))
 - **mathematical.jl**: Mathematical definition printing ([`__print_mathematical_definition`](@ref))
 - **model.jl**: Display for [`CTModels.Models.Model`](@ref)
 - **pre_model.jl**: Display for [`CTModels.Building.PreModel`](@ref)
-- **solution.jl**: Display for [`CTModels.Solutions.Solution`](@ref)
 
 # Public API
 
 The following functions are exported and accessible via `Base.show`:
 
 - `Base.show(io::IO, ::MIME"text/plain", ocp::CTModels.Models.Model)`: Display an optimal control problem
-- `Base.show(io::IO, ::MIME"text/plain", sol::CTModels.Solutions.Solution)`: Display a solution
 
 # Private API
 
@@ -39,6 +37,7 @@ See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Building`, `CTMode
 module Display
 
 import CTBase.Exceptions
+import CTBase.Core
 import DocStringExtensions: TYPEDSIGNATURES
 
 using CTBase: CTBase
@@ -57,7 +56,6 @@ include(joinpath(@__DIR__, "definition.jl"))
 include(joinpath(@__DIR__, "mathematical.jl"))
 include(joinpath(@__DIR__, "model.jl"))
 include(joinpath(@__DIR__, "pre_model.jl"))
-include(joinpath(@__DIR__, "solution.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension

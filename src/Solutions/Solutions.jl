@@ -11,9 +11,8 @@ and all solution accessors (trajectories, duals, solver metadata).
 - **dual_model.jl**: `DualModel`, `AbstractDualModel`, and dual accessors.
 - **discretization_utils.jl**: time-grid helpers used by `build_solution`.
 - **interpolation_helpers.jl**: trajectory interpolation helpers.
-- **build_solution.jl**: `build_solution` constructor + all solution accessors,
-  `Base.show(::Solution)` (temporary — moves to Display in Phase E),
-  `_serialize_solution` (temporary — moves to Serialization in Phase F).
+- **build_solution.jl**: `build_solution` constructor + all solution accessors.
+- **show.jl**: `Base.show(::Solution)` display with CTBase palette.
 
 # Public API
 
@@ -79,6 +78,7 @@ include(joinpath(@__DIR__, "dual_model.jl"))
 include(joinpath(@__DIR__, "discretization_utils.jl"))
 include(joinpath(@__DIR__, "interpolation_helpers.jl"))
 include(joinpath(@__DIR__, "build_solution.jl"))
+include(joinpath(@__DIR__, "show.jl"))
 
 # Solution types
 export Solution, AbstractSolution

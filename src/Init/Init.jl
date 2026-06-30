@@ -68,6 +68,7 @@ include(joinpath(@__DIR__, "init_functors.jl"))
 include(joinpath(@__DIR__, "builders.jl"))
 include(joinpath(@__DIR__, "validation.jl"))
 include(joinpath(@__DIR__, "api.jl"))
+include(joinpath(@__DIR__, "show.jl"))
 
 # Export public API
 export initial_guess, pre_initial_guess, build_initial_guess, validate_initial_guess

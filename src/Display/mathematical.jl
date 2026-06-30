@@ -95,18 +95,19 @@ function __print_mathematical_definition(
     variable_args_names = v_name
 
     #
+    fmt = CTBase.Core.get_format_codes(io)
     some_printing && println(io)
-    _print_ansi_styled(io, "The ", :default, true)
+    print(io, fmt.emphasis, "The ")
     if is_time_dependent
-        _print_ansi_styled(io, "(non autonomous) ", :default, true)
+        print(io, "(non autonomous) ")
     else
-        _print_ansi_styled(io, "(autonomous) ", :default, true)
+        print(io, "(autonomous) ")
     end
-    _print_ansi_styled(io, "optimal control problem is of the form:\n", :default, true)
+    print(io, "optimal control problem is of the form:\n", fmt.reset)
     println(io)
 
     # J
-    _print_ansi_styled(io, "    minimize  ", :blue, false)
+    print(io, fmt.keyword, "    minimize  ", fmt.reset)
     # Only include control in objective if !is_control_free_ocp
     u_in_obj = !is_control_free_ocp ? ", " * u_name : ""
     print(io, "J(" * x_name * u_in_obj * _v * ") = ")
@@ -136,7 +137,7 @@ function __print_mathematical_definition(
 
     # constraints
     println(io, "")
-    _print_ansi_styled(io, "    subject to\n", :blue, false)
+    print(io, fmt.keyword, "    subject to\n", fmt.reset)
     println(io, "")
 
     # dynamics
