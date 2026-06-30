@@ -9,6 +9,7 @@ pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
 using Documenter
 using DocumenterVitepress
+using DocumenterInterLinks
 using CTModels
 using CTBase
 using Markdown
@@ -18,6 +19,16 @@ using MarkdownAST: MarkdownAST
 # Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
 draft = false # Draft mode: if true, @example blocks in markdown are not executed
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cross-package links (InterLinks)
+# ═══════════════════════════════════════════════════════════════════════════════
+links = InterLinks(
+    "CTBase" => (
+        "https://control-toolbox.org/CTBase.jl/dev/",
+        "https://control-toolbox.org/CTBase.jl/dev/objects.inv",
+    ),
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Extensions
@@ -45,7 +56,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
     return makedocs(;
         draft=draft,
         remotes=nothing,
-        warnonly=[:cross_references],
+        warnonly=[:cross_references, :external_cross_references],
         sitename="CTModels.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
             repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
@@ -79,6 +90,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
             ],
             "API Reference" => api_pages,
         ],
+        plugins=[links],
     )
 end
 

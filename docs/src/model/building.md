@@ -20,7 +20,7 @@ a piece is missing. Control and variable are optional — their absence is repre
 Two extra declarations complete the problem:
 
 - [`time_dependence!`](@ref CTModels.Building.time_dependence!) — marks the system
-  `autonomous=true|false` (sets the [`TimeDependence`](@ref CTModels.Components.TimeDependence) trait);
+  `autonomous=true|false` (sets the `TimeDependence` trait);
 - [`definition!`](@ref CTModels.Building.definition!) — *optional* — attaches the symbolic
   problem definition (a Julia `Expr`) as a [`Definition`](@ref CTModels.Components.Definition);
   without it the model carries an [`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition).

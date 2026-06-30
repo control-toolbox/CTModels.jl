@@ -8,7 +8,7 @@ component types), and all reader functions that operate on a built `Model`.
 
 # Organisation
 
-- **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Models.state`](@ref), [`CTModels.Models.control`](@ref), [`CTModels.Models.variable`](@ref), [`CTModels.Models.times`](@ref), [`CTModels.Models.objective`](@ref), [`CTModels.Models.constraints`](@ref), [`CTModels.Models.dynamics`](@ref), [`CTModels.Models.definition`](@ref))
+- **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref), [`CTModels.Components.variable`](@ref), [`CTModels.Components.times`](@ref), [`CTModels.Components.objective`](@ref), [`CTModels.Models.constraints`](@ref), [`CTModels.Models.dynamics`](@ref), [`CTModels.Models.definition`](@ref))
 
 # Public API
 

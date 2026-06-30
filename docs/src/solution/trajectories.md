@@ -10,11 +10,11 @@ variable and the objective.
 
 | Accessor | Returns | Shape |
 |---|---|---|
-| [`state`](@ref CTModels.Models.state) | `x(t)` | callable → ``\mathbb{R}^n`` |
-| [`control`](@ref CTModels.Models.control) | `u(t)` | callable → ``\mathbb{R}^m`` |
-| [`costate`](@ref CTModels.Solutions.costate) | `p(t)` | callable → ``\mathbb{R}^n`` |
-| [`variable`](@ref CTModels.Models.variable) | `v` | value |
-| [`objective`](@ref CTModels.Models.objective) | optimal cost | scalar |
+| [`state`](@ref CTModels.Components.state) | `x(t)` | callable → ``\mathbb{R}^n`` |
+| [`control`](@ref CTModels.Components.control) | `u(t)` | callable → ``\mathbb{R}^m`` |
+| [`costate`](@ref CTModels.Components.costate) | `p(t)` | callable → ``\mathbb{R}^n`` |
+| [`variable`](@ref CTModels.Components.variable) | `v` | value |
+| [`objective`](@ref CTModels.Components.objective) | optimal cost | scalar |
 
 ```@example traj
 using CTModels

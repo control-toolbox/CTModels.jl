@@ -30,7 +30,7 @@ keyword argument because its deserialization is format-specific (JSON restores `
 julia> sol = _reconstruct_solution_from_data(ocp, data; infos=infos)
 ```
 
-See also: [`_extract_time_vector`](@ref).
+See also: [`CTModels.Serialization._extract_time_vector`](@ref).
 """
 function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
     control_interpolation = Symbol(data["control_interpolation"])
@@ -134,7 +134,7 @@ Extract time vector from various data formats.
 - Handles both Vector{Float64} and Matrix{Float64} (single column) formats
 - Used by JSON and JLD2 importers to normalize time grid data
 
-See also: [`_reconstruct_solution_from_data`](@ref).
+See also: [`CTModels.Serialization._reconstruct_solution_from_data`](@ref).
 """
 function _extract_time_vector(time_data)
     if time_data isa Vector{Float64}

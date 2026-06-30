@@ -21,7 +21,7 @@ The OCP layer is organised by responsibility across four modules:
 
 | Module | Directory | What it provides |
 |---|---|---|
-| `CTModels.Components` | `src/Components/` | Component types ([`StateModel`](@ref CTModels.Components.StateModel), [`TimeDependence`](@ref CTModels.Components.TimeDependence), …) and their accessors |
+| `CTModels.Components` | `src/Components/` | Component types ([`StateModel`](@ref CTModels.Components.StateModel), `TimeDependence`, …) and their accessors |
 | `CTModels.Models` | `src/Models/` | Immutable [`Model`](@ref CTModels.Models.Model) type and all model accessor methods |
 | `CTModels.Building` | `src/Building/` | [`PreModel`](@ref CTModels.Building.PreModel), declaration verbs (`state!`, `control!`, …), name validation, [`build`](@ref CTModels.Building.build) |
 | `CTModels.Solutions` | `src/Solutions/` | [`build_solution`](@ref CTModels.Solutions.build_solution), solution types, dual model, interpolation |
@@ -30,7 +30,7 @@ The OCP layer is organised by responsibility across four modules:
 
 | Page | Topic | Key symbols |
 |---|---|---|
-| [Types and traits](types_and_traits.md) | The noun/trait architecture | [`TimeDependence`](@ref CTModels.Components.TimeDependence), `AbstractStateModel`, `Empty*` |
+| [Types and traits](types_and_traits.md) | The noun/trait architecture | `TimeDependence`, `AbstractStateModel`, `Empty*` |
 | [Components](components.md) | Declaring the spaces | [`state!`](@ref CTModels.Building.state!), [`control!`](@ref CTModels.Building.control!), [`variable!`](@ref CTModels.Building.variable!), [`time!`](@ref CTModels.Building.time!) |
 | [Dynamics and objective](dynamics_objective.md) | The equations of motion and cost | [`dynamics!`](@ref CTModels.Building.dynamics!), [`objective!`](@ref CTModels.Building.objective!) |
 | [Constraints](constraints.md) | Path, boundary and box constraints | [`constraint!`](@ref CTModels.Building.constraint!) |
@@ -121,8 +121,7 @@ optimisation variable ``v \in \mathbb{R}^q`` (free final time, design parameters
 Two **orthogonal axes** shape the representation:
 
 - **Time dependence** — whether ``f``, ``f^0`` depend explicitly on ``t``
-  ([`Autonomous`](@ref CTModels.Components.Autonomous) vs
-  [`NonAutonomous`](@ref CTModels.Components.NonAutonomous)).
+  (`Autonomous` vs `NonAutonomous`).
 - **Time structure** — whether ``t_0`` / ``t_f`` are fixed or free
   ([`FixedTimeModel`](@ref CTModels.Components.FixedTimeModel) vs
   [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel)).

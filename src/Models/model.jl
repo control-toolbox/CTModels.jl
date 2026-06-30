@@ -119,12 +119,44 @@ Traits.time_dependence(::Model{TD}) where {TD} = TD
 Traits.has_variable_dependence_trait(::Model) = true
 
 Traits.variable_dependence(ocp::Model) = _variable_dependence(ocp.variable)
+"""
+$(TYPEDSIGNATURES)
+
+Resolve the variable-dependence trait value from the variable model type.
+
+Returns `Traits.Fixed` when the model carries no optimisation variable
+([`CTModels.Components.EmptyVariableModel`](@ref)), and `Traits.NonFixed` otherwise.
+
+# Arguments
+- `model`: an [`CTModels.Components.AbstractVariableModel`](@ref) instance.
+
+# Returns
+- trait value: `Traits.Fixed` or `Traits.NonFixed`.
+
+See also: [`CTModels.Models._control_dependence`](@ref)
+"""
 _variable_dependence(::EmptyVariableModel) = Traits.Fixed
 _variable_dependence(::AbstractVariableModel) = Traits.NonFixed
 
 Traits.has_control_dependence_trait(::Model) = true
 
 Traits.control_dependence(ocp::Model) = _control_dependence(ocp.control)
+"""
+$(TYPEDSIGNATURES)
+
+Resolve the control-dependence trait value from the control model type.
+
+Returns `Traits.ControlFree` when the model carries no control input
+([`CTModels.Components.EmptyControlModel`](@ref)), and `Traits.WithControl` otherwise.
+
+# Arguments
+- `model`: an [`CTModels.Components.AbstractControlModel`](@ref) instance.
+
+# Returns
+- trait value: `Traits.ControlFree` or `Traits.WithControl`.
+
+See also: [`CTModels.Models._variable_dependence`](@ref)
+"""
 _control_dependence(::EmptyControlModel) = Traits.ControlFree
 _control_dependence(::AbstractControlModel) = Traits.WithControl
 
@@ -203,7 +235,7 @@ Return the name of the state.
 # Returns
 - `String`: The state name.
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function state_name(ocp::Model)::String
     return name(state(ocp))
@@ -220,7 +252,7 @@ Return the names of the components of the state.
 # Returns
 - `Vector{String}`: The state component names.
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_dimension`](@ref).
 """
 function state_components(ocp::Model)::Vector{String}
     return components(state(ocp))
@@ -237,7 +269,7 @@ Return the state dimension.
 # Returns
 - `Dimension`: The state dimension.
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref).
 """
 function state_dimension(ocp::Model)::Dimension
     return dimension(state(ocp))
@@ -288,7 +320,7 @@ Return the name of the control.
 # Returns
 - `String`: The control name.
 
-See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_name(ocp::Model)::String
     return name(control(ocp))
@@ -305,7 +337,7 @@ Return the names of the components of the control.
 # Returns
 - `Vector{String}`: The control component names.
 
-See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_components(ocp::Model)::Vector{String}
     return components(control(ocp))
@@ -322,7 +354,7 @@ Return the control dimension.
 # Returns
 - `Dimension`: The control dimension.
 
-See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref).
+See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref).
 """
 function control_dimension(ocp::Model)::Dimension
     return dimension(control(ocp))
@@ -373,7 +405,7 @@ Return the name of the variable.
 # Returns
 - `String`: The variable name.
 
-See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function variable_name(ocp::Model)::String
     return name(variable(ocp))
@@ -390,7 +422,7 @@ Return the names of the components of the variable.
 # Returns
 - `Vector{String}`: The variable component names.
 
-See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_dimension`](@ref).
 """
 function variable_components(ocp::Model)::Vector{String}
     return components(variable(ocp))
@@ -407,7 +439,7 @@ Return the variable dimension.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref).
+See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
 function variable_dimension(ocp::Model)::Dimension
     return dimension(variable(ocp))
@@ -458,7 +490,7 @@ Return the name of the time.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Models.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
 """
 Components.time_name(ocp::Model)::String = Components.time_name(times(ocp))
 
@@ -853,7 +885,7 @@ Return the type of criterion (:min or :max).
 # Returns
 - `Symbol`: The criterion type (`:min` or `:max`).
 
-See also: [`CTModels.Models.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
 """
 Components.criterion(ocp::Model)::Symbol = Components.criterion(objective(ocp))
 
@@ -884,7 +916,7 @@ Return the Mayer cost.
 # Returns
 - `M`: The Mayer cost function.
 
-See also: [`CTModels.Models.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
 """
 function Components.mayer(
     ocp::Model{
@@ -914,7 +946,7 @@ Return the Mayer cost.
 # Returns
 - `M`: The Mayer cost function.
 
-See also: [`CTModels.Models.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
 """
 function Components.mayer(
     ocp::Model{
@@ -975,7 +1007,7 @@ Return the Lagrange cost.
 # Returns
 - `L`: The Lagrange cost function.
 
-See also: [`CTModels.Models.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -1005,7 +1037,7 @@ Return the Lagrange cost.
 # Returns
 - `L`: The Lagrange cost function.
 
-See also: [`CTModels.Models.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -1055,7 +1087,7 @@ Return the dynamics.
 # Returns
 - `D`: The dynamics function.
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.control`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref).
 """
 function dynamics(
     ocp::Model{

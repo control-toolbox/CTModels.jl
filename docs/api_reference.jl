@@ -38,8 +38,11 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             title="Components",
             filename="components",
             files=src(
+                joinpath("Components", "Components.jl"),
+                joinpath("Components", "functors.jl"),
                 joinpath("Components", "types.jl"),
                 joinpath("Components", "aliases.jl"),
+                joinpath("Components", "accessors_api.jl"),
                 joinpath("Components", "accessors.jl"),
                 joinpath("Components", "times_accessors.jl"),
                 joinpath("Components", "objective_accessors.jl"),
@@ -51,6 +54,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             title="Models",
             filename="models",
             files=src(
+                joinpath("Models", "Models.jl"),
                 joinpath("Models", "constraint_functors.jl"),
                 joinpath("Models", "model.jl"),
             ),
@@ -60,6 +64,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             title="Building",
             filename="building",
             files=src(
+                joinpath("Building", "Building.jl"),
                 joinpath("Building", "constraint_composers.jl"),
                 joinpath("Building", "pre_model.jl"),
                 joinpath("Building", "state.jl"),
@@ -81,6 +86,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             title="Solutions",
             filename="solutions",
             files=src(
+                joinpath("Solutions", "Solutions.jl"),
                 joinpath("Solutions", "solution_types.jl"),
                 joinpath("Solutions", "dual_functors.jl"),
                 joinpath("Solutions", "build_solution.jl"),

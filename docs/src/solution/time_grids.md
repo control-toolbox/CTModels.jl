@@ -53,7 +53,7 @@ sol_u = CTModels.build_solution(ocp, T, T, T, T, X, U, Float64[], P;
 
 Passing different grids for state, control, costate and path yields a
 [`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel); each component is then
-queried by name through [`time_grid`](@ref CTModels.Solutions.time_grid):
+queried by name through [`time_grid`](@ref CTModels.Components.time_grid):
 
 ```@example grids
 T_state   = collect(range(0.0, 1.0; length=101))

@@ -407,7 +407,7 @@ instance, incorporating optional components like control, variable, and constrai
 
 !!! note
     Control is **optional**: calling [`CTModels.Building.control!`](@ref) is not required. When omitted, the model is
-    built with `control_dimension == 0` (an [`CTModels.Models.EmptyControlModel`](@ref)). This is useful for problems
+    built with `control_dimension == 0` (an [`CTModels.Components.EmptyControlModel`](@ref)). This is useful for problems
     where the dynamics depend only on the state, such as pure state-space systems.
 
 # Arguments

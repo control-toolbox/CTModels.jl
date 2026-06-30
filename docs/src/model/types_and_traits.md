@@ -47,12 +47,9 @@ Orthogonal yes/no axes are **not** modelled as separate types but as traits.
 
 ### Time dependence
 
-[`TimeDependence`](@ref CTModels.Components.TimeDependence) has the two values
-[`Autonomous`](@ref CTModels.Components.Autonomous) and
-[`NonAutonomous`](@ref CTModels.Components.NonAutonomous). It is carried as the **first type
+`TimeDependence` has the two values `Autonomous` and `NonAutonomous`. It is carried as the **first type
 parameter** of [`Model`](@ref CTModels.Models.Model), so the distinction between
-``\dot{x} = f(x,u)`` and ``\dot{x} = f(t,x,u)`` is available at compile time. The extractor
-is [`is_autonomous`](@ref CTModels.Models.is_autonomous):
+``\dot{x} = f(x,u)`` and ``\dot{x} = f(t,x,u)`` is available at compile time. The extractor is `is_autonomous`:
 
 ```@example types
 pre = CTModels.PreModel()
@@ -76,8 +73,7 @@ Whether the problem carries a control input is the **type** of the
 [`EmptyControlModel`](@ref CTModels.Components.EmptyControlModel) means *control-free*, any
 other control model means *with control*. This is exposed through the
 `CTBase.Traits.ControlDependence` axis (values `ControlFree` / `WithControl`), shared
-ecosystem-wide, with the extractors [`is_control_free`](@ref CTModels.Models.is_control_free)
-and [`has_control`](@ref CTModels.Models.has_control):
+ecosystem-wide, with the extractors `is_control_free` and `has_control`:
 
 ```@example types
 (CTModels.is_control_free(ocp), CTModels.has_control(ocp))
