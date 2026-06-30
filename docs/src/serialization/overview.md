@@ -69,8 +69,12 @@ nothing # hide
 base = joinpath(tempdir(), "ctmodels_overview")
 CTModels.export_ocp_solution(sol; filename=base, format=:JSON)
 reloaded = CTModels.import_ocp_solution(ocp; filename=base, format=:JSON)
+nothing # hide
+```
 
-(CTModels.objective(sol), CTModels.objective(reloaded))
+```@repl ser_index
+CTModels.objective(sol)
+CTModels.objective(reloaded)
 ```
 
 See [Export & import](export_import.md) for the formats and the resampling strategy, and

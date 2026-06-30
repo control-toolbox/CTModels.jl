@@ -78,12 +78,49 @@ CTModels.objective!(pre, :min;
 )
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
+nothing # hide
+```
 
-(CTModels.criterion(ocp),
- CTModels.has_mayer_cost(ocp),
- CTModels.has_lagrange_cost(ocp))
+```@repl dynobj
+CTModels.criterion(ocp)
+CTModels.has_mayer_cost(ocp)
+CTModels.has_lagrange_cost(ocp)
 ```
 
 Because the cost is stored as a typed object, downstream code dispatches on it (Mayer /
 Lagrange / Bolza) instead of inspecting closures — see the
 [Solutions](../solution/overview.md) guide for how the objective **value** is read back.
+
+## Error cases
+
+Calling `dynamics!` before the state is set raises a `PreconditionError`:
+
+```@example dynobj
+pre_no_state = CTModels.PreModel()
+CTModels.time!(pre_no_state; t0=0.0, tf=1.0)
+nothing # hide
+```
+
+```@repl dynobj
+try # hide
+CTModels.dynamics!(pre_no_state, (r, t, x, u, v) -> (r[1] = 0.0; nothing))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
+```
+
+In block form, overlapping ranges raise a `PreconditionError` immediately:
+
+```@example dynobj
+pre_overlap = fresh()
+CTModels.dynamics!(pre_overlap, 1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing))
+nothing # hide
+```
+
+```@repl dynobj
+try # hide
+CTModels.dynamics!(pre_overlap, 1:2, (r, t, x, u, v) -> (r[1] = x[1]; nothing))  # overlaps 1:1
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
+```

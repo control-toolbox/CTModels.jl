@@ -68,10 +68,14 @@ diagnostics as scalars:
 
 ```@example sol_index
 x = CTModels.state(sol)          # x(t) → state at time t
-(x(0.5),
- CTModels.objective(sol),
- CTModels.iterations(sol),
- CTModels.successful(sol))
+nothing # hide
+```
+
+```@repl sol_index
+x(0.5)
+CTModels.objective(sol)
+CTModels.iterations(sol)
+CTModels.successful(sol)
 ```
 
 ## Anatomy of a `Solution`

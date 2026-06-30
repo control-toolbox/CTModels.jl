@@ -92,11 +92,11 @@ ocp = CTModels.build(pre)
 
 Once built, the `Model` answers queries through accessors:
 
-```@example model_index
-(CTModels.state_dimension(ocp),
- CTModels.control_dimension(ocp),
- CTModels.variable_dimension(ocp),
- CTModels.is_autonomous(ocp))
+```@repl model_index
+CTModels.state_dimension(ocp)
+CTModels.control_dimension(ocp)
+CTModels.variable_dimension(ocp)
+CTModels.is_autonomous(ocp)
 ```
 
 The shortcut `CTModels.build_model(pre)` is an alias for `CTModels.build(pre)`; see

@@ -51,12 +51,19 @@ not only at grid points — the samples are interpolated:
 x = CTModels.state(sol)
 u = CTModels.control(sol)
 p = CTModels.costate(sol)
-
-(x(0.0), x(0.123), u(0.5), p(1.0))
+nothing # hide
 ```
 
-```@example traj
-(CTModels.variable(sol), CTModels.objective(sol))
+```@repl traj
+x(0.0)
+x(0.123)
+u(0.5)
+p(1.0)
+```
+
+```@repl traj
+CTModels.variable(sol)
+CTModels.objective(sol)
 ```
 
 ## Interpolation of the control
@@ -72,8 +79,12 @@ sol_const = CTModels.build_solution(ocp, T, X, U, v, P;
     objective=0.5, iterations=10, constraints_violation=1e-9,
     message="ok", status=:optimal, successful=true,
     control_interpolation=:constant)
+nothing # hide
+```
 
-(CTModels.control_interpolation(sol), CTModels.control_interpolation(sol_const))
+```@repl traj
+CTModels.control_interpolation(sol)
+CTModels.control_interpolation(sol_const)
 ```
 
 Because the interpolation kind is a stored field — not baked into an opaque closure —

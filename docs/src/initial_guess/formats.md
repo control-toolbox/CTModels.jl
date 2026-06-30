@@ -36,7 +36,13 @@ The most general form — a time-varying guess:
 ```@example fmt
 init = CTModels.build_initial_guess(ocp,
     (state = t -> [cos(t), -sin(t)], control = t -> [0.5 * t]))
-(init.state(0.0), init.state(1.0), init.control(1.0))
+nothing # hide
+```
+
+```@repl fmt
+init.state(0.0)
+init.state(1.0)
+init.control(1.0)
 ```
 
 ## Constants
@@ -46,7 +52,13 @@ trajectory:
 
 ```@example fmt
 init = CTModels.build_initial_guess(ocp, (state = [0.0, 1.0], control = 0.1))
-(init.state(0.0), init.state(0.9), init.control(0.5))   # constant in time
+nothing # hide
+```
+
+```@repl fmt
+init.state(0.0)
+init.state(0.9)
+init.control(0.5)
 ```
 
 ## Defaults
@@ -56,7 +68,12 @@ the problem:
 
 ```@example fmt
 init = CTModels.build_initial_guess(ocp, ())
-(init.state(0.5), init.control(0.5))
+nothing # hide
+```
+
+```@repl fmt
+init.state(0.5)
+init.control(0.5)
 ```
 
 ## Pre-initialisation
@@ -68,6 +85,10 @@ later when [`build_initial_guess`](@ref CTModels.Init.build_initial_guess) valid
 ```@example fmt
 pre_ig = CTModels.pre_initial_guess(state = t -> [0.0, 0.0], control = t -> [1.0])
 init   = CTModels.build_initial_guess(ocp, pre_ig)
+nothing # hide
+```
+
+```@repl fmt
 init.control(0.25)
 ```
 
