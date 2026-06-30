@@ -78,5 +78,5 @@ definition! (opt.)    dynamics complete
 ```
 
 The immutable `Model` is the object every downstream package consumes: it is the input to
-[Solutions](../solution/index.md), [Initial guesses](../initial_guess/index.md) and
-[Serialization](../serialization/index.md).
+[Solutions](../solution/overview.md), [Initial guesses](../initial_guess/overview.md) and
+[Serialization](../serialization/overview.md).

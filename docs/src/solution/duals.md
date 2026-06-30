@@ -89,4 +89,4 @@ The [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) record is exposed throu
 ```
 
 `infos(sol)` returns the `Dict{Symbol,Any}` of any extra solver-specific data. These fields
-are what [Serialization](../serialization/index.md) writes to disk alongside the trajectories.
+are what [Serialization](../serialization/overview.md) writes to disk alongside the trajectories.

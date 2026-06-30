@@ -65,7 +65,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
             # index.md is the VitePress root — not listed here
             "Getting Started" => "getting-started.md",
             "OCP Model" => [
-                "Overview"             => "model/index.md",
+                "Overview"             => "model/overview.md",
                 "Types & Traits"       => "model/types_and_traits.md",
                 "Components"           => "model/components.md",
                 "Dynamics & Objective" => "model/dynamics_objective.md",
@@ -73,18 +73,18 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 "Building a Model"     => "model/building.md",
             ],
             "Solutions" => [
-                "Overview"            => "solution/index.md",
+                "Overview"            => "solution/overview.md",
                 "Time Grids"          => "solution/time_grids.md",
                 "Trajectories"        => "solution/trajectories.md",
                 "Duals & Diagnostics" => "solution/duals.md",
             ],
             "Initial Guesses" => [
-                "Overview"      => "initial_guess/index.md",
+                "Overview"      => "initial_guess/overview.md",
                 "Input Formats" => "initial_guess/formats.md",
                 "Validation"    => "initial_guess/validation.md",
             ],
             "Extensions" => [
-                "Overview"       => "serialization/index.md",
+                "Overview"       => "serialization/overview.md",
                 "Export & Import" => "serialization/export_import.md",
                 "Plotting"       => "serialization/plotting.md",
             ],

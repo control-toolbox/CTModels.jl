@@ -155,11 +155,11 @@ The documentation consists of:
 
 - **Developer guides** — narrative, architecture-oriented walkthroughs aimed at
   control-toolbox contributors:
-  - [Optimal control problems](model/index.md): the `PreModel → build → Model` pipeline,
+  - [Optimal control problems](model/overview.md): the `PreModel → build → Model` pipeline,
     types & traits, components, dynamics, objective, constraints.
-  - [Solutions](solution/index.md): the `Solution` anatomy, time grids, trajectories, duals.
-  - [Initial guesses](initial_guess/index.md): the `Init` pipeline and warm-starting.
-  - [Serialization & extensions](serialization/index.md): export/import and plotting.
+  - [Solutions](solution/overview.md): the `Solution` anatomy, time grids, trajectories, duals.
+  - [Initial guesses](initial_guess/overview.md): the `Init` pipeline and warm-starting.
+  - [Serialization & extensions](serialization/overview.md): export/import and plotting.
 
 - **API Reference**: Auto-generated, exhaustive documentation of every module and symbol
   (public *and* private), one page per submodule and loaded extension.
@@ -170,19 +170,19 @@ the details of a particular function or type.
 ## Quick start guide
 
 - **I want to define an optimal control problem**  
-  See the [Optimal control problems](model/index.md) guide for `state!`, `control!`,
+  See the [Optimal control problems](model/overview.md) guide for `state!`, `control!`,
   `dynamics!`, `objective!`, `constraint!`, and `build`.
 
 - **I want to read a solution**  
-  See the [Solutions](solution/index.md) guide for `state`, `control`, `costate`, `dual`, and
+  See the [Solutions](solution/overview.md) guide for `state`, `control`, `costate`, `dual`, and
   the solver diagnostics.
 
 - **I want to build initial guesses**  
-  See the [Initial guesses](initial_guess/index.md) guide for `pre_initial_guess`,
+  See the [Initial guesses](initial_guess/overview.md) guide for `pre_initial_guess`,
   `initial_guess`, and `build_initial_guess`.
 
 - **I want to save/load or plot solutions**  
-  See the [Serialization & extensions](serialization/index.md) guide for `export_ocp_solution`,
+  See the [Serialization & extensions](serialization/overview.md) guide for `export_ocp_solution`,
   `import_ocp_solution`, and `plot(sol)`.
 
 - **I want to solve an optimal control problem**  

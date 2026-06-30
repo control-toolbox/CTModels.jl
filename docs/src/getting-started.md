@@ -145,6 +145,6 @@ init = CTModels.build_initial_guess(ocp,
 | Freezing a `PreModel` into a `Model` | [Building a Model](model/building.md) |
 | Reading state, control, costate trajectories | [Trajectories](solution/trajectories.md) |
 | Dual variables and solver diagnostics | [Duals & Diagnostics](solution/duals.md) |
-| Warm-starting with initial guesses | [Initial Guesses](initial_guess/index.md) |
+| Warm-starting with initial guesses | [Initial Guesses](initial_guess/overview.md) |
 | Saving and loading solutions | [Export & Import](serialization/export_import.md) |
 | Full API reference | API Reference (left sidebar) |
