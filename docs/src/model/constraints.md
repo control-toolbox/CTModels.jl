@@ -51,12 +51,12 @@ ocp = CTModels.build(pre)
 On the built [`Model`](@ref CTModels.Models.Model), the constraints are grouped in a
 [`ConstraintsModel`](@ref CTModels.Components.ConstraintsModel) and queried by dimension or by label:
 
-```@example cons
-(CTModels.dim_path_constraints_nl(ocp),
- CTModels.dim_boundary_constraints_nl(ocp),
- CTModels.dim_state_constraints_box(ocp),
- CTModels.dim_control_constraints_box(ocp),
- CTModels.dim_variable_constraints_box(ocp))
+```@repl cons
+CTModels.dim_path_constraints_nl(ocp)
+CTModels.dim_boundary_constraints_nl(ocp)
+CTModels.dim_state_constraints_box(ocp)
+CTModels.dim_control_constraints_box(ocp)
+CTModels.dim_variable_constraints_box(ocp)
 ```
 
 ## Labels and aliases
@@ -73,3 +73,35 @@ see the [Duals](../solution/duals.md) guide.
     Always pass an explicit `label`. It is the stable handle for the constraint across
     `build`, solution reconstruction, and dual extraction; auto-generated labels are harder
     to track in downstream packages.
+
+## Error cases
+
+Passing the same `label` twice raises a `PreconditionError` immediately:
+
+```@example cons
+pre_dup = CTModels.PreModel()
+CTModels.variable!(pre_dup, 0)
+CTModels.time!(pre_dup; t0=0.0, tf=1.0)
+CTModels.state!(pre_dup, 2)
+CTModels.control!(pre_dup, 1)
+CTModels.constraint!(pre_dup, :state; rg=1:1, lb=[-1.0], ub=[1.0], label=:x1)
+nothing # hide
+```
+
+```@repl cons
+try # hide
+CTModels.constraint!(pre_dup, :control; rg=1:1, lb=[-10.0], ub=[10.0], label=:x1)  # duplicate
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
+```
+
+Bounds with `lb > ub` are rejected on the spot:
+
+```@repl cons
+try # hide
+CTModels.constraint!(pre_dup, :state; rg=2:2, lb=[1.0], ub=[0.0], label=:bad)
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
+```

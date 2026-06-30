@@ -37,8 +37,13 @@ using CTModels
 
 sm  = CTModels.StateModel("x", ["x₁", "x₂"])
 evm = CTModels.EmptyVariableModel()
+nothing # hide
+```
 
-(CTModels.dimension(sm), CTModels.name(sm), evm isa CTModels.Components.AbstractVariableModel)
+```@repl types
+CTModels.dimension(sm)
+CTModels.name(sm)
+evm isa CTModels.Components.AbstractVariableModel
 ```
 
 ## The trait axes
@@ -47,12 +52,9 @@ Orthogonal yes/no axes are **not** modelled as separate types but as traits.
 
 ### Time dependence
 
-[`TimeDependence`](@ref CTModels.Components.TimeDependence) has the two values
-[`Autonomous`](@ref CTModels.Components.Autonomous) and
-[`NonAutonomous`](@ref CTModels.Components.NonAutonomous). It is carried as the **first type
+`TimeDependence` has the two values `Autonomous` and `NonAutonomous`. It is carried as the **first type
 parameter** of [`Model`](@ref CTModels.Models.Model), so the distinction between
-``\dot{x} = f(x,u)`` and ``\dot{x} = f(t,x,u)`` is available at compile time. The extractor
-is [`is_autonomous`](@ref CTModels.Models.is_autonomous):
+``\dot{x} = f(x,u)`` and ``\dot{x} = f(t,x,u)`` is available at compile time. The extractor is `is_autonomous`:
 
 ```@example types
 pre = CTModels.PreModel()
@@ -64,7 +66,10 @@ CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
 CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
+nothing # hide
+```
 
+```@repl types
 CTModels.is_autonomous(ocp)
 ```
 
@@ -76,11 +81,11 @@ Whether the problem carries a control input is the **type** of the
 [`EmptyControlModel`](@ref CTModels.Components.EmptyControlModel) means *control-free*, any
 other control model means *with control*. This is exposed through the
 `CTBase.Traits.ControlDependence` axis (values `ControlFree` / `WithControl`), shared
-ecosystem-wide, with the extractors [`is_control_free`](@ref CTModels.Models.is_control_free)
-and [`has_control`](@ref CTModels.Models.has_control):
+ecosystem-wide, with the extractors `is_control_free` and `has_control`:
 
-```@example types
-(CTModels.is_control_free(ocp), CTModels.has_control(ocp))
+```@repl types
+CTModels.is_control_free(ocp)
+CTModels.has_control(ocp)
 ```
 
 Like time dependence, the predicates are generic functions owned by `CTBase.Traits`; the
@@ -99,8 +104,9 @@ exposing the concrete type:
 | Is ``t_0`` fixed / free? | [`has_fixed_initial_time`](@ref CTModels.Components.has_fixed_initial_time) / [`has_free_initial_time`](@ref CTModels.Components.has_free_initial_time) |
 | Is ``t_f`` fixed / free? | [`has_fixed_final_time`](@ref CTModels.Components.has_fixed_final_time) / [`has_free_final_time`](@ref CTModels.Components.has_free_final_time) |
 
-```@example types
-(CTModels.has_fixed_initial_time(ocp), CTModels.has_fixed_final_time(ocp))
+```@repl types
+CTModels.has_fixed_initial_time(ocp)
+CTModels.has_fixed_final_time(ocp)
 ```
 
 A [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel) stores the **index** into the
@@ -118,5 +124,5 @@ method and break as soon as a third axis appears (the combinatorial explosion of
 - the public surface stays the *nouns* (`StateModel`, `Model`, …) and the *extractors*
   (`is_autonomous`, `has_free_final_time`), never the raw parameters.
 
-This mirrors the ecosystem-wide design described in the package philosophy
-(`dev/philosophy/types-traits-interfaces.md`).
+This mirrors the ecosystem-wide design described in the
+[control-toolbox Handbook](https://github.com/control-toolbox/Handbook/blob/main/PHILOSOPHY.md).

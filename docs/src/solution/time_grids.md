@@ -44,16 +44,19 @@ P = zeros(101, 2)
 sol_u = CTModels.build_solution(ocp, T, T, T, T, X, U, Float64[], P;
     objective=0.5, iterations=10, constraints_violation=1e-6,
     message="ok", status=:optimal, successful=true)
+nothing # hide
+```
 
-(CTModels.time_grid_model(sol_u) isa CTModels.UnifiedTimeGridModel,
- length(CTModels.time_grid(sol_u)))
+```@repl grids
+CTModels.time_grid_model(sol_u) isa CTModels.UnifiedTimeGridModel
+length(CTModels.time_grid(sol_u))
 ```
 
 ## One grid per component
 
 Passing different grids for state, control, costate and path yields a
 [`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel); each component is then
-queried by name through [`time_grid`](@ref CTModels.Solutions.time_grid):
+queried by name through [`time_grid`](@ref CTModels.Components.time_grid):
 
 ```@example grids
 T_state   = collect(range(0.0, 1.0; length=101))
@@ -69,11 +72,14 @@ sol_m = CTModels.build_solution(ocp, T_state, T_control, T_costate, T_path,
     X, U, Float64[], P;
     objective=0.5, iterations=10, constraints_violation=1e-6,
     message="ok", status=:optimal, successful=true)
+nothing # hide
+```
 
-(CTModels.time_grid_model(sol_m) isa CTModels.MultipleTimeGridModel,
- length(CTModels.time_grid(sol_m, :state)),
- length(CTModels.time_grid(sol_m, :control)),
- length(CTModels.time_grid(sol_m, :costate)))
+```@repl grids
+CTModels.time_grid_model(sol_m) isa CTModels.MultipleTimeGridModel
+length(CTModels.time_grid(sol_m, :state))
+length(CTModels.time_grid(sol_m, :control))
+length(CTModels.time_grid(sol_m, :costate))
 ```
 
 ## Component aliases
@@ -82,7 +88,7 @@ sol_m = CTModels.build_solution(ocp, T_state, T_control, T_costate, T_path,
 normalised to the four canonical grids (`:state`, `:control`, `:costate`, `:path`) by
 [`clean_component_symbols`](@ref CTModels.Solutions.clean_component_symbols):
 
-```@example grids
+```@repl grids
 CTModels.clean_component_symbols((:states, :controls, :costate, :constraint, :duals))
 ```
 

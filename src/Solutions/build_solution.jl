@@ -184,8 +184,8 @@ A legacy signature `build_solution(ocp, T, X, U, v, P; ...)` exists for single-g
 It internally calls this multi-grid version with `T_state = T_control = T_costate = T_path = T`.
 
 See also: [`CTModels.Solutions.Solution`](@ref), [`CTModels.Solutions.UnifiedTimeGridModel`](@ref),
-[`CTModels.Solutions.MultipleTimeGridModel`](@ref), [`CTModels.Solutions.time_grid`](@ref),
-[`CTModels.Models.state`](@ref), [`CTModels.Models.control`](@ref), [`CTModels.Solutions.costate`](@ref).
+[`CTModels.Solutions.MultipleTimeGridModel`](@ref), [`CTModels.Components.time_grid`](@ref),
+[`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref), [`CTModels.Components.costate`](@ref).
 """
 function build_solution(
     ocp::Model,
@@ -585,7 +585,7 @@ Return the dimension of the state.
 # Returns
 - `Dimension`: The state dimension.
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Models.state_components`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_components`](@ref).
 """
 function Models.state_dimension(sol::Solution)::Dimension
     return dimension(sol.state)
@@ -673,7 +673,7 @@ Return the dimension of the control.
 # Returns
 - `Dimension`: The control dimension.
 
-See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_components`](@ref).
+See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_components`](@ref).
 """
 function Models.control_dimension(sol::Solution)::Dimension
     return dimension(sol.control)
@@ -724,7 +724,7 @@ Return the interpolation type of the control.
 # Returns
 - `Symbol`: The interpolation type (`:constant` or `:linear`).
 
-See also: [`CTModels.Models.control`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_dimension`](@ref).
 """
 function control_interpolation(sol::Solution)::Symbol
     return interpolation(sol.control)
@@ -778,7 +778,7 @@ Return the dimension of the variable.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Models.variable`](@ref), [`CTModels.Models.variable_components`](@ref).
+See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_components`](@ref).
 """
 function Models.variable_dimension(sol::Solution)::Dimension
     return dimension(sol.variable)
@@ -981,7 +981,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> p0 = p(t0) # costate at the initial time
 ```
 
-See also: [`CTModels.Models.state`](@ref), [`CTModels.Solutions.dual`](@ref).
+See also: [`CTModels.Components.state`](@ref), [`CTModels.Solutions.dual`](@ref).
 """
 function Components.costate(
     sol::Solution{
@@ -1195,7 +1195,7 @@ Return the time grid for solutions with unified time grid.
 # Returns
 - `T`: The unified time grid.
 
-See also: [`CTModels.Solutions.time_grid(sol, component)`](@ref), [`CTModels.Models.times`](@ref).
+See also: [`CTModels.Components.time_grid`](@ref), [`CTModels.Components.times`](@ref).
 """
 function Components.time_grid(
     sol::Solution{
@@ -1229,19 +1229,17 @@ Return the time grid for a specific component.
 # Returns
 - `TimesDisc`: The time grid for the specified component
 
-# Behavior
-- For `UnifiedTimeGridModel`: Returns the unique time grid for any component
-- For `MultipleTimeGridModel`: Returns the specific time grid for the component
+Returns the unique time grid for any component (all components share the same grid).
 
 # Throws
-- `IncorrectArgument`: If component is not one of the valid symbols
+- `IncorrectArgument`: If component is not one of the valid symbols.
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)   # Works for both unified and multiple grids
-julia> time_grid(sol, :control) # Works for both unified and multiple grids
-julia> time_grid(sol, :costate) # Maps to :state grid
-julia> time_grid(sol, :dual)    # Maps to :path grid
+julia> CTModels.time_grid(sol, :state)   # unified grid
+julia> CTModels.time_grid(sol, :control) # same unified grid
+julia> CTModels.time_grid(sol, :costate) # :costate → :state mapping
+julia> CTModels.time_grid(sol, :dual)    # :dual → :path mapping
 ```
 """
 function Components.time_grid(
@@ -1296,14 +1294,14 @@ Return the time grid for a specific component in solutions with multiple time gr
 - `TimesDisc`: The time grid for the specified component
 
 # Throws
-- `IncorrectArgument`: If component is not one of the valid symbols
+- `IncorrectArgument`: If component is not one of the valid symbols.
 
 # Examples
 ```julia-repl
-julia> time_grid(sol, :state)   # Get state time grid
-julia> time_grid(sol, :control) # Get control time grid
-julia> time_grid(sol, :costate) # Maps to state time grid
-julia> time_grid(sol, :dual)    # Maps to path time grid
+julia> CTModels.time_grid(sol, :state)   # state time grid
+julia> CTModels.time_grid(sol, :control) # control time grid
+julia> CTModels.time_grid(sol, :costate) # :costate → :state
+julia> CTModels.time_grid(sol, :dual)    # :dual → :path
 ```
 """
 function Components.time_grid(
@@ -1679,8 +1677,8 @@ data = _serialize_solution(sol)
 sol_new = build_solution(ocp, data["time_grid_state"], ...; objective=data["objective"], ...)
 ```
 
-See also: [`build_solution`](@ref), [`_reconstruct_solution_from_data`](@ref), 
-[`export_ocp_solution`](@ref), [`import_ocp_solution`](@ref)
+See also: [`CTModels.Solutions.build_solution`](@ref), [`CTModels.Serialization._reconstruct_solution_from_data`](@ref),
+[`CTModels.Serialization.export_ocp_solution`](@ref), [`CTModels.Serialization.import_ocp_solution`](@ref)
 """
 function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters

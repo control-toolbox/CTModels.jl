@@ -1,23 +1,25 @@
 """
 $(TYPEDSIGNATURES)
 
-Set the full dynamics of the optimal control problem `ocp` using the function `f`.
+Set the full dynamics of the optimal control problem `ocp` using the in-place function `f`.
+
+The dynamics have the signature `f!(r, t, x, u, v)` where `r` is the output buffer (filled
+in-place), `t` is the time, `x` the state, `u` the control (or `nothing` for control-free
+problems), and `v` the optimisation variable.
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
-- `f::Function`: A function that defines the complete system dynamics.
+- `f::Function`: In-place function `f!(r, t, x, u, v)` defining the complete dynamics.
 
-# Preconditions
-- The state and times must be set before calling this function.
-- Control is **optional**: problems without control input (dimension 0) are supported.
-- No dynamics must have been set previously.
-
-# Behavior
-This function assigns `f` as the complete dynamics of the system. It throws an error
-if the state or times are not yet set, or if dynamics have already been set.
+# Returns
+- `Nothing`
 
 # Throws
-- `Exceptions.PreconditionError`: If called out of order or in an invalid state.
+- `Exceptions.PreconditionError`: If state has not been set yet.
+- `Exceptions.PreconditionError`: If times have not been set yet.
+- `Exceptions.PreconditionError`: If dynamics have already been set.
+
+See also: [`CTModels.Building.objective!`](@ref), [`CTModels.Building.time_dependence!`](@ref).
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
     Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
@@ -48,43 +50,27 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a partial dynamics function `f` to the optimal control problem `ocp`, applying to the
-subset of state indices specified by the range `rg`.
+Add a partial dynamics function for a range of state indices in `ocp`.
+
+The partial right-hand side fills `r[1:length(rg)]` (local buffer view). Ranges must tile
+`1:n` without overlap; completeness is verified by [`CTModels.Building.build`](@ref) via
+[`CTModels.Building.__is_dynamics_complete`](@ref).
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
-- `rg::AbstractRange{<:Int}`: Range of state indices to which `f` applies.
-- `f::Function`: A function describing the dynamics over the specified state indices.
-
-# Preconditions
-- The state and times must be set before calling this function.
-- Control is **optional**: problems without control input (dimension 0) are supported.
-- The full dynamics must not yet be complete.
-- No overlap is allowed between `rg` and existing dynamics index ranges.
-
-# Behavior
-This function appends the tuple `(rg, f)` to the list of partial dynamics. It ensures
-that the specified indices are not already covered and that the system is in a valid
-configuration for adding partial dynamics.
-
-# Throws
-- `Exceptions.PreconditionError`: If the state or times are not yet set
-- `Exceptions.PreconditionError`: If the dynamics are already defined completely
-- `Exceptions.PreconditionError`: If any index in `rg` overlaps with an existing dynamics range
-- `Exceptions.IncorrectArgument`: If an index in `rg` is out of bounds
+- `rg::AbstractRange{<:Int}`: State index range covered by `f`.
+- `f::Function`: In-place function `f!(r, t, x, u, v)` updating `r[1:length(rg)]`.
 
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.time_dependence!`](@ref), [`CTModels.Building.objective!`](@ref), [`CTModels.Building.constraint!`](@ref).
+# Throws
+- `Exceptions.PreconditionError`: If state or times have not been set yet.
+- `Exceptions.PreconditionError`: If complete dynamics have already been set.
+- `Exceptions.PreconditionError`: If `rg` overlaps with an existing dynamics range.
+- `Exceptions.IncorrectArgument`: If any index in `rg` is out of bounds.
 
-# Example
-```julia-repl
-julia> using CTModels
-
-julia> ocp = PreModel(); dynamics!(ocp, 1:2, (out, t, x, u, v) -> out .= x[1:2] .+ u[1:2])
-julia> dynamics!(ocp, 3:3, (out, t, x, u, v) -> out .= x[3] * v[1])
-```
+See also: [`CTModels.Building.dynamics!`](@ref), [`CTModels.Building.objective!`](@ref).
 """
 function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothing
     Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
@@ -160,36 +146,21 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Define partial dynamics for a single state variable index in an optimal control problem.
+Convenience wrapper: add partial dynamics for a single state index `i`.
 
-This is a convenience method for defining dynamics affecting only one element of the state vector. It wraps the scalar index `i` into a range `i:i` and delegates to the general partial dynamics method.
+Equivalent to `CTModels.Building.dynamics!(ocp, i:i, f)`.
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
-- `i::Integer`: The index of the state variable to which the function `f` applies.
-- `f::Function`: A function of the form `(out, t, x, u, v) -> ...`, which updates the scalar output `out[1]` in-place.
-
-# Behavior
-This is equivalent to calling:
-```julia-repl
-julia> dynamics!(ocp, i:i, f)
-```
-
-# Throws
-- `Exceptions.PreconditionError`: If the model is not properly initialized
-- `Exceptions.PreconditionError`: If the index `i` overlaps with existing dynamics
-- `Exceptions.PreconditionError`: If a full dynamics function is already defined
-- `Exceptions.IncorrectArgument`: If the index `i` is out of bounds
-
-# Example
-```julia-repl
-julia> using CTModels
-
-julia> ocp = PreModel(); dynamics!(ocp, 3, (out, t, x, u, v) -> out[1] = x[3]^2 + u[1])
-```
+- `i::Integer`: State index covered by `f`.
+- `f::Function`: In-place function `f!(r, t, x, u, v)` updating `r[1]`.
 
 # Returns
 - `Nothing`
+
+# Throws
+- `Exceptions.PreconditionError`: If state, times, or dynamics preconditions are violated.
+- `Exceptions.IncorrectArgument`: If `i` is out of bounds.
 
 See also: [`CTModels.Building.dynamics!`](@ref) (range-based version).
 """
@@ -200,37 +171,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Build a combined dynamics function from multiple parts.
+Build a single combined in-place dynamics function from ordered partial parts.
 
-This function constructs an in-place dynamics function `dyn!` by composing several sub-functions, each responsible for updating a specific segment of the output vector.
+Used internally by [`CTModels.Building.build`](@ref) after all partial dynamics calls
+have been collected. Each part function updates its assigned slice of the output vector
+via a `@view`, avoiding copies.
 
 # Arguments
-- `parts::Vector{<:Tuple{<:AbstractRange{<:Int}, <:Function}}`: 
-  A vector of tuples, where each tuple contains:
-  - A range specifying the indices in the output vector `val` that the corresponding function updates.
-  - A function `f` with the signature `(output_segment, t, x, u, v)`, which updates the slice of `val` indicated by the range.
+- `parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}`: Ordered vector of
+  `(range, f!)` pairs; each `f!(r, t, x, u, v)` fills `r` = `view(val, range)`.
 
 # Returns
-- `dyn!`: A function with signature `(val, t, x, u, v)` that updates the full output vector `val` in-place by applying each part function to its assigned segment.
-
-# Details
-- The returned `dyn!` function calls each part function with a view of `val` restricted to the assigned range. This avoids unnecessary copying and allows efficient updates of sub-vectors.
-- Each part function is expected to modify its output segment in-place.
-
-# Example
-```julia-repl
-# Define two sub-dynamics functions
-julia> f1(out, t, x, u, v) = out .= x[1:2] .+ u[1:2]
-julia> f2(out, t, x, u, v) = out .= x[3] * v
-
-# Combine them into one dynamics function affecting different parts of the output vector
-julia> parts = [(1:2, f1), (3:3, f2)]
-julia> dyn! = __build_dynamics_from_parts(parts)
-
-val = zeros(3)
-julia> dyn!(val, 0.0, [1.0, 2.0, 3.0], [0.5, 0.5], 2.0)
-julia> println(val)  # prints [1.5, 2.5, 6.0]
-```
+- `Function`: Combined `dyn!(val, t, x, u, v)` that applies all parts in order.
 """
 function __build_dynamics_from_parts(
     parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}

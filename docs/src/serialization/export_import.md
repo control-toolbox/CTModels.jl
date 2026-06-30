@@ -51,8 +51,12 @@ CTModels.export_ocp_solution(sol; filename=base, format=:JLD)
 
 from_json = CTModels.import_ocp_solution(ocp; filename=base, format=:JSON)
 from_jld  = CTModels.import_ocp_solution(ocp; filename=base, format=:JLD)
+nothing # hide
+```
 
-(CTModels.objective(from_json), CTModels.objective(from_jld))
+```@repl exim
+CTModels.objective(from_json)
+CTModels.objective(from_jld)
 ```
 
 The reloaded solution behaves exactly like the original — its trajectories are again callables
@@ -60,6 +64,10 @@ of time:
 
 ```@example exim
 x = CTModels.state(from_json)
+nothing # hide
+```
+
+```@repl exim
 x(0.5)
 ```
 

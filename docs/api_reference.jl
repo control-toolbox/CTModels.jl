@@ -1,10 +1,9 @@
 # ==============================================================================
-# CTModels API Reference Generator
-# ==============================================================================
+# CTModels API Reference Manager
 #
-# This module provides functions to generate API reference documentation
-# for CTModels.jl, following the pattern established in CTBase.jl.
-#
+# One CTBase.automatic_reference_documentation call per documented page.
+# Keep the file lists in sync with src/<Submodule>/ and ext/ when files
+# are added, removed, or renamed.
 # ==============================================================================
 
 """
@@ -14,11 +13,9 @@ Generate the API reference documentation for CTModels.
 Returns the list of pages.
 """
 function generate_api_reference(src_dir::String, ext_dir::String)
-    # Helper to build absolute paths
     src(files...) = [abspath(joinpath(src_dir, f)) for f in files]
     ext(files...) = [abspath(joinpath(ext_dir, f)) for f in files]
 
-    # Symbols to exclude from documentation
     EXCLUDE_SYMBOLS = Symbol[
         :include,
         :eval,
@@ -28,246 +25,162 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         :is_empty,
         :time_ns,
     ]
+    EXCLUDE_INTERNALS = vcat(
+        EXCLUDE_SYMBOLS,
+        Symbol[:DOCTYPE_ABSTRACT_TYPE, :DOCTYPE_CONSTANT, :DOCTYPE_FUNCTION,
+               :DOCTYPE_MACRO, :DOCTYPE_MODULE, :DOCTYPE_STRUCT],
+    )
 
-    CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
-    CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
-    CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
-
-    pages = [
-        # ───────────────────────────────────────────────────────────────────
-        # Components — foundational types and basic accessors
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Components => src(
-                    joinpath("Components", "types.jl"),
-                    joinpath("Components", "aliases.jl"),
-                    joinpath("Components", "accessors.jl"),
-                    joinpath("Components", "times_accessors.jl"),
-                    joinpath("Components", "objective_accessors.jl"),
-                    joinpath("Components", "constraints_accessors.jl"),
-                ),
-            ],
-            external_modules_to_document=[CTModels],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
+    # ── Shared config: one entry per submodule ────────────────────────────────
+    modules_config = [
+        (
+            mod=CTModels.Components,
             title="Components",
-            title_in_menu="Components",
-            filename="api_ocp_types",
+            filename="components",
+            files=src(
+                joinpath("Components", "Components.jl"),
+                joinpath("Components", "functors.jl"),
+                joinpath("Components", "types.jl"),
+                joinpath("Components", "aliases.jl"),
+                joinpath("Components", "accessors_api.jl"),
+                joinpath("Components", "accessors.jl"),
+                joinpath("Components", "times_accessors.jl"),
+                joinpath("Components", "objective_accessors.jl"),
+                joinpath("Components", "constraints_accessors.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # Models — AbstractModel, Model and its accessors
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Models => src(
-                    joinpath("Models", "constraint_functors.jl"),
-                    joinpath("Models", "model.jl"),
-                ),
-            ],
-            external_modules_to_document=[CTModels],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
+        (
+            mod=CTModels.Models,
             title="Models",
-            title_in_menu="Models",
-            filename="api_ocp_components",
+            filename="models",
+            files=src(
+                joinpath("Models", "Models.jl"),
+                joinpath("Models", "constraint_functors.jl"),
+                joinpath("Models", "model.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # Building — PreModel, mutators, build
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Building => src(
-                    joinpath("Building", "constraint_composers.jl"),
-                    joinpath("Building", "pre_model.jl"),
-                    joinpath("Building", "state.jl"),
-                    joinpath("Building", "control.jl"),
-                    joinpath("Building", "variable.jl"),
-                    joinpath("Building", "times.jl"),
-                    joinpath("Building", "dynamics.jl"),
-                    joinpath("Building", "objective.jl"),
-                    joinpath("Building", "constraints.jl"),
-                    joinpath("Building", "definition.jl"),
-                    joinpath("Building", "time_dependence.jl"),
-                    joinpath("Building", "build.jl"),
-                    joinpath("Building", "defaults.jl"),
-                    joinpath("Building", "name_validation.jl"),
-                ),
-            ],
-            external_modules_to_document=[CTModels],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
+        (
+            mod=CTModels.Building,
             title="Building",
-            title_in_menu="Building",
-            filename="api_ocp_building",
+            filename="building",
+            files=src(
+                joinpath("Building", "Building.jl"),
+                joinpath("Building", "constraint_composers.jl"),
+                joinpath("Building", "pre_model.jl"),
+                joinpath("Building", "state.jl"),
+                joinpath("Building", "control.jl"),
+                joinpath("Building", "variable.jl"),
+                joinpath("Building", "times.jl"),
+                joinpath("Building", "dynamics.jl"),
+                joinpath("Building", "objective.jl"),
+                joinpath("Building", "constraints.jl"),
+                joinpath("Building", "definition.jl"),
+                joinpath("Building", "time_dependence.jl"),
+                joinpath("Building", "build.jl"),
+                joinpath("Building", "defaults.jl"),
+                joinpath("Building", "name_validation.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # Solutions — Solution types, build_solution, duals
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Solutions => src(
-                    joinpath("Solutions", "solution_types.jl"),
-                    joinpath("Solutions", "dual_functors.jl"),
-                    joinpath("Solutions", "build_solution.jl"),
-                    joinpath("Solutions", "dual_model.jl"),
-                    joinpath("Solutions", "interpolation_helpers.jl"),
-                    joinpath("Solutions", "discretization_utils.jl"),
-                ),
-            ],
-            external_modules_to_document=[CTModels],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
+        (
+            mod=CTModels.Solutions,
             title="Solutions",
-            title_in_menu="Solutions",
-            filename="api_ocp_core",
+            filename="solutions",
+            files=src(
+                joinpath("Solutions", "Solutions.jl"),
+                joinpath("Solutions", "solution_types.jl"),
+                joinpath("Solutions", "dual_functors.jl"),
+                joinpath("Solutions", "build_solution.jl"),
+                joinpath("Solutions", "dual_model.jl"),
+                joinpath("Solutions", "interpolation_helpers.jl"),
+                joinpath("Solutions", "discretization_utils.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # Display
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Display => src(
-                    joinpath("Display", "Display.jl"),
-                    joinpath("Display", "ansi.jl"),
-                    joinpath("Display", "definition.jl"),
-                    joinpath("Display", "mathematical.jl"),
-                    joinpath("Display", "model.jl"),
-                    joinpath("Display", "pre_model.jl"),
-                    joinpath("Display", "solution.jl"),
-                ),
-                CTModelsPlots =>
-                    ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),
-            ],
-            external_modules_to_document=[Plots],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Display, Plots",
-            title_in_menu="Display, Plots",
-            filename="api_display",
+        (
+            mod=CTModels.Display,
+            title="Display",
+            filename="display",
+            files=src(
+                joinpath("Display", "Display.jl"),
+                joinpath("Display", "ansi.jl"),
+                joinpath("Display", "definition.jl"),
+                joinpath("Display", "mathematical.jl"),
+                joinpath("Display", "model.jl"),
+                joinpath("Display", "pre_model.jl"),
+                joinpath("Display", "solution.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # Serialization
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Serialization => src(
-                    joinpath("Serialization", "Serialization.jl"),
-                    joinpath("Serialization", "export_import.jl"),
-                    joinpath("Serialization", "types.jl"),
-                    joinpath("Serialization", "reconstruction_helpers.jl"),
-                ),
-                CTModelsJSON => ext("CTModelsJSON.jl"),
-                CTModelsJLD => ext("CTModelsJLD.jl"),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Serialization, JSON & JLD2",
-            title_in_menu="Serialization, JSON & JLD2",
-            filename="api_serialization",
+        (
+            mod=CTModels.Serialization,
+            title="Serialization",
+            filename="serialization",
+            files=src(
+                joinpath("Serialization", "Serialization.jl"),
+                joinpath("Serialization", "export_import.jl"),
+                joinpath("Serialization", "types.jl"),
+                joinpath("Serialization", "reconstruction_helpers.jl"),
+            ),
         ),
-        # ───────────────────────────────────────────────────────────────────
-        # InitialGuess
-        # ───────────────────────────────────────────────────────────────────
-        CTBase.automatic_reference_documentation(;
-            subdirectory=".",
-            primary_modules=[
-                CTModels.Init => src(
-                    joinpath("Init", "Init.jl"),
-                    joinpath("Init", "types.jl"),
-                    joinpath("Init", "api.jl"),
-                    joinpath("Init", "init_functors.jl"),
-                    joinpath("Init", "builders.jl"),
-                    joinpath("Init", "state.jl"),
-                    joinpath("Init", "control.jl"),
-                    joinpath("Init", "variable.jl"),
-                    joinpath("Init", "validation.jl"),
-                    joinpath("Init", "utils.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="InitialGuess",
-            title_in_menu="InitialGuess",
-            filename="api_initial_guess",
+        (
+            mod=CTModels.Init,
+            title="Init",
+            filename="init",
+            files=src(
+                joinpath("Init", "Init.jl"),
+                joinpath("Init", "types.jl"),
+                joinpath("Init", "api.jl"),
+                joinpath("Init", "init_functors.jl"),
+                joinpath("Init", "builders.jl"),
+                joinpath("Init", "state.jl"),
+                joinpath("Init", "control.jl"),
+                joinpath("Init", "variable.jl"),
+                joinpath("Init", "validation.jl"),
+                joinpath("Init", "utils.jl"),
+            ),
         ),
     ]
 
-    # ───────────────────────────────────────────────────────────────────
-    # Extensions (conditional)
-    # ───────────────────────────────────────────────────────────────────
+    # ── Public pages: one flat page per submodule ─────────────────────────────
+    pages = [
+        CTBase.automatic_reference_documentation(;
+            subdirectory="api",
+            primary_modules=[cfg.mod => cfg.files],
+            external_modules_to_document=[CTModels],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title=cfg.title,
+            title_in_menu=cfg.title,
+            filename=cfg.filename,
+        ) for cfg in modules_config
+    ]
 
-    # # CTModelsPlots extension
-    # CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
-    # if !isnothing(CTModelsPlots)
-    #     push!(
-    #         pages,
-    #         CTBase.automatic_reference_documentation(;
-    #             subdirectory=".",
-    #             primary_modules=[
-    #                 CTModelsPlots => ext("plot.jl", "plot_utils.jl", "plot_default.jl")
-    #             ],
-    #             external_modules_to_document=[CTModels],
-    #             exclude=EXCLUDE_SYMBOLS,
-    #             public=true,
-    #             private=true,
-    #             title="CTModelsPlots",
-    #             title_in_menu="Plots Extension",
-    #             filename="api_plots_extension",
-    #         ),
-    #     )
-    # end
+    # ── Internals: all private symbols in one page, sections by module ────────
+    internals_modules = Any[cfg.mod => cfg.files for cfg in modules_config]
 
-    # # CTModelsJSON extension
-    # CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
-    # if !isnothing(CTModelsJSON)
-    #     push!(
-    #         pages,
-    #         CTBase.automatic_reference_documentation(;
-    #             subdirectory=".",
-    #             primary_modules=[CTModelsJSON => ext("CTModelsJSON.jl")],
-    #             external_modules_to_document=[CTModels],
-    #             exclude=EXCLUDE_SYMBOLS,
-    #             public=true,
-    #             private=true,
-    #             title="CTModelsJSON",
-    #             title_in_menu="JSON Extension",
-    #             filename="api_json_extension",
-    #         ),
-    #     )
-    # end
+    # Conditional extensions
+    for (sym, files) in [
+        (:CTModelsPlots, ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl")),
+        (:CTModelsJSON, ext("CTModelsJSON.jl")),
+        (:CTModelsJLD, ext("CTModelsJLD.jl")),
+    ]
+        extmod = Base.get_extension(CTModels, sym)
+        isnothing(extmod) || push!(internals_modules, extmod => files)
+    end
 
-    # # CTModelsJLD extension
-    # CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
-    # if !isnothing(CTModelsJLD)
-    #     push!(
-    #         pages,
-    #         CTBase.automatic_reference_documentation(;
-    #             subdirectory=".",
-    #             primary_modules=[CTModelsJLD => ext("CTModelsJLD.jl")],
-    #             external_modules_to_document=[CTModels],
-    #             exclude=EXCLUDE_SYMBOLS,
-    #             public=true,
-    #             private=true,
-    #             title="CTModelsJLD",
-    #             title_in_menu="JLD2 Extension",
-    #             filename="api_jld_extension",
-    #         ),
-    #     )
-    # end
+    push!(
+        pages,
+        CTBase.automatic_reference_documentation(;
+            subdirectory="api",
+            primary_modules=internals_modules,
+            external_modules_to_document=[CTModels],
+            exclude=EXCLUDE_INTERNALS,
+            public=false,
+            private=true,
+            title="Internals",
+            title_in_menu="Internals",
+            filename="internals",
+        ),
+    )
 
     return pages
 end
@@ -282,39 +195,19 @@ function with_api_reference(f::Function, src_dir::String, ext_dir::String)
     try
         f(pages)
     finally
-        # Clean up generated files
-        # The pages are Pairs: "Title" => "filename.md" (relative to build? no, relative to src)
-        # automatic_reference_documentation returns "filename" which is relative to docs/src if subdirectory="."
-
-        # We need to reconstruct the full path to delete them.
-        # Assuming they are in docs/src (which is where makedocs runs from?)
-        # Wait, makedocs options say subdirectory=".". 
-        # Typically automatic_reference_documentation writes to joinpath(@__DIR__, "src", subdirectory, filename.md) ??
-        # I need to check where automatic_reference_documentation writes.
-        # Assuming we are running from docs/ (where make.jl is).
-
-        # Let's assume the files are in `docs/src`.
         docs_src = abspath(joinpath(@__DIR__, "src"))
-
-        function cleanup_pages(pages)
+        function cleanup(pages)
             for p in pages
                 content = last(p)
                 if content isa AbstractString
-                    # file path
-                    filename = content
-                    fname = endswith(filename, ".md") ? filename : filename * ".md"
+                    fname = endswith(content, ".md") ? content : content * ".md"
                     full_path = joinpath(docs_src, fname)
-                    if isfile(full_path)
-                        rm(full_path)
-                        println("Removed temporary API doc: $full_path")
-                    end
+                    isfile(full_path) && rm(full_path)
                 elseif content isa Vector
-                    # nested pages
-                    cleanup_pages(content)
+                    cleanup(content)
                 end
             end
         end
-
-        cleanup_pages(pages)
+        cleanup(pages)
     end
 end

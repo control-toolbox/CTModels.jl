@@ -22,13 +22,14 @@ Set the objective of the optimal control problem.
 ```julia-repl
 julia> using CTModels
 
-julia> function mayer(x0, xf, v)
-           return x0[1] + xf[1] + v[1]
-       end
-julia> function lagrange(t, x, u, v)
-           return x[1] + u[1] + v[1]
-       end
-julia> ocp = PreModel(); objective!(ocp, :min, mayer=mayer, lagrange=lagrange)
+julia> ocp = CTModels.PreModel()
+
+julia> CTModels.state!(ocp, 1); CTModels.control!(ocp, 1); CTModels.variable!(ocp, 1); CTModels.time!(ocp; t0=0, tf=1);
+
+julia> mayer(x0, xf, v)    = x0[1] + xf[1] + v[1]
+julia> lagrange(t, x, u, v) = x[1]  + u[1]  + v[1]
+
+julia> CTModels.objective!(ocp, :min; mayer=mayer, lagrange=lagrange);
 ```
 
 # Throws

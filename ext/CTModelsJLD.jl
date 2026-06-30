@@ -30,8 +30,9 @@ serialization warnings for function objects.
 
 # Example
 ```julia-repl
-julia> using JLD2
-julia> export_ocp_solution(JLD2Tag(), sol; filename="mysolution")
+julia> using JLD2, CTModels
+
+julia> CTModels.export_ocp_solution(CTModels.JLD2Tag(), sol; filename="mysolution")
 # → creates "mysolution.jld2"
 ```
 
@@ -72,8 +73,9 @@ reconstructs it using `build_solution` from the discretized data.
 
 # Example
 ```julia-repl
-julia> using JLD2
-julia> sol = import_ocp_solution(JLD2Tag(), model; filename="mysolution")
+julia> using JLD2, CTModels
+
+julia> sol = CTModels.import_ocp_solution(CTModels.JLD2Tag(), model; filename="mysolution")
 ```
 
 # Notes

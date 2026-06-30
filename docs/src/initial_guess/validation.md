@@ -34,6 +34,10 @@ model. This separation lets a caller build once and validate against several mod
 
 ```@example val
 ig = CTModels.initial_guess(ocp; state = t -> [0.0, 0.0], control = t -> [0.1])
+nothing # hide
+```
+
+```@repl val
 ig === CTModels.validate_initial_guess(ocp, ig)   # returns the same object when valid
 ```
 
@@ -42,12 +46,12 @@ ig === CTModels.validate_initial_guess(ocp, ig)   # returns the same object when
 Validation samples the guess and compares its shape to the problem dimensions. A state guess
 of the wrong length is refused:
 
-```@example val
-try
-    CTModels.build_initial_guess(ocp, (state = t -> [0.0],))   # 1 ≠ 2 states
-catch e
-    (e isa CTBase.Exceptions.IncorrectArgument, :rejected)
-end
+```@repl val
+try # hide
+CTModels.build_initial_guess(ocp, (state = t -> [0.0],))   # 1 ≠ 2 states
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 ## Warm-start from a solution
@@ -69,6 +73,10 @@ sol = CTModels.build_solution(ocp, T, X, U, Float64[], P;
 
 # Reuse it as an initial guess
 warm = CTModels.build_initial_guess(ocp, sol)
+nothing # hide
+```
+
+```@repl val
 warm.state(0.5)
 ```
 

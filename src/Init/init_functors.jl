@@ -6,11 +6,47 @@
 # the compiler can specialise statically when the return type of `base` is known.
 
 # For dim == 1: normalise any base value to a length-1 vector (no length check).
+"""
+$(TYPEDSIGNATURES)
+
+Normalise a scalar or vector base value to a `Vector` of length 1 for dim-1 components.
+
+Dispatched overloads replace `isa AbstractVector` runtime checks with static dispatch,
+letting the compiler specialise on the return type of the base trajectory.
+
+# Arguments
+- `v`: raw output of a base trajectory function for a 1-dimensional component.
+
+# Returns
+- `Vector`: a length-1 vector containing or wrapping `v`.
+
+See also: [`CTModels.Init._coerce_base`](@ref)
+"""
 _wrap_1d(v::AbstractVector) = copy(v)
 _wrap_1d(v) = [v]
 
 # For dim > 1: check that `v` has the expected length, then collect.
 # The scalar overload always throws because a scalar cannot fill a dim>1 vector.
+"""
+$(TYPEDSIGNATURES)
+
+Validate and collect the base trajectory output for a component with `dim > 1`.
+
+Throws if `v` is not an `AbstractVector` of the expected length, or if `v` is a scalar.
+
+# Arguments
+- `v`: raw output of the base trajectory function.
+- `dim::Int`: expected component dimension.
+- `role::Symbol`: component role (e.g. `:state`, `:control`) used in the error message.
+
+# Returns
+- `Vector`: a freshly collected copy of `v`.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if `v` is a scalar or has incorrect length.
+
+See also: [`CTModels.Init._wrap_1d`](@ref)
+"""
 function _coerce_base(v::AbstractVector, dim::Int, role::Symbol)
     if length(v) != dim
         throw(

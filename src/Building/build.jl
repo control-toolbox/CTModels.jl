@@ -407,7 +407,7 @@ instance, incorporating optional components like control, variable, and constrai
 
 !!! note
     Control is **optional**: calling [`CTModels.Building.control!`](@ref) is not required. When omitted, the model is
-    built with `control_dimension == 0` (an [`CTModels.Models.EmptyControlModel`](@ref)). This is useful for problems
+    built with `control_dimension == 0` (an [`CTModels.Components.EmptyControlModel`](@ref)). This is useful for problems
     where the dynamics depend only on the state, such as pure state-space systems.
 
 # Arguments
@@ -417,29 +417,38 @@ instance, incorporating optional components like control, variable, and constrai
 # Returns
 - `CTModels.Models.Model`: A fully constructed model ready for solving.
 
-# Example without control
-```julia
-using CTModels.Building
+# Examples
 
-pre_ocp = PreModel()
-times!(pre_ocp, 0.0, 1.0, 100)
-state!(pre_ocp, 2, "x", ["x1", "x2"])
-dynamics!(pre_ocp, (t, x, u) -> [-x[2], x[1]])
-objective!(pre_ocp, :min, mayer=(x0, xf) -> xf[1]^2)
-model = build(pre_ocp)
-CTModels.Models.control_dimension(model)  # 0
+Minimal Mayer problem (no control):
+
+```julia
+using CTModels
+
+pre = CTModels.PreModel()
+CTModels.variable!(pre, 0)
+CTModels.time!(pre; t0=0.0, tf=1.0)
+CTModels.state!(pre, 2, "x", ["x1", "x2"])
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = -x[2]; r[2] = x[1]; nothing))
+CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1]^2)
+CTModels.time_dependence!(pre; autonomous=true)
+model = CTModels.build(pre)
+CTModels.control_dimension(model)  # 0
 ```
 
-# Example with control
-```julia
-using CTModels.Building
+Bolza problem with control:
 
-pre_ocp = PreModel()
-times!(pre_ocp, 0.0, 1.0, 100)
-state!(pre_ocp, 2, "x", ["x1", "x2"])
-control!(pre_ocp, 1, "u", ["u1"])
-dynamics!(pre_ocp, (dx, t, x, u, v) -> dx .= x + u)
-model = build(pre_ocp)
+```julia
+using CTModels
+
+pre = CTModels.PreModel()
+CTModels.variable!(pre, 0)
+CTModels.time!(pre; t0=0.0, tf=1.0)
+CTModels.state!(pre, 2)
+CTModels.control!(pre, 1)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.time_dependence!(pre; autonomous=true)
+model = CTModels.build(pre)
 ```
 
 # Throws

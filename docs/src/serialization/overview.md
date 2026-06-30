@@ -1,4 +1,4 @@
-# Serialization & extensions
+# Extensions
 
 ```@meta
 CurrentModule = CTModels
@@ -20,7 +20,7 @@ live in the core; their **implementations** live in the extension. Until the tri
 loaded, calling a wrapper raises a descriptive `CTBase.ExtensionError` — the core never hard-
 depends on JSON3, JLD2 or Plots.
 
-```
+```text
 core wrapper ──(trigger pkg loaded?)──► extension method
      │                  │
 export_ocp_solution    no ─► CTBase.ExtensionError
@@ -69,8 +69,12 @@ nothing # hide
 base = joinpath(tempdir(), "ctmodels_overview")
 CTModels.export_ocp_solution(sol; filename=base, format=:JSON)
 reloaded = CTModels.import_ocp_solution(ocp; filename=base, format=:JSON)
+nothing # hide
+```
 
-(CTModels.objective(sol), CTModels.objective(reloaded))
+```@repl ser_index
+CTModels.objective(sol)
+CTModels.objective(reloaded)
 ```
 
 See [Export & import](export_import.md) for the formats and the resampling strategy, and

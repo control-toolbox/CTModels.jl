@@ -57,6 +57,10 @@ covers the **two** path rows declared with it, so its dual is the 2-vector slice
 
 ```@example duals
 d = CTModels.dual(sol, ocp, :con2)
+nothing # hide
+```
+
+```@repl duals
 d(0.5)
 ```
 
@@ -64,7 +68,7 @@ The whole path multiplier is reached directly through the
 [`DualModel`](@ref CTModels.Solutions.DualModel) accessor
 [`path_constraints_dual`](@ref CTModels.Solutions.path_constraints_dual):
 
-```@example duals
+```@repl duals
 CTModels.path_constraints_dual(sol)(0.5)
 ```
 
@@ -80,13 +84,13 @@ CTModels.path_constraints_dual(sol)(0.5)
 
 The [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) record is exposed through scalar accessors:
 
-```@example duals
-(CTModels.iterations(sol),
- CTModels.status(sol),
- CTModels.message(sol),
- CTModels.successful(sol),
- CTModels.constraints_violation(sol))
+```@repl duals
+CTModels.iterations(sol)
+CTModels.status(sol)
+CTModels.message(sol)
+CTModels.successful(sol)
+CTModels.constraints_violation(sol)
 ```
 
 `infos(sol)` returns the `Dict{Symbol,Any}` of any extra solver-specific data. These fields
-are what [Serialization](../serialization/index.md) writes to disk alongside the trajectories.
+are what [Serialization](../serialization/overview.md) writes to disk alongside the trajectories.

@@ -25,7 +25,7 @@ model + numerical arrays (T, X, U, v, P, duals, infos)
 | Page | Topic | Key symbols |
 |---|---|---|
 | [Time grids](time_grids.md) | One grid or several | [`UnifiedTimeGridModel`](@ref CTModels.Solutions.UnifiedTimeGridModel), [`MultipleTimeGridModel`](@ref CTModels.Solutions.MultipleTimeGridModel) |
-| [Trajectories](trajectories.md) | Reading primal data | [`state`](@ref CTModels.Models.state), [`control`](@ref CTModels.Models.control), [`costate`](@ref CTModels.Solutions.costate) |
+| [Trajectories](trajectories.md) | Reading primal data | [`state`](@ref CTModels.Components.state), [`control`](@ref CTModels.Components.control), [`costate`](@ref CTModels.Components.costate) |
 | [Duals & diagnostics](duals.md) | Multipliers and solver status | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel), [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) |
 
 ## Minimal end-to-end example
@@ -68,19 +68,23 @@ diagnostics as scalars:
 
 ```@example sol_index
 x = CTModels.state(sol)          # x(t) → state at time t
-(x(0.5),
- CTModels.objective(sol),
- CTModels.iterations(sol),
- CTModels.successful(sol))
+nothing # hide
+```
+
+```@repl sol_index
+x(0.5)
+CTModels.objective(sol)
+CTModels.iterations(sol)
+CTModels.successful(sol)
 ```
 
 ## Anatomy of a `Solution`
 
 | Field group | Accessor(s) | Stored as |
 |---|---|---|
-| time grid | [`time_grid`](@ref CTModels.Solutions.time_grid) | [`AbstractTimeGridModel`](@ref CTModels.Solutions.AbstractTimeGridModel) |
-| state / control / costate | [`state`](@ref CTModels.Models.state), [`control`](@ref CTModels.Models.control), [`costate`](@ref CTModels.Solutions.costate) | callables `t → …` |
-| variable / objective | [`variable`](@ref CTModels.Models.variable), [`objective`](@ref CTModels.Models.objective) | value |
+| time grid | [`time_grid`](@ref CTModels.Components.time_grid) | [`AbstractTimeGridModel`](@ref CTModels.Solutions.AbstractTimeGridModel) |
+| state / control / costate | [`state`](@ref CTModels.Components.state), [`control`](@ref CTModels.Components.control), [`costate`](@ref CTModels.Components.costate) | callables `t → …` |
+| variable / objective | [`variable`](@ref CTModels.Components.variable), [`objective`](@ref CTModels.Components.objective) | value |
 | duals | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel) | callables / vectors |
 | diagnostics | [`iterations`](@ref CTModels.Solutions.iterations), [`status`](@ref CTModels.Solutions.status), [`successful`](@ref CTModels.Solutions.successful) | [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) |
 
