@@ -4,6 +4,25 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.14.1-beta] - 2026-06-30
+
+### No Breaking Changes
+
+This release migrates the display layer to the CTBase palette and moves `show`
+methods to their respective modules. Documentation is migrated to
+DocumenterVitepress with a full docstring audit.
+
+#### Internal Refactoring (Non-Breaking)
+
+- **Display ANSI helpers removed**: `_ansi_color`, `_ansi_reset`,
+  `_print_ansi_styled` removed from `Display/ansi.jl`. These were internal
+  functions; display now uses `CTBase.Core` format codes.
+- **`Display/solution.jl` removed**: `Base.show` for `Solution` moved to
+  `Solutions/show.jl`. The show method is still defined on the same type.
+- **`Base.show` for `InitialGuess` / `PreInitialGuess`**: new display methods
+  in `Init/show.jl`. Purely additive.
+- **No user action required**.
+
 ## [0.14.0-beta] - 2026-06-28
 
 ### No Breaking Changes

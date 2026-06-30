@@ -7,6 +7,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.1-beta] - 2026-06-30
+
+### ✨ New Features
+
+- **`Base.show` for `InitialGuess` and `PreInitialGuess`**: display methods added
+  in `Init/show.jl` using the CTBase palette (`CTBase.Core.get_format_codes`).
+- **`Base.show` for `Solution` relocated**: moved from `Display/solution.jl` to
+  `Solutions/show.jl`, now using `fmt.success` / `fmt.error` for solver status.
+
+### 🔄 Refactoring
+
+- **Display migrated to CTBase palette**: `definition.jl` and `mathematical.jl`
+  now use `CTBase.Core` format codes (`fmt.emphasis`, `fmt.keyword`) instead of
+  custom ANSI helpers. Removed `_ansi_color`, `_ansi_reset`, `_print_ansi_styled`
+  from `ansi.jl` (only `__print` remains).
+- **Docstring audit**: all docstrings qualified with proper module paths and
+  standardized sections across `Building/`, `Solutions/`, and extensions.
+
+### 📚 Documentation
+
+- **Migrated to DocumenterVitepress**: new Vitepress-based docs site with custom
+  theme, MathJax plugin, Julia REPL transformer, and version picker component.
+- **New getting-started guide**: comprehensive install + walkthrough page.
+- **API reference refactored**: unified Internals page, subdirectory layout.
+
+### 🧪 Tests
+
+- **`test_initial_guess_show.jl`**: 23 tests for InitialGuess/PreInitialGuess display.
+- **`test_solution_show.jl`**: 15 tests for Solution display.
+
 ## [0.14.0-beta] - 2026-06-28
 
 ### ✨ New Features
