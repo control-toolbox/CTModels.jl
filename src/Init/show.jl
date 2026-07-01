@@ -24,7 +24,17 @@ function Base.show(io::IO, ::MIME"text/plain", init::InitialGuess)
     if isempty(init.variable)
         print(io, "  ", fmt.label, "variable:", fmt.reset, fmt.muted, " (none)", fmt.reset)
     else
-        print(io, "  ", fmt.label, "variable:", fmt.reset, " ", fmt.value, init.variable, fmt.reset)
+        print(
+            io,
+            "  ",
+            fmt.label,
+            "variable:",
+            fmt.reset,
+            " ",
+            fmt.value,
+            init.variable,
+            fmt.reset,
+        )
     end
 end
 
@@ -41,8 +51,15 @@ See also: [`CTModels.Init.InitialGuess`](@ref)
 function Base.show(io::IO, init::InitialGuess)
     fmt = Core.get_format_codes(io)
     v_str = isempty(init.variable) ? "(none)" : string(init.variable)
-    print(io, fmt.name, "InitialGuess", fmt.reset,
-          "(state=<callable>, control=<callable>, variable=", v_str, ")")
+    return print(
+        io,
+        fmt.name,
+        "InitialGuess",
+        fmt.reset,
+        "(state=<callable>, control=<callable>, variable=",
+        v_str,
+        ")",
+    )
 end
 
 """
@@ -61,9 +78,30 @@ See also: [`CTModels.Init.PreInitialGuess`](@ref), [`CTModels.Init.InitialGuess`
 function Base.show(io::IO, ::MIME"text/plain", pre::PreInitialGuess)
     fmt = Core.get_format_codes(io)
     println(io, fmt.name, "PreInitialGuess", fmt.reset)
-    println(io, "  ", fmt.label, "state:   ", fmt.reset, fmt.type, typeof(pre.state), fmt.reset)
-    println(io, "  ", fmt.label, "control: ", fmt.reset, fmt.type, typeof(pre.control), fmt.reset)
-    print(io, "  ", fmt.label, "variable:", fmt.reset, " ", fmt.type, typeof(pre.variable), fmt.reset)
+    println(
+        io, "  ", fmt.label, "state:   ", fmt.reset, fmt.type, typeof(pre.state), fmt.reset
+    )
+    println(
+        io,
+        "  ",
+        fmt.label,
+        "control: ",
+        fmt.reset,
+        fmt.type,
+        typeof(pre.control),
+        fmt.reset,
+    )
+    return print(
+        io,
+        "  ",
+        fmt.label,
+        "variable:",
+        fmt.reset,
+        " ",
+        fmt.type,
+        typeof(pre.variable),
+        fmt.reset,
+    )
 end
 
 """
@@ -78,8 +116,17 @@ See also: [`CTModels.Init.PreInitialGuess`](@ref)
 """
 function Base.show(io::IO, pre::PreInitialGuess)
     fmt = Core.get_format_codes(io)
-    print(io, fmt.name, "PreInitialGuess", fmt.reset,
-          "(state=", typeof(pre.state),
-          ", control=", typeof(pre.control),
-          ", variable=", typeof(pre.variable), ")")
+    return print(
+        io,
+        fmt.name,
+        "PreInitialGuess",
+        fmt.reset,
+        "(state=",
+        typeof(pre.state),
+        ", control=",
+        typeof(pre.control),
+        ", variable=",
+        typeof(pre.variable),
+        ")",
+    )
 end
