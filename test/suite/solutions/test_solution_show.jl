@@ -23,10 +23,11 @@ function test_solution_show()
             Building.state!(pre_ocp, 1, "x", ["x"])
             Building.control!(pre_ocp, 1, "u", ["u"])
             Building.variable!(pre_ocp, 0)
-            dynamics!(r, t, x, u, v) = (r[1] = u[1]; nothing)
+            dynamics!(r, t, x, u, v) = (r[1]=u[1]; nothing)
             Building.dynamics!(pre_ocp, dynamics!)
             Building.objective!(
-                pre_ocp, :min;
+                pre_ocp,
+                :min;
                 mayer=(x0, xf, v) -> 0.0,
                 lagrange=(t, x, u, v) -> 0.5 * u[1]^2,
             )
@@ -43,7 +44,12 @@ function test_solution_show()
             P = zeros(3, 1)
             P[:, 1] = [0.1, 0.2, 0.3]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=0.5,
                 iterations=10,
                 constraints_violation=1e-8,
@@ -74,10 +80,11 @@ function test_solution_show()
             Building.state!(pre_ocp, 1, "x", ["x"])
             Building.control!(pre_ocp, 1, "u", ["u"])
             Building.variable!(pre_ocp, 1, "v", ["v"])
-            dynamics!(r, t, x, u, v) = (r[1] = u[1]; nothing)
+            dynamics!(r, t, x, u, v) = (r[1]=u[1]; nothing)
             Building.dynamics!(pre_ocp, dynamics!)
             Building.objective!(
-                pre_ocp, :min;
+                pre_ocp,
+                :min;
                 mayer=(x0, xf, v) -> 0.0,
                 lagrange=(t, x, u, v) -> 0.5 * u[1]^2,
             )
@@ -93,7 +100,12 @@ function test_solution_show()
             P = zeros(2, 1)
             P[:, 1] = [0.1, 0.2]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=1.0,
                 iterations=5,
                 constraints_violation=0.0,
@@ -116,10 +128,11 @@ function test_solution_show()
             Building.state!(pre_ocp, 1, "x", ["x"])
             Building.control!(pre_ocp, 1, "u", ["u"])
             Building.variable!(pre_ocp, 0)
-            dynamics!(r, t, x, u, v) = (r[1] = u[1]; nothing)
+            dynamics!(r, t, x, u, v) = (r[1]=u[1]; nothing)
             Building.dynamics!(pre_ocp, dynamics!)
             Building.objective!(
-                pre_ocp, :min;
+                pre_ocp,
+                :min;
                 mayer=(x0, xf, v) -> 0.0,
                 lagrange=(t, x, u, v) -> 0.5 * u[1]^2,
             )
@@ -135,7 +148,12 @@ function test_solution_show()
             P = zeros(2, 1)
             P[:, 1] = [0.1, 0.2]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=1.0,
                 iterations=3,
                 constraints_violation=100.0,

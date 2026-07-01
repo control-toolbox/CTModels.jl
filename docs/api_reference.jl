@@ -27,8 +27,14 @@ function generate_api_reference(src_dir::String, ext_dir::String)
     ]
     EXCLUDE_INTERNALS = vcat(
         EXCLUDE_SYMBOLS,
-        Symbol[:DOCTYPE_ABSTRACT_TYPE, :DOCTYPE_CONSTANT, :DOCTYPE_FUNCTION,
-               :DOCTYPE_MACRO, :DOCTYPE_MODULE, :DOCTYPE_STRUCT],
+        Symbol[
+            :DOCTYPE_ABSTRACT_TYPE,
+            :DOCTYPE_CONSTANT,
+            :DOCTYPE_FUNCTION,
+            :DOCTYPE_MACRO,
+            :DOCTYPE_MODULE,
+            :DOCTYPE_STRUCT,
+        ],
     )
 
     # ── Shared config: one entry per submodule ────────────────────────────────
@@ -160,7 +166,10 @@ function generate_api_reference(src_dir::String, ext_dir::String)
 
     # Conditional extensions
     for (sym, files) in [
-        (:CTModelsPlots, ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl")),
+        (
+            :CTModelsPlots,
+            ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),
+        ),
         (:CTModelsJSON, ext("CTModelsJSON.jl")),
         (:CTModelsJLD, ext("CTModelsJLD.jl")),
     ]
