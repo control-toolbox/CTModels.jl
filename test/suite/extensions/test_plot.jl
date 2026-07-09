@@ -325,6 +325,40 @@ function test_plot()
         end
 
         # ====================================================================
+        # REGRESSION TESTS - dual-free solution with a declared path constraint
+        # (EmptyDualModel)
+        #
+        # `sol` (from `solution_example()`) has a `:path` constraint declared in
+        # its model, yet every dual keyword passed to `build_solution` is
+        # `nothing` — the same shape as a solution built by a flow. Since
+        # CTModels' EmptyDualModel change, such a solution's dual model is the
+        # `EmptyDualModel` sentinel, and `path_constraints_dual(sol)` returns
+        # `nothing`. Plotting must not error when `:dual` is requested; the
+        # `do_plot` gate (`!isnothing(path_constraints_dual(sol))`) must simply
+        # omit the dual panel.
+        # ====================================================================
+
+        Test.@testset "plot(sol) – dual-free solution with path constraint (EmptyDualModel)" begin
+            Test.@test !Solutions.has_duals(sol)
+            Test.@test Solutions.dual_model(sol) isa Solutions.EmptyDualModel
+            Test.@test Solutions.path_constraints_dual(sol) === nothing
+            Test.@test Components.dim_path_constraints_nl(ocp) > 0
+
+            # explicit :dual request alongside other groups: no error, panel silently omitted
+            Test.@test Plots.plot(sol, :state, :control, :path, :dual) isa Plots.Plot
+
+            # :dual requested alone: no error, falls back to an empty figure
+            Test.@test Plots.plot(sol, :dual) isa Plots.Plot
+
+            # default description (includes :dual): no error
+            Test.@test Plots.plot(sol) isa Plots.Plot
+
+            # plot! variant: overlay onto an existing plot, :dual requested explicitly
+            plt = Plots.plot(sol, :state, :control, :path, :dual)
+            Test.@test Plots.plot!(plt, sol, :state, :control, :path, :dual) isa Plots.Plot
+        end
+
+        # ====================================================================
         # INTEGRATION TESTS - Solution Example Dual (with duals)
         # ====================================================================
 

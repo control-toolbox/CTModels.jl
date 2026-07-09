@@ -319,6 +319,64 @@ struct DualModel{
     variable_constraints_ub_dual::VC_UB_Dual
 end
 
+"""
+$(TYPEDEF)
+
+Sentinel type representing the absence of dual variables in an optimal control solution.
+
+Used when a solution carries no Lagrange multipliers, for instance a solution built by a
+flow rather than by a solver.
+
+# Example
+
+```julia-repl
+julia> using CTModels
+
+julia> edm = CTModels.EmptyDualModel()
+```
+"""
+struct EmptyDualModel <: AbstractDualModel end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `false` for an empty dual model: the solution carries no dual variables.
+
+# Arguments
+- `model::EmptyDualModel`: An empty dual model
+
+# Returns
+- `Bool`: Always `false` for empty dual models
+
+# Example
+```julia-repl
+julia> edm = CTModels.EmptyDualModel()
+julia> CTModels.has_duals(edm)
+false
+```
+"""
+has_duals(model::EmptyDualModel)::Bool = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` for a non-empty dual model: the solution carries dual variables.
+
+# Arguments
+- `model::AbstractDualModel`: Any non-empty dual model
+
+# Returns
+- `Bool`: Always `true` for non-empty dual models
+
+# Example
+```julia-repl
+julia> dm = CTModels.DualModel(nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
+julia> CTModels.has_duals(dm)
+true
+```
+"""
+has_duals(model::AbstractDualModel)::Bool = true
+
 # ------------------------------------------------------------------------------ #
 # Solution
 # ------------------------------------------------------------------------------ #

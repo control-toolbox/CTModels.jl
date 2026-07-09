@@ -117,7 +117,8 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
                 fmt.reset,
             )
         end
-        if Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
+        if Solutions.has_duals(sol) &&
+            Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
             Components.dim_variable_constraints_box(Solutions.model(sol)) > 0
             println(
                 io,
@@ -143,7 +144,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     end
 
     # Boundary constraints duals
-    if Components.dim_boundary_constraints_nl(sol) > 0
+    if Solutions.has_duals(sol) && Components.dim_boundary_constraints_nl(sol) > 0
         println(
             io,
             "\n",

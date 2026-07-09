@@ -375,16 +375,34 @@ function build_solution(
         control_name(ocp), control_components(ocp), fu, control_interpolation
     )
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
-    dual = DualModel(
-        fpcd,
-        boundary_constraints_dual,
-        fscbd,
-        fscud,
-        fccbd,
-        fccud,
-        variable_constraints_lb_dual,
-        variable_constraints_ub_dual,
+    # When no dual variable is provided, use the empty sentinel so the solution
+    # reports `has_duals == false` and its dual accessors return `nothing`.
+    dual = if all(
+        isnothing,
+        (
+            fpcd,
+            boundary_constraints_dual,
+            fscbd,
+            fscud,
+            fccbd,
+            fccud,
+            variable_constraints_lb_dual,
+            variable_constraints_ub_dual,
+        ),
     )
+        EmptyDualModel()
+    else
+        DualModel(
+            fpcd,
+            boundary_constraints_dual,
+            fscbd,
+            fscud,
+            fccbd,
+            fccud,
+            variable_constraints_lb_dual,
+            variable_constraints_ub_dual,
+        )
+    end
 
     solver_infos = SolverInfos(
         iterations, status, message, successful, constraints_violation, infos
@@ -1466,6 +1484,16 @@ function dual_model(
 )::DM where {DM<:AbstractDualModel}
     return sol.dual
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the solution carries dual variables (Lagrange multipliers).
+
+A solution produced by a solver carries duals; a solution built by a flow does not
+(its dual model is an [`CTModels.Solutions.EmptyDualModel`](@ref)).
+"""
+has_duals(sol::Solution)::Bool = has_duals(dual_model(sol))
 
 """
 $(TYPEDSIGNATURES)

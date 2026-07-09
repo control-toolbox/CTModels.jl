@@ -82,7 +82,7 @@ include(joinpath(@__DIR__, "show.jl"))
 
 # Solution types
 export Solution, AbstractSolution
-export DualModel, AbstractDualModel
+export DualModel, AbstractDualModel, EmptyDualModel, has_duals
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
 export UnifiedTimeGridModel, MultipleTimeGridModel

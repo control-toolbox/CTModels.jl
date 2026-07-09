@@ -36,6 +36,16 @@ If the label is not found, throws an `IncorrectArgument` exception.
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 
+    # the solution must carry dual variables
+    has_duals(sol) || throw(
+        Exceptions.PreconditionError(
+            "the solution carries no dual variables";
+            reason="the solution's dual model is empty (EmptyDualModel)",
+            suggestion="only solutions produced by a solver carry duals; a solution built by a flow has none",
+            context="dual - looking up a constraint dual on a dual-free solution",
+        ),
+    )
+
     # check if the label is in the path constraints
     cp = path_constraints_nl(model)
     labels = cp[4] # vector of labels
@@ -342,3 +352,20 @@ function variable_constraints_ub_dual(
 )::VC_UB_Dual where {VC_UB_Dual<:Union{ctVector,Nothing}}
     return model.variable_constraints_ub_dual
 end
+
+# ------------------------------------------------------------------------------ #
+# Empty dual model
+#
+# A solution carrying no dual variables (e.g. built by a flow) stores an
+# `EmptyDualModel`. Every dual accessor returns `nothing` for it, so the
+# Solution-level delegating accessors and `show` behave as with an all-`nothing`
+# `DualModel`.
+# ------------------------------------------------------------------------------ #
+path_constraints_dual(::EmptyDualModel) = nothing
+boundary_constraints_dual(::EmptyDualModel) = nothing
+state_constraints_lb_dual(::EmptyDualModel) = nothing
+state_constraints_ub_dual(::EmptyDualModel) = nothing
+control_constraints_lb_dual(::EmptyDualModel) = nothing
+control_constraints_ub_dual(::EmptyDualModel) = nothing
+variable_constraints_lb_dual(::EmptyDualModel) = nothing
+variable_constraints_ub_dual(::EmptyDualModel) = nothing
