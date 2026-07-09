@@ -4,6 +4,38 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.15.0-beta] - 2026-07-09
+
+The plotting extension is rewritten on top of the generic `CTBase.Plotting` engine. The
+main `plot(sol, description...)` API and all its options are **unchanged**; the changes
+below concern a niche entry point and rendering details.
+
+### Breaking
+
+- **Phase-plot recipe removed.** The 4-argument recipe `plot(sol, model, xx, yy, time)`
+  (e.g. `plot(sol, model, (:state, 1), (:state, 2))` for phase portraits) is no longer
+  provided. There is no direct replacement; extract the series manually from the solution
+  accessors (`CTModels.state(sol)`, `CTModels.control(sol)`, …) and plot them if needed.
+
+### Rendering differences (non-API)
+
+Behaviour is frozen by the test matrix (`isa Plots.Plot`, no throw), not pixel-for-pixel:
+
+- Default figure sizes now come from the engine heuristic (≈180 px per row vs 140 before).
+- The constant-series `ylims` guard uses an absolute tolerance (`1e-8`) instead of the
+  former relative `1e-3` (with the mid≈0 special case dropped).
+
+Pass an explicit `size=...` and per-series styles to recover a specific appearance.
+
+### Compatibility
+
+- Requires `CTBase` `"0.27"`; correct `:split` row heights need CTBase ≥ `0.27.1-beta`.
+
+### Migration
+
+- No action for `plot(sol)` / `plot!(sol)` users. Only replace any use of the removed
+  4-argument phase-plot recipe.
+
 ## [0.14.1-beta] - 2026-06-30
 
 ### No Breaking Changes
