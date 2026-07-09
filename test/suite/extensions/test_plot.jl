@@ -18,7 +18,7 @@ struct FakeModelDoPlot{N} <: Models.AbstractModel end
 
 struct FakeSolutionDoPlot{N} <: Solutions.AbstractSolution
     ocp::FakeModelDoPlot{N}
-    pcd
+    pcd::Any
 end
 
 Components.dim_path_constraints_nl(::FakeModelDoPlot{N}) where {N} = N
@@ -32,7 +32,12 @@ function test_plot()
     Test.@testset "Plotting Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
 
         # ====================================================================
-        # UNIT TESTS - Plotting Helper Functions
+        # UNIT TESTS - Case-layer vocabulary and gating
+        #
+        # The layout/rendering internals (sizes, weighted tree, series-attribute
+        # filtering) now live in `CTBase.Plotting` and are tested there. This file
+        # keeps the case-layer helpers (`clean`, `do_plot`, `do_decorate`, defaults)
+        # and the end-to-end rendering behaviour.
         # ====================================================================
 
         # Resolve the plotting extension module to access internal helpers.
@@ -154,138 +159,6 @@ function test_plot()
             Test.@test plots_ext.__plot_label_suffix() == ""
         end
 
-        Test.@testset "plot defaults: __size_plot – layout=:group" begin
-            fake = FakeSolutionDoPlot(FakeModelDoPlot{0}(), nothing)
-            desc = (:state, :costate, :control)
-
-            sz_components = plots_ext.__size_plot(
-                fake,
-                Solutions.model(fake),
-                :components,
-                :group,
-                desc...;
-                state_style=NamedTuple(),
-                control_style=NamedTuple(),
-                costate_style=NamedTuple(),
-                path_style=NamedTuple(),
-                dual_style=NamedTuple(),
-            )
-            Test.@test sz_components == (600, 280)
-
-            sz_all = plots_ext.__size_plot(
-                fake,
-                Solutions.model(fake),
-                :all,
-                :group,
-                desc...;
-                state_style=NamedTuple(),
-                control_style=NamedTuple(),
-                costate_style=NamedTuple(),
-                path_style=NamedTuple(),
-                dual_style=NamedTuple(),
-            )
-            Test.@test sz_all == (600, 420)
-        end
-
-        Test.@testset "plot defaults: __size_plot – layout=:split" begin
-            # Only state → 2 lines
-            fake_state = FakeSolutionDoPlot(FakeModelDoPlot{0}(), nothing)
-            sz_state = plots_ext.__size_plot(
-                fake_state,
-                Solutions.model(fake_state),
-                :components,
-                :split,
-                :state;
-                state_style=NamedTuple(),
-                control_style=:none,
-                costate_style=:none,
-                path_style=:none,
-                dual_style=:none,
-            )
-            Test.@test sz_state == (600, 420)
-
-            # Only control norm → 1 line
-            fake_control = FakeSolutionDoPlot(FakeModelDoPlot{0}(), nothing)
-            sz_control = plots_ext.__size_plot(
-                fake_control,
-                Solutions.model(fake_control),
-                :norm,
-                :split,
-                :control;
-                state_style=:none,
-                control_style=NamedTuple(),
-                costate_style=:none,
-                path_style=:none,
-                dual_style=:none,
-            )
-            Test.@test sz_control == (600, 280)
-
-            # State + control + path constraints (nc = 2) → nb_lines > 2
-            fake_full = FakeSolutionDoPlot(FakeModelDoPlot{2}(), nothing)
-            sz_full = plots_ext.__size_plot(
-                fake_full,
-                Solutions.model(fake_full),
-                :components,
-                :split,
-                :state,
-                :control,
-                :path;
-                state_style=NamedTuple(),
-                control_style=NamedTuple(),
-                costate_style=:none,
-                path_style=NamedTuple(),
-                dual_style=:none,
-            )
-            Test.@test sz_full == (600, 140 * 5) # 2 (state) + 1 (control) + 2 (path)
-
-            # Invalid control keyword should throw
-            Test.@test_throws Exceptions.IncorrectArgument plots_ext.__size_plot(
-                fake_state,
-                Solutions.model(fake_state),
-                :wrong_choice,
-                :split,
-                :state;
-                state_style=NamedTuple(),
-                control_style=NamedTuple(),
-                costate_style=:none,
-                path_style=:none,
-                dual_style=:none,
-            )
-        end
-
-        Test.@testset "plot tree: __plot_tree" begin
-            # Single leaf → one subplot
-            leaf = plots_ext.PlotLeaf()
-            p_leaf = plots_ext.__plot_tree(leaf, 0)
-            Test.@test p_leaf isa Plots.Plot
-            Test.@test length(p_leaf.subplots) == 1
-
-            # Row layout with three leaves → three subplots
-            leaves_row = [plots_ext.PlotLeaf() for _ in 1:3]
-            node_row = plots_ext.PlotNode(:row, leaves_row)
-            p_row = plots_ext.__plot_tree(node_row)
-            Test.@test p_row isa Plots.Plot
-            Test.@test length(p_row.subplots) == 3
-
-            # Column layout with EmptyPlot filtered out → one subplot
-            children_col = [
-                plots_ext.EmptyPlot(), plots_ext.PlotLeaf(), plots_ext.EmptyPlot()
-            ]
-            node_col = plots_ext.PlotNode(:column, children_col)
-            p_col = plots_ext.__plot_tree(node_col)
-            Test.@test p_col isa Plots.Plot
-            Test.@test length(p_col.subplots) == 1
-
-            # Nested nodes: a row of two columns (one with 2 leaves, one with 1)
-            col1 = plots_ext.PlotNode(:column, [plots_ext.PlotLeaf(), plots_ext.PlotLeaf()])
-            col2 = plots_ext.PlotNode(:column, [plots_ext.PlotLeaf()])
-            root = plots_ext.PlotNode(:row, [col1, col2])
-            p_nested = plots_ext.__plot_tree(root)
-            Test.@test p_nested isa Plots.Plot
-            # At the top level we have at least two column blocks
-            Test.@test length(p_nested.subplots) ≥ 2
-        end
-
         Test.@testset "plot helpers: do_decorate" begin
             ocp, sol, pre_ocp = TestProblems.solution_example()
 
@@ -327,20 +200,6 @@ function test_plot()
             Test.@test dsb3
             Test.@test !dcb3
             Test.@test dpb3
-        end
-
-        Test.@testset "plot helpers: __keep_series_attributes" begin
-            attrs = plots_ext.__keep_series_attributes(color=:red, linestyle=:dash, foo=1)
-            keys = [kv[1] for kv in attrs]
-
-            # Unknown attributes should be filtered out
-            Test.@test :foo ∉ keys
-
-            # All returned keys must be known Plots series attributes
-            series_attrs = Plots.attributes(:Series)
-            for k in keys
-                Test.@test k ∈ series_attrs
-            end
         end
 
         # ====================================================================

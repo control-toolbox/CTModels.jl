@@ -7,6 +7,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0-beta] - 2026-07-09
+
+### 🔄 Refactoring
+
+- **Plotting migrated to the `CTBase.Plotting` engine.** The monolithic `CTModelsPlots`
+  extension (`ext/plot.jl`, `ext/plot_default.jl`, `ext/plot_utils.jl`, ~2100 lines) is
+  replaced by a thin **case layer** (`ext/case/`, ~430 lines) that names and samples the
+  optimal-control quantities, chooses a layout template and delegates all layout and
+  rendering to the generic, backend-agnostic `CTBase.Plotting` IR. The public
+  `Plots.plot` / `plot!` API and all options (`layout`, `control`, `time`, the `*_style`
+  and `*_bounds_style` keywords, `time_style`, `color`, `size`) are unchanged.
+
+### 💥 Breaking
+
+- **Phase-plot recipe removed.** The 4-argument `@recipe plot(sol, model, xx, yy, time)`
+  used for state/costate/control phase portraits (e.g. `plot(sol, model, (:state,1),
+  (:state,2))`) is no longer provided. The `plot(sol, description...)` API is unchanged.
+- **Rendering differences** (behaviour frozen by the test matrix, not pixels): default
+  figure sizes now come from the engine heuristic (≈180 px per row instead of 140), and
+  the constant-series `ylims` guard uses an absolute tolerance (`1e-8`) instead of the
+  former relative `1e-3`.
+
+### 🔧 Compatibility
+
+- `CTBase` compat bumped to `"0.27"` (the `Plotting` engine). Correct `:split` row heights
+  need CTBase ≥ `0.27.1-beta` (geometry-aware `:auto` weights).
+
 ## [0.14.1-beta] - 2026-06-30
 
 ### ✨ New Features
