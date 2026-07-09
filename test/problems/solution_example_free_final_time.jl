@@ -61,14 +61,10 @@ function solution_example_free_final_time()
     CTModels.objective!(pre_ocp, :min; mayer=mayer)
 
     # control box constraint: -1 ≤ u(t) ≤ 1
-    CTModels.constraint!(
-        pre_ocp, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:u_box
-    )
+    CTModels.constraint!(pre_ocp, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:u_box)
 
     # variable box constraint: 0.05 ≤ tf ≤ Inf
-    CTModels.constraint!(
-        pre_ocp, :variable; rg=1:1, lb=[0.05], ub=[Inf], label=:tf_box
-    )
+    CTModels.constraint!(pre_ocp, :variable; rg=1:1, lb=[0.05], ub=[Inf], label=:tf_box)
 
     # boundary constraints: x(t0) == x0 and x(tf) == xf
     f_boundary(r, x0_state, xf_state, v) = begin
