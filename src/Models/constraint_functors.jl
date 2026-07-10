@@ -20,7 +20,9 @@ struct SubPathConstraint{CP,I} <: Function
 end
 
 function (f::SubPathConstraint)(r, t, x, u, v)
-    r_ = zeros(f.n)
+    # Match the caller's buffer element type so the intermediate buffer can hold
+    # e.g. ForwardDiff.Dual values when the constraint is differentiated through.
+    r_ = zeros(eltype(r), f.n)
     f.cp[2](r_, t, x, u, v)
     r .= r_[f.indices]
     return nothing
@@ -56,7 +58,9 @@ struct SubBoundaryConstraint{CP,I} <: Function
 end
 
 function (f::SubBoundaryConstraint)(r, x0, xf, v)
-    r_ = zeros(f.n)
+    # Match the caller's buffer element type so the intermediate buffer can hold
+    # e.g. ForwardDiff.Dual values when the constraint is differentiated through.
+    r_ = zeros(eltype(r), f.n)
     f.cp[2](r_, x0, xf, v)
     r .= r_[f.indices]
     return nothing
