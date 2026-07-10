@@ -361,11 +361,58 @@ end
 # Solution-level delegating accessors and `show` behave as with an all-`nothing`
 # `DualModel`.
 # ------------------------------------------------------------------------------ #
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the path constraints dual is absent.
+"""
 path_constraints_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the boundary constraints dual is absent.
+"""
 boundary_constraints_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the state lower-bound dual is absent.
+"""
 state_constraints_lb_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the state upper-bound dual is absent.
+"""
 state_constraints_ub_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the control lower-bound dual is absent.
+"""
 control_constraints_lb_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the control upper-bound dual is absent.
+"""
 control_constraints_ub_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the variable lower-bound dual is absent.
+"""
 variable_constraints_lb_dual(::EmptyDualModel) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `nothing` for an empty dual model: the variable upper-bound dual is absent.
+"""
 variable_constraints_ub_dual(::EmptyDualModel) = nothing

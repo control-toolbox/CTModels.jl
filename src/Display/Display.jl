@@ -59,6 +59,15 @@ include(joinpath(@__DIR__, "pre_model.jl"))
 
 # -----------------------------
 # RecipesBase.plot stub - to be extended by CTModelsPlots extension
+"""
+$(TYPEDSIGNATURES)
+
+Stub for `RecipesBase.plot` for CTModels solutions.
+
+Loaded and specialised by the `CTModelsPlots` extension when `Plots` is available.
+Without that extension, calling this throws an [`CTBase.Exceptions.ExtensionError`](@extref)
+pointing to `Plots`.
+"""
 function RecipesBase.plot(
     sol::Solutions.AbstractSolution, description::Symbol...; kwargs...
 )

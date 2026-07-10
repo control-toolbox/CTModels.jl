@@ -9,6 +9,11 @@
 # =============================================================================
 
 # Time-axis name, with the historical "(normalized)" suffix when time is rescaled.
+"""
+$(TYPEDSIGNATURES)
+
+Return the time-axis label, with the historical "(normalized)" suffix when time is rescaled.
+"""
 function _time_name(sol, time::Symbol)
     tn = CTModels.time_name(sol)
     if time === :normalize
@@ -22,6 +27,14 @@ end
 
 # Build the layout tree (or `nothing` if there is nothing to draw). Decorations
 # (bounds, initial/final time lines) are added in Phase 3c; path/dual in Phase 3b.
+"""
+$(TYPEDSIGNATURES)
+
+Build the CTBase.Plotting layout tree for a CTModels solution.
+
+Returns `nothing` if there is nothing to draw. Decorations (bounds, initial/final time lines)
+are added according to the user-supplied style keywords.
+"""
 function _build_root(
     sol,
     description::Symbol...;
@@ -145,6 +158,13 @@ function _build_root(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Internal implementation of `Plots.plot(::CTModels.Solution)`.
+
+Builds the layout tree and renders it via [`CTBase.Plotting`](@extref).
+"""
 function _plot(
     sol::CTModels.Solution,
     description::Symbol...;
@@ -191,6 +211,13 @@ function _plot(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Internal implementation of `Plots.plot!(::Plots.Plot, ::CTModels.Solution)`.
+
+Builds the layout tree and overlays it onto the existing plot `p` via [`CTBase.Plotting`](@extref).
+"""
 function _plot!(
     p::Plots.Plot,
     sol::CTModels.Solution,

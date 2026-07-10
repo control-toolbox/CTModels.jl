@@ -11,16 +11,38 @@
 
 # Sample a callable `f` (state/control/costate accessor) over grid `T` into an
 # (n_times × n_components) matrix, uniformly for scalar and vector-valued `f`.
+"""
+$(TYPEDSIGNATURES)
+
+Sample a callable `f` over grid `T` into an `(n_times, n_components)` matrix.
+
+Uniform for scalar and vector-valued `f`.
+"""
 _sample(f, T) = Matrix{Float64}(reduce(hcat, f.(T))')
 
 # Euclidean norm of a matrix row.
+"""
+$(TYPEDSIGNATURES)
+
+Return the Euclidean norm of a matrix row.
+"""
 _rownorm(row) = sqrt(sum(abs2, row))
 
 # Default per-series style shared by every group; user group styles merge on top.
+"""
+$(TYPEDSIGNATURES)
+
+Return the default per-series style, merged with any user-supplied group style.
+"""
 _base_style(style::NamedTuple) = merge((linewidth=2,), style)
 
 # --- state / costate ---------------------------------------------------------
 
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTBase.Plotting.Panel`](@extref) for the state trajectory.
+"""
 function _state_panel(sol, style::NamedTuple)
     T = CTModels.time_grid(sol, :state)
     M = _sample(CTModels.state(sol), T)
@@ -32,6 +54,13 @@ end
 # Costate labels follow the CTModels convention: in `:group` (a legend) they are
 # `p·xᵢ`; in `:split` they label the rows, but when state is shown alongside (paired
 # columns) the shared state ylabels already do that, so the costate carries none.
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTBase.Plotting.Panel`](@extref) for the costate trajectory.
+
+Labels depend on `layout` and whether the state panel is shown alongside.
+"""
 function _costate_panel(sol, style::NamedTuple; layout::Symbol, state_shown::Bool)
     T = CTModels.time_grid(sol, :costate)
     M = _sample(CTModels.costate(sol), T)
@@ -46,6 +75,18 @@ end
 # One control cell shows `:components` (a curve per component), `:norm` (‖u‖) or, in
 # `:group`, `:all` splits into two cells (components then norm); in `:split`, `:all`
 # is a single column of m+1 components. Return a Vector of panels accordingly.
+"""
+$(TYPEDSIGNATURES)
+
+Build one or more [`CTBase.Plotting.Panel`](@extref) objects for the control trajectory.
+
+- `control = :components`: one panel with a curve per control component.
+- `control = :norm`: one panel with the Euclidean norm of the control.
+- `control = :all`: both panels (in `:group`) or a single panel with components and norm (in `:split`).
+
+# Returns
+- `Vector{Plotting.Panel}`: The panels to be assembled into the layout.
+"""
 function _control_panels(sol, control::Symbol, style::NamedTuple, layout::Symbol)
     T = CTModels.time_grid(sol, :control)
     U = _sample(CTModels.control(sol), T)
@@ -88,6 +129,11 @@ end
 
 # Evaluate the nonlinear path constraints g(t, x, u, v) over the path grid into an
 # (n_times × nc) matrix; labels are the constraint labels carried by the model.
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTBase.Plotting.Panel`](@extref) for the nonlinear path constraints.
+"""
 function _path_panel(sol, model, style::NamedTuple)
     T = CTModels.time_grid(sol, :path)
     X = CTModels.state(sol).(T)
@@ -109,6 +155,11 @@ end
 
 # Duals of the path constraints. As for the costate, the ylabels are dropped when the
 # path column is shown alongside (paired), otherwise prefixed with "dual ".
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTBase.Plotting.Panel`](@extref) for the dual variables of the path constraints.
+"""
 function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool)
     T = CTModels.time_grid(sol, :path)
     M = _sample(CTModels.path_constraints_dual(sol), T)

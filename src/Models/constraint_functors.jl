@@ -28,10 +28,20 @@ function (f::SubPathConstraint)(r, t, x, u, v)
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a compact one-line representation of a [`SubPathConstraint`](@ref).
+"""
 function Base.show(io::IO, f::SubPathConstraint)
     return print(io, "SubPathConstraint(n=", f.n, ", indices=", f.indices, ")")
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a multi-line representation of a [`SubPathConstraint`](@ref).
+"""
 function Base.show(io::IO, ::MIME"text/plain", f::SubPathConstraint{CP,I}) where {CP,I}
     print(io, "SubPathConstraint")
     print(io, "\n  n:       ", f.n)
@@ -66,10 +76,20 @@ function (f::SubBoundaryConstraint)(r, x0, xf, v)
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a compact one-line representation of a [`SubBoundaryConstraint`](@ref).
+"""
 function Base.show(io::IO, f::SubBoundaryConstraint)
     return print(io, "SubBoundaryConstraint(n=", f.n, ", indices=", f.indices, ")")
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a multi-line representation of a [`SubBoundaryConstraint`](@ref).
+"""
 function Base.show(io::IO, ::MIME"text/plain", f::SubBoundaryConstraint{CP,I}) where {CP,I}
     print(io, "SubBoundaryConstraint")
     print(io, "\n  n:       ", f.n)
@@ -103,10 +123,20 @@ BoxProjection{Slot}(cidx) where {Slot} = BoxProjection{Slot,typeof(cidx)}(cidx)
 (f::BoxProjection{:control})(_, _, u, _) = u[f.cidx]
 (f::BoxProjection{:variable})(_, _, v) = v[f.cidx]
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a compact one-line representation of a [`BoxProjection`](@ref).
+"""
 function Base.show(io::IO, f::BoxProjection{Slot,CIDX}) where {Slot,CIDX}
     return print(io, "BoxProjection{:", Slot, "}(", f.cidx, ")")
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Print a multi-line representation of a [`BoxProjection`](@ref).
+"""
 function Base.show(
     io::IO, ::MIME"text/plain", f::BoxProjection{Slot,CIDX}
 ) where {Slot,CIDX}

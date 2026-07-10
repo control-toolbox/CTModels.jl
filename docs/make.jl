@@ -40,6 +40,14 @@ if !isnothing(DocumenterReference)
 end
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Docstrings from external packages
+# ═══════════════════════════════════════════════════════════════════════════════
+using JLD2, JSON3, Plots
+const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
+const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
+const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Paths
 # ═══════════════════════════════════════════════════════════════════════════════
 repo_url = "github.com/control-toolbox/CTModels.jl"

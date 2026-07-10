@@ -11,6 +11,13 @@
 # =============================================================================
 
 # Pair two columns side by side, tolerating a missing one.
+"""
+$(TYPEDSIGNATURES)
+
+Pair two layout columns side by side, tolerating a missing one.
+
+If both are present, returns a `Plotting.Paired`; otherwise returns the non-nothing one.
+"""
 function _pair(a, b)
     a !== nothing && b !== nothing && return Plotting.Paired(a, b)
     return a !== nothing ? a : b
@@ -18,6 +25,13 @@ end
 
 # Horizontal row of group cells (`:group`). Exactly four cells (state, costate,
 # control, control-norm) fold into a 2×2 grid, as in the historical layout.
+"""
+$(TYPEDSIGNATURES)
+
+Assemble group cells horizontally (`:group` layout).
+
+Exactly four cells (state, costate, control, control-norm) fold into a 2×2 grid.
+"""
 function _assemble_group(cells::AbstractVector{<:Plotting.AbstractLayoutNode})
     n = length(cells)
     n == 1 && return cells[1]
@@ -33,6 +47,14 @@ end
 
 # Stacked columns (`:split`): (state|costate) over control over (path|dual). Returns
 # `nothing` when there is nothing to draw.
+"""
+$(TYPEDSIGNATURES)
+
+Assemble stacked columns (`:split` layout).
+
+The layout is `(state | costate)` over `control` over `(path | dual)`.
+Returns `nothing` when there is nothing to draw.
+"""
 function _assemble_split(;
     state=nothing, costate=nothing, control=nothing, path=nothing, dual=nothing
 )

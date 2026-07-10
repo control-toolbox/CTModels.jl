@@ -9,11 +9,27 @@
 # Docstrings deferred (Handbook convention).
 # =============================================================================
 
+"""$(TYPEDSIGNATURES)
+
+Default style for box-bound and path-bound horizontal reference lines.
+"""
 const _BOUND_STYLE = (color=15, linewidth=1, z_order=:back, label="")
+
+"""$(TYPEDSIGNATURES)
+
+Default style for initial/final time vertical reference lines.
+"""
 const _TIME_STYLE = (color=:black, linestyle=:dash, linewidth=1, z_order=:back, label="")
 
 # Per-component horizontal bound lines from a box `(lb, ind, ub, …)`, aligned to a
 # panel of `ncomp` components: `hlines[i]` holds the lines for component `i`.
+"""
+$(TYPEDSIGNATURES)
+
+Build per-component horizontal bound lines from a box constraint tuple.
+
+For a panel with `ncomp` components, `hlines[i]` holds the lines for component `i`.
+"""
 function _box_hlines(box, ncomp::Int, style::NamedTuple)
     lb, ind, ub = box[1], box[2], box[3]
     s = merge(_BOUND_STYLE, style)
@@ -27,6 +43,13 @@ function _box_hlines(box, ncomp::Int, style::NamedTuple)
 end
 
 # Path-constraint bound lines: every one of the `nc` components carries `[lb, ub]`.
+"""
+$(TYPEDSIGNATURES)
+
+Build bound lines for nonlinear path constraints.
+
+Each of the `nc` components carries lower and upper bound lines.
+"""
 function _path_hlines(model, style::NamedTuple)
     cp = CTModels.path_constraints_nl(model)
     nc = length(cp[1])
@@ -40,6 +63,14 @@ end
 
 # Initial/final time vertical lines, shared by every cell. Positions are `[0, 1]`
 # under time normalisation, else read from the model (variable-dependent for free time).
+"""
+$(TYPEDSIGNATURES)
+
+Build initial/final time vertical lines shared by every cell.
+
+Positions are `[0, 1]` under time normalisation, otherwise read from the model
+(variable-dependent for free time).
+"""
 function _time_vlines(sol, model, time::Symbol, style::NamedTuple)
     if time === :normalize || time === :normalise
         t0, tf = 0.0, 1.0

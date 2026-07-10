@@ -9,14 +9,50 @@
 # =============================================================================
 
 # --- defaults ----------------------------------------------------------------
+"""
+$(TYPEDSIGNATURES)
+
+Return the default plot layout (`:split`).
+"""
 __plot_layout() = :split
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default control representation (`:components`).
+"""
 __control_layout() = :components
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default time-axis normalization (`:default`).
+"""
 __time_normalization() = :default
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default plotting style (empty `NamedTuple`).
+"""
 __plot_style() = NamedTuple()
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default suffix appended to plot labels (empty string).
+"""
 __plot_label_suffix() = ""
 
 # Default description when the user gives none: everything (aliases included, so
 # `clean` collapses them to the canonical set).
+"""
+$(TYPEDSIGNATURES)
+
+Return the default description tuple used when the user gives none.
+
+Aliases are included so that [`clean`](@ref) collapses them to the canonical set.
+"""
 function __description()
     return (
         :state,
@@ -36,6 +72,19 @@ end
 
 # Collapse plural/alias forms to the canonical singular symbols and drop
 # duplicates: (:states, :controls, :cons, :duals) -> (:state, :control, :path, :dual).
+"""
+$(TYPEDSIGNATURES)
+
+Collapse plural/alias forms to canonical singular symbols and drop duplicates.
+
+For example, `(:states, :controls, :cons, :duals)` becomes `(:state, :control, :path, :dual)`.
+
+# Arguments
+- `description`: A tuple of symbols from the caller.
+
+# Returns
+- `Tuple{Symbol...}`: Cleaned, unique, canonical symbols.
+"""
 function clean(description)
     description = replace(
         description,
@@ -53,6 +102,19 @@ end
 # Which signal groups to draw. A group is drawn when it is requested, its style is
 # not `:none`, and it actually exists in the solution (control needs m > 0, path
 # needs constraints, dual needs the multipliers to be present).
+"""
+$(TYPEDSIGNATURES)
+
+Decide which signal groups to draw for the given solution and description.
+
+A group is drawn when it is requested, its style is not `:none`, and it actually exists in the solution:
+- control needs `control_dimension(sol) > 0`,
+- path needs `dim_path_constraints_nl(ocp) > 0`,
+- dual needs `path_constraints_dual(sol)` to be present.
+
+# Returns
+- `NTuple{5, Bool}`: flags for `(state, costate, control, path, dual)`.
+"""
 function do_plot(
     sol::CTModels.AbstractSolution,
     description::Symbol...;
@@ -83,6 +145,16 @@ end
 
 # Which decorations to draw (bounds lines, initial/final time lines). Each needs a
 # non-`:none` style and a model to read the bounds/times from.
+"""
+$(TYPEDSIGNATURES)
+
+Decide which decorations to draw (bounds lines and initial/final time lines).
+
+Each decoration needs a non-`:none` style and a model to read the bounds/times from.
+
+# Returns
+- `NTuple{4, Bool}`: flags for `(time, state_bounds, control_bounds, path_bounds)`.
+"""
 function do_decorate(;
     model::Union{CTModels.Model,Nothing},
     time_style::Union{NamedTuple,Symbol},

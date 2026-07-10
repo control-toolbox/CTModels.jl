@@ -168,7 +168,14 @@ function generate_api_reference(src_dir::String, ext_dir::String)
     for (sym, files) in [
         (
             :CTModelsPlots,
-            ext("CTModelsPlots.jl", "plot.jl", "plot_utils.jl", "plot_default.jl"),
+            ext(
+                "CTModelsPlots.jl",
+                joinpath("case", "vocabulary.jl"),
+                joinpath("case", "panels.jl"),
+                joinpath("case", "decorations.jl"),
+                joinpath("case", "assemble.jl"),
+                joinpath("case", "plot.jl"),
+            ),
         ),
         (:CTModelsJSON, ext("CTModelsJSON.jl")),
         (:CTModelsJLD, ext("CTModelsJLD.jl")),
