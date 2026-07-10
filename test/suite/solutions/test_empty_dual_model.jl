@@ -34,7 +34,12 @@ function _make_dualfree_solution(m::Models.Model; state_dim::Int=2, control_dim:
     P = zeros(3, state_dim)
     v = Float64[]
     return Solutions.build_solution(
-        m, T, X, U, v, P;
+        m,
+        T,
+        X,
+        U,
+        v,
+        P;
         objective=0.0,
         iterations=0,
         constraints_violation=0.0,
