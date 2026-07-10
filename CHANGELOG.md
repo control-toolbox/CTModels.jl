@@ -7,6 +7,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.2-beta] - 2026-07-10
+
+### 🐛 Bug Fixes
+
+#### **Models** — constraint-by-label functors are AD-differentiable
+
+- **`SubPathConstraint` and `SubBoundaryConstraint` now allocate their intermediate buffer
+  with `eltype(r)`** (the caller's buffer element type) instead of a hard-coded `Float64`
+  vector. Combined with the CTBase `to_out_of_place` fix (≥ 0.27.4-beta), the out-of-place
+  functor returned by `Models.constraint(model, label)` for a `:path`/`:boundary` constraint
+  can now be differentiated through (e.g. `ForwardDiff.Dual` inputs), which previously threw
+  `MethodError: Float64(::Dual)`.
+- **Why**: needed to differentiate a path constraint referenced by label through a
+  constrained CTFlows `:total` Hamiltonian flow.
+- **No breaking changes**: purely additive; behaviour on `Float64` buffers is unchanged.
+  See [BREAKING.md](BREAKING.md).
+
 ## [0.15.1-beta] - 2026-07-09
 
 ### ✨ New Features

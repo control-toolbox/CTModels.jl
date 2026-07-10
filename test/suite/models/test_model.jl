@@ -180,6 +180,21 @@ function test_model()
         Test.@test Models.constraint(model, :control_scalar_2)[2](t, x, u, v) == u[2]
         Test.@test Models.constraint(model, :variable_scalar_2)[2](x0, xf, v) == v[2]
 
+        # Regression: resolved constraint functors must widen their buffer element type
+        # from the arguments (they were Float64-only, which breaks differentiation of a
+        # constraint through AD). Complex arguments are a dependency-free proxy for a
+        # non-Float64 numeric type — `Float64(z)` with a nonzero imaginary part throws.
+        Test.@testset "constraint-by-label — buffer widens to non-Float64 eltype" begin
+            xc = ComplexF64[2 + im, 3 + 2im]
+            resp = Models.constraint(model, :path)[2](t, xc, u, v)
+            Test.@test resp == xc .+ u .+ v .+ t
+            Test.@test eltype(resp) <: Complex
+            x0c = ComplexF64[1 + im, 2 - im]
+            resb = Models.constraint(model, :boundary)[2](x0c, xf, v)
+            Test.@test resb == x0c .+ v .* (xf .- x0c)
+            Test.@test eltype(resb) <: Complex
+        end
+
         # test the type of the constraints
         Test.@test Models.constraint(model, :path)[1] == :path
         Test.@test Models.constraint(model, :boundary)[1] == :boundary
