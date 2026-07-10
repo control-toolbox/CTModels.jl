@@ -85,8 +85,8 @@ function _build_root(
             sp = _state_panel(sol, state_style)
             hl = if dec_state_bounds
                 _box_hlines(
-                CTModels.state_constraints_box(model), ncomp(sp), state_bounds_style
-            )
+                    CTModels.state_constraints_box(model), ncomp(sp), state_bounds_style
+                )
             else
                 Vector{Plotting.HLine}[]
             end
@@ -102,8 +102,10 @@ function _build_root(
             cp = only(_control_panels(sol, control, control_style, layout))
             hl = if (dec_control_bounds && control !== :norm)
                 _box_hlines(
-                CTModels.control_constraints_box(model), ncomp(cp), control_bounds_style
-            )
+                    CTModels.control_constraints_box(model),
+                    ncomp(cp),
+                    control_bounds_style,
+                )
             else
                 Vector{Plotting.HLine}[]
             end

@@ -54,9 +54,8 @@ function _control_panels(sol, control::Symbol, style::NamedTuple, layout::Symbol
     st = CTModels.control_interpolation(sol) == :constant ? :steppost : :path
     base = _base_style(merge((seriestype=st,), style))
     _norm(U) = reshape([_rownorm(@view U[k, :]) for k in axes(U, 1)], :, 1)
-    _panel(data, labels, title) = Plotting.Panel(
-        T, data; title=title, labels=labels, style=base
-    )
+    _panel(data, labels, title) =
+        Plotting.Panel(T, data; title=title, labels=labels, style=base)
 
     if control === :components
         return [_panel(U, u_labels, "control")]

@@ -377,32 +377,33 @@ function build_solution(
     variable = VariableModelSolution(variable_name(ocp), variable_components(ocp), var)
     # When no dual variable is provided, use the empty sentinel so the solution
     # reports `has_duals == false` and its dual accessors return `nothing`.
-    dual = if all(
-        isnothing,
-        (
-            fpcd,
-            boundary_constraints_dual,
-            fscbd,
-            fscud,
-            fccbd,
-            fccud,
-            variable_constraints_lb_dual,
-            variable_constraints_ub_dual,
-        ),
-    )
-        EmptyDualModel()
-    else
-        DualModel(
-            fpcd,
-            boundary_constraints_dual,
-            fscbd,
-            fscud,
-            fccbd,
-            fccud,
-            variable_constraints_lb_dual,
-            variable_constraints_ub_dual,
+    dual =
+        if all(
+            isnothing,
+            (
+                fpcd,
+                boundary_constraints_dual,
+                fscbd,
+                fscud,
+                fccbd,
+                fccud,
+                variable_constraints_lb_dual,
+                variable_constraints_ub_dual,
+            ),
         )
-    end
+            EmptyDualModel()
+        else
+            DualModel(
+                fpcd,
+                boundary_constraints_dual,
+                fscbd,
+                fscud,
+                fccbd,
+                fccud,
+                variable_constraints_lb_dual,
+                variable_constraints_ub_dual,
+            )
+        end
 
     solver_infos = SolverInfos(
         iterations, status, message, successful, constraints_violation, infos
