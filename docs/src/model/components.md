@@ -78,7 +78,9 @@ CTModels.final_time(pre2.times, [0.0, 1.5])
 ```
 
 For a free time the value is read from ``v``, hence
-[`final_time`](@ref CTModels.Components.final_time) takes the variable vector. See
+[`final_time`](@ref CTModels.Components.final_time) takes the variable vector. The
+companion accessor [`initial_time`](@ref CTModels.Components.initial_time) works the
+same way. See
 [Types and traits](types_and_traits.md) for the `Fixed`/`Free` distinction.
 
 ## Naming rules
@@ -129,3 +131,12 @@ end # hide
 
 These rules guarantee that a label like `:a` resolves unambiguously to one component when
 reading a solution or a constraint.
+
+## Symbolic definitions
+
+A [`Definition`](@ref CTModels.Components.Definition) wraps a Julia `Expr` that captures the
+original problem definition (e.g. from a macro-based DSL). The wrapped expression is
+retrieved with [`expression`](@ref CTModels.Components.expression); an
+[`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition) returns an empty block
+`:(begin end)`. Use [`definition!`](@ref CTModels.Building.definition!) on the `PreModel`
+to attach one before building.

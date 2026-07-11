@@ -53,7 +53,14 @@ CTModels.initial_time(ocp)
 CTModels.final_time(ocp)
 CTModels.is_autonomous(ocp)
 CTModels.has_lagrange_cost(ocp)
+CTModels.has_abstract_definition(ocp)
+CTModels.is_abstractly_defined(ocp)
+CTModels.isempty_constraints(ocp)
 ```
+
+The optional ExaModels builder can be retrieved with
+[`get_build_examodel`](@ref CTModels.Models.get_build_examodel); it returns `nothing`
+when no builder was attached.
 
 Missing a required piece is caught at build time. Here state is set but times, dynamics, objective and the time-dependence flag are all missing:
 

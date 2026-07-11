@@ -82,11 +82,12 @@ CTModels.successful(sol)
 
 | Field group | Accessor(s) | Stored as |
 |---|---|---|
-| time grid | [`time_grid`](@ref CTModels.Components.time_grid) | [`AbstractTimeGridModel`](@ref CTModels.Solutions.AbstractTimeGridModel) |
+| time grid | [`time_grid`](@ref CTModels.Components.time_grid), `is_empty`, [`is_empty_time_grid`](@ref CTModels.Solutions.is_empty_time_grid) | [`AbstractTimeGridModel`](@ref CTModels.Solutions.AbstractTimeGridModel) |
 | state / control / costate | [`state`](@ref CTModels.Components.state), [`control`](@ref CTModels.Components.control), [`costate`](@ref CTModels.Components.costate) | callables `t → …` |
 | variable / objective | [`variable`](@ref CTModels.Components.variable), [`objective`](@ref CTModels.Components.objective) | value |
-| duals | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel) | callables / vectors |
+| duals | [`dual`](@ref CTModels.Solutions.dual), [`DualModel`](@ref CTModels.Solutions.DualModel), [`has_duals`](@ref CTModels.Solutions.has_duals) | callables / vectors |
 | diagnostics | [`iterations`](@ref CTModels.Solutions.iterations), [`status`](@ref CTModels.Solutions.status), [`successful`](@ref CTModels.Solutions.successful) | [`SolverInfos`](@ref CTModels.Solutions.SolverInfos) |
+| model | [`model`](@ref CTModels.Solutions.model) | [`Model`](@ref CTModels.Models.Model) |
 
 Each accessor dispatches on a typed field, so reading a solution never inspects raw
 closures. The following pages take each group in turn.

@@ -59,6 +59,20 @@ CTModels.dim_control_constraints_box(ocp)
 CTModels.dim_variable_constraints_box(ocp)
 ```
 
+The raw constraint tuples can also be retrieved:
+
+```@repl cons
+CTModels.path_constraints_nl(ocp)
+CTModels.boundary_constraints_nl(ocp)
+CTModels.state_constraints_box(ocp)
+CTModels.control_constraints_box(ocp)
+CTModels.variable_constraints_box(ocp)
+```
+
+Use [`isempty_constraints`](@ref CTModels.Models.isempty_constraints) to check whether the
+model has any constraints at all, and [`constraint`](@ref CTModels.Models.constraint) to
+retrieve a single constraint by label.
+
 ## Labels and aliases
 
 Before building, constraints live in a [`ConstraintsDictType`](@ref CTModels.Components.ConstraintsDictType)

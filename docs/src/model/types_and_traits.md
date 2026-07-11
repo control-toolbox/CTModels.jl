@@ -26,6 +26,7 @@ The pattern is uniform: a *definition* type (structure only) and a *solution* ty
 | [`AbstractVariableModel`](@ref CTModels.Components.AbstractVariableModel) | [`VariableModel`](@ref CTModels.Components.VariableModel) | [`VariableModelSolution`](@ref CTModels.Components.VariableModelSolution) | [`EmptyVariableModel`](@ref CTModels.Components.EmptyVariableModel) |
 | [`AbstractTimeModel`](@ref CTModels.Components.AbstractTimeModel) | [`FixedTimeModel`](@ref CTModels.Components.FixedTimeModel) / [`FreeTimeModel`](@ref CTModels.Components.FreeTimeModel) | — | — |
 | [`AbstractObjectiveModel`](@ref CTModels.Components.AbstractObjectiveModel) | [`MayerObjectiveModel`](@ref CTModels.Components.MayerObjectiveModel) / [`LagrangeObjectiveModel`](@ref CTModels.Components.LagrangeObjectiveModel) / [`BolzaObjectiveModel`](@ref CTModels.Components.BolzaObjectiveModel) | — | — |
+| [`AbstractConstraintsModel`](@ref CTModels.Components.AbstractConstraintsModel) | [`ConstraintsModel`](@ref CTModels.Components.ConstraintsModel) | — | — |
 | [`AbstractDefinition`](@ref CTModels.Components.AbstractDefinition) | [`Definition`](@ref CTModels.Components.Definition) | — | [`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition) |
 
 The **empty sentinel** lets dispatch stay total: a control-free problem carries an
@@ -103,6 +104,8 @@ exposing the concrete type:
 |---|---|
 | Is ``t_0`` fixed / free? | [`has_fixed_initial_time`](@ref CTModels.Components.has_fixed_initial_time) / [`has_free_initial_time`](@ref CTModels.Components.has_free_initial_time) |
 | Is ``t_f`` fixed / free? | [`has_fixed_final_time`](@ref CTModels.Components.has_fixed_final_time) / [`has_free_final_time`](@ref CTModels.Components.has_free_final_time) |
+| Is ``t_0`` fixed / free? (predicate form) | [`is_initial_time_fixed`](@ref CTModels.Components.is_initial_time_fixed) / [`is_initial_time_free`](@ref CTModels.Components.is_initial_time_free) |
+| Is ``t_f`` fixed / free? (predicate form) | [`is_final_time_fixed`](@ref CTModels.Components.is_final_time_fixed) / [`is_final_time_free`](@ref CTModels.Components.is_final_time_free) |
 
 ```@repl types
 CTModels.has_fixed_initial_time(ocp)

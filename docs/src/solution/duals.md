@@ -72,6 +72,40 @@ The whole path multiplier is reached directly through the
 CTModels.path_constraints_dual(sol)(0.5)
 ```
 
+Boundary-constraint multipliers are read with
+[`boundary_constraints_dual`](@ref CTModels.Solutions.boundary_constraints_dual):
+
+```@repl duals
+CTModels.boundary_constraints_dual(sol)
+```
+
+### Box-constraint duals
+
+Box constraints on state, control, and variable components have separate lower-bound
+and upper-bound dual accessors:
+
+| Accessor | Returns |
+|---|---|
+| [`state_constraints_lb_dual`](@ref CTModels.Solutions.state_constraints_lb_dual) | state lower-bound duals |
+| [`state_constraints_ub_dual`](@ref CTModels.Solutions.state_constraints_ub_dual) | state upper-bound duals |
+| [`control_constraints_lb_dual`](@ref CTModels.Solutions.control_constraints_lb_dual) | control lower-bound duals |
+| [`control_constraints_ub_dual`](@ref CTModels.Solutions.control_constraints_ub_dual) | control upper-bound duals |
+| [`variable_constraints_lb_dual`](@ref CTModels.Solutions.variable_constraints_lb_dual) | variable lower-bound duals |
+| [`variable_constraints_ub_dual`](@ref CTModels.Solutions.variable_constraints_ub_dual) | variable upper-bound duals |
+
+Their dimensions are queried with
+[`dim_dual_state_constraints_box`](@ref CTModels.Solutions.dim_dual_state_constraints_box),
+[`dim_dual_control_constraints_box`](@ref CTModels.Solutions.dim_dual_control_constraints_box),
+and
+[`dim_dual_variable_constraints_box`](@ref CTModels.Solutions.dim_dual_variable_constraints_box).
+
+### Checking for duals
+
+A solution produced by a solver carries duals; a solution built by a flow does not.
+Use [`has_duals`](@ref CTModels.Solutions.has_duals) to test this — when it returns
+`false`, the dual model is an [`EmptyDualModel`](@ref CTModels.Solutions.EmptyDualModel)
+and all dual accessors return `nothing`.
+
 !!! note "Box duals are indexed per component"
 
     For state/control/variable **box** constraints, the stored duals are indexed by *primal
@@ -92,5 +126,7 @@ CTModels.successful(sol)
 CTModels.constraints_violation(sol)
 ```
 
-`infos(sol)` returns the `Dict{Symbol,Any}` of any extra solver-specific data. These fields
+The original [`Model`](@ref CTModels.Models.Model) can be retrieved from a solution with
+[`model`](@ref CTModels.Solutions.model), and `infos(sol)` returns the `Dict{Symbol,Any}`
+of any extra solver-specific data. These fields
 are what [Serialization](../serialization/overview.md) writes to disk alongside the trajectories.

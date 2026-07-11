@@ -157,6 +157,7 @@ The documentation consists of:
   control-toolbox contributors:
   - [Optimal control problems](model/overview.md): the `PreModel → build → Model` pipeline,
     types & traits, components, dynamics, objective, constraints.
+  - [Displaying models](model/display.md): `Base.show` and mathematical rendering of models.
   - [Solutions](solution/overview.md): the `Solution` anatomy, time grids, trajectories, duals.
   - [Initial guesses](initial_guess/overview.md): the `Init` pipeline and warm-starting.
   - [Serialization & extensions](serialization/overview.md): export/import and plotting.
