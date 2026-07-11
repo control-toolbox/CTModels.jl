@@ -94,3 +94,18 @@ init.control(0.25)
 
 How the dimensions are checked, and how to warm-start from a previous solution, is covered in
 [Validation & warm-start](validation.md).
+
+## Per-component constructors
+
+Behind the convenience of `build_initial_guess`, each component is built by a dedicated
+constructor that normalises the input to a callable:
+
+| Constructor | Purpose |
+|---|---|
+| [`initial_state`](@ref CTModels.Init.initial_state) | normalise a state guess (function, vector, scalar, `nothing`, or `(T, X)` grid pair) |
+| [`initial_control`](@ref CTModels.Init.initial_control) | normalise a control guess (same shapes) |
+| [`initial_variable`](@ref CTModels.Init.initial_variable) | normalise a variable guess (scalar, vector, or `nothing`) |
+
+When `nothing` is passed, each constructor returns a built-in default (constant `0.1` for
+non-empty components, `Float64[]` for empty ones). A 2-tuple `(time_grid, data_matrix)` is
+interpreted as **grid data** that gets interpolated linearly in time.

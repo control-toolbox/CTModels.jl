@@ -79,6 +79,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 "Dynamics & Objective" => "model/dynamics_objective.md",
                 "Constraints" => "model/constraints.md",
                 "Building a Model" => "model/building.md",
+                "Displaying Models" => "model/display.md",
             ],
             "Solutions" => [
                 "Overview" => "solution/overview.md",

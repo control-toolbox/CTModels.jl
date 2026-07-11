@@ -22,6 +22,11 @@ raw data ──► pre_initial_guess / initial_guess ──► InitialGuess (unv
 that does both: it accepts many input formats, converts them, and validates dimensions against
 the [`Model`](@ref CTModels.Models.Model).
 
+The type hierarchy mirrors the pipeline:
+[`AbstractInitialGuess`](@ref CTModels.Init.AbstractInitialGuess) → [`InitialGuess`](@ref CTModels.Init.InitialGuess)
+and
+[`AbstractPreInitialGuess`](@ref CTModels.Init.AbstractPreInitialGuess) → [`PreInitialGuess`](@ref CTModels.Init.PreInitialGuess).
+
 ## Reading order
 
 | Page | Topic | Key symbols |

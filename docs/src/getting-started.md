@@ -143,6 +143,7 @@ init = CTModels.build_initial_guess(ocp,
 | Dynamics and objective | [Dynamics & Objective](model/dynamics_objective.md) |
 | Path, boundary, and box constraints | [Constraints](model/constraints.md) |
 | Freezing a `PreModel` into a `Model` | [Building a Model](model/building.md) |
+| Displaying models in the REPL | [Displaying Models](model/display.md) |
 | Reading state, control, costate trajectories | [Trajectories](solution/trajectories.md) |
 | Dual variables and solver diagnostics | [Duals & Diagnostics](solution/duals.md) |
 | Warm-starting with initial guesses | [Initial Guesses](initial_guess/overview.md) |

@@ -82,7 +82,9 @@ mechanism used when [building a solution](../solution/trajectories.md).
 
 !!! note "Low-level tags"
 
-    The format keyword dispatches internally on the tags `CTModels.JSON3Tag()` and
-    `CTModels.JLD2Tag()`. The extension methods
+    The format keyword dispatches internally on the tags
+    [`JLD2Tag`](@ref CTModels.Serialization.JLD2Tag) and
+    [`JSON3Tag`](@ref CTModels.Serialization.JSON3Tag), both subtypes of
+    [`AbstractTag`](@ref CTModels.Serialization.AbstractTag). The extension methods
     `export_ocp_solution(CTModels.JLD2Tag(), sol; …)` etc. are what each `ext/` file
     implements; the `format=` wrapper is the public, dependency-free entry point.

@@ -94,3 +94,10 @@ CTModels.clean_component_symbols((:states, :controls, :costate, :constraint, :du
 
 This is why box-constraint duals share the state/control grids, and path-constraint duals the
 `:path` grid — the mapping is centralised in one place rather than scattered across accessors.
+
+## Checking for emptiness
+
+`is_empty` returns `true` for an
+[`EmptyTimeGridModel`](@ref CTModels.Solutions.EmptyTimeGridModel) and `false` otherwise.
+The convenience [`is_empty_time_grid`](@ref CTModels.Solutions.is_empty_time_grid) calls
+`is_empty` on the solution's time grid model directly.

@@ -35,6 +35,7 @@ The OCP layer is organised by responsibility across four modules:
 | [Dynamics and objective](dynamics_objective.md) | The equations of motion and cost | [`dynamics!`](@ref CTModels.Building.dynamics!), [`objective!`](@ref CTModels.Building.objective!) |
 | [Constraints](constraints.md) | Path, boundary and box constraints | [`constraint!`](@ref CTModels.Building.constraint!) |
 | [Building a model](building.md) | Freezing the `PreModel` | [`build`](@ref CTModels.Building.build), [`Model`](@ref CTModels.Models.Model) |
+| [Displaying models](display.md) | `Base.show` and mathematical rendering | `Model`, `PreModel` display |
 
 ## Qualified access
 
