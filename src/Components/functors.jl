@@ -67,7 +67,7 @@ g = CoercedTrajectory(t -> [t, 2t], identity)
 g(0.5)   # returns [0.5, 1.0]
 ```
 """
-struct CoercedTrajectory{F,C} <: Function
+struct CoercedTrajectory{F,C<:Union{typeof(only),typeof(identity)}} <: Function
     inner::F
     coerce::C
 end

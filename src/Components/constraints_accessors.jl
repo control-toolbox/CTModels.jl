@@ -32,7 +32,7 @@ See also: [`CTModels.Components.boundary_constraints_nl`](@ref), [`CTModels.Comp
 """
 function path_constraints_nl(
     model::ConstraintsModel{TP,<:Tuple,<:Tuple,<:Tuple,<:Tuple}
-) where {TP}
+) where {TP<:Tuple}
     return model.path_nl
 end
 
@@ -48,7 +48,7 @@ See also: [`CTModels.Components.path_constraints_nl`](@ref), [`CTModels.Componen
 """
 function boundary_constraints_nl(
     model::ConstraintsModel{<:Tuple,TB,<:Tuple,<:Tuple,<:Tuple}
-) where {TB}
+) where {TB<:Tuple}
     return model.boundary_nl
 end
 
@@ -64,7 +64,7 @@ See also: [`CTModels.Components.control_constraints_box`](@ref), [`CTModels.Comp
 """
 function state_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,TS,<:Tuple,<:Tuple}
-) where {TS}
+) where {TS<:Tuple}
     return model.state_box
 end
 
@@ -80,7 +80,7 @@ See also: [`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Compon
 """
 function control_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,TC,<:Tuple}
-) where {TC}
+) where {TC<:Tuple}
     return model.control_box
 end
 
@@ -96,7 +96,7 @@ See also: [`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Compon
 """
 function variable_constraints_box(
     model::ConstraintsModel{<:Tuple,<:Tuple,<:Tuple,<:Tuple,TV}
-) where {TV}
+) where {TV<:Tuple}
     return model.variable_box
 end
 

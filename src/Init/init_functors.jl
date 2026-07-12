@@ -109,13 +109,15 @@ f = MergedTrajectory(base, comps, 2, :state)
 f(0.5)   # returns [0.0, sin(0.5)]
 ```
 """
-struct MergedTrajectory{F,C} <: Function
+struct MergedTrajectory{F,C<:AbstractDict{Int,<:Function}} <: Function
     base::F
     comps::C       # Dict{Int,Function}
     dim::Int
     role::Symbol
 
-    function MergedTrajectory{F,C}(base::F, comps::C, dim::Int, role::Symbol) where {F,C}
+    function MergedTrajectory{F,C}(
+        base::F, comps::C, dim::Int, role::Symbol
+    ) where {F,C<:AbstractDict{Int,<:Function}}
         for i in keys(comps)
             if !(1 <= i <= dim)
                 throw(
@@ -133,7 +135,9 @@ struct MergedTrajectory{F,C} <: Function
     end
 end
 
-function MergedTrajectory(base::F, comps::C, dim::Int, role::Symbol) where {F,C}
+function MergedTrajectory(
+    base::F, comps::C, dim::Int, role::Symbol
+) where {F,C<:AbstractDict{Int,<:Function}}
     return MergedTrajectory{F,C}(base, comps, dim, role)
 end
 

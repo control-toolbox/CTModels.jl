@@ -114,7 +114,7 @@ end
 
 Traits.has_time_dependence_trait(::Model) = true
 
-Traits.time_dependence(::Model{TD}) where {TD} = TD
+Traits.time_dependence(::Model{TD}) where {TD<:TimeDependence} = TD
 
 Traits.has_variable_dependence_trait(::Model) = true
 
