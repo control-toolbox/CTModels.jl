@@ -4,6 +4,13 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.15.3-beta] - 2026-07-13
+
+### Compatibility
+
+- **No breaking changes.** CTBase compat is widened from `0.27` to `0.27, 0.28`.
+  Existing code targeting CTBase 0.27 continues to work unchanged.
+
 ## [0.15.0-beta] - 2026-07-09
 
 The plotting extension is rewritten on top of the generic `CTBase.Plotting` engine. The
