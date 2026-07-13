@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.3-beta] - 2026-07-13
+
+### 📦 Dependencies
+
+- **Widened CTBase compatibility**: Extended support to CTBase 0.28 (compat now
+  `0.27, 0.28` in both `Project.toml` and `docs/Project.toml`).
+- **No breaking changes**: Full backward compatibility maintained with CTBase 0.27.
+  No source changes required. See [BREAKING.md](BREAKING.md).
+
 ## [0.15.2-beta] - 2026-07-10
 
 ### 🐛 Bug Fixes
