@@ -1,9 +1,8 @@
+# Performance & Type Stability
+
 ```@meta
 CurrentModule = CTModels
-Draft = false
 ```
-
-# Performance & Type Stability
 
 This guide explains **how CTModels keeps its runtime-critical code fast**, and how a
 contributor can check that a change has not introduced a regression.

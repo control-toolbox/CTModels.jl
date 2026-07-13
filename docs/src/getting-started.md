@@ -87,11 +87,11 @@ ocp = CTModels.build(pre)
 
 The built `Model` exposes its structure through accessors:
 
-```@example gs
-(CTModels.state_dimension(ocp),
- CTModels.control_dimension(ocp),
- CTModels.is_autonomous(ocp),
- CTModels.has_lagrange_cost(ocp))
+```@repl gs
+CTModels.state_dimension(ocp)
+CTModels.control_dimension(ocp)
+CTModels.is_autonomous(ocp)
+CTModels.has_lagrange_cost(ocp)
 ```
 
 ### Assembling a solution
@@ -118,20 +118,29 @@ sol = CTModels.build_solution(ocp, T, X, U, Float64[], P;
 
 Trajectories are returned as callables (interpolated from the samples):
 
-```@example gs
+```@repl gs
 x = CTModels.state(sol)
-(x(0.5),
- CTModels.objective(sol),
- CTModels.successful(sol))
+x(0.5)
+CTModels.objective(sol)
+CTModels.successful(sol)
 ```
 
 ### Building an initial guess
+
+An initial guess provides the solver with a starting point for the state and control trajectories.
+It is built from the `Model` and a pair of functions that return the guessed state and control at any time `t`:
 
 ```@example gs
 init = CTModels.build_initial_guess(ocp,
     (state=t -> [0.0, 0.0], control=t -> [0.1])
 )
-(init.state(0.5), init.control(0.5))
+```
+
+The returned object exposes the guessed trajectories as callables, just like a `Solution`:
+
+```@repl gs
+init.state(0.5)
+init.control(0.5)
 ```
 
 ## Next Steps
