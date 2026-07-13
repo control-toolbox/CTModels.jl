@@ -323,6 +323,27 @@ function test_dual_model()
             Test.@test f(0.0) == [0.5, 2.5]
             Test.@test f(0.0) isa AbstractVector
         end
+
+        # Contract: the repeated call must infer; construction is not asserted.
+        Test.@testset "Type stability" begin
+            duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
+
+            f_slice_scalar = Solutions.DualSlice(duals_fn, 2)
+            Test.@inferred f_slice_scalar(1.0)
+
+            f_slice_vector = Solutions.DualSlice(duals_fn, [1, 3])
+            Test.@inferred f_slice_vector(1.0)
+
+            f_boxdiff_scalar = Solutions.BoxDualDiff(
+                t -> [1.0, 2.0, 3.0], t -> [0.5, 0.5, 0.5], 2
+            )
+            Test.@inferred f_boxdiff_scalar(0.0)
+
+            f_boxdiff_vector = Solutions.BoxDualDiff(
+                t -> [1.0, 2.0, 3.0], t -> [0.5, 0.5, 0.5], [1, 3]
+            )
+            Test.@inferred f_boxdiff_vector(0.0)
+        end
     end
 end
 

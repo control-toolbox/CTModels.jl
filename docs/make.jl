@@ -97,6 +97,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 "Export & Import" => "serialization/export_import.md",
                 "Plotting" => "serialization/plotting.md",
             ],
+            "Performance" => joinpath("guide", "performance.md"),
             "API Reference" => api_pages,
         ],
         plugins=[links],

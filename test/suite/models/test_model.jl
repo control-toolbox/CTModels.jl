@@ -2,6 +2,7 @@ module TestOCPModel
 
 import Test: Test
 import CTBase.Exceptions: Exceptions
+import CTBase.Traits: Traits
 import CTModels.Components: Components
 import CTModels.Building: Building
 import CTModels.Models: Models
@@ -494,6 +495,7 @@ function test_model()
             Test.@test_nowarn Test.@inferred Models.control_dimension(m)
             Test.@test_nowarn Test.@inferred Models.variable_dimension(m)
             Test.@test_nowarn Test.@inferred Models.is_autonomous(m)
+            Test.@test_nowarn Test.@inferred Traits.time_dependence(m)
         end
 
         # ====================================================================
@@ -550,6 +552,21 @@ function test_model()
             f = Models.BoxProjection{:variable}(2)
             Test.@test f isa Function
             Test.@test f(nothing, nothing, [7.0, 8.0]) == 8.0
+        end
+
+        # Contract: the repeated call must infer; construction is not asserted.
+        Test.@testset "Type stability" begin
+            x = [10.0, 20.0, 30.0]
+            f_state = Models.BoxProjection{:state}(2)
+            Test.@inferred f_state(nothing, x, nothing, nothing)
+
+            u = [5.0, 6.0]
+            f_control = Models.BoxProjection{:control}(1)
+            Test.@inferred f_control(nothing, nothing, u, nothing)
+
+            v = [7.0, 8.0]
+            f_variable = Models.BoxProjection{:variable}(2)
+            Test.@inferred f_variable(nothing, nothing, v)
         end
 
         Test.@testset "SubPathConstraint" begin

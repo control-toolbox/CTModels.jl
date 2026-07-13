@@ -241,6 +241,38 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return the control dimension of the `PreModel`.
+
+`control` defaults to [`CTModels.Components.EmptyControlModel`](@ref) (dimension `0`),
+so — unlike [`state_dimension`](@ref) — no precondition on `control` having been set
+is required.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to query.
+"""
+function Models.control_dimension(ocp::PreModel)::Dimension
+    return Components.dimension(ocp.control)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the variable dimension of the `PreModel`.
+
+`variable` defaults to [`CTModels.Components.EmptyVariableModel`](@ref) (dimension `0`),
+so — unlike [`state_dimension`](@ref) — no precondition on `variable` having been set
+is required.
+
+# Arguments
+- `ocp::PreModel`: The pre-model to query.
+"""
+function Models.variable_dimension(ocp::PreModel)::Dimension
+    return Components.dimension(ocp.variable)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if dynamics cover all state components in the `PreModel`.
 
 For component-wise dynamics, checks that all state indices are covered.
