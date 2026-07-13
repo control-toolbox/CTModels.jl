@@ -253,11 +253,11 @@ true
 ```
 """
 struct SolverInfos{V,TI<:Dict{Symbol,V}} <: AbstractSolverInfos
-    iterations::Int
-    status::Symbol
-    message::String
+    iterations::Union{Int, Core.NotProvidedType}
+    status::Union{Symbol, Core.NotProvidedType}
+    message::Union{String, Core.NotProvidedType}
     successful::Bool
-    constraints_violation::Float64
+    constraints_violation::Union{Float64, Core.NotProvidedType}
     infos::TI
 end
 

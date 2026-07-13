@@ -198,10 +198,10 @@ function build_solution(
     v::Vector{Float64},
     P::TP;
     objective::Float64,
-    iterations::Int,
-    constraints_violation::Float64,
-    message::String,
-    status::Symbol,
+    iterations::Union{Int, Core.NotProvidedType}=Core.NotProvided,
+    constraints_violation::Union{Float64, Core.NotProvidedType}=Core.NotProvided,
+    message::Union{String, Core.NotProvidedType}=Core.NotProvided,
+    status::Union{Symbol, Core.NotProvidedType}=Core.NotProvided,
     successful::Bool,
     path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
@@ -539,10 +539,10 @@ function build_solution(
     v::Vector{Float64},
     P::TP;
     objective::Float64,
-    iterations::Int,
-    constraints_violation::Float64,
-    message::String,
-    status::Symbol,
+    iterations::Union{Int, Core.NotProvidedType}=Core.NotProvided,
+    constraints_violation::Union{Float64, Core.NotProvidedType}=Core.NotProvided,
+    message::Union{String, Core.NotProvidedType}=Core.NotProvided,
+    status::Union{Symbol, Core.NotProvidedType}=Core.NotProvided,
     successful::Bool,
     path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
@@ -1388,7 +1388,7 @@ $(TYPEDSIGNATURES)
 Return the number of iterations (if solved by an iterative method).
 
 """
-function iterations(sol::Solution)::Int
+function iterations(sol::Solution)
     return sol.solver_infos.iterations
 end
 
@@ -1398,7 +1398,7 @@ $(TYPEDSIGNATURES)
 Return the status criterion (a Symbol).
 
 """
-function status(sol::Solution)::Symbol
+function status(sol::Solution)
     return sol.solver_infos.status
 end
 
@@ -1408,7 +1408,7 @@ $(TYPEDSIGNATURES)
 Return the message associated to the status criterion.
 
 """
-function message(sol::Solution)::String
+function message(sol::Solution)
     return sol.solver_infos.message
 end
 
@@ -1428,7 +1428,7 @@ $(TYPEDSIGNATURES)
 Return the constraints violation.
 
 """
-function constraints_violation(sol::Solution)::Float64
+function constraints_violation(sol::Solution)
     return sol.solver_infos.constraints_violation
 end
 

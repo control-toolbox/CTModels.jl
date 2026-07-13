@@ -91,3 +91,106 @@ CTModels.successful(sol)
 
 Each accessor dispatches on a typed field, so reading a solution never inspects raw
 closures. The following pages take each group in turn.
+
+## Displaying a solution
+
+Typing a `Solution` in the REPL renders a single tree whose branches adapt to the
+data that was actually provided — fields left as `NotProvided` are silently omitted.
+
+### Case 1 — Full solver diagnostics
+
+The typical output when an NLP solver fills every field:
+
+```@example sol_display
+using CTModels
+pre = CTModels.PreModel()
+CTModels.variable!(pre, 0)
+CTModels.time!(pre; t0=0.0, tf=1.0)
+CTModels.state!(pre, 2)
+CTModels.control!(pre, 1)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.time_dependence!(pre; autonomous=true)
+ocp = CTModels.build(pre)
+N = 11; T = collect(range(0.0, 1.0; length=N))
+X = hcat(cos.(T), -sin.(T)); U = reshape(-cos.(T), N, 1); P = zeros(N, 2)
+sol = CTModels.build_solution(ocp, T, X, U, Float64[], P;
+    objective=0.5,
+    iterations=10,
+    constraints_violation=1e-9,
+    message="Solve_Succeeded",
+    status=:Solve_Succeeded,
+    successful=true,
+)
+```
+
+### Case 2 — Lightweight flow result
+
+When only a message is meaningful (e.g. from CTFlows),
+`iterations`, `status`, and `constraints_violation` are simply not shown:
+
+```@example sol_display
+sol_flow = CTModels.build_solution(ocp, T, X, U, Float64[], P;
+    objective=0.5,
+    message="Solution computed by CTFlows OCP flow",
+    successful=true,
+)
+sol_flow
+```
+
+### Case 3 — With an optimisation variable
+
+When the OCP has an optimisation variable, it appears between the objective and the
+solver metadata:
+
+```@example sol_display
+pre_v = CTModels.PreModel()
+CTModels.variable!(pre_v, 1, "T", ["T"])
+CTModels.time!(pre_v; t0=0.0, tf=1.0)
+CTModels.state!(pre_v, 1)
+CTModels.control!(pre_v, 1)
+CTModels.dynamics!(pre_v, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
+CTModels.objective!(pre_v, :min; mayer=(x0, xf, v) -> v[1]^2)
+CTModels.time_dependence!(pre_v; autonomous=true)
+ocp_v = CTModels.build(pre_v)
+Xv = reshape(T, N, 1); Uv = ones(N, 1); Pv = zeros(N, 1)
+sol_v = CTModels.build_solution(ocp_v, T, Xv, Uv, [1.5], Pv;
+    objective=2.25,
+    iterations=7,
+    constraints_violation=1e-11,
+    message="optimal",
+    status=:first_order,
+    successful=true,
+)
+```
+
+### Case 4 — Variable duals and boundary duals
+
+When a solver also provides dual variables (Lagrange multipliers), they appear nested
+under the variable and as a separate "Boundary duals" row:
+
+```@example sol_display
+pre_d = CTModels.PreModel()
+CTModels.variable!(pre_d, 1, "T", ["T"])
+CTModels.time!(pre_d; t0=0.0, tf=1.0)
+CTModels.state!(pre_d, 1)
+CTModels.control!(pre_d, 1)
+CTModels.dynamics!(pre_d, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
+CTModels.objective!(pre_d, :min; mayer=(x0, xf, v) -> v[1]^2)
+CTModels.constraint!(pre_d, :variable; rg=1:1, lb=[0.5], ub=[2.0], label=:T_box)
+bc!(r, x0, xf, v) = (r[1] = x0[1]; r[2] = xf[1] - 1.0; nothing)
+CTModels.constraint!(pre_d, :boundary; f=bc!, lb=zeros(2), ub=zeros(2), label=:bc)
+CTModels.time_dependence!(pre_d; autonomous=true)
+ocp_d = CTModels.build(pre_d)
+sol_d = CTModels.build_solution(ocp_d, T, Xv, Uv, [1.5], Pv;
+    objective=2.25,
+    iterations=12,
+    constraints_violation=2e-10,
+    message="optimal",
+    status=:first_order,
+    successful=true,
+    variable_constraints_lb_dual=[0.0],
+    variable_constraints_ub_dual=[0.3],
+    boundary_constraints_dual=[1.2, -0.8],
+)
+```
