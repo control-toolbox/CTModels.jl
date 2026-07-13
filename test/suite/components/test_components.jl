@@ -131,6 +131,29 @@ function test_components()
             Test.@test contains(repr(MIME("text/plain"), f), "only")
         end
 
+        # Contract: hot-path calls (functor evaluation, solution accessors) must
+        # infer. Construction is not asserted — it may be dynamic by design.
+        Test.@testset "Type stability" begin
+            f_const = Components.ConstantInTime(1.0)
+            Test.@inferred f_const(0.5)
+
+            f_coerced_only = Components.CoercedTrajectory(t -> [2t], only)
+            Test.@inferred f_coerced_only(0.5)
+
+            f_coerced_id = Components.CoercedTrajectory(t -> [t, 2t], identity)
+            Test.@inferred f_coerced_id(0.5)
+
+            sms = Components.StateModelSolution("x", ["x1", "x2"], t -> [sin(t), cos(t)])
+            Test.@inferred Components.name(sms)
+            Test.@inferred Components.components(sms)
+            Test.@inferred Components.dimension(sms)
+            Test.@inferred Components.value(sms)
+
+            cms = Components.ControlModelSolution("u", ["u"], t -> cos(t), :constant)
+            Test.@inferred Components.value(cms)
+            Test.@inferred Components.interpolation(cms)
+        end
+
         Test.@testset "objective and constraints models" begin
             mayer_f = (x0, xf, _v) -> x0[1] + xf[1]
             lagrange_f = (_t, _x, u, _v) -> u[1]^2

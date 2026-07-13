@@ -25,8 +25,10 @@ CTModelsPlots = "Plots"
 
 [compat]
 Aqua = "0.8"
+BenchmarkTools = "1"
 CTBase = "0.27"
 DocStringExtensions = "0.9"
+JET = "0.11"
 JLD2 = "0.6"
 JSON3 = "1"
 LinearAlgebra = "1"
@@ -42,6 +44,8 @@ julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -49,4 +53,4 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "JLD2", "JSON3", "Plots", "Random", "Test"]
+test = ["Aqua", "BenchmarkTools", "JET", "JLD2", "JSON3", "Plots", "Random", "Test"]
