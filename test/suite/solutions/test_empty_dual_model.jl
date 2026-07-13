@@ -115,7 +115,7 @@ function test_empty_dual_model()
             sol = _make_dualfree_solution(m)
             str = repr(MIME("text/plain"), sol)
             Test.@test str isa String
-            Test.@test occursin("Solver", str)
+            Test.@test occursin("Solution", str)
             # the model has boundary constraints but the solution carries no duals,
             # so the boundary-duals block must not appear
             Test.@test !occursin("Boundary duals", str)
