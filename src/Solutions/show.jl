@@ -27,42 +27,43 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     fmt = Core.get_format_codes(io)
 
     # ── Header ──────────────────────────────────────────────────────────────
-    ok      = Solutions.successful(sol)
+    ok = Solutions.successful(sol)
     ok_code = ok ? fmt.success : fmt.error
-    ok_sym  = ok ? "✓ successful" : "✗ failed"
+    ok_sym = ok ? "✓ successful" : "✗ failed"
     println(io, fmt.name, "Solution", fmt.reset, "  ", ok_code, ok_sym, fmt.reset)
 
     # ── Optional solver-metadata — only display when provided ────────────────
-    _np     = Core.NotProvidedType
-    _iter   = Solutions.iterations(sol)
+    _np = Core.NotProvidedType
+    _iter = Solutions.iterations(sol)
     _status = Solutions.status(sol)
-    _msg    = Solutions.message(sol)
-    _cv     = Solutions.constraints_violation(sol)
-    has_iter   = !(_iter   isa _np)
+    _msg = Solutions.message(sol)
+    _cv = Solutions.constraints_violation(sol)
+    has_iter = !(_iter isa _np)
     has_status = !(_status isa _np)
-    has_msg    = !(_msg    isa _np)
-    has_cv     = !(_cv     isa _np)
+    has_msg = !(_msg isa _np)
+    has_cv = !(_cv isa _np)
 
     # ── Primal-extra presence ────────────────────────────────────────────────
     has_var = Models.variable_dimension(sol) > 0
-    has_bd  = Solutions.has_duals(sol) && Components.dim_boundary_constraints_nl(sol) > 0
-    has_vd  = has_var &&
-              Solutions.has_duals(sol) &&
-              Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
-              Components.dim_variable_constraints_box(Solutions.model(sol)) > 0
+    has_bd = Solutions.has_duals(sol) && Components.dim_boundary_constraints_nl(sol) > 0
+    has_vd =
+        has_var &&
+        Solutions.has_duals(sol) &&
+        Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
+        Components.dim_variable_constraints_box(Solutions.model(sol)) > 0
 
-    has_solver_meta  = has_iter || has_status || has_msg || has_cv
+    has_solver_meta = has_iter || has_status || has_msg || has_cv
     has_primal_extra = has_var || has_bd
 
     # ── Build ordered list of top-level item tags ────────────────────────────
     tags = Symbol[]
     push!(tags, :obj)
-    has_var    && push!(tags, :var)
-    has_bd     && push!(tags, :bd)
-    has_iter   && push!(tags, :iter)
+    has_var && push!(tags, :var)
+    has_bd && push!(tags, :bd)
+    has_iter && push!(tags, :iter)
     has_status && push!(tags, :status)
-    has_msg    && push!(tags, :msg)
-    has_cv     && push!(tags, :cv)
+    has_msg && push!(tags, :msg)
+    has_cv && push!(tags, :cv)
 
     last_tag = last(tags)
 
@@ -71,11 +72,18 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
 
     # ── Print one labeled field row ──────────────────────────────────────────
     function _row(c, label, value)
-        println(
+        return println(
             io,
-            fmt.muted, c, fmt.reset,
-            fmt.label, label, " : ", fmt.reset,
-            fmt.value, value, fmt.reset,
+            fmt.muted,
+            c,
+            fmt.reset,
+            fmt.label,
+            label,
+            " : ",
+            fmt.reset,
+            fmt.value,
+            value,
+            fmt.reset,
         )
     end
 
@@ -84,17 +92,16 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
 
     # ── Variable (optional) ──────────────────────────────────────────────────
     if has_var
-        dim_v     = Models.variable_dimension(sol)
-        var_val   = Components.variable(sol)
-        var_name  = Models.variable_name(sol)
+        dim_v = Models.variable_dimension(sol)
+        var_val = Components.variable(sol)
+        var_name = Models.variable_name(sol)
         var_comps = Models.variable_components(sol)
 
-        var_label =
-            if dim_v == 1 || var_name == var_comps[1]
-                var_name
-            else
-                var_name * " = (" * join(var_comps, ", ") * ")"
-            end
+        var_label = if dim_v == 1 || var_name == var_comps[1]
+            var_name
+        else
+            var_name * " = (" * join(var_comps, ", ") * ")"
+        end
 
         c = conn(:var)
         _row(c, var_label, string(var_val))
@@ -103,11 +110,55 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
             lb = Solutions.variable_constraints_lb_dual(sol)
             ub = Solutions.variable_constraints_ub_dual(sol)
             if c == "  └─ "
-                println(io, fmt.muted, "     ├─ ", fmt.reset, fmt.label, "dual lb : ", fmt.reset, fmt.value, string(lb), fmt.reset)
-                println(io, fmt.muted, "     └─ ", fmt.reset, fmt.label, "dual ub : ", fmt.reset, fmt.value, string(ub), fmt.reset)
+                println(
+                    io,
+                    fmt.muted,
+                    "     ├─ ",
+                    fmt.reset,
+                    fmt.label,
+                    "dual lb : ",
+                    fmt.reset,
+                    fmt.value,
+                    string(lb),
+                    fmt.reset,
+                )
+                println(
+                    io,
+                    fmt.muted,
+                    "     └─ ",
+                    fmt.reset,
+                    fmt.label,
+                    "dual ub : ",
+                    fmt.reset,
+                    fmt.value,
+                    string(ub),
+                    fmt.reset,
+                )
             else
-                println(io, fmt.muted, "  │  ├─ ", fmt.reset, fmt.label, "dual lb : ", fmt.reset, fmt.value, string(lb), fmt.reset)
-                println(io, fmt.muted, "  │  └─ ", fmt.reset, fmt.label, "dual ub : ", fmt.reset, fmt.value, string(ub), fmt.reset)
+                println(
+                    io,
+                    fmt.muted,
+                    "  │  ├─ ",
+                    fmt.reset,
+                    fmt.label,
+                    "dual lb : ",
+                    fmt.reset,
+                    fmt.value,
+                    string(lb),
+                    fmt.reset,
+                )
+                println(
+                    io,
+                    fmt.muted,
+                    "  │  └─ ",
+                    fmt.reset,
+                    fmt.label,
+                    "dual ub : ",
+                    fmt.reset,
+                    fmt.value,
+                    string(ub),
+                    fmt.reset,
+                )
             end
         end
     end
@@ -123,10 +174,10 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     end
 
     # ── Solver metadata ───────────────────────────────────────────────────────
-    has_iter   && _row(conn(:iter),   "Iterations",            string(_iter))
-    has_status && _row(conn(:status), "Status",                string(_status))
-    has_msg    && _row(conn(:msg),    "Message",               string(_msg))
-    has_cv     && _row(conn(:cv),     "Constraints violation", string(_cv))
+    has_iter && _row(conn(:iter), "Iterations", string(_iter))
+    has_status && _row(conn(:status), "Status", string(_status))
+    has_msg && _row(conn(:msg), "Message", string(_msg))
+    has_cv && _row(conn(:cv), "Constraints violation", string(_cv))
 
     return nothing
 end
