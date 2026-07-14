@@ -34,12 +34,20 @@ function test_solution_show()
             ocp = Building.build(pre_ocp)
 
             T = [0.0, 0.5, 1.0]
-            X = zeros(3, 1); X[:, 1] = [0.0, 0.5, 1.0]
-            U = zeros(3, 1); U[:, 1] = [1.0, 2.0, 3.0]
+            X = zeros(3, 1);
+            X[:, 1] = [0.0, 0.5, 1.0]
+            U = zeros(3, 1);
+            U[:, 1] = [1.0, 2.0, 3.0]
             v = Float64[]
-            P = zeros(3, 1); P[:, 1] = [0.1, 0.2, 0.3]
+            P = zeros(3, 1);
+            P[:, 1] = [0.1, 0.2, 0.3]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=0.5,
                 iterations=10,
                 constraints_violation=1e-8,
@@ -82,12 +90,20 @@ function test_solution_show()
             ocp = Building.build(pre_ocp)
 
             T = [0.0, 1.0]
-            X = zeros(2, 1); X[:, 1] = [0.0, 1.0]
-            U = zeros(2, 1); U[:, 1] = [1.0, 2.0]
+            X = zeros(2, 1);
+            X[:, 1] = [0.0, 1.0]
+            U = zeros(2, 1);
+            U[:, 1] = [1.0, 2.0]
             v = Float64[]
-            P = zeros(2, 1); P[:, 1] = [0.1, 0.2]
+            P = zeros(2, 1);
+            P[:, 1] = [0.1, 0.2]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=7.389,
                 message="Solution computed by flow",
                 successful=true,
@@ -125,12 +141,20 @@ function test_solution_show()
             ocp = Building.build(pre_ocp)
 
             T = [0.0, 1.0]
-            X = zeros(2, 1); X[:, 1] = [0.0, 1.0]
-            U = zeros(2, 1); U[:, 1] = [1.0, 2.0]
+            X = zeros(2, 1);
+            X[:, 1] = [0.0, 1.0]
+            U = zeros(2, 1);
+            U[:, 1] = [1.0, 2.0]
             v = [5.0]
-            P = zeros(2, 1); P[:, 1] = [0.1, 0.2]
+            P = zeros(2, 1);
+            P[:, 1] = [0.1, 0.2]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=1.0,
                 iterations=5,
                 constraints_violation=0.0,
@@ -166,12 +190,20 @@ function test_solution_show()
             ocp = Building.build(pre_ocp)
 
             T = [0.0, 1.0]
-            X = zeros(2, 1); X[:, 1] = [0.0, 1.0]
-            U = zeros(2, 1); U[:, 1] = [1.0, 2.0]
+            X = zeros(2, 1);
+            X[:, 1] = [0.0, 1.0]
+            U = zeros(2, 1);
+            U[:, 1] = [1.0, 2.0]
             v = Float64[]
-            P = zeros(2, 1); P[:, 1] = [0.1, 0.2]
+            P = zeros(2, 1);
+            P[:, 1] = [0.1, 0.2]
             sol = Solutions.build_solution(
-                ocp, T, X, U, v, P;
+                ocp,
+                T,
+                X,
+                U,
+                v,
+                P;
                 objective=1.0,
                 iterations=3,
                 constraints_violation=100.0,

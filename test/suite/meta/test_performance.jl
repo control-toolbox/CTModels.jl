@@ -60,18 +60,15 @@ _pre = Building.PreModel()
 Building.time!(_pre; t0=0.0, tf=1.0)
 Building.state!(_pre, 2)
 Building.control!(_pre, 1)
-Building.dynamics!(_pre, (r, t, x, u, v) -> (r .= x .+ u; nothing))
+Building.dynamics!(_pre, (r, t, x, u, v) -> (r.=x .+ u; nothing))
 Building.objective!(_pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
-Building.definition!(
-    _pre,
-    quote
-        t ∈ [0, 1], time
-        x ∈ R², state
-        u ∈ R, control
-        ẋ(t) == x(t) .+ u(t)
-        ∫(u(t)^2) → min
-    end,
-)
+Building.definition!(_pre, quote
+    t ∈ [0, 1], time
+    x ∈ R², state
+    u ∈ R, control
+    ẋ(t) == x(t) .+ u(t)
+    ∫(u(t)^2) → min
+end)
 Building.time_dependence!(_pre; autonomous=true)
 const _model = Building.build(_pre)
 
@@ -112,14 +109,16 @@ function test_performance()
             # wrapper's real, reproducible 80 B — an artifact of the comparison,
             # not a wrapper defect (verified at the REPL before writing this).
             f_boxdiff = Solutions.BoxDualDiff(_lb_raw, _ub_raw, idx)
-            Test.@test (BenchmarkTools.@ballocated $f_boxdiff($t)) == (BenchmarkTools.@ballocated _boxdualdiff_raw(
+            Test.@test (BenchmarkTools.@ballocated $f_boxdiff($t)) ==
+                (BenchmarkTools.@ballocated _boxdualdiff_raw(
                 $_lb_raw, $_ub_raw, $t, $idx
             ))
 
             f_proj = Models.BoxProjection{:state}(idx)
             x = [1.0, 2.0, 3.0]
-            Test.@test (BenchmarkTools.@ballocated $f_proj(nothing, $x, nothing, nothing)) ==
-                (BenchmarkTools.@ballocated _boxproj_raw($x, $idx))
+            Test.@test (BenchmarkTools.@ballocated $f_proj(
+                nothing, $x, nothing, nothing
+            )) == (BenchmarkTools.@ballocated _boxproj_raw($x, $idx))
 
             # CTModels-specific composition: the CoercedTrajectory+deepcopy
             # wrapping produced by `build_interpolated_function` (the function
@@ -127,7 +126,9 @@ function test_performance()
             # through) must add zero overhead over the raw interpolant it wraps.
             T = [0.0, 0.5, 1.0]
             X = [0.0 1.0; 0.5 1.5; 1.0 2.0]
-            fx = Solutions.build_interpolated_function(X, T, 2, Matrix{Float64}; expected_dim=2)
+            fx = Solutions.build_interpolated_function(
+                X, T, 2, Matrix{Float64}; expected_dim=2
+            )
             raw_interp = Interpolation.ctinterpolate(T, CTBase.Core.matrix2vec(X, 1))
             Test.@test (BenchmarkTools.@ballocated $fx(0.25)) ==
                 (BenchmarkTools.@ballocated $raw_interp(0.25))
