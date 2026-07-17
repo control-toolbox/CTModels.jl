@@ -4,6 +4,11 @@
 CurrentModule = CTModels
 ```
 
+```@setup plt
+using Plots
+Base.showable(::MIME"image/png", ::Plots.Plot) = false
+```
+
 When `Plots` is loaded, the `CTModelsPlots` extension adds a recipe so a
 [`Solution`](@ref CTModels.Solutions.Solution) can be drawn directly with `plot` / `plot!`. The
 recipe lays out the state, control, costate (and, when present, path constraints and their
