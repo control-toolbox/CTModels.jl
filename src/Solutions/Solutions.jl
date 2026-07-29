@@ -96,7 +96,7 @@ export control_interpolation
 export dim_dual_state_constraints_box,
     dim_dual_control_constraints_box, dim_dual_variable_constraints_box
 export dual
-export iterations, status, message, success, successful
+export iterations, status, message, successful
 export constraints_violation, infos
 export is_empty, is_empty_time_grid
 export index
