@@ -1,7 +1,7 @@
 module TestInitialGuessShow
 
-import Test: Test
-import CTModels.Init: Init
+using Test: Test
+using CTModels: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

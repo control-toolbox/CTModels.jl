@@ -1,12 +1,12 @@
 module TestCodeQuality
 
-import Test: Test
-import Aqua: Aqua
-import JET: JET
-import CTModels: CTModels
-import CTModels.Components: Components
-import CTModels.Solutions: Solutions
-import CTModels.Models: Models
+using Test: Test
+using Aqua: Aqua
+using JET: JET
+using CTModels: CTModels
+using CTModels: Components
+using CTModels: Solutions
+using CTModels: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

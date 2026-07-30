@@ -7,7 +7,7 @@ Adds methods for [`CTModels.export_ocp_solution`](@ref) and
 """
 module CTModelsJLD
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTModels: CTModels
 using JLD2: JLD2

@@ -170,7 +170,7 @@ This function processes a dictionary where each entry defines a constraint with 
 
 # Example
 ```julia
-using CTModels.Building
+using CTModels: Building
 using OrderedCollections
 
 f1(t, x, u, v) = x[1]
@@ -547,7 +547,7 @@ a fully validated [`CTModels.Models.Model`](@ref) from a [`CTModels.Building.Pre
 
 # Example
 ```julia
-using CTModels.Building
+using CTModels: Building
 
 # Create and configure a pre-model
 pre_ocp = PreModel()

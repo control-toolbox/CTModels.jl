@@ -1,9 +1,9 @@
 module TestPrint
 
-import Test: Test
-import CTModels.Components: Components
-import CTModels.Building: Building
-import CTModels.Display: Display
+using Test: Test
+using CTModels: Components
+using CTModels: Building
+using CTModels: Display
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

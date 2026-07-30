@@ -1,7 +1,7 @@
 module TestDiscretizationUtils
 
-import Test: Test
-import CTModels.Solutions: Solutions
+using Test: Test
+using CTModels: Solutions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

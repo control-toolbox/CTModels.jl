@@ -36,11 +36,9 @@ See also: `CTModels.Components`, `CTModels.Models`, `CTModels.Building`, `CTMode
 """
 module Display
 
-import CTBase.Exceptions
-import CTBase.Core
-import DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDSIGNATURES
 
-using CTBase: CTBase
+using CTBase: CTBase, Exceptions, Core
 using MLStyle: MLStyle
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools

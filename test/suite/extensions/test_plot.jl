@@ -1,15 +1,15 @@
 module TestPlot
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import Plots: Plots
-import CTModels: CTModels
-import CTModels.Components: Components
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
+using Test: Test
+using CTBase: Exceptions
+using Plots: Plots
+using CTModels: CTModels
+using CTModels: Components
+using CTModels: Models
+using CTModels: Solutions
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
-import .TestProblems
+using .TestProblems: TestProblems
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

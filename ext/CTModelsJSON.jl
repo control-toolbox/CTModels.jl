@@ -7,9 +7,9 @@ Adds methods for [`CTModels.export_ocp_solution`](@ref) and
 """
 module CTModelsJSON
 
-import CTBase.Core
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
+using CTBase: Core
 using CTModels: CTModels
 using JSON3: JSON3
 

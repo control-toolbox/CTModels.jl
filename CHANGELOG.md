@@ -883,7 +883,7 @@ using CTModels.InitialGuess
 pre = CTModels.OptimalControlPreInit(...)
 
 # After
-using CTModels.Init  
+using CTModels: Init  
 pre = CTModels.PreInitialGuess(...)
 ```
 

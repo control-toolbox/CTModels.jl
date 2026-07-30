@@ -45,12 +45,9 @@ See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref), [`CTModels.S
 """
 module Init
 
-import CTBase.Core
-import CTBase.Interpolation
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-using CTBase: CTBase
+using CTBase: CTBase, Core, Interpolation, Exceptions
 
 using ..Components
 using ..Models

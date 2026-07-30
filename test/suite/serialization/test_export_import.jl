@@ -1,15 +1,15 @@
 module TestExportImport
 
-import Test: Test
-import JLD2: JLD2
-import JSON3: JSON3
-import CTModels.Components: Components
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
-import CTModels.Serialization: Serialization
+using Test: Test
+using JLD2: JLD2
+using JSON3: JSON3
+using CTModels: Components
+using CTModels: Models
+using CTModels: Solutions
+using CTModels: Serialization
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
-import .TestProblems
+using .TestProblems: TestProblems
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

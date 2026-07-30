@@ -1,14 +1,14 @@
 module TestInitialGuessValidation
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import CTModels.Components: Components
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
-import CTModels.Init: Init
+using Test: Test
+using CTBase: Exceptions
+using CTModels: Components
+using CTModels: Models
+using CTModels: Solutions
+using CTModels: Init
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
-import .TestProblems
+using .TestProblems: TestProblems
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

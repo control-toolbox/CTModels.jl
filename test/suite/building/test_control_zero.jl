@@ -1,16 +1,16 @@
 module TestControlZero
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import CTModels.Components: Components
-import CTModels.Building: Building
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
-import CTModels.Init: Init
-import CTModels.Serialization: Serialization
-import Plots: Plots
-import JLD2: JLD2
-import JSON3: JSON3
+using Test: Test
+using CTBase: Exceptions
+using CTModels: Components
+using CTModels: Building
+using CTModels: Models
+using CTModels: Solutions
+using CTModels: Init
+using CTModels: Serialization
+using Plots: Plots
+using JLD2: JLD2
+using JSON3: JSON3
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

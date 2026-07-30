@@ -1,10 +1,10 @@
 module TestOCPSolution
 
-import Test: Test
-import CTModels.Components: Components
-import CTModels.Building: Building
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
+using Test: Test
+using CTModels: Components
+using CTModels: Building
+using CTModels: Models
+using CTModels: Solutions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
