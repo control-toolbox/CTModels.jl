@@ -4,6 +4,30 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.16.0] - 2026-07-30
+
+### Stable release — migration from 0.15.x-beta to 0.16.0
+
+This is the first stable release of the 0.16 series. It consolidates all
+beta releases from 0.15.x into a stable baseline with no new breaking
+changes beyond those already introduced in the 0.15.x betas.
+
+#### Compatibility
+
+- **CTBase compat tightened to `0.29`**: the compat range is now `0.29`
+  (dropping `0.27` and `0.28`). Update your `Project.toml`:
+
+  ```toml
+  [compat]
+  CTBase = "0.29"
+  ```
+
+- **No source changes required** if you were already on CTBase 0.29.
+- **Migration from 0.14.x or earlier**: review the breaking changes from
+  [0.15.0-beta](#0150-beta---2026-07-09) (plotting rewrite, phase-plot recipe
+  removal) and [0.9.15-beta](#0915-beta---2026-04-18) (function renames,
+  PreModel predicate removal).
+
 ## [0.15.3-beta] - 2026-07-13
 
 ### Compatibility
