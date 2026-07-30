@@ -1,11 +1,11 @@
 module TestOCPModel
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import CTBase.Traits: Traits
-import CTModels.Components: Components
-import CTModels.Building: Building
-import CTModels.Models: Models
+using Test: Test
+using CTBase: Exceptions
+using CTBase: Traits
+using CTModels: Components
+using CTModels: Building
+using CTModels: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

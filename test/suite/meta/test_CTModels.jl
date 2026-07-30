@@ -1,12 +1,12 @@
 module TestCTModelsTop
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import CTModels: CTModels
-import CTModels.Components: Components
-import CTModels.Models: Models
-import CTModels.Solutions: Solutions
-import CTModels.Serialization: Serialization
+using Test: Test
+using CTBase: Exceptions
+using CTModels: CTModels
+using CTModels: Components
+using CTModels: Models
+using CTModels: Solutions
+using CTModels: Serialization
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

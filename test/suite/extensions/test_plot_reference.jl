@@ -28,13 +28,13 @@ module TestPlotReference
 #     a CTDirect/Ipopt dependency (closed-form solution via `build_solution`).
 # ==============================================================================
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import Plots: Plots
-import CTModels: CTModels
+using Test: Test
+using CTBase: Exceptions
+using Plots: Plots
+using CTModels: CTModels
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
-import .TestProblems
+using .TestProblems: TestProblems
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

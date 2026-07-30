@@ -17,10 +17,10 @@ tightened, that the induced `TypeVar`'s upper bound is the intended bound and no
 
 module TestWhereBounds
 
-import Test: Test
-import CTBase.Traits: Traits
-import CTModels.Components: Components
-import CTModels.Models: Models
+using Test: Test
+using CTBase: Traits
+using CTModels: Components
+using CTModels: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

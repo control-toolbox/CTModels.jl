@@ -36,10 +36,9 @@ See also: [`CTModels.Serialization.export_ocp_solution`](@ref),
 """
 module Serialization
 
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-using CTBase: CTBase
+using CTBase: CTBase, Exceptions
 
 using ..Components
 using ..Models

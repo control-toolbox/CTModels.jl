@@ -17,7 +17,7 @@ with inconsistent dimensions, raises a structured exception.
 
 ```@example components
 using CTModels
-import CTBase
+using CTBase: CTBase
 pre = CTModels.PreModel()
 nothing # hide
 ```

@@ -51,12 +51,9 @@ Exported functions:
 """
 module Solutions
 
-import CTBase.Core
-import CTBase.Interpolation
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
-using CTBase: CTBase
+using CTBase: CTBase, Core, Interpolation, Exceptions
 
 # Foundational types and type aliases
 using ..Components
@@ -65,7 +62,7 @@ using ..Components
 using ..Models
 
 # Private defaults used by build_solution and its accessors
-import ..Building:
+using ..Building:
     __constraints,
     __control_interpolation,
     __time_grid_default_component,

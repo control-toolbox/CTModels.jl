@@ -1,9 +1,9 @@
 module TestModelTypes
 
-import Test: Test
-import CTModels.Components: Components
-import CTModels.Models: Models
-import CTModels.Building: Building
+using Test: Test
+using CTModels: Components
+using CTModels: Models
+using CTModels: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

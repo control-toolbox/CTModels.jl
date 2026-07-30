@@ -8,10 +8,9 @@ and rendering to the generic `CTBase.Plotting` engine.
 """
 module CTModelsPlots
 
-import CTBase.Plotting
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDSIGNATURES
 
+using CTBase: Plotting, Exceptions
 using CTModels: CTModels
 using Plots: Plots
 

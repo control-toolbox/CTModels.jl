@@ -101,7 +101,7 @@ Replaces the anonymous closure `t -> begin … end` (57 lines) produced inside
 # Examples
 
 ```julia
-using CTModels.Init
+using CTModels: Init
 
 base = t -> [0.0, 0.0]
 comps = Dict{Int,Function}(2 => t -> sin(t))

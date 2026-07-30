@@ -11,7 +11,7 @@ CTModels.jl is typically installed as a dependency of another package in the eco
 To install it directly:
 
 ```julia
-import Pkg
+using Pkg: Pkg
 Pkg.add("CTModels")
 ```
 

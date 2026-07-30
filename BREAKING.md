@@ -596,7 +596,7 @@ The InitialGuess module has been renamed to `Init` for better API ergonomics and
 using CTModels.InitialGuess
 
 # After (0.9.0-beta)
-using CTModels.Init
+using CTModels: Init
 ```
 
 ##### Type Names
@@ -620,7 +620,7 @@ using CTModels.InitialGuess
 pre_init = CTModels.OptimalControlPreInit(state=0.1, control=0.2)
 
 # After
-using CTModels.Init
+using CTModels: Init
 pre_init = CTModels.PreInitialGuess(state=0.1, control=0.2)
 ```
 
@@ -695,12 +695,12 @@ Major refactoring where several modules have been moved from CTModels to the new
 #### Moved Modules
 The following modules are no longer part of CTModels and must be imported from CTSolvers:
 
-- **Options** → `using CTSolvers.Options`
-- **Strategies** → `using CTSolvers.Strategies` 
-- **Orchestration** → `using CTSolvers.Orchestration`
-- **Optimization** → `using CTSolvers.Optimization`
-- **Modelers** → `using CTSolvers.Modelers`
-- **DOCP** → `using CTSolvers.DOCP`
+- **Options** → `using CTSolvers: Options`
+- **Strategies** → `using CTSolvers: Strategies` 
+- **Orchestration** → `using CTSolvers: Orchestration`
+- **Optimization** → `using CTSolvers: Optimization`
+- **Modelers** → `using CTSolvers: Modelers`
+- **DOCP** → `using CTSolvers: DOCP`
 
 #### Migration Guide
 
@@ -715,9 +715,9 @@ using CTModels.Optimization
 ##### After (CTModels ≥ 0.8.0)
 ```julia
 using CTModels
-using CTSolvers.Options
-using CTSolvers.Strategies  
-using CTSolvers.Optimization
+using CTSolvers: Options
+using CTSolvers: Strategies  
+using CTSolvers: Optimization
 ```
 
 #### Specific Changes
@@ -729,7 +729,7 @@ using CTModels.Options
 opt = CTModels.OptionValue(100, :user)
 
 # After  
-using CTSolvers.Options
+using CTSolvers: Options
 opt = CTSolvers.OptionValue(100, :user)
 ```
 
@@ -740,7 +740,7 @@ using CTModels.Strategies
 strategy = CTModels.DirectStrategy()
 
 # After
-using CTSolvers.Strategies
+using CTSolvers: Strategies
 strategy = CTSolvers.DirectStrategy()
 ```
 
@@ -751,7 +751,7 @@ using CTModels.Modelers
 modeler = CTModels.ADNLPModeler()
 
 # After
-using CTSolvers.Modelers
+using CTSolvers: Modelers
 modeler = CTSolvers.ADNLPModeler()
 ```
 
@@ -762,7 +762,7 @@ using CTModels.DOCP
 docp = CTModels.DiscretizedOptimalControlProblem(...)
 
 # After
-using CTSolvers.DOCP
+using CTSolvers: DOCP
 docp = CTSolvers.DiscretizedOptimalControlProblem(...)
 )
 ```

@@ -11,7 +11,7 @@ check against the model. The check can also be invoked on its own with
 
 ```@example val
 using CTModels
-import CTBase
+using CTBase: CTBase
 
 pre = CTModels.PreModel()
 CTModels.variable!(pre, 0)

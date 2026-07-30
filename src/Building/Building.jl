@@ -20,12 +20,10 @@ See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref).
 """
 module Building
 
-import CTBase.Core
-import CTBase.Exceptions
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import Parameters: @with_kw
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using Parameters: @with_kw
 
-using CTBase: CTBase
+using CTBase: CTBase, Core, Exceptions
 using MLStyle: MLStyle
 
 # Foundational types and type aliases

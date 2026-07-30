@@ -1,9 +1,9 @@
 module TestContracts
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import CTModels.Components: Components
-import CTModels.Models: Models
+using Test: Test
+using CTBase: Exceptions
+using CTModels: Components
+using CTModels: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

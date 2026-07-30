@@ -34,13 +34,13 @@ module TestPerformance
 
 using Test: Test
 using BenchmarkTools: BenchmarkTools
-import CTBase: CTBase
-import CTBase.Interpolation
-import CTBase.Traits
-import CTModels.Components: Components
-import CTModels.Building: Building
-import CTModels.Solutions: Solutions
-import CTModels.Models: Models
+using CTBase: CTBase
+using CTBase: Interpolation
+using CTBase: Traits
+using CTModels: Components
+using CTModels: Building
+using CTModels: Solutions
+using CTModels: Models
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

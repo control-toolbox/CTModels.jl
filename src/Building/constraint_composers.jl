@@ -26,7 +26,7 @@ inside [`CTModels.Building.build`](@ref) in `build.jl`.
 # Examples
 
 ```julia
-using CTModels.Building
+using CTModels: Building
 
 f1!(r, t, x, u, v) = (r[1] = x[1] + u[1])
 f2!(r, t, x, u, v) = (r[1] = x[2])

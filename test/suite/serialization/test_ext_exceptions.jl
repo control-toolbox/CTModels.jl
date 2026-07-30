@@ -1,14 +1,14 @@
 module TestExtExceptions
 
-import Test: Test
-import CTBase.Exceptions: Exceptions
-import RecipesBase: RecipesBase
-import CTModels.Serialization: Serialization
-import CTModels.Solutions: Solutions
-import CTModels.Models: Models
+using Test: Test
+using CTBase: Exceptions
+using RecipesBase: RecipesBase
+using CTModels: Serialization
+using CTModels: Solutions
+using CTModels: Models
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
-import .TestProblems
+using .TestProblems: TestProblems
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

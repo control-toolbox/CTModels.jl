@@ -26,10 +26,9 @@ See also: [`CTModels.Building`](@ref), [`CTModels.Models`](@ref).
 """
 module Components
 
-import CTBase.Core
-import CTBase.Exceptions
-import CTBase.Traits: TimeDependence, Autonomous, NonAutonomous
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using CTBase: CTBase, Core, Exceptions
+using CTBase: TimeDependence, Autonomous, NonAutonomous
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using OrderedCollections: OrderedCollections
 
 include(joinpath(@__DIR__, "functors.jl"))
