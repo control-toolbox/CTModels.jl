@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-07-30
+
+### 📦 Stable Release
+
+This is the first stable release of the 0.16 series. It consolidates all
+beta releases from 0.15.x into a stable baseline.
+
+- **CTBase compat bumped to `0.29`**: CTBase `0.29` is now the minimum
+  supported version (compat `0.29` in `Project.toml` and `docs/Project.toml`).
+- **No new breaking changes** beyond those already introduced in the 0.15.x
+  beta series. See [BREAKING.md](BREAKING.md) for the full migration guide.
+- **All 70 411 tests pass.**
+
 ## [0.15.3-beta] - 2026-07-13
 
 ### 📦 Dependencies
