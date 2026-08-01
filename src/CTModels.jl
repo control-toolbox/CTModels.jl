@@ -12,13 +12,13 @@ initial-guess management; and optional extensions for serialization and plotting
 
 | Module | Responsibility |
 |--------|---------------|
-| [`CTModels.Components`](@ref) | Foundational types: state, control, variable, times, constraints |
-| [`CTModels.Models`](@ref) | Immutable `Model` type and its accessor methods |
-| [`CTModels.Building`](@ref) | `PreModel`, component mutators, `build` |
-| [`CTModels.Solutions`](@ref) | `Solution` types, `build_solution`, dual model, interpolation |
-| [`CTModels.Display`](@ref) | `Base.show` extensions for models and solutions |
-| [`CTModels.Serialization`](@ref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
-| [`CTModels.Init`](@ref) | Initial guess construction and validation |
+| [`CTModels.Components`](@extref) | Foundational types: state, control, variable, times, constraints |
+| [`CTModels.Models`](@extref) | Immutable `Model` type and its accessor methods |
+| [`CTModels.Building`](@extref) | `PreModel`, component mutators, `build` |
+| [`CTModels.Solutions`](@extref) | `Solution` types, `build_solution`, dual model, interpolation |
+| [`CTModels.Display`](@extref) | `Base.show` extensions for models and solutions |
+| [`CTModels.Serialization`](@extref) | `export_ocp_solution` / `import_ocp_solution` (JLD2, JSON) |
+| [`CTModels.Init`](@extref) | Initial guess construction and validation |
 
 # Extensions
 

@@ -35,6 +35,18 @@ links = InterLinks(
         "https://control-toolbox.org/CTBase.jl/stable/",
         "https://control-toolbox.org/CTBase.jl/stable/objects.inv",
     ),
+    "CTModels" => (
+        "https://control-toolbox.org/CTModels.jl/stable/",
+        # Self-reference: CTModels' own docstrings use `@extref CTModels...` for
+        # cross-submodule links (Models/Solutions/Components/...), so they resolve
+        # correctly both here (in CTModels' own build) and when transcluded into a
+        # downstream package's docs (e.g. CTFlows extending CTModels.Components
+        # generics). Local build checked first so this is verifiable without
+        # requiring a published objects.inv (e.g. on a fresh docs branch before
+        # the first deploy); falls back to the published inventory otherwise.
+        joinpath(@__DIR__, "build", "1", "objects.inv"),
+        "https://control-toolbox.org/CTModels.jl/stable/objects.inv",
+    ),
 )
 
 # ═══════════════════════════════════════════════════════════════════════════════

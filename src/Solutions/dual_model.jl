@@ -140,7 +140,7 @@ Return the dual function associated with the nonlinear path constraints.
 # Returns
 - `PC_Dual`: A function mapping time `t` to the vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.boundary_constraints_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
+See also: [`CTModels.Solutions.boundary_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
 function path_constraints_dual(
     model::DualModel{
@@ -168,7 +168,7 @@ Return the dual vector associated with the boundary constraints.
 # Returns
 - `BC_Dual`: A vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.path_constraints_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
+See also: [`CTModels.Solutions.path_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
 function boundary_constraints_dual(
     model::DualModel{
@@ -196,7 +196,7 @@ Return the dual function associated with the lower bounds of state constraints.
 # Returns
 - `SC_LB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.state_constraints_ub_dual`](@ref), [`CTModels.Solutions.control_constraints_lb_dual`](@ref).
+See also: [`CTModels.Solutions.state_constraints_ub_dual`](@extref), [`CTModels.Solutions.control_constraints_lb_dual`](@extref).
 """
 function state_constraints_lb_dual(
     model::DualModel{
@@ -224,7 +224,7 @@ Return the dual function associated with the upper bounds of state constraints.
 # Returns
 - `SC_UB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.state_constraints_lb_dual`](@ref), [`CTModels.Solutions.control_constraints_ub_dual`](@ref).
+See also: [`CTModels.Solutions.state_constraints_lb_dual`](@extref), [`CTModels.Solutions.control_constraints_ub_dual`](@extref).
 """
 function state_constraints_ub_dual(
     model::DualModel{
@@ -252,7 +252,7 @@ Return the dual function associated with the lower bounds of control constraints
 # Returns
 - `CC_LB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.control_constraints_ub_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
+See also: [`CTModels.Solutions.control_constraints_ub_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
 function control_constraints_lb_dual(
     model::DualModel{
@@ -280,7 +280,7 @@ Return the dual function associated with the upper bounds of control constraints
 # Returns
 - `CC_UB_Dual`: A function mapping time `t` to a vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.control_constraints_lb_dual`](@ref), [`CTModels.Solutions.state_constraints_ub_dual`](@ref).
+See also: [`CTModels.Solutions.control_constraints_lb_dual`](@extref), [`CTModels.Solutions.state_constraints_ub_dual`](@extref).
 """
 function control_constraints_ub_dual(
     model::DualModel{
@@ -308,7 +308,7 @@ Return the dual vector associated with the lower bounds of variable constraints.
 # Returns
 - `VC_LB_Dual`: A vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.variable_constraints_ub_dual`](@ref), [`CTModels.Solutions.state_constraints_lb_dual`](@ref).
+See also: [`CTModels.Solutions.variable_constraints_ub_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
 function variable_constraints_lb_dual(
     model::DualModel{
@@ -336,7 +336,7 @@ Return the dual vector associated with the upper bounds of variable constraints.
 # Returns
 - `VC_UB_Dual`: A vector of dual values, or `nothing` if not set.
 
-See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@ref), [`CTModels.Solutions.state_constraints_ub_dual`](@ref).
+See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@extref), [`CTModels.Solutions.state_constraints_ub_dual`](@extref).
 """
 function variable_constraints_ub_dual(
     model::DualModel{

@@ -21,7 +21,7 @@ The display is a single tree rooted at "Solution":
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Solutions.Solution`](@ref)
+See also: [`CTModels.Solutions.Solution`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     fmt = Core.get_format_codes(io)

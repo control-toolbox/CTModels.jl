@@ -13,7 +13,7 @@ Return the control function directly when provided as a function.
 # Returns
 - `Function`: The control function unchanged.
 
-See also: [`CTModels.Init.initial_control`](@ref) for other input types.
+See also: [`CTModels.Init.initial_control`](@extref) for other input types.
 """
 initial_control(::Models.AbstractModel, control::Function) = control
 
@@ -139,7 +139,7 @@ Handle time-grid control initialization with (time, data) tuple.
 # Throws
 - `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
 
-See also: [`CTModels.Init._build_time_dependent_init`](@ref).
+See also: [`CTModels.Init._build_time_dependent_init`](@extref).
 """
 function initial_control(ocp::Models.AbstractModel, control::Tuple)
     length(control) == 2 || throw(

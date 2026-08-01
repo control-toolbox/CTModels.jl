@@ -20,7 +20,7 @@ letting the compiler specialise on the return type of the base trajectory.
 # Returns
 - `Vector`: a length-1 vector containing or wrapping `v`.
 
-See also: [`CTModels.Init._coerce_base`](@ref)
+See also: [`CTModels.Init._coerce_base`](@extref)
 """
 _wrap_1d(v::AbstractVector) = copy(v)
 _wrap_1d(v) = [v]
@@ -45,7 +45,7 @@ Throws if `v` is not an `AbstractVector` of the expected length, or if `v` is a 
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: if `v` is a scalar or has incorrect length.
 
-See also: [`CTModels.Init._wrap_1d`](@ref)
+See also: [`CTModels.Init._wrap_1d`](@extref)
 """
 function _coerce_base(v::AbstractVector, dim::Int, role::Symbol)
     if length(v) != dim
@@ -90,7 +90,7 @@ Component index bounds are validated at construction, not at call time, so the c
 method stays allocation-free beyond what `base` and the component functions allocate.
 
 Replaces the anonymous closure `t -> begin … end` (57 lines) produced inside
-[`CTModels.Init._build_block_with_components`](@ref) in `builders.jl`.
+[`CTModels.Init._build_block_with_components`](@extref) in `builders.jl`.
 
 # Fields
 - `base::F`: Block-level trajectory function.
@@ -185,7 +185,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact string representation of [`CTModels.Init.MergedTrajectory`](@ref).
+Compact string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
 function Base.show(io::IO, f::MergedTrajectory{F,C}) where {F,C}
     return print(
@@ -203,7 +203,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Detailed string representation of [`CTModels.Init.MergedTrajectory`](@ref).
+Detailed string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,C}) where {F,C}
     print(io, "MergedTrajectory")

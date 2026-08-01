@@ -13,7 +13,7 @@ Return the state function directly when provided as a function.
 # Returns
 - `Function`: The state function unchanged.
 
-See also: [`CTModels.Init.initial_state`](@ref) for other input types.
+See also: [`CTModels.Init.initial_state`](@extref) for other input types.
 """
 initial_state(::Models.AbstractModel, state::Function) = state
 
@@ -116,7 +116,7 @@ Handle time-grid state initialization with (time, data) tuple.
 # Throws
 - `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
 
-See also: [`CTModels.Init._build_time_dependent_init`](@ref).
+See also: [`CTModels.Init._build_time_dependent_init`](@extref).
 """
 function initial_state(ocp::Models.AbstractModel, state::Tuple)
     length(state) == 2 || throw(

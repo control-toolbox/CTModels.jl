@@ -1,22 +1,22 @@
 """
     Building
 
-Building module for CTModels — assembles [`CTModels.Building.PreModel`](@ref) (mutable problem under
-construction), all component mutators, and the [`CTModels.Building.build`](@ref) / [`CTModels.Building.build_model`](@ref) functions
-that convert a finished [`CTModels.Building.PreModel`](@ref) into an immutable [`CTModels.Models.Model`](@ref).
+Building module for CTModels — assembles [`CTModels.Building.PreModel`](@extref) (mutable problem under
+construction), all component mutators, and the [`CTModels.Building.build`](@extref) / [`CTModels.Building.build_model`](@extref) functions
+that convert a finished [`CTModels.Building.PreModel`](@extref) into an immutable [`CTModels.Models.Model`](@extref).
 
 # Organisation
 
 - **defaults.jl**: default names, labels, and criterion for mutators.
-- **pre_model.jl**: [`CTModels.Building.PreModel`](@ref) struct and `__is_*` consistency helpers.
-- **time_dependence.jl**: [`CTModels.Building.time_dependence!`](@ref) mutator.
+- **pre_model.jl**: [`CTModels.Building.PreModel`](@extref) struct and `__is_*` consistency helpers.
+- **time_dependence.jl**: [`CTModels.Building.time_dependence!`](@extref) mutator.
 - **name_validation.jl**: `__validate_name_uniqueness` and friends.
 - **state.jl / control.jl / variable.jl / times.jl**: component mutators.
 - **dynamics.jl / objective.jl / constraints.jl / definition.jl**: remaining mutators.
-- **build.jl**: [`CTModels.Building.append_box_constraints!`](@ref), [`CTModels.Building.build`](@ref)([`CTModels.Components.ConstraintsDictType`](@ref)),
-  [`CTModels.Building.build`](@ref)([`CTModels.Building.PreModel`](@ref)), [`CTModels.Building.build_model`](@ref).
+- **build.jl**: [`CTModels.Building.append_box_constraints!`](@extref), [`CTModels.Building.build`](@extref)([`CTModels.Components.ConstraintsDictType`](@extref)),
+  [`CTModels.Building.build`](@extref)([`CTModels.Building.PreModel`](@extref)), [`CTModels.Building.build_model`](@extref).
 
-See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref).
+See also: [`CTModels.Components`](@extref), [`CTModels.Models`](@extref).
 """
 module Building
 

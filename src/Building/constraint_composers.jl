@@ -16,7 +16,7 @@ fragility present in the previous `make_boundary_cons_nl` closure (where
 `constraints_number` and `constraints_dimensions` were outside the `let` block).
 
 Replaces the anonymous closures `path_cons_nl!` and `boundary_cons_nl!` produced
-inside [`CTModels.Building.build`](@ref) in `build.jl`.
+inside [`CTModels.Building.build`](@extref) in `build.jl`.
 
 # Fields
 - `n::Int`: Number of individual constraints.
@@ -100,7 +100,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact string representation of [`CTModels.Building.CompositeConstraint`](@ref).
+Compact string representation of [`CTModels.Building.CompositeConstraint`](@extref).
 """
 function Base.show(io::IO, f::CompositeConstraint{Sig,CS}) where {Sig,CS}
     return print(io, "CompositeConstraint{:", Sig, "}(n=", f.n, ", dims=", f.dims, ")")
@@ -109,7 +109,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Detailed string representation of [`CTModels.Building.CompositeConstraint`](@ref).
+Detailed string representation of [`CTModels.Building.CompositeConstraint`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", f::CompositeConstraint{Sig,CS}

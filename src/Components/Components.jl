@@ -11,18 +11,18 @@ this module. It has no sibling dependencies.
 
 # Organisation
 
-- **aliases.jl**: Type aliases ([`CTModels.Components.Dimension`](@ref), [`CTModels.Components.ctNumber`](@ref), [`CTModels.Components.Time`](@ref), etc.)
-- **types.jl**: Abstract and concrete component types ([`CTModels.Components.StateModel`](@ref), [`CTModels.Components.ControlModel`](@ref), etc.)
+- **aliases.jl**: Type aliases ([`CTModels.Components.Dimension`](@extref), [`CTModels.Components.ctNumber`](@extref), [`CTModels.Components.Time`](@extref), etc.)
+- **types.jl**: Abstract and concrete component types ([`CTModels.Components.StateModel`](@extref), [`CTModels.Components.ControlModel`](@extref), etc.)
 - **accessors.jl**: Accessor methods for state, control, variable, and definition models
-- **times_accessors.jl**: Accessor methods for time models ([`CTModels.Components.TimesModel`](@ref))
-- **objective_accessors.jl**: Accessor methods for objective models ([`CTModels.Components.MayerObjectiveModel`](@ref), etc.)
-- **constraints_accessors.jl**: Accessor methods for constraints models ([`CTModels.Components.ConstraintsModel`](@ref))
+- **times_accessors.jl**: Accessor methods for time models ([`CTModels.Components.TimesModel`](@extref))
+- **objective_accessors.jl**: Accessor methods for objective models ([`CTModels.Components.MayerObjectiveModel`](@extref), etc.)
+- **constraints_accessors.jl**: Accessor methods for constraints models ([`CTModels.Components.ConstraintsModel`](@extref))
 
 # Dependencies
 
-External: `OrderedCollections` (for [`CTModels.Components.ConstraintsDictType`](@ref)), `CTBase`.
+External: `OrderedCollections` (for [`CTModels.Components.ConstraintsDictType`](@extref)), `CTBase`.
 
-See also: [`CTModels.Building`](@ref), [`CTModels.Models`](@ref).
+See also: [`CTModels.Building`](@extref), [`CTModels.Models`](@extref).
 """
 module Components
 

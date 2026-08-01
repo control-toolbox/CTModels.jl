@@ -44,10 +44,10 @@ Exported functions:
 
 # See also
 
-- [`CTModels.Models`](@ref): Model types and building
-- [`CTModels.Components`](@ref): Model components
-- [`CTModels.Building`](@ref): Model construction
-- [`CTModels.Serialization`](@ref): Solution import/export
+- [`CTModels.Models`](@extref): Model types and building
+- [`CTModels.Components`](@extref): Model components
+- [`CTModels.Building`](@extref): Model construction
+- [`CTModels.Serialization`](@extref): Solution import/export
 """
 module Solutions
 

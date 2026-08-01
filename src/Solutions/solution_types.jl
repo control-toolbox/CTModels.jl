@@ -9,8 +9,8 @@ Abstract base type for time grid models used in optimal control solutions.
 
 Subtypes store the discretised time points at which the solution is evaluated.
 
-See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@ref), [`CTModels.Solutions.MultipleTimeGridModel`](@ref),
-[`CTModels.Solutions.EmptyTimeGridModel`](@ref).
+See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@extref), [`CTModels.Solutions.MultipleTimeGridModel`](@extref),
+[`CTModels.Solutions.EmptyTimeGridModel`](@extref).
 """
 abstract type AbstractTimeGridModel end
 
@@ -105,12 +105,12 @@ function MultipleTimeGridModel(;
 end
 
 """
-Legacy type alias for [`CTModels.Solutions.UnifiedTimeGridModel`](@ref).
+Legacy type alias for [`CTModels.Solutions.UnifiedTimeGridModel`](@extref).
 
 Kept for backward compatibility with code written before the multi-grid feature.
-Prefer [`CTModels.Solutions.UnifiedTimeGridModel`](@ref) for new code.
+Prefer [`CTModels.Solutions.UnifiedTimeGridModel`](@extref) for new code.
 
-See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@ref), [`CTModels.Solutions.MultipleTimeGridModel`](@ref).
+See also: [`CTModels.Solutions.UnifiedTimeGridModel`](@extref), [`CTModels.Solutions.MultipleTimeGridModel`](@extref).
 """
 const TimeGridModel = UnifiedTimeGridModel
 
@@ -224,7 +224,7 @@ Abstract base type for solver information associated with an optimal control sol
 
 Subtypes store metadata about the numerical solution process.
 
-See also: [`CTModels.Solutions.SolverInfos`](@ref).
+See also: [`CTModels.Solutions.SolverInfos`](@extref).
 """
 abstract type AbstractSolverInfos end
 
@@ -270,7 +270,7 @@ Abstract base type for dual variable models in optimal control solutions.
 
 Subtypes store Lagrange multipliers (dual variables) associated with constraints.
 
-See also: [`CTModels.Solutions.DualModel`](@ref).
+See also: [`CTModels.Solutions.DualModel`](@extref).
 """
 abstract type AbstractDualModel end
 
@@ -388,7 +388,7 @@ Abstract base type for optimal control problem solutions.
 Subtypes store the complete solution including primal trajectories, dual variables,
 and solver information.
 
-See also: [`CTModels.Solutions.Solution`](@ref).
+See also: [`CTModels.Solutions.Solution`](@extref).
 """
 abstract type AbstractSolution end
 

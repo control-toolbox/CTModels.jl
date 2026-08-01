@@ -48,7 +48,7 @@ output are suppressed:
 
 - `Bool`: `true` if something was printed.
 
-See also: [`CTModels.Display._print_abstract_definition`](@ref).
+See also: [`CTModels.Display._print_abstract_definition`](@extref).
 """
 function __print_mathematical_definition(
     io::IO,

@@ -257,7 +257,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a constraint to a pre-model. See [`CTModels.Building.__constraint!`](@ref) for more details.
+Add a constraint to a pre-model. See [`CTModels.Building.__constraint!`](@extref) for more details.
 
 # Arguments
 
@@ -295,7 +295,7 @@ julia> CTModels.constraint!(ocp, :control; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.control!`](@ref), [`CTModels.Building.variable!`](@ref).
+See also: [`CTModels.Building.state!`](@extref), [`CTModels.Building.control!`](@extref), [`CTModels.Building.variable!`](@extref).
 
 !!! note
     Control is only required for `type == :control` constraints. All other types

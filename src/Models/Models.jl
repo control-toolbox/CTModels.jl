@@ -8,25 +8,25 @@ component types), and all reader functions that operate on a built `Model`.
 
 # Organisation
 
-- **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref), [`CTModels.Components.variable`](@ref), [`CTModels.Components.times`](@ref), [`CTModels.Components.objective`](@ref), [`CTModels.Models.constraints`](@ref), [`CTModels.Models.dynamics`](@ref), [`CTModels.Models.definition`](@ref))
+- **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref), [`CTModels.Components.variable`](@extref), [`CTModels.Components.times`](@extref), [`CTModels.Components.objective`](@extref), [`CTModels.Models.constraints`](@extref), [`CTModels.Models.dynamics`](@extref), [`CTModels.Models.definition`](@extref))
 
 # Public API
 
 The following functions are exported and accessible as `CTModels.function_name()`:
 
-- **Types**: [`CTModels.Models.AbstractModel`](@ref), [`CTModels.Models.Model`](@ref)
+- **Types**: [`CTModels.Models.AbstractModel`](@extref), [`CTModels.Models.Model`](@extref)
 - **Time dependence predicates**: `is_autonomous`, `is_nonautonomous`
 - **Variable / control presence predicates**: `is_variable`, `is_nonvariable`, `is_control_free`, `has_variable`, `has_control`, `has_abstract_definition`, `is_abstractly_defined`
-- **Component field accessors**: [`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref), [`CTModels.Components.variable`](@ref), [`CTModels.Components.times`](@ref), [`CTModels.Components.objective`](@ref), [`CTModels.Models.constraints`](@ref), [`CTModels.Models.dynamics`](@ref), [`CTModels.Models.definition`](@ref)
-- **Named accessors on state/control/variable**: [`state_name`](@ref), [`state_components`](@ref), [`state_dimension`](@ref), [`control_name`](@ref), [`control_components`](@ref), [`control_dimension`](@ref), [`variable_name`](@ref), [`variable_components`](@ref), [`variable_dimension`](@ref)
-- **ExaModels builder**: [`get_build_examodel`](@ref)
-- **Constraints helpers**: [`isempty_constraints`](@ref), [`constraint`](@ref)
+- **Component field accessors**: [`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref), [`CTModels.Components.variable`](@extref), [`CTModels.Components.times`](@extref), [`CTModels.Components.objective`](@extref), [`CTModels.Models.constraints`](@extref), [`CTModels.Models.dynamics`](@extref), [`CTModels.Models.definition`](@extref)
+- **Named accessors on state/control/variable**: [`CTModels.Models.state_name`](@extref), [`CTModels.Models.state_components`](@extref), [`CTModels.Models.state_dimension`](@extref), [`CTModels.Models.control_name`](@extref), [`CTModels.Models.control_components`](@extref), [`CTModels.Models.control_dimension`](@extref), [`CTModels.Models.variable_name`](@extref), [`CTModels.Models.variable_components`](@extref), [`CTModels.Models.variable_dimension`](@extref)
+- **ExaModels builder**: [`CTModels.Models.get_build_examodel`](@extref)
+- **Constraints helpers**: [`CTModels.Models.isempty_constraints`](@extref), [`CTModels.Models.constraint`](@extref)
 
 # Dependencies
 
 Depends on `Components` for foundational types and low-level accessor functions.
 
-See also: [`CTModels.Components`](@ref), [`CTModels.Building`](@ref), [`CTModels.Solutions`](@ref), [`CTModels.Init`](@ref).
+See also: [`CTModels.Components`](@extref), [`CTModels.Building`](@extref), [`CTModels.Solutions`](@extref), [`CTModels.Init`](@extref).
 """
 module Models
 

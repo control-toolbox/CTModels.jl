@@ -113,7 +113,7 @@ Handle time-grid variable initialization with (time, data) tuple.
 # Throws
 - `Exceptions.IncorrectArgument`: If the tuple is not a 2-tuple.
 
-See also: [`CTModels.Init._build_time_dependent_init`](@ref).
+See also: [`CTModels.Init._build_time_dependent_init`](@extref).
 """
 function initial_variable(ocp::Models.AbstractModel, variable::Tuple)
     length(variable) == 2 || throw(

@@ -14,7 +14,7 @@ functions; `variable` shows its value or `(none)` when empty.
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Init.InitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref)
+See also: [`CTModels.Init.InitialGuess`](@extref), [`CTModels.Init.PreInitialGuess`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", init::InitialGuess)
     fmt = Core.get_format_codes(io)
@@ -46,7 +46,7 @@ Print a compact one-line representation of the initial guess to `io`.
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Init.InitialGuess`](@ref)
+See also: [`CTModels.Init.InitialGuess`](@extref)
 """
 function Base.show(io::IO, init::InitialGuess)
     fmt = Core.get_format_codes(io)
@@ -73,7 +73,7 @@ Displays the type name, then the `typeof` of each raw field (`state`, `control`,
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Init.PreInitialGuess`](@ref), [`CTModels.Init.InitialGuess`](@ref)
+See also: [`CTModels.Init.PreInitialGuess`](@extref), [`CTModels.Init.InitialGuess`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", pre::PreInitialGuess)
     fmt = Core.get_format_codes(io)
@@ -112,7 +112,7 @@ Print a compact one-line representation of the pre-initial guess to `io`.
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Init.PreInitialGuess`](@ref)
+See also: [`CTModels.Init.PreInitialGuess`](@extref)
 """
 function Base.show(io::IO, pre::PreInitialGuess)
     fmt = Core.get_format_codes(io)

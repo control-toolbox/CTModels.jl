@@ -183,9 +183,9 @@ reducing memory overhead. This is detected automatically.
 A legacy signature `build_solution(ocp, T, X, U, v, P; ...)` exists for single-grid solutions. 
 It internally calls this multi-grid version with `T_state = T_control = T_costate = T_path = T`.
 
-See also: [`CTModels.Solutions.Solution`](@ref), [`CTModels.Solutions.UnifiedTimeGridModel`](@ref),
-[`CTModels.Solutions.MultipleTimeGridModel`](@ref), [`CTModels.Components.time_grid`](@ref),
-[`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref), [`CTModels.Components.costate`](@ref).
+See also: [`CTModels.Solutions.Solution`](@extref), [`CTModels.Solutions.UnifiedTimeGridModel`](@extref),
+[`CTModels.Solutions.MultipleTimeGridModel`](@extref), [`CTModels.Components.time_grid`](@extref),
+[`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref), [`CTModels.Components.costate`](@extref).
 """
 function build_solution(
     ocp::Model,
@@ -477,7 +477,7 @@ grid unification. Otherwise, it returns `T_target` unchanged.
 - Emits `@info` log when extension is performed for transparency
 - Does not modify trajectory data matrices (interpolation handles this via `T[1:N]`)
 
-See also: [`_validate_and_fix_time_grid`](@ref), [`build_solution`](@ref)
+See also: [`CTModels.Solutions._validate_and_fix_time_grid`](@extref), [`CTModels.Solutions.build_solution`](@extref)
 """
 function _extend_grid_to_match(
     T_target::Vector{Float64}, T_reference::Vector{Float64}, component_name::String
@@ -604,7 +604,7 @@ Return the dimension of the state.
 # Returns
 - `Dimension`: The state dimension.
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_components`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Models.state_components`](@extref).
 """
 function Models.state_dimension(sol::Solution)::Dimension
     return dimension(sol.state)
@@ -621,7 +621,7 @@ Return the names of the components of the state.
 # Returns
 - `Vector{String}`: The state component names.
 
-See also: [`CTModels.Models.state_dimension`](@ref), [`CTModels.Models.state_name`](@ref).
+See also: [`CTModels.Models.state_dimension`](@extref), [`CTModels.Models.state_name`](@extref).
 """
 function Models.state_components(sol::Solution)::Vector{String}
     return components(sol.state)
@@ -638,7 +638,7 @@ Return the name of the state.
 # Returns
 - `String`: The state name.
 
-See also: [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Models.state_components`](@extref), [`CTModels.Models.state_dimension`](@extref).
 """
 function Models.state_name(sol::Solution)::String
     return name(sol.state)
@@ -662,7 +662,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> x0 = x(t0) # state at the initial time
 ```
 
-See also: [`CTModels.Models.state_dimension`](@ref), [`CTModels.Models.state_components`](@ref).
+See also: [`CTModels.Models.state_dimension`](@extref), [`CTModels.Models.state_components`](@extref).
 """
 function Components.state(
     sol::Solution{
@@ -692,7 +692,7 @@ Return the dimension of the control.
 # Returns
 - `Dimension`: The control dimension.
 
-See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_components`](@ref).
+See also: [`CTModels.Components.control`](@extref), [`CTModels.Models.control_components`](@extref).
 """
 function Models.control_dimension(sol::Solution)::Dimension
     return dimension(sol.control)
@@ -709,7 +709,7 @@ Return the names of the components of the control.
 # Returns
 - `Vector{String}`: The control component names.
 
-See also: [`CTModels.Models.control_dimension`](@ref), [`CTModels.Models.control_name`](@ref).
+See also: [`CTModels.Models.control_dimension`](@extref), [`CTModels.Models.control_name`](@extref).
 """
 function Models.control_components(sol::Solution)::Vector{String}
     return components(sol.control)
@@ -726,7 +726,7 @@ Return the name of the control.
 # Returns
 - `String`: The control name.
 
-See also: [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Models.control_components`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function Models.control_name(sol::Solution)::String
     return name(sol.control)
@@ -743,7 +743,7 @@ Return the interpolation type of the control.
 # Returns
 - `Symbol`: The interpolation type (`:constant` or `:linear`).
 
-See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function control_interpolation(sol::Solution)::Symbol
     return interpolation(sol.control)
@@ -767,7 +767,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> u0 = u(t0) # control at the initial time
 ```
 
-See also: [`CTModels.Models.control_dimension`](@ref), [`CTModels.Models.control_components`](@ref).
+See also: [`CTModels.Models.control_dimension`](@extref), [`CTModels.Models.control_components`](@extref).
 """
 function Components.control(
     sol::Solution{
@@ -797,7 +797,7 @@ Return the dimension of the variable.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_components`](@ref).
+See also: [`CTModels.Components.variable`](@extref), [`CTModels.Models.variable_components`](@extref).
 """
 function Models.variable_dimension(sol::Solution)::Dimension
     return dimension(sol.variable)
@@ -814,7 +814,7 @@ Return the names of the components of the variable.
 # Returns
 - `Vector{String}`: The variable component names.
 
-See also: [`CTModels.Models.variable_dimension`](@ref), [`CTModels.Models.variable_name`](@ref).
+See also: [`CTModels.Models.variable_dimension`](@extref), [`CTModels.Models.variable_name`](@extref).
 """
 function Models.variable_components(sol::Solution)::Vector{String}
     return components(sol.variable)
@@ -831,7 +831,7 @@ Return the name of the variable.
 # Returns
 - `String`: The variable name.
 
-See also: [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Models.variable_components`](@extref), [`CTModels.Models.variable_dimension`](@extref).
 """
 function Models.variable_name(sol::Solution)::String
     return name(sol.variable)
@@ -848,7 +848,7 @@ Return the dimension of the boundary constraints.
 # Returns
 - `Dimension`: The boundary constraints dimension.
 
-See also: [`CTModels.Components.boundary_constraints_nl`](@ref), [`CTModels.Components.dim_path_constraints_nl`](@ref).
+See also: [`CTModels.Components.boundary_constraints_nl`](@extref), [`CTModels.Components.dim_path_constraints_nl`](@extref).
 """
 function Components.dim_boundary_constraints_nl(sol::Solution)::Dimension
     bc_dual = boundary_constraints_dual(sol)
@@ -866,7 +866,7 @@ Return the dimension of the path constraints.
 # Returns
 - `Dimension`: The path constraints dimension.
 
-See also: [`CTModels.Components.path_constraints_nl`](@ref), [`CTModels.Components.dim_boundary_constraints_nl`](@ref).
+See also: [`CTModels.Components.path_constraints_nl`](@extref), [`CTModels.Components.dim_boundary_constraints_nl`](@extref).
 """
 function Components.dim_path_constraints_nl(sol::Solution)::Dimension
     pc_dual = path_constraints_dual(sol)
@@ -889,7 +889,7 @@ Return the dimension of the variable box constraints duals.
 # Returns
 - `Dimension`: The variable box constraints duals dimension.
 
-See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@ref), [`CTModels.Solutions.variable_constraints_ub_dual`](@ref).
+See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@extref), [`CTModels.Solutions.variable_constraints_ub_dual`](@extref).
 """
 function dim_dual_variable_constraints_box(sol::Solution)::Dimension
     vc_lb_dual = variable_constraints_lb_dual(sol)
@@ -908,7 +908,7 @@ Return the dimension of a dual value, evaluating at initial time.
 # Returns
 - `Dimension`: The dual dimension (0 if dual is nothing).
 
-See also: [`CTModels.Solutions.dim_dual_state_constraints_box`](@ref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@ref).
+See also: [`CTModels.Solutions.dim_dual_state_constraints_box`](@extref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@extref).
 """
 _dual_dimension(::Nothing, ::Solution)::Dimension = 0
 _dual_dimension(dual::Function, sol::Solution)::Dimension = length(dual(initial_time(sol)))
@@ -924,7 +924,7 @@ Return the dimension of the box constraints duals on state.
 # Returns
 - `Dimension`: The state box constraints duals dimension.
 
-See also: [`CTModels.Solutions.state_constraints_lb_dual`](@ref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@ref).
+See also: [`CTModels.Solutions.state_constraints_lb_dual`](@extref), [`CTModels.Solutions.dim_dual_control_constraints_box`](@extref).
 """
 function dim_dual_state_constraints_box(sol::Solution)::Dimension
     return _dual_dimension(state_constraints_lb_dual(sol), sol)
@@ -941,7 +941,7 @@ Return the dimension of the box constraints duals on control.
 # Returns
 - `Dimension`: The control box constraints duals dimension.
 
-See also: [`CTModels.Solutions.control_constraints_lb_dual`](@ref), [`CTModels.Solutions.dim_dual_state_constraints_box`](@ref).
+See also: [`CTModels.Solutions.control_constraints_lb_dual`](@extref), [`CTModels.Solutions.dim_dual_state_constraints_box`](@extref).
 """
 function dim_dual_control_constraints_box(sol::Solution)::Dimension
     return _dual_dimension(control_constraints_lb_dual(sol), sol)
@@ -963,7 +963,7 @@ Return the variable or `nothing`.
 julia> v = CTModels.variable(sol)
 ```
 
-See also: [`CTModels.Models.variable_dimension`](@ref), [`CTModels.Models.variable_components`](@ref).
+See also: [`CTModels.Models.variable_dimension`](@extref), [`CTModels.Models.variable_components`](@extref).
 """
 function Components.variable(
     sol::Solution{
@@ -1000,7 +1000,7 @@ julia> t0 = CTModels.time_grid(sol)[1]
 julia> p0 = p(t0) # costate at the initial time
 ```
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Solutions.dual`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Solutions.dual`](@extref).
 """
 function Components.costate(
     sol::Solution{
@@ -1030,7 +1030,7 @@ Return the name of the initial time.
 # Returns
 - `String`: The initial time name.
 
-See also: [`CTModels.Components.final_time_name`](@ref), [`CTModels.Components.time_name`](@ref).
+See also: [`CTModels.Components.final_time_name`](@extref), [`CTModels.Components.time_name`](@extref).
 """
 function Components.initial_time_name(sol::Solution)::String
     return name(initial(sol.times))
@@ -1047,7 +1047,7 @@ Return the name of the final time.
 # Returns
 - `String`: The final time name.
 
-See also: [`CTModels.Components.initial_time_name`](@ref), [`CTModels.Components.time_name`](@ref).
+See also: [`CTModels.Components.initial_time_name`](@extref), [`CTModels.Components.time_name`](@extref).
 """
 function Components.final_time_name(sol::Solution)::String
     return name(final(sol.times))
@@ -1064,7 +1064,7 @@ Return the name of the time component.
 # Returns
 - `String`: The time component name.
 
-See also: [`CTModels.Components.initial_time_name`](@ref), [`CTModels.Components.final_time_name`](@ref).
+See also: [`CTModels.Components.initial_time_name`](@extref), [`CTModels.Components.final_time_name`](@extref).
 """
 function Components.time_name(sol::Solution)::String
     return time_name(sol.times)
@@ -1082,7 +1082,7 @@ Return the initial time of the solution.
 # Returns
 - `Real`: The initial time.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.initial_time_name`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.initial_time_name`](@extref).
 """
 function Components.initial_time(sol::Solution)::Real
     return initial_time(sol.times)
@@ -1099,7 +1099,7 @@ Return the final time of the solution.
 # Returns
 - `Real`: The final time.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time_name`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time_name`](@extref).
 """
 function Components.final_time(sol::Solution)::Real
     return final_time(sol.times)
@@ -1116,7 +1116,7 @@ Check if the initial time is fixed.
 # Returns
 - `Bool`: `true` if the initial time is fixed, `false` otherwise.
 
-See also: [`CTModels.Components.has_free_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function Components.has_fixed_initial_time(sol::Solution)::Bool
     return has_fixed_initial_time(sol.times)
@@ -1133,7 +1133,7 @@ Check if the initial time is free.
 # Returns
 - `Bool`: `true` if the initial time is free, `false` otherwise.
 
-See also: [`CTModels.Components.has_fixed_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_fixed_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function Components.has_free_initial_time(sol::Solution)::Bool
     return has_free_initial_time(sol.times)
@@ -1150,7 +1150,7 @@ Check if the final time is fixed.
 # Returns
 - `Bool`: `true` if the final time is fixed, `false` otherwise.
 
-See also: [`CTModels.Components.has_free_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function Components.has_fixed_final_time(sol::Solution)::Bool
     return has_fixed_final_time(sol.times)
@@ -1167,7 +1167,7 @@ Check if the final time is free.
 # Returns
 - `Bool`: `true` if the final time is free, `false` otherwise.
 
-See also: [`CTModels.Components.has_fixed_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_fixed_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function Components.has_free_final_time(sol::Solution)::Bool
     return has_free_final_time(sol.times)
@@ -1184,7 +1184,7 @@ Return the times model.
 # Returns
 - `TM`: The times model.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function Components.times(
     sol::Solution{
@@ -1214,7 +1214,7 @@ Return the time grid for solutions with unified time grid.
 # Returns
 - `T`: The unified time grid.
 
-See also: [`CTModels.Components.time_grid`](@ref), [`CTModels.Components.times`](@ref).
+See also: [`CTModels.Components.time_grid`](@extref), [`CTModels.Components.times`](@extref).
 """
 function Components.time_grid(
     sol::Solution{
@@ -1492,7 +1492,7 @@ $(TYPEDSIGNATURES)
 Return `true` if the solution carries dual variables (Lagrange multipliers).
 
 A solution produced by a solver carries duals; a solution built by a flow does not
-(its dual model is an [`CTModels.Solutions.EmptyDualModel`](@ref)).
+(its dual model is an [`CTModels.Solutions.EmptyDualModel`](@extref)).
 """
 has_duals(sol::Solution)::Bool = has_duals(dual_model(sol))
 
@@ -1706,8 +1706,8 @@ data = _serialize_solution(sol)
 sol_new = build_solution(ocp, data["time_grid_state"], ...; objective=data["objective"], ...)
 ```
 
-See also: [`CTModels.Solutions.build_solution`](@ref), [`CTModels.Serialization._reconstruct_solution_from_data`](@ref),
-[`CTModels.Serialization.export_ocp_solution`](@ref), [`CTModels.Serialization.import_ocp_solution`](@ref)
+See also: [`CTModels.Solutions.build_solution`](@extref), [`CTModels.Serialization._reconstruct_solution_from_data`](@extref),
+[`CTModels.Serialization.export_ocp_solution`](@extref), [`CTModels.Serialization.import_ocp_solution`](@extref)
 """
 function _serialize_solution(sol::Solution)::Dict{String,Any}
     # Use public getters
@@ -1759,7 +1759,7 @@ This function does NOT include time grid data in the returned dictionary. The ca
 function (`_serialize_solution` for `UnifiedTimeGridModel` or `MultipleTimeGridModel`) 
 is responsible for adding the appropriate grid keys.
 
-See also: [`_serialize_solution`](@ref), [`_discretize_function`](@ref), [`_discretize_dual`](@ref)
+See also: [`CTModels.Solutions._serialize_solution`](@extref), [`CTModels.Solutions._discretize_function`](@extref), [`CTModels.Solutions._discretize_dual`](@extref)
 """
 function _discretize_all_components(
     sol::Solution,
@@ -1846,7 +1846,7 @@ This format is used when `build_solution` is called with identical grids for all
 or when using the legacy single-grid signature. It ensures backward compatibility with files 
 created before the multi-grid feature was introduced.
 
-See also: [`CTModels.Solutions._serialize_solution`](@ref)
+See also: [`CTModels.Solutions._serialize_solution`](@extref)
 """
 function _serialize_solution(::UnifiedTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Legacy format: single time grid
@@ -1906,7 +1906,7 @@ components. It allows numerical schemes to use optimal discretizations for each 
 The reconstruction function `_reconstruct_solution_from_data` detects this format by checking 
 for the presence of `"time_grid_state"` key and handles it appropriately.
 
-See also: [`CTModels.Solutions._serialize_solution`](@ref), [`CTModels.Solutions.build_solution`](@ref)
+See also: [`CTModels.Solutions._serialize_solution`](@extref), [`CTModels.Solutions.build_solution`](@extref)
 """
 function _serialize_solution(::MultipleTimeGridModel, sol::Solution, dim_x::Int, dim_u::Int)
     # Multiple time grids format

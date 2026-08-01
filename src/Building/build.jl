@@ -3,10 +3,10 @@ $(TYPEDSIGNATURES)
 
 Append box constraint data to the provided flat vectors.
 
-This is an internal helper used by [`CTModels.Building.build`](@ref). It simply
+This is an internal helper used by [`CTModels.Building.build`](@extref). It simply
 accumulates declarations. Deduplication (one entry per component with
 intersection semantics) and associated warnings are handled later by
-[`CTModels.Building._dedup_box_constraints!`](@ref).
+[`CTModels.Building._dedup_box_constraints!`](@extref).
 
 # Arguments
 - `inds::Vector{Int}`: Vector of component indices to append to.
@@ -20,7 +20,7 @@ intersection semantics) and associated warnings are handled later by
 
 # Notes
 - Modifies `inds`, `lbs`, `ubs`, `labels` in-place.
-- No deduplication or warning emitted here; see [`CTModels.Building._dedup_box_constraints!`](@ref).
+- No deduplication or warning emitted here; see [`CTModels.Building._dedup_box_constraints!`](@extref).
 
 # Returns
 - `Nothing`
@@ -58,7 +58,7 @@ labels. If the intersection is empty (i.e. `max(lbs_k) > min(ubs_k)`), an
 
 # Arguments
 - `inds`, `lbs`, `ubs`, `labels`: in-place flat vectors produced by successive
-  calls to [`CTModels.Building.append_box_constraints!`](@ref).
+  calls to [`CTModels.Building.append_box_constraints!`](@extref).
 - `aliases`: in-place empty `Vector{Vector{Symbol}}` to be populated with the
   per-component list of all declaring labels.
 - `kind::String`: human-readable descriptor (e.g. "state", "control",
@@ -158,9 +158,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Constructs a [`CTModels.Components.ConstraintsModel`](@ref) from a dictionary of constraints.
+Constructs a [`CTModels.Components.ConstraintsModel`](@extref) from a dictionary of constraints.
 
-This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured [`CTModels.Components.ConstraintsModel`](@ref).
+This function processes a dictionary where each entry defines a constraint with its type, function or index range, lower and upper bounds, and label. It categorizes constraints into path, boundary, state, control, and variable constraints, assembling them into a structured [`CTModels.Components.ConstraintsModel`](@extref).
 
 # Arguments
 - `constraints::CTModels.Components.ConstraintsDictType`: A dictionary mapping constraint labels to tuples of the form `(type, function_or_range, lower_bound, upper_bound)`.
@@ -184,7 +184,7 @@ model = build(constraints)
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: If an unknown constraint type is encountered
 
-See also: [`CTModels.Building.append_box_constraints!`](@ref), [`CTModels.Building._dedup_box_constraints!`](@ref)
+See also: [`CTModels.Building.append_box_constraints!`](@extref), [`CTModels.Building._dedup_box_constraints!`](@extref)
 """
 function build(constraints::ConstraintsDictType)::ConstraintsModel
     LocalNumber = Float64
@@ -399,15 +399,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Converts a mutable [`CTModels.Building.PreModel`](@ref) into an immutable [`CTModels.Models.Model`](@ref).
+Converts a mutable [`CTModels.Building.PreModel`](@extref) into an immutable [`CTModels.Models.Model`](@extref).
 
-This function finalizes a pre-defined optimal control problem ([`CTModels.Building.PreModel`](@ref)) by verifying that all
-necessary components (times, state, dynamics, objective) are set. It then constructs a [`CTModels.Models.Model`](@ref)
+This function finalizes a pre-defined optimal control problem ([`CTModels.Building.PreModel`](@extref)) by verifying that all
+necessary components (times, state, dynamics, objective) are set. It then constructs a [`CTModels.Models.Model`](@extref)
 instance, incorporating optional components like control, variable, and constraints.
 
 !!! note
-    Control is **optional**: calling [`CTModels.Building.control!`](@ref) is not required. When omitted, the model is
-    built with `control_dimension == 0` (an [`CTModels.Components.EmptyControlModel`](@ref)). This is useful for problems
+    Control is **optional**: calling [`CTModels.Building.control!`](@extref) is not required. When omitted, the model is
+    built with `control_dimension == 0` (an [`CTModels.Components.EmptyControlModel`](@extref)). This is useful for problems
     where the dynamics depend only on the state, such as pure state-space systems.
 
 # Arguments
@@ -455,7 +455,7 @@ model = CTModels.build(pre)
 - `CTBase.Exceptions.PreconditionError`: If times, state, dynamics, objective, or time dependence are not set
 - `CTBase.Exceptions.PreconditionError`: If dynamics are incomplete
 
-See also: [`CTModels.Building.build_model`](@ref), [`CTModels.Building.PreModel`](@ref), [`CTModels.Models.Model`](@ref)
+See also: [`CTModels.Building.build_model`](@extref), [`CTModels.Building.PreModel`](@extref), [`CTModels.Models.Model`](@extref)
 """
 function build(pre_ocp::PreModel; build_examodel=nothing)::Model
     Core.@ensure __is_times_set(pre_ocp) Exceptions.PreconditionError(
@@ -531,8 +531,8 @@ $(TYPEDSIGNATURES)
 
 Build a complete optimal control problem model from a pre-model.
 
-This function is an alias for [`CTModels.Building.build`](@ref) and constructs
-a fully validated [`CTModels.Models.Model`](@ref) from a [`CTModels.Building.PreModel`](@ref) by extracting and organizing all components
+This function is an alias for [`CTModels.Building.build`](@extref) and constructs
+a fully validated [`CTModels.Models.Model`](@extref) from a [`CTModels.Building.PreModel`](@extref) by extracting and organizing all components
 (times, state, control, variable, dynamics, objective, constraints).
 
 # Arguments
@@ -543,7 +543,7 @@ a fully validated [`CTModels.Models.Model`](@ref) from a [`CTModels.Building.Pre
 - `CTModels.Models.Model`: A complete, validated optimal control problem model
 
 # Throws
-- `CTBase.Exceptions.PreconditionError`: If time dependence has not been set via [`CTModels.Building.time_dependence!`](@ref)
+- `CTBase.Exceptions.PreconditionError`: If time dependence has not been set via [`CTModels.Building.time_dependence!`](@extref)
 
 # Example
 ```julia
@@ -561,8 +561,8 @@ objective!(pre_ocp, :mayer, (x0, xf) -> xf[1]^2)
 ocp = build_model(pre_ocp)
 ```
 
-See also: [`CTModels.Building.build`](@ref), [`CTModels.Building.PreModel`](@ref),
-[`CTModels.Models.Model`](@ref), [`CTModels.Building.time_dependence!`](@ref).
+See also: [`CTModels.Building.build`](@extref), [`CTModels.Building.PreModel`](@extref),
+[`CTModels.Models.Model`](@extref), [`CTModels.Building.time_dependence!`](@extref).
 """
 function build_model(pre_ocp::PreModel; build_examodel=nothing)::Model
     return build(pre_ocp; build_examodel=build_examodel)

@@ -13,7 +13,7 @@ Get the name of the state from the state model.
 # Returns
 - `String`: The state name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function name(model::StateModel)::String
     return model.name
@@ -27,7 +27,7 @@ Get the component names of the state from the state model.
 # Returns
 - `Vector{String}`: The state component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function components(model::StateModel)::Vector{String}
     return model.components
@@ -41,7 +41,7 @@ Get the dimension of the state from the state model.
 # Returns
 - `Dimension`: The state dimension (number of components).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref).
 """
 function dimension(model::StateModel)::Dimension
     return length(components(model))
@@ -57,7 +57,7 @@ Get the name of the state from the state model solution.
 # Returns
 - `String`: The state name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref).
 """
 function name(model::StateModelSolution)::String
     return model.name
@@ -71,7 +71,7 @@ Get the component names of the state from the state model solution.
 # Returns
 - `Vector{String}`: The state component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref).
 """
 function components(model::StateModelSolution)::Vector{String}
     return model.components
@@ -85,7 +85,7 @@ Get the dimension of the state from the state model solution.
 # Returns
 - `Dimension`: The state dimension (number of components).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref), [`CTModels.Components.value`](@extref).
 """
 function dimension(model::StateModelSolution)::Dimension
     return length(components(model))
@@ -99,7 +99,7 @@ Get the state function from the state model solution.
 # Returns
 - `TS`: A function `t -> x(t)` returning the state vector at time `t`.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref).
 """
 function value(model::StateModelSolution{TS})::TS where {TS<:Function}
     return model.value
@@ -115,7 +115,7 @@ Get the name of the control variable.
 # Returns
 - `String`: The control name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function name(model::ControlModel)::String
     return model.name
@@ -129,7 +129,7 @@ Get the names of the control components.
 # Returns
 - `Vector{String}`: The control component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function components(model::ControlModel)::Vector{String}
     return model.components
@@ -143,7 +143,7 @@ Get the control input dimension.
 # Returns
 - `Dimension`: The control dimension (number of components).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref).
 """
 function dimension(model::ControlModel)::Dimension
     return length(components(model))
@@ -159,7 +159,7 @@ Get the name of the control variable from the solution.
 # Returns
 - `String`: The control name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref), [`CTModels.Components.interpolation`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref), [`CTModels.Components.interpolation`](@extref).
 """
 function name(model::ControlModelSolution)::String
     return model.name
@@ -173,7 +173,7 @@ Get the names of the control components from the solution.
 # Returns
 - `Vector{String}`: The control component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref), [`CTModels.Components.interpolation`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref), [`CTModels.Components.interpolation`](@extref).
 """
 function components(model::ControlModelSolution)::Vector{String}
     return model.components
@@ -187,7 +187,7 @@ Get the control input dimension from the solution.
 # Returns
 - `Dimension`: The control dimension (number of components).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.value`](@ref), [`CTModels.Components.interpolation`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref), [`CTModels.Components.value`](@extref), [`CTModels.Components.interpolation`](@extref).
 """
 function dimension(model::ControlModelSolution)::Dimension
     return length(components(model))
@@ -201,7 +201,7 @@ Get the control function associated with the solution.
 # Returns
 - `TS`: A function `t -> u(t)` returning the control vector at time `t`.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.interpolation`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref), [`CTModels.Components.interpolation`](@extref).
 """
 function value(model::ControlModelSolution{TS})::TS where {TS<:Function}
     return model.value
@@ -215,7 +215,7 @@ Get the interpolation type for the control.
 # Returns
 - `Symbol`: The interpolation type (`:constant` or `:linear`).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.value`](@extref).
 """
 function interpolation(model::ControlModelSolution)::Symbol
     return model.interpolation
@@ -269,7 +269,7 @@ Return the name of the variable stored in the model.
 # Returns
 - `String`: The variable name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function name(model::VariableModel)::String
     return model.name
@@ -283,7 +283,7 @@ Return the names of the components of the variable.
 # Returns
 - `Vector{String}`: The variable component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref).
 """
 function components(model::VariableModel)::Vector{String}
     return model.components
@@ -297,7 +297,7 @@ Return the dimension (number of components) of the variable.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref).
 """
 function dimension(model::VariableModel)::Dimension
     return length(components(model))
@@ -313,7 +313,7 @@ Return the name of the variable stored in the model solution.
 # Returns
 - `String`: The variable name.
 
-See also: [`CTModels.Components.components`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.components`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref).
 """
 function name(model::VariableModelSolution)::String
     return model.name
@@ -327,7 +327,7 @@ Return the names of the components from the variable solution.
 # Returns
 - `Vector{String}`: The variable component names.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.dimension`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.dimension`](@extref), [`CTModels.Components.value`](@extref).
 """
 function components(model::VariableModelSolution)::Vector{String}
     return model.components
@@ -341,7 +341,7 @@ Return the number of components in the variable solution.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref), [`CTModels.Components.value`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref), [`CTModels.Components.value`](@extref).
 """
 function dimension(model::VariableModelSolution)::Dimension
     return length(components(model))
@@ -355,7 +355,7 @@ Return the value stored in the variable solution model.
 # Returns
 - `TS`: The optimisation variable value (scalar or vector).
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.components`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.components`](@extref).
 """
 function value(model::VariableModelSolution{TS})::TS where {TS<:Union{ctNumber,ctVector}}
     return model.value
@@ -409,7 +409,7 @@ Get the name of the time from the fixed time model.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref).
 """
 function name(model::FixedTimeModel{<:Time})::String
     return model.name
@@ -423,7 +423,7 @@ Get the name of the time from the free time model.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Components.index`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.index`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function name(model::FreeTimeModel)::String
     return model.name
@@ -434,12 +434,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return an empty block expression for an [`CTModels.Components.EmptyDefinition`](@ref).
+Return an empty block expression for an [`CTModels.Components.EmptyDefinition`](@extref).
 
 # Returns
 - `Expr`: An empty block expression `:(begin end)`.
 
-See also: [`CTModels.Components.expression`](@ref).
+See also: [`CTModels.Components.expression`](@extref).
 """
 expression(::EmptyDefinition)::Expr = :(
     begin end
@@ -448,11 +448,11 @@ expression(::EmptyDefinition)::Expr = :(
 """
 $(TYPEDSIGNATURES)
 
-Return the symbolic expression wrapped by a [`CTModels.Components.Definition`](@ref).
+Return the symbolic expression wrapped by a [`CTModels.Components.Definition`](@extref).
 
 # Returns
 - `Expr`: The symbolic expression defining the problem.
 
-See also: [`CTModels.Components.expression`](@ref).
+See also: [`CTModels.Components.expression`](@extref).
 """
 expression(d::Definition)::Expr = d.expr

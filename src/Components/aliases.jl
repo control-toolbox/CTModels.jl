@@ -7,7 +7,7 @@ Type alias for a dimension, used for the state, costate, control and variable sp
 const Dimension = Int
 ```
 
-See also: [`CTModels.Components.ctNumber`](@ref).
+See also: [`CTModels.Components.ctNumber`](@extref).
 """
 const Dimension = Int
 
@@ -18,7 +18,7 @@ Type alias for a real number.
 const ctNumber = Real
 ```
 
-See also: [`CTModels.Components.Dimension`](@ref), [`CTModels.Components.Time`](@ref), [`CTModels.Components.ctVector`](@ref).
+See also: [`CTModels.Components.Dimension`](@extref), [`CTModels.Components.Time`](@extref), [`CTModels.Components.ctVector`](@extref).
 """
 const ctNumber = Real
 
@@ -29,8 +29,8 @@ Type alias for a (continuous) time.
 const Time = ctNumber
 ```
 
-See also: [`CTModels.Components.ctNumber`](@ref), [`CTModels.Components.Times`](@ref),
-[`CTModels.Components.TimesDisc`](@ref).
+See also: [`CTModels.Components.ctNumber`](@extref), [`CTModels.Components.Times`](@extref),
+[`CTModels.Components.TimesDisc`](@extref).
 """
 const Time = ctNumber
 
@@ -41,7 +41,7 @@ Type alias for a vector of real numbers.
 const ctVector = AbstractVector{<:ctNumber}
 ```
 
-See also: [`CTModels.Components.ctNumber`](@ref), [`CTModels.Components.Dimension`](@ref).
+See also: [`CTModels.Components.ctNumber`](@extref), [`CTModels.Components.Dimension`](@extref).
 """
 const ctVector = AbstractVector{<:ctNumber}
 
@@ -52,7 +52,7 @@ Type alias for a vector of times.
 const Times = AbstractVector{<:Time}
 ```
 
-See also: [`CTModels.Components.Time`](@ref), [`CTModels.Components.TimesDisc`](@ref).
+See also: [`CTModels.Components.Time`](@extref), [`CTModels.Components.TimesDisc`](@extref).
 """
 const Times = AbstractVector{<:Time}
 
@@ -63,7 +63,7 @@ Type alias for a grid of times, used to discretize the time interval given to so
 const TimesDisc = Union{Times,StepRangeLen}
 ```
 
-See also: [`CTModels.Components.Time`](@ref), [`CTModels.Components.Times`](@ref).
+See also: [`CTModels.Components.Time`](@extref), [`CTModels.Components.Times`](@extref).
 """
 const TimesDisc = Union{Times,StepRangeLen}
 
@@ -76,7 +76,7 @@ const ConstraintsDictType = OrderedCollections.OrderedDict{
 }
 ```
 
-See also: [`CTModels.Components.ConstraintsModel`](@ref).
+See also: [`CTModels.Components.ConstraintsModel`](@extref).
 """
 const ConstraintsDictType = OrderedCollections.OrderedDict{
     Symbol,Tuple{Symbol,Union{Function,OrdinalRange{<:Int}},ctVector,ctVector}

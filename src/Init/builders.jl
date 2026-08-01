@@ -18,7 +18,7 @@ Build an initialisation function combining block-level and component-level data.
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: If dimensions are incompatible or component indices are out of bounds.
 
-See also: [`CTModels.Init.MergedTrajectory`](@ref), [`CTModels.Init.initial_state`](@ref), [`CTModels.Init.initial_control`](@ref)
+See also: [`CTModels.Init.MergedTrajectory`](@extref), [`CTModels.Init.initial_state`](@extref), [`CTModels.Init.initial_control`](@extref)
 """
 function _build_block_with_components(
     ocp::Models.AbstractModel, role::Symbol, block_data, comp_data::Dict{Int,Any}
@@ -68,7 +68,7 @@ Build a component-level initialisation function from data.
 # Returns
 - `Function`: A component initialisation function.
 
-See also: [`CTModels.Init._build_component_function_without_time`](@ref), [`CTModels.Init._build_component_function_with_time`](@ref)
+See also: [`CTModels.Init._build_component_function_without_time`](@extref), [`CTModels.Init._build_component_function_with_time`](@extref)
 """
 function _build_component_function(data)
     # Support (time, data) tuples for per-component time grids
@@ -95,7 +95,7 @@ Build a component function from time-independent data (scalar, vector, or functi
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: If the data type is unsupported or vector length is invalid.
 
-See also: [`CTModels.Components.ConstantInTime`](@ref)
+See also: [`CTModels.Components.ConstantInTime`](@extref)
 """
 function _build_component_function_without_time(data)
     if data isa Function
@@ -144,7 +144,7 @@ Build a component function from data with an associated time grid.
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: If the data type is unsupported or time-grid mismatch occurs.
 
-See also: [`CTModels.Components.ConstantInTime`](@ref), [`CTBase.Interpolation.ctinterpolate`](@extref)
+See also: [`CTModels.Components.ConstantInTime`](@extref), [`CTBase.Interpolation.ctinterpolate`](@extref)
 """
 function _build_component_function_with_time(data, time::AbstractVector)
     if data isa Function
@@ -197,7 +197,7 @@ Build a time-dependent initialisation function from data and a time grid.
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: If data type is unsupported or dimensions/time-grid mismatch occurs.
 
-See also: [`CTBase.Interpolation.ctinterpolate`](@extref), [`CTModels.Init.initial_state`](@ref), [`CTModels.Init.initial_control`](@ref)
+See also: [`CTBase.Interpolation.ctinterpolate`](@extref), [`CTModels.Init.initial_state`](@extref), [`CTModels.Init.initial_control`](@extref)
 """
 function _build_time_dependent_init(
     ocp::Models.AbstractModel, role::Symbol, data, time::AbstractVector
