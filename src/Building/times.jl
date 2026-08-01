@@ -56,7 +56,7 @@ julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 0); CTModels.time!(ocp
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.time_dependence!`](@ref), [`CTModels.Components.time_name`](@ref).
+See also: [`CTModels.Building.state!`](@extref), [`CTModels.Building.time_dependence!`](@extref), [`CTModels.Components.time_name`](@extref).
 """
 function time!(
     ocp::PreModel;

@@ -12,7 +12,7 @@ Return the criterion (:min or :max).
 # Returns
 - `Symbol`: The optimisation criterion (`:min` or `:max`).
 
-See also: [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.mayer`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function criterion(model::MayerObjectiveModel)::Symbol
     return model.criterion
@@ -26,7 +26,7 @@ Return the Mayer function.
 # Returns
 - `M`: The Mayer cost function `(x0, xf, v) -> g(x0, xf, v)`.
 
-See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.criterion`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function mayer(model::MayerObjectiveModel{M})::M where {M<:Function}
     return model.mayer
@@ -40,7 +40,7 @@ Return true.
 # Returns
 - `Bool`: `true` (Mayer cost is defined).
 
-See also: [`CTModels.Components.has_lagrange_cost`](@ref), [`CTModels.Components.mayer`](@ref).
+See also: [`CTModels.Components.has_lagrange_cost`](@extref), [`CTModels.Components.mayer`](@extref).
 """
 function has_mayer_cost(::MayerObjectiveModel)::Bool
     return true
@@ -54,7 +54,7 @@ Return false.
 # Returns
 - `Bool`: `false` (Lagrange cost is not defined).
 
-See also: [`CTModels.Components.has_mayer_cost`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.has_mayer_cost`](@extref), [`CTModels.Components.lagrange`](@extref).
 """
 function has_lagrange_cost(::MayerObjectiveModel)::Bool
     return false
@@ -69,7 +69,7 @@ Return the criterion (:min or :max).
 # Returns
 - `Symbol`: The optimisation criterion (`:min` or `:max`).
 
-See also: [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 function criterion(model::LagrangeObjectiveModel)::Symbol
     return model.criterion
@@ -83,7 +83,7 @@ Return the Lagrange function.
 # Returns
 - `L`: The Lagrange integrand `(t, x, u, v) -> f⁰(t, x, u, v)`.
 
-See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.criterion`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 function lagrange(model::LagrangeObjectiveModel{L})::L where {L<:Function}
     return model.lagrange
@@ -97,7 +97,7 @@ Return false.
 # Returns
 - `Bool`: `false` (Mayer cost is not defined).
 
-See also: [`CTModels.Components.has_lagrange_cost`](@ref), [`CTModels.Components.mayer`](@ref).
+See also: [`CTModels.Components.has_lagrange_cost`](@extref), [`CTModels.Components.mayer`](@extref).
 """
 function has_mayer_cost(::LagrangeObjectiveModel)::Bool
     return false
@@ -111,7 +111,7 @@ Return true.
 # Returns
 - `Bool`: `true` (Lagrange cost is defined).
 
-See also: [`CTModels.Components.has_mayer_cost`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.has_mayer_cost`](@extref), [`CTModels.Components.lagrange`](@extref).
 """
 function has_lagrange_cost(::LagrangeObjectiveModel)::Bool
     return true
@@ -126,7 +126,7 @@ Return the criterion (:min or :max).
 # Returns
 - `Symbol`: The optimisation criterion (`:min` or `:max`).
 
-See also: [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.mayer`](@extref), [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function criterion(model::BolzaObjectiveModel)::Symbol
     return model.criterion
@@ -140,7 +140,7 @@ Return the Mayer function.
 # Returns
 - `M`: The Mayer cost function.
 
-See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.criterion`](@extref), [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function mayer(model::BolzaObjectiveModel{M,<:Function})::M where {M<:Function}
     return model.mayer
@@ -154,7 +154,7 @@ Return the Lagrange function.
 # Returns
 - `L`: The Lagrange integrand.
 
-See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.criterion`](@extref), [`CTModels.Components.mayer`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 function lagrange(model::BolzaObjectiveModel{<:Function,L})::L where {L<:Function}
     return model.lagrange
@@ -168,7 +168,7 @@ Return true.
 # Returns
 - `Bool`: `true` (Mayer cost is defined).
 
-See also: [`CTModels.Components.has_lagrange_cost`](@ref), [`CTModels.Components.mayer`](@ref).
+See also: [`CTModels.Components.has_lagrange_cost`](@extref), [`CTModels.Components.mayer`](@extref).
 """
 function has_mayer_cost(::BolzaObjectiveModel)::Bool
     return true
@@ -182,7 +182,7 @@ Return true.
 # Returns
 - `Bool`: `true` (Lagrange cost is defined).
 
-See also: [`CTModels.Components.has_mayer_cost`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.has_mayer_cost`](@extref), [`CTModels.Components.lagrange`](@extref).
 """
 function has_lagrange_cost(::BolzaObjectiveModel)::Bool
     return true
@@ -195,13 +195,13 @@ end
 """
 Alias for `has_mayer_cost`.
 
-See also: [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.has_mayer_cost`](@extref).
 """
 const is_mayer_cost_defined = has_mayer_cost
 
 """
 Alias for `has_lagrange_cost`.
 
-See also: [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 const is_lagrange_cost_defined = has_lagrange_cost

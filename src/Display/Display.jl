@@ -8,11 +8,11 @@ problems and solutions in human-readable formats.
 
 # Organisation
 
-- **ansi.jl**: Generic Expr printing ([`__print`](@ref))
-- **definition.jl**: Abstract (symbolic) definition printing ([`_print_abstract_definition`](@ref))
-- **mathematical.jl**: Mathematical definition printing ([`__print_mathematical_definition`](@ref))
-- **model.jl**: Display for [`CTModels.Models.Model`](@ref)
-- **pre_model.jl**: Display for [`CTModels.Building.PreModel`](@ref)
+- **ansi.jl**: Generic Expr printing ([`CTModels.Display.__print`](@extref))
+- **definition.jl**: Abstract (symbolic) definition printing ([`CTModels.Display._print_abstract_definition`](@extref))
+- **mathematical.jl**: Mathematical definition printing ([`CTModels.Display.__print_mathematical_definition`](@extref))
+- **model.jl**: Display for [`CTModels.Models.Model`](@extref)
+- **pre_model.jl**: Display for [`CTModels.Building.PreModel`](@extref)
 
 # Public API
 

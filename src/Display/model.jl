@@ -13,8 +13,8 @@ mathematical formulation of the optimal control problem.
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Display.__print_mathematical_definition`](@ref),
-[`CTModels.Display._print_abstract_definition`](@ref).
+See also: [`CTModels.Display.__print_mathematical_definition`](@extref),
+[`CTModels.Display._print_abstract_definition`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", ocp::Models.Model)
 
@@ -92,7 +92,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default show method for a [`CTModels.Models.Model`](@ref).
+Default show method for a [`CTModels.Models.Model`](@extref).
 
 Prints only the type name.
 

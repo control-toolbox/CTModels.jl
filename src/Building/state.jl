@@ -58,7 +58,7 @@ julia> CTModels.state_dimension(ocp), CTModels.state_components(ocp)
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.control!`](@ref), [`CTModels.Building.variable!`](@ref), [`CTModels.Building.time!`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Building.control!`](@extref), [`CTModels.Building.variable!`](@extref), [`CTModels.Building.time!`](@extref), [`CTModels.Models.state_dimension`](@extref).
 """
 function state!(
     ocp::PreModel,

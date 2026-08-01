@@ -32,7 +32,7 @@ Internal helper to create an interpolated function from discrete data.
 # Notes
 This is a low-level helper. Use `build_interpolated_function` for the complete workflow.
 
-See also: [`CTModels.Solutions.build_interpolated_function`](@ref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@ref).
+See also: [`CTModels.Solutions.build_interpolated_function`](@extref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@extref).
 """
 function _interpolate_from_data(
     data,
@@ -111,7 +111,7 @@ end
     _wrap_scalar_and_deepcopy(func, dim)
 
 Internal helper to wrap a function with scalar extraction and deepcopy, returning a
-[`CTModels.Components.CoercedTrajectory`](@ref).
+[`CTModels.Components.CoercedTrajectory`](@extref).
 
 # Arguments
 - `func`: Function or callable to wrap (or nothing)
@@ -138,7 +138,7 @@ param_x = 999.0
 # With deepcopy: sol.state(0.5) returns [0.5] (uses original param_x value)
 ```
 
-See also: [`CTModels.Solutions._interpolate_from_data`](@ref), [`CTModels.Solutions.build_interpolated_function`](@ref).
+See also: [`CTModels.Solutions._interpolate_from_data`](@extref), [`CTModels.Solutions.build_interpolated_function`](@extref).
 """
 function _wrap_scalar_and_deepcopy(func, dim::Union{Int,Nothing})
     isnothing(func) && return nothing
@@ -191,7 +191,7 @@ fscbd = build_interpolated_function(state_constraints_lb_dual, T, dim_x,
                                     allow_nothing=true)
 ```
 
-See also: [`CTModels.Solutions._interpolate_from_data`](@ref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@ref).
+See also: [`CTModels.Solutions._interpolate_from_data`](@extref), [`CTModels.Solutions._wrap_scalar_and_deepcopy`](@extref).
 """
 function build_interpolated_function(
     data,

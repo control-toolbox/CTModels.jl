@@ -54,7 +54,7 @@ julia> CTModels.control_components(ocp)
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.variable!`](@ref), [`CTModels.Building.dynamics!`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Building.state!`](@extref), [`CTModels.Building.variable!`](@extref), [`CTModels.Building.dynamics!`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function control!(
     ocp::PreModel,

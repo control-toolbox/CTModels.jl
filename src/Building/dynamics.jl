@@ -19,7 +19,7 @@ problems), and `v` the optimisation variable.
 - `Exceptions.PreconditionError`: If times have not been set yet.
 - `Exceptions.PreconditionError`: If dynamics have already been set.
 
-See also: [`CTModels.Building.objective!`](@ref), [`CTModels.Building.time_dependence!`](@ref).
+See also: [`CTModels.Building.objective!`](@extref), [`CTModels.Building.time_dependence!`](@extref).
 """
 function dynamics!(ocp::PreModel, f::Function)::Nothing
     Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
@@ -53,8 +53,8 @@ $(TYPEDSIGNATURES)
 Add a partial dynamics function for a range of state indices in `ocp`.
 
 The partial right-hand side fills `r[1:length(rg)]` (local buffer view). Ranges must tile
-`1:n` without overlap; completeness is verified by [`CTModels.Building.build`](@ref) via
-[`CTModels.Building.__is_dynamics_complete`](@ref).
+`1:n` without overlap; completeness is verified by [`CTModels.Building.build`](@extref) via
+[`CTModels.Building.__is_dynamics_complete`](@extref).
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
@@ -70,7 +70,7 @@ The partial right-hand side fills `r[1:length(rg)]` (local buffer view). Ranges 
 - `Exceptions.PreconditionError`: If `rg` overlaps with an existing dynamics range.
 - `Exceptions.IncorrectArgument`: If any index in `rg` is out of bounds.
 
-See also: [`CTModels.Building.dynamics!`](@ref), [`CTModels.Building.objective!`](@ref).
+See also: [`CTModels.Building.dynamics!`](@extref), [`CTModels.Building.objective!`](@extref).
 """
 function dynamics!(ocp::PreModel, rg::AbstractRange{<:Int}, f::Function)::Nothing
     Core.@ensure __is_state_set(ocp) Exceptions.PreconditionError(
@@ -162,7 +162,7 @@ Equivalent to `CTModels.Building.dynamics!(ocp, i:i, f)`.
 - `Exceptions.PreconditionError`: If state, times, or dynamics preconditions are violated.
 - `Exceptions.IncorrectArgument`: If `i` is out of bounds.
 
-See also: [`CTModels.Building.dynamics!`](@ref) (range-based version).
+See also: [`CTModels.Building.dynamics!`](@extref) (range-based version).
 """
 function dynamics!(ocp::PreModel, i::Integer, f::Function)::Nothing
     return dynamics!(ocp, i:i, f)
@@ -173,7 +173,7 @@ $(TYPEDSIGNATURES)
 
 Build a single combined in-place dynamics function from ordered partial parts.
 
-Used internally by [`CTModels.Building.build`](@ref) after all partial dynamics calls
+Used internally by [`CTModels.Building.build`](@extref) after all partial dynamics calls
 have been collected. Each part function updates its assigned slice of the output vector
 via a `@view`, avoiding copies.
 

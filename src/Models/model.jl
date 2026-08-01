@@ -7,7 +7,7 @@ $(TYPEDEF)
 
 Abstract base type for optimal control problem models.
 
-Subtypes represent either a fully built immutable model ([`Model`](@ref)) or a
+Subtypes represent either a fully built immutable model ([`CTModels.Models.Model`](@extref)) or a
 mutable model under construction (`PreModel`).
 """
 abstract type AbstractModel end
@@ -125,15 +125,15 @@ $(TYPEDSIGNATURES)
 Resolve the variable-dependence trait value from the variable model type.
 
 Returns `Traits.Fixed` when the model carries no optimisation variable
-([`CTModels.Components.EmptyVariableModel`](@ref)), and `Traits.NonFixed` otherwise.
+([`CTModels.Components.EmptyVariableModel`](@extref)), and `Traits.NonFixed` otherwise.
 
 # Arguments
-- `model`: an [`CTModels.Components.AbstractVariableModel`](@ref) instance.
+- `model`: an [`CTModels.Components.AbstractVariableModel`](@extref) instance.
 
 # Returns
 - trait value: `Traits.Fixed` or `Traits.NonFixed`.
 
-See also: [`CTModels.Models._control_dependence`](@ref)
+See also: [`CTModels.Models._control_dependence`](@extref)
 """
 _variable_dependence(::EmptyVariableModel) = Traits.Fixed
 _variable_dependence(::AbstractVariableModel) = Traits.NonFixed
@@ -147,15 +147,15 @@ $(TYPEDSIGNATURES)
 Resolve the control-dependence trait value from the control model type.
 
 Returns `Traits.ControlFree` when the model carries no control input
-([`CTModels.Components.EmptyControlModel`](@ref)), and `Traits.WithControl` otherwise.
+([`CTModels.Components.EmptyControlModel`](@extref)), and `Traits.WithControl` otherwise.
 
 # Arguments
-- `model`: an [`CTModels.Components.AbstractControlModel`](@ref) instance.
+- `model`: an [`CTModels.Components.AbstractControlModel`](@extref) instance.
 
 # Returns
 - trait value: `Traits.ControlFree` or `Traits.WithControl`.
 
-See also: [`CTModels.Models._variable_dependence`](@ref)
+See also: [`CTModels.Models._variable_dependence`](@extref)
 """
 _control_dependence(::EmptyControlModel) = Traits.ControlFree
 _control_dependence(::AbstractControlModel) = Traits.WithControl
@@ -171,7 +171,7 @@ Check whether the problem has an abstract definition.
 # Returns
 - `Bool`: `true` if the problem has an abstract definition, `false` otherwise.
 
-See also: [`CTModels.Models.is_abstractly_defined`](@ref), [`CTModels.Models.definition`](@ref).
+See also: [`CTModels.Models.is_abstractly_defined`](@extref), [`CTModels.Models.definition`](@extref).
 """
 has_abstract_definition(ocp::Model)::Bool = !(definition(ocp) isa EmptyDefinition)
 
@@ -186,7 +186,7 @@ Check whether the problem is abstractly defined.
 # Returns
 - `Bool`: `true` if the problem is abstractly defined, `false` otherwise.
 
-See also: [`CTModels.Models.has_abstract_definition`](@ref).
+See also: [`CTModels.Models.has_abstract_definition`](@extref).
 """
 is_abstractly_defined(ocp::Model)::Bool = has_abstract_definition(ocp)
 
@@ -205,7 +205,7 @@ Return the state struct.
 # Returns
 - `T`: The state model.
 
-See also: [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Models.state_name`](@extref), [`CTModels.Models.state_components`](@extref), [`CTModels.Models.state_dimension`](@extref).
 """
 function Components.state(
     ocp::Model{
@@ -235,7 +235,7 @@ Return the name of the state.
 # Returns
 - `String`: The state name.
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_components`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Models.state_components`](@extref), [`CTModels.Models.state_dimension`](@extref).
 """
 function state_name(ocp::Model)::String
     return name(state(ocp))
@@ -252,7 +252,7 @@ Return the names of the components of the state.
 # Returns
 - `Vector{String}`: The state component names.
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_dimension`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Models.state_name`](@extref), [`CTModels.Models.state_dimension`](@extref).
 """
 function state_components(ocp::Model)::Vector{String}
     return components(state(ocp))
@@ -269,7 +269,7 @@ Return the state dimension.
 # Returns
 - `Dimension`: The state dimension.
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Models.state_name`](@ref), [`CTModels.Models.state_components`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Models.state_name`](@extref), [`CTModels.Models.state_components`](@extref).
 """
 function state_dimension(ocp::Model)::Dimension
     return dimension(state(ocp))
@@ -290,7 +290,7 @@ Return the control struct.
 # Returns
 - `T`: The control model.
 
-See also: [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Models.control_name`](@extref), [`CTModels.Models.control_components`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function Components.control(
     ocp::Model{
@@ -320,7 +320,7 @@ Return the name of the control.
 # Returns
 - `String`: The control name.
 
-See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_components`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@extref), [`CTModels.Models.control_components`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function control_name(ocp::Model)::String
     return name(control(ocp))
@@ -337,7 +337,7 @@ Return the names of the components of the control.
 # Returns
 - `Vector{String}`: The control component names.
 
-See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_dimension`](@ref).
+See also: [`CTModels.Components.control`](@extref), [`CTModels.Models.control_name`](@extref), [`CTModels.Models.control_dimension`](@extref).
 """
 function control_components(ocp::Model)::Vector{String}
     return components(control(ocp))
@@ -354,7 +354,7 @@ Return the control dimension.
 # Returns
 - `Dimension`: The control dimension.
 
-See also: [`CTModels.Components.control`](@ref), [`CTModels.Models.control_name`](@ref), [`CTModels.Models.control_components`](@ref).
+See also: [`CTModels.Components.control`](@extref), [`CTModels.Models.control_name`](@extref), [`CTModels.Models.control_components`](@extref).
 """
 function control_dimension(ocp::Model)::Dimension
     return dimension(control(ocp))
@@ -375,7 +375,7 @@ Return the variable struct.
 # Returns
 - `T`: The variable model.
 
-See also: [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Models.variable_name`](@extref), [`CTModels.Models.variable_components`](@extref), [`CTModels.Models.variable_dimension`](@extref).
 """
 function Components.variable(
     ocp::Model{
@@ -405,7 +405,7 @@ Return the name of the variable.
 # Returns
 - `String`: The variable name.
 
-See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_components`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Components.variable`](@extref), [`CTModels.Models.variable_components`](@extref), [`CTModels.Models.variable_dimension`](@extref).
 """
 function variable_name(ocp::Model)::String
     return name(variable(ocp))
@@ -422,7 +422,7 @@ Return the names of the components of the variable.
 # Returns
 - `Vector{String}`: The variable component names.
 
-See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Components.variable`](@extref), [`CTModels.Models.variable_name`](@extref), [`CTModels.Models.variable_dimension`](@extref).
 """
 function variable_components(ocp::Model)::Vector{String}
     return components(variable(ocp))
@@ -439,7 +439,7 @@ Return the variable dimension.
 # Returns
 - `Dimension`: The variable dimension.
 
-See also: [`CTModels.Components.variable`](@ref), [`CTModels.Models.variable_name`](@ref), [`CTModels.Models.variable_components`](@ref).
+See also: [`CTModels.Components.variable`](@extref), [`CTModels.Models.variable_name`](@extref), [`CTModels.Models.variable_components`](@extref).
 """
 function variable_dimension(ocp::Model)::Dimension
     return dimension(variable(ocp))
@@ -460,7 +460,7 @@ Return the times struct.
 # Returns
 - `T`: The times model.
 
-See also: [`CTModels.Components.time_name`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.time_name`](@extref), [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function Components.times(
     ocp::Model{
@@ -490,7 +490,7 @@ Return the name of the time.
 # Returns
 - `String`: The time name.
 
-See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@extref), [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 Components.time_name(ocp::Model)::String = Components.time_name(times(ocp))
 
@@ -505,7 +505,7 @@ Return the name of the initial time.
 # Returns
 - `String`: The initial time name.
 
-See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@extref), [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 Components.initial_time_name(ocp::Model)::String = Components.initial_time_name(times(ocp))
 
@@ -520,7 +520,7 @@ Return the name of the final time.
 # Returns
 - `String`: The final time name.
 
-See also: [`CTModels.Components.times`](@ref), [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.times`](@extref), [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 Components.final_time_name(ocp::Model)::String = Components.final_time_name(times(ocp))
 
@@ -567,7 +567,7 @@ Return the initial time, for a fixed initial time.
 # Returns
 - `T`: The initial time value.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.has_fixed_initial_time`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_fixed_initial_time`](@extref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -598,7 +598,7 @@ Return the initial time, for a free initial time.
 # Returns
 - `T`: The initial time value.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.has_free_initial_time`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_free_initial_time`](@extref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -630,7 +630,7 @@ Return the initial time, for a free initial time (scalar variable).
 # Returns
 - `T`: The initial time value.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.has_free_initial_time`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_free_initial_time`](@extref).
 """
 function Components.initial_time(
     ocp::Model{
@@ -693,7 +693,7 @@ Return the final time, for a fixed final time.
 # Returns
 - `T`: The final time value.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.has_fixed_final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_fixed_final_time`](@extref).
 """
 function Components.final_time(
     ocp::Model{
@@ -724,7 +724,7 @@ Return the final time, for a free final time.
 # Returns
 - `T`: The final time value.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.has_free_final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_free_final_time`](@extref).
 """
 function Components.final_time(
     ocp::Model{
@@ -756,7 +756,7 @@ Return the final time, for a free final time (scalar variable).
 # Returns
 - `T`: The final time value.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.has_free_final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_free_final_time`](@extref).
 """
 function Components.final_time(
     ocp::Model{
@@ -787,7 +787,7 @@ Check if the initial time is fixed.
 # Returns
 - `Bool`: `true` if the initial time is fixed, `false` otherwise.
 
-See also: [`CTModels.Components.has_free_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 Components.has_fixed_initial_time(ocp::Model)::Bool =
     Components.has_fixed_initial_time(times(ocp))
@@ -803,7 +803,7 @@ Check if the initial time is free.
 # Returns
 - `Bool`: `true` if the initial time is free, `false` otherwise.
 
-See also: [`CTModels.Components.has_fixed_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_fixed_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 Components.has_free_initial_time(ocp::Model)::Bool =
     Components.has_free_initial_time(times(ocp))
@@ -819,7 +819,7 @@ Check if the final time is fixed.
 # Returns
 - `Bool`: `true` if the final time is fixed, `false` otherwise.
 
-See also: [`CTModels.Components.has_free_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 Components.has_fixed_final_time(ocp::Model)::Bool =
     Components.has_fixed_final_time(times(ocp))
@@ -835,7 +835,7 @@ Check if the final time is free.
 # Returns
 - `Bool`: `true` if the final time is free, `false` otherwise.
 
-See also: [`CTModels.Components.has_fixed_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_fixed_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 Components.has_free_final_time(ocp::Model)::Bool =
     Components.has_free_final_time(times(ocp))
@@ -855,7 +855,7 @@ Return the objective struct.
 # Returns
 - `O`: The objective model.
 
-See also: [`CTModels.Components.criterion`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.criterion`](@extref), [`CTModels.Components.mayer`](@extref), [`CTModels.Components.lagrange`](@extref).
 """
 function Components.objective(
     ocp::Model{
@@ -885,7 +885,7 @@ Return the type of criterion (:min or :max).
 # Returns
 - `Symbol`: The criterion type (`:min` or `:max`).
 
-See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.lagrange`](@ref).
+See also: [`CTModels.Components.objective`](@extref), [`CTModels.Components.mayer`](@extref), [`CTModels.Components.lagrange`](@extref).
 """
 Components.criterion(ocp::Model)::Symbol = Components.criterion(objective(ocp))
 
@@ -916,7 +916,7 @@ Return the Mayer cost.
 # Returns
 - `M`: The Mayer cost function.
 
-See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.objective`](@extref), [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function Components.mayer(
     ocp::Model{
@@ -946,7 +946,7 @@ Return the Mayer cost.
 # Returns
 - `M`: The Mayer cost function.
 
-See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.objective`](@extref), [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 function Components.mayer(
     ocp::Model{
@@ -976,7 +976,7 @@ Check if the model has a Mayer cost.
 # Returns
 - `Bool`: `true` if the model has a Mayer cost, `false` otherwise.
 
-See also: [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.mayer`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 Components.has_mayer_cost(ocp::Model)::Bool = Components.has_mayer_cost(objective(ocp))
 
@@ -1007,7 +1007,7 @@ Return the Lagrange cost.
 # Returns
 - `L`: The Lagrange cost function.
 
-See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.objective`](@extref), [`CTModels.Components.mayer`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -1037,7 +1037,7 @@ Return the Lagrange cost.
 # Returns
 - `L`: The Lagrange cost function.
 
-See also: [`CTModels.Components.objective`](@ref), [`CTModels.Components.mayer`](@ref), [`CTModels.Components.has_lagrange_cost`](@ref).
+See also: [`CTModels.Components.objective`](@extref), [`CTModels.Components.mayer`](@extref), [`CTModels.Components.has_lagrange_cost`](@extref).
 """
 function Components.lagrange(
     ocp::Model{
@@ -1067,7 +1067,7 @@ Check if the model has a Lagrange cost.
 # Returns
 - `Bool`: `true` if the model has a Lagrange cost, `false` otherwise.
 
-See also: [`CTModels.Components.lagrange`](@ref), [`CTModels.Components.has_mayer_cost`](@ref).
+See also: [`CTModels.Components.lagrange`](@extref), [`CTModels.Components.has_mayer_cost`](@extref).
 """
 Components.has_lagrange_cost(ocp::Model)::Bool =
     Components.has_lagrange_cost(objective(ocp))
@@ -1087,7 +1087,7 @@ Return the dynamics.
 # Returns
 - `D`: The dynamics function.
 
-See also: [`CTModels.Components.state`](@ref), [`CTModels.Components.control`](@ref).
+See also: [`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref).
 """
 function dynamics(
     ocp::Model{
@@ -1121,7 +1121,7 @@ Return the build_examodel.
 # Returns
 - `BE`: The ExaModels builder function.
 
-See also: [`CTModels.Models.dynamics`](@ref).
+See also: [`CTModels.Models.dynamics`](@extref).
 """
 function get_build_examodel(
     ocp::Model{
@@ -1184,7 +1184,7 @@ Return the constraints struct.
 # Returns
 - `C`: The constraints model.
 
-See also: [`CTModels.Models.isempty_constraints`](@ref), [`CTModels.Models.constraint`](@ref).
+See also: [`CTModels.Models.isempty_constraints`](@extref), [`CTModels.Models.constraint`](@extref).
 """
 function constraints(
     ocp::Model{
@@ -1214,7 +1214,7 @@ Return true if the model has no constraints.
 # Returns
 - `Bool`: `true` if the model has no constraints, `false` otherwise.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Models.constraint`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Models.constraint`](@extref).
 """
 function isempty_constraints(ocp::Model)::Bool
     return Base.isempty(constraints(ocp))
@@ -1231,7 +1231,7 @@ Return the nonlinear path constraints.
 # Returns
 - `Function`: The nonlinear path constraints function.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.boundary_constraints_nl`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.boundary_constraints_nl`](@extref).
 """
 function Components.path_constraints_nl(ocp::Model)
     return Components.path_constraints_nl(constraints(ocp))
@@ -1248,7 +1248,7 @@ Return the nonlinear boundary constraints.
 # Returns
 - `Function`: The nonlinear boundary constraints function.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.path_constraints_nl`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.path_constraints_nl`](@extref).
 """
 function Components.boundary_constraints_nl(ocp::Model)
     return Components.boundary_constraints_nl(constraints(ocp))
@@ -1265,7 +1265,7 @@ Return the box constraints on state.
 # Returns
 - `BoxConstraints`: The box constraints on state.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.control_constraints_box`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.control_constraints_box`](@extref).
 """
 function Components.state_constraints_box(ocp::Model)
     return Components.state_constraints_box(constraints(ocp))
@@ -1282,7 +1282,7 @@ Return the box constraints on control.
 # Returns
 - `BoxConstraints`: The box constraints on control.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.state_constraints_box`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.state_constraints_box`](@extref).
 """
 function Components.control_constraints_box(ocp::Model)
     return Components.control_constraints_box(constraints(ocp))
@@ -1299,7 +1299,7 @@ Return the box constraints on variable.
 # Returns
 - `BoxConstraints`: The box constraints on variable.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.state_constraints_box`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.state_constraints_box`](@extref).
 """
 function Components.variable_constraints_box(ocp::Model)
     return Components.variable_constraints_box(constraints(ocp))
@@ -1316,7 +1316,7 @@ Return the dimension of nonlinear path constraints.
 # Returns
 - `Dimension`: The dimension of nonlinear path constraints.
 
-See also: [`CTModels.Components.path_constraints_nl`](@ref), [`CTModels.Components.dim_boundary_constraints_nl`](@ref).
+See also: [`CTModels.Components.path_constraints_nl`](@extref), [`CTModels.Components.dim_boundary_constraints_nl`](@extref).
 """
 Components.dim_path_constraints_nl(ocp::Model)::Dimension =
     Components.dim_path_constraints_nl(constraints(ocp))
@@ -1332,7 +1332,7 @@ Return the dimension of the boundary constraints.
 # Returns
 - `Dimension`: The dimension of boundary constraints.
 
-See also: [`CTModels.Components.boundary_constraints_nl`](@ref), [`CTModels.Components.dim_path_constraints_nl`](@ref).
+See also: [`CTModels.Components.boundary_constraints_nl`](@extref), [`CTModels.Components.dim_path_constraints_nl`](@extref).
 """
 Components.dim_boundary_constraints_nl(ocp::Model)::Dimension =
     Components.dim_boundary_constraints_nl(constraints(ocp))
@@ -1348,7 +1348,7 @@ Return the dimension of box constraints on state.
 # Returns
 - `Dimension`: The dimension of box constraints on state.
 
-See also: [`CTModels.Components.state_constraints_box`](@ref), [`CTModels.Components.dim_control_constraints_box`](@ref).
+See also: [`CTModels.Components.state_constraints_box`](@extref), [`CTModels.Components.dim_control_constraints_box`](@extref).
 """
 Components.dim_state_constraints_box(ocp::Model)::Dimension =
     Components.dim_state_constraints_box(constraints(ocp))
@@ -1364,7 +1364,7 @@ Return the dimension of box constraints on control.
 # Returns
 - `Dimension`: The dimension of box constraints on control.
 
-See also: [`CTModels.Components.control_constraints_box`](@ref), [`CTModels.Components.dim_state_constraints_box`](@ref).
+See also: [`CTModels.Components.control_constraints_box`](@extref), [`CTModels.Components.dim_state_constraints_box`](@extref).
 """
 Components.dim_control_constraints_box(ocp::Model)::Dimension =
     Components.dim_control_constraints_box(constraints(ocp))
@@ -1380,7 +1380,7 @@ Return the dimension of box constraints on variable.
 # Returns
 - `Dimension`: The dimension of box constraints on variable.
 
-See also: [`CTModels.Components.variable_constraints_box`](@ref), [`CTModels.Components.dim_state_constraints_box`](@ref).
+See also: [`CTModels.Components.variable_constraints_box`](@extref), [`CTModels.Components.dim_state_constraints_box`](@extref).
 """
 Components.dim_variable_constraints_box(ocp::Model)::Dimension =
     Components.dim_variable_constraints_box(constraints(ocp))
@@ -1400,7 +1400,7 @@ Return the model definition.
 # Returns
 - `D`: The model definition.
 
-See also: [`CTModels.Components.expression`](@ref).
+See also: [`CTModels.Components.expression`](@extref).
 """
 function definition(
     ocp::Model{
@@ -1430,7 +1430,7 @@ Return the symbolic expression of the model definition.
 # Returns
 - `Expr`: The symbolic expression of the model definition.
 
-See also: [`CTModels.Models.definition`](@ref).
+See also: [`CTModels.Models.definition`](@extref).
 """
 Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
 
@@ -1454,7 +1454,7 @@ The function returns an exception if the label is not found in the model.
 # Returns
 - `Tuple`: A tuple of the form `(type, f, lb, ub)`.
 
-See also: [`CTModels.Models.constraints`](@ref), [`CTModels.Components.path_constraints_nl`](@ref).
+See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.path_constraints_nl`](@extref).
 """
 function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple element types depend on the runtime label value
 

@@ -44,7 +44,7 @@ Export an optimal control solution to a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: [`CTModels.Serialization.import_ocp_solution`](@ref).
+See also: [`CTModels.Serialization.import_ocp_solution`](@extref).
 """
 function export_ocp_solution(
     sol::Solutions.AbstractSolution;
@@ -86,7 +86,7 @@ Import an optimal control solution from a file.
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
 
-See also: [`CTModels.Serialization.export_ocp_solution`](@ref).
+See also: [`CTModels.Serialization.export_ocp_solution`](@extref).
 """
 function import_ocp_solution(
     ocp::Models.AbstractModel;

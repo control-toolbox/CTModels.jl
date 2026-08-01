@@ -39,7 +39,7 @@ julia> ocp = CTModels.PreModel(); CTModels.variable!(ocp, 2, "v", ["v₁", "v₂
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.state!`](@ref), [`CTModels.Building.control!`](@ref), [`CTModels.Models.variable_dimension`](@ref).
+See also: [`CTModels.Building.state!`](@extref), [`CTModels.Building.control!`](@extref), [`CTModels.Models.variable_dimension`](@extref).
 """
 function variable!(
     ocp::PreModel,

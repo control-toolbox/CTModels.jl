@@ -51,7 +51,7 @@ $(TYPEDSIGNATURES)
 
 Return the default description tuple used when the user gives none.
 
-Aliases are included so that [`clean`](@ref) collapses them to the canonical set.
+Aliases are included so that `clean` collapses them to the canonical set.
 """
 function __description()
     return (

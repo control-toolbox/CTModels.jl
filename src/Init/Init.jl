@@ -9,14 +9,14 @@ solvers by providing starting trajectories for state, control, and variables.
 
 # Organisation
 
-- **types.jl**: Abstract and concrete initial guess types ([`CTModels.Init.InitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref))
-- **utils.jl**: Time grid and data formatting helpers ([`CTModels.Init._format_time_grid`](@ref), [`CTModels.Init._format_init_data_for_grid`](@ref))
-- **state.jl**: State initialisation functions ([`CTModels.Init.initial_state`](@ref))
-- **control.jl**: Control initialisation functions ([`CTModels.Init.initial_control`](@ref))
-- **variable.jl**: Variable initialisation functions ([`CTModels.Init.initial_variable`](@ref))
-- **builders.jl**: Component-level and time-grid builders ([`CTModels.Init._build_block_with_components`](@ref), [`CTModels.Init._build_time_dependent_init`](@ref))
-- **validation.jl**: Validation and construction from various formats ([`CTModels.Init._validate_initial_guess`](@ref), [`CTModels.Init._initial_guess_from_solution`](@ref))
-- **api.jl**: Public API for initial guess construction ([`CTModels.Init.initial_guess`](@ref), [`CTModels.Init.build_initial_guess`](@ref), [`CTModels.Init.validate_initial_guess`](@ref))
+- **types.jl**: Abstract and concrete initial guess types ([`CTModels.Init.InitialGuess`](@extref), [`CTModels.Init.PreInitialGuess`](@extref))
+- **utils.jl**: Time grid and data formatting helpers ([`CTModels.Init._format_time_grid`](@extref), [`CTModels.Init._format_init_data_for_grid`](@extref))
+- **state.jl**: State initialisation functions ([`CTModels.Init.initial_state`](@extref))
+- **control.jl**: Control initialisation functions ([`CTModels.Init.initial_control`](@extref))
+- **variable.jl**: Variable initialisation functions ([`CTModels.Init.initial_variable`](@extref))
+- **builders.jl**: Component-level and time-grid builders ([`CTModels.Init._build_block_with_components`](@extref), [`CTModels.Init._build_time_dependent_init`](@extref))
+- **validation.jl**: Validation and construction from various formats ([`CTModels.Init._validate_initial_guess`](@extref), [`CTModels.Init._initial_guess_from_solution`](@extref))
+- **api.jl**: Public API for initial guess construction ([`CTModels.Init.initial_guess`](@extref), [`CTModels.Init.build_initial_guess`](@extref), [`CTModels.Init.validate_initial_guess`](@extref))
 
 # Public API
 
@@ -32,16 +32,16 @@ The following functions are exported and accessible as `CTModels.function_name()
 
 # Types
 
-- [`CTModels.Init.InitialGuess`](@ref): Validated initial guess with callable trajectories
-- [`CTModels.Init.PreInitialGuess`](@ref): Pre-initialization container for raw data
-- [`CTModels.Init.AbstractInitialGuess`](@ref): Abstract base type for initial guesses
-- [`CTModels.Init.AbstractPreInitialGuess`](@ref): Abstract base type for pre-initialization data
+- [`CTModels.Init.InitialGuess`](@extref): Validated initial guess with callable trajectories
+- [`CTModels.Init.PreInitialGuess`](@extref): Pre-initialization container for raw data
+- [`CTModels.Init.AbstractInitialGuess`](@extref): Abstract base type for initial guesses
+- [`CTModels.Init.AbstractPreInitialGuess`](@extref): Abstract base type for pre-initialization data
 
 # Dependencies
 
 External: `CTBase.Core`, `CTBase.Interpolation`, `CTBase.Exceptions`.
 
-See also: [`CTModels.Components`](@ref), [`CTModels.Models`](@ref), [`CTModels.Solutions`](@ref), [`CTModels.Building`](@ref).
+See also: [`CTModels.Components`](@extref), [`CTModels.Models`](@extref), [`CTModels.Solutions`](@extref), [`CTModels.Building`](@extref).
 """
 module Init
 

@@ -43,7 +43,7 @@ julia> CTModels.objective!(ocp, :min; mayer=mayer, lagrange=lagrange);
 # Returns
 - `Nothing`
 
-See also: [`CTModels.Building.dynamics!`](@ref), [`CTModels.Building.state!`](@ref), [`CTModels.Building.time!`](@ref).
+See also: [`CTModels.Building.dynamics!`](@extref), [`CTModels.Building.state!`](@extref), [`CTModels.Building.time!`](@extref).
 """
 function objective!(
     ocp::PreModel,

@@ -12,7 +12,7 @@ Get the time from the fixed time model.
 # Returns
 - `T`: The fixed time value.
 
-See also: [`CTModels.Components.name`](@ref).
+See also: [`CTModels.Components.name`](@extref).
 """
 function Base.time(model::FixedTimeModel{T})::T where {T<:Time}
     return model.time
@@ -27,7 +27,7 @@ Get the index of the time variable from the free time model.
 # Returns
 - `Int`: The index into the optimisation variable.
 
-See also: [`CTModels.Components.name`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.name`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function index(model::FreeTimeModel)::Int
     return model.index
@@ -68,7 +68,7 @@ Get the initial time from the times model.
 # Returns
 - `TI`: The initial time model (fixed or free).
 
-See also: [`CTModels.Components.final`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.final`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function initial(
     model::TimesModel{TI,<:AbstractTimeModel}
@@ -84,7 +84,7 @@ Get the final time from the times model.
 # Returns
 - `TF`: The final time model (fixed or free).
 
-See also: [`CTModels.Components.initial`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.initial`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function final(model::TimesModel{<:AbstractTimeModel,TF})::TF where {TF<:AbstractTimeModel}
     return model.final
@@ -98,7 +98,7 @@ Get the name of the time variable from the times model.
 # Returns
 - `String`: The time variable name.
 
-See also: [`CTModels.Components.initial_time_name`](@ref), [`CTModels.Components.final_time_name`](@ref).
+See also: [`CTModels.Components.initial_time_name`](@extref), [`CTModels.Components.final_time_name`](@extref).
 """
 function time_name(model::TimesModel)::String
     return model.time_name
@@ -112,7 +112,7 @@ Get the name of the initial time from the times model.
 # Returns
 - `String`: The initial time name.
 
-See also: [`CTModels.Components.time_name`](@ref), [`CTModels.Components.final_time_name`](@ref).
+See also: [`CTModels.Components.time_name`](@extref), [`CTModels.Components.final_time_name`](@extref).
 """
 function initial_time_name(model::TimesModel)::String
     return name(initial(model))
@@ -126,7 +126,7 @@ Get the name of the final time from the times model.
 # Returns
 - `String`: The final time name.
 
-See also: [`CTModels.Components.time_name`](@ref), [`CTModels.Components.initial_time_name`](@ref).
+See also: [`CTModels.Components.time_name`](@extref), [`CTModels.Components.initial_time_name`](@extref).
 """
 function final_time_name(model::TimesModel)::String
     return name(final(model))
@@ -140,7 +140,7 @@ Get the initial time from the times model, from a fixed initial time model.
 # Returns
 - `T`: The fixed initial time value.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.has_fixed_initial_time`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_fixed_initial_time`](@extref).
 """
 function initial_time(
     model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}
@@ -156,7 +156,7 @@ Get the final time from the times model, from a fixed final time model.
 # Returns
 - `T`: The fixed final time value.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.has_fixed_final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_fixed_final_time`](@extref).
 """
 function final_time(
     model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}
@@ -176,7 +176,7 @@ Get the initial time from the times model, from a free initial time model.
 # Returns
 - `T`: The initial time value from the variable.
 
-See also: [`CTModels.Components.final_time`](@ref), [`CTModels.Components.has_free_initial_time`](@ref).
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_free_initial_time`](@extref).
 """
 function initial_time(
     model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, variable::AbstractVector{T}
@@ -196,7 +196,7 @@ Get the final time from the times model, from a free final time model.
 # Returns
 - `T`: The final time value from the variable.
 
-See also: [`CTModels.Components.initial_time`](@ref), [`CTModels.Components.has_free_final_time`](@ref).
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_free_final_time`](@extref).
 """
 function final_time(
     model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::AbstractVector{T}
@@ -212,7 +212,7 @@ Check if the initial time is fixed. Return true.
 # Returns
 - `Bool`: `true` if the initial time is fixed.
 
-See also: [`CTModels.Components.has_free_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function has_fixed_initial_time(
     ::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}
@@ -228,7 +228,7 @@ Check if the initial time is free. Return false.
 # Returns
 - `Bool`: `false` (initial time is not fixed).
 
-See also: [`CTModels.Components.has_free_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function has_fixed_initial_time(::TimesModel{FreeTimeModel,<:AbstractTimeModel})::Bool
     return false
@@ -242,7 +242,7 @@ Check if the initial time is free.
 # Returns
 - `Bool`: `true` if the initial time is free.
 
-See also: [`CTModels.Components.has_fixed_initial_time`](@ref), [`CTModels.Components.initial_time`](@ref).
+See also: [`CTModels.Components.has_fixed_initial_time`](@extref), [`CTModels.Components.initial_time`](@extref).
 """
 function has_free_initial_time(times::TimesModel)::Bool
     return !has_fixed_initial_time(times)
@@ -256,7 +256,7 @@ Check if the final time is fixed. Return true.
 # Returns
 - `Bool`: `true` if the final time is fixed.
 
-See also: [`CTModels.Components.has_free_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function has_fixed_final_time(
     ::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}
@@ -272,7 +272,7 @@ Check if the final time is free. Return false.
 # Returns
 - `Bool`: `false` (final time is not fixed).
 
-See also: [`CTModels.Components.has_free_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function has_fixed_final_time(::TimesModel{<:AbstractTimeModel,FreeTimeModel})::Bool
     return false
@@ -286,7 +286,7 @@ Check if the final time is free.
 # Returns
 - `Bool`: `true` if the final time is free.
 
-See also: [`CTModels.Components.has_fixed_final_time`](@ref), [`CTModels.Components.final_time`](@ref).
+See also: [`CTModels.Components.has_fixed_final_time`](@extref), [`CTModels.Components.final_time`](@extref).
 """
 function has_free_final_time(times::TimesModel)::Bool
     return !has_fixed_final_time(times)
@@ -299,27 +299,27 @@ end
 """
 Alias for `has_fixed_initial_time`.
 
-See also: [`CTModels.Components.has_fixed_initial_time`](@ref).
+See also: [`CTModels.Components.has_fixed_initial_time`](@extref).
 """
 const is_initial_time_fixed = has_fixed_initial_time
 
 """
 Alias for `has_free_initial_time`.
 
-See also: [`CTModels.Components.has_free_initial_time`](@ref).
+See also: [`CTModels.Components.has_free_initial_time`](@extref).
 """
 const is_initial_time_free = has_free_initial_time
 
 """
 Alias for `has_fixed_final_time`.
 
-See also: [`CTModels.Components.has_fixed_final_time`](@ref).
+See also: [`CTModels.Components.has_fixed_final_time`](@extref).
 """
 const is_final_time_fixed = has_fixed_final_time
 
 """
 Alias for `has_free_final_time`.
 
-See also: [`CTModels.Components.has_free_final_time`](@ref).
+See also: [`CTModels.Components.has_free_final_time`](@extref).
 """
 const is_final_time_free = has_free_final_time

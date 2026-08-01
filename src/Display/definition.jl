@@ -5,7 +5,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Print a [`CTModels.Components.EmptyDefinition`](@ref): no output is produced.
+Print a [`CTModels.Components.EmptyDefinition`](@extref): no output is produced.
 
 # Returns
 - `Bool`: `false` to indicate that nothing was printed.
@@ -15,7 +15,7 @@ _print_abstract_definition(::IO, ::Components.EmptyDefinition)::Bool = false
 """
 $(TYPEDSIGNATURES)
 
-Print a [`CTModels.Components.Definition`](@ref) under an "Abstract definition:" header.
+Print a [`CTModels.Components.Definition`](@extref) under an "Abstract definition:" header.
 
 Block expressions are unfolded line-by-line; other expression heads are
 printed as a single indented entry.
@@ -28,7 +28,7 @@ printed as a single indented entry.
 # Returns
 - `Bool`: `true` to indicate that output was produced.
 
-See also: [`CTModels.Display.__print`](@ref).
+See also: [`CTModels.Display.__print`](@extref).
 """
 function _print_abstract_definition(io::IO, d::Components.Definition)::Bool
     fmt = CTBase.Core.get_format_codes(io)
@@ -45,14 +45,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display method for any [`CTModels.Components.AbstractDefinition`](@ref).
+Display method for any [`CTModels.Components.AbstractDefinition`](@extref).
 
-Delegates to [`_print_abstract_definition`](@ref).
+Delegates to [`CTModels.Display._print_abstract_definition`](@extref).
 
 # Returns
 - `Nothing`: Prints to `io` and returns nothing.
 
-See also: [`CTModels.Display._print_abstract_definition`](@ref).
+See also: [`CTModels.Display._print_abstract_definition`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", d::Components.AbstractDefinition)
     return _print_abstract_definition(io, d)

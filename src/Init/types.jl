@@ -9,7 +9,7 @@ Abstract base type for initial guesses used in optimal control problem solvers.
 Subtypes provide initial trajectories for state, control, and optimisation variables
 to warm-start numerical solvers.
 
-See also: [`CTModels.Init.InitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref).
+See also: [`CTModels.Init.InitialGuess`](@extref), [`CTModels.Init.PreInitialGuess`](@extref).
 """
 abstract type AbstractInitialGuess end
 
@@ -36,7 +36,7 @@ julia> v_guess = [1.0, 2.0]
 julia> ig = CTModels.InitialGuess(x_guess, u_guess, v_guess)
 ```
 
-See also: [`CTModels.Init.AbstractInitialGuess`](@ref), [`CTModels.Init.PreInitialGuess`](@ref).
+See also: [`CTModels.Init.AbstractInitialGuess`](@extref), [`CTModels.Init.PreInitialGuess`](@extref).
 """
 struct InitialGuess{X<:Function,U<:Function,V} <: AbstractInitialGuess
     state::X
@@ -51,9 +51,9 @@ Abstract base type for pre-initialisation data used before constructing a full
 initial guess.
 
 Subtypes store raw or partial information that will be processed into an
-[`CTModels.Init.InitialGuess`](@ref).
+[`CTModels.Init.InitialGuess`](@extref).
 
-See also: [`CTModels.Init.PreInitialGuess`](@ref).
+See also: [`CTModels.Init.PreInitialGuess`](@extref).
 """
 abstract type AbstractPreInitialGuess end
 
@@ -77,7 +77,7 @@ julia> using CTModels
 julia> pre = CTModels.PreInitialGuess([1.0 2.0; 3.0 4.0], [0.5, 0.6], [1.0])
 ```
 
-See also: [`CTModels.Init.AbstractPreInitialGuess`](@ref), [`CTModels.Init.InitialGuess`](@ref).
+See also: [`CTModels.Init.AbstractPreInitialGuess`](@extref), [`CTModels.Init.InitialGuess`](@extref).
 """
 struct PreInitialGuess{SX,SU,SV} <: AbstractPreInitialGuess
     state::SX

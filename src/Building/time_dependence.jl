@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Set the time dependence of the optimal control problem `ocp`.
 
 Must be called exactly once, after declaring the spaces and dynamics but before
-calling [`CTModels.Building.build`](@ref).
+calling [`CTModels.Building.build`](@extref).
 
 # Arguments
 - `ocp::PreModel`: The optimal control problem being defined.
@@ -24,7 +24,7 @@ julia> using CTModels
 julia> ocp = CTModels.PreModel(); CTModels.time_dependence!(ocp; autonomous=true);
 ```
 
-See also: [`CTModels.Building.time!`](@ref), [`CTModels.Building.dynamics!`](@ref).
+See also: [`CTModels.Building.time!`](@extref), [`CTModels.Building.dynamics!`](@extref).
 """
 function time_dependence!(ocp::PreModel; autonomous::Bool)::Nothing
     Core.@ensure !__is_autonomous_set(ocp) Exceptions.PreconditionError(
