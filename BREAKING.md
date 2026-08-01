@@ -4,6 +4,16 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.16.1] - 2026-08-01
+
+### No Breaking Changes
+
+Docstring cross-reference roles across `src/` and `ext/` were switched from
+bare `@ref` to `@extref CTModels...` so links resolve correctly when
+transcluded into downstream package docs (e.g. CTFlows). `docs/make.jl` gained
+a self-referencing `InterLinks` entry for `CTModels`. This is a docs-only
+change with no source/API impact.
+
 ## [0.16.0] - 2026-07-30
 
 ### Stable release — migration from 0.15.x-beta to 0.16.0

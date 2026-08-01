@@ -7,6 +7,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.1] - 2026-08-01
+
+### 📚 Documentation
+
+- **Cross-reference roles fixed for downstream documentation.** Docstrings across
+  `src/` and `ext/` now use `@extref CTModels...` instead of bare `@ref` for
+  cross-submodule links (`Models`, `Solutions`, `Components`, …), so links resolve
+  correctly both in CTModels' own docs build and when transcluded into a
+  downstream package's docs (e.g. CTFlows extending `CTModels.Components`
+  generics). `docs/make.jl` registers a self-referencing `InterLinks` entry for
+  `CTModels`, checking the local build's `objects.inv` first and falling back to
+  the published inventory.
+- **No breaking changes**: docs-only change, no source/API impact.
+  See [BREAKING.md](BREAKING.md).
+
 ## [0.16.0] - 2026-07-30
 
 ### 📦 Stable Release
