@@ -369,6 +369,15 @@ function build_solution(
         )
     end
 
+    # Variable box constraint duals follow the same "1-D is a scalar" convention as
+    # `variable` itself (see `var` above): a length-1 vector is stored as a scalar.
+    vc_lb_dual =
+        isnothing(variable_constraints_lb_dual) ? nothing :
+        (dim_v == 1 ? variable_constraints_lb_dual[1] : variable_constraints_lb_dual)
+    vc_ub_dual =
+        isnothing(variable_constraints_ub_dual) ? nothing :
+        (dim_v == 1 ? variable_constraints_ub_dual[1] : variable_constraints_ub_dual)
+
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
     control = ControlModelSolution(
@@ -387,8 +396,8 @@ function build_solution(
                 fscud,
                 fccbd,
                 fccud,
-                variable_constraints_lb_dual,
-                variable_constraints_ub_dual,
+                vc_lb_dual,
+                vc_ub_dual,
             ),
         )
             EmptyDualModel()
@@ -400,8 +409,8 @@ function build_solution(
                 fscud,
                 fccbd,
                 fccud,
-                variable_constraints_lb_dual,
-                variable_constraints_ub_dual,
+                vc_lb_dual,
+                vc_ub_dual,
             )
         end
 
@@ -1559,7 +1568,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the lower bound dual of the variable constraints.
+Return the lower bound dual of the variable constraints: a scalar for a 1-D variable,
+a vector otherwise, or `nothing` if not set.
 
 """
 function variable_constraints_lb_dual(sol::Solution)
@@ -1569,7 +1579,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the upper bound dual of the variable constraints.
+Return the upper bound dual of the variable constraints: a scalar for a 1-D variable,
+a vector otherwise, or `nothing` if not set.
 
 """
 function variable_constraints_ub_dual(sol::Solution)
@@ -1775,7 +1786,7 @@ function _discretize_all_components(
         "control" => _discretize_function(control(sol), T_control, dim_u),
         "control_interpolation" => string(control_interpolation(sol)),
         "costate" => _discretize_function(costate(sol), T_costate, dim_x),
-        "variable" => variable(sol),
+        "variable" => _as_vector(variable(sol)),
         "objective" => objective(sol),
         "path_constraints_dual" => _discretize_dual(
             path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)
@@ -1797,8 +1808,8 @@ function _discretize_all_components(
             dim_dual_control_constraints_box(sol),
         ),
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
-        "variable_constraints_lb_dual" => variable_constraints_lb_dual(sol),
-        "variable_constraints_ub_dual" => variable_constraints_ub_dual(sol),
+        "variable_constraints_lb_dual" => _as_vector(variable_constraints_lb_dual(sol)),
+        "variable_constraints_ub_dual" => _as_vector(variable_constraints_ub_dual(sol)),
         "iterations" => iterations(sol),
         "message" => message(sol),
         "status" => status(sol),

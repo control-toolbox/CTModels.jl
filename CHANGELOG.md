@@ -7,6 +7,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-08-16
+
+### 🐛 Fixed
+
+- **`variable` and its box-constraint duals now follow "1-D is a scalar" consistently.**
+  `Components.variable(sol)` already returned a `Float64` for a 1-D `variable`
+  (`variable_dimension(ocp) == 1`), but this scalar was previously written raw into
+  JLD2/JSON exports, breaking `import_ocp_solution` on re-import
+  ([OptimalControl.jl#857](https://github.com/control-toolbox/OptimalControl.jl/issues/857)).
+  `_serialize_solution` now normalizes `"variable"` to a `Vector{Float64}` on the wire
+  (`Solutions._as_vector`), and both importers (`_extract_time_vector` in
+  `Serialization`, and the JSON extension) accept the scalar format from
+  already-exported files as well, so existing exports remain importable without
+  re-exporting.
+- **`Solutions.variable_constraints_lb_dual(sol)` / `ub_dual(sol)` now follow the same
+  convention** ([#393](https://github.com/control-toolbox/CTModels.jl/issues/393)):
+  they return a `Float64` for a 1-D `variable`, matching `variable(sol)` itself,
+  instead of always returning a `Vector{Float64}`. `DualModel`'s storage type and
+  `build_solution`'s internal coercion were updated accordingly; the two other
+  time-dependent duals families already followed this convention. Export/import
+  normalize the same way as `variable`.
+
+See [BREAKING.md](BREAKING.md) for migration notes.
+
 ## [0.16.1] - 2026-08-01
 
 ### 📚 Documentation

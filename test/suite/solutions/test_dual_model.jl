@@ -128,6 +128,33 @@ function test_dual_model()
             Test.@test Solutions.variable_constraints_ub_dual(dual) === vc_ub
         end
 
+        Test.@testset "DualModel constraint dual accessors: scalar variable duals" begin
+            # DualModel is a convention-agnostic container: it stores whatever shape it
+            # is given (scalar or vector) verbatim, exactly like it already does for a
+            # vector. The 1-D-is-a-scalar coercion happens in build_solution, not here.
+            pc = t -> [1.0]
+            bc = [3.0]
+            sc_lb = t -> [0.0]
+            sc_ub = t -> [1.0]
+            cc_lb = t -> [0.0]
+            cc_ub = t -> [1.0]
+            vc_lb = 5.0
+            vc_ub = 6.0
+
+            dual = Solutions.DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub)
+
+            Test.@test Solutions.path_constraints_dual(dual) === pc
+            Test.@test Solutions.boundary_constraints_dual(dual) === bc
+            Test.@test Solutions.state_constraints_lb_dual(dual) === sc_lb
+            Test.@test Solutions.state_constraints_ub_dual(dual) === sc_ub
+            Test.@test Solutions.control_constraints_lb_dual(dual) === cc_lb
+            Test.@test Solutions.control_constraints_ub_dual(dual) === cc_ub
+            Test.@test Solutions.variable_constraints_lb_dual(dual) === vc_lb
+            Test.@test Solutions.variable_constraints_ub_dual(dual) === vc_ub
+            Test.@test Solutions.variable_constraints_lb_dual(dual) isa Float64
+            Test.@test Solutions.variable_constraints_ub_dual(dual) isa Float64
+        end
+
         # ====================================================================
         # INTEGRATION TESTS - dual(sol, model, label) on box constraints
         # Verifies that `dual(sol, m, :label)` returns the multiplier(s)
@@ -267,6 +294,26 @@ function test_dual_model()
                 sol = _make_solution(m; variable_dim=1, variable_lb=lb, variable_ub=ub)
                 Test.@test Solutions.dual(sol, m, :v1) ≈ 1.0
                 Test.@test Solutions.dual(sol, m, :v2) ≈ 1.0
+            end
+
+            Test.@testset "variable - dim 1: raw accessors return a scalar" begin
+                # https://github.com/control-toolbox/CTModels.jl/issues/393
+                # variable_constraints_lb_dual/ub_dual follow the same "1-D is a
+                # scalar" convention as `variable` itself.
+                ocp = _build_model_with_variable_box(;
+                    variable_dim=1, constraints=[(1:1, [0.0], [2.0], :vbl)]
+                )
+                m = Building.build(ocp)
+                lb = [0.05]
+                ub = [1.5]
+                sol = _make_solution(m; variable_dim=1, variable_lb=lb, variable_ub=ub)
+
+                vc_lb = Solutions.variable_constraints_lb_dual(sol)
+                vc_ub = Solutions.variable_constraints_ub_dual(sol)
+                Test.@test vc_lb isa Float64
+                Test.@test vc_ub isa Float64
+                Test.@test vc_lb ≈ 0.05
+                Test.@test vc_ub ≈ 1.5
             end
         end
 
