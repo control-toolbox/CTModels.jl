@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `build_solution`'s internal coercion were updated accordingly; the two other
   time-dependent duals families already followed this convention. Export/import
   normalize the same way as `variable`.
+- **`plot(sol)` no longer crashes with `IncorrectArgument: a VBox needs at least
+  one child` when the OCP has zero nonlinear path constraints**
+  ([#392](https://github.com/control-toolbox/CTModels.jl/issues/392)). CTDirect
+  always builds a real `zeros(N, dpc)` matrix for `path_constraints_dual`, even
+  when `dpc == 0`, so the accessor is never `nothing` — only zero-width. The
+  plot recipe's `do_plot_dual` gate now also requires
+  `Components.dim_path_constraints_nl(ocp) > 0`, mirroring the existing
+  `do_plot_path` guard, instead of relying on `!isnothing(...)` alone.
 
 See [BREAKING.md](BREAKING.md) for migration notes.
 
