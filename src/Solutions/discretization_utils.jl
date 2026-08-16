@@ -87,3 +87,20 @@ See also: [`CTModels.Solutions._discretize_function`](@extref).
 function _discretize_dual(dual_func::Union{Function,Nothing}, T, dim::Int=-1)
     return isnothing(dual_func) ? nothing : _discretize_function(dual_func, T, dim)
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Normalize a time-independent solution field (currently only `variable`) to a
+`Vector{Float64}` for serialization.
+
+`Components.variable(sol)` follows the "1-D is a scalar" convention: it returns a bare
+`Number` when `variable_dimension(ocp) == 1`, and a `Vector{Float64}` otherwise. Unlike
+`state`/`control`/`costate`, this field is not run through `_discretize_function` (it is
+time-independent), so without this normalization a scalar would leak into the serialized
+data untouched.
+
+See also: [`CTModels.Solutions._discretize_all_components`](@extref).
+"""
+_as_vector(v::ctNumber)::Vector{Float64} = [Float64(v)]
+_as_vector(v::ctVector)::Vector{Float64} = Vector{Float64}(v)

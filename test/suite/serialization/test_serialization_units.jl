@@ -287,6 +287,70 @@ function test_serialization_units()
 
             isfile("dual_functor_jld_test.jld2") && rm("dual_functor_jld_test.jld2")
         end
+
+        # ==============================================================================
+        # C.6 — Regression: scalar variable (variable_dimension == 1)
+        #
+        # https://github.com/control-toolbox/OptimalControl.jl/issues/857
+        # `variable(sol)` follows the "1-D is a scalar" convention and returns a bare
+        # `Float64` when variable_dimension(ocp) == 1 (e.g. a free final time). This
+        # scalar must be normalized to a Vector{Float64} on export, and any legacy
+        # scalar already on disk must still be readable on import.
+        # ==============================================================================
+
+        Test.@testset "_serialize_solution: variable is always a Vector{Float64} (dim 1)" begin
+            _, sol = TestProblems.solution_example_free_final_time()
+            Test.@test Components.variable(sol) isa Float64
+
+            data = Solutions._serialize_solution(sol)
+            Test.@test data["variable"] isa Vector{Float64}
+            Test.@test data["variable"] == [Components.variable(sol)]
+        end
+
+        Test.@testset "Round-trip: scalar variable (dim 1, JLD2)" begin
+            ocp, sol = TestProblems.solution_example_free_final_time()
+
+            Serialization.export_ocp_solution(
+                sol; filename="scalar_variable_test", format=:JLD
+            )
+            sol2 = Serialization.import_ocp_solution(
+                ocp; filename="scalar_variable_test", format=:JLD
+            )
+
+            Test.@test Components.variable(sol2) isa Float64
+            Test.@test Components.variable(sol2) ≈ Components.variable(sol) atol = 1e-10
+
+            isfile("scalar_variable_test.jld2") && rm("scalar_variable_test.jld2")
+        end
+
+        Test.@testset "Round-trip: scalar variable (dim 1, JSON)" begin
+            ocp, sol = TestProblems.solution_example_free_final_time()
+
+            Serialization.export_ocp_solution(
+                sol; filename="scalar_variable_test", format=:JSON
+            )
+            sol2 = Serialization.import_ocp_solution(
+                ocp; filename="scalar_variable_test", format=:JSON
+            )
+
+            Test.@test Components.variable(sol2) isa Float64
+            Test.@test Components.variable(sol2) ≈ Components.variable(sol) atol = 1e-10
+
+            isfile("scalar_variable_test.json") && rm("scalar_variable_test.json")
+        end
+
+        Test.@testset "_reconstruct_solution_from_data: legacy scalar variable (backward compat)" begin
+            ocp, sol = TestProblems.solution_example_free_final_time()
+            data = Solutions._serialize_solution(sol)
+
+            # Simulate a file exported before the fix, where "variable" was a bare
+            # scalar Float64 instead of a Vector{Float64}.
+            data["variable"] = Components.variable(sol)
+
+            sol2 = Serialization._reconstruct_solution_from_data(ocp, data)
+            Test.@test Components.variable(sol2) isa Float64
+            Test.@test Components.variable(sol2) ≈ Components.variable(sol) atol = 1e-10
+        end
     end
 end
 

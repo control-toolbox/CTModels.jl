@@ -7,6 +7,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.2] - 2026-08-16
+
+### 🐛 Fixed
+
+- **`import_ocp_solution` failed for a solution whose OCP has exactly one variable.**
+  `Components.variable(sol)` returns a `Float64` (not a length-1 vector) when
+  `variable_dimension(ocp) == 1`, per the "1-D is a scalar" convention. This scalar was
+  previously written raw into JLD2/JSON exports, and `import_ocp_solution` then failed
+  with `MethodError: no method matching Vector{Float64}(::Float64)` on re-import
+  ([OptimalControl.jl#857](https://github.com/control-toolbox/OptimalControl.jl/issues/857)).
+  `_serialize_solution` now normalizes `"variable"` to a `Vector{Float64}` on the wire
+  (`Solutions._as_vector`), and both importers (`Serialization._extract_time_vector`,
+  and the JSON extension) accept the scalar format from already-exported files as well,
+  so files exported before this fix remain importable without re-exporting.
+- **No breaking changes**: `variable(sol)` was already a scalar for a 1-D variable;
+  only the on-disk format and import robustness changed. See [BREAKING.md](BREAKING.md).
+
 ## [0.16.1] - 2026-08-01
 
 ### 📚 Documentation

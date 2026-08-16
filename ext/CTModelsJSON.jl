@@ -305,7 +305,7 @@ function CTModels.import_ocp_solution(
         "state" => _json_to_matrix(blob["state"]),
         "control" => _json_to_matrix(blob["control"]),
         "costate" => _json_to_matrix(blob["costate"]),
-        "variable" => Vector{Float64}(blob.variable),
+        "variable" => CTModels.Serialization._extract_time_vector(blob.variable),
         "path_constraints_dual" => _json_to_optional_matrix(blob["path_constraints_dual"]),
         "boundary_constraints_dual" => isnothing(bcd) ? nothing : Vector{Float64}(bcd),
         "state_constraints_lb_dual" =>

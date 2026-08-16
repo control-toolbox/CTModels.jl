@@ -1775,7 +1775,7 @@ function _discretize_all_components(
         "control" => _discretize_function(control(sol), T_control, dim_u),
         "control_interpolation" => string(control_interpolation(sol)),
         "costate" => _discretize_function(costate(sol), T_costate, dim_x),
-        "variable" => variable(sol),
+        "variable" => _as_vector(variable(sol)),
         "objective" => objective(sol),
         "path_constraints_dual" => _discretize_dual(
             path_constraints_dual(sol), T_path, dim_path_constraints_nl(sol)
