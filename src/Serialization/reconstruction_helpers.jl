@@ -125,14 +125,16 @@ $(TYPEDSIGNATURES)
 Extract time vector from various data formats.
 
 # Arguments
-- `time_data`: Time data in various formats (Vector, Matrix, etc.)
+- `time_data`: Time data in various formats (Vector, Matrix, scalar, etc.)
 
 # Returns
 - `Vector{Float64}`: Time vector
 
 # Notes
-- Handles both Vector{Float64} and Matrix{Float64} (single column) formats
-- Used by JSON and JLD2 importers to normalize time grid data
+- Handles Vector{Float64}, Matrix{Float64} (single column) and scalar `Real` formats
+- Used by JSON and JLD2 importers to normalize time grid data, and to normalize the
+  `"variable"` field, which is serialized as a scalar when `variable_dimension(ocp) == 1`
+  (per the "1-D is a scalar" convention, see [`CTModels.Components.variable`](@extref))
 
 See also: [`CTModels.Serialization._reconstruct_solution_from_data`](@extref).
 """
@@ -141,6 +143,8 @@ function _extract_time_vector(time_data)
         return time_data
     elseif time_data isa Matrix{Float64}
         return vec(time_data)
+    elseif time_data isa Real
+        return [Float64(time_data)]
     else
         return Vector{Float64}(time_data)
     end

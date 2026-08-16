@@ -4,6 +4,18 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.16.2] - 2026-08-16
+
+### No Breaking Changes
+
+Fixes `import_ocp_solution` for a solution whose OCP has exactly one variable
+([OptimalControl.jl#857](https://github.com/control-toolbox/OptimalControl.jl/issues/857)).
+`Components.variable(sol)` was already a scalar for a 1-D variable; only the on-disk
+JLD2/JSON format and the importer's robustness changed — exports always write a
+`Vector{Float64}` now, and imports accept both the new vector format and the old
+(broken) scalar format, so files exported before this fix remain importable without
+re-exporting. No API signature changed.
+
 ## [0.16.1] - 2026-08-01
 
 ### No Breaking Changes
