@@ -149,6 +149,23 @@ function test_plot()
             )
             Test.@test fp3
             Test.@test fd3
+
+            # no path constraints, but a non-nothing (zero-width) dual — the shape
+            # CTDirect always produces, since it fills a `zeros(N, dpc)` matrix
+            # regardless of `dpc` (issue #392: this used to slip past the
+            # `!isnothing` gate and hit an empty `:split` panel downstream)
+            fake4 = FakeSolutionDoPlot(FakeModelDoPlot{0}(), (1.0,))
+            (_, _, _, fp4, fd4) = plots_ext.do_plot(
+                fake4,
+                desc2...;
+                state_style=NamedTuple(),
+                control_style=NamedTuple(),
+                costate_style=NamedTuple(),
+                path_style=NamedTuple(),
+                dual_style=NamedTuple(),
+            )
+            Test.@test !fp4
+            Test.@test !fd4
         end
 
         Test.@testset "plot defaults: scalar helpers" begin
@@ -356,6 +373,69 @@ function test_plot()
             # plot! variant: overlay onto an existing plot, :dual requested explicitly
             plt = Plots.plot(sol, :state, :control, :path, :dual)
             Test.@test Plots.plot!(plt, sol, :state, :control, :path, :dual) isa Plots.Plot
+        end
+
+        # ====================================================================
+        # REGRESSION TEST - GitHub issue #392: `plot(sol)` fails with
+        # "VBox needs at least one child" on a plain direct solution.
+        #
+        # CTDirect always passes a real matrix as `path_constraints_dual`, even
+        # when the model has zero nonlinear path constraints (it fills a
+        # `zeros(N, dpc)` matrix regardless of `dpc`). So `path_constraints_dual(sol)`
+        # is a genuine (zero-width) interpolant, never `nothing` — the old
+        # `do_plot_dual` gate (`!isnothing(path_constraints_dual(sol))` alone) let
+        # a 0-column dual panel through, which `layout=:split` lowered to an empty
+        # `VBox`. `do_plot_dual` must also require `dim_path_constraints_nl(ocp) > 0`,
+        # mirroring `do_plot_path`.
+        # ====================================================================
+
+        Test.@testset "plot(sol) – no path constraints but a non-nothing (zero-width) dual" begin
+            pre_ocp_nopath = CTModels.PreModel()
+            CTModels.time!(pre_ocp_nopath; t0=0.0, tf=1.0)
+            CTModels.state!(pre_ocp_nopath, 2)
+            CTModels.control!(pre_ocp_nopath, 1)
+            dynamics!(r, t, x, u, v) = r .= [x[2], u[1]]
+            CTModels.dynamics!(pre_ocp_nopath, dynamics!)
+            lagrange(t, x, u, v) = 0.5 * u[1]^2
+            CTModels.objective!(pre_ocp_nopath, :min; lagrange=lagrange)
+            CTModels.time_dependence!(pre_ocp_nopath; autonomous=false)
+            ocp_nopath = CTModels.build(pre_ocp_nopath)
+
+            N = 11
+            T_nopath = collect(range(0.0, 1.0; length=N))
+            X_nopath = zeros(N, 2)
+            U_nopath = zeros(N, 1)
+            P_nopath = zeros(N - 1, 2)
+            # mimics CTDirect's `zeros(N, dpc)` with `dpc == 0`
+            path_constraints_dual_nopath = zeros(N, 0)
+
+            sol_nopath = CTModels.build_solution(
+                ocp_nopath,
+                T_nopath,
+                T_nopath,
+                T_nopath[1:(end - 1)],
+                T_nopath,
+                X_nopath,
+                U_nopath,
+                Float64[],
+                P_nopath;
+                objective=0.0,
+                iterations=1,
+                constraints_violation=0.0,
+                message="",
+                status=:optimal,
+                successful=true,
+                path_constraints_dual=path_constraints_dual_nopath,
+            )
+
+            Test.@test Solutions.path_constraints_dual(sol_nopath) !== nothing
+            Test.@test Components.dim_path_constraints_nl(ocp_nopath) == 0
+
+            # default description (includes :dual), default layout (:split): no error
+            Test.@test Plots.plot(sol_nopath) isa Plots.Plot
+
+            # explicit :dual request: no error, panel silently omitted
+            Test.@test Plots.plot(sol_nopath, :state, :control, :dual) isa Plots.Plot
         end
 
         # ====================================================================

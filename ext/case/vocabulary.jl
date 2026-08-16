@@ -138,6 +138,7 @@ function do_plot(
     do_plot_dual =
         :dual ∈ description &&
         dual_style != :none &&
+        CTModels.dim_path_constraints_nl(ocp) > 0 &&
         !isnothing(CTModels.path_constraints_dual(sol))
 
     return (do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual)
