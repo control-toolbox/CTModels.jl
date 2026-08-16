@@ -3,6 +3,7 @@ module TestExportImport
 using Test: Test
 using JLD2: JLD2
 using JSON3: JSON3
+using CTModels: Building
 using CTModels: Components
 using CTModels: Models
 using CTModels: Solutions
@@ -20,6 +21,44 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function remove_if_exists(filename::String)
     return isfile(filename) && rm(filename)
+end
+
+# Minimal variable_dim=1 solution with variable box-constraint duals set, used to
+# regression-test https://github.com/control-toolbox/CTModels.jl/issues/393
+# (variable_constraints_lb_dual/ub_dual should be a scalar for a 1-D variable).
+function _variable_dim1_solution_with_duals()
+    pre_ocp = Building.PreModel()
+    Building.time!(pre_ocp; t0=0.0, tf=1.0)
+    Building.state!(pre_ocp, 1)
+    Building.control!(pre_ocp, 1)
+    Building.variable!(pre_ocp, 1)
+    Building.dynamics!(pre_ocp, (r, t, x, u, v) -> (r .= u))
+    Building.objective!(pre_ocp, :min; mayer=(x0, xf, v) -> 0.0)
+    Building.definition!(pre_ocp, quote end)
+    Building.time_dependence!(pre_ocp; autonomous=false)
+    ocp = Building.build(pre_ocp)
+
+    T = [0.0, 0.5, 1.0]
+    X = zeros(3, 1)
+    U = zeros(3, 1)
+    P = zeros(3, 1)
+    sol = Solutions.build_solution(
+        ocp,
+        T,
+        X,
+        U,
+        [1.5],
+        P;
+        objective=0.0,
+        iterations=0,
+        constraints_violation=0.0,
+        message="",
+        status=:optimal,
+        successful=true,
+        variable_constraints_lb_dual=[0.05],
+        variable_constraints_ub_dual=[2.0],
+    )
+    return ocp, sol
 end
 
 """
@@ -1307,6 +1346,51 @@ function test_export_import()
 
             remove_if_exists("test_mixed_json.json")
             remove_if_exists("test_mixed_jld.jld2")
+        end
+
+        # ========================================================================
+        # Regression: scalar variable box-constraint duals (variable_dimension == 1)
+        # https://github.com/control-toolbox/CTModels.jl/issues/393
+        # ========================================================================
+
+        Test.@testset "JSON round-trip: variable_dim=1 duals stay scalar" begin
+            ocp, sol = _variable_dim1_solution_with_duals()
+
+            Serialization.export_ocp_solution(
+                sol; filename="variable_dim1_dual_test", format=:JSON
+            )
+            sol_reloaded = Serialization.import_ocp_solution(
+                ocp; filename="variable_dim1_dual_test", format=:JSON
+            )
+
+            vc_lb = Solutions.variable_constraints_lb_dual(sol_reloaded)
+            vc_ub = Solutions.variable_constraints_ub_dual(sol_reloaded)
+            Test.@test vc_lb isa Float64
+            Test.@test vc_ub isa Float64
+            Test.@test vc_lb ≈ 0.05 atol = 1e-10
+            Test.@test vc_ub ≈ 2.0 atol = 1e-10
+
+            remove_if_exists("variable_dim1_dual_test.json")
+        end
+
+        Test.@testset "JLD round-trip: variable_dim=1 duals stay scalar" begin
+            ocp, sol = _variable_dim1_solution_with_duals()
+
+            Serialization.export_ocp_solution(
+                sol; filename="variable_dim1_dual_test", format=:JLD
+            )
+            sol_reloaded = Serialization.import_ocp_solution(
+                ocp; filename="variable_dim1_dual_test", format=:JLD
+            )
+
+            vc_lb = Solutions.variable_constraints_lb_dual(sol_reloaded)
+            vc_ub = Solutions.variable_constraints_ub_dual(sol_reloaded)
+            Test.@test vc_lb isa Float64
+            Test.@test vc_ub isa Float64
+            Test.@test vc_lb ≈ 0.05 atol = 1e-10
+            Test.@test vc_ub ≈ 2.0 atol = 1e-10
+
+            remove_if_exists("variable_dim1_dual_test.jld2")
         end
     end
 end

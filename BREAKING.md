@@ -4,17 +4,46 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [0.16.2] - 2026-08-16
+## [0.17.0] - 2026-08-16
 
-### No Breaking Changes
+### `Solutions.variable_constraints_lb_dual`/`ub_dual` return a scalar for a 1-D variable
 
-Fixes `import_ocp_solution` for a solution whose OCP has exactly one variable
-([OptimalControl.jl#857](https://github.com/control-toolbox/OptimalControl.jl/issues/857)).
-`Components.variable(sol)` was already a scalar for a 1-D variable; only the on-disk
-JLD2/JSON format and the importer's robustness changed — exports always write a
-`Vector{Float64}` now, and imports accept both the new vector format and the old
-(broken) scalar format, so files exported before this fix remain importable without
-re-exporting. No API signature changed.
+`Solutions.variable_constraints_lb_dual(sol)` and `ub_dual(sol)` now return a `Float64`
+instead of a `Vector{Float64}` when `variable_dimension(ocp) == 1`, mirroring
+`Components.variable(sol)` — see the ["1-D is a
+scalar"](https://github.com/control-toolbox/Handbook/blob/main/philosophy/dimension-and-shape.md)
+convention. Previously these two accessors were the only quantities in a `Solution`
+that never followed the convention (see
+[#393](https://github.com/control-toolbox/CTModels.jl/issues/393)).
+
+**Who is affected**: only code that reads `variable_constraints_lb_dual`/`ub_dual`
+directly on a solution whose OCP has exactly one variable. No downstream
+control-toolbox package (CTDirect.jl, CTFlows.jl, CTParser.jl) was found to read these
+accessors as of this release — they only *write* them via `build_solution`'s keyword
+arguments, whose parameter types are unchanged (`Union{Vector{Float64},Nothing}`, still
+accepting a length-1 vector).
+
+**Migration**:
+
+- Code indexing with `[1]` (e.g. `duals_lb[1]`) is unaffected: `x[1] == x` for a scalar
+  in Julia.
+- Code calling `length(...)` on the result is unaffected: `length` of a scalar is `1`.
+- Code that pattern-matches with `isa Vector` or `isa AbstractVector` should switch to
+  `isa Union{Number,AbstractVector}`, or call `only(...)` to normalize to the scalar in
+  both cases.
+
+### `variable` serialization (JLD2/JSON export+import)
+
+Building on the fix above, `Components.variable(sol)` for a 1-D variable was already a
+scalar but was previously written raw into exported JLD2/JSON files, which then failed
+to re-import (`import_ocp_solution` raised a `MethodError`) — see
+[OptimalControl.jl#857](https://github.com/control-toolbox/OptimalControl.jl/issues/857).
+This is now fixed: exports always write a `Vector{Float64}` on the wire, and imports
+accept both the new vector format and the old (broken) scalar format, so files exported
+by a pre-0.17 CTModels for a 1-D-variable problem become importable without
+re-exporting. No API change here — `import_ocp_solution`/`export_ocp_solution`'s
+signatures and behavior for `variable(sol)` (already a scalar) are unchanged; only the
+on-disk format and its robustness on import changed.
 
 ## [0.16.1] - 2026-08-01
 

@@ -150,8 +150,8 @@ function path_constraints_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::PC_Dual where {PC_Dual<:Union{Function,Nothing}}
     return model.path_constraints_dual
@@ -178,8 +178,8 @@ function boundary_constraints_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::BC_Dual where {BC_Dual<:Union{ctVector,Nothing}}
     return model.boundary_constraints_dual
@@ -206,8 +206,8 @@ function state_constraints_lb_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::SC_LB_Dual where {SC_LB_Dual<:Union{Function,Nothing}}
     return model.state_constraints_lb_dual
@@ -234,8 +234,8 @@ function state_constraints_ub_dual(
         SC_UB_Dual,
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::SC_UB_Dual where {SC_UB_Dual<:Union{Function,Nothing}}
     return model.state_constraints_ub_dual
@@ -262,8 +262,8 @@ function control_constraints_lb_dual(
         <:Union{Function,Nothing},
         CC_LB_Dual,
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::CC_LB_Dual where {CC_LB_Dual<:Union{Function,Nothing}}
     return model.control_constraints_lb_dual
@@ -290,8 +290,8 @@ function control_constraints_ub_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         CC_UB_Dual,
-        <:Union{ctVector,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
 )::CC_UB_Dual where {CC_UB_Dual<:Union{Function,Nothing}}
     return model.control_constraints_ub_dual
@@ -300,13 +300,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dual vector associated with the lower bounds of variable constraints.
+Return the dual associated with the lower bounds of variable constraints.
 
 # Arguments
 - `model::DualModel`: A model including dual variables for variable lower bounds.
 
 # Returns
-- `VC_LB_Dual`: A vector of dual values, or `nothing` if not set.
+- `VC_LB_Dual`: A scalar for a 1-D variable, a vector otherwise, or `nothing` if not set.
 
 See also: [`CTModels.Solutions.variable_constraints_ub_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
@@ -319,22 +319,22 @@ function variable_constraints_lb_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         VC_LB_Dual,
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
     },
-)::VC_LB_Dual where {VC_LB_Dual<:Union{ctVector,Nothing}}
+)::VC_LB_Dual where {VC_LB_Dual<:Union{ctNumber,ctVector,Nothing}}
     return model.variable_constraints_lb_dual
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the dual vector associated with the upper bounds of variable constraints.
+Return the dual associated with the upper bounds of variable constraints.
 
 # Arguments
 - `model::DualModel`: A model including dual variables for variable upper bounds.
 
 # Returns
-- `VC_UB_Dual`: A vector of dual values, or `nothing` if not set.
+- `VC_UB_Dual`: A scalar for a 1-D variable, a vector otherwise, or `nothing` if not set.
 
 See also: [`CTModels.Solutions.variable_constraints_lb_dual`](@extref), [`CTModels.Solutions.state_constraints_ub_dual`](@extref).
 """
@@ -346,10 +346,10 @@ function variable_constraints_ub_dual(
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
         <:Union{Function,Nothing},
-        <:Union{ctVector,Nothing},
+        <:Union{ctNumber,ctVector,Nothing},
         VC_UB_Dual,
     },
-)::VC_UB_Dual where {VC_UB_Dual<:Union{ctVector,Nothing}}
+)::VC_UB_Dual where {VC_UB_Dual<:Union{ctNumber,ctVector,Nothing}}
     return model.variable_constraints_ub_dual
 end
 

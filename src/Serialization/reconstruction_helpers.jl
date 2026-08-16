@@ -41,8 +41,12 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
     state_constraints_ub_dual = data["state_constraints_ub_dual"]
     control_constraints_lb_dual = data["control_constraints_lb_dual"]
     control_constraints_ub_dual = data["control_constraints_ub_dual"]
-    variable_constraints_lb_dual = data["variable_constraints_lb_dual"]
-    variable_constraints_ub_dual = data["variable_constraints_ub_dual"]
+    variable_constraints_lb_dual = _extract_optional_vector(
+        data["variable_constraints_lb_dual"]
+    )
+    variable_constraints_ub_dual = _extract_optional_vector(
+        data["variable_constraints_ub_dual"]
+    )
 
     # Detect format and extract time grids
     if haskey(data, "time_grid_state")
@@ -149,3 +153,15 @@ function _extract_time_vector(time_data)
         return Vector{Float64}(time_data)
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Nothing-safe wrapper around [`CTModels.Serialization._extract_time_vector`](@extref).
+
+Used to normalize the `"variable_constraints_lb_dual"`/`"ub_dual"` fields, which are
+nullable (unlike the time grids and `"variable"`, which are always present).
+
+See also: [`CTModels.Serialization._reconstruct_solution_from_data`](@extref).
+"""
+_extract_optional_vector(x) = isnothing(x) ? nothing : _extract_time_vector(x)

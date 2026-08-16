@@ -91,16 +91,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Normalize a time-independent solution field (currently only `variable`) to a
-`Vector{Float64}` for serialization.
+Normalize a time-independent solution field to a `Vector{Float64}` (or `nothing`) for
+serialization.
 
-`Components.variable(sol)` follows the "1-D is a scalar" convention: it returns a bare
-`Number` when `variable_dimension(ocp) == 1`, and a `Vector{Float64}` otherwise. Unlike
-`state`/`control`/`costate`, this field is not run through `_discretize_function` (it is
-time-independent), so without this normalization a scalar would leak into the serialized
-data untouched.
+Several solution fields follow the "1-D is a scalar" convention: `Components.variable(sol)`
+and, for `variable_dimension(ocp) == 1`, `Solutions.variable_constraints_lb_dual(sol)` /
+`ub_dual(sol)`. Unlike `state`/`control`/`costate`, these fields are time-independent and
+are not run through `_discretize_function`, so without this normalization a scalar (or
+`nothing`) would leak into the serialized data untouched.
 
 See also: [`CTModels.Solutions._discretize_all_components`](@extref).
 """
 _as_vector(v::ctNumber)::Vector{Float64} = [Float64(v)]
 _as_vector(v::ctVector)::Vector{Float64} = Vector{Float64}(v)
+_as_vector(::Nothing) = nothing

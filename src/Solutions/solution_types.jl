@@ -287,8 +287,8 @@ Dual variables (Lagrange multipliers) for all constraints in an optimal control 
 - `state_constraints_ub_dual::SC_UB_Dual`: Multipliers for state upper bounds `t -> ν⁺(t)`, or `nothing`.
 - `control_constraints_lb_dual::CC_LB_Dual`: Multipliers for control lower bounds `t -> ω⁻(t)`, or `nothing`.
 - `control_constraints_ub_dual::CC_UB_Dual`: Multipliers for control upper bounds `t -> ω⁺(t)`, or `nothing`.
-- `variable_constraints_lb_dual::VC_LB_Dual`: Multipliers for variable lower bounds (vector), or `nothing`.
-- `variable_constraints_ub_dual::VC_UB_Dual`: Multipliers for variable upper bounds (vector), or `nothing`.
+- `variable_constraints_lb_dual::VC_LB_Dual`: Multipliers for variable lower bounds (scalar for 1-D, vector otherwise), or `nothing`.
+- `variable_constraints_ub_dual::VC_UB_Dual`: Multipliers for variable upper bounds (scalar for 1-D, vector otherwise), or `nothing`.
 
 # Example
 
@@ -306,8 +306,8 @@ struct DualModel{
     SC_UB_Dual<:Union{Function,Nothing},
     CC_LB_Dual<:Union{Function,Nothing},
     CC_UB_Dual<:Union{Function,Nothing},
-    VC_LB_Dual<:Union{ctVector,Nothing},
-    VC_UB_Dual<:Union{ctVector,Nothing},
+    VC_LB_Dual<:Union{ctNumber,ctVector,Nothing},
+    VC_UB_Dual<:Union{ctNumber,ctVector,Nothing},
 } <: AbstractDualModel
     path_constraints_dual::PC_Dual
     boundary_constraints_dual::BC_Dual
