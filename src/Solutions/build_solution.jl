@@ -371,12 +371,16 @@ function build_solution(
 
     # Variable box constraint duals follow the same "1-D is a scalar" convention as
     # `variable` itself (see `var` above): a length-1 vector is stored as a scalar.
-    vc_lb_dual =
-        isnothing(variable_constraints_lb_dual) ? nothing :
+    vc_lb_dual = if isnothing(variable_constraints_lb_dual)
+        nothing
+    else
         (dim_v == 1 ? variable_constraints_lb_dual[1] : variable_constraints_lb_dual)
-    vc_ub_dual =
-        isnothing(variable_constraints_ub_dual) ? nothing :
+    end
+    vc_ub_dual = if isnothing(variable_constraints_ub_dual)
+        nothing
+    else
         (dim_v == 1 ? variable_constraints_ub_dual[1] : variable_constraints_ub_dual)
+    end
 
     # build Models
     state = StateModelSolution(state_name(ocp), state_components(ocp), fx)
