@@ -181,7 +181,8 @@ including all primal and dual information, which can be read by external tools.
 - `sol::CTModels.Solution`: The solution to be saved.
 
 # Keyword Arguments
-- `filename::String = "solution"`: Base filename. The `.json` extension is automatically appended.
+- `filename::String = "solution"`: Base filename. The `.json` extension is appended
+  automatically, unless `filename` already ends with it (case-insensitively).
 
 # Notes
 The exported JSON includes the time grid, state, control, costate, objective, solver info, and all constraint duals (if available).
@@ -208,7 +209,7 @@ function CTModels.export_ocp_solution(
     blob["infos"] = infos_serialized
     blob["infos_symbol_keys"] = symbol_keys
 
-    open(filename * ".json", "w") do io
+    open(CTModels.Serialization._ensure_extension(filename, ".json"), "w") do io
         return JSON3.pretty(io, blob)
     end
 
@@ -260,7 +261,8 @@ including the discretized primal and dual trajectories.
 - `ocp::CTModels.Model`: The model associated with the optimal control problem. Used to rebuild the full solution.
 
 # Keyword Arguments
-- `filename::String = "solution"`: Base filename. The `.json` extension is automatically appended.
+- `filename::String = "solution"`: Base filename. The `.json` extension is appended
+  automatically, unless `filename` already ends with it (case-insensitively).
 
 # Returns
 - `CTModels.Solution`: A reconstructed solution instance.
@@ -278,7 +280,7 @@ julia> sol = CTModels.import_ocp_solution(CTModels.JSON3Tag(), model; filename="
 function CTModels.import_ocp_solution(
     ::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String
 )
-    json_string = read(filename * ".json", String)
+    json_string = read(CTModels.Serialization._ensure_extension(filename, ".json"), String)
     blob = JSON3.read(json_string)
 
     # Restore Symbol types in infos (JSON3 deserializes all strings; metadata tracks which were Symbols)

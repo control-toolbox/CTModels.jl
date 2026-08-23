@@ -29,6 +29,34 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return `filename` with `ext` appended, unless `filename` already ends with `ext`
+(case-insensitively).
+
+# Arguments
+- `filename::String`: base filename, with or without `ext`.
+- `ext::String`: extension to ensure, including the leading dot (e.g. `".json"`).
+
+# Returns
+- `String`: `filename` unchanged if it already ends with `ext`; `filename * ext` otherwise.
+
+# Example
+```julia-repl
+julia> using CTModels: Serialization
+
+julia> Serialization._ensure_extension("solution", ".json")
+"solution.json"
+
+julia> Serialization._ensure_extension("solution.json", ".json")
+"solution.json"
+```
+"""
+function _ensure_extension(filename::String, ext::String)::String
+    return endswith(lowercase(filename), lowercase(ext)) ? filename : filename * ext
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Export an optimal control solution to a file.
 
 # Arguments
@@ -36,7 +64,8 @@ Export an optimal control solution to a file.
 
 # Keyword Arguments
 - `format::Symbol=:JLD`: Export format, either `:JLD` or `:JSON`.
-- `filename::String="solution"`: Base filename (extension added automatically).
+- `filename::String="solution"`: Base filename; the extension is appended automatically,
+  unless `filename` already ends with it (case-insensitively).
 
 # Returns
 - `Nothing`: This function writes to a file and returns nothing.
@@ -78,7 +107,8 @@ Import an optimal control solution from a file.
 
 # Keyword Arguments
 - `format::Symbol=:JLD`: Import format, either `:JLD` or `:JSON`.
-- `filename::String="solution"`: Base filename (extension added automatically).
+- `filename::String="solution"`: Base filename; the extension is appended automatically,
+  unless `filename` already ends with it (case-insensitively).
 
 # Returns
 - `Solution`: The imported solution.

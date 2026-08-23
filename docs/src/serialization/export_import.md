@@ -71,6 +71,22 @@ nothing # hide
 x(0.5)
 ```
 
+## Extension appending is idempotent
+
+If `filename` already ends with the target extension (case-insensitively), it is left
+alone instead of being suffixed a second time:
+
+```@example exim
+base_json = base * ".json"
+CTModels.export_ocp_solution(sol; filename=base_json, format=:JSON)
+nothing # hide
+```
+
+```@repl exim
+isfile(base_json)
+isfile(base_json * ".json")
+```
+
 ## How trajectories survive serialization
 
 A trajectory is a *function* `t -> x(t)`, which neither JSON nor JLD2 can store directly.

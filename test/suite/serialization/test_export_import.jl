@@ -1392,6 +1392,47 @@ function test_export_import()
 
             remove_if_exists("variable_dim1_dual_test.jld2")
         end
+
+        # ========================================================================
+        # Regression: filename already carrying the format extension
+        # https://github.com/control-toolbox/CTModels.jl/issues/399
+        # ========================================================================
+
+        Test.@testset "JSON round-trip: filename already ends with .json" begin
+            ocp, sol = TestProblems.solution_example()
+
+            Serialization.export_ocp_solution(
+                sol; filename="dup_ext_test.json", format=:JSON
+            )
+            Test.@test isfile("dup_ext_test.json")
+            Test.@test !isfile("dup_ext_test.json.json")
+
+            sol_reloaded = Serialization.import_ocp_solution(
+                ocp; filename="dup_ext_test.json", format=:JSON
+            )
+            Test.@test Solutions.objective(sol) ≈ Solutions.objective(sol_reloaded) atol =
+                1e-8
+
+            remove_if_exists("dup_ext_test.json")
+        end
+
+        Test.@testset "JLD round-trip: filename already ends with .jld2" begin
+            ocp, sol = TestProblems.solution_example()
+
+            Serialization.export_ocp_solution(
+                sol; filename="dup_ext_test.jld2", format=:JLD
+            )
+            Test.@test isfile("dup_ext_test.jld2")
+            Test.@test !isfile("dup_ext_test.jld2.jld2")
+
+            sol_reloaded = Serialization.import_ocp_solution(
+                ocp; filename="dup_ext_test.jld2", format=:JLD
+            )
+            Test.@test Solutions.objective(sol) ≈ Solutions.objective(sol_reloaded) atol =
+                1e-8
+
+            remove_if_exists("dup_ext_test.jld2")
+        end
     end
 end
 

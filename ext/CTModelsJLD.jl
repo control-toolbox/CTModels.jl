@@ -26,7 +26,8 @@ serialization warnings for function objects.
 - `sol::CTModels.Solution`: The optimal control solution to be saved.
 
 # Keyword Arguments
-- `filename::String = "solution"`: Base name of the file. The `.jld2` extension is automatically appended.
+- `filename::String = "solution"`: Base name of the file. The `.jld2` extension is
+  appended automatically, unless `filename` already ends with it (case-insensitively).
 
 # Example
 ```julia-repl
@@ -48,7 +49,7 @@ function CTModels.export_ocp_solution(
     data = CTModels.Solutions._serialize_solution(sol)
 
     # Save only the serialized data (no more OCP model)
-    JLD2.jldsave(filename * ".jld2"; solution_data=data)
+    JLD2.jldsave(CTModels.Serialization._ensure_extension(filename, ".jld2"); solution_data=data)
 
     return nothing
 end
@@ -66,7 +67,8 @@ reconstructs it using `build_solution` from the discretized data.
 - `ocp::CTModels.Model`: The associated optimal control problem model.
 
 # Keyword Arguments
-- `filename::String = "solution"`: Base name of the file. The `.jld2` extension is automatically appended.
+- `filename::String = "solution"`: Base name of the file. The `.jld2` extension is
+  appended automatically, unless `filename` already ends with it (case-insensitively).
 
 # Returns
 - `CTModels.Solution`: The reconstructed solution object.
@@ -87,7 +89,7 @@ function CTModels.import_ocp_solution(
     ::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String
 )
     # Load the saved data
-    file_data = JLD2.load(filename * ".jld2")
+    file_data = JLD2.load(CTModels.Serialization._ensure_extension(filename, ".jld2"))
     data = file_data["solution_data"]
 
     infos = get(data, "infos", Dict{Symbol,Any}())

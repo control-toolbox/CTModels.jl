@@ -448,6 +448,33 @@ function test_serialization_units()
             Test.@test Components.variable(sol2) isa Float64
             Test.@test Components.variable(sol2) ≈ Components.variable(sol) atol = 1e-10
         end
+
+        # ==============================================================================
+        # C.8 — Regression: idempotent extension appending
+        #
+        # https://github.com/control-toolbox/CTModels.jl/issues/399
+        # `_ensure_extension` must append the format extension exactly once, whether or
+        # not the caller already included it (case-insensitively).
+        # ==============================================================================
+
+        Test.@testset "_ensure_extension: bare name gets extension appended" begin
+            Test.@test Serialization._ensure_extension("solution", ".json") == "solution.json"
+        end
+
+        Test.@testset "_ensure_extension: already suffixed, same case, is unchanged" begin
+            Test.@test Serialization._ensure_extension("solution.json", ".json") ==
+                "solution.json"
+        end
+
+        Test.@testset "_ensure_extension: already suffixed, different case, is unchanged" begin
+            Test.@test Serialization._ensure_extension("solution.JLD2", ".jld2") ==
+                "solution.JLD2"
+        end
+
+        Test.@testset "_ensure_extension: extension substring not at the end still appends" begin
+            Test.@test Serialization._ensure_extension("jld2_backup", ".jld2") ==
+                "jld2_backup.jld2"
+        end
     end
 end
 
