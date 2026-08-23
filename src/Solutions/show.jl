@@ -24,7 +24,7 @@ The display is a single tree rooted at "Solution":
 See also: [`CTModels.Solutions.Solution`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
 
     # ── Header ──────────────────────────────────────────────────────────────
     ok = Solutions.successful(sol)
@@ -33,7 +33,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     println(io, fmt.name, "Solution", fmt.reset, "  ", ok_code, ok_sym, fmt.reset)
 
     # ── Optional solver-metadata — only display when provided ────────────────
-    _np = Core.NotProvidedType
+    _np = CTBase.Core.NotProvidedType
     _iter = Solutions.iterations(sol)
     _status = Solutions.status(sol)
     _msg = Solutions.message(sol)

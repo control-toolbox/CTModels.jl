@@ -16,10 +16,12 @@ function test_print()
         # ====================================================================
 
         Test.@testset "AbstractDefinition display" begin
-            Test.@testset "show(EmptyDefinition) produces no output" begin
+            Test.@testset "show(EmptyDefinition) identifies empty definition" begin
                 io = IOBuffer()
                 show(io, MIME"text/plain"(), Components.EmptyDefinition())
-                Test.@test isempty(String(take!(io)))
+                s = String(take!(io))
+                Test.@test occursin("EmptyDefinition", s)
+                Test.@test occursin("empty", s)
             end
 
             Test.@testset "show(Definition) prints header" begin

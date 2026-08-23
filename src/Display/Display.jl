@@ -9,6 +9,9 @@ problems and solutions in human-readable formats.
 # Organisation
 
 - **ansi.jl**: Generic Expr printing ([`CTModels.Display.__print`](@extref))
+- **helpers.jl**: Shared palette-aware field and tree rendering helpers
+- **components.jl**: Display for concrete component model types
+- **solution_types.jl**: Display for solution support types
 - **definition.jl**: Abstract (symbolic) definition printing ([`CTModels.Display._print_abstract_definition`](@extref))
 - **mathematical.jl**: Mathematical definition printing ([`CTModels.Display.__print_mathematical_definition`](@extref))
 - **model.jl**: Display for [`CTModels.Models.Model`](@extref)
@@ -38,7 +41,7 @@ module Display
 
 using DocStringExtensions: TYPEDSIGNATURES
 
-using CTBase: CTBase, Exceptions, Core
+using CTBase: CTBase, Exceptions
 using MLStyle: MLStyle
 using RecipesBase: RecipesBase
 using MacroTools: MacroTools
@@ -50,6 +53,9 @@ using ..Solutions
 
 # Include display functions (split by responsibility)
 include(joinpath(@__DIR__, "ansi.jl"))
+include(joinpath(@__DIR__, "helpers.jl"))
+include(joinpath(@__DIR__, "components.jl"))
+include(joinpath(@__DIR__, "solution_types.jl"))
 include(joinpath(@__DIR__, "definition.jl"))
 include(joinpath(@__DIR__, "mathematical.jl"))
 include(joinpath(@__DIR__, "model.jl"))

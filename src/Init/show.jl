@@ -17,7 +17,7 @@ functions; `variable` shows its value or `(none)` when empty.
 See also: [`CTModels.Init.InitialGuess`](@extref), [`CTModels.Init.PreInitialGuess`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", init::InitialGuess)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
     println(io, fmt.name, "InitialGuess", fmt.reset)
     println(io, "  ", fmt.label, "state:   ", fmt.reset, fmt.muted, "<callable>", fmt.reset)
     println(io, "  ", fmt.label, "control: ", fmt.reset, fmt.muted, "<callable>", fmt.reset)
@@ -49,7 +49,7 @@ Print a compact one-line representation of the initial guess to `io`.
 See also: [`CTModels.Init.InitialGuess`](@extref)
 """
 function Base.show(io::IO, init::InitialGuess)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
     v_str = isempty(init.variable) ? "(none)" : string(init.variable)
     return print(
         io,
@@ -76,7 +76,7 @@ Displays the type name, then the `typeof` of each raw field (`state`, `control`,
 See also: [`CTModels.Init.PreInitialGuess`](@extref), [`CTModels.Init.InitialGuess`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", pre::PreInitialGuess)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
     println(io, fmt.name, "PreInitialGuess", fmt.reset)
     println(
         io, "  ", fmt.label, "state:   ", fmt.reset, fmt.type, typeof(pre.state), fmt.reset
@@ -115,7 +115,7 @@ Print a compact one-line representation of the pre-initial guess to `io`.
 See also: [`CTModels.Init.PreInitialGuess`](@extref)
 """
 function Base.show(io::IO, pre::PreInitialGuess)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
     return print(
         io,
         fmt.name,
