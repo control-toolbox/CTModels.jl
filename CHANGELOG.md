@@ -7,6 +7,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-08-23
+
+### 💥 Changed
+
+- **`Components.times(sol)` is now a simple alias for `Components.time_grid(sol)`**
+  ([#310](https://github.com/control-toolbox/CTModels.jl/issues/310)). It previously
+  returned the solution's `AbstractTimesModel` metadata (fixed/free descriptors,
+  names) — for a free time, that struct only carries an index into the optimisation
+  variable, so the value was unusable without manually indexing `sol.variable`.
+  `times(sol)` now returns the discretised time grid, exactly like `time_grid(sol)`
+  (including the optional `component` argument, e.g. `times(sol, :state)`).
+
+### 🐛 Fixed
+
+- **`Components.initial_time(sol)` / `final_time(sol)` no longer throw
+  `MethodError` when the initial or final time is free**
+  ([#310](https://github.com/control-toolbox/CTModels.jl/issues/310)). They called
+  `initial_time(sol.times)` / `final_time(sol.times)` without passing `sol.variable`,
+  which only has a method for the fixed-time case. The dispatch matrix on
+  `TimesModel` is now complete (fixed/free × with/without a variable, vector or
+  scalar), and the solution-level accessors always pass `Components.variable(sol)`.
+
+See [BREAKING.md](BREAKING.md) for migration notes.
+
 ## [0.17.1] - 2026-08-23
 
 ### 🐛 Bug Fixes

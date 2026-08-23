@@ -126,9 +126,9 @@ function test_solution()
             Test.@test Components.initial_time_name(sol) == "0.0"
             Test.@test Components.final_time_name(sol) == "1.0"
             Test.@test Solutions.time_grid(sol) == [0.0, 0.5, 1.0]
-            Test.@test Models.times(sol) isa Components.TimesModel
-            Test.@test Components.initial_time(Models.times(sol)) == 0
-            Test.@test Components.final_time(Models.times(sol)) == 1
+            # times(sol) is a simple alias for time_grid(sol)
+            Test.@test Models.times(sol) == Solutions.time_grid(sol)
+            Test.@test Models.times(sol) == [0.0, 0.5, 1.0]
             # Test direct time getters on solution
             Test.@test Components.initial_time(sol) == 0
             Test.@test Components.final_time(sol) == 1
@@ -136,6 +136,32 @@ function test_solution()
             Test.@test Components.has_free_initial_time(sol) == false
             Test.@test Components.has_fixed_final_time(sol) == true
             Test.@test Components.has_free_final_time(sol) == false
+        end
+        Test.@testset "time (free initial and final)" begin
+            pre_free = Building.PreModel()
+            Building.variable!(pre_free, 2, "z", ["a", "b"])
+            Building.time!(pre_free; ind0=1, indf=2, time_name=:s)
+            Building.state!(pre_free, 2, "y", ["u", "v"])
+            Building.control!(pre_free, 1, "w")
+            Building.dynamics!(pre_free, (r, t, x, u, v) -> r .= [x[1], u[1]])
+            Building.objective!(pre_free, :min; mayer=(x0, xf, v) -> x0[1] + xf[1])
+            Building.definition!(pre_free, quote end)
+            Building.time_dependence!(pre_free; autonomous=false)
+            ocp_free = Building.build(pre_free)
+
+            T_free = [0.0, 0.5, 1.0]
+            X_free = [0.0 0.0; 0.5 0.5; 1.0 1.0]
+            U_free = reshape([1.0, 2.0, 3.0], 3, 1)
+            v_free = [0.0, 1.0] # t0 = v[1] = 0.0, tf = v[2] = 1.0
+            P_free = zeros(3, 2)
+            sol_free = Solutions.build_solution(
+                ocp_free, T_free, X_free, U_free, v_free, P_free; kwargs...
+            )
+
+            Test.@test Components.has_free_initial_time(sol_free) == true
+            Test.@test Components.has_free_final_time(sol_free) == true
+            Test.@test Components.initial_time(sol_free) == v_free[1]
+            Test.@test Components.final_time(sol_free) == v_free[2]
         end
         Test.@testset "infos" begin
             Test.@test Models.objective(sol) == 0.5

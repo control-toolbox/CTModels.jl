@@ -82,6 +82,16 @@ length(CTModels.time_grid(sol_m, :control))
 length(CTModels.time_grid(sol_m, :costate))
 ```
 
+## `times` is an alias for `time_grid`
+
+[`times`](@ref CTModels.Components.times) on a solution is a simple alias for
+[`time_grid`](@ref CTModels.Components.time_grid): same arguments, same return value.
+
+```@repl grids
+CTModels.times(sol_u) == CTModels.time_grid(sol_u)
+CTModels.times(sol_m, :state) == CTModels.time_grid(sol_m, :state)
+```
+
 ## Component aliases
 
 `time_grid(sol, :states)`, `time_grid(sol, :duals)`, … accept many synonyms. They are
