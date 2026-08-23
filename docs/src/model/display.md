@@ -103,6 +103,93 @@ macro-based DSL (e.g. OptimalControl.jl) that stores the original user code.
 When no definition is set ([`EmptyDefinition`](@ref CTModels.Components.EmptyDefinition)),
 this section is skipped silently.
 
+## Displaying component types
+
+The same display conventions are used by the concrete component types that make up a
+model. The types are normally inspected through their public accessors, while `show`
+provides a compact visual summary of their structure:
+
+```@repl display
+state_model = CTModels.Components.StateModel("x", ["x₁", "x₂"])
+CTModels.Components.name(state_model)
+CTModels.Components.components(state_model)
+CTModels.Components.dimension(state_model)
+```
+
+```@example display
+state_model
+```
+
+A solution component indicates that its value is a callable trajectory without expanding
+the closure. The value and metadata remain available through accessors:
+
+```@repl display
+state_solution = CTModels.Components.StateModelSolution("x", ["x₁"], t -> 2t)
+CTModels.Components.value(state_solution)(0.5)
+CTModels.Components.name(state_solution)
+CTModels.Components.dimension(state_solution)
+```
+
+```@example display
+state_solution
+```
+
+Time models, objectives, and constraints follow the same pattern. Their summaries expose
+semantic fields while the accessors provide the programmatic interface:
+
+```@repl display
+times_model = CTModels.Components.TimesModel(
+    CTModels.Components.FixedTimeModel(0.0, "t₀"),
+    CTModels.Components.FreeTimeModel(2, "tf"),
+    "t",
+)
+CTModels.Components.initial(times_model)
+CTModels.Components.final(times_model)
+CTModels.Components.initial_time_name(times_model)
+CTModels.Components.final_time_name(times_model)
+```
+
+```@example display
+times_model
+```
+
+```@repl display
+objective_model = CTModels.Components.MayerObjectiveModel((x0, xf, v) -> xf[1], :min)
+CTModels.Components.criterion(objective_model)
+CTModels.Components.mayer(objective_model)
+```
+
+```@example display
+objective_model
+```
+
+For solution support objects, the display summarizes grid sizes, optional solver metadata,
+and dual presence rather than printing all numerical data:
+
+```@repl display
+grid = CTModels.UnifiedTimeGridModel(collect(range(0.0, 1.0; length=5)))
+infos = CTModels.SolverInfos(12, :first_order, "converged", true, 1e-8, Dict{Symbol,Any}())
+grid
+infos
+```
+
+The corresponding accessors can be used without relying on the stored fields:
+
+```@example display
+CTModels.time_grid_model(
+    CTModels.build_solution(
+        ocp,
+        collect(range(0.0, 1.0; length=3)),
+        zeros(3, 2),
+        zeros(3, 1),
+        Float64[],
+        zeros(3, 2);
+        objective=0.0,
+        successful=true,
+    ),
+)
+```
+
 ## Plotting solutions
 
 The `Display` module registers a `RecipesBase.plot` method for

@@ -34,7 +34,8 @@ $(TYPEDSIGNATURES)
 Print a compact one-line representation of a [`SubPathConstraint`](@extref).
 """
 function Base.show(io::IO, f::SubPathConstraint)
-    return print(io, "SubPathConstraint(n=", f.n, ", indices=", f.indices, ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "SubPathConstraint", fmt.reset, "(n=", fmt.count, f.n, fmt.reset, ", indices=", fmt.value, f.indices, fmt.reset, ")")
 end
 
 """
@@ -43,9 +44,10 @@ $(TYPEDSIGNATURES)
 Print a multi-line representation of a [`SubPathConstraint`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", f::SubPathConstraint{CP,I}) where {CP,I}
-    print(io, "SubPathConstraint")
-    print(io, "\n  n:       ", f.n)
-    return print(io, "\n  indices: ", f.indices)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "SubPathConstraint", fmt.reset)
+    print(io, "\n  ", fmt.label, "n:       ", fmt.reset, fmt.count, f.n, fmt.reset)
+    return print(io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset)
 end
 
 # ------------------------------------------------------------------------------
@@ -82,7 +84,8 @@ $(TYPEDSIGNATURES)
 Print a compact one-line representation of a [`SubBoundaryConstraint`](@extref).
 """
 function Base.show(io::IO, f::SubBoundaryConstraint)
-    return print(io, "SubBoundaryConstraint(n=", f.n, ", indices=", f.indices, ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "SubBoundaryConstraint", fmt.reset, "(n=", fmt.count, f.n, fmt.reset, ", indices=", fmt.value, f.indices, fmt.reset, ")")
 end
 
 """
@@ -91,9 +94,10 @@ $(TYPEDSIGNATURES)
 Print a multi-line representation of a [`SubBoundaryConstraint`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", f::SubBoundaryConstraint{CP,I}) where {CP,I}
-    print(io, "SubBoundaryConstraint")
-    print(io, "\n  n:       ", f.n)
-    return print(io, "\n  indices: ", f.indices)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "SubBoundaryConstraint", fmt.reset)
+    print(io, "\n  ", fmt.label, "n:       ", fmt.reset, fmt.count, f.n, fmt.reset)
+    return print(io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset)
 end
 
 # ------------------------------------------------------------------------------
@@ -129,7 +133,8 @@ $(TYPEDSIGNATURES)
 Print a compact one-line representation of a [`BoxProjection`](@extref).
 """
 function Base.show(io::IO, f::BoxProjection{Slot,CIDX}) where {Slot,CIDX}
-    return print(io, "BoxProjection{:", Slot, "}(", f.cidx, ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "BoxProjection", fmt.reset, "{", fmt.keyword, ":", Slot, fmt.reset, "}(", fmt.value, f.cidx, fmt.reset, ")")
 end
 
 """
@@ -140,7 +145,8 @@ Print a multi-line representation of a [`BoxProjection`](@extref).
 function Base.show(
     io::IO, ::MIME"text/plain", f::BoxProjection{Slot,CIDX}
 ) where {Slot,CIDX}
-    print(io, "BoxProjection")
-    print(io, "\n  slot: :", Slot)
-    return print(io, "\n  cidx: ", f.cidx)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "BoxProjection", fmt.reset)
+    print(io, "\n  ", fmt.label, "slot: ", fmt.reset, fmt.keyword, ":", Slot, fmt.reset)
+    return print(io, "\n  ", fmt.label, "cidx: ", fmt.reset, fmt.value, f.cidx, fmt.reset)
 end

@@ -188,14 +188,25 @@ $(TYPEDSIGNATURES)
 Compact string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
 function Base.show(io::IO, f::MergedTrajectory{F,C}) where {F,C}
+    fmt = CTBase.Core.get_format_codes(io)
     return print(
         io,
-        "MergedTrajectory(dim=",
+        fmt.name,
+        "MergedTrajectory",
+        fmt.reset,
+        "(dim=",
+        fmt.count,
         f.dim,
-        ", role=:",
+        fmt.reset,
+        ", role=",
+        fmt.keyword,
+        ":",
         f.role,
+        fmt.reset,
         ", ncomps=",
+        fmt.count,
         length(f.comps),
+        fmt.reset,
         ")",
     )
 end
@@ -206,8 +217,9 @@ $(TYPEDSIGNATURES)
 Detailed string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,C}) where {F,C}
-    print(io, "MergedTrajectory")
-    print(io, "\n  role:   :", f.role)
-    print(io, "\n  dim:    ", f.dim)
-    return print(io, "\n  ncomps: ", length(f.comps))
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "MergedTrajectory", fmt.reset)
+    print(io, "\n  ", fmt.label, "role:   ", fmt.reset, fmt.keyword, ":", f.role, fmt.reset)
+    print(io, "\n  ", fmt.label, "dim:    ", fmt.reset, fmt.count, f.dim, fmt.reset)
+    return print(io, "\n  ", fmt.label, "ncomps: ", fmt.reset, fmt.count, length(f.comps), fmt.reset)
 end

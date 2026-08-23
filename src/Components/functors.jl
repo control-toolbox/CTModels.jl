@@ -30,13 +30,15 @@ end
 (f::ConstantInTime)(::Real) = f.value
 
 function Base.show(io::IO, f::ConstantInTime)
-    return print(io, "ConstantInTime(", f.value, ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "ConstantInTime", fmt.reset, "(", fmt.value, f.value, fmt.reset, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::ConstantInTime{V}) where {V}
-    print(io, "ConstantInTime")
-    print(io, "\n  value: ", f.value)
-    return print(io, "\n  type:  ", V)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "ConstantInTime", fmt.reset)
+    print(io, "\n  ", fmt.label, "value: ", fmt.reset, fmt.value, f.value, fmt.reset)
+    return print(io, "\n  ", fmt.label, "type:  ", fmt.reset, fmt.type, V, fmt.reset)
 end
 
 # ------------------------------------------------------------------------------
@@ -75,11 +77,13 @@ end
 (f::CoercedTrajectory)(t) = f.coerce(f.inner(t))
 
 function Base.show(io::IO, f::CoercedTrajectory)
-    return print(io, "CoercedTrajectory(", nameof(f.coerce), ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "CoercedTrajectory", fmt.reset, "(", fmt.keyword, nameof(f.coerce), fmt.reset, ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::CoercedTrajectory{F,C}) where {F,C}
-    print(io, "CoercedTrajectory")
-    print(io, "\n  inner:  ", nameof(typeof(f.inner)))
-    return print(io, "\n  coerce: ", nameof(f.coerce))
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "CoercedTrajectory", fmt.reset)
+    print(io, "\n  ", fmt.label, "inner:  ", fmt.reset, fmt.type, nameof(typeof(f.inner)), fmt.reset)
+    return print(io, "\n  ", fmt.label, "coerce: ", fmt.reset, fmt.keyword, nameof(f.coerce), fmt.reset)
 end

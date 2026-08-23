@@ -103,7 +103,8 @@ $(TYPEDSIGNATURES)
 Compact string representation of [`CTModels.Building.CompositeConstraint`](@extref).
 """
 function Base.show(io::IO, f::CompositeConstraint{Sig,CS}) where {Sig,CS}
-    return print(io, "CompositeConstraint{:", Sig, "}(n=", f.n, ", dims=", f.dims, ")")
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "CompositeConstraint", fmt.reset, "{", fmt.keyword, ":", Sig, fmt.reset, "}(n=", fmt.count, f.n, fmt.reset, ", dims=", fmt.value, f.dims, fmt.reset, ")")
 end
 
 """
@@ -114,8 +115,9 @@ Detailed string representation of [`CTModels.Building.CompositeConstraint`](@ext
 function Base.show(
     io::IO, ::MIME"text/plain", f::CompositeConstraint{Sig,CS}
 ) where {Sig,CS}
-    print(io, "CompositeConstraint")
-    print(io, "\n  sig:  :", Sig)
-    print(io, "\n  n:    ", f.n)
-    return print(io, "\n  dims: ", f.dims)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "CompositeConstraint", fmt.reset)
+    print(io, "\n  ", fmt.label, "sig:  ", fmt.reset, fmt.keyword, ":", Sig, fmt.reset)
+    print(io, "\n  ", fmt.label, "n:    ", fmt.reset, fmt.count, f.n, fmt.reset)
+    return print(io, "\n  ", fmt.label, "dims: ", fmt.reset, fmt.value, f.dims, fmt.reset)
 end
