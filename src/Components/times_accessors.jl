@@ -207,6 +207,96 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Get the initial time from the times model, ignoring `variable` (fixed initial time).
+
+Completes the dispatch matrix so that `initial_time(model, variable)` works uniformly
+regardless of whether the initial time is fixed or free, and regardless of `variable`
+being a vector or a scalar (per the "1-D is a scalar" convention).
+
+# Arguments
+- `model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}`: The times model with fixed initial time.
+- `variable`: Ignored.
+
+# Returns
+- `T`: The fixed initial time value.
+
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_fixed_initial_time`](@extref).
+"""
+function initial_time(
+    model::TimesModel{<:FixedTimeModel{T},<:AbstractTimeModel}, ::Any
+)::T where {T<:Time}
+    return initial_time(model)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the times model, ignoring `variable` (fixed final time).
+
+Completes the dispatch matrix so that `final_time(model, variable)` works uniformly
+regardless of whether the final time is fixed or free, and regardless of `variable`
+being a vector or a scalar (per the "1-D is a scalar" convention).
+
+# Arguments
+- `model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}`: The times model with fixed final time.
+- `variable`: Ignored.
+
+# Returns
+- `T`: The fixed final time value.
+
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_fixed_final_time`](@extref).
+"""
+function final_time(
+    model::TimesModel{<:AbstractTimeModel,<:FixedTimeModel{T}}, ::Any
+)::T where {T<:Time}
+    return final_time(model)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the initial time from the times model, from a free initial time model and a scalar
+variable.
+
+# Arguments
+- `model::TimesModel{FreeTimeModel,<:AbstractTimeModel}`: The times model with free initial time.
+- `variable::T`: The scalar optimisation variable.
+
+# Returns
+- `T`: The initial time value from the variable.
+
+See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.has_free_initial_time`](@extref).
+"""
+function initial_time(
+    model::TimesModel{FreeTimeModel,<:AbstractTimeModel}, variable::T
+)::T where {T<:ctNumber}
+    return initial_time(model, [variable])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Get the final time from the times model, from a free final time model and a scalar
+variable.
+
+# Arguments
+- `model::TimesModel{<:AbstractTimeModel,FreeTimeModel}`: The times model with free final time.
+- `variable::T`: The scalar optimisation variable.
+
+# Returns
+- `T`: The final time value from the variable.
+
+See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.has_free_final_time`](@extref).
+"""
+function final_time(
+    model::TimesModel{<:AbstractTimeModel,FreeTimeModel}, variable::T
+)::T where {T<:ctNumber}
+    return final_time(model, [variable])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Check if the initial time is fixed. Return true.
 
 # Returns

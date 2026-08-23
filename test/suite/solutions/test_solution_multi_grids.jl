@@ -320,6 +320,11 @@ function test_solution_multi_grids()
                 # Test plural forms
                 Test.@test Solutions.time_grid(sol, :states) == T
                 Test.@test Solutions.time_grid(sol, :controls) == T
+
+                # times(sol) is a simple alias for time_grid(sol)
+                Test.@test Components.times(sol) == Solutions.time_grid(sol)
+                Test.@test Components.times(sol, :control) ==
+                    Solutions.time_grid(sol, :control)
             end
 
             Test.@testset "MultipleTimeGridModel getters" begin
@@ -365,6 +370,13 @@ function test_solution_multi_grids()
                 # Test plural forms
                 Test.@test Solutions.time_grid(sol, :states) == T_state
                 Test.@test Solutions.time_grid(sol, :controls) == T_control
+
+                # times(sol) is a simple alias for time_grid(sol)
+                Test.@test Components.times(sol) == Solutions.time_grid(sol)
+                Test.@test Components.times(sol, :state) ==
+                    Solutions.time_grid(sol, :state)
+                Test.@test Components.times(sol, :costate) ==
+                    Solutions.time_grid(sol, :costate)
 
                 # Test invalid component
                 Test.@test_throws Exceptions.IncorrectArgument Solutions.time_grid(

@@ -1087,7 +1087,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the initial time of the solution.
+Return the initial time of the solution, whether fixed or free.
 
 # Arguments
 - `sol::Solution`: The optimal control solution.
@@ -1098,13 +1098,13 @@ Return the initial time of the solution.
 See also: [`CTModels.Components.final_time`](@extref), [`CTModels.Components.initial_time_name`](@extref).
 """
 function Components.initial_time(sol::Solution)::Real
-    return initial_time(sol.times)
+    return initial_time(sol.times, Components.variable(sol))
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the final time of the solution.
+Return the final time of the solution, whether fixed or free.
 
 # Arguments
 - `sol::Solution`: The optimal control solution.
@@ -1115,7 +1115,7 @@ Return the final time of the solution.
 See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time_name`](@extref).
 """
 function Components.final_time(sol::Solution)::Real
-    return final_time(sol.times)
+    return final_time(sol.times, Components.variable(sol))
 end
 
 """
@@ -1189,31 +1189,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the times model.
+Alias for [`CTModels.Components.time_grid`](@extref): return the solution's time grid
+(optionally for a given `component`).
 
-# Arguments
-- `sol::Solution`: The optimal control solution.
-
-# Returns
-- `TM`: The times model.
-
-See also: [`CTModels.Components.initial_time`](@extref), [`CTModels.Components.final_time`](@extref).
+See also: [`CTModels.Components.time_grid`](@extref).
 """
-function Components.times(
-    sol::Solution{
-        <:AbstractTimeGridModel,
-        TM,
-        <:AbstractStateModel,
-        <:AbstractControlModel,
-        <:AbstractVariableModel,
-        <:AbstractModel,
-        <:Function,
-        <:ctNumber,
-        <:AbstractDualModel,
-        <:AbstractSolverInfos,
-    },
-)::TM where {TM<:AbstractTimesModel}
-    return sol.times
+function Components.times(sol::Solution, args...)
+    return Components.time_grid(sol, args...)
 end
 
 """

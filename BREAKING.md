@@ -4,6 +4,35 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.18.0] - 2026-08-23
+
+### `Components.times(sol)` returns the time grid instead of the times model
+
+`Components.times(sol::Solution)` used to return `sol.times`, the solution's
+`AbstractTimesModel` (fixed/free descriptors, names). It is now a simple alias for
+`Components.time_grid(sol)`: it returns the discretised time grid (same value/type as
+`time_grid(sol)`), and accepts the same optional `component` argument
+(`times(sol, :state)`, etc.) — see
+[#310](https://github.com/control-toolbox/CTModels.jl/issues/310).
+
+**Who is affected**: only code that calls `Components.times(sol)` (or
+`Models.times(sol)`/`Solutions.times(sol)`, the same re-exported generic) on a
+`Solution` and expects an `AbstractTimesModel` back. A search across the
+control-toolbox ecosystem (CTDirect.jl, CTFlows.jl, CTParser.jl, CTSolvers,
+OptimalControl.jl, CTBase) found no such call site as of this release — CTFlows.jl's
+`Integrators.times` is an unrelated generic on its own trajectory types, not this one.
+`Components.times` on a `Model` (as opposed to a `Solution`) is unaffected.
+
+**Migration**:
+
+- If you need the underlying `AbstractTimesModel` metadata (fixed/free, names), access
+  the `sol.times` field directly, or use the existing solution-level accessors
+  `Components.has_fixed_initial_time(sol)` / `has_free_initial_time(sol)` /
+  `has_fixed_final_time(sol)` / `has_free_final_time(sol)` /
+  `Components.initial_time_name(sol)` / `final_time_name(sol)`.
+- If you were already calling `Components.time_grid(sol)`, `times(sol)` now behaves
+  identically — no change needed.
+
 ## [0.17.0] - 2026-08-16
 
 ### `Solutions.variable_constraints_lb_dual`/`ub_dual` return a scalar for a 1-D variable
