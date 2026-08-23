@@ -7,6 +7,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1] - 2026-08-23
+
+### 🐛 Bug Fixes
+
+- **`export_ocp_solution`/`import_ocp_solution` no longer double-append the format
+  extension** ([#399](https://github.com/control-toolbox/CTModels.jl/issues/399)).
+  `filename` is documented as a base name — the `.jld2`/`.json` extension is added
+  automatically — but a caller who already included it (`filename="sol.jld2"`) ended up
+  with `sol.jld2.jld2`. A new private helper, `Serialization._ensure_extension`, detects
+  the extension case-insensitively before appending, used by both extensions
+  (`CTModelsJLD`, `CTModelsJSON`) for both export and import.
+
+### ✅ Compatibility
+
+- **No breaking changes**: `filename` now additionally accepts names already ending in
+  the target extension; behavior for names that don't is unchanged. See
+  [BREAKING.md](BREAKING.md).
+
 ## [0.17.0] - 2026-08-16
 
 ### 🐛 Fixed
