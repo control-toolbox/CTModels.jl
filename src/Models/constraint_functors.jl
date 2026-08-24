@@ -35,7 +35,21 @@ Print a compact one-line representation of a [`SubPathConstraint`](@extref).
 """
 function Base.show(io::IO, f::SubPathConstraint)
     fmt = CTBase.Core.get_format_codes(io)
-    return print(io, fmt.name, "SubPathConstraint", fmt.reset, "(n=", fmt.count, f.n, fmt.reset, ", indices=", fmt.value, f.indices, fmt.reset, ")")
+    return print(
+        io,
+        fmt.name,
+        "SubPathConstraint",
+        fmt.reset,
+        "(n=",
+        fmt.count,
+        f.n,
+        fmt.reset,
+        ", indices=",
+        fmt.value,
+        f.indices,
+        fmt.reset,
+        ")",
+    )
 end
 
 """
@@ -47,7 +61,9 @@ function Base.show(io::IO, ::MIME"text/plain", f::SubPathConstraint{CP,I}) where
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "SubPathConstraint", fmt.reset)
     print(io, "\n  ", fmt.label, "n:       ", fmt.reset, fmt.count, f.n, fmt.reset)
-    return print(io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset)
+    return print(
+        io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset
+    )
 end
 
 # ------------------------------------------------------------------------------
@@ -85,7 +101,21 @@ Print a compact one-line representation of a [`SubBoundaryConstraint`](@extref).
 """
 function Base.show(io::IO, f::SubBoundaryConstraint)
     fmt = CTBase.Core.get_format_codes(io)
-    return print(io, fmt.name, "SubBoundaryConstraint", fmt.reset, "(n=", fmt.count, f.n, fmt.reset, ", indices=", fmt.value, f.indices, fmt.reset, ")")
+    return print(
+        io,
+        fmt.name,
+        "SubBoundaryConstraint",
+        fmt.reset,
+        "(n=",
+        fmt.count,
+        f.n,
+        fmt.reset,
+        ", indices=",
+        fmt.value,
+        f.indices,
+        fmt.reset,
+        ")",
+    )
 end
 
 """
@@ -97,7 +127,9 @@ function Base.show(io::IO, ::MIME"text/plain", f::SubBoundaryConstraint{CP,I}) w
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "SubBoundaryConstraint", fmt.reset)
     print(io, "\n  ", fmt.label, "n:       ", fmt.reset, fmt.count, f.n, fmt.reset)
-    return print(io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset)
+    return print(
+        io, "\n  ", fmt.label, "indices: ", fmt.reset, fmt.value, f.indices, fmt.reset
+    )
 end
 
 # ------------------------------------------------------------------------------
@@ -134,7 +166,22 @@ Print a compact one-line representation of a [`BoxProjection`](@extref).
 """
 function Base.show(io::IO, f::BoxProjection{Slot,CIDX}) where {Slot,CIDX}
     fmt = CTBase.Core.get_format_codes(io)
-    return print(io, fmt.name, "BoxProjection", fmt.reset, "{", fmt.keyword, ":", Slot, fmt.reset, "}(", fmt.value, f.cidx, fmt.reset, ")")
+    return print(
+        io,
+        fmt.name,
+        "BoxProjection",
+        fmt.reset,
+        "{",
+        fmt.keyword,
+        ":",
+        Slot,
+        fmt.reset,
+        "}(",
+        fmt.value,
+        f.cidx,
+        fmt.reset,
+        ")",
+    )
 end
 
 """

@@ -25,9 +25,11 @@ $(TYPEDSIGNATURES)
 Render a nested display value while preserving the colour context of `io`.
 """
 function _display_value(io::IO, value)
-    return value isa AbstractString ? value : sprint(
-        print, value; context=IOContext(io, :color => get(io, :color, false))
-    )
+    return if value isa AbstractString
+        value
+    else
+        sprint(print, value; context=IOContext(io, :color => get(io, :color, false)))
+    end
 end
 
 """
@@ -64,7 +66,9 @@ Print a sequence of labelled fields and mark the final field with `└─`.
 function print_fields(io::IO, fields; fmt=format_codes(io))
     for (index, field) in enumerate(fields)
         style = length(field) >= 3 ? field[3] : nothing
-        print_field(io, field[1], field[2]; last=index == length(fields), fmt=fmt, value_style=style)
+        print_field(
+            io, field[1], field[2]; last=index == length(fields), fmt=fmt, value_style=style
+        )
     end
     return nothing
 end

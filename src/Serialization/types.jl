@@ -41,7 +41,9 @@ end
 function Base.show(io::IO, ::MIME"text/plain", ::JLD2Tag)
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "JLD2Tag", fmt.reset)
-    return print(io, "\n  ", fmt.label, "kind: ", fmt.reset, fmt.keyword, ":format_tag", fmt.reset)
+    return print(
+        io, "\n  ", fmt.label, "kind: ", fmt.reset, fmt.keyword, ":format_tag", fmt.reset
+    )
 end
 
 function Base.show(io::IO, ::JSON3Tag)
@@ -52,5 +54,7 @@ end
 function Base.show(io::IO, ::MIME"text/plain", ::JSON3Tag)
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "JSON3Tag", fmt.reset)
-    return print(io, "\n  ", fmt.label, "kind: ", fmt.reset, fmt.keyword, ":format_tag", fmt.reset)
+    return print(
+        io, "\n  ", fmt.label, "kind: ", fmt.reset, fmt.keyword, ":format_tag", fmt.reset
+    )
 end

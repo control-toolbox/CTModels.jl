@@ -6,7 +6,9 @@
 _component_name(model) = nameof(typeof(model))
 
 """Collect accessor-backed fields for a state, control, or variable model."""
-function _space_fields(model::Union{Components.StateModel,Components.ControlModel,Components.VariableModel})
+function _space_fields(
+    model::Union{Components.StateModel,Components.ControlModel,Components.VariableModel}
+)
     return [
         ("name", Components.name(model), fmt -> fmt.value),
         ("dimension", Components.dimension(model), fmt -> fmt.count),
@@ -29,9 +31,13 @@ function _show_space(io::IO, model; detailed::Bool=false)
     fmt = format_codes(io)
     fields = _space_fields(model)
     if detailed
-        return _show_detail(io, string(nameof(typeof(model))); fmt=fmt, fields=_styled_fields(fields, fmt))
+        return _show_detail(
+            io, string(nameof(typeof(model))); fmt=fmt, fields=_styled_fields(fields, fmt)
+        )
     end
-    return _show_compact(io, string(nameof(typeof(model))); fmt=fmt, fields=_compact_fields(fields))
+    return _show_compact(
+        io, string(nameof(typeof(model))); fmt=fmt, fields=_compact_fields(fields)
+    )
 end
 
 """Apply the selected palette role to each display field."""
@@ -60,9 +66,11 @@ function _show_solution_space(io::IO, model; detailed::Bool=false)
     model isa Components.ControlModelSolution && push!(
         fields, ("interpolation", Components.interpolation(model), fmt -> fmt.keyword)
     )
-    return detailed ?
-        _show_detail(io, nameof(typeof(model)); fmt=fmt, fields=_styled_fields(fields, fmt)) :
+    return if detailed
+        _show_detail(io, nameof(typeof(model)); fmt=fmt, fields=_styled_fields(fields, fmt))
+    else
         _show_compact(io, nameof(typeof(model)); fmt=fmt, fields=_compact_fields(fields))
+    end
 end
 
 for T in (:StateModelSolution, :ControlModelSolution, :VariableModelSolution)
@@ -82,7 +90,9 @@ for T in (:EmptyControlModel, :EmptyVariableModel)
         function Base.show(io::IO, ::MIME"text/plain", ::Components.$T)
             fmt = format_codes(io)
             print_header(io, string(nameof(Components.$T)); fmt=fmt)
-            return print_field(io, "status", :empty; last=true, fmt=fmt, value_style=fmt.muted)
+            return print_field(
+                io, "status", :empty; last=true, fmt=fmt, value_style=fmt.muted
+            )
         end
     end
 end
@@ -94,7 +104,12 @@ Display a fixed time model compactly using its name and time value.
 """
 function Base.show(io::IO, model::Components.FixedTimeModel)
     fmt = format_codes(io)
-    return _show_compact(io, "FixedTimeModel"; fmt=fmt, fields=[("name", Components.name(model)), ("time", Base.time(model))])
+    return _show_compact(
+        io,
+        "FixedTimeModel";
+        fmt=fmt,
+        fields=[("name", Components.name(model)), ("time", Base.time(model))],
+    )
 end
 
 """
@@ -104,7 +119,15 @@ Display a fixed time model as a labelled tree.
 """
 function Base.show(io::IO, ::MIME"text/plain", model::Components.FixedTimeModel)
     fmt = format_codes(io)
-    return _show_detail(io, "FixedTimeModel"; fmt=fmt, fields=[("name", Components.name(model), fmt.value), ("time", Base.time(model), fmt.value)])
+    return _show_detail(
+        io,
+        "FixedTimeModel";
+        fmt=fmt,
+        fields=[
+            ("name", Components.name(model), fmt.value),
+            ("time", Base.time(model), fmt.value),
+        ],
+    )
 end
 
 """
@@ -114,7 +137,12 @@ Display a free time model compactly using its name and variable index.
 """
 function Base.show(io::IO, model::Components.FreeTimeModel)
     fmt = format_codes(io)
-    return _show_compact(io, "FreeTimeModel"; fmt=fmt, fields=[("name", Components.name(model)), ("index", Components.index(model))])
+    return _show_compact(
+        io,
+        "FreeTimeModel";
+        fmt=fmt,
+        fields=[("name", Components.name(model)), ("index", Components.index(model))],
+    )
 end
 
 """
@@ -124,7 +152,15 @@ Display a free time model as a labelled tree.
 """
 function Base.show(io::IO, ::MIME"text/plain", model::Components.FreeTimeModel)
     fmt = format_codes(io)
-    return _show_detail(io, "FreeTimeModel"; fmt=fmt, fields=[("name", Components.name(model), fmt.value), ("index", Components.index(model), fmt.count)])
+    return _show_detail(
+        io,
+        "FreeTimeModel";
+        fmt=fmt,
+        fields=[
+            ("name", Components.name(model), fmt.value),
+            ("index", Components.index(model), fmt.count),
+        ],
+    )
 end
 
 """
@@ -134,7 +170,16 @@ Display the initial and final time models compactly.
 """
 function Base.show(io::IO, model::Components.TimesModel)
     fmt = format_codes(io)
-    return _show_compact(io, "TimesModel"; fmt=fmt, fields=[("initial", Components.initial(model)), ("final", Components.final(model)), ("time_name", Components.time_name(model))])
+    return _show_compact(
+        io,
+        "TimesModel";
+        fmt=fmt,
+        fields=[
+            ("initial", Components.initial(model)),
+            ("final", Components.final(model)),
+            ("time_name", Components.time_name(model)),
+        ],
+    )
 end
 
 """
@@ -144,7 +189,16 @@ Display the initial and final time models as a labelled tree.
 """
 function Base.show(io::IO, ::MIME"text/plain", model::Components.TimesModel)
     fmt = format_codes(io)
-    return _show_detail(io, "TimesModel"; fmt=fmt, fields=[("initial", Components.initial(model), ""), ("final", Components.final(model), ""), ("time_name", Components.time_name(model), fmt.value)])
+    return _show_detail(
+        io,
+        "TimesModel";
+        fmt=fmt,
+        fields=[
+            ("initial", Components.initial(model), ""),
+            ("final", Components.final(model), ""),
+            ("time_name", Components.time_name(model), fmt.value),
+        ],
+    )
 end
 
 """
@@ -155,15 +209,22 @@ Render an objective model without expanding its callable fields.
 function _show_objective(io::IO, model, fields; detailed::Bool=false)
     fmt = format_codes(io)
     values = Any[("criterion", Components.criterion(model), fmt -> fmt.keyword)]
-    Components.has_mayer_cost(model) && push!(values, ("mayer", "<callable>", fmt -> fmt.muted))
-    Components.has_lagrange_cost(model) && push!(values, ("lagrange", "<callable>", fmt -> fmt.muted))
-    return detailed ? _show_detail(io, nameof(typeof(model)); fmt=fmt, fields=_styled_fields(values, fmt)) : _show_compact(io, nameof(typeof(model)); fmt=fmt, fields=_compact_fields(values))
+    Components.has_mayer_cost(model) &&
+        push!(values, ("mayer", "<callable>", fmt -> fmt.muted))
+    Components.has_lagrange_cost(model) &&
+        push!(values, ("lagrange", "<callable>", fmt -> fmt.muted))
+    return if detailed
+        _show_detail(io, nameof(typeof(model)); fmt=fmt, fields=_styled_fields(values, fmt))
+    else
+        _show_compact(io, nameof(typeof(model)); fmt=fmt, fields=_compact_fields(values))
+    end
 end
 
 for T in (:MayerObjectiveModel, :LagrangeObjectiveModel, :BolzaObjectiveModel)
     @eval begin
         Base.show(io::IO, model::Components.$T) = _show_objective(io, model, nothing)
-        Base.show(io::IO, ::MIME"text/plain", model::Components.$T) = _show_objective(io, model, nothing; detailed=true)
+        Base.show(io::IO, ::MIME"text/plain", model::Components.$T) =
+            _show_objective(io, model, nothing; detailed=true)
     end
 end
 
@@ -193,7 +254,11 @@ function Base.show(io::IO, ::MIME"text/plain", model::Components.ConstraintsMode
     fmt = format_codes(io)
     fields = [
         ("path nonlinear", length(Components.path_constraints_nl(model)), fmt.count),
-        ("boundary nonlinear", length(Components.boundary_constraints_nl(model)), fmt.count),
+        (
+            "boundary nonlinear",
+            length(Components.boundary_constraints_nl(model)),
+            fmt.count,
+        ),
         ("state box", length(Components.state_constraints_box(model)), fmt.count),
         ("control box", length(Components.control_constraints_box(model)), fmt.count),
         ("variable box", length(Components.variable_constraints_box(model)), fmt.count),

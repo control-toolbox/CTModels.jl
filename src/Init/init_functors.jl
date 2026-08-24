@@ -221,5 +221,7 @@ function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,C}) where {
     print(io, fmt.name, "MergedTrajectory", fmt.reset)
     print(io, "\n  ", fmt.label, "role:   ", fmt.reset, fmt.keyword, ":", f.role, fmt.reset)
     print(io, "\n  ", fmt.label, "dim:    ", fmt.reset, fmt.count, f.dim, fmt.reset)
-    return print(io, "\n  ", fmt.label, "ncomps: ", fmt.reset, fmt.count, length(f.comps), fmt.reset)
+    return print(
+        io, "\n  ", fmt.label, "ncomps: ", fmt.reset, fmt.count, length(f.comps), fmt.reset
+    )
 end

@@ -15,7 +15,16 @@ Display a unified time grid compactly with its size and endpoints.
 """
 function Base.show(io::IO, grid::Solutions.UnifiedTimeGridModel)
     fmt = format_codes(io)
-    return _show_compact(io, "UnifiedTimeGridModel"; fmt=fmt, fields=[("points", length(grid.value)), ("first", first(grid.value)), ("last", last(grid.value))])
+    return _show_compact(
+        io,
+        "UnifiedTimeGridModel";
+        fmt=fmt,
+        fields=[
+            ("points", length(grid.value)),
+            ("first", first(grid.value)),
+            ("last", last(grid.value)),
+        ],
+    )
 end
 
 """
@@ -25,11 +34,15 @@ Display a unified time grid as a labelled tree.
 """
 function Base.show(io::IO, ::MIME"text/plain", grid::Solutions.UnifiedTimeGridModel)
     fmt = format_codes(io)
-    fields = isempty(grid.value) ? [("points", 0, fmt.count)] : [
+    fields = if isempty(grid.value)
+        [("points", 0, fmt.count)]
+    else
+        [
         ("points", length(grid.value), fmt.count),
         ("first", first(grid.value), fmt.value),
         ("last", last(grid.value), fmt.value),
     ]
+    end
     return _show_detail(io, "UnifiedTimeGridModel"; fmt=fmt, fields=fields)
 end
 
@@ -40,7 +53,10 @@ Display the component sizes of a multiple time grid compactly.
 """
 function Base.show(io::IO, grid::Solutions.MultipleTimeGridModel)
     fmt = format_codes(io)
-    fields = [(string(name), _grid_summary(getfield(grid.grids, name))) for name in keys(grid.grids)]
+    fields = [
+        (string(name), _grid_summary(getfield(grid.grids, name))) for
+        name in keys(grid.grids)
+    ]
     return _show_compact(io, "MultipleTimeGridModel"; fmt=fmt, fields=fields)
 end
 
@@ -51,7 +67,10 @@ Display each component grid as a labelled tree.
 """
 function Base.show(io::IO, ::MIME"text/plain", grid::Solutions.MultipleTimeGridModel)
     fmt = format_codes(io)
-    fields = [(string(name), _grid_summary(getfield(grid.grids, name)), fmt.value) for name in keys(grid.grids)]
+    fields = [
+        (string(name), _grid_summary(getfield(grid.grids, name)), fmt.value) for
+        name in keys(grid.grids)
+    ]
     return _show_detail(io, "MultipleTimeGridModel"; fmt=fmt, fields=fields)
 end
 
@@ -115,9 +134,33 @@ function Base.show(io::IO, dual::Solutions.DualModel)
     fields = [
         ("path", _dual_presence(dual.path_constraints_dual)),
         ("boundary", _dual_presence(dual.boundary_constraints_dual)),
-        ("state box", _dual_presence(dual.state_constraints_lb_dual) !== :none || _dual_presence(dual.state_constraints_ub_dual) !== :none ? :present : :none),
-        ("control box", _dual_presence(dual.control_constraints_lb_dual) !== :none || _dual_presence(dual.control_constraints_ub_dual) !== :none ? :present : :none),
-        ("variable box", _dual_presence(dual.variable_constraints_lb_dual) !== :none || _dual_presence(dual.variable_constraints_ub_dual) !== :none ? :present : :none),
+        (
+            "state box",
+            if _dual_presence(dual.state_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.state_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+        ),
+        (
+            "control box",
+            if _dual_presence(dual.control_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.control_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+        ),
+        (
+            "variable box",
+            if _dual_presence(dual.variable_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.variable_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+        ),
     ]
     return _show_compact(io, "DualModel"; fmt=fmt, fields=fields)
 end
@@ -132,9 +175,36 @@ function Base.show(io::IO, ::MIME"text/plain", dual::Solutions.DualModel)
     fields = [
         ("path", _dual_presence(dual.path_constraints_dual), fmt.keyword),
         ("boundary", _dual_presence(dual.boundary_constraints_dual), fmt.keyword),
-        ("state box", _dual_presence(dual.state_constraints_lb_dual) !== :none || _dual_presence(dual.state_constraints_ub_dual) !== :none ? :present : :none, fmt.keyword),
-        ("control box", _dual_presence(dual.control_constraints_lb_dual) !== :none || _dual_presence(dual.control_constraints_ub_dual) !== :none ? :present : :none, fmt.keyword),
-        ("variable box", _dual_presence(dual.variable_constraints_lb_dual) !== :none || _dual_presence(dual.variable_constraints_ub_dual) !== :none ? :present : :none, fmt.keyword),
+        (
+            "state box",
+            if _dual_presence(dual.state_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.state_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+            fmt.keyword,
+        ),
+        (
+            "control box",
+            if _dual_presence(dual.control_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.control_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+            fmt.keyword,
+        ),
+        (
+            "variable box",
+            if _dual_presence(dual.variable_constraints_lb_dual) !== :none ||
+               _dual_presence(dual.variable_constraints_ub_dual) !== :none
+                :present
+            else
+                :none
+            end,
+            fmt.keyword,
+        ),
     ]
     return _show_detail(io, "DualModel"; fmt=fmt, fields=fields)
 end

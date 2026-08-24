@@ -35,7 +35,9 @@ function test_type_show()
         infos = Solutions.SolverInfos(
             12, :first_order, "converged", true, 1e-8, Dict{Symbol,Any}()
         )
-        dual = Solutions.DualModel(nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
+        dual = Solutions.DualModel(
+            nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing
+        )
 
         for value in (
             state,
@@ -82,11 +84,15 @@ function test_type_show()
         merged = Init.MergedTrajectory(t -> [0.0], Dict{Int,Function}(), 1, :state)
         constant = Components.ConstantInTime(1.0)
         coerced = Components.CoercedTrajectory(t -> [1.0], only)
-        composite = Building.CompositeConstraint{:path}(1, [1], ((r, t, x, u, v) -> nothing,))
+        composite = Building.CompositeConstraint{:path}(
+            1, [1], ((r, t, x, u, v) -> nothing,)
+        )
         dual_slice = Solutions.DualSlice(t -> [1.0], 1)
         dual_diff = Solutions.BoxDualDiff(t -> [1.0], t -> [0.0], 1)
 
-        for value in (subpath, projection, merged, constant, coerced, composite, dual_slice, dual_diff)
+        for value in (
+            subpath, projection, merged, constant, coerced, composite, dual_slice, dual_diff
+        )
             Test.@test !occursin("\e[", _show_string(value; plain=true, color=false))
         end
     end
