@@ -104,7 +104,26 @@ Compact string representation of [`CTModels.Building.CompositeConstraint`](@extr
 """
 function Base.show(io::IO, f::CompositeConstraint{Sig,CS}) where {Sig,CS}
     fmt = CTBase.Core.get_format_codes(io)
-    return print(io, fmt.name, "CompositeConstraint", fmt.reset, "{", fmt.keyword, ":", Sig, fmt.reset, "}(n=", fmt.count, f.n, fmt.reset, ", dims=", fmt.value, f.dims, fmt.reset, ")")
+    return print(
+        io,
+        fmt.name,
+        "CompositeConstraint",
+        fmt.reset,
+        "{",
+        fmt.keyword,
+        ":",
+        Sig,
+        fmt.reset,
+        "}(n=",
+        fmt.count,
+        f.n,
+        fmt.reset,
+        ", dims=",
+        fmt.value,
+        f.dims,
+        fmt.reset,
+        ")",
+    )
 end
 
 """

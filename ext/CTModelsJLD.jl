@@ -49,7 +49,9 @@ function CTModels.export_ocp_solution(
     data = CTModels.Solutions._serialize_solution(sol)
 
     # Save only the serialized data (no more OCP model)
-    JLD2.jldsave(CTModels.Serialization._ensure_extension(filename, ".jld2"); solution_data=data)
+    JLD2.jldsave(
+        CTModels.Serialization._ensure_extension(filename, ".jld2"); solution_data=data
+    )
 
     return nothing
 end

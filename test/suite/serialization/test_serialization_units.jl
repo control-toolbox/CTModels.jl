@@ -458,7 +458,8 @@ function test_serialization_units()
         # ==============================================================================
 
         Test.@testset "_ensure_extension: bare name gets extension appended" begin
-            Test.@test Serialization._ensure_extension("solution", ".json") == "solution.json"
+            Test.@test Serialization._ensure_extension("solution", ".json") ==
+                "solution.json"
         end
 
         Test.@testset "_ensure_extension: already suffixed, same case, is unchanged" begin

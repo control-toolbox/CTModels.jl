@@ -373,8 +373,7 @@ function test_solution_multi_grids()
 
                 # times(sol) is a simple alias for time_grid(sol)
                 Test.@test Components.times(sol) == Solutions.time_grid(sol)
-                Test.@test Components.times(sol, :state) ==
-                    Solutions.time_grid(sol, :state)
+                Test.@test Components.times(sol, :state) == Solutions.time_grid(sol, :state)
                 Test.@test Components.times(sol, :costate) ==
                     Solutions.time_grid(sol, :costate)
 

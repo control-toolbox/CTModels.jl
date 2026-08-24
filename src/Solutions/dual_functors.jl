@@ -24,13 +24,36 @@ end
 
 function Base.show(io::IO, f::DualSlice)
     fmt = CTBase.Core.get_format_codes(io)
-    return print(io, fmt.name, "DualSlice", fmt.reset, "(", fmt.type, nameof(typeof(f.duals)), fmt.reset, ", ", fmt.value, f.idx, fmt.reset, ")")
+    return print(
+        io,
+        fmt.name,
+        "DualSlice",
+        fmt.reset,
+        "(",
+        fmt.type,
+        nameof(typeof(f.duals)),
+        fmt.reset,
+        ", ",
+        fmt.value,
+        f.idx,
+        fmt.reset,
+        ")",
+    )
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::DualSlice{D,I}) where {D,I}
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "DualSlice", fmt.reset)
-    print(io, "\n  ", fmt.label, "duals: ", fmt.reset, fmt.type, nameof(typeof(f.duals)), fmt.reset)
+    print(
+        io,
+        "\n  ",
+        fmt.label,
+        "duals: ",
+        fmt.reset,
+        fmt.type,
+        nameof(typeof(f.duals)),
+        fmt.reset,
+    )
     return print(io, "\n  ", fmt.label, "idx:   ", fmt.reset, fmt.value, f.idx, fmt.reset)
 end
 
@@ -60,17 +83,33 @@ function Base.show(io::IO, f::BoxDualDiff)
     fmt = CTBase.Core.get_format_codes(io)
     return print(
         io,
-        fmt.name, "BoxDualDiff", fmt.reset, "(",
-        fmt.type, nameof(typeof(f.lb)), fmt.reset, ", ",
-        fmt.type, nameof(typeof(f.ub)), fmt.reset, ", ",
-        fmt.value, f.idx, fmt.reset, ")",
+        fmt.name,
+        "BoxDualDiff",
+        fmt.reset,
+        "(",
+        fmt.type,
+        nameof(typeof(f.lb)),
+        fmt.reset,
+        ", ",
+        fmt.type,
+        nameof(typeof(f.ub)),
+        fmt.reset,
+        ", ",
+        fmt.value,
+        f.idx,
+        fmt.reset,
+        ")",
     )
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::BoxDualDiff{DL,DU,I}) where {DL,DU,I}
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "BoxDualDiff", fmt.reset)
-    print(io, "\n  ", fmt.label, "lb:  ", fmt.reset, fmt.type, nameof(typeof(f.lb)), fmt.reset)
-    print(io, "\n  ", fmt.label, "ub:  ", fmt.reset, fmt.type, nameof(typeof(f.ub)), fmt.reset)
+    print(
+        io, "\n  ", fmt.label, "lb:  ", fmt.reset, fmt.type, nameof(typeof(f.lb)), fmt.reset
+    )
+    print(
+        io, "\n  ", fmt.label, "ub:  ", fmt.reset, fmt.type, nameof(typeof(f.ub)), fmt.reset
+    )
     return print(io, "\n  ", fmt.label, "idx: ", fmt.reset, fmt.value, f.idx, fmt.reset)
 end
