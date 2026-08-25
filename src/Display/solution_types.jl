@@ -38,10 +38,10 @@ function Base.show(io::IO, ::MIME"text/plain", grid::Solutions.UnifiedTimeGridMo
         [("points", 0, fmt.count)]
     else
         [
-        ("points", length(grid.value), fmt.count),
-        ("first", first(grid.value), fmt.value),
-        ("last", last(grid.value), fmt.value),
-    ]
+            ("points", length(grid.value), fmt.count),
+            ("first", first(grid.value), fmt.value),
+            ("last", last(grid.value), fmt.value),
+        ]
     end
     return _show_detail(io, "UnifiedTimeGridModel"; fmt=fmt, fields=fields)
 end
@@ -137,7 +137,7 @@ function Base.show(io::IO, dual::Solutions.DualModel)
         (
             "state box",
             if _dual_presence(dual.state_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.state_constraints_ub_dual) !== :none
+                _dual_presence(dual.state_constraints_ub_dual) !== :none
                 :present
             else
                 :none
@@ -146,7 +146,7 @@ function Base.show(io::IO, dual::Solutions.DualModel)
         (
             "control box",
             if _dual_presence(dual.control_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.control_constraints_ub_dual) !== :none
+                _dual_presence(dual.control_constraints_ub_dual) !== :none
                 :present
             else
                 :none
@@ -155,7 +155,7 @@ function Base.show(io::IO, dual::Solutions.DualModel)
         (
             "variable box",
             if _dual_presence(dual.variable_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.variable_constraints_ub_dual) !== :none
+                _dual_presence(dual.variable_constraints_ub_dual) !== :none
                 :present
             else
                 :none
@@ -178,7 +178,7 @@ function Base.show(io::IO, ::MIME"text/plain", dual::Solutions.DualModel)
         (
             "state box",
             if _dual_presence(dual.state_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.state_constraints_ub_dual) !== :none
+                _dual_presence(dual.state_constraints_ub_dual) !== :none
                 :present
             else
                 :none
@@ -188,7 +188,7 @@ function Base.show(io::IO, ::MIME"text/plain", dual::Solutions.DualModel)
         (
             "control box",
             if _dual_presence(dual.control_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.control_constraints_ub_dual) !== :none
+                _dual_presence(dual.control_constraints_ub_dual) !== :none
                 :present
             else
                 :none
@@ -198,7 +198,7 @@ function Base.show(io::IO, ::MIME"text/plain", dual::Solutions.DualModel)
         (
             "variable box",
             if _dual_presence(dual.variable_constraints_lb_dual) !== :none ||
-               _dual_presence(dual.variable_constraints_ub_dual) !== :none
+                _dual_presence(dual.variable_constraints_ub_dual) !== :none
                 :present
             else
                 :none
