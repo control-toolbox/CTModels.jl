@@ -41,7 +41,8 @@ function test_plot()
         # ====================================================================
 
         # Resolve the plotting extension module to access internal helpers.
-        plots_ext = Base.get_extension(CTModels, :CTModelsPlots)
+        # Case-layer vocabulary / gating helpers now live in `src` (backend-free).
+        plots_ext = CTModels.PlotCase
 
         Test.@testset "plot helpers: clean" begin
             description = (

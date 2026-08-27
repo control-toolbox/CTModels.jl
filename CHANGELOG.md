@@ -7,6 +7,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0-beta] - unreleased
+
+### ✨ Added
+
+- **Makie plotting backend (proof of concept)**: new `CTModelsMakie` weak-dependency
+  extension (trigger: `Makie`). Load a Makie backend package (`CairoMakie`,
+  `GLMakie`, …) and `plot(sol)` renders a `Makie.Figure`; the backend is chosen by
+  which package is loaded (`Plots` → Plots, `Makie` → Makie), with identical
+  `description` and keyword arguments. Part of the plot-engine roadmap
+  ([#366](https://github.com/control-toolbox/CTModels.jl/issues/366)).
+  - Scope: `plot` only. Not yet handled (parity follow-up): `plot!` (overlay,
+    throws `NotImplemented`), the reference-line decorations (box bounds,
+    initial/final time markers), and step/scatter control curves — constant
+    controls render as lines.
+  - Requires `CTBase` ≥ 0.30 (`Plotting.MakieBackend` + `CTBaseMakie`).
+
+### ♻️ Internal
+
+- The backend-free plotting case layer (vocabulary, gating, panel/decoration
+  builders, layout assembly, `build_figure`) moved from the `CTModelsPlots`
+  extension into a new `src` submodule, `CTModels.PlotCase`, so the Plots and Makie
+  extensions share it. `Plots.plot(sol)` behaviour, signatures and defaults are
+  unchanged.
+
 ## [0.18.0] - 2026-08-23
 
 ### 💥 Changed

@@ -1,23 +1,20 @@
 """
 Weak-dependency extension of CTModels providing `Plots.plot` / `plot!` for solutions.
 
-Loaded automatically when both `CTModels` and `Plots` are available. This is a thin
-**case layer**: it names and samples the optimal-control quantities (state, control,
-costate, path constraints, duals), chooses a layout template, and delegates all layout
-and rendering to the generic `CTBase.Plotting` engine.
+Loaded automatically when both `CTModels` and `Plots` are available. This is the thin
+plumbing on top of the backend-free case layer [`CTModels.PlotCase`](@extref): the
+public `Plots.plot` / `plot!` methods build the figure with
+[`CTModels.PlotCase.build_figure`](@extref) and render it through the
+`CTBase.Plotting` Plots backend.
 """
 module CTModelsPlots
 
 using DocStringExtensions: TYPEDSIGNATURES
 
-using CTBase: Plotting, Exceptions
-using CTModels: CTModels
+using CTBase: Plotting
+using CTModels: CTModels, PlotCase
 using Plots: Plots
 
-include(joinpath(@__DIR__, "case", "vocabulary.jl"))
-include(joinpath(@__DIR__, "case", "panels.jl"))
-include(joinpath(@__DIR__, "case", "decorations.jl"))
-include(joinpath(@__DIR__, "case", "assemble.jl"))
 include(joinpath(@__DIR__, "case", "plot.jl"))
 
 end

@@ -4,6 +4,27 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.0-beta] - unreleased
+
+### Plotting case-layer helpers moved to `CTModels.PlotCase`
+
+The backend-free plotting helpers (`clean`, `do_plot`, `do_decorate`, the
+`__plot_*` defaults, the panel/decoration builders) moved out of the
+`CTModelsPlots` extension into a new `src` submodule, `CTModels.PlotCase`.
+
+**Who is affected**: only code reaching these *internal* helpers through
+`Base.get_extension(CTModels, :CTModelsPlots)`. The public `Plots.plot(sol)` /
+`plot!(sol)` API — signatures, keywords, defaults and behaviour — is unchanged.
+
+**Migration**: replace
+`Base.get_extension(CTModels, :CTModelsPlots).clean` (etc.) with
+`CTModels.PlotCase.clean`. These helpers are now available without loading `Plots`.
+
+### `CTBase` lower bound raised to 0.30
+
+The Makie backend needs `CTBase.Plotting.MakieBackend` (CTBase 0.30). `[compat]`
+is now `CTBase = "0.29, 0.30"` for this beta and will tighten to `"0.30"`.
+
 ## [0.18.0] - 2026-08-23
 
 ### `Components.times(sol)` returns the time grid instead of the times model
