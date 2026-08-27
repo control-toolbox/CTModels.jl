@@ -119,7 +119,7 @@ function _control_panels(sol, control::Symbol, style::NamedTuple, layout::Symbol
                 "Invalid control choice";
                 got="control=$control",
                 expected=":components, :norm or :all",
-                context="CTModelsPlots._control_panels",
+                context="CTModels.PlotCase._control_panels",
             ),
         )
     end

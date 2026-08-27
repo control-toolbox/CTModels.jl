@@ -24,6 +24,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         Symbol("@unpack_PreModel"),
         :is_empty,
         :time_ns,
+        :CTModels,   # PlotCase binds the parent module name for the moved case files
     ]
     EXCLUDE_INTERNALS = vcat(
         EXCLUDE_SYMBOLS,
@@ -103,6 +104,19 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             ),
         ),
         (
+            mod=CTModels.PlotCase,
+            title="PlotCase",
+            filename="plotcase",
+            files=src(
+                joinpath("PlotCase", "PlotCase.jl"),
+                joinpath("PlotCase", "vocabulary.jl"),
+                joinpath("PlotCase", "panels.jl"),
+                joinpath("PlotCase", "decorations.jl"),
+                joinpath("PlotCase", "assemble.jl"),
+                joinpath("PlotCase", "build.jl"),
+            ),
+        ),
+        (
             mod=CTModels.Display,
             title="Display",
             filename="display",
@@ -166,17 +180,8 @@ function generate_api_reference(src_dir::String, ext_dir::String)
 
     # Conditional extensions
     for (sym, files) in [
-        (
-            :CTModelsPlots,
-            ext(
-                "CTModelsPlots.jl",
-                joinpath("case", "vocabulary.jl"),
-                joinpath("case", "panels.jl"),
-                joinpath("case", "decorations.jl"),
-                joinpath("case", "assemble.jl"),
-                joinpath("case", "plot.jl"),
-            ),
-        ),
+        (:CTModelsPlots, ext("CTModelsPlots.jl", joinpath("case", "plot.jl"))),
+        (:CTModelsMakie, ext("CTModelsMakie.jl")),
         (:CTModelsJSON, ext("CTModelsJSON.jl")),
         (:CTModelsJLD, ext("CTModelsJLD.jl")),
     ]
