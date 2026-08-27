@@ -28,7 +28,7 @@ CTModelsPlots = "Plots"
 [compat]
 Aqua = "0.8"
 BenchmarkTools = "1"
-CTBase = "0.29, 0.30"
+CTBase = "0.30"
 CairoMakie = "0.15"
 DocStringExtensions = "0.9"
 JET = "0.9, 0.11, 0.12"

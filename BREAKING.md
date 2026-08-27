@@ -23,7 +23,7 @@ The backend-free plotting helpers (`clean`, `do_plot`, `do_decorate`, the
 ### `CTBase` lower bound raised to 0.30
 
 The Makie backend needs `CTBase.Plotting.MakieBackend` (CTBase 0.30). `[compat]`
-is now `CTBase = "0.29, 0.30"` for this beta and will tighten to `"0.30"`.
+is now `CTBase = "0.30"`.
 
 ## [0.18.0] - 2026-08-23
 
