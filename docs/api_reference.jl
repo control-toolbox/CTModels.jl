@@ -24,6 +24,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
         Symbol("@unpack_PreModel"),
         :is_empty,
         :time_ns,
+        :CTModels,   # PlotCase binds the parent module name for the moved case files
     ]
     EXCLUDE_INTERNALS = vcat(
         EXCLUDE_SYMBOLS,
