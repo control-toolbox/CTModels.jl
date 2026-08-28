@@ -178,6 +178,17 @@ function test_plot_makie()
             Test.@test Makie.plot!(Makie.Figure(), sol_pc) isa Makie.Figure
         end
 
+        Test.@testset "plot(; size) is an empty canvas to overlay onto" begin
+            # mirror of `Plots.plot(; size=…)`: a blank figure, then `plot!(f, sol)`.
+            f = Makie.plot(; size=(800, 800))
+            Test.@test f isa Makie.Figure
+            Test.@test _n_axes(f) == 0
+            Test.@test size(f.scene) == (800, 800)
+            out = Makie.plot!(f, sol_pc)
+            Test.@test out === f
+            Test.@test _n_axes(f) == _n_axes(Makie.plot(sol_pc))
+        end
+
         Test.@testset "free final time decorations" begin
             Test.@test !CTModels.has_fixed_final_time(ocp_tf)
             Test.@test CTModels.final_time(ocp_tf, CTModels.variable(sol_tf)) ≈ 2.0

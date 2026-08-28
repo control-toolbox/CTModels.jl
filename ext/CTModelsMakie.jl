@@ -113,4 +113,24 @@ function Makie.plot!(sol::CTModels.Solution, description::Symbol...; kwargs...)
     return _plot!(f === nothing ? Makie.Figure() : f, sol, description...; kwargs...)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Create an empty `Makie.Figure`, forwarding keyword arguments (`size`, …).
+
+Mirror of `Plots.plot(; kwargs...)`: a blank canvas to overlay solutions onto with
+`Makie.plot!`. Makie has no zero-argument `plot` of its own, so this fills that gap
+for the `Plots`-style workflow `f = plot(; size=…); plot!(f, sol)`.
+
+# Example
+```julia-repl
+julia> using CairoMakie
+
+julia> f = plot(; size=(800, 800));
+
+julia> plot!(f, sol)
+```
+"""
+Makie.plot(; kwargs...) = Makie.Figure(; kwargs...)
+
 end # module CTModelsMakie
