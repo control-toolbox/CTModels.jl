@@ -144,10 +144,9 @@ by the corresponding packages:
   variables in a consistent, configurable way.
 
 - **CTModelsMakie.jl** (requires `Makie.jl`, e.g. via `CairoMakie` / `GLMakie`):
-  a second, backend-agnostic rendering path for the same figure —
-  `Makie.plot(sol::CTModels.Solution, ...)` returns a `Makie.Figure`. Proof of
-  concept ([#366](https://github.com/control-toolbox/CTModels.jl/issues/366)):
-  `plot` only, no reference lines or `plot!` yet.
+  a second rendering path for the same figure, at feature parity with
+  `CTModelsPlots` — `Makie.plot(sol::CTModels.Solution, ...)` returns a
+  `Makie.Figure`, and `Makie.plot!` overlays onto an existing one.
 
 If the corresponding extension package is not loaded, the public wrappers
 `export_ocp_solution`, `import_ocp_solution`, and the generic `RecipesBase.plot`

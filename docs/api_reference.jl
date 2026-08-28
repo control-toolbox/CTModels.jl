@@ -180,7 +180,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
 
     # Conditional extensions
     for (sym, files) in [
-        (:CTModelsPlots, ext("CTModelsPlots.jl", joinpath("case", "plot.jl"))),
+        (:CTModelsPlots, ext("CTModelsPlots.jl")),
         (:CTModelsMakie, ext("CTModelsMakie.jl")),
         (:CTModelsJSON, ext("CTModelsJSON.jl")),
         (:CTModelsJLD, ext("CTModelsJLD.jl")),
