@@ -7,7 +7,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.19.0-beta] - unreleased
+## [0.19.1-beta] - unreleased
+
+### ✨ Added
+
+- **Makie plotting backend — parity with the Plots backend**
+  ([#408](https://github.com/control-toolbox/CTModels.jl/issues/408)). The
+  `CTModelsMakie` extension now matches `CTModelsPlots` on the full reference
+  matrix:
+  - **`Makie.plot!`** — `plot!(f::Makie.Figure, sol, …)` and `plot!(sol, …)` (onto
+    `Makie.current_figure()`) overlay a solution onto an existing figure. Previously
+    threw `NotImplemented`.
+  - **`Makie.plot(; kwargs...)`** — a zero-argument empty-canvas figure mirroring
+    `Plots.plot(; size=…)`, for the `f = plot(; size=…); plot!(f, sol)` workflow.
+  - **Reference-line decorations** (box bounds, initial/final-time markers) and
+    **constant controls drawn as steps** now render on the Makie backend, matching
+    the Plots output.
+  - Needs `CTBase` 0.30.1-beta or later for the `CTBaseMakie` parity backend
+    (`[compat]` stays `CTBase = "0.30"`; 0.30.1-beta is the effective floor).
+
+### 🔧 Fixed
+
+- **`:split` layout: a user `label=` now shows the legend** (via CTBase
+  0.30.1-beta), on both the Plots and Makie backends, so overlaid solutions can be
+  told apart. Previously the label was accepted but never displayed.
+
+### ♻️ Internal
+
+- `ext/case/plot.jl` folded into `ext/CTModelsPlots.jl` and the `ext/case/`
+  directory removed — all four extensions are now flat single files, consistent
+  with `CTModelsJLD` / `CTModelsJSON`. `Plots.plot(sol)` behaviour, signatures and
+  defaults are unchanged.
+
+### 📚 Documentation
+
+- The plotting guide's Makie section is now executed `@example`s (including a
+  `plot!` overlay); `serialization/overview.md`, `model/display.md` and `index.md`
+  name the Makie backend; `serialization/plotting.md` links the CTBase *Plotting
+  Engine* guide's "User Attributes: Series vs Axis" section for the per-backend
+  keyword-argument rules. `CairoMakie` added to the docs build.
+
+### ✅ Compatibility
+
+- **No breaking changes**: `Makie.plot!` methods that previously threw
+  `NotImplemented` now succeed; nothing is removed or renamed. The internal
+  helpers listed for 0.19.0-beta keep their `CTModels.PlotCase` location.
+
+## [0.19.0-beta] - 2026-08-27
 
 ### ✨ Added
 
