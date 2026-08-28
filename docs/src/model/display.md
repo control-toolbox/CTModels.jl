@@ -221,7 +221,10 @@ end
 ```
 
 When `Plots.jl` is loaded, the `CTModelsPlots` extension provides full plot
-recipes. See [Plotting](@ref) for details.
+recipes. A Makie backend (`CTModelsMakie`, activated by loading `CairoMakie` or
+`GLMakie`) renders the same figure as a `Makie.Figure` through a separate
+`Makie.plot(sol)` method — not the `RecipesBase.plot` stub above. See
+[Plotting](@ref) for both backends.
 
 ## See also
 

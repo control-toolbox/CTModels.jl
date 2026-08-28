@@ -102,3 +102,9 @@ The `description` and keyword arguments (`layout`, `control`, `time`, the
 `*_style` keywords, `color`, `size`) are identical to the Plots backend. When both
 `Plots` and a Makie package are loaded, `plot` must be qualified —
 `Plots.plot(sol)` renders with Plots, `Makie.plot(sol)` with Makie.
+
+Style keywords beyond the neutral vocabulary (`color`, `linewidth`, `linestyle`,
+`alpha`, `seriestype`) are resolved per backend: the Plots backend forwards any
+attribute Plots recognises, while the Makie backend only forwards a fixed whitelist
+and drops the rest. See the *Plotting Engine* guide in the CTBase documentation
+("User Attributes: Series vs Axis") for the exact rule.

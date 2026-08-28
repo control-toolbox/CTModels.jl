@@ -189,7 +189,7 @@ the details of a particular function or type.
 
 - **I want to save/load or plot solutions**  
   See the [Serialization & extensions](serialization/overview.md) guide for `export_ocp_solution`,
-  `import_ocp_solution`, and `plot(sol)`.
+  `import_ocp_solution`, and `Plots.plot(sol)` / `Makie.plot(sol)`.
 
 - **I want to solve an optimal control problem**  
   Use [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl) which provides discretization, NLP backends, and optimization strategies.
