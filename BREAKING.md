@@ -4,7 +4,29 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [0.19.0-beta] - unreleased
+## [0.19.1-beta] - unreleased
+
+### No Breaking Changes
+
+The Makie plotting backend reached feature parity with the Plots backend
+([#408](https://github.com/control-toolbox/CTModels.jl/issues/408)):
+`Makie.plot!(sol)` / `Makie.plot!(f, sol)` now overlay onto a `Makie.Figure` (they
+previously threw `NotImplemented`), a zero-argument `Makie.plot(; kwargs...)`
+empty-canvas figure was added, and reference-line decorations and step controls now
+render. All additive — no public signature, type or name changed; no migration
+required.
+
+`ext/case/plot.jl` was folded into `ext/CTModelsPlots.jl` and the `ext/case/`
+directory removed. The `_plot` / `_plot!` plumbing stays in the `CTModelsPlots`
+extension module, reachable exactly as before — this is an internal file move only.
+
+#### Compatibility
+
+- The parity backend needs **`CTBase` ≥ 0.30.1-beta** (`CTBaseMakie` with
+  `render!`, decorations and `seriestype` dispatch). `[compat]` stays
+  `CTBase = "0.30"`; `0.30.1-beta` is the effective lower bound.
+
+## [0.19.0-beta] - 2026-08-27
 
 ### Plotting case-layer helpers moved to `CTModels.PlotCase`
 
