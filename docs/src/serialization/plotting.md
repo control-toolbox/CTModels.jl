@@ -6,6 +6,7 @@ CurrentModule = CTModels
 
 ```@setup plt
 using Plots
+using CairoMakie: CairoMakie, Makie
 Base.showable(::MIME"image/png", ::Plots.Plot) = false
 ```
 
@@ -73,27 +74,37 @@ Because the recipe reads the *typed* solution (its time grids, interpolation kin
 structure) rather than raw arrays, the same call works for unified- and multiple-grid
 solutions alike — see [Time grids](../solution/time_grids.md).
 
-## Makie backend (proof of concept)
+## Makie backend
 
-A second backend renders the same figure with [Makie.jl](https://docs.makie.org).
-Load a Makie backend package (`CairoMakie`, `GLMakie`, …) instead of `Plots`; the
-`CTModelsMakie` extension then provides `plot(sol)`:
+A second backend renders the same figure with [Makie.jl](https://docs.makie.org),
+at feature parity with the Plots backend (reference lines, step controls, overlay
+and forwarded attributes all supported). Load a Makie backend package
+(`CairoMakie`, `GLMakie`, …); the `CTModelsMakie` extension then provides
+`Makie.plot(sol)`, returning a `Makie.Figure`:
 
-```julia
-using CTModels
-using CairoMakie          # activates the CTModelsMakie extension
-
-f = plot(sol)             # a Makie.Figure
-plot(sol; layout=:group, control=:all)
+```@example plt
+Makie.plot(sol)
 ```
 
-The backend is chosen by which package is loaded — `Plots.plot(sol)` renders with
-Plots, `Makie.plot(sol)` renders with Makie; the `description` and keyword
-arguments (`layout`, `control`, `time`, the `*_style` keywords, `color`, `size`)
-are identical. Loading both packages at once means `plot` must be qualified.
+```@example plt
+Makie.plot(sol; layout=:group, control=:all)
+```
 
-This backend is a proof of concept (issue
-[#366](https://github.com/control-toolbox/CTModels.jl/issues/366)). It does not
-yet draw the reference lines (box bounds, initial/final time markers), renders
-constant-interpolation controls as lines rather than steps, and does not support
-`plot!` (overlay). A parity follow-up tracks these.
+`Makie.plot!` overlays onto an existing figure, the same way `Plots.plot!` does:
+
+```@example plt
+f = Makie.plot(sol)
+Makie.plot!(f, sol; time=:normalize)
+f
+```
+
+The `description` and keyword arguments (`layout`, `control`, `time`, the
+`*_style` keywords, `color`, `size`) are identical to the Plots backend. When both
+`Plots` and a Makie package are loaded, `plot` must be qualified —
+`Plots.plot(sol)` renders with Plots, `Makie.plot(sol)` with Makie.
+
+Style keywords beyond the neutral vocabulary (`color`, `linewidth`, `linestyle`,
+`alpha`, `seriestype`) are resolved per backend: the Plots backend forwards any
+attribute Plots recognises, while the Makie backend only forwards a fixed whitelist
+and drops the rest. See the *Plotting Engine* guide in the CTBase documentation
+("User Attributes: Series vs Axis") for the exact rule.

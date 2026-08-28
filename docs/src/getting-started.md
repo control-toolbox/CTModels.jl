@@ -25,7 +25,7 @@ It provides:
 - **Types** and **building blocks** for states, controls, variables, time grids, constraints, and cost functionals.
 - An immutable `Model` / `Solution` hierarchy for optimal control problems and their numerical solutions.
 - Tools to build **initial guesses** for warm-starting a solver.
-- Optional extensions for **serialization** (JSON, JLD2) and **plotting**.
+- Optional extensions for **serialization** (JSON, JLD2) and **plotting** (Plots, Makie).
 
 Two things to keep in mind:
 

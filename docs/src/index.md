@@ -144,10 +144,9 @@ by the corresponding packages:
   variables in a consistent, configurable way.
 
 - **CTModelsMakie.jl** (requires `Makie.jl`, e.g. via `CairoMakie` / `GLMakie`):
-  a second, backend-agnostic rendering path for the same figure —
-  `Makie.plot(sol::CTModels.Solution, ...)` returns a `Makie.Figure`. Proof of
-  concept ([#366](https://github.com/control-toolbox/CTModels.jl/issues/366)):
-  `plot` only, no reference lines or `plot!` yet.
+  a second rendering path for the same figure, at feature parity with
+  `CTModelsPlots` — `Makie.plot(sol::CTModels.Solution, ...)` returns a
+  `Makie.Figure`, and `Makie.plot!` overlays onto an existing one.
 
 If the corresponding extension package is not loaded, the public wrappers
 `export_ocp_solution`, `import_ocp_solution`, and the generic `RecipesBase.plot`
@@ -190,7 +189,7 @@ the details of a particular function or type.
 
 - **I want to save/load or plot solutions**  
   See the [Serialization & extensions](serialization/overview.md) guide for `export_ocp_solution`,
-  `import_ocp_solution`, and `plot(sol)`.
+  `import_ocp_solution`, and `Plots.plot(sol)` / `Makie.plot(sol)`.
 
 - **I want to solve an optimal control problem**  
   Use [CTSolvers.jl](https://github.com/control-toolbox/CTSolvers.jl) which provides discretization, NLP backends, and optimization strategies.

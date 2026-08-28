@@ -61,10 +61,11 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 # Docstrings from external packages
 # ═══════════════════════════════════════════════════════════════════════════════
-using JLD2, JSON3, Plots
+using JLD2, JSON3, Plots, CairoMakie
 const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
 const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
 const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
+const CTModelsMakie = Base.get_extension(CTModels, :CTModelsMakie)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Paths

@@ -13,18 +13,19 @@ when the trigger package is present.
 | `CTModelsJSON` | `JSON3` | JSON export/import of a [`Solution`](@ref CTModels.Solutions.Solution) |
 | `CTModelsJLD` | `JLD2` | JLD2 (binary) export/import |
 | `CTModelsPlots` | `Plots` | `Plots.plot(sol)` / `Plots.plot!(sol)` |
+| `CTModelsMakie` | `Makie` (via `CairoMakie`, `GLMakie`, …) | `Makie.plot(sol)` / `Makie.plot!(sol)`, returning a `Makie.Figure` |
 
 The public wrappers [`export_ocp_solution`](@ref CTModels.Serialization.export_ocp_solution),
 [`import_ocp_solution`](@ref CTModels.Serialization.import_ocp_solution) and the plot recipe
 live in the core; their **implementations** live in the extension. Until the trigger package is
 loaded, calling a wrapper raises a descriptive `CTBase.ExtensionError` — the core never hard-
-depends on JSON3, JLD2 or Plots.
+depends on JSON3, JLD2, Plots or Makie.
 
 ```text
 core wrapper ──(trigger pkg loaded?)──► extension method
      │                  │
 export_ocp_solution    no ─► CTBase.ExtensionError
-plot recipe            yes ─► JSON3 / JLD2 / Plots implementation
+plot / Makie.plot      yes ─► JSON3 / JLD2 / Plots / Makie implementation
 ```
 
 ## Reading order
@@ -32,7 +33,7 @@ plot recipe            yes ─► JSON3 / JLD2 / Plots implementation
 | Page | Topic | Key symbols |
 |---|---|---|
 | [Export & import](export_import.md) | Persisting solutions | [`export_ocp_solution`](@ref CTModels.Serialization.export_ocp_solution), [`import_ocp_solution`](@ref CTModels.Serialization.import_ocp_solution) |
-| [Plotting](plotting.md) | Visualising trajectories | `Plots.plot`, `Plots.plot!` |
+| [Plotting](plotting.md) | Visualising trajectories | `Plots.plot`, `Makie.plot` |
 
 ## A solution to serialize
 
@@ -78,4 +79,4 @@ CTModels.objective(reloaded)
 ```
 
 See [Export & import](export_import.md) for the formats and the resampling strategy, and
-[Plotting](plotting.md) for the Plots recipe.
+[Plotting](plotting.md) for the Plots and Makie backends.
