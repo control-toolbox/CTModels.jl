@@ -52,7 +52,11 @@ onto `f` via [`CTBase.Plotting`](@extref) (Makie backend); an empty `f` is fille
 if by `plot`.
 """
 function _plot!(
-    f::Makie.Figure, sol::CTModels.Solution, description::Symbol...; color=nothing, kwargs...
+    f::Makie.Figure,
+    sol::CTModels.Solution,
+    description::Symbol...;
+    color=nothing,
+    kwargs...,
 )
     build, render_kwargs = PlotCase.split_plot_kwargs(kwargs)
     fig = PlotCase.build_figure(sol, description...; build...)
