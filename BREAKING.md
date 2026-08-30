@@ -4,6 +4,16 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.2-beta] - unreleased
+
+### No Breaking Changes
+
+The `@extref` targets in the `CTModelsPlots` and `CTModelsMakie` extension
+docstrings now use the canonical `CTModels.Solutions.Solution` path
+([#416](https://github.com/control-toolbox/CTModels.jl/issues/416)). This only
+fixes documentation cross-reference resolution; runtime behavior and the public
+API are unchanged, and no migration is required.
+
 ## [0.19.1-beta] - unreleased
 
 ### No Breaking Changes

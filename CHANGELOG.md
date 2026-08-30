@@ -7,6 +7,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.2-beta] - unreleased
+
+### 🔧 Fixed
+
+- **Extension docstring cross-references**
+  ([#416](https://github.com/control-toolbox/CTModels.jl/issues/416)). The
+  `CTModelsPlots` and `CTModelsMakie` extension docstrings now use the canonical
+  `CTModels.Solutions.Solution` path so their `@extref` links resolve in CTModels
+  and downstream documentation builds.
+
+### 📚 Documentation
+
+- Corrected the five plotting-extension `@extref` targets to match the
+  `objects.inv` inventory entry for `CTModels.Solutions.Solution`.
+
+### ✅ Compatibility
+
+- **No breaking changes**: this release only corrects documentation
+  cross-references; no runtime behavior, public API, or migration is affected.
+
 ## [0.19.1-beta] - unreleased
 
 ### ✨ Added

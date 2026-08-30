@@ -81,7 +81,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Plot the components of an optimal control [`CTModels.Solution`](@extref).
+Plot the components of an optimal control [`CTModels.Solutions.Solution`](@extref).
 
 Generates a set of subplots showing the state, control, costate, path constraints and
 dual variables over time, depending on the problem and the given `description`.
@@ -125,7 +125,7 @@ end
 $(TYPEDSIGNATURES)
 
 Overlay the optimal control solution `sol` onto the existing plot `p`. Same behaviour and
-keyword arguments as [`Plots.plot(::CTModels.Solution)`](@extref); an empty `p` is filled as
+keyword arguments as [`Plots.plot(::CTModels.Solutions.Solution)`](@extref); an empty `p` is filled as
 if by `plot`.
 """
 function Plots.plot!(
