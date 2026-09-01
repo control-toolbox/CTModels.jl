@@ -7,7 +7,6 @@ CurrentModule = CTModels
 ```@setup plt
 using Plots
 using CairoMakie: CairoMakie, Makie
-Base.showable(::MIME"image/png", ::Plots.Plot) = false
 ```
 
 When `Plots` is loaded, the `CTModelsPlots` extension adds a recipe so a
@@ -50,7 +49,7 @@ The recipe accepts keyword arguments that control the arrangement and how the co
 displayed:
 
 | Keyword | Values | Effect |
-|---|---|---|
+| --- | --- | --- |
 | `layout` | `:group` / `:split` | one figure per quantity, or state/costate split |
 | `control` | `:components` / `:norm` / `:all` | plot each control, its norm, or both |
 | `time` | `:default` / `:normalize` | physical time, or rescaled to ``[0, 1]`` |
