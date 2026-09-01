@@ -65,8 +65,9 @@ using JLD2, JSON3
 
 # plotting
 using Plots
-import CairoMakie   # `import`, not `using`: keeps Makie's `plot`/`plot!` out of Main,
-                    # which would collide with Plots' `plot`/`plot!` in the `@docs` block on results/plot.md
+using CairoMakie: CairoMakie, Makie   # qualified `using`: loads CairoMakie and exposes
+                                      # CairoMakie/Makie without importing Makie's `plot`/`plot!`
+                                      # into Main (avoids clashing with Plots in `@docs` blocks).
 
 # DocumenterVitepress picks the highest-priority MIME type a plot object responds to
 # (image/png: 4.0 over image/svg+xml: 3.0) — the opposite of Documenter.HTML, which
