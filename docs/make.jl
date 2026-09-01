@@ -61,7 +61,23 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 # Docstrings from external packages
 # ═══════════════════════════════════════════════════════════════════════════════
-using JLD2, JSON3, Plots, CairoMakie
+using JLD2, JSON3
+
+# plotting
+using Plots
+import CairoMakie   # `import`, not `using`: keeps Makie's `plot`/`plot!` out of Main,
+                    # which would collide with Plots' `plot`/`plot!` in the `@docs` block on results/plot.md
+
+# DocumenterVitepress picks the highest-priority MIME type a plot object responds to
+# (image/png: 4.0 over image/svg+xml: 3.0) — the opposite of Documenter.HTML, which
+# prefers SVG. Both Plots.jl and CairoMakie respond to `image/png`, so PNG wins for
+# every figure unless it is disabled. Set once here, before any @example block runs,
+# so it covers every page present or future — not just the ones plotting today. See
+# Handbook/VITEPRESS-DOC.md "Plot image format — SVG vs PNG".
+Base.showable(::MIME"image/png", ::Plots.Plot) = false
+CairoMakie.activate!(; type="svg")
+Base.showable(::MIME"image/png", ::CairoMakie.Makie.Figure) = false
+
 const CTModelsJLD = Base.get_extension(CTModels, :CTModelsJLD)
 const CTModelsJSON = Base.get_extension(CTModels, :CTModelsJSON)
 const CTModelsPlots = Base.get_extension(CTModels, :CTModelsPlots)
