@@ -124,11 +124,11 @@ $(TYPEDSIGNATURES)
 Validate that a name and its components don't conflict with existing names.
 
 Performs comprehensive validation:
-1. Name is not empty
-2. Components are not empty
-3. Name not in components (internal conflict)
-4. No duplicates in components
-5. No conflicts with existing names in other components (global uniqueness)
+- Name is not empty
+- Components are not empty
+- Name not in components (internal conflict)
+- No duplicates in components
+- No conflicts with existing names in other components (global uniqueness)
 
 # Arguments
 

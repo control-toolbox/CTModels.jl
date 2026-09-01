@@ -38,15 +38,15 @@ for memory efficiency. Otherwise, it uses `MultipleTimeGridModel` to store each 
 
 Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two formats:
 
-1. **Matrix format**: `Matrix{Float64}` with dimensions `(n_points, n_dim)`
-   - Each row corresponds to a time point in the associated grid
-   - Each column corresponds to a component dimension
-   - Example: `X` is `(length(T_state), state_dimension(ocp))`
+- **Matrix format**: `Matrix{Float64}` with dimensions `(n_points, n_dim)`
+  - Each row corresponds to a time point in the associated grid
+  - Each column corresponds to a component dimension
+  - Example: `X` is `(length(T_state), state_dimension(ocp))`
 
-2. **Function format**: `Function` that takes time `t::Float64` and returns a vector
-   - Allows analytical or pre-interpolated trajectories
-   - Function signature: `t -> Vector{Float64}` of appropriate dimension
-   - Useful for exact solutions or when data is already interpolated
+- **Function format**: `Function` that takes time `t::Float64` and returns a vector
+  - Allows analytical or pre-interpolated trajectories
+  - Function signature: `t -> Vector{Float64}` of appropriate dimension
+  - Useful for exact solutions or when data is already interpolated
 
 # Arguments
 

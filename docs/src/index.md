@@ -81,10 +81,10 @@ The core **optimal control model** is expressed via:
 
 In practice you typically:
 
-1. Specify **time dependence** and **time models** (fixed or free final time, etc.).
-2. Describe **state, control, and variable spaces**.
-3. Provide **dynamics** and **objective** functions.
-4. Add **constraints**, either programmatically or via a `ConstraintsDictType` dictionary.
+- Specify **time dependence** and **time models** (fixed or free final time, etc.).
+- Describe **state, control, and variable spaces**.
+- Provide **dynamics** and **objective** functions.
+- Add **constraints**, either programmatically or via a `ConstraintsDictType` dictionary.
 
 The numerical **solution** of an OCP is represented by:
 

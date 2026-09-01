@@ -29,14 +29,14 @@ It provides:
 
 Two things to keep in mind:
 
-1. **No top-level exports.** `using CTModels` loads the package but brings no symbols
+- **No top-level exports.** `using CTModels` loads the package but brings no symbols
    into scope. Every symbol is accessed via its qualified path:
    ```julia
    CTModels.Building.state!     # ✓ always works
    CTModels.Solutions.build_solution
    CTModels.Init.build_initial_guess
    ```
-2. **`PreModel → build → Model` pipeline.** An OCP is assembled incrementally on a mutable
+- **`PreModel → build → Model` pipeline.** An OCP is assembled incrementally on a mutable
    `PreModel`, then frozen into an immutable `Model` by `build`. The `Model` is the object
    every downstream package (solver, initial-guess builder, serializer) consumes.
 
