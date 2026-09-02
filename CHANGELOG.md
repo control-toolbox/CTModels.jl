@@ -7,6 +7,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.4-beta] - unreleased
+
+### 📚 Documentation
+
+- **Drop unresolvable `@extref` in the plotting-extension docstrings**
+  ([#427](https://github.com/control-toolbox/CTModels.jl/issues/427)). The `plot!` /
+  `Makie.plot` / `Makie.plot!` docstrings cross-referenced the public method as
+  `` [`Plots.plot(::CTModels.Solutions.Solution)`](@extref) ``, an anchor that cannot
+  exist: the public `Plots.plot` / `Makie.plot` methods on a `Solution` are defined in
+  weak-dependency extensions, so the inventory registers only the internal
+  `CTModelsPlots._plot` / `CTModelsMakie._plot` helpers. The links are now plain prose.
+  This also clears four `@extref` warnings from OptimalControl.jl's docs build, where
+  these docstrings are transcluded. Follow-on to
+  [#416](https://github.com/control-toolbox/CTModels.jl/issues/416).
+
+### ✅ Compatibility
+
+- **No breaking changes**: documentation sources only; no runtime behavior, public API,
+  or migration is affected.
+
 ## [0.19.3-beta] - unreleased
 
 ### 📚 Documentation

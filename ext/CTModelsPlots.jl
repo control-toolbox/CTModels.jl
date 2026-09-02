@@ -125,8 +125,7 @@ end
 $(TYPEDSIGNATURES)
 
 Overlay the optimal control solution `sol` onto the existing plot `p`. Same behaviour and
-keyword arguments as [`Plots.plot(::CTModels.Solutions.Solution)`](@extref); an empty `p` is filled as
-if by `plot`.
+keyword arguments as `plot` (documented above); an empty `p` is filled as if by `plot`.
 """
 function Plots.plot!(
     p::Plots.Plot, sol::CTModels.Solution, description::Symbol...; kwargs...

@@ -76,7 +76,7 @@ $(TYPEDSIGNATURES)
 Plot the components of an optimal control [`CTModels.Solutions.Solution`](@extref) with a
 Makie backend.
 
-Same `description` and keyword arguments as [`Plots.plot(::CTModels.Solutions.Solution)`](@extref)
+Same `description` and keyword arguments as the Plots-backend `plot`
 (`layout`, `control`, `time`, the `*_style` / `*_bounds_style` keywords, `color`,
 `size`). Returns a `Makie.Figure`.
 
@@ -97,8 +97,8 @@ end
 $(TYPEDSIGNATURES)
 
 Overlay the optimal control solution `sol` onto the existing `Makie.Figure` `f`. Same
-behaviour and keyword arguments as [`Plots.plot(::CTModels.Solutions.Solution)`](@extref); an
-empty `f` is filled as if by `plot`.
+behaviour and keyword arguments as the Plots-backend `plot`; an empty `f` is filled as if
+by `plot`.
 """
 function Makie.plot!(
     f::Makie.Figure, sol::CTModels.Solution, description::Symbol...; kwargs...
