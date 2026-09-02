@@ -4,6 +4,21 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.3-beta] - unreleased
+
+### No Breaking Changes
+
+This release is documentation-only. It fixes the docs build to emit SVG figures for
+both the Plots and CairoMakie backends
+([#423](https://github.com/control-toolbox/CTModels.jl/issues/423)), loads
+`CairoMakie` with `import` so its `plot`/`plot!` no longer collide with Plots' in
+`@docs` blocks ([#424](https://github.com/control-toolbox/CTModels.jl/issues/424)),
+converts ordered lists to bullets across `src/` and `docs/src/`
+([#421](https://github.com/control-toolbox/CTModels.jl/issues/421)) and re-runs
+`JuliaFormatter` on `docs/make.jl`
+([#425](https://github.com/control-toolbox/CTModels.jl/issues/425)). No runtime
+behavior or public API changed; no migration required.
+
 ## [0.19.2-beta] - unreleased
 
 ### No Breaking Changes
