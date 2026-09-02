@@ -4,6 +4,18 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.4-beta] - unreleased
+
+### No Breaking Changes
+
+This release is documentation-only. The `plot!` / `Makie.plot` / `Makie.plot!` docstrings
+in the plotting extensions no longer cross-reference the public method with an `@extref`
+anchor that cannot resolve — the public `Plots.plot` / `Makie.plot` methods on a `Solution`
+live in weak-dependency extensions, so only the internal `_plot` helpers are in the
+inventory ([#427](https://github.com/control-toolbox/CTModels.jl/issues/427), follow-on to
+[#416](https://github.com/control-toolbox/CTModels.jl/issues/416)). The links are now plain
+prose. No runtime behavior or public API changed; no migration required.
+
 ## [0.19.3-beta] - unreleased
 
 ### No Breaking Changes
