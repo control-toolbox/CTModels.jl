@@ -7,6 +7,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.3-beta] - unreleased
+
+### 📚 Documentation
+
+- **Force SVG figures in the docs build**
+  ([#423](https://github.com/control-toolbox/CTModels.jl/issues/423)). Under
+  DocumenterVitepress every plot was emitted as PNG (Vitepress picks the highest
+  MIME priority rather than Documenter.HTML's SVG preference), degrading the
+  printed quality. The docs build now disables PNG output and activates the SVG
+  backend once, for both the Plots and CairoMakie backends.
+
+- **No `plot` name collision in `@docs` blocks**
+  ([#424](https://github.com/control-toolbox/CTModels.jl/issues/424)). `CairoMakie`
+  is now loaded with `import` (not `using`) in `docs/make.jl` so its generic
+  `plot`/`plot!` methods stay out of `Main` and no longer collide with Plots' in the
+  documentation `@docs` blocks, satisfying the meta "no-import" test.
+
+- Converted ordered lists to bullet lists across `src/` and `docs/src/`
+  ([#421](https://github.com/control-toolbox/CTModels.jl/issues/421)) for a
+  consistent Markdown rendering style.
+
+### ♻️ Internal
+
+- Re-ran `JuliaFormatter` on `docs/make.jl`
+  ([#425](https://github.com/control-toolbox/CTModels.jl/issues/425)).
+
+### ✅ Compatibility
+
+- **No breaking changes**: this release only touches documentation sources and the
+  docs build configuration; no runtime behavior, public API, or migration is
+  affected.
+
 ## [0.19.2-beta] - unreleased
 
 ### 🔧 Fixed
