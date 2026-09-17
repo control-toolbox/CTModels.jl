@@ -159,14 +159,14 @@ function test_multi_grids()
                 successful=Solutions.successful(sol_unified),
             )
 
+            filename = tempname()
+
             # Export
-            Serialization.export_ocp_solution(
-                sol_multi; filename="multi_grid_test", format=:JLD
-            )
+            Serialization.export_ocp_solution(sol_multi; filename=filename, format=:JLD)
 
             # Import
             sol_reloaded = Serialization.import_ocp_solution(
-                ocp; filename="multi_grid_test", format=:JLD
+                ocp; filename=filename, format=:JLD
             )
 
             # Verify time grid model type
@@ -193,7 +193,7 @@ function test_multi_grids()
                     Components.control(sol_multi)(t) atol=1e-8
             end
 
-            remove_if_exists("multi_grid_test.jld2")
+            remove_if_exists(filename * ".jld2")
         end
 
         # ====================================================================
