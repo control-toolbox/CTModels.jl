@@ -4,7 +4,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [0.19.4-beta] - unreleased
+## [0.19.5] - 2026-09-17
 
 ### No Breaking Changes
 
