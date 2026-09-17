@@ -674,6 +674,7 @@ The package automatically detects and handles both formats. All tests pass (3324
 ### Migration Notes
 
 No action required for users. All existing code continues to work unchanged. This is an internal improvement that:
+
 - Removes a redundant generic method
 - Improves type safety and method dispatch clarity
 - Maintains all existing public APIs
@@ -770,11 +771,13 @@ Existing plotting code continues to work unchanged.
 ### Module and Type Renaming
 
 #### Overview
+
 The InitialGuess module has been renamed to `Init` for better API ergonomics and more concise naming. This is a **breaking change** that requires users to update their imports and type references.
 
 #### What Changed
 
 ##### Module Name
+
 ```julia
 # Before (0.8.2-beta and earlier)
 using CTModels.InitialGuess
@@ -784,6 +787,7 @@ using CTModels: Init
 ```
 
 ##### Type Names
+
 ```julia
 # Before
 pre = CTModels.OptimalControlPreInit(...)
@@ -829,11 +833,13 @@ pre_init = CTModels.PreInitialGuess(state=0.1, control=0.2)
 ### InitialGuess Validation Architecture Change
 
 #### Overview
+
 Refactored the InitialGuess validation system to follow Single Responsibility Principle. This is an **internal architectural change** that does not affect the public API behavior but improves code organization.
 
 #### What Changed
 
 ##### Construction vs Validation Separation
+
 ```julia
 # Before (0.8.1-beta and earlier)
 # initial_guess() validated internally, build_initial_guess() had mixed responsibilities
@@ -844,6 +850,7 @@ Refactored the InitialGuess validation system to follow Single Responsibility Pr
 ```
 
 ##### Validation Coverage Fix
+
 ```julia
 # Before: This case was NOT validated (potential runtime error)
 bad_init = CTModels.InitialGuess(wrong_dimensions...)
@@ -856,6 +863,7 @@ validated = CTModels.build_initial_guess(ocp, bad_init)  # Throws IncorrectArgum
 #### Migration Required
 
 **No user code changes required** - this is an internal refactoring that:
+
 - Maintains all existing public APIs
 - Fixes a validation gap for direct `AbstractInitialGuess` inputs
 - Improves error detection and code reliability
@@ -874,13 +882,15 @@ validated = CTModels.build_initial_guess(ocp, bad_init)  # Throws IncorrectArgum
 ### Module Migration to CTSolvers
 
 #### Overview
+
 Major refactoring where several modules have been moved from CTModels to the new CTSolvers package.
 
 #### Moved Modules
+
 The following modules are no longer part of CTModels and must be imported from CTSolvers:
 
 - **Options** → `using CTSolvers: Options`
-- **Strategies** → `using CTSolvers: Strategies` 
+- **Strategies** → `using CTSolvers: Strategies`
 - **Orchestration** → `using CTSolvers: Orchestration`
 - **Optimization** → `using CTSolvers: Optimization`
 - **Modelers** → `using CTSolvers: Modelers`
@@ -889,6 +899,7 @@ The following modules are no longer part of CTModels and must be imported from C
 #### Migration Guide
 
 ##### Before (CTModels < 0.8.0)
+
 ```julia
 using CTModels
 using CTModels.Options
@@ -897,6 +908,7 @@ using CTModels.Optimization
 ```
 
 ##### After (CTModels ≥ 0.8.0)
+
 ```julia
 using CTModels
 using CTSolvers: Options
@@ -907,6 +919,7 @@ using CTSolvers: Optimization
 #### Specific Changes
 
 ##### Option Types
+
 ```julia
 # Before
 using CTModels.Options
@@ -918,6 +931,7 @@ opt = CTSolvers.OptionValue(100, :user)
 ```
 
 ##### Strategy Types
+
 ```julia
 # Before
 using CTModels.Strategies
@@ -929,6 +943,7 @@ strategy = CTSolvers.DirectStrategy()
 ```
 
 ##### Modelers
+
 ```julia
 # Before
 using CTModels.Modelers
@@ -940,6 +955,7 @@ modeler = CTSolvers.ADNLPModeler()
 ```
 
 ##### DOCP Types
+
 ```julia
 # Before
 using CTModels.DOCP
