@@ -113,8 +113,20 @@ Import an optimal control solution from a file.
 # Returns
 - `Solution`: The imported solution.
 
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if the file cannot belong to a solution of `ocp`
+  (dimensions of the state, control or variable, number or labels of the constraints,
+  fixed versus free initial or final time). All differences are reported together; pass the
+  model the solution was computed from.
+
 # Notes
 Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
+
+Files store a signature of the model they were exported from. Differences that cannot
+make the solution unusable (names of the components, criterion, type of cost, values of
+fixed times) only produce a warning. Files exported by older versions of CTModels have no
+signature: only the dimensions and the time grids are then checked, and an informational
+message is logged.
 
 See also: [`CTModels.Serialization.export_ocp_solution`](@extref).
 """

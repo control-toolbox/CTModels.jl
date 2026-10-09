@@ -38,6 +38,8 @@ julia> CTModels.export_ocp_solution(CTModels.JLD2Tag(), sol; filename="mysolutio
 ```
 
 # Notes
+- A signature of the model (dimensions, names, constraint labels, times, criterion) is
+  stored with the data, to check the file against the model at import time
 - Functions are discretized on the time grid to avoid JLD2 serialization warnings
 - The solution can be perfectly reconstructed via `import_ocp_solution`
 - Uses the same discretization logic as JSON export for consistency
@@ -85,7 +87,9 @@ julia> sol = CTModels.import_ocp_solution(CTModels.JLD2Tag(), model; filename="m
 # Notes
 - The solution is reconstructed from discretized data via `build_solution`
 - This ensures perfect round-trip consistency with the export
-- The OCP model from the file is used if the provided one is not compatible
+- The file does not contain the model: `ocp` must be the model the solution was computed
+  from. Incompatible dimensions, constraints or times raise an `IncorrectArgument`;
+  other differences (names, criterion, ...) raise a warning
 """
 function CTModels.import_ocp_solution(
     ::CTModels.JLD2Tag, ocp::CTModels.Model; filename::String

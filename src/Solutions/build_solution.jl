@@ -1668,6 +1668,8 @@ Dict(
     - `"boundary_constraints_dual"`: Boundary duals (time-independent vector)
     - `"variable_constraints_lb_dual"`, `"variable_constraints_ub_dual"`: Variable duals (vectors)
   - **Solver info**: `"iterations"`, `"message"`, `"status"`, `"successful"`, `"constraints_violation"`, `"infos"`
+  - **Compatibility check**: `"format_version"` and `"model_signature"` (see
+    [`CTModels.Models._model_signature`](@extref)), used at import time to check the file against the model
 
 # Discretization Behavior
 

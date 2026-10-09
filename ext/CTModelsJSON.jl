@@ -278,8 +278,16 @@ including the discretized primal and dual trajectories.
 # Returns
 - `CTModels.Solution`: A reconstructed solution instance.
 
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if the file does not match `ocp` (dimensions,
+  number or labels of constraints, fixed versus free times). Pass the model the solution
+  was computed from.
+
 # Notes
 Handles both vector and matrix encodings of signals. If dual fields are missing or `null`, the corresponding attributes are set to `nothing`.
+
+The file is checked against `ocp` before the solution is rebuilt; see
+[`CTModels.Serialization.import_ocp_solution`](@extref).
 
 # Example
 ```julia-repl
