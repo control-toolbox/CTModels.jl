@@ -162,13 +162,33 @@ function test_contracts()
             Test.@test occursin("This problem has no Mayer cost", mayer_message)
             Test.@test occursin("has_mayer_cost(ocp)", mayer_message)
             Test.@test !occursin("objective!", mayer_message)
-            Test.@test_throws Exceptions.PreconditionError Components.lagrange(fm)
+
+            lagrange_error = try
+                Components.lagrange(fm)
+            catch err
+                err
+            end
+            Test.@test lagrange_error isa Exceptions.PreconditionError
+            lagrange_message = sprint(showerror, lagrange_error)
+            Test.@test occursin("This problem has no Lagrange cost", lagrange_message)
+            Test.@test occursin("has_lagrange_cost(ocp)", lagrange_message)
+            Test.@test !occursin("objective!", lagrange_message)
         end
 
         Test.@testset "AbstractModel initial_time/final_time stubs" begin
             fm = FakeModel()
             # No-argument forms (fixed-time shortcut) throw on abstract type
-            Test.@test_throws Exceptions.PreconditionError Components.initial_time(fm)
+            initial_time_error = try
+                Components.initial_time(fm)
+            catch err
+                err
+            end
+            Test.@test initial_time_error isa Exceptions.PreconditionError
+            initial_time_message = sprint(showerror, initial_time_error)
+            Test.@test occursin("The initial time is free", initial_time_message)
+            Test.@test occursin("initial_time(ocp, v)", initial_time_message)
+            Test.@test !occursin("FixedTimeModel", initial_time_message)
+
             final_time_error = try
                 Components.final_time(fm)
             catch err
@@ -176,9 +196,11 @@ function test_contracts()
             end
             Test.@test final_time_error isa Exceptions.PreconditionError
             final_time_message = sprint(showerror, final_time_error)
-            Test.@test occursin("The final time is free", final_time_message)
+            Test.@test occursin("The final time is free (part of the variable)", final_time_message)
             Test.@test occursin("final_time(ocp, v)", final_time_message)
+            Test.@test occursin("final_time accessor", final_time_message)
             Test.@test !occursin("FixedTimeModel", final_time_message)
+            Test.@test !occursin("AbstractModel", final_time_message)
 
             # Vector-argument forms (free-time access) throw on abstract type
             Test.@test_throws Exceptions.PreconditionError Components.initial_time(

@@ -533,9 +533,9 @@ function Components.initial_time(::AbstractModel)
     return throw(
         Exceptions.PreconditionError(
             "Cannot get initial time with this function";
-            reason="This model type does not support direct initial time access",
-            suggestion="Use initial_time(ocp) on a Model with FixedTimeModel or use initial_time(ocp, variable) for variable initial time",
-            context="initial_time on AbstractModel",
+            reason="The initial time is free (part of the variable)",
+            suggestion="The initial time is free; use initial_time(ocp, v) with a value v of the variable",
+            context="initial_time accessor",
         ),
     )
 end
@@ -659,9 +659,9 @@ function Components.final_time(::AbstractModel)
     return throw(
         Exceptions.PreconditionError(
             "Cannot get final time with this function";
-            reason="This model type does not support direct final time access",
+            reason="The final time is free (part of the variable)",
             suggestion="The final time is free; use final_time(ocp, v) with a value v of the variable",
-            context="final_time on AbstractModel",
+            context="final_time accessor",
         ),
     )
 end
@@ -990,7 +990,7 @@ function Components.lagrange(::AbstractModel)
         Exceptions.PreconditionError(
             "Cannot access Lagrange cost";
             reason="This OCP has no Lagrange objective defined",
-            suggestion="Define a Lagrange objective using objective!(ocp, :min/:max, lagrange=...) before accessing it",
+            suggestion="This problem has no Lagrange cost (check with has_lagrange_cost(ocp))",
             context="lagrange accessor",
         ),
     )
