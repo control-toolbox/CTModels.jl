@@ -152,7 +152,16 @@ function test_contracts()
 
         Test.@testset "AbstractModel mayer/lagrange stubs" begin
             fm = FakeModel()
-            Test.@test_throws Exceptions.PreconditionError Components.mayer(fm)
+            mayer_error = try
+                Components.mayer(fm)
+            catch err
+                err
+            end
+            Test.@test mayer_error isa Exceptions.PreconditionError
+            mayer_message = sprint(showerror, mayer_error)
+            Test.@test occursin("This problem has no Mayer cost", mayer_message)
+            Test.@test occursin("has_mayer_cost(ocp)", mayer_message)
+            Test.@test !occursin("objective!", mayer_message)
             Test.@test_throws Exceptions.PreconditionError Components.lagrange(fm)
         end
 
@@ -160,7 +169,17 @@ function test_contracts()
             fm = FakeModel()
             # No-argument forms (fixed-time shortcut) throw on abstract type
             Test.@test_throws Exceptions.PreconditionError Components.initial_time(fm)
-            Test.@test_throws Exceptions.PreconditionError Components.final_time(fm)
+            final_time_error = try
+                Components.final_time(fm)
+            catch err
+                err
+            end
+            Test.@test final_time_error isa Exceptions.PreconditionError
+            final_time_message = sprint(showerror, final_time_error)
+            Test.@test occursin("The final time is free", final_time_message)
+            Test.@test occursin("final_time(ocp, v)", final_time_message)
+            Test.@test !occursin("FixedTimeModel", final_time_message)
+
             # Vector-argument forms (free-time access) throw on abstract type
             Test.@test_throws Exceptions.PreconditionError Components.initial_time(
                 fm, [0.0]
