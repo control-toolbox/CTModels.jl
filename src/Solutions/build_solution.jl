@@ -1578,6 +1578,14 @@ end
 # ============================================================================== #
 
 """
+Version of the serialized solution format, stored under the `"format_version"` key.
+
+Files written before the key existed (no `"format_version"`, no `"model_signature"`) are
+still readable, with a reduced compatibility check against the model.
+"""
+const SERIALIZATION_FORMAT_VERSION = 1
+
+"""
 $(TYPEDSIGNATURES)
 
 Serialize a solution into discrete data for export to persistent storage (JLD2, JSON, etc.).
@@ -1802,6 +1810,8 @@ function _discretize_all_components(
         "successful" => successful(sol),
         "constraints_violation" => constraints_violation(sol),
         "infos" => infos(sol),
+        "format_version" => SERIALIZATION_FORMAT_VERSION,
+        "model_signature" => Models._model_signature(model(sol)),
     )
 end
 

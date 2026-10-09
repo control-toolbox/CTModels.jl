@@ -85,8 +85,8 @@ end
 
 _ext(fmt) = fmt == :JLD ? ".jld2" : ".json"
 
-function _export(sol, fmt, dir)
-    filename = joinpath(dir, "sol")
+function _export(sol, fmt, dir; name="sol")
+    filename = joinpath(dir, name)
     Serialization.export_ocp_solution(sol; filename=filename, format=fmt)
     return filename
 end
@@ -258,7 +258,7 @@ function test_import_model_mismatch()
 
                     Test.@testset "issue #435: 2D state file, 1D state model" begin
                         big = _model(; n=2, nv=1)
-                        fbig = _export(_solution(big), fmt, dir)
+                        fbig = _export(_solution(big), fmt, dir; name="big")
                         err = _caught(() -> _import(_model(; nv=1), fmt, fbig))
                         Test.@test err isa Exceptions.IncorrectArgument
                         Test.@test occursin("state dimension", err.got)
@@ -292,7 +292,7 @@ function test_import_model_mismatch()
                     end
 
                     Test.@testset "old file without signature" begin
-                        old = _export(sol, fmt, dir)
+                        old = _export(sol, fmt, dir; name="old")
                         _strip_signature(fmt, old)
                         Test.@test_logs (:info, r"older") _import(ocp, fmt, old)
                         Test.@test_throws Exceptions.IncorrectArgument _import(
