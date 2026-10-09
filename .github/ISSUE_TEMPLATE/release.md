@@ -1,6 +1,6 @@
 ---
 name: Release
-about: Prepare a CTBase release
+about: Prepare a release
 title: "[RELEASE] v"
 labels: ""
 assignees: ocots
