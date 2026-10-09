@@ -4,6 +4,15 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.6] - 2026-10-09
+
+### No Breaking Changes
+
+This release improves the error diagnostics for free initial and final time
+access and for missing Mayer or Lagrange costs ([#431](https://github.com/control-toolbox/CTModels.jl/issues/431)).
+The function signatures, model behavior, and public API are unchanged; no migration
+is required.
+
 ## [0.19.5] - 2026-09-17
 
 ### No Breaking Changes
