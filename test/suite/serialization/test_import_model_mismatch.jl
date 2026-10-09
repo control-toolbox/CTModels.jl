@@ -243,6 +243,40 @@ function test_import_model_mismatch()
         end
 
         # ==================================================================
+        # build_solution: inputs that used to be accepted silently
+        # ==================================================================
+        Test.@testset "build_solution rejects inconsistent sizes" begin
+            ocp = _model(; nv=1)
+            T = collect(range(0.0, 1.0, _N))
+            build(; v=[1.0], kwargs...) = Solutions.build_solution(
+                ocp,
+                T,
+                zeros(_N, 1),
+                zeros(_N, 1),
+                v,
+                zeros(_N, 1);
+                objective=0.0,
+                iterations=1,
+                constraints_violation=0.0,
+                message="",
+                status=:optimal,
+                successful=true,
+                kwargs...,
+            )
+            Test.@test build() isa Solutions.Solution
+            Test.@test_throws Exceptions.IncorrectArgument build(; v=[1.0, 2.0])
+            Test.@test_throws Exceptions.IncorrectArgument build(; v=Float64[])
+            Test.@test_throws Exceptions.IncorrectArgument build(;
+                path_constraints_dual=zeros(_N, 3)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument build(;
+                boundary_constraints_dual=zeros(2)
+            )
+            err = _caught(() -> build(; path_constraints_dual=zeros(_N, 3)))
+            Test.@test occursin("model", err.suggestion)
+        end
+
+        # ==================================================================
         # INTEGRATION: JLD and JSON round trips
         # ==================================================================
         for fmt in (:JLD, :JSON)

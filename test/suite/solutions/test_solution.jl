@@ -304,7 +304,7 @@ function test_solution()
 
             # Test dim_boundary_constraints_nl
             Test.@test Components.dim_boundary_constraints_nl(sol) == 0  # no boundary constraints
-            boundary_constraints_dual = [3.0, 2.0, 1.0]
+            boundary_constraints_dual = [3.0, 2.0]
             sol_bc = Solutions.build_solution(
                 ocp,
                 T,
@@ -315,7 +315,7 @@ function test_solution()
                 kwargs...,
                 boundary_constraints_dual=boundary_constraints_dual,
             )
-            Test.@test Components.dim_boundary_constraints_nl(sol_bc) == 3  # 3 boundary constraints
+            Test.@test Components.dim_boundary_constraints_nl(sol_bc) == 2  # 2 boundary constraints
 
             # Test dim_dual_variable_constraints_box
             Test.@test Solutions.dim_dual_variable_constraints_box(sol) == 0  # no variable duals

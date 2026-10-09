@@ -289,6 +289,13 @@ function build_solution(
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
+    Core.@ensure length(v) == dim_v Exceptions.IncorrectArgument(
+        "variable length mismatch";
+        got="length=$(length(v))",
+        expected="length=$(dim_v) (= variable_dimension)",
+        suggestion="Provide a vector of length variable_dimension(ocp). If the data comes from an exported solution, pass the model the solution was computed from.",
+        context="build_solution - validating variable length",
+    )
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
@@ -302,6 +309,7 @@ function build_solution(
         dim_path_constraints_nl(ocp),
         TPCD;
         allow_nothing=true,
+        expected_dim=dim_path_constraints_nl(ocp),
     )
 
     # box constraints multipliers (optional, can be nothing)
@@ -347,6 +355,18 @@ function build_solution(
         expected_dim=dim_u,
         interpolation=control_interpolation,
     )
+
+    # Boundary constraint duals are a (time-independent) vector with one entry per constraint.
+    if !isnothing(boundary_constraints_dual)
+        dim_b = dim_boundary_constraints_nl(ocp)
+        Core.@ensure length(boundary_constraints_dual) == dim_b Exceptions.IncorrectArgument(
+            "boundary_constraints_dual length mismatch";
+            got="length=$(length(boundary_constraints_dual))",
+            expected="length=$(dim_b) (= number of boundary constraints)",
+            suggestion="Provide a vector with one entry per boundary constraint. If the data comes from an exported solution, pass the model the solution was computed from.",
+            context="build_solution - validating boundary dual length",
+        )
+    end
 
     # Variable box constraint duals are (time-independent) vectors.
     # Enforce length == variable_dimension(ocp) when provided.
