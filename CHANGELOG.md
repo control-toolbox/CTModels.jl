@@ -7,6 +7,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.6] - 2026-10-09
+
+### 🔧 Fixed
+
+- **Accessor error hints** ([#431](https://github.com/control-toolbox/CTModels.jl/issues/431)).
+  Improved the diagnostics for free initial and final times and for missing Mayer
+  or Lagrange costs. The hints now point to the appropriate accessor or
+  `has_*_cost` predicate without exposing internal model types or suggesting
+  mutation of an already built model.
+
+### ✅ Compatibility
+
+- **No breaking changes**: only error diagnostics were clarified; function
+  signatures and model behavior are unchanged.
+
 ## [0.19.5] - 2026-09-17
 
 ### 📚 Documentation
