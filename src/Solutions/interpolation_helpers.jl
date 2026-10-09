@@ -73,7 +73,7 @@ function _interpolate_from_data(
             "Matrix dimension mismatch",
             got="$actual_dim columns",
             expected="exactly $dim columns",
-            suggestion="Provide a matrix with exactly $dim columns (pad with zeros for unconstrained components if dual).",
+            suggestion="Provide a matrix with exactly $dim columns, one per component (for box duals, pad with zeros for unconstrained components). If the data comes from an exported solution, pass the model the solution was computed from.",
             context="_interpolate_from_data - validating matrix dimensions",
         )
     end

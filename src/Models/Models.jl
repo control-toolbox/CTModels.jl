@@ -48,6 +48,7 @@ using ..Components
 
 include(joinpath(@__DIR__, "constraint_functors.jl"))
 include(joinpath(@__DIR__, "model.jl"))
+include(joinpath(@__DIR__, "model_signature.jl"))
 
 # Types
 export AbstractModel, Model

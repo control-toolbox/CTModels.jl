@@ -251,6 +251,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Recursively convert JSON3 objects and arrays into plain `Dict{String,Any}` and `Vector{Any}`.
+"""
+function _to_plain(x)
+    x isa AbstractDict && return Dict{String,Any}(string(k) => _to_plain(v) for (k, v) in x)
+    x isa AbstractArray && return Any[_to_plain(v) for v in x]
+    return x
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Import an optimal control solution from a `.json` file exported with `export_ocp_solution`.
 
 This function reads the JSON contents and reconstructs a `CTModels.Solution` object,
@@ -267,8 +278,16 @@ including the discretized primal and dual trajectories.
 # Returns
 - `CTModels.Solution`: A reconstructed solution instance.
 
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if the file does not match `ocp` (dimensions,
+  number or labels of constraints, fixed versus free times). Pass the model the solution
+  was computed from.
+
 # Notes
 Handles both vector and matrix encodings of signals. If dual fields are missing or `null`, the corresponding attributes are set to `nothing`.
+
+The file is checked against `ocp` before the solution is rebuilt; see
+[`CTModels.Serialization.import_ocp_solution`](@extref).
 
 # Example
 ```julia-repl
@@ -324,6 +343,11 @@ function CTModels.import_ocp_solution(
             CTModels.Serialization._extract_optional_vector(vcubd),
         "control_interpolation" => blob["control_interpolation"],
     )
+
+    # Model signature (absent from files exported by older versions)
+    if haskey(blob, "model_signature")
+        data["model_signature"] = _to_plain(blob["model_signature"])
+    end
 
     # Time grid: multi-grid format (4 separate grids) or unified format (single time_grid)
     if haskey(blob, "time_grid_state")

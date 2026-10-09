@@ -289,6 +289,13 @@ function build_solution(
     fp = build_interpolated_function(
         P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
     )
+    Core.@ensure length(v) == dim_v Exceptions.IncorrectArgument(
+        "variable length mismatch";
+        got="length=$(length(v))",
+        expected="length=$(dim_v) (= variable_dimension)",
+        suggestion="Provide a vector of length variable_dimension(ocp). If the data comes from an exported solution, pass the model the solution was computed from.",
+        context="build_solution - validating variable length",
+    )
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
@@ -302,6 +309,7 @@ function build_solution(
         dim_path_constraints_nl(ocp),
         TPCD;
         allow_nothing=true,
+        expected_dim=dim_path_constraints_nl(ocp),
     )
 
     # box constraints multipliers (optional, can be nothing)
@@ -347,6 +355,18 @@ function build_solution(
         expected_dim=dim_u,
         interpolation=control_interpolation,
     )
+
+    # Boundary constraint duals are a (time-independent) vector with one entry per constraint.
+    if !isnothing(boundary_constraints_dual)
+        dim_b = dim_boundary_constraints_nl(ocp)
+        Core.@ensure length(boundary_constraints_dual) == dim_b Exceptions.IncorrectArgument(
+            "boundary_constraints_dual length mismatch";
+            got="length=$(length(boundary_constraints_dual))",
+            expected="length=$(dim_b) (= number of boundary constraints)",
+            suggestion="Provide a vector with one entry per boundary constraint. If the data comes from an exported solution, pass the model the solution was computed from.",
+            context="build_solution - validating boundary dual length",
+        )
+    end
 
     # Variable box constraint duals are (time-independent) vectors.
     # Enforce length == variable_dimension(ocp) when provided.
@@ -1578,6 +1598,14 @@ end
 # ============================================================================== #
 
 """
+Version of the serialized solution format, stored under the `"format_version"` key.
+
+Files written before the key existed (no `"format_version"`, no `"model_signature"`) are
+still readable, with a reduced compatibility check against the model.
+"""
+const SERIALIZATION_FORMAT_VERSION = 1
+
+"""
 $(TYPEDSIGNATURES)
 
 Serialize a solution into discrete data for export to persistent storage (JLD2, JSON, etc.).
@@ -1640,6 +1668,8 @@ Dict(
     - `"boundary_constraints_dual"`: Boundary duals (time-independent vector)
     - `"variable_constraints_lb_dual"`, `"variable_constraints_ub_dual"`: Variable duals (vectors)
   - **Solver info**: `"iterations"`, `"message"`, `"status"`, `"successful"`, `"constraints_violation"`, `"infos"`
+  - **Compatibility check**: `"format_version"` and `"model_signature"` (see
+    [`CTModels.Models._model_signature`](@extref)), used at import time to check the file against the model
 
 # Discretization Behavior
 
@@ -1802,6 +1832,8 @@ function _discretize_all_components(
         "successful" => successful(sol),
         "constraints_violation" => constraints_violation(sol),
         "infos" => infos(sol),
+        "format_version" => SERIALIZATION_FORMAT_VERSION,
+        "model_signature" => Models._model_signature(model(sol)),
     )
 end
 

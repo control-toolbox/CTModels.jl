@@ -33,6 +33,8 @@ julia> sol = _reconstruct_solution_from_data(ocp, data; infos=infos)
 See also: [`CTModels.Serialization._extract_time_vector`](@extref).
 """
 function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
+    _validate_solution_against_model(ocp, data)
+
     control_interpolation = Symbol(data["control_interpolation"])
 
     path_constraints_dual = data["path_constraints_dual"]

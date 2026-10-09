@@ -7,6 +7,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🔧 Fixed
+
+- **`import_ocp_solution` with a model that does not match the file**
+  ([#435](https://github.com/control-toolbox/CTModels.jl/issues/435)). The import used to
+  fail deep inside the interpolation with an obscure `Matrix dimension mismatch`, or even
+  succeed silently with a wrong variable or truncated duals. The file is now checked against
+  the model before the solution is rebuilt:
+  - an `IncorrectArgument` listing every difference between the file and the model is raised
+    for the dimensions of the state, control and variable, the number and labels of the
+    constraints, and fixed versus free initial/final times;
+  - differences that cannot make the solution unusable (names, criterion, cost type, values
+    of fixed times) only produce a warning;
+  - exported files now store `"format_version"` and a `"model_signature"`; files exported by
+    older versions are still readable, with a reduced check (dimensions and time grids) and
+    an informational message.
+- **`build_solution` validates more sizes**: the length of `variable`, the number of columns
+  of `path_constraints_dual` and the length of `boundary_constraints_dual` must match the
+  model (they were previously truncated or failed with a `BoundsError`). The hint of the
+  dimension mismatch error no longer suggests padding with zeros for non-dual data.
+
+### ✅ Compatibility
+
+- **Not breaking for valid data**: code that passed a wrongly sized `variable`, path dual or
+  boundary dual to `build_solution` now gets an `IncorrectArgument`.
+
 ## [0.19.6] - 2026-10-09
 
 ### 🔧 Fixed

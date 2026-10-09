@@ -87,6 +87,30 @@ isfile(base_json)
 isfile(base_json * ".json")
 ```
 
+## Importing with the wrong model
+
+The file does not contain the model, only a *signature* of it (dimensions, names, labels of
+the constraints, fixed or free times, criterion). `import_ocp_solution` compares it with the
+model you pass, **before** rebuilding the solution:
+
+- if the solution cannot belong to this model (dimension of the state, control or variable,
+  number or labels of the constraints, fixed versus free initial or final time), an
+  `IncorrectArgument` lists all the differences between the file and the model, and asks for
+  the model the solution was computed from;
+- if the differences cannot make the solution unusable (names of the components, criterion,
+  type of cost, values of fixed times), a warning is logged and the solution is returned.
+
+```julia
+import_ocp_solution(other_model; filename="solution")
+# IncorrectArgument: The solution in the file does not match the model
+#   Got       state dimension = 2 (file)
+#   Expected  state dimension = 1 (model)
+#   Hint      Pass the model the solution was computed from.
+```
+
+Files exported by older versions of CTModels carry no signature: only the dimensions and the
+time grids can then be checked, and an informational message says so.
+
 ## How trajectories survive serialization
 
 A trajectory is a *function* `t -> x(t)`, which neither JSON nor JLD2 can store directly.

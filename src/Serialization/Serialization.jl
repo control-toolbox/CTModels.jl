@@ -48,6 +48,7 @@ using ..Solutions
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "export_import.jl"))
 include(joinpath(@__DIR__, "reconstruction_helpers.jl"))
+include(joinpath(@__DIR__, "model_validation.jl"))
 
 # Export public API
 export export_ocp_solution, import_ocp_solution
