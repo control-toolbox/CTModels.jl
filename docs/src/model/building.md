@@ -71,11 +71,7 @@ nothing # hide
 ```
 
 ```@repl building
-try # hide
 CTModels.build(incomplete)        # no times, dynamics, objective…
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 A pre-model that has everything except the `time_dependence!` call is also rejected:
@@ -92,11 +88,7 @@ nothing # hide
 ```
 
 ```@repl building
-try # hide
 CTModels.build(pre_no_td)          # time_dependence! not called
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 ## Where `build` sits in the pipeline

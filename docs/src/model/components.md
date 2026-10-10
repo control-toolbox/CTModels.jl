@@ -96,11 +96,7 @@ nothing # hide
 ```
 
 ```@repl components
-try # hide
 CTModels.control!(pre3, 1, "a")   # "a" already names a state component
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 Each verb may be called **at most once** per `PreModel`. A second call raises a `PreconditionError`:
@@ -112,21 +108,13 @@ nothing # hide
 ```
 
 ```@repl components
-try # hide
 CTModels.state!(pre4, 1)          # state already declared
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 Dimensions must be strictly positive:
 
 ```@repl components
-try # hide
 CTModels.state!(CTModels.PreModel(), 0)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 These rules guarantee that a label like `:a` resolves unambiguously to one component when
