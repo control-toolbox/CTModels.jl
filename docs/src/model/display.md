@@ -196,27 +196,10 @@ The `Display` module registers a `RecipesBase.plot` method for
 [`AbstractSolution`](@ref CTModels.Solutions.AbstractSolution). Without
 `Plots.jl` loaded, calling it throws an `ExtensionError`:
 
-```@example display
-using CTModels
-sol = CTModels.build_solution(
-    ocp,
-    collect(range(0.0, 1.0; length=10)),
-    zeros(10, 2),
-    zeros(10, 1),
-    Float64[],
-    zeros(10, 2);
-    objective=0.0,
-    iterations=0,
-    constraints_violation=0.0,
-    message="",
-    status=:dummy,
-    successful=true,
-)
-nothing # hide
-```
-
-```@repl display
-CTModels.plot(sol)
+```julia
+using RecipesBase
+RecipesBase.plot(sol)   # sol::AbstractSolution, Plots.jl not loaded
+# ERROR: ExtensionError: ... to plot solutions
 ```
 
 When `Plots.jl` is loaded, the `CTModelsPlots` extension provides full plot
