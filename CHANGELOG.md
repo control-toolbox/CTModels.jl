@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.7] - 2026-10-10
+
 ### 🔧 Fixed
 
 - **`import_ocp_solution` with a model that does not match the file**
@@ -28,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of `path_constraints_dual` and the length of `boundary_constraints_dual` must match the
   model (they were previously truncated or failed with a `BoundsError`). The hint of the
   dimension mismatch error no longer suggests padding with zeros for non-dual data.
+
+### 📚 Documentation
+
+- **`@repl` examples rely on REPL-style exception capture**
+  ([#418](https://github.com/control-toolbox/CTModels.jl/issues/418)). The `try`/`catch`
+  and `showerror(IOContext(stdout, :color => false), e)` workarounds are removed now that
+  DocumenterVitepress >= 0.3.5 renders ANSI output correctly; the docs environment requires
+  `DocumenterVitepress = "0.3.5"`. The plot `ExtensionError` demo in the display page is a
+  static snippet.
 
 ### ✅ Compatibility
 

@@ -4,6 +4,20 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.7] - 2026-10-10
+
+### Stricter validation (no breaking change for valid data)
+
+`import_ocp_solution` now checks the file against the model
+([#435](https://github.com/control-toolbox/CTModels.jl/issues/435)), and `build_solution`
+validates the length of `variable`, the number of columns of `path_constraints_dual` and the
+length of `boundary_constraints_dual`. Code that passed wrongly sized data (previously
+truncated silently or failing with a `BoundsError`) now gets an `IncorrectArgument`; valid
+data is unaffected. The function signatures and public API are unchanged. Documentation
+examples were also cleaned up ([#418](https://github.com/control-toolbox/CTModels.jl/issues/418)).
+To migrate, fix the sizes of the data passed, or import the file with the model it was
+exported from.
+
 ## [0.19.6] - 2026-10-09
 
 ### No Breaking Changes
