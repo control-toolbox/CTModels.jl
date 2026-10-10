@@ -45,10 +45,20 @@ function _model(;
     Building.dynamics!(pre, (r, t, x, u, v) -> (r .= 0.0))
     Building.objective!(pre, criterion; lagrange=(t, x, u, v) -> 0.0)
     path && Building.constraint!(
-        pre, :path; f=(r, t, x, u, v) -> (r[1] = x[1]), lb=[-1.0], ub=[1.0], label=path_label
+        pre,
+        :path;
+        f=(r, t, x, u, v) -> (r[1] = x[1]),
+        lb=[-1.0],
+        ub=[1.0],
+        label=path_label,
     )
     boundary && Building.constraint!(
-        pre, :boundary; f=(r, x0, xf, v) -> (r[1] = x0[1]), lb=[0.0], ub=[0.0], label=boundary_label
+        pre,
+        :boundary;
+        f=(r, x0, xf, v) -> (r[1] = x0[1]),
+        lb=[0.0],
+        ub=[0.0],
+        label=boundary_label,
     )
     Building.constraint!(pre, :state; rg=1:1, lb=[-5.0], ub=[5.0], label=:sb)
     Building.definition!(pre, quote end)
