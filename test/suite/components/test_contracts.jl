@@ -196,7 +196,9 @@ function test_contracts()
             end
             Test.@test final_time_error isa Exceptions.PreconditionError
             final_time_message = sprint(showerror, final_time_error)
-            Test.@test occursin("The final time is free (part of the variable)", final_time_message)
+            Test.@test occursin(
+                "The final time is free (part of the variable)", final_time_message
+            )
             Test.@test occursin("final_time(ocp, v)", final_time_message)
             Test.@test occursin("final_time accessor", final_time_message)
             Test.@test !occursin("FixedTimeModel", final_time_message)

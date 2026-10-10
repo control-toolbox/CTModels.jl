@@ -139,7 +139,11 @@ function _check_data_dimensions!(errors, ocp, data)::Nothing
         N = length(grids[comp])
         rows > N && push!(
             errors,
-            ("number of samples of $key", rows, "at most $N (length of the $comp time grid)"),
+            (
+                "number of samples of $key",
+                rows,
+                "at most $N (length of the $comp time grid)",
+            ),
         )
     end
     return nothing
@@ -232,9 +236,7 @@ function _check_signature!(errors, warnings, ocp, sig)::Nothing
     end
     for (key, what) in (("has_mayer", "Mayer cost"), ("has_lagrange", "Lagrange cost"))
         fv = g(key)
-        _record_difference!(
-            warnings, what, isnothing(fv) ? nothing : Bool(fv), msig[key]
-        )
+        _record_difference!(warnings, what, isnothing(fv) ? nothing : Bool(fv), msig[key])
     end
     return nothing
 end
@@ -309,7 +311,9 @@ function _validate_solution_against_model(ocp, data)::Nothing
             Exceptions.IncorrectArgument(
                 "The solution in the file does not match the model";
                 got=join((_format_difference(d, 1) * " (file)" for d in errors), "\n"),
-                expected=join((_format_difference(d, 2) * " (model)" for d in errors), "\n"),
+                expected=join(
+                    (_format_difference(d, 2) * " (model)" for d in errors), "\n"
+                ),
                 suggestion="Pass the model the solution was computed from.",
                 context="import_ocp_solution - checking the file against the model",
             ),

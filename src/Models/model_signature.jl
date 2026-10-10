@@ -71,9 +71,8 @@ function _model_signature(ocp::Model)::Dict{String,Any}
         "labels_boundary_nl" => _label_strings(Components.boundary_constraints_nl(cons)[4]),
         "labels_state_box" => _label_strings(Components.state_constraints_box(cons)[4]),
         "labels_control_box" => _label_strings(Components.control_constraints_box(cons)[4]),
-        "labels_variable_box" => _label_strings(
-            Components.variable_constraints_box(cons)[4]
-        ),
+        "labels_variable_box" =>
+            _label_strings(Components.variable_constraints_box(cons)[4]),
         "criterion" => string(Components.criterion(obj)),
         "has_mayer" => Components.has_mayer_cost(obj),
         "has_lagrange" => Components.has_lagrange_cost(obj),
