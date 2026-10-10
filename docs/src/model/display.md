@@ -212,12 +212,11 @@ sol = CTModels.build_solution(
     status=:dummy,
     successful=true,
 )
+nothing # hide
+```
 
-try
-    CTModels.plot(sol)
-catch e
-    println(typeof(e))
-end
+```@repl display
+CTModels.plot(sol)
 ```
 
 When `Plots.jl` is loaded, the `CTModelsPlots` extension provides full plot
