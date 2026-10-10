@@ -102,11 +102,7 @@ nothing # hide
 ```
 
 ```@repl dynobj
-try # hide
 CTModels.dynamics!(pre_no_state, (r, t, x, u, v) -> (r[1] = 0.0; nothing))
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 In block form, overlapping ranges raise a `PreconditionError` immediately:
@@ -118,9 +114,5 @@ nothing # hide
 ```
 
 ```@repl dynobj
-try # hide
 CTModels.dynamics!(pre_overlap, 1:2, (r, t, x, u, v) -> (r[1] = x[1]; nothing))  # overlaps 1:1
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```

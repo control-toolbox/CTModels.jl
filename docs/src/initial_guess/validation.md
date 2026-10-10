@@ -47,11 +47,7 @@ Validation samples the guess and compares its shape to the problem dimensions. A
 of the wrong length is refused:
 
 ```@repl val
-try # hide
 CTModels.build_initial_guess(ocp, (state = t -> [0.0],))   # 1 ≠ 2 states
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 ## Warm-start from a solution

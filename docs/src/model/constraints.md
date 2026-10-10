@@ -103,19 +103,11 @@ nothing # hide
 ```
 
 ```@repl cons
-try # hide
 CTModels.constraint!(pre_dup, :control; rg=1:1, lb=[-10.0], ub=[10.0], label=:x1)  # duplicate
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 Bounds with `lb > ub` are rejected on the spot:
 
 ```@repl cons
-try # hide
 CTModels.constraint!(pre_dup, :state; rg=2:2, lb=[1.0], ub=[0.0], label=:bad)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
