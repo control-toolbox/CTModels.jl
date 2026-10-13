@@ -18,8 +18,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 nothing # hide
@@ -30,10 +30,11 @@ nothing # hide
 [`initial_guess`](@ref CTModels.Init.initial_guess) builds an **unvalidated**
 [`InitialGuess`](@ref CTModels.Init.InitialGuess); pass it to
 [`validate_initial_guess`](@ref CTModels.Init.validate_initial_guess) to check it against the
-model. This separation lets a caller build once and validate against several models.
+model. The two steps are separate so that a caller holding an `InitialGuess` (built by
+hand, or received from another package) can check it explicitly.
 
 ```@example val
-ig = CTModels.initial_guess(ocp; state = t -> [0.0, 0.0], control = t -> [0.1])
+ig = CTModels.initial_guess(ocp; state = t -> [0.0, 0.0], control = t -> 0.1)
 nothing # hide
 ```
 

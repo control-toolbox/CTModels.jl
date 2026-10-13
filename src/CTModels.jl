@@ -26,7 +26,7 @@ initial-guess management; and optional extensions for serialization and plotting
 | Extension | Trigger package | Adds |
 |-----------|----------------|------|
 | `CTModelsPlots` | `Plots.jl` | `Plots.plot(sol)` and `Plots.plot!(sol)` |
-| `CTModelsMakie` | `Makie.jl` | `Makie.plot(sol)` (proof of concept) |
+| `CTModelsMakie` | `Makie.jl` | `Makie.plot(sol)` and `Makie.plot!(fig, sol)` |
 | `CTModelsJSON` | `JSON3.jl` | JSON serialization |
 | `CTModelsJLD` | `JLD2.jl` | JLD2 serialization |
 

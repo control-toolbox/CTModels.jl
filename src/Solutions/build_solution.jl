@@ -147,17 +147,14 @@ number of constraint declarations:
 - `control_constraints_*_dual`: Dimension `(length(T_control), control_dimension(ocp))`
 - `variable_constraints_*_dual`: Dimension `variable_dimension(ocp)`
 
-If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` and `x₂(t) ≤ 2.0`), 
-only the last bound value is retained, and a warning is emitted during model construction.
+If several box constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` and
+`x₂(t) ≤ 2.0`), `build` keeps the intersection of the bounds and all the labels as aliases,
+and emits a warning; the component has a single dual, shared by these labels.
 
 ## Grid Validation
 
-All time grids must be:
-- Strictly increasing: `T[i] < T[i+1]` for all `i`
-- Non-empty: At least one time point
-- Finite: No `Inf` or `NaN` values
-
-The function automatically validates and fixes grids (e.g., converts ranges to vectors).
+Each time grid is expected to be increasing. A grid that is not is sorted, and a warning
+is emitted.
 
 ## Automatic Grid Extension
 
@@ -560,8 +557,9 @@ Build a solution from the optimal control problem, the time grid, the state, con
 
 The dimensions of box constraint dual variables (`state_constraints_*_dual`, `control_constraints_*_dual`, 
 `variable_constraints_*_dual`) correspond to the **state/control/variable dimension**, not the number of 
-constraint declarations. If multiple constraints are declared on the same component (e.g., `x₂(t) ≤ 1.2` 
-and `x₂(t) ≤ 2.0`), only the last bound value is retained, and a warning is emitted during model construction.
+constraint declarations. If several box constraints are declared on the same component (e.g.,
+`x₂(t) ≤ 1.2` and `x₂(t) ≤ 2.0`), `build` keeps the intersection of the bounds and all the labels
+as aliases, and emits a warning.
 
 """
 function build_solution(

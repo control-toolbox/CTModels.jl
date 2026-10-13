@@ -11,8 +11,14 @@ normalises them all to a **callable of time**, so the rest of the stack sees one
 |---|---|
 | a function `t -> …` | used directly |
 | a vector `[a, b, …]` | the constant trajectory `t -> [a, b, …]` |
-| a scalar (dim-1 component) | the constant trajectory `t -> [a]` |
+| a scalar `a` (dim-1 component) | the constant trajectory `t -> a` |
 | `nothing` | a built-in default |
+
+!!! note "One-dimensional components are scalars"
+
+    As everywhere in CTModels, a one-dimensional state, control or variable is a `Number`,
+    never a length-1 vector. `build_initial_guess` still *accepts* `[a]` or `t -> [a]` for a
+    one-dimensional component, but the validated guess always returns the scalar `a`.
 
 ```@example fmt
 using CTModels
@@ -22,8 +28,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 nothing # hide
@@ -35,7 +41,7 @@ The most general form — a time-varying guess:
 
 ```@example fmt
 init = CTModels.build_initial_guess(ocp,
-    (state = t -> [cos(t), -sin(t)], control = t -> [0.5 * t]))
+    (state = t -> [cos(t), -sin(t)], control = t -> 0.5 * t))
 nothing # hide
 ```
 
@@ -83,7 +89,7 @@ data into a [`PreInitialGuess`](@ref CTModels.Init.PreInitialGuess); the model i
 later when [`build_initial_guess`](@ref CTModels.Init.build_initial_guess) validates it:
 
 ```@example fmt
-pre_ig = CTModels.pre_initial_guess(state = t -> [0.0, 0.0], control = t -> [1.0])
+pre_ig = CTModels.pre_initial_guess(state = t -> [0.0, 0.0], control = t -> 1.0)
 init   = CTModels.build_initial_guess(ocp, pre_ig)
 nothing # hide
 ```
@@ -106,6 +112,7 @@ constructor that normalises the input to a callable:
 | [`initial_control`](@ref CTModels.Init.initial_control) | normalise a control guess (same shapes) |
 | [`initial_variable`](@ref CTModels.Init.initial_variable) | normalise a variable guess (scalar, vector, or `nothing`) |
 
-When `nothing` is passed, each constructor returns a built-in default (constant `0.1` for
-non-empty components, `Float64[]` for empty ones). A 2-tuple `(time_grid, data_matrix)` is
+When `nothing` is passed, each constructor returns a built-in default: the constant `0.1`
+for a one-dimensional component, `fill(0.1, n)` for an `n`-dimensional one, and `Float64[]`
+for an empty one. A 2-tuple `(time_grid, data_matrix)` is
 interpreted as **grid data** that gets interpolated linearly in time.

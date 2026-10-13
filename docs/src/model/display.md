@@ -6,9 +6,8 @@ CurrentModule = CTModels
 
 The `CTModels.Display` module provides `Base.show` extensions that render
 [`Model`](@ref CTModels.Models.Model) and [`PreModel`](@ref CTModels.Building.PreModel)
-objects in a human-readable mathematical format. It also hosts a
-`RecipesBase.plot` stub that is specialised by the `CTModelsPlots` extension
-when `Plots.jl` is loaded.
+objects in a human-readable mathematical format, and gives compact summaries of the
+component and solution types.
 
 ## Setup
 
@@ -32,12 +31,12 @@ CTModels.control!(pre, 1)
 
 function dynamics!(r, t, x, u, v)
     r[1] = x[2]
-    r[2] = u[1]
+    r[2] = u
     return nothing
 end
 CTModels.dynamics!(pre, dynamics!)
 
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 
 function boundary!(r, x0, xf, v)
     r[1] = x0[1]
@@ -79,8 +78,8 @@ CTModels.variable!(pre2, 0)
 CTModels.time!(pre2; t0=0.0, tf=1.0)
 CTModels.state!(pre2, 1)
 CTModels.control!(pre2, 1)
-CTModels.dynamics!(pre2, (r, t, x, u, v) -> (r[1] = u[1]; return nothing))
-CTModels.objective!(pre2, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre2, (r, t, x, u, v) -> (r[1] = u; return nothing))
+CTModels.objective!(pre2, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre2; autonomous=true)
 
 pre2  # consistent PreModel displays the mathematical form
@@ -190,23 +189,11 @@ CTModels.time_grid_model(
 )
 ```
 
-## Plotting solutions
+!!! note "Plotting"
 
-The `Display` module registers a `RecipesBase.plot` method for
-[`AbstractSolution`](@ref CTModels.Solutions.AbstractSolution). Without
-`Plots.jl` loaded, calling it throws an `ExtensionError`:
-
-```julia
-using RecipesBase
-RecipesBase.plot(sol)   # sol::AbstractSolution, Plots.jl not loaded
-# ERROR: ExtensionError: ... to plot solutions
-```
-
-When `Plots.jl` is loaded, the `CTModelsPlots` extension provides full plot
-recipes. A Makie backend (`CTModelsMakie`, activated by loading `CairoMakie` or
-`GLMakie`) renders the same figure as a `Makie.Figure` through a separate
-`Makie.plot(sol)` method — not the `RecipesBase.plot` stub above. See
-[Plotting](@ref) for both backends.
+    `Display` also hosts the `RecipesBase.plot` stub for solutions, which raises an
+    `ExtensionError` until `Plots` is loaded. Plotting itself is covered in
+    [Plotting](../serialization/plotting.md).
 
 ## See also
 

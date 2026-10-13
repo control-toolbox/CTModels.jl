@@ -29,22 +29,26 @@ It provides:
 
 Two things to keep in mind:
 
-- **No top-level exports.** `using CTModels` loads the package but brings no symbols
-   into scope. Every symbol is accessed via its qualified path:
-   ```julia
-   CTModels.Building.state!     # ✓ always works
-   CTModels.Solutions.build_solution
-   CTModels.Init.build_initial_guess
-   ```
+- **No top-level exports.** `using CTModels` loads the package but brings no symbol into
+  scope. Every public symbol is reached as `CTModels.symbol`, which is the form used in
+  this documentation; the fully qualified `CTModels.Submodule.symbol` is the same function:
+
+  ```julia
+  CTModels.state!              # short form
+  CTModels.Building.state!     # same function, fully qualified
+  ```
+
 - **`PreModel → build → Model` pipeline.** An OCP is assembled incrementally on a mutable
-   `PreModel`, then frozen into an immutable `Model` by `build`. The `Model` is the object
-   every downstream package (solver, initial-guess builder, serializer) consumes.
+  `PreModel`, then frozen into an immutable `Model` by `build`. The `Model` is the object
+  every downstream package (solver, initial-guess builder, serializer) consumes.
+- **One-dimensional is scalar.** A one-dimensional state, control or variable is a
+  `Number`: the functions below receive `u`, not `u[1]`.
 
 ## 5-Minute Walkthrough
 
 ### Building an optimal control problem
 
-We solve the *beam* problem: minimise ``\int_0^1 u(t)^2\,\mathrm{d}t`` subject to
+We define the *beam* problem: minimise ``\int_0^1 u(t)^2\,\mathrm{d}t`` subject to
 ``\dot{x} = (x_2, u)``, fixed boundary conditions, and box constraints.
 
 ```@example gs
@@ -62,13 +66,13 @@ CTModels.control!(pre, 1)              # u ∈ ℝ
 # 3. Dynamics ẋ = (x₂, u) — in-place form
 function beam_dynamics!(r, t, x, u, v)
     r[1] = x[2]
-    r[2] = u[1]
+    r[2] = u
     return nothing
 end
 CTModels.dynamics!(pre, beam_dynamics!)
 
 # 4. Lagrange cost ∫ u² → min
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 
 # 5. Constraints
 function beam_boundary!(r, x0, xf, v)
@@ -132,7 +136,7 @@ It is built from the `Model` and a pair of functions that return the guessed sta
 
 ```@example gs
 init = CTModels.build_initial_guess(ocp,
-    (state=t -> [0.0, 0.0], control=t -> [0.1])
+    (state=t -> [0.0, 0.0], control=t -> 0.1),
 )
 ```
 
@@ -153,8 +157,13 @@ init.control(0.5)
 | Path, boundary, and box constraints | [Constraints](model/constraints.md) |
 | Freezing a `PreModel` into a `Model` | [Building a Model](model/building.md) |
 | Displaying models in the REPL | [Displaying Models](model/display.md) |
+| Turning solver output into a `Solution` | [The `build_solution` contract](solution/build_solution.md) |
+| One grid or one grid per component | [Time Grids](solution/time_grids.md) |
 | Reading state, control, costate trajectories | [Trajectories](solution/trajectories.md) |
 | Dual variables and solver diagnostics | [Duals & Diagnostics](solution/duals.md) |
-| Warm-starting with initial guesses | [Initial Guesses](initial_guess/overview.md) |
+| Input formats for initial guesses | [Input Formats](initial_guess/formats.md) |
+| Validation and warm start | [Validation](initial_guess/validation.md) |
 | Saving and loading solutions | [Export & Import](serialization/export_import.md) |
+| Plotting with Plots or Makie | [Plotting](serialization/plotting.md) |
+| Type stability and the hot path | [Performance](guide/performance.md) |
 | Full API reference | API Reference (left sidebar) |

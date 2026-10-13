@@ -33,8 +33,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 
 ocp = CTModels.build(pre)
@@ -82,8 +82,8 @@ CTModels.variable!(pre_no_td, 0)
 CTModels.time!(pre_no_td; t0=0.0, tf=1.0)
 CTModels.state!(pre_no_td, 1)
 CTModels.control!(pre_no_td, 1)
-CTModels.dynamics!(pre_no_td, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
-CTModels.objective!(pre_no_td, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre_no_td, (r, t, x, u, v) -> (r[1] = u; nothing))
+CTModels.objective!(pre_no_td, :min; lagrange=(t, x, u, v) -> u^2)
 nothing # hide
 ```
 

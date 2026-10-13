@@ -25,8 +25,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 
@@ -115,9 +115,8 @@ time grids can then be checked, and an informational message says so.
 
 A trajectory is a *function* `t -> x(t)`, which neither JSON nor JLD2 can store directly.
 CTModels works around this by **resampling**: before writing, each trajectory is evaluated on
-its time grid (the helpers in
-[`OCP/Building/discretization_utils.jl`](../model/building.md)), and only the resulting arrays
-are persisted. On import, the arrays are wrapped back into interpolated callables — the same
+its time grid (the helpers of `src/Solutions/discretization_utils.jl`), and only the
+resulting arrays are persisted. On import, the arrays are wrapped back into interpolated callables — the same
 mechanism used when [building a solution](../solution/trajectories.md).
 
 !!! note "Low-level tags"
