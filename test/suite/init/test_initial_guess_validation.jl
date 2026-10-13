@@ -294,8 +294,7 @@ function test_initial_guess_validation()
             Test.@test length(x) == 2
 
             u = Models.control(ig)(0.5)
-            Test.@test u isa AbstractVector
-            Test.@test length(u) == 1
+            Test.@test u isa Real
         end
 
         Test.@testset "enriched error messages validation" begin
