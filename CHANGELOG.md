@@ -9,9 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔧 Fixed
+
+- **One-dimensional initial-guess components are scalars**
+  ([#441](https://github.com/control-toolbox/CTModels.jl/pull/441)). For a one-dimensional
+  state, control or variable, `build_initial_guess` accepted `[a]`, `t -> [a]`, `N×1` grid
+  data or a vector of length-1 vectors, but returned the length-1 vector as is. The
+  validated guess now returns the scalar `a`, as everywhere else in CTModels; the accepted
+  inputs and the validation errors are unchanged.
+
 ### 📚 Documentation
 
-- Pin ct-conventions in `.conventions/` at `v0.2.0`, cite rules by identifier in `AGENTS.md`, and update references.
+- **Documentation refreshed for developers and experienced users**
+  ([#441](https://github.com/control-toolbox/CTModels.jl/pull/441)); end users are
+  pointed to OptimalControl.jl.
+  - The index now gives the place of CTModels in the ecosystem (CTParser, CTDirect, CTFlows,
+    CTSolvers, OptimalControl), all eight modules and the conventions.
+  - New pages: *The `build_solution` contract*, for solver authors, and *Plotting
+    architecture* (`PlotCase`, the `CTBase.Plotting` figure, the Plots and Makie backends).
+  - Fixed: examples follow the one-dimensional-is-scalar rule; the initial-guess formats
+    table; the role of CTSolvers (discretisation belongs to CTDirect); the plot `layout`
+    semantics; the default control interpolation (`:constant`); the `build_solution`
+    docstring on duplicated box bounds (intersected) and on unsorted grids (sorted, with a
+    warning).
+  - The API reference now covers every source file.
+- Pin ct-conventions in `.conventions/` at `v0.2.0`, cite rules by identifier in `AGENTS.md`, and
+  update the references to the Handbook.
+
+### ♻️ Internal
+
+- Removed the unused display helpers `_callable_name` and `_callable_value`.
+
+### ✅ Compatibility
+
+- **Not breaking for valid data**: code that read `init.control(t)[1]` on a
+  one-dimensional control keeps working (indexing a `Number` returns it); code that tested
+  `init.control(t) isa AbstractVector` in dimension one must expect a `Real`.
 
 ## [0.19.7] - 2026-10-10
 

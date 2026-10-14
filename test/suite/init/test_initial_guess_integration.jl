@@ -36,9 +36,8 @@ function test_initial_guess_integration()
             Test.@test x[2] ≈ 0.1
 
             u = Models.control(ig)(0.5)
-            Test.@test u isa AbstractVector
-            Test.@test length(u) == 1
-            Test.@test u[1] ≈ 0.1
+            Test.@test u isa Real
+            Test.@test u ≈ 0.1
 
             # Test with incorrect state dimension (should throw)
             bad_named = (state=[0.1, 0.2, 0.3], control=[0.1], variable=Float64[])

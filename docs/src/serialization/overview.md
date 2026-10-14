@@ -34,6 +34,7 @@ plot / Makie.plot      yes ─► JSON3 / JLD2 / Plots / Makie implementation
 |---|---|---|
 | [Export & import](export_import.md) | Persisting solutions | [`export_ocp_solution`](@ref CTModels.Serialization.export_ocp_solution), [`import_ocp_solution`](@ref CTModels.Serialization.import_ocp_solution) |
 | [Plotting](plotting.md) | Visualising trajectories | `Plots.plot`, `Makie.plot` |
+| [Plotting architecture](plotcase.md) | How the figure is built and rendered | [`build_figure`](@ref CTModels.PlotCase.build_figure) |
 
 ## A solution to serialize
 
@@ -48,8 +49,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 

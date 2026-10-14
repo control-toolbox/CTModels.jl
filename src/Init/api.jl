@@ -59,7 +59,7 @@ problem dimensions; use `build_initial_guess` or
 ```julia-repl
 julia> using CTModels
 
-julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> [1.0])
+julia> init = CTModels.initial_guess(ocp; state=t -> [0.0, 0.0], control=t -> 1.0)
 ```
 
 See also: [`CTModels.Init.build_initial_guess`](@extref), [`CTModels.Init.validate_initial_guess`](@extref).
@@ -99,7 +99,8 @@ Supported input types:
 
 # Returns
 
-- `InitialGuess`: A validated initial guess.
+- `InitialGuess`: A validated initial guess. One-dimensional components are returned as
+  scalars: a length-1 vector or a function returning one is converted.
 
 # Throws
 
@@ -111,7 +112,7 @@ Supported input types:
 ```julia-repl
 julia> using CTModels
 
-julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0], control=t -> [1.0]))
+julia> init = CTModels.build_initial_guess(ocp, (state=t -> [0.0, 0.0], control=t -> 1.0))
 ```
 
 See also: [`CTModels.Init.initial_guess`](@extref), [`CTModels.Init.validate_initial_guess`](@extref).
@@ -141,7 +142,10 @@ function build_initial_guess(ocp::Models.AbstractModel, init_data)
     end
 
     # Phase 2: Centralised validation
-    return validate_initial_guess(ocp, init)
+    validated = validate_initial_guess(ocp, init)
+
+    # Phase 3: one-dimensional components are returned as scalars
+    return _normalize_scalar_components(ocp, validated)
 end
 
 """

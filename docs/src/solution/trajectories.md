@@ -24,8 +24,8 @@ CTModels.variable!(pre, 1, "v")
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 
@@ -68,23 +68,25 @@ CTModels.objective(sol)
 
 ## Interpolation of the control
 
-State and costate are interpolated **linearly**. The control may instead be **piecewise
-constant** — typical of direct collocation — selected by the `control_interpolation` keyword
-of [`build_solution`](@ref CTModels.Solutions.build_solution) (`:linear` or `:constant`). The choice
-is recorded and read back with
-[`control_interpolation`](@ref CTModels.Solutions.control_interpolation):
+State and costate are interpolated **linearly**. The control is **piecewise constant** by
+default, as produced by direct methods; indirect methods, whose control is a smooth function
+of the state and costate, pass `control_interpolation=:linear` to
+[`build_solution`](@ref CTModels.Solutions.build_solution). The choice is recorded and read
+back with [`control_interpolation`](@ref CTModels.Solutions.control_interpolation):
 
 ```@example traj
-sol_const = CTModels.build_solution(ocp, T, X, U, v, P;
+sol_lin = CTModels.build_solution(ocp, T, X, U, v, P;
     objective=0.5, iterations=10, constraints_violation=1e-9,
     message="ok", status=:optimal, successful=true,
-    control_interpolation=:constant)
+    control_interpolation=:linear)
 nothing # hide
 ```
 
 ```@repl traj
-CTModels.control_interpolation(sol)
-CTModels.control_interpolation(sol_const)
+CTModels.control_interpolation(sol)        # default
+CTModels.control_interpolation(sol_lin)
+u(0.005)                                   # constant on [T[1], T[2])
+CTModels.control(sol_lin)(0.005)           # linear between T[1] and T[2]
 ```
 
 Because the interpolation kind is a stored field — not baked into an opaque closure —

@@ -128,8 +128,8 @@ function test_initial_guess_builders()
             # Verify interpolation
             x_fun = Models.state(ig)
             x1_val = x_fun(1.0)
-            Test.@test x1_val isa AbstractVector
-            Test.@test isapprox(x1_val[1], 1.0; atol=1e-12)
+            Test.@test x1_val isa Real
+            Test.@test isapprox(x1_val, 1.0; atol=1e-12)
         end
 
         Test.@testset "per-component state init without time" begin

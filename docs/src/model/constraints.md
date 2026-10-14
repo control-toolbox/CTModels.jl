@@ -27,12 +27,12 @@ CTModels.variable!(pre, 2, "v")
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 
 # Nonlinear path and boundary constraints
 CTModels.constraint!(pre, :path;
-    f=(r, t, x, u, v) -> (r[1] = x[1] + u[1]; nothing), lb=[0.0], ub=[1.0], label=:p)
+    f=(r, t, x, u, v) -> (r[1] = x[1] + u; nothing), lb=[0.0], ub=[1.0], label=:p)
 CTModels.constraint!(pre, :boundary;
     f=(r, x0, xf, v) -> (r[1] = x0[1]; r[2] = xf[1]; nothing),
     lb=[0.0, 0.0], ub=[0.0, 0.0], label=:bc)
