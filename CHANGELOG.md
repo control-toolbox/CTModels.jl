@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation
+
+- Pin ct-conventions in `.conventions/` at `v0.2.0`, cite rules by identifier in `AGENTS.md`, and update references.
+
 ## [0.19.7] - 2026-10-10
 
 ### 🔧 Fixed
