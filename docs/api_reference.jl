@@ -64,6 +64,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Models", "Models.jl"),
                 joinpath("Models", "constraint_functors.jl"),
                 joinpath("Models", "model.jl"),
+                joinpath("Models", "model_signature.jl"),
             ),
         ),
         (
@@ -123,6 +124,9 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             files=src(
                 joinpath("Display", "Display.jl"),
                 joinpath("Display", "ansi.jl"),
+                joinpath("Display", "helpers.jl"),
+                joinpath("Display", "components.jl"),
+                joinpath("Display", "solution_types.jl"),
                 joinpath("Display", "definition.jl"),
                 joinpath("Display", "mathematical.jl"),
                 joinpath("Display", "model.jl"),
@@ -138,6 +142,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Serialization", "export_import.jl"),
                 joinpath("Serialization", "types.jl"),
                 joinpath("Serialization", "reconstruction_helpers.jl"),
+                joinpath("Serialization", "model_validation.jl"),
             ),
         ),
         (
