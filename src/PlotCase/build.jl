@@ -6,9 +6,6 @@
 # the `CTModelsPlots` / `CTModelsMakie` extensions call it and hand the figure to
 # a `CTBase.Plotting.render` backend. It also owns the user-facing defaults, so
 # the two extensions only forward keyword arguments.
-#
-# Docstrings deferred where the historical helpers already carried none (ct-conventions:
-# docstrings last, see its plan-template.md).
 # =============================================================================
 
 # Time-axis name, with the historical "(normalized)" suffix when time is rescaled.
