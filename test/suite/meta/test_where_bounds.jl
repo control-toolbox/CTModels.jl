@@ -1,7 +1,7 @@
 """
 Regression guard for the `where`-clause bound-dropping pitfall (see
-`.reports/2026-07-12_alias-where-bounds-audit.md` and the Handbook rule in
-`philosophy/types-traits-interfaces.md#aliases-and-where`).
+`.reports/2026-07-12_alias-where-bounds-audit.md` and the ct-conventions rule
+`TYP3`).
 
 A `where {X}` clause that names a type parameter without repeating the bound the
 struct already declares for it silently widens it to `<:Any`. This is invisible

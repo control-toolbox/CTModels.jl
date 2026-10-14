@@ -21,11 +21,11 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 # problem is built up). That union-split analysis reports ~40 "no matching method
 # found `f(::Nothing)`" findings for branches that are unreachable at runtime
 # (guarded by `Core.@ensure`/precondition checks before the field is read) — this
-# is setup-path code, deliberately dynamic, not a defect (see the Handbook's
-# performance guide, "hot path vs. setup path").
+# is setup-path code, deliberately dynamic, not a defect (see ct-conventions
+# PERF1, "hot path vs. setup path").
 #
-# So instead of a whole-package scan, JET is applied precisely where the Handbook
-# says it matters: `JET.@test_opt` on concrete **hot-path** calls (functor
+# So instead of a whole-package scan, JET is applied precisely where ct-conventions
+# (PERF1, PERF2) says it matters: `JET.@test_opt` on concrete **hot-path** calls (functor
 # evaluation, accessor reads) — the code called repeatedly during a solve, where a
 # dispatch regression actually multiplies over thousands of calls.
 function test_code_quality()

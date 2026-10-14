@@ -5,8 +5,6 @@
 # grid (state/costate/control/path grids may differ) and the naming/seriestype
 # conventions of optimal control. Sampling is done here provisionally; it will move
 # to CTModels/src/Display in Phase 3d.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
 # Sample a callable `f` (state/control/costate accessor) over grid `T` into an

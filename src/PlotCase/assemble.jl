@@ -6,8 +6,6 @@
 #   :split -> paired columns (state|costate, path|dual) stacked with the control
 #             column, row heights n : l : nc coming for free from the geometry-aware
 #             `:auto` weights of `Stacked`.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
 # Pair two columns side by side, tolerating a missing one.

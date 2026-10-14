@@ -5,8 +5,6 @@
 # the initial/final times become vertical lines (`VLine`) shared by every cell. Base
 # styles reproduce the historical appearance; user `*_bounds_style` / `time_style`
 # merge on top. Gating lives in `do_decorate` (vocabulary.jl).
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
 """$(TYPEDSIGNATURES)

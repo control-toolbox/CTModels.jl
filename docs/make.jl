@@ -74,7 +74,7 @@ using CairoMakie: CairoMakie, Makie   # qualified `using`: loads CairoMakie and 
 # prefers SVG. Both Plots.jl and CairoMakie respond to `image/png`, so PNG wins for
 # every figure unless it is disabled. Set once here, before any @example block runs,
 # so it covers every page present or future — not just the ones plotting today. See
-# Handbook/VITEPRESS-DOC.md "Plot image format — SVG vs PNG".
+# ct-conventions SITE12 (plots are rendered as SVG).
 Base.showable(::MIME"image/png", ::Plots.Plot) = false
 CairoMakie.activate!(; type="svg")
 Base.showable(::MIME"image/png", ::CairoMakie.Makie.Figure) = false
