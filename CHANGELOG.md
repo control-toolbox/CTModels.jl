@@ -33,9 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docstring on duplicated box bounds (intersected) and on unsorted grids (sorted, with a
     warning).
   - The API reference now covers every source file.
-- Pin ct-conventions in `.conventions/` at `v0.3.0`, cite rules by identifier in `AGENTS.md`, and
-  update the references to the Handbook. `CONTRIBUTING.md` documents the submodule, and the
-  spell check excludes `.conventions/`.
+- Pin ct-conventions at `v0.3.0` in `AGENTS.md` (read from a git-ignored clone in
+  `.conventions/`, not a submodule, which `Pkg.add` cannot install on Julia 1.10), cite rules by
+  identifier, and update the references to the Handbook. `CONTRIBUTING.md` documents it, and
+  the spell check excludes `.conventions/`.
 
 ### ♻️ Internal
 
