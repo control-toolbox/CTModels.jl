@@ -28,8 +28,8 @@ module TestPerformance
 #      allocate nothing at all.
 #
 # Setup-path code (PreModel construction, build(), build_solution()) is
-# deliberately NOT guarded here — see philosophy/performance.md in the Handbook
-# ("hot path vs. setup path").
+# deliberately NOT guarded here — see ct-conventions PERF1 ("hot path vs. setup
+# path").
 # ==============================================================================
 
 using Test: Test
