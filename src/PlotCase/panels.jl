@@ -6,7 +6,7 @@
 # conventions of optimal control. Sampling is done here provisionally; it will move
 # to CTModels/src/Display in Phase 3d.
 #
-# Docstrings deferred (Handbook convention).
+# Docstrings deferred (ct-conventions: docstrings last, see its plan-template.md).
 # =============================================================================
 
 # Sample a callable `f` (state/control/costate accessor) over grid `T` into an

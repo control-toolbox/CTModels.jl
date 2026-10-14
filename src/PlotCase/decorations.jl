@@ -6,7 +6,7 @@
 # styles reproduce the historical appearance; user `*_bounds_style` / `time_style`
 # merge on top. Gating lives in `do_decorate` (vocabulary.jl).
 #
-# Docstrings deferred (Handbook convention).
+# Docstrings deferred (ct-conventions: docstrings last, see its plan-template.md).
 # =============================================================================
 
 """$(TYPEDSIGNATURES)

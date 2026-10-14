@@ -5,7 +5,7 @@
 # (`do_decorate`), plus the user-facing defaults. No geometry, no Plots: the
 # layout/rendering all lives in `CTBase.Plotting`.
 #
-# Docstrings deferred (Handbook convention).
+# Docstrings deferred (ct-conventions: docstrings last, see its plan-template.md).
 # =============================================================================
 
 # --- defaults ----------------------------------------------------------------
