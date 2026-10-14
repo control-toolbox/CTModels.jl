@@ -12,3 +12,11 @@ If you want to ask a question, feel free to start a discussion [here](https://gi
 
 >[!NOTE]
 > If you want to add an application or a package to the control-toolbox ecosystem, please follow this [set up tutorial](https://github.com/orgs/control-toolbox/discussions/65).
+
+---
+
+## Developer Resources
+
+The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is a git submodule in `.conventions/`, pinned to a SemVer release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` in an existing clone.
+
+To bump it, run `git -C .conventions fetch --tags && git -C .conventions checkout <tag>`, then commit the updated pointer.
