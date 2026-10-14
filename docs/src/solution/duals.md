@@ -22,15 +22,15 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 1)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> -u[1])
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> -u)
 
 CTModels.constraint!(pre, :boundary;
-    f=(r, x0, xf, v) -> (r[1] = x0[1] + 1; nothing), lb=[0.0], ub=[0.0], label=:initial_con)
+    f=(r, x0, xf, v) -> (r[1] = x0 + 1; nothing), lb=[0.0], ub=[0.0], label=:initial_con)
 CTModels.constraint!(pre, :path;
-    f=(r, t, x, u, v) -> (r[1] = x[1] + u[1]; nothing), lb=[-Inf], ub=[0.0])  # 1 row
+    f=(r, t, x, u, v) -> (r[1] = x + u; nothing), lb=[-Inf], ub=[0.0])  # 1 row
 CTModels.constraint!(pre, :path;
-    f=(r, t, x, u, v) -> (r[1] = x[1] + 1; r[2] = u[1] + 1; nothing),
+    f=(r, t, x, u, v) -> (r[1] = x + 1; r[2] = u + 1; nothing),
     lb=[-3.0, 1.0], ub=[1.0, 2.5], label=:con2)                                # 2 rows
 
 CTModels.time_dependence!(pre; autonomous=false)

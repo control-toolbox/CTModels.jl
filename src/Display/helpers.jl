@@ -73,9 +73,6 @@ function print_fields(io::IO, fields; fmt=format_codes(io))
     return nothing
 end
 
-_callable_name(f) = nameof(typeof(f))
-_callable_value(_) = "<callable>"
-
 """
 $(TYPEDSIGNATURES)
 

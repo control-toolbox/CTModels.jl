@@ -32,7 +32,7 @@ even for an autonomous system (the unused `t` keeps one uniform interface).
 pre = fresh()
 function f!(r, t, x, u, v)
     r[1] = x[2]
-    r[2] = u[1]
+    r[2] = u
     return nothing
 end
 CTModels.dynamics!(pre, f!)
@@ -47,7 +47,7 @@ This is convenient when components come from different physical models.
 ```@example dynobj
 pre = fresh()
 CTModels.dynamics!(pre, 1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing))
-CTModels.dynamics!(pre, 2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing))
+CTModels.dynamics!(pre, 2:2, (r, t, x, u, v) -> (r[1] = u; nothing))
 ```
 
 The ranges must **tile** `1:n` without overlap; mixing the full form and the block form, or
@@ -74,7 +74,7 @@ pre = fresh()
 CTModels.dynamics!(pre, f!)
 CTModels.objective!(pre, :min;
     mayer    = (x0, xf, v) -> xf[1]^2,
-    lagrange = (t, x, u, v) -> u[1]^2,
+    lagrange = (t, x, u, v) -> u^2,
 )
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)

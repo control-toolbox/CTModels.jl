@@ -25,13 +25,36 @@ function _record_difference!(list, what::String, file_value, model_value)::Nothi
     return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Number of columns of a stored matrix, or `nothing` when the entry is absent.
+"""
 _ncols(::Nothing) = nothing
 _ncols(x::AbstractMatrix) = size(x, 2)
+
+"""
+$(TYPEDSIGNATURES)
+
+Number of rows of a stored array, or `nothing` when the entry is absent.
+"""
 _nrows(::Nothing) = nothing
 _nrows(x::AbstractArray) = size(x, 1)
+
+"""
+$(TYPEDSIGNATURES)
+
+Number of points of a stored time grid, or `nothing` when the entry is absent.
+"""
 _nlength(::Nothing) = nothing
 _nlength(x) = length(_extract_time_vector(x))
 
+"""
+$(TYPEDSIGNATURES)
+
+Format one side of a recorded difference `(what, file_value, model_value)` as
+`"what = value"`: `side = 1` for the file, `side = 2` for the model.
+"""
 _format_difference(d, side::Int) = "$(d[1]) = $(repr(d[side + 1]))"
 
 """

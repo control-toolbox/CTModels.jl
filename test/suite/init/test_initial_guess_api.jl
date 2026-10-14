@@ -189,9 +189,8 @@ function test_initial_guess_api()
             Test.@test x[2] ≈ 0.0
 
             u = Models.control(ig)(0.5)
-            Test.@test u isa AbstractVector
-            Test.@test length(u) == 1
-            Test.@test u[1] ≈ 1.0
+            Test.@test u isa Real
+            Test.@test u ≈ 1.0
         end
 
         Test.@testset "build_initial_guess - unsupported type" begin

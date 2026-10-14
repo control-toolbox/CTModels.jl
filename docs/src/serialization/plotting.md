@@ -23,8 +23,8 @@ CTModels.variable!(pre, 0)
 CTModels.time!(pre; t0=0.0, tf=1.0)
 CTModels.state!(pre, 2)
 CTModels.control!(pre, 1)
-CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
-CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
 CTModels.time_dependence!(pre; autonomous=true)
 ocp = CTModels.build(pre)
 
@@ -43,19 +43,36 @@ nothing # hide
 Plots.plot(sol)
 ```
 
-## Layout and control options
+## Choosing what to draw
 
-The recipe accepts keyword arguments that control the arrangement and how the control is
-displayed:
-
-| Keyword | Values | Effect |
-| --- | --- | --- |
-| `layout` | `:group` / `:split` | one figure per quantity, or state/costate split |
-| `control` | `:components` / `:norm` / `:all` | plot each control, its norm, or both |
-| `time` | `:default` / `:normalize` | physical time, or rescaled to ``[0, 1]`` |
+Positional symbols after the solution select the groups to draw, among `:state`,
+`:costate`, `:control`, `:path` (path constraints) and `:dual` (their multipliers). Without
+any, a default set is chosen from the problem:
 
 ```@example plt
-Plots.plot(sol; layout=:split, control=:all)
+Plots.plot(sol, :state, :control)
+```
+
+## Layout and control options
+
+| Keyword | Values (default first) | Effect |
+| --- | --- | --- |
+| `layout` | `:split` / `:group` | one subplot per component, or one subplot per group with a legend |
+| `control` | `:components` / `:norm` / `:all` | a curve per control component, the norm ``\lVert u(t) \rVert``, or both |
+| `time` | `:default` / `:normalize` | physical time, or rescaled to ``[0, 1]`` |
+| `color`, `size` | | colour of every curve, figure size |
+
+```@example plt
+Plots.plot(sol; layout=:group, control=:all)
+```
+
+Each group and decoration also takes a style keyword, a `NamedTuple` of plotting
+attributes or `:none` to hide it: `state_style`, `costate_style`, `control_style`,
+`path_style`, `dual_style`, `time_style` (initial and final time markers), and the bound
+decorations `state_bounds_style`, `control_bounds_style`, `path_bounds_style`.
+
+```@example plt
+Plots.plot(sol; state_style=(color=:blue,), costate_style=:none)
 ```
 
 ## Overlaying solutions
@@ -97,7 +114,7 @@ Makie.plot!(f, sol; time=:normalize)
 f
 ```
 
-The `description` and keyword arguments (`layout`, `control`, `time`, the
+The positional group symbols and the keyword arguments (`layout`, `control`, `time`, the
 `*_style` keywords, `color`, `size`) are identical to the Plots backend. When both
 `Plots` and a Makie package are loaded, `plot` must be qualified —
 `Plots.plot(sol)` renders with Plots, `Makie.plot(sol)` with Makie.
