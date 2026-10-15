@@ -17,7 +17,7 @@ function scalar_ocp()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 1)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
     Building.time_dependence!(pre; autonomous=true)
     return Building.build(pre)
@@ -30,7 +30,7 @@ function vector_ocp()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
     Building.time_dependence!(pre; autonomous=true)
     return Building.build(pre)
@@ -42,7 +42,9 @@ function test_initial_guess_scalar()
         T = collect(range(0.0, 1.0; length=5))
 
         Test.@testset "length-1 vector constant" begin
-            init = Init.build_initial_guess(ocp, (state=[0.2], control=[0.3], variable=[1.5]))
+            init = Init.build_initial_guess(
+                ocp, (state=[0.2], control=[0.3], variable=[1.5])
+            )
             Test.@test init.state(0.5) === 0.2
             Test.@test init.control(0.5) === 0.3
             Test.@test init.variable === 1.5
