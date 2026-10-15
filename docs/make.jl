@@ -121,7 +121,8 @@ with_api_reference(src_dir, ext_dir) do api_pages
             ],
             "Solutions" => [
                 "Overview" => joinpath("solution", "overview.md"),
-                "The build_solution Contract" => joinpath("solution", "build_solution.md"),
+                "The build_solution Contract" =>
+                    joinpath("solution", "build_solution.md"),
                 "Time Grids" => joinpath("solution", "time_grids.md"),
                 "Trajectories" => joinpath("solution", "trajectories.md"),
                 "Duals & Diagnostics" => joinpath("solution", "duals.md"),
