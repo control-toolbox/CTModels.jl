@@ -4,6 +4,17 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [0.19.8] - 2026-10-14
+
+### No Breaking Changes
+
+One-dimensional initial-guess components now return scalars instead of length-1 vectors
+([#441](https://github.com/control-toolbox/CTModels.jl/pull/441)). Valid inputs and validation
+errors are unchanged, and code that indexes the result remains compatible. Code that explicitly
+checks `init.control(t) isa AbstractVector` in dimension one should instead expect a `Real`; no
+migration is required for other valid uses. This release also refreshes the documentation and
+removes unused internal display helpers.
+
 ## [0.19.7] - 2026-10-10
 
 ### Stricter validation (no breaking change for valid data)
