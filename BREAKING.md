@@ -1,7 +1,5 @@
 # Breaking Changes
 
-<!-- markdownlint-disable MD024 -->
-
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
 ## [0.19.8] - 2026-10-14
