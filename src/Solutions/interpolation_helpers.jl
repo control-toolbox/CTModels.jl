@@ -164,6 +164,9 @@ This is the main entry point that combines interpolation and wrapping in one cal
 - `constant_if_two_points`: Return constant function if length(T)==2 (for costate)
 - `expected_dim`: Validate matrix has this dimension (for robustness)
 - `interpolation`: Interpolation type (`:linear` or `:constant`)
+- `jumps`: `nothing`, or `(switching, component)` to keep the jumps of `component` stored in
+  the switching model when the data is a matrix (see
+  [`CTModels.Solutions._JumpInterpolant`](@extref)); function data is left as is.
 
 # Returns
 - Wrapped interpolated function ready for use in Solution
@@ -202,6 +205,7 @@ function build_interpolated_function(
     constant_if_two_points::Bool=false,
     expected_dim::Union{Int,Nothing}=nothing,
     interpolation::Symbol=:linear,
+    jumps::Union{Nothing,Tuple{AbstractSwitchingModel,Symbol}}=nothing,
 )
     # Handle T=nothing case
     if isnothing(T)
@@ -232,6 +236,18 @@ function build_interpolated_function(
         expected_dim=expected_dim,
         interpolation=interpolation,
     )
+
+    # Step 1b: keep the jumps at the switching times of sampled data
+    if !isnothing(jumps) && data isa AbstractMatrix
+        sw, component = jumps
+        func = _with_jumps(
+            func,
+            T[1:size(data, 1)],
+            sw,
+            component;
+            constant=(interpolation === :constant),
+        )
+    end
 
     # Step 2: Wrap with deepcopy and scalar extraction
     return _wrap_scalar_and_deepcopy(func, dim)

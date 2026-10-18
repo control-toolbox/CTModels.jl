@@ -38,6 +38,63 @@ __plot_style() = NamedTuple()
 """
 $(TYPEDSIGNATURES)
 
+Return the default placement of the phase labels (`:control`).
+"""
+__phase_labels() = :control
+
+"""
+$(TYPEDSIGNATURES)
+
+Check the placement of the phase labels: `:control`, `:all` or `:none`.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): for any other value.
+"""
+function _check_phase_labels(phase_labels::Symbol)
+    phase_labels in (:control, :all, :none) || throw(
+        Exceptions.IncorrectArgument(
+            "Invalid phase_labels choice";
+            got="phase_labels=$phase_labels",
+            expected=":control, :all or :none",
+            suggestion="Use phase_labels=:control (default), :all or :none",
+            context="CTModels.PlotCase.build_figure",
+        ),
+    )
+    return nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the default drawing of a jump at a switching time (`:segment`, a vertical segment
+from the left to the right limit).
+"""
+__plot_jumps() = :segment
+
+"""
+$(TYPEDSIGNATURES)
+
+Check the drawing of the jumps: `:segment` or `:none`.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): for any other value.
+"""
+function _check_jumps(jumps::Symbol)
+    jumps in (:segment, :none) || throw(
+        Exceptions.IncorrectArgument(
+            "Invalid jumps choice";
+            got="jumps=$jumps",
+            expected=":segment or :none",
+            suggestion="Use jumps=:segment (default, a vertical segment) or :none (a break)",
+            context="CTModels.PlotCase.build_figure",
+        ),
+    )
+    return nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the default suffix appended to plot labels (empty string).
 """
 __plot_label_suffix() = ""

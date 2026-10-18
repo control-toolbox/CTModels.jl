@@ -24,6 +24,8 @@ keyword argument because its deserialization is format-specific (JSON restores `
 # Notes
 - If `time_grid_state` key exists, assumes multiple time grid format
 - Otherwise, uses the current unified format (single `time_grid` key)
+- The switching structure is rebuilt when the data holds it (`"switching_times"`), so the
+  trajectories keep their jumps (see [`CTModels.Solutions.build_solution`](@extref))
 
 # Example
 ```julia-repl
@@ -49,6 +51,8 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
     variable_constraints_ub_dual = _extract_optional_vector(
         data["variable_constraints_ub_dual"]
     )
+    # Switching structure: absent from files without one (and from older files)
+    switching = Solutions._deserialize_switching(data)
 
     # Detect format and extract time grids
     if haskey(data, "time_grid_state")
@@ -84,6 +88,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             variable_constraints_ub_dual=variable_constraints_ub_dual,
             infos=infos,
             control_interpolation=control_interpolation,
+            switching=switching,
         )
     else
         # Current unified format: single time grid
@@ -121,6 +126,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             variable_constraints_ub_dual=variable_constraints_ub_dual,
             infos=infos,
             control_interpolation=control_interpolation,
+            switching=switching,
         )
     end
 end

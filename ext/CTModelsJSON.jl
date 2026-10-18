@@ -29,6 +29,9 @@ const _OPTIONAL_MATRIX_FIELDS = [
     "control_constraints_ub_dual",
 ]
 
+"Switching limits (present when the solution holds a switching structure), converted like the other matrices."
+const _SWITCHING_MATRIX_FIELDS = [first(k) for k in CTModels.Solutions._SWITCHING_LIMIT_KEYS]
+
 """
 Convert Matrix fields to Vector{Vector} for JSON3 export.
 
@@ -49,6 +52,28 @@ function _convert_matrices_for_json!(blob::Dict)
             blob[key] = Core.matrix2vec(blob[key], 1)
         end
     end
+
+    # Switching limits: one row per switching time (rows may be empty)
+    for key in _SWITCHING_MATRIX_FIELDS
+        if haskey(blob, key) && blob[key] isa Matrix
+            M = blob[key]
+            blob[key] = [Vector{Float64}(M[i, :]) for i in axes(M, 1)]
+        end
+    end
+end
+
+"""
+Convert the rows of a JSON switching-limit field back to a `Matrix{Float64}` with `n` rows
+(one per switching time); `0 × 0` when there is no switching time.
+"""
+function _json_rows_to_matrix(rows, n::Int)::Matrix{Float64}
+    n == 0 && return zeros(0, 0)
+    ncols = length(rows[1])
+    M = zeros(n, ncols)
+    for i in 1:n
+        M[i, :] .= Float64.(rows[i])
+    end
+    return M
 end
 
 # ============================================================================
@@ -185,7 +210,7 @@ including all primal and dual information, which can be read by external tools.
   automatically, unless `filename` already ends with it (case-insensitively).
 
 # Notes
-The exported JSON includes the time grid, state, control, costate, objective, solver info, and all constraint duals (if available).
+The exported JSON includes the time grid, state, control, costate, objective, solver info, all constraint duals (if available), and the switching structure (switching times, phase labels, left/right limits) when the solution holds one.
 
 # Example
 ```julia-repl
@@ -343,6 +368,16 @@ function CTModels.import_ocp_solution(
             CTModels.Serialization._extract_optional_vector(vcubd),
         "control_interpolation" => blob["control_interpolation"],
     )
+
+    # Switching structure (absent when the solution holds none, and from older files)
+    if haskey(blob, "switching_times")
+        n = length(blob["switching_times"])
+        data["switching_times"] = Vector{Float64}(collect(blob["switching_times"]))
+        data["phase_labels"] = collect(String, blob["phase_labels"])
+        for key in _SWITCHING_MATRIX_FIELDS
+            data[key] = _json_rows_to_matrix(blob[key], n)
+        end
+    end
 
     # Model signature (absent from files exported by older versions)
     if haskey(blob, "model_signature")

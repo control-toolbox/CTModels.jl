@@ -96,6 +96,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             files=src(
                 joinpath("Solutions", "Solutions.jl"),
                 joinpath("Solutions", "solution_types.jl"),
+                joinpath("Solutions", "switching_model.jl"),
                 joinpath("Solutions", "dual_functors.jl"),
                 joinpath("Solutions", "build_solution.jl"),
                 joinpath("Solutions", "dual_model.jl"),

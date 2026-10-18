@@ -84,6 +84,9 @@ All dual variable arguments default to `nothing` if not provided:
 - `variable_constraints_lb_dual::Union{Vector{Float64},Nothing}`: Variable lower bound duals (time-independent)
 - `variable_constraints_ub_dual::Union{Vector{Float64},Nothing}`: Variable upper bound duals (time-independent)
 - `infos::Dict{Symbol,Any}`: Additional solver-specific information (default: empty dict)
+- `control_interpolation::Symbol`: `:constant` (direct methods) or `:linear` (indirect methods)
+- `switching::AbstractSwitchingModel`: Switching structure (default: `EmptySwitchingModel()`),
+  see the Switching Structure note below
 
 # Returns
 
@@ -153,8 +156,22 @@ and emits a warning; the component has a single dual, shared by these labels.
 
 ## Grid Validation
 
-Each time grid is expected to be increasing. A grid that is not is sorted, and a warning
-is emitted.
+Each time grid is expected to be strictly increasing. A grid that is not increasing is
+sorted, and a warning is emitted. A grid with a repeated time raises an
+`IncorrectArgument`: a trajectory has one value at each time.
+
+## Switching Structure
+
+The keyword `switching::AbstractSwitchingModel` (default `EmptySwitchingModel()`) stores
+the switching structure of a solution made of phases: the switching times, a label per
+phase, and the left/right limits of the state, costate and control at every switching time
+(see [`CTModels.Solutions.SwitchingModel`](@extref)). The switching times must lie strictly
+inside the time span, and the limits must have one column per component (or none).
+
+The trajectories stay left-continuous at a switching time. When a trajectory is given as a
+matrix, its interpolation uses the limits, so that it keeps its jumps: it joins the last
+grid point before a switching time to the left limit, and the right limit to the first grid
+point after it. A trajectory given as a function is used as is.
 
 ## Automatic Grid Extension
 
@@ -210,6 +227,7 @@ function build_solution(
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
+    switching::AbstractSwitchingModel=EmptySwitchingModel(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
@@ -275,16 +293,34 @@ function build_solution(
         )
     end
 
+    # Switching structure: consistent with the grids and the dimensions of the problem
+    _check_switching(switching, T_state, dim_x, dim_u)
+
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
     # Note: costate uses its own grid (T_costate)
     # Note: control uses configurable interpolation (constant for direct methods, linear for indirect methods)
-    fx = build_interpolated_function(X, T_state, dim_x, TX; expected_dim=dim_x)
+    # Note: sampled data keeps its jumps at the switching times (`jumps`)
+    fx = build_interpolated_function(
+        X, T_state, dim_x, TX; expected_dim=dim_x, jumps=(switching, :state)
+    )
     fu = build_interpolated_function(
-        U, T_control, dim_u, TU; expected_dim=dim_u, interpolation=control_interpolation
+        U,
+        T_control,
+        dim_u,
+        TU;
+        expected_dim=dim_u,
+        interpolation=control_interpolation,
+        jumps=(switching, :control),
     )
     fp = build_interpolated_function(
-        P, T_costate, dim_x, TP; constant_if_two_points=true, expected_dim=dim_x
+        P,
+        T_costate,
+        dim_x,
+        TP;
+        constant_if_two_points=true,
+        expected_dim=dim_x,
+        jumps=(switching, :costate),
     )
     Core.@ensure length(v) == dim_v Exceptions.IncorrectArgument(
         "variable length mismatch";
@@ -450,7 +486,52 @@ function build_solution(
         objective,
         dual,
         solver_infos,
+        switching,
     )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check that a switching model is consistent with a solution: its switching times lie strictly
+inside the time span of the state grid `T`, and its stored limits have one column per
+component (`dim_x` for the state and costate, `dim_u` for the control) or none (limits not
+known).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if a switching time is outside
+  `(first(T), last(T))`, or a matrix of limits has a wrong number of columns.
+"""
+function _check_switching(::EmptySwitchingModel, T, dim_x, dim_u)
+    return nothing
+end
+function _check_switching(sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, dim_u::Int)
+    t0, tf = first(T), last(T)
+    for τ in switching_times(sw)
+        t0 < τ < tf || throw(
+            Exceptions.IncorrectArgument(
+                "switching time outside the time span";
+                got="switching time $τ",
+                expected="a time in ($t0, $tf), strictly inside the time grid",
+                suggestion="Give switching times strictly between the first and last " *
+                           "times of the grid",
+                context="build_solution - validating the switching model",
+            ),
+        )
+    end
+    for (component, dim) in ((:state, dim_x), (:costate, dim_x), (:control, dim_u))
+        ncols = size(limits(sw, component)[1], 2)
+        ncols in (0, dim) || throw(
+            Exceptions.IncorrectArgument(
+                "wrong dimension of the $component limits";
+                got="$ncols column(s)",
+                expected="$dim columns (one per $component component), or 0 if not known",
+                suggestion="Give one column per $component component in the limits",
+                context="build_solution - validating the switching model",
+            ),
+        )
+    end
+    return nothing
 end
 
 """
@@ -465,10 +546,16 @@ Validate and fix a time grid by ensuring it is strictly increasing.
 # Returns
 - `Vector{Float64}`: Validated and potentially reordered time grid
 
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the grid holds a repeated time. A
+  trajectory takes one value at each time; a jump at a switching time is stored in the
+  switching model instead (see [`CTModels.Solutions.SwitchingModel`](@extref)).
+
 # Notes
-If the grid is not strictly increasing, it is reordered and a warning is emitted.
+If the grid is not increasing, it is reordered and a warning is emitted.
 """
 function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
+    Ts = T
     if !issorted(T; lt=(<))
         # Build appropriate message based on component name
         components_with_issues = [component_name]  # TODO: Collect all components when called multiple times
@@ -480,9 +567,34 @@ function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
         end
 
         @warn msg
-        return sort(T)
+        Ts = sort(T)
     end
-    return T
+    # on the sorted grid, a repeated time is adjacent
+    for i in 1:(length(Ts) - 1)
+        Ts[i] == Ts[i + 1] && _throw_repeated_time(Ts[i], component_name)
+    end
+    return Ts
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw the error of a time grid with a repeated time.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): always.
+"""
+function _throw_repeated_time(t::Float64, component_name::String)
+    throw(
+        Exceptions.IncorrectArgument(
+            "repeated time in the $component_name time grid";
+            got="time $t appears more than once",
+            expected="a strictly increasing time grid (each time once)",
+            suggestion="Keep each time once. To store a jump at a switching time, give " *
+                       "the left and right limits in `switching=SwitchingModel(...)`.",
+            context="build_solution - validating the $component_name time grid",
+        ),
+    )
 end
 
 """
@@ -548,6 +660,8 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `variable_constraints_lb_dual::Vector{Float64}`: the lower bound dual of the variable constraints.
 - `variable_constraints_ub_dual::Vector{Float64}`: the upper bound dual of the variable constraints.
 - `infos::Dict{Symbol,Any}`: additional solver information dictionary.
+- `control_interpolation::Symbol`: `:constant` (direct methods) or `:linear` (indirect methods).
+- `switching::AbstractSwitchingModel`: the switching structure (default: `EmptySwitchingModel()`).
 
 # Returns
 
@@ -585,6 +699,7 @@ function build_solution(
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
+    switching::AbstractSwitchingModel=EmptySwitchingModel(),
 ) where {
     TX<:Union{Matrix{Float64},Function},
     TU<:Union{Matrix{Float64},Function},
@@ -618,6 +733,7 @@ function build_solution(
         variable_constraints_ub_dual=variable_constraints_ub_dual,
         infos=infos,
         control_interpolation=control_interpolation,
+        switching=switching,
     )
 end
 
@@ -1600,8 +1716,72 @@ Version of the serialized solution format, stored under the `"format_version"` k
 
 Files written before the key existed (no `"format_version"`, no `"model_signature"`) are
 still readable, with a reduced compatibility check against the model.
+
+Version history:
+- `1`: model signature, for the compatibility check at import time.
+- `2`: optional switching structure (`"switching_times"`, `"phase_labels"` and the
+  `"switching_<component>_<side>"` limits), written only for a solution that holds one;
+  files without these keys are read with an [`CTModels.Solutions.EmptySwitchingModel`](@extref).
 """
-const SERIALIZATION_FORMAT_VERSION = 1
+const SERIALIZATION_FORMAT_VERSION = 2
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the key of the serialized `side` limit (`1` left, `2` right) of `component`, e.g.
+`"switching_state_left"`.
+"""
+function _switching_limit_key(component::Symbol, side::Int)::String
+    return "switching_$(component)_$(side == 1 ? "left" : "right")"
+end
+
+"""
+Keys of the serialized switching limits, as `(key, component, side)` with `side = 1` for
+the left limit and `2` for the right limit.
+"""
+const _SWITCHING_LIMIT_KEYS = Tuple(
+    (_switching_limit_key(c, side), c, side) for c in (:state, :costate, :control) for
+    side in (1, 2)
+)
+
+"""
+$(TYPEDSIGNATURES)
+
+Add the switching structure of a solution to its serialized data: nothing for an
+[`CTModels.Solutions.EmptySwitchingModel`](@extref); the switching times, the phase labels and
+the six matrices of limits for a [`CTModels.Solutions.SwitchingModel`](@extref).
+"""
+_serialize_switching!(data::Dict{String,Any}, ::EmptySwitchingModel) = data
+function _serialize_switching!(data::Dict{String,Any}, sw::SwitchingModel)
+    data["switching_times"] = copy(switching_times(sw))
+    data["phase_labels"] = copy(phase_labels(sw))
+    for (key, component, side) in _SWITCHING_LIMIT_KEYS
+        data[key] = copy(limits(sw, component)[side])
+    end
+    return data
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Rebuild the switching model from serialized data: an
+[`CTModels.Solutions.EmptySwitchingModel`](@extref) when the data holds no `"switching_times"`
+(e.g. a file written by an older version), a [`CTModels.Solutions.SwitchingModel`](@extref)
+otherwise. The limits are matrices with one row per switching time.
+"""
+function _deserialize_switching(data)::AbstractSwitchingModel
+    haskey(data, "switching_times") || return EmptySwitchingModel()
+    times = Vector{Float64}(collect(data["switching_times"]))
+    labels = collect(String, data["phase_labels"])
+    lim(c, side) = Matrix{Float64}(data[_switching_limit_key(c, side)])
+    return SwitchingModel(;
+        times=times,
+        labels=labels,
+        state=(lim(:state, 1), lim(:state, 2)),
+        costate=(lim(:costate, 1), lim(:costate, 2)),
+        control=(lim(:control, 1), lim(:control, 2)),
+    )
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -1739,8 +1919,9 @@ function _serialize_solution(sol::Solution)::Dict{String,Any}
     dim_x = state_dimension(sol)
     dim_u = control_dimension(sol)
 
-    # Dispatch based on time grid model type
-    return _serialize_solution(time_grid_model(sol), sol, dim_x, dim_u)
+    # Dispatch based on time grid model type, then add the switching structure (if any)
+    data = _serialize_solution(time_grid_model(sol), sol, dim_x, dim_u)
+    return _serialize_switching!(data, switching_model(sol))
 end
 
 """

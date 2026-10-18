@@ -127,3 +127,11 @@ mechanism used when [building a solution](../solution/trajectories.md).
     [`AbstractTag`](@ref CTModels.Serialization.AbstractTag). The extension methods
     `export_ocp_solution(CTModels.JLD2Tag(), sol; …)` etc. are what each `ext/` file
     implements; the `format=` wrapper is the public, dependency-free entry point.
+
+## Switching structure
+
+The switching structure of a solution (switching times, phase labels, left and right limits,
+see [Switching structure](../solution/switching.md)) is saved with it, in both formats. When
+the file is read back, the trajectories are rebuilt phase by phase, so they keep their jumps. A file
+without switching structure, including one written by an older version, is read with an
+[`EmptySwitchingModel`](@ref CTModels.Solutions.EmptySwitchingModel).

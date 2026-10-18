@@ -126,6 +126,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 "Time Grids" => joinpath("solution", "time_grids.md"),
                 "Trajectories" => joinpath("solution", "trajectories.md"),
                 "Duals & Diagnostics" => joinpath("solution", "duals.md"),
+                "Switching Structure" => joinpath("solution", "switching.md"),
             ],
             "Initial Guesses" => [
                 "Overview" => joinpath("initial_guess", "overview.md"),
