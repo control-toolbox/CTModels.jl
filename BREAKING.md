@@ -4,6 +4,25 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## [Unreleased]
 
+### `Makie.plot(; kwargs...)` is removed
+
+The zero-argument `Makie.plot(; kwargs...)` of the `CTModelsMakie` extension was type
+piracy: CTModels owns neither `Makie.plot` nor any argument type, so it replaced
+`Makie.plot()` for every session loading Makie and CTModels
+([#466](https://github.com/control-toolbox/CTModels.jl/issues/466)).
+
+**Migration**:
+
+```julia
+# Before
+f = Makie.plot(; size=(800, 800))
+Makie.plot!(f, sol)
+
+# After
+f = Makie.Figure(; size=(800, 800))
+Makie.plot!(f, sol)
+```
+
 ### A time grid with a repeated time is an error
 
 `build_solution` raises an `IncorrectArgument` when a time grid (state, control, costate or

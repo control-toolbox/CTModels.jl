@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚠️ Breaking
 
+- **`Makie.plot(; kwargs...)` is removed**
+  ([#466](https://github.com/control-toolbox/CTModels.jl/issues/466)). The zero-argument
+  method was type piracy: it redefined `Makie.plot()` for every session loading Makie and
+  CTModels. Use `Makie.Figure(; kwargs...)` for an empty canvas. See `BREAKING.md`.
 - **A time grid with a repeated time is an error**
   ([#460](https://github.com/control-toolbox/CTModels.jl/issues/460)). `build_solution`
   raises an `IncorrectArgument` when a grid holds the same time twice; it let it through

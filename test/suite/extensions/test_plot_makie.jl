@@ -178,9 +178,8 @@ function test_plot_makie()
             Test.@test Makie.plot!(Makie.Figure(), sol_pc) isa Makie.Figure
         end
 
-        Test.@testset "plot(; size) is an empty canvas to overlay onto" begin
-            # mirror of `Plots.plot(; size=…)`: a blank figure, then `plot!(f, sol)`.
-            f = Makie.plot(; size=(800, 800))
+        Test.@testset "Figure(; size) is an empty canvas to overlay onto" begin
+            f = Makie.Figure(; size=(800, 800))
             Test.@test f isa Makie.Figure
             Test.@test _n_axes(f) == 0
             Test.@test size(f.scene) == (800, 800)
