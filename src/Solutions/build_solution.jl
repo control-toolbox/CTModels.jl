@@ -1728,6 +1728,15 @@ const SERIALIZATION_FORMAT_VERSION = 2
 """
 $(TYPEDSIGNATURES)
 
+Return `nothing` for an unset optional field (`Core.NotProvided`), and `x` otherwise.
+
+An unset field is written as `nothing` (`null` in JSON), whatever the format.
+"""
+_unset_to_nothing(x) = x isa Core.NotProvidedType ? nothing : x
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the key of the serialized `side` limit (`1` left, `2` right) of `component`, e.g.
 `"switching_state_left"`.
 """
@@ -1845,7 +1854,9 @@ Dict(
     - `"control_constraints_lb_dual"`, `"control_constraints_ub_dual"`: Control box duals on control grid
     - `"boundary_constraints_dual"`: Boundary duals (time-independent vector)
     - `"variable_constraints_lb_dual"`, `"variable_constraints_ub_dual"`: Variable duals (vectors)
-  - **Solver info**: `"iterations"`, `"message"`, `"status"`, `"successful"`, `"constraints_violation"`, `"infos"`
+  - **Solver info**: `"iterations"`, `"message"`, `"status"`, `"successful"`, `"constraints_violation"`, `"infos"`.
+    The optional fields `"iterations"`, `"message"`, `"status"` and `"constraints_violation"` are
+    `nothing` when unset (`Core.NotProvided`)
   - **Compatibility check**: `"format_version"` and `"model_signature"` (see
     [`CTModels.Models._model_signature`](@extref)), used at import time to check the file against the model
 
@@ -2005,11 +2016,11 @@ function _discretize_all_components(
         "boundary_constraints_dual" => boundary_constraints_dual(sol),
         "variable_constraints_lb_dual" => _as_vector(variable_constraints_lb_dual(sol)),
         "variable_constraints_ub_dual" => _as_vector(variable_constraints_ub_dual(sol)),
-        "iterations" => iterations(sol),
-        "message" => message(sol),
-        "status" => status(sol),
+        "iterations" => _unset_to_nothing(iterations(sol)),
+        "message" => _unset_to_nothing(message(sol)),
+        "status" => _unset_to_nothing(status(sol)),
         "successful" => successful(sol),
-        "constraints_violation" => constraints_violation(sol),
+        "constraints_violation" => _unset_to_nothing(constraints_violation(sol)),
         "infos" => infos(sol),
         "format_version" => SERIALIZATION_FORMAT_VERSION,
         "model_signature" => Models._model_signature(model(sol)),

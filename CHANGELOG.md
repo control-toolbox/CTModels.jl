@@ -50,6 +50,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Solution` gains an eleventh field and type parameter, `switching`; the ten-argument
     positional constructor is kept and builds an `EmptySwitchingModel`.
 
+### 🔧 Fixed
+
+- **Export/import round trip of a `Solution` with unset optional solver fields**
+  ([#464](https://github.com/control-toolbox/CTModels.jl/issues/464)). A solution whose
+  `iterations`, `constraints_violation`, `message` or `status` are `NotProvided` (as the
+  ones built by an indirect method) could be exported but not imported, in JSON and JLD2.
+  An unset field is now written as `null` (JSON) / `nothing` (JLD2) and read back as
+  `NotProvided`; files holding the string `"NotProvided"` (older versions) are still read.
+  A value of the wrong type raises a `ParsingError` instead of a `MethodError`.
+
 ### 📚 Documentation
 
 - New page *Switching structure*; the `build_solution` contract, plotting and

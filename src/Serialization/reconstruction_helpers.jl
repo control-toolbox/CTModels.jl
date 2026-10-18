@@ -4,6 +4,34 @@
 """
 $(TYPEDSIGNATURES)
 
+Read the optional solver field `key` of `data` as a `T`, or `Core.NotProvided` if it is unset.
+
+A field is unset when its key is missing or when its value is `nothing` (`null` in JSON),
+`Core.NotProvided`, or the string `"NotProvided"` (written by older versions).
+
+# Throws
+- `CTBase.Exceptions.ParsingError`: if the value cannot be converted to `T`.
+"""
+function _optional(data, key::String, ::Type{T}) where {T}
+    value = get(data, key, nothing)
+    (isnothing(value) || value isa CTBase.Core.NotProvidedType || value == "NotProvided") &&
+        return CTBase.Core.NotProvided
+    try
+        return T(value)
+    catch
+        throw(
+            Exceptions.ParsingError(
+                "solution field '$key' must be a $T, got $(repr(value))";
+                location="imported solution dictionary",
+                suggestion="re-export the solution with a current CTModels version",
+            ),
+        )
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Reconstruct a solution from imported data, detecting the format (single vs multiple time grids).
 
 Duals and `control_interpolation` are read from `data`. Only `infos` is accepted as a
@@ -73,10 +101,10 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             _extract_time_vector(data["variable"]),
             data["costate"];
             objective=Float64(data["objective"]),
-            iterations=data["iterations"],
-            constraints_violation=Float64(data["constraints_violation"]),
-            message=data["message"],
-            status=Symbol(data["status"]),
+            iterations=_optional(data, "iterations", Int),
+            constraints_violation=_optional(data, "constraints_violation", Float64),
+            message=_optional(data, "message", String),
+            status=_optional(data, "status", Symbol),
             successful=data["successful"],
             path_constraints_dual=path_constraints_dual,
             boundary_constraints_dual=boundary_constraints_dual,
@@ -111,10 +139,10 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             _extract_time_vector(data["variable"]),
             data["costate"];
             objective=Float64(data["objective"]),
-            iterations=data["iterations"],
-            constraints_violation=Float64(data["constraints_violation"]),
-            message=data["message"],
-            status=Symbol(data["status"]),
+            iterations=_optional(data, "iterations", Int),
+            constraints_violation=_optional(data, "constraints_violation", Float64),
+            message=_optional(data, "message", String),
+            status=_optional(data, "status", Symbol),
             successful=data["successful"],
             path_constraints_dual=path_constraints_dual,
             boundary_constraints_dual=boundary_constraints_dual,

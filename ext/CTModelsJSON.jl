@@ -296,8 +296,13 @@ including the discretized primal and dual trajectories.
 - `CTBase.Exceptions.IncorrectArgument`: if the file does not match `ocp` (dimensions,
   number or labels of constraints, fixed versus free times). Pass the model the solution
   was computed from.
+- `CTBase.Exceptions.ParsingError`: if an optional solver field has a value of the wrong type.
 
 # Notes
+An unset optional solver field (`iterations`, `constraints_violation`, `message`, `status`)
+is written as `null` and read back as `Core.NotProvided`; the string `"NotProvided"`, written
+by older versions, is read the same way.
+
 Handles both vector and matrix encodings of signals. If dual fields are missing or `null`, the corresponding attributes are set to `nothing`.
 
 The file is checked against `ocp` before the solution is rebuilt; see
@@ -332,10 +337,10 @@ function CTModels.import_ocp_solution(
 
     data = Dict{String,Any}(
         "objective" => blob["objective"],
-        "iterations" => blob["iterations"],
-        "constraints_violation" => blob["constraints_violation"],
-        "message" => blob["message"],
-        "status" => blob["status"],
+        "iterations" => get(blob, "iterations", nothing),
+        "constraints_violation" => get(blob, "constraints_violation", nothing),
+        "message" => get(blob, "message", nothing),
+        "status" => get(blob, "status", nothing),
         "successful" => blob["successful"],
         "state" => _json_to_matrix(blob["state"]),
         "control" => _json_to_matrix(blob["control"]),
