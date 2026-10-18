@@ -27,7 +27,7 @@ initial-guess management; and optional extensions for serialization and plotting
 |-----------|----------------|------|
 | `CTModelsPlots` | `Plots.jl` | `Plots.plot(sol)` and `Plots.plot!(sol)` |
 | `CTModelsMakie` | `Makie.jl` | `Makie.plot(sol)` and `Makie.plot!(fig, sol)` |
-| `CTModelsJSON` | `JSON3.jl` | JSON serialization |
+| `CTModelsJSON` | `JSON.jl` | JSON serialization |
 | `CTModelsJLD` | `JLD2.jl` | JLD2 serialization |
 
 All public symbols are accessed as `CTModels.symbol` (no top-level exports).

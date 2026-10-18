@@ -10,7 +10,7 @@ using CTModels: Init
 using CTModels: Serialization
 using Plots: Plots
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

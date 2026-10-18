@@ -61,7 +61,7 @@ function test_type_show()
             Solutions.EmptyDualModel(),
             Components.EmptyDefinition(),
             Serialization.JLD2Tag(),
-            Serialization.JSON3Tag(),
+            Serialization.JSONTag(),
         )
             compact = _show_string(value)
             detailed = _show_string(value; plain=true)

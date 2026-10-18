@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   raises an `IncorrectArgument` when a grid holds the same time twice; it let it through
   before, although a trajectory takes one value at each time. A grid that is not increasing
   is still sorted, with a warning. See `BREAKING.md`.
+- **The JSON format uses JSON.jl; `JSON3Tag` is renamed `JSONTag`**
+  ([#467](https://github.com/control-toolbox/CTModels.jl/issues/467)). JSON3.jl is
+  deprecated in favour of JSON.jl v1. The weak dependency of the `CTModelsJSON` extension
+  is now `JSON` (load it with `using JSON`), and the format tag is `JSONTag`.
+  `format=:JSON` is unchanged, and so is the format of the files: files written with JSON3
+  are still read, and a test checks it against files written by the previous version. An
+  export now serializes first, so a value JSON cannot hold (a `NaN`) leaves no half-written
+  file. See `BREAKING.md`.
 
 ### ✨ New Features
 

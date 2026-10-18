@@ -2,7 +2,7 @@ module TestExportImport
 
 using Test: Test
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using CTModels: Building
 using CTModels: Components
 using CTModels: Models
@@ -361,7 +361,7 @@ function test_export_import()
 
             # Read raw JSON to verify structure
             json_string = read("solution_full.json", String)
-            blob = JSON3.read(json_string)
+            blob = JSON.parse(json_string)
 
             # Verify all expected keys are present
             expected_keys = [
@@ -681,7 +681,7 @@ function test_export_import()
 
             # Read raw JSON
             json_string = read("solution_no_duals.json", String)
-            blob = JSON3.read(json_string)
+            blob = JSON.parse(json_string)
 
             # Verify dual fields are null
             Test.@test isnothing(blob["path_constraints_dual"])
@@ -769,7 +769,7 @@ function test_export_import()
 
             # Verify JSON structure
             json_string = read("solution_with_infos.json", String)
-            blob = JSON3.read(json_string)
+            blob = JSON.parse(json_string)
             Test.@test haskey(blob, "infos")
             Test.@test blob["infos"]["solver_name"] == "TestSolver"
             Test.@test blob["infos"]["tolerance"] == 1e-6
@@ -1050,7 +1050,7 @@ function test_export_import()
 
             # Read and observe what stack() returns
             json_string = read("stack_investigation.json", String)
-            blob = JSON3.read(json_string)
+            blob = JSON.parse(json_string)
 
             # Test state (multi-dimensional: 2D in TestProblems.solution_example)
             # Now exported as Vector{Vector}, so stack() returns Matrix
@@ -1268,13 +1268,13 @@ function test_export_import()
 
             # Simulate a legacy file by removing control_interpolation from JSON
             json_string = read("test_missing_interp.json", String)
-            json_data = JSON3.read(json_string)
+            json_data = JSON.parse(json_string)
             json_without = Dict{String,Any}(
                 string(k) => v for
                 (k, v) in json_data if string(k) != "control_interpolation"
             )
             open("test_missing_interp.json", "w") do f
-                return JSON3.write(f, json_without)
+                return JSON.json(f, json_without)
             end
 
             # Import must now raise a KeyError (missing required field)

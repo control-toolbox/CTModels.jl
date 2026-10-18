@@ -2,7 +2,7 @@ module TestMultiGrids
 
 using Test: Test
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using CTBase: Exceptions
 using CTModels: Components
 using CTModels: Models
@@ -670,13 +670,13 @@ function test_multi_grids()
 
             # Simulate a file with the old key name (time_grid_dual) instead of time_grid_path
             json_string = read("missing_tgp_test.json", String)
-            blob = JSON3.read(json_string)
+            blob = JSON.parse(json_string)
             legacy_data = Dict{String,Any}(
                 string(k) => v for (k, v) in blob if string(k) != "time_grid_path"
             )
             legacy_data["time_grid_dual"] = blob["time_grid_path"]  # old name
             open("missing_tgp_legacy.json", "w") do f
-                return JSON3.write(f, legacy_data)
+                return JSON.json(f, legacy_data)
             end
 
             # Import from file with old key must raise a KeyError (required key absent)
