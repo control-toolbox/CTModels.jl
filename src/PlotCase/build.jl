@@ -71,9 +71,12 @@ function _build_root(
     switching_style::Union{NamedTuple,Symbol}=__plot_style(),
     phase_labels::Symbol=__phase_labels(),
     phase_labels_style::NamedTuple=__plot_style(),
+    jumps::Symbol=__plot_jumps(),
 )
     model = CTModels.model(sol)
     _check_phase_labels(phase_labels)
+    _check_jumps(jumps)
+    connect = jumps === :segment
     desc = clean(isempty(description) ? __description() : description)
     do_state, do_costate, do_control, do_path, do_dual = do_plot(
         sol,
@@ -129,17 +132,19 @@ function _build_root(
     if layout === :group
         # No bounds lines in :group (historical); only the time markers, via `vlines`.
         cells = Plotting.AbstractLayoutNode[]
-        do_state && push!(cells, L(_state_panel(sol, state_style); group=:state))
+        do_state && push!(cells, L(_state_panel(sol, state_style; connect=connect); group=:state))
         do_costate && push!(
             cells,
             L(
-                _costate_panel(sol, costate_style; layout=layout, state_shown=do_state);
+                _costate_panel(
+                    sol, costate_style; layout=layout, state_shown=do_state, connect=connect
+                );
                 group=:costate,
             ),
         )
         if do_control
             # with `control=:all`, the labels go to the first control cell only
-            for (k, cp) in enumerate(_control_panels(sol, control, control_style, layout))
+            for (k, cp) in enumerate(_control_panels(sol, control, control_style, layout; connect=connect))
                 push!(cells, L(cp; group=(k == 1 ? :control : :none)))
             end
         end
@@ -148,7 +153,7 @@ function _build_root(
     elseif layout === :split
         state_col = nothing
         if do_state
-            sp = _state_panel(sol, state_style)
+            sp = _state_panel(sol, state_style; connect=connect)
             hl = if dec_state_bounds
                 _box_hlines(
                     CTModels.state_constraints_box(model), ncomp(sp), state_bounds_style
@@ -160,7 +165,9 @@ function _build_root(
         end
         costate_col = if do_costate
             L(
-                _costate_panel(sol, costate_style; layout=layout, state_shown=do_state);
+                _costate_panel(
+                    sol, costate_style; layout=layout, state_shown=do_state, connect=connect
+                );
                 group=:costate,
             )
         else
@@ -168,7 +175,7 @@ function _build_root(
         end
         control_col = nothing
         if do_control
-            cp = only(_control_panels(sol, control, control_style, layout))
+            cp = only(_control_panels(sol, control, control_style, layout; connect=connect))
             hl = if (dec_control_bounds && control !== :norm)
                 _box_hlines(
                     CTModels.control_constraints_box(model),
@@ -182,7 +189,7 @@ function _build_root(
         end
         path_col = nothing
         if do_path
-            pp = _path_panel(sol, model, path_style)
+            pp = _path_panel(sol, model, path_style; connect=connect)
             hl = if dec_path_bounds
                 _path_hlines(model, path_bounds_style)
             else
@@ -238,10 +245,14 @@ assembles the layout template and wraps it in a `Figure`. The `CTModelsPlots` /
   first drawn group when the control is not drawn), `:all` (every group) or `:none`.
 - `phase_labels_style::NamedTuple = NamedTuple()`: style of the phase labels (`color`,
   `fontsize`, `halign`, `valign`).
+- `jumps::Symbol = :segment`: how a jump at a switching time is drawn: `:segment`, a
+  vertical segment from the left to the right limit (it makes the jumps easy to see and to
+  compare with a smoothed jump, e.g. from a direct method), or `:none`, the curve is broken
+  between the two limits (no segment suggests values the trajectory does not take).
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): for an invalid `layout`, `control`,
-  `time` or `phase_labels`.
+  `time`, `phase_labels` or `jumps`.
 """
 function build_figure(
     sol::CTModels.Solution,
@@ -261,6 +272,7 @@ function build_figure(
     switching_style::Union{NamedTuple,Symbol}=__plot_style(),
     phase_labels::Symbol=__phase_labels(),
     phase_labels_style::NamedTuple=__plot_style(),
+    jumps::Symbol=__plot_jumps(),
     size=nothing,
 )
     root = _build_root(
@@ -281,6 +293,7 @@ function build_figure(
         switching_style=switching_style,
         phase_labels=phase_labels,
         phase_labels_style=phase_labels_style,
+        jumps=jumps,
     )
     root === nothing && return nothing
     return Plotting.Figure(root; size=size)
@@ -306,6 +319,7 @@ const _BUILD_KEYS = (
     :switching_style,
     :phase_labels,
     :phase_labels_style,
+    :jumps,
 )
 
 """

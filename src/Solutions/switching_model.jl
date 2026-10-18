@@ -470,3 +470,101 @@ function _with_jumps(
     size(left, 2) == 0 && return base
     return _JumpInterpolant(base, grid, switching_times(sw), left, right, constant)
 end
+
+# ------------------------------------------------------------------------------ #
+# Display
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the sequence of phase labels as written by the displays, e.g. `"bang → · → singular"`:
+the labels joined by arrows, a phase with no label written `·` so that every phase keeps
+its place between the switching times.
+"""
+function _phase_sequence(labels::AbstractVector{<:AbstractString})::String
+    return join((isempty(l) ? "·" : l for l in labels), " → ")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the components whose limits a switching model stores, e.g. `"state, costate"`, or
+`"none"`.
+"""
+function _stored_limits(m::SwitchingModel)::String
+    stored = [String(c) for c in (:state, :costate, :control) if size(limits(m, c)[1], 2) > 0]
+    return isempty(stored) ? "none" : join(stored, ", ")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact display of an [`CTModels.Solutions.EmptySwitchingModel`](@extref).
+"""
+function Base.show(io::IO, ::EmptySwitchingModel)
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(io, fmt.name, "EmptySwitchingModel", fmt.reset, "()")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Display of an [`CTModels.Solutions.EmptySwitchingModel`](@extref): no switching time, no
+phase label.
+"""
+function Base.show(io::IO, ::MIME"text/plain", ::EmptySwitchingModel)
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(
+        io, fmt.name, "EmptySwitchingModel", fmt.reset, fmt.muted, "  (no switching)", fmt.reset
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact one-line display of a [`CTModels.Solutions.SwitchingModel`](@extref): its switching
+times and its sequence of phases.
+"""
+function Base.show(io::IO, m::SwitchingModel)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "SwitchingModel", fmt.reset, "(")
+    print(io, fmt.label, "times=", fmt.reset, fmt.value, m.times, fmt.reset)
+    if any(!isempty, m.labels)
+        print(io, ", ", fmt.label, "phases=", fmt.reset, fmt.value, _phase_sequence(m.labels))
+        print(io, fmt.reset)
+    end
+    return print(io, ")")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Display of a [`CTModels.Solutions.SwitchingModel`](@extref) as a tree, in the style of the
+display of a [`CTModels.Solutions.Solution`](@extref): the switching times, the sequence of
+phases (an unlabelled phase shows as `·`) and the components whose limits are stored.
+
+# Example
+```julia-repl
+julia> CTModels.SwitchingModel(; times=[0.5], labels=["bang", "singular"])
+SwitchingModel
+  │  Switching times : [0.5]
+  │  Phases : bang → singular
+  └─ Limits : none
+```
+"""
+function Base.show(io::IO, ::MIME"text/plain", m::SwitchingModel)
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "SwitchingModel", fmt.reset)
+    rows = (
+        ("Switching times", string(m.times)),
+        ("Phases", _phase_sequence(m.labels)),
+        ("Limits", _stored_limits(m)),
+    )
+    for (k, (label, value)) in enumerate(rows)
+        c = k == length(rows) ? "  └─ " : "  │  "
+        print(io, "\n", fmt.muted, c, fmt.reset, fmt.label, label, " : ", fmt.reset)
+        print(io, fmt.value, value, fmt.reset)
+    end
+    return nothing
+end

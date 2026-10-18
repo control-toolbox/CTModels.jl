@@ -117,6 +117,8 @@ limit.
   `CTModels.phase_labels`): `:control` (the control cell, or the first drawn group when
   the control is not drawn), `:all` (every group) or `:none`.
 - `phase_labels_style`: style of the labels (`color`, `fontsize`, `halign`, `valign`).
+- `jumps::Symbol = :segment`: a jump is drawn as a vertical segment (`:segment`) or as a
+  break in the curve (`:none`).
 
 # Returns
 A `Plots.Plot`. All layout and rendering is delegated to `CTBase.Plotting`.

@@ -77,6 +77,12 @@ function test_plot_switching_render()
                 Plots.Plot
             # overlay
             Test.@test Plots.plot!(Plots.plot(sol), sol) isa Plots.Plot
+            # jumps=:none: a break (NaN) in the curve, no vertical segment
+            br = Plots.plot(sol; jumps=:none)
+            ys = br.subplots[1].series_list[1][:y]
+            Test.@test count(isnan, ys) == 1
+            # one color per trajectory: one series for the whole state component
+            Test.@test count(s -> s[:seriestype] === :path, plt.subplots[1].series_list) == 1
         end
 
         Test.@testset "Makie" begin

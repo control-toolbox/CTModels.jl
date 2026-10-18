@@ -157,6 +157,25 @@ function test_plot_switching()
             Test.@test count(==(τ), _series(fig2, "path constraints").x) == 1
         end
 
+        Test.@testset "jumps=:none breaks the curves between the limits" begin
+            fig = CTModels.PlotCase.build_figure(_sol(); jumps=:none)
+            for (title, left, right) in
+                (("state", τ, τ + 1.0), ("costate", 0.0, 2.0), ("control", 1.0, -1.0))
+                s = _series(fig, title)
+                k = findfirst(==(τ), s.x)
+                Test.@test s.x[k:(k + 2)] == [τ, τ, τ]
+                Test.@test s.y[k] ≈ left
+                Test.@test isnan(s.y[k + 1])                    # no vertical segment
+                Test.@test s.y[k + 2] ≈ right
+            end
+            p = _series(CTModels.PlotCase.build_figure(_sol(), :path; jumps=:none), "path constraints")
+            k = findfirst(==(τ), p.x)
+            Test.@test isnan(p.y[k + 1])
+            Test.@test (p.y[k], p.y[k + 2]) == (τ + 1.0, (τ + 1.0) - 1.0)
+            # default: the vertical segment, no NaN
+            Test.@test !any(isnan, _series(CTModels.PlotCase.build_figure(_sol()), "state").y)
+        end
+
         Test.@testset "no switching structure: unchanged panels" begin
             fig = CTModels.PlotCase.build_figure(_sol(; switching=Solutions.EmptySwitchingModel()))
             Test.@test _series(fig, "state").x == T
@@ -263,6 +282,12 @@ function test_plot_switching()
         # ====================================================================
         # ERROR TESTS
         # ====================================================================
+
+        Test.@testset "invalid jumps" begin
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.PlotCase.build_figure(
+                _sol(); jumps=:dotted
+            )
+        end
 
         Test.@testset "invalid phase_labels" begin
             Test.@test_throws Exceptions.IncorrectArgument CTModels.PlotCase.build_figure(

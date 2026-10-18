@@ -116,6 +116,29 @@ function test_switching()
             Test.@test Solutions.limits(e, :costate) == (zeros(0, 0), zeros(0, 0))
         end
 
+        Test.@testset "show: SwitchingModel and EmptySwitchingModel" begin
+            e = Solutions.EmptySwitchingModel()
+            Test.@test sprint(show, e) == "EmptySwitchingModel()"
+            Test.@test occursin("EmptySwitchingModel", sprint(show, MIME"text/plain"(), e))
+            Test.@test occursin("no switching", sprint(show, MIME"text/plain"(), e))
+            sw = _sw_1d()
+            plain = sprint(show, MIME"text/plain"(), sw)
+            Test.@test startswith(plain, "SwitchingModel")
+            Test.@test occursin("Switching times : [0.5]", plain)
+            Test.@test occursin("Phases : bang+ → bang-", plain)
+            Test.@test occursin("Limits : state, costate, control", plain)
+            Test.@test sprint(show, sw) == "SwitchingModel(times=[0.5], phases=bang+ → bang-)"
+            # labels only, limits not stored; an unlabelled phase shows as ·
+            m = Solutions.SwitchingModel(; times=[0.2, 0.6], labels=["a", "", "c"])
+            Test.@test occursin("Phases : a → · → c", sprint(show, MIME"text/plain"(), m))
+            Test.@test occursin("Limits : none", sprint(show, MIME"text/plain"(), m))
+            # no label: no phases in the compact form
+            u = Solutions.SwitchingModel(; times=[0.5])
+            Test.@test sprint(show, u) == "SwitchingModel(times=[0.5])"
+            # colors only with an IOContext asking for them
+            Test.@test !occursin("\e[", plain)
+        end
+
         # ====================================================================
         # ERROR TESTS - SwitchingModel
         # ====================================================================

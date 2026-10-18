@@ -28,11 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `PreconditionError` when the limits of `component` were not stored).
   - The trajectories stay left-continuous. Sampled (matrix) trajectories are interpolated
     with the limits, so the jump is not smeared over the next grid cell.
-  - Display: `Switching times` and `Phases` rows.
+  - Display: `Switching times` and `Phases` rows in the `Solution`; `SwitchingModel` and
+    `EmptySwitchingModel` have their own displays.
   - Plot (Plots and Makie): each jump is a vertical segment; vertical lines at the
     switching times (`switching_style`, styled like the time markers by default); phase
     labels on the control cell (`phase_labels = :control | :all | :none`,
-    `phase_labels_style`; an unlabelled phase gets no text). The plot data comes from the
+    `phase_labels_style`; an unlabelled phase gets no text); `jumps = :none` breaks the
+    curve between the two limits instead of drawing the segment. The plot data comes from the
     building blocks of `CTBase.Plotting` (`splice_jumps`, `switching_vlines`,
     `phase_annotations`), shared with CTFlows.
   - Serialization (JLD2 and JSON): the structure is saved and read back

@@ -78,7 +78,7 @@ Makie backend.
 
 Same `description` and keyword arguments as the Plots-backend `plot`
 (`layout`, `control`, `time`, the `*_style` / `*_bounds_style` keywords,
-`switching_style`, `phase_labels`, `phase_labels_style`, `color`, `size`). Returns a
+`switching_style`, `phase_labels`, `phase_labels_style`, `jumps`, `color`, `size`). Returns a
 `Makie.Figure`.
 
 # Example

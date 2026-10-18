@@ -95,10 +95,23 @@ plot(sol)
 | `switching_style` | `NamedTuple()` / a `NamedTuple` / `:none` | style of the switching-time lines, merged on the time markers' style; `:none` hides them |
 | `phase_labels` | `:control` / `:all` / `:none` | write the labels on the control cell (or on the first drawn group when the control is not drawn), on every group, or nowhere |
 | `phase_labels_style` | `NamedTuple()` | `color`, `fontsize`, `halign`, `valign` of the labels |
+| `jumps` | `:segment` / `:none` | draw a jump as a vertical segment, or break the curve between the two limits |
 
 ```@example sw
 plot(sol; switching_style=(color=:red,), phase_labels=:all)
 ```
+
+The vertical segment makes a jump easy to see, and to compare with a solution whose jump
+is smoothed, e.g. from a direct method. It does not mean that the trajectory takes the
+values in between: with `jumps=:none`, the curve stops at the left limit and starts again
+at the right limit.
+
+```@example sw
+plot(sol; jumps=:none)
+```
+
+The whole trajectory keeps one color: the phases are parts of the same curve, not
+separate series. A solution drawn on top with `plot!` takes the next color, as usual.
 
 ## Saving and loading
 

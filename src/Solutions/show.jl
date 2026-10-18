@@ -103,7 +103,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
     # ── Switching times and phases (optional) ────────────────────────────────
     has_sw && _row(conn(:sw), "Switching times", string(_sw_times))
     if has_phases
-        _row(conn(:phases), "Phases", join((isempty(l) ? "·" : l for l in _labels), " → "))
+        _row(conn(:phases), "Phases", Solutions._phase_sequence(_labels))
     end
 
     # ── Variable (optional) ──────────────────────────────────────────────────

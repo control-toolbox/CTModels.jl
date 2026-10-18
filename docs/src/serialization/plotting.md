@@ -81,7 +81,8 @@ A solution with a switching structure (see [Switching structure](../solution/swi
 draws each jump as a vertical segment, marks each switching time with a vertical line
 (`switching_style`, by default like the time markers; `:none` hides them) and writes the
 phase labels on the control cell (`phase_labels = :control`, `:all` or `:none`;
-`phase_labels_style` for their style).
+`phase_labels_style` for their style). With `jumps = :none`, the curve is broken between
+the two limits instead of drawing the vertical segment.
 
 ## Overlaying solutions
 
