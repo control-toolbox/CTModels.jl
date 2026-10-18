@@ -13,11 +13,11 @@ extension:
 | `format` | Extension | File |
 |---|---|---|
 | `:JLD` (default) | `CTModelsJLD` (`JLD2`) | binary `.jld2` |
-| `:JSON` | `CTModelsJSON` (`JSON3`) | text `.json` |
+| `:JSON` | `CTModelsJSON` (`JSON`) | text `.json` |
 
 ```@example exim
 using CTModels
-using JSON3      # CTModelsJSON
+using JSON      # CTModelsJSON
 using JLD2       # CTModelsJLD
 
 pre = CTModels.PreModel()
@@ -123,7 +123,7 @@ mechanism used when [building a solution](../solution/trajectories.md).
 
     The format keyword dispatches internally on the tags
     [`JLD2Tag`](@ref CTModels.Serialization.JLD2Tag) and
-    [`JSON3Tag`](@ref CTModels.Serialization.JSON3Tag), both subtypes of
+    [`JSONTag`](@ref CTModels.Serialization.JSONTag), both subtypes of
     [`AbstractTag`](@ref CTModels.Serialization.AbstractTag). The extension methods
     `export_ocp_solution(CTModels.JLD2Tag(), sol; …)` etc. are what each `ext/` file
     implements; the `format=` wrapper is the public, dependency-free entry point.

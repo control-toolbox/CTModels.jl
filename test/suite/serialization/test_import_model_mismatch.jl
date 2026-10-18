@@ -2,7 +2,7 @@ module TestImportModelMismatch
 
 using Test: Test
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using CTBase: Exceptions
 using CTModels: Building
 using CTModels: Models
@@ -110,10 +110,10 @@ function _strip_signature(fmt, filename)
         delete!(data, "format_version")
         JLD2.jldsave(path; solution_data=data)
     else
-        blob = JSON3.read(read(path, String), Dict{String,Any})
+        blob = JSON.parse(read(path, String); dicttype=Dict{String,Any})
         delete!(blob, "model_signature")
         delete!(blob, "format_version")
-        open(io -> JSON3.write(io, blob), path, "w")
+        open(io -> JSON.json(io, blob), path, "w")
     end
     return nothing
 end

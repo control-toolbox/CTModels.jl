@@ -2,7 +2,7 @@ module TestSwitchingSerialization
 
 using Test: Test
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using CTModels: CTModels
 using CTModels: Building
 using CTModels: Solutions
@@ -118,7 +118,7 @@ function test_switching_serialization()
                 Serialization.export_ocp_solution(sol; filename=f, format=:JSON)
                 back = Serialization.import_ocp_solution(ocp; filename=f, format=:JSON)
                 _check_roundtrip(sol, back)
-                blob = JSON3.read(read(f * ".json", String))
+                blob = JSON.parse(read(f * ".json", String))
                 Test.@test length(blob["switching_state_left"]) == 2   # one row per τ
             end
 

@@ -14,15 +14,15 @@ function import_ocp_solution(::JLD2Tag, ::Models.AbstractModel; filename::String
     )
 end
 
-function export_ocp_solution(::JSON3Tag, ::Solutions.AbstractSolution; filename::String)
+function export_ocp_solution(::JSONTag, ::Solutions.AbstractSolution; filename::String)
     return throw(
-        Exceptions.ExtensionError(:JSON3; message="to export solutions to JSON format")
+        Exceptions.ExtensionError(:JSON; message="to export solutions to JSON format")
     )
 end
 
-function import_ocp_solution(::JSON3Tag, ::Models.AbstractModel; filename::String)
+function import_ocp_solution(::JSONTag, ::Models.AbstractModel; filename::String)
     return throw(
-        Exceptions.ExtensionError(:JSON3; message="to import solutions from JSON format")
+        Exceptions.ExtensionError(:JSON; message="to import solutions from JSON format")
     )
 end
 
@@ -71,7 +71,7 @@ Export an optimal control solution to a file.
 - `Nothing`: This function writes to a file and returns nothing.
 
 # Notes
-Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
+Requires loading the appropriate package (`JLD2` or `JSON`) before use.
 
 See also: [`CTModels.Serialization.import_ocp_solution`](@extref).
 """
@@ -83,7 +83,7 @@ function export_ocp_solution(
     if format == :JLD
         return export_ocp_solution(JLD2Tag(), sol; filename=filename)
     elseif format == :JSON
-        return export_ocp_solution(JSON3Tag(), sol; filename=filename)
+        return export_ocp_solution(JSONTag(), sol; filename=filename)
     else
         throw(
             Exceptions.IncorrectArgument(
@@ -120,7 +120,7 @@ Import an optimal control solution from a file.
   model the solution was computed from.
 
 # Notes
-Requires loading the appropriate package (`JLD2` or `JSON3`) before use.
+Requires loading the appropriate package (`JLD2` or `JSON`) before use.
 
 Files store a signature of the model they were exported from. Differences that cannot
 make the solution unusable (names of the components, criterion, type of cost, values of
@@ -138,7 +138,7 @@ function import_ocp_solution(
     if format == :JLD
         return import_ocp_solution(JLD2Tag(), ocp; filename=filename)
     elseif format == :JSON
-        return import_ocp_solution(JSON3Tag(), ocp; filename=filename)
+        return import_ocp_solution(JSONTag(), ocp; filename=filename)
     else
         throw(
             Exceptions.IncorrectArgument(

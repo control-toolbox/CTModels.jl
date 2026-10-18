@@ -10,7 +10,7 @@ when the trigger package is present.
 
 | Extension | Trigger package | Adds |
 |---|---|---|
-| `CTModelsJSON` | `JSON3` | JSON export/import of a [`Solution`](@ref CTModels.Solutions.Solution) |
+| `CTModelsJSON` | `JSON` | JSON export/import of a [`Solution`](@ref CTModels.Solutions.Solution) |
 | `CTModelsJLD` | `JLD2` | JLD2 (binary) export/import |
 | `CTModelsPlots` | `Plots` | `Plots.plot(sol)` / `Plots.plot!(sol)` |
 | `CTModelsMakie` | `Makie` (via `CairoMakie`, `GLMakie`, …) | `Makie.plot(sol)` / `Makie.plot!(sol)`, returning a `Makie.Figure` |
@@ -19,13 +19,13 @@ The public wrappers [`export_ocp_solution`](@ref CTModels.Serialization.export_o
 [`import_ocp_solution`](@ref CTModels.Serialization.import_ocp_solution) and the plot recipe
 live in the core; their **implementations** live in the extension. Until the trigger package is
 loaded, calling a wrapper raises a descriptive `CTBase.ExtensionError` — the core never hard-
-depends on JSON3, JLD2, Plots or Makie.
+depends on JSON, JLD2, Plots or Makie.
 
 ```text
 core wrapper ──(trigger pkg loaded?)──► extension method
      │                  │
 export_ocp_solution    no ─► CTBase.ExtensionError
-plot / Makie.plot      yes ─► JSON3 / JLD2 / Plots / Makie implementation
+plot / Makie.plot      yes ─► JSON / JLD2 / Plots / Makie implementation
 ```
 
 ## Reading order
@@ -42,7 +42,7 @@ The examples in this guide reuse one fabricated solution:
 
 ```@example ser_index
 using CTModels
-using JSON3     # activates the CTModelsJSON extension
+using JSON     # activates the CTModelsJSON extension
 
 pre = CTModels.PreModel()
 CTModels.variable!(pre, 0)

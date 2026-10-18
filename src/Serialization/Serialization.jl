@@ -8,7 +8,7 @@ solutions to various formats (JLD2, JSON).
 
 # Organisation
 
-- **types.jl**: Abstract and concrete types for format tags ([`CTModels.Serialization.AbstractTag`](@extref), [`CTModels.Serialization.JLD2Tag`](@extref), [`CTModels.Serialization.JSON3Tag`](@extref))
+- **types.jl**: Abstract and concrete types for format tags ([`CTModels.Serialization.AbstractTag`](@extref), [`CTModels.Serialization.JLD2Tag`](@extref), [`CTModels.Serialization.JSONTag`](@extref))
 - **export_import.jl**: Public API for export/import ([`CTModels.Serialization.export_ocp_solution`](@extref), [`CTModels.Serialization.import_ocp_solution`](@extref))
 - **reconstruction_helpers.jl**: Internal helpers for solution reconstruction ([`CTModels.Serialization._reconstruct_solution_from_data`](@extref), [`CTModels.Serialization._extract_time_vector`](@extref))
 
@@ -22,7 +22,7 @@ The following functions are exported and accessible as `CTModels.function_name()
 # Supported Formats
 
 - **JLD2**: Binary format (requires `JLD2.jl` package)
-- **JSON**: Text format (requires `JSON3.jl` package)
+- **JSON**: Text format (requires `JSON.jl` package)
 
 # Private API
 
@@ -52,6 +52,6 @@ include(joinpath(@__DIR__, "model_validation.jl"))
 
 # Export public API
 export export_ocp_solution, import_ocp_solution
-export JLD2Tag, JSON3Tag, AbstractTag
+export JLD2Tag, JSONTag, AbstractTag
 
 end

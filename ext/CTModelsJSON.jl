@@ -1,9 +1,9 @@
 """
-Weak-dependency extension of CTModels providing JSON3-based serialization.
+Weak-dependency extension of CTModels providing JSON-based serialization.
 
-Loaded automatically when both `CTModels` and `JSON3` are available in the session.
+Loaded automatically when both `CTModels` and `JSON` are available in the session.
 Adds methods for [`CTModels.export_ocp_solution`](@extref) and
-[`CTModels.import_ocp_solution`](@extref) dispatching on [`CTModels.JSON3Tag`](@extref).
+[`CTModels.import_ocp_solution`](@extref) dispatching on [`CTModels.JSONTag`](@extref).
 """
 module CTModelsJSON
 
@@ -11,13 +11,13 @@ using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTBase: Core
 using CTModels: CTModels
-using JSON3: JSON3
+using JSON: JSON
 
 # ============================================================================
 # Private helpers for JSON matrix conversion
 # ============================================================================
 
-"Solution fields that are always serialized as `Matrix{Float64}` and must be converted to `Vector{Vector}` for JSON3."
+"Solution fields that are always serialized as `Matrix{Float64}` and must be converted to `Vector{Vector}` for JSON."
 const _MATRIX_FIELDS = ["state", "control", "costate"]
 
 "Solution fields that may be present (non-empty duals) and require the same `Matrix → Vector{Vector}` conversion."
@@ -33,9 +33,9 @@ const _OPTIONAL_MATRIX_FIELDS = [
 const _SWITCHING_MATRIX_FIELDS = [first(k) for k in CTModels.Solutions._SWITCHING_LIMIT_KEYS]
 
 """
-Convert Matrix fields to Vector{Vector} for JSON3 export.
+Convert Matrix fields to Vector{Vector} for JSON export.
 
-JSON3 flattens Matrix{Float64} into 1D arrays, losing the 2D structure.
+JSON writes a Matrix{Float64} as a flat 1D array, losing the 2D structure.
 This function converts all matrix fields to Vector{Vector} format to preserve dimensions.
 """
 function _convert_matrices_for_json!(blob::Dict)
@@ -196,13 +196,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Export an optimal control solution to a `.json` file using the JSON3 format.
+Export an optimal control solution to a `.json` file using the JSON format.
 
 This function serializes a `CTModels.Solution` into a structured JSON dictionary,
 including all primal and dual information, which can be read by external tools.
 
 # Arguments
-- `::CTModels.JSON3Tag`: A tag used to dispatch the export method for JSON3.
+- `::CTModels.JSONTag`: A tag used to dispatch the export method for JSON.
 - `sol::CTModels.Solution`: The solution to be saved.
 
 # Keyword Arguments
@@ -214,19 +214,19 @@ The exported JSON includes the time grid, state, control, costate, objective, so
 
 # Example
 ```julia-repl
-julia> using JSON3, CTModels
+julia> using JSON, CTModels
 
-julia> CTModels.export_ocp_solution(CTModels.JSON3Tag(), sol; filename="mysolution")
+julia> CTModels.export_ocp_solution(CTModels.JSONTag(), sol; filename="mysolution")
 # → creates "mysolution.json"
 ```
 """
 function CTModels.export_ocp_solution(
-    ::CTModels.JSON3Tag, sol::CTModels.Solution; filename::String
+    ::CTModels.JSONTag, sol::CTModels.Solution; filename::String
 )
     # Use unified serialization that handles both unified and multiple time grids
     blob = CTModels.Solutions._serialize_solution(sol)
 
-    # Convert Matrix → Vector{Vector} for JSON (to avoid JSON3 flattening)
+    # Convert Matrix → Vector{Vector} for JSON (a Matrix would be written flat)
     _convert_matrices_for_json!(blob)
 
     # Serialize infos and get Symbol type metadata
@@ -234,9 +234,9 @@ function CTModels.export_ocp_solution(
     blob["infos"] = infos_serialized
     blob["infos_symbol_keys"] = symbol_keys
 
-    open(CTModels.Serialization._ensure_extension(filename, ".json"), "w") do io
-        return JSON3.pretty(io, blob)
-    end
+    # serialize first: an error (e.g. a NaN, not allowed in JSON) leaves no half-written file
+    text = JSON.json(blob; pretty=true)
+    write(CTModels.Serialization._ensure_extension(filename, ".json"), text)
 
     return nothing
 end
@@ -276,24 +276,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Recursively convert JSON3 objects and arrays into plain `Dict{String,Any}` and `Vector{Any}`.
-"""
-function _to_plain(x)
-    x isa AbstractDict && return Dict{String,Any}(string(k) => _to_plain(v) for (k, v) in x)
-    x isa AbstractArray && return Any[_to_plain(v) for v in x]
-    return x
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Import an optimal control solution from a `.json` file exported with `export_ocp_solution`.
 
 This function reads the JSON contents and reconstructs a `CTModels.Solution` object,
 including the discretized primal and dual trajectories.
 
 # Arguments
-- `::CTModels.JSON3Tag`: A tag used to dispatch the import method for JSON3.
+- `::CTModels.JSONTag`: A tag used to dispatch the import method for JSON.
 - `ocp::CTModels.Model`: The model associated with the optimal control problem. Used to rebuild the full solution.
 
 # Keyword Arguments
@@ -316,18 +305,18 @@ The file is checked against `ocp` before the solution is rebuilt; see
 
 # Example
 ```julia-repl
-julia> using JSON3, CTModels
+julia> using JSON, CTModels
 
-julia> sol = CTModels.import_ocp_solution(CTModels.JSON3Tag(), model; filename="mysolution")
+julia> sol = CTModels.import_ocp_solution(CTModels.JSONTag(), model; filename="mysolution")
 ```
 """
 function CTModels.import_ocp_solution(
-    ::CTModels.JSON3Tag, ocp::CTModels.Model; filename::String
+    ::CTModels.JSONTag, ocp::CTModels.Model; filename::String
 )
     json_string = read(CTModels.Serialization._ensure_extension(filename, ".json"), String)
-    blob = JSON3.read(json_string)
+    blob = JSON.parse(json_string; dicttype=Dict{String,Any})
 
-    # Restore Symbol types in infos (JSON3 deserializes all strings; metadata tracks which were Symbols)
+    # Restore Symbol types in infos (JSON reads all strings as String; metadata tracks which were Symbols)
     symbol_keys_raw = get(blob, "infos_symbol_keys", String[])
     symbol_keys = collect(String, symbol_keys_raw)
     infos = if haskey(blob, "infos")
@@ -342,16 +331,16 @@ function CTModels.import_ocp_solution(
     vcubd = blob["variable_constraints_ub_dual"]
 
     data = Dict{String,Any}(
-        "objective" => blob.objective,
-        "iterations" => blob.iterations,
-        "constraints_violation" => blob.constraints_violation,
-        "message" => blob.message,
-        "status" => blob.status,
-        "successful" => blob.successful,
+        "objective" => blob["objective"],
+        "iterations" => blob["iterations"],
+        "constraints_violation" => blob["constraints_violation"],
+        "message" => blob["message"],
+        "status" => blob["status"],
+        "successful" => blob["successful"],
         "state" => _json_to_matrix(blob["state"]),
         "control" => _json_to_matrix(blob["control"]),
         "costate" => _json_to_matrix(blob["costate"]),
-        "variable" => CTModels.Serialization._extract_time_vector(blob.variable),
+        "variable" => CTModels.Serialization._extract_time_vector(blob["variable"]),
         "path_constraints_dual" => _json_to_optional_matrix(blob["path_constraints_dual"]),
         "boundary_constraints_dual" => isnothing(bcd) ? nothing : Vector{Float64}(bcd),
         "state_constraints_lb_dual" =>
@@ -381,17 +370,17 @@ function CTModels.import_ocp_solution(
 
     # Model signature (absent from files exported by older versions)
     if haskey(blob, "model_signature")
-        data["model_signature"] = _to_plain(blob["model_signature"])
+        data["model_signature"] = blob["model_signature"]
     end
 
     # Time grid: multi-grid format (4 separate grids) or unified format (single time_grid)
     if haskey(blob, "time_grid_state")
-        data["time_grid_state"] = blob.time_grid_state
-        data["time_grid_control"] = blob.time_grid_control
-        data["time_grid_costate"] = blob.time_grid_costate
-        data["time_grid_path"] = blob.time_grid_path
+        data["time_grid_state"] = blob["time_grid_state"]
+        data["time_grid_control"] = blob["time_grid_control"]
+        data["time_grid_costate"] = blob["time_grid_costate"]
+        data["time_grid_path"] = blob["time_grid_path"]
     else
-        data["time_grid"] = blob.time_grid
+        data["time_grid"] = blob["time_grid"]
     end
 
     return CTModels.Serialization._reconstruct_solution_from_data(ocp, data; infos=infos)

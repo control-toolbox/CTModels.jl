@@ -4,6 +4,34 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## [Unreleased]
 
+### The JSON format uses JSON.jl instead of JSON3.jl (`JSON3Tag` is now `JSONTag`)
+
+JSON3.jl is deprecated in favour of [JSON.jl](https://github.com/JuliaIO/JSON.jl) v1
+([#467](https://github.com/control-toolbox/CTModels.jl/issues/467)). The `CTModelsJSON`
+extension is now activated by `JSON` instead of `JSON3`, and the format tag is renamed.
+
+- Code that calls `export_ocp_solution(sol; format=:JSON)` / `import_ocp_solution(ocp;
+  format=:JSON)` only has to load `JSON` instead of `JSON3`.
+- Code that builds the tag itself uses `JSONTag` instead of `JSON3Tag`.
+- The format of the files is unchanged: files written with JSON3 are still read.
+
+**Migration**:
+
+```julia
+# Before
+using JSON3
+CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
+CTModels.export_ocp_solution(CTModels.JSON3Tag(), sol; filename="solution")
+
+# After
+using JSON
+CTModels.export_ocp_solution(sol; filename="solution", format=:JSON)
+CTModels.export_ocp_solution(CTModels.JSONTag(), sol; filename="solution")
+```
+
+An environment that lists `JSON3` as a dependency only for this format can replace it
+with `JSON`.
+
 ### A time grid with a repeated time is an error
 
 `build_solution` raises an `IncorrectArgument` when a time grid (state, control, costate or
