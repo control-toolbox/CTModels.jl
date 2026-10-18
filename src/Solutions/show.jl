@@ -7,9 +7,11 @@ $(TYPEDSIGNATURES)
 
 Print the solution to `io` with semantic ANSI formatting.
 
-Displays the objective, the optimisation variable (if defined), boundary constraint
-duals (if present), and solver metadata (iterations, status, message, constraints
-violation) — each field only when it has been provided (not `NotProvided`).
+Displays the objective, the switching times (if any), the sequence of phase labels (if
+at least one phase is labelled; an unlabelled phase shows as `·`), the optimisation
+variable (if defined), boundary constraint duals (if present), and solver metadata
+(iterations, status, message, constraints violation) — each field only when it has been
+provided (not `NotProvided`).
 
 The display is a single tree rooted at "Solution":
 - `│  label : value` for interior rows
@@ -52,12 +54,20 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
         Solutions.dim_dual_variable_constraints_box(sol) > 0 &&
         Components.dim_variable_constraints_box(Solutions.model(sol)) > 0
 
+    # ── Switching structure (optional) ───────────────────────────────────────
+    _sw_times = Solutions.switching_times(sol)
+    _labels = Solutions.phase_labels(sol)
+    has_sw = !isempty(_sw_times)
+    has_phases = any(!isempty, _labels)
+
     has_solver_meta = has_iter || has_status || has_msg || has_cv
-    has_primal_extra = has_var || has_bd
+    has_primal_extra = has_var || has_bd || has_sw || has_phases
 
     # ── Build ordered list of top-level item tags ────────────────────────────
     tags = Symbol[]
     push!(tags, :obj)
+    has_sw && push!(tags, :sw)
+    has_phases && push!(tags, :phases)
     has_var && push!(tags, :var)
     has_bd && push!(tags, :bd)
     has_iter && push!(tags, :iter)
@@ -89,6 +99,12 @@ function Base.show(io::IO, ::MIME"text/plain", sol::Solution)
 
     # ── Objective ────────────────────────────────────────────────────────────
     _row(conn(:obj), "Objective", string(Components.objective(sol)))
+
+    # ── Switching times and phases (optional) ────────────────────────────────
+    has_sw && _row(conn(:sw), "Switching times", string(_sw_times))
+    if has_phases
+        _row(conn(:phases), "Phases", join((isempty(l) ? "·" : l for l in _labels), " → "))
+    end
 
     # ── Variable (optional) ──────────────────────────────────────────────────
     if has_var

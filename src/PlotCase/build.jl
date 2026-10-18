@@ -49,8 +49,12 @@ function _build_root(
     state_bounds_style::Union{NamedTuple,Symbol},
     control_bounds_style::Union{NamedTuple,Symbol},
     path_bounds_style::Union{NamedTuple,Symbol},
+    switching_style::Union{NamedTuple,Symbol}=__plot_style(),
+    phase_labels::Symbol=__phase_labels(),
+    phase_labels_style::NamedTuple=__plot_style(),
 )
     model = CTModels.model(sol)
+    _check_phase_labels(phase_labels)
     desc = clean(isempty(description) ? __description() : description)
     do_state, do_costate, do_control, do_path, do_dual = do_plot(
         sol,
@@ -69,24 +73,62 @@ function _build_root(
         path_bounds_style=path_bounds_style,
     )
     tn = _time_name(sol, time)
-    # Initial/final time markers are shared by every cell (both layouts).
+    # Initial/final time markers are shared by every cell (both layouts), and so are the
+    # switching-time markers, styled like the time markers by default.
     vlines = dec_time ? _time_vlines(sol, model, time, time_style) : Plotting.VLine[]
+    if switching_style !== :none
+        sw_style = _switching_style(time_style, switching_style)
+        vlines = vcat(vlines, _switching_vlines(sol, time, sw_style))
+    end
+    # Phase labels go to the control cell (`:control`, or the first drawn group when the
+    # control is not drawn) or to every group (`:all`).
+    texts = if phase_labels === :none
+        Plotting.Annotation[]
+    else
+        _phase_annotations(sol, time, phase_labels_style)
+    end
+    label_group = if phase_labels === :all
+        :all
+    elseif do_control
+        :control
+    else
+        first(
+            g for (g, on) in (
+                (:state, do_state),
+                (:costate, do_costate),
+                (:path, do_path),
+                (:dual, do_dual),
+                (:none, true),
+            ) if on
+        )
+    end
+    _texts(group) = (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
     ncomp(p) = size(p.data, 2)
-    L(p; hlines=Vector{Plotting.HLine}[]) = Plotting.lower(
-        p; layout=layout, time=time, time_name=tn, vlines=vlines, hlines=hlines
+    L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none) = Plotting.lower(
+        p;
+        layout=layout,
+        time=time,
+        time_name=tn,
+        vlines=vlines,
+        hlines=hlines,
+        annotations=_texts(group),
     )
 
     if layout === :group
         # No bounds lines in :group (historical); only the time markers, via `vlines`.
         cells = Plotting.AbstractLayoutNode[]
-        do_state && push!(cells, L(_state_panel(sol, state_style)))
+        do_state && push!(cells, L(_state_panel(sol, state_style); group=:state))
         do_costate && push!(
             cells,
-            L(_costate_panel(sol, costate_style; layout=layout, state_shown=do_state)),
+            L(
+                _costate_panel(sol, costate_style; layout=layout, state_shown=do_state);
+                group=:costate,
+            ),
         )
         if do_control
-            for cp in _control_panels(sol, control, control_style, layout)
-                push!(cells, L(cp))
+            # with `control=:all`, the labels go to the first control cell only
+            for (k, cp) in enumerate(_control_panels(sol, control, control_style, layout))
+                push!(cells, L(cp; group=(k == 1 ? :control : :none)))
             end
         end
         isempty(cells) && return nothing
@@ -102,10 +144,13 @@ function _build_root(
             else
                 Vector{Plotting.HLine}[]
             end
-            state_col = L(sp; hlines=hl)
+            state_col = L(sp; hlines=hl, group=:state)
         end
         costate_col = if do_costate
-            L(_costate_panel(sol, costate_style; layout=layout, state_shown=do_state))
+            L(
+                _costate_panel(sol, costate_style; layout=layout, state_shown=do_state);
+                group=:costate,
+            )
         else
             nothing
         end
@@ -121,7 +166,7 @@ function _build_root(
             else
                 Vector{Plotting.HLine}[]
             end
-            control_col = L(cp; hlines=hl)
+            control_col = L(cp; hlines=hl, group=:control)
         end
         path_col = nothing
         if do_path
@@ -131,10 +176,10 @@ function _build_root(
             else
                 Vector{Plotting.HLine}[]
             end
-            path_col = L(pp; hlines=hl)
+            path_col = L(pp; hlines=hl, group=:path)
         end
         dual_col = if do_dual
-            L(_dual_panel(sol, model, dual_style; path_shown=do_path))
+            L(_dual_panel(sol, model, dual_style; path_shown=do_path); group=:dual)
         else
             nothing
         end
@@ -173,6 +218,18 @@ assembles the layout template and wraps it in a `Figure`. The `CTModelsPlots` /
 - `size`: figure size; `nothing` defers to the engine heuristic.
 - the `*_style` / `*_bounds_style` / `time_style` keywords: a `NamedTuple` of
   attributes or `:none` to hide the group / decoration.
+- `switching_style = NamedTuple()`: style of the vertical lines at the switching times
+  (see [`CTModels.Solutions.switching_times`](@extref)); by default they look like the
+  initial/final time lines (`time_style` included); `:none` hides them.
+- `phase_labels::Symbol = :control`: where to write the phase labels (see
+  [`CTModels.Solutions.phase_labels`](@extref)): `:control` (the control cell, or the
+  first drawn group when the control is not drawn), `:all` (every group) or `:none`.
+- `phase_labels_style::NamedTuple = NamedTuple()`: style of the phase labels (`color`,
+  `fontsize`, `halign`, `valign`).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): for an invalid `layout`, `control`,
+  `time` or `phase_labels`.
 """
 function build_figure(
     sol::CTModels.Solution,
@@ -189,6 +246,9 @@ function build_figure(
     state_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     control_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
     path_bounds_style::Union{NamedTuple,Symbol}=__plot_style(),
+    switching_style::Union{NamedTuple,Symbol}=__plot_style(),
+    phase_labels::Symbol=__phase_labels(),
+    phase_labels_style::NamedTuple=__plot_style(),
     size=nothing,
 )
     root = _build_root(
@@ -206,6 +266,9 @@ function build_figure(
         state_bounds_style=state_bounds_style,
         control_bounds_style=control_bounds_style,
         path_bounds_style=path_bounds_style,
+        switching_style=switching_style,
+        phase_labels=phase_labels,
+        phase_labels_style=phase_labels_style,
     )
     root === nothing && return nothing
     return Plotting.Figure(root; size=size)
@@ -228,6 +291,9 @@ const _BUILD_KEYS = (
     :state_bounds_style,
     :control_bounds_style,
     :path_bounds_style,
+    :switching_style,
+    :phase_labels,
+    :phase_labels_style,
 )
 
 """

@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### ⚠️ Breaking
+
+- **A time grid with a repeated time is an error**
+  ([#460](https://github.com/control-toolbox/CTModels.jl/issues/460)). `build_solution`
+  raises an `IncorrectArgument` when a grid holds the same time twice; it let it through
+  before, although a trajectory takes one value at each time. A grid that is not increasing
+  is still sorted, with a warning. See `BREAKING.md`.
+
+### ✨ New Features
+
+- **Switching structure of a solution**
+  ([#460](https://github.com/control-toolbox/CTModels.jl/issues/460)). A `Solution` made of
+  phases, typically from an indirect method where the structure is fixed, keeps its
+  switching times, a label per phase, and the left and right limits of the state, costate
+  and control at every switching time: `build_solution(...; switching=SwitchingModel(...))`
+  (default `EmptySwitchingModel()`).
+  - Accessors: `switching_model`, `switching_times`, `phase_labels`, `has_switching`,
+    `left_limit(sol, component, i)`, `right_limit(sol, component, i)`.
+  - The trajectories stay left-continuous. Sampled (matrix) trajectories are interpolated
+    with the limits, so the jump is not smeared over the next grid cell.
+  - Display: `Switching times` and `Phases` rows.
+  - Plot (Plots and Makie): each jump is a vertical segment; vertical lines at the
+    switching times (`switching_style`, styled like the time markers by default); phase
+    labels on the control cell (`phase_labels = :control | :all | :none`,
+    `phase_labels_style`).
+  - Serialization (JLD2 and JSON): the structure is saved and read back
+    (`format_version` 2); files without it load with an `EmptySwitchingModel`.
+  - `Solution` gains an eleventh field and type parameter, `switching`; the ten-argument
+    positional constructor is kept and builds an `EmptySwitchingModel`.
+
+### 📚 Documentation
+
+- New page *Switching structure*; the `build_solution` contract, plotting and
+  export/import pages describe it.
+
 ## [0.19.8] - 2026-10-14
 
 ### 🔧 Fixed

@@ -75,6 +75,14 @@ decorations `state_bounds_style`, `control_bounds_style`, `path_bounds_style`.
 Plots.plot(sol; state_style=(color=:blue,), costate_style=:none)
 ```
 
+## Switching times and phase labels
+
+A solution with a switching structure (see [Switching structure](../solution/switching.md))
+draws each jump as a vertical segment, marks each switching time with a vertical line
+(`switching_style`, by default like the time markers; `:none` hides them) and writes the
+phase labels on the control cell (`phase_labels = :control`, `:all` or `:none`;
+`phase_labels_style` for their style).
+
 ## Overlaying solutions
 
 `plot!` adds a solution to an existing figure — handy for comparing two solves on the same

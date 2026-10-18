@@ -77,8 +77,9 @@ Plot the components of an optimal control [`CTModels.Solutions.Solution`](@extre
 Makie backend.
 
 Same `description` and keyword arguments as the Plots-backend `plot`
-(`layout`, `control`, `time`, the `*_style` / `*_bounds_style` keywords, `color`,
-`size`). Returns a `Makie.Figure`.
+(`layout`, `control`, `time`, the `*_style` / `*_bounds_style` keywords,
+`switching_style`, `phase_labels`, `phase_labels_style`, `color`, `size`). Returns a
+`Makie.Figure`.
 
 # Example
 ```julia-repl

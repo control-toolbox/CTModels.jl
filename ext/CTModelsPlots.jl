@@ -107,6 +107,17 @@ group/decoration: `state_style`, `costate_style`, `control_style`, `path_style`,
 `dual_style`, `time_style` (initial/final time markers), and the bounds decorations
 `state_bounds_style`, `control_bounds_style`, `path_bounds_style`.
 
+## Switching structure
+When the solution holds switching times (see `CTModels.switching_times`), each jump of
+the state, costate or control is drawn as a vertical segment, from the left to the right
+limit.
+- `switching_style`: style of the vertical lines at the switching times; by default they
+  look like the initial/final time markers; `:none` hides them.
+- `phase_labels::Symbol = :control`: where to write the phase labels (see
+  `CTModels.phase_labels`): `:control` (the control cell, or the first drawn group when
+  the control is not drawn), `:all` (every group) or `:none`.
+- `phase_labels_style`: style of the labels (`color`, `fontsize`, `halign`, `valign`).
+
 # Returns
 A `Plots.Plot`. All layout and rendering is delegated to `CTBase.Plotting`.
 
@@ -115,6 +126,7 @@ A `Plots.Plot`. All layout and rendering is delegated to `CTBase.Plotting`.
 julia> plot(sol)
 julia> plot(sol, :state, :control; layout=:group, control=:all)
 julia> plot(sol; state_style=(color=:blue,), costate_style=:none)
+julia> plot(sol; switching_style=(color=:red,), phase_labels=:all)
 ```
 """
 function Plots.plot(sol::CTModels.Solution, description::Symbol...; kwargs...)

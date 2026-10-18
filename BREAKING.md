@@ -2,6 +2,34 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [Unreleased]
+
+### A time grid with a repeated time is an error
+
+`build_solution` raises an `IncorrectArgument` when a time grid (state, control, costate or
+path) holds the same time twice ([#460](https://github.com/control-toolbox/CTModels.jl/issues/460)).
+It let such a grid through before; the trajectories then took the first value at the
+repeated time, and the plots drew a zero-length segment. A grid that is not increasing is
+still sorted, with a warning.
+
+**Migration**: keep each time once. To store a jump at a switching time, give its left and
+right limits in a `SwitchingModel`:
+
+```julia
+# before: the switching time τ repeated in the grid
+T = [0.0, 0.25, 0.5, 0.5, 0.75, 1.0]
+
+# after: τ once, and the jump in the switching structure
+T = [0.0, 0.25, 0.5, 0.75, 1.0]
+sw = CTModels.SwitchingModel(; times=[0.5], state=(x_left, x_right),
+                             costate=(p_left, p_right), control=(u_left, u_right))
+sol = CTModels.build_solution(ocp, T, X, U, v, P; ..., switching=sw)
+```
+
+The other changes of this release add the switching structure and are not breaking: the
+`switching` keyword defaults to `EmptySwitchingModel()`, and the ten-argument positional
+`Solution` constructor is kept.
+
 ## [0.19.8] - 2026-10-14
 
 ### No Breaking Changes

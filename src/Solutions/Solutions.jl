@@ -8,6 +8,8 @@ and all solution accessors (trajectories, duals, solver metadata).
 # Organisation
 
 - **solution_types.jl**: `Solution`, `AbstractSolution`, time-grid types, solver infos.
+- **switching_model.jl**: `SwitchingModel` (switching times, phase labels, left/right
+  limits), its accessors, and the jump-aware interpolation of sampled data.
 - **dual_model.jl**: `DualModel`, `AbstractDualModel`, and dual accessors.
 - **discretization_utils.jl**: time-grid helpers used by `build_solution`.
 - **interpolation_helpers.jl**: trajectory interpolation helpers.
@@ -21,12 +23,15 @@ Exported types:
 - `AbstractTimeGridModel`, `UnifiedTimeGridModel`, `MultipleTimeGridModel`, `EmptyTimeGridModel`
 - `AbstractDualModel`, `DualModel`
 - `AbstractSolverInfos`, `SolverInfos`
+- `AbstractSwitchingModel`, `SwitchingModel`, `EmptySwitchingModel`
 
 Exported functions:
 - `build_solution`: Main constructor for solutions
 - `clean_component_symbols`: Clean and validate component symbols
 - `is_empty`: Check if time grid is empty
 - `time_grid_model`: Get time grid model from solution
+- `switching_model`, `switching_times`, `phase_labels`, `has_switching`: Switching structure
+- `left_limit`, `right_limit`: Limits of a trajectory at a switching time
 - `dual`: Get dual by label
 - `path_constraints_dual`, `boundary_constraints_dual`: Dual accessors
 - `state_constraints_lb_dual`, `state_constraints_ub_dual`: State dual accessors
@@ -70,6 +75,7 @@ using ..Building:
     __filename_export_import
 
 include(joinpath(@__DIR__, "solution_types.jl"))
+include(joinpath(@__DIR__, "switching_model.jl"))
 include(joinpath(@__DIR__, "dual_functors.jl"))
 include(joinpath(@__DIR__, "dual_model.jl"))
 include(joinpath(@__DIR__, "discretization_utils.jl"))
@@ -83,6 +89,9 @@ export DualModel, AbstractDualModel, EmptyDualModel, has_duals
 export SolverInfos, AbstractSolverInfos
 export TimeGridModel, AbstractTimeGridModel, EmptyTimeGridModel
 export UnifiedTimeGridModel, MultipleTimeGridModel
+export AbstractSwitchingModel, SwitchingModel, EmptySwitchingModel
+export switching_model, switching_times, phase_labels, has_switching
+export left_limit, right_limit
 
 # build_solution constructor
 export build_solution

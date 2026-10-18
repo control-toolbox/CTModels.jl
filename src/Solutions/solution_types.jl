@@ -378,6 +378,19 @@ true
 has_duals(model::AbstractDualModel)::Bool = true
 
 # ------------------------------------------------------------------------------ #
+# Switching structure
+# ------------------------------------------------------------------------------ #
+"""
+$(TYPEDEF)
+
+Abstract base type for the switching structure of a solution: switching times, phase
+labels, and left/right limits of the trajectories at every switching time.
+
+See also: [`CTModels.Solutions.SwitchingModel`](@extref), [`CTModels.Solutions.EmptySwitchingModel`](@extref).
+"""
+abstract type AbstractSwitchingModel end
+
+# ------------------------------------------------------------------------------ #
 # Solution
 # ------------------------------------------------------------------------------ #
 """
@@ -412,6 +425,8 @@ variable value, objective value, dual variables, and solver information.
 - `objective::ObjectiveValueType`: Optimal objective value.
 - `dual::DualModelType`: Dual variables for all constraints.
 - `solver_infos::SolverInfosType`: Solver statistics and status.
+- `switching::SwitchingModelType`: Switching structure (switching times, phase labels,
+  left/right limits); an [`CTModels.Solutions.EmptySwitchingModel`](@extref) when none.
 
 # Example
 
@@ -434,6 +449,7 @@ struct Solution{
     ObjectiveValueType<:ctNumber,
     DualModelType<:AbstractDualModel,
     SolverInfosType<:AbstractSolverInfos,
+    SwitchingModelType<:AbstractSwitchingModel,
 } <: AbstractSolution
     time_grid::TimeGridModelType
     times::TimesModelType
@@ -445,6 +461,40 @@ struct Solution{
     objective::ObjectiveValueType
     dual::DualModelType
     solver_infos::SolverInfosType
+    switching::SwitchingModelType
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTModels.Solutions.Solution`](@extref) with no switching structure
+([`CTModels.Solutions.EmptySwitchingModel`](@extref)), from its first ten fields.
+"""
+function Solution(
+    time_grid::AbstractTimeGridModel,
+    times::AbstractTimesModel,
+    state::AbstractStateModel,
+    control::AbstractControlModel,
+    variable::AbstractVariableModel,
+    model::AbstractModel,
+    costate::Function,
+    objective::ctNumber,
+    dual::AbstractDualModel,
+    solver_infos::AbstractSolverInfos,
+)
+    return Solution(
+        time_grid,
+        times,
+        state,
+        control,
+        variable,
+        model,
+        costate,
+        objective,
+        dual,
+        solver_infos,
+        EmptySwitchingModel(),
+    )
 end
 
 """

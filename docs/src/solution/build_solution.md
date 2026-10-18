@@ -90,6 +90,18 @@ and serialization.
 - State and costate are interpolated linearly. The control is piecewise constant by
   default; pass `control_interpolation=:linear` for a control computed from the state and
   costate, as in indirect methods. Control box duals follow the control interpolation.
+- A grid holds each time once: a repeated time raises an `IncorrectArgument`. A grid that
+  is not increasing is sorted, with a warning.
+
+## Switching structure
+
+A solution made of phases, typically from an indirect method, passes its structure with the
+`switching` keyword: a [`SwitchingModel`](@ref CTModels.Solutions.SwitchingModel) with the
+switching times, the phase labels and the left/right limits of the state, costate and
+control (default: an [`EmptySwitchingModel`](@ref CTModels.Solutions.EmptySwitchingModel)).
+The switching times must lie strictly inside the time span, and each matrix of limits must
+have one row per switching time and one column per component, or no column when the limits
+are not known. See [Switching structure](switching.md).
 
 ## Dual variables
 
@@ -130,7 +142,10 @@ flow-based result typically needs; see the display examples in [Solutions](overv
 - the number of columns of `X`, `U`, `P`, a path dual or a box dual does not match the
   model;
 - `v`, `boundary_constraints_dual` or a variable box dual has the wrong length;
-- `control_interpolation` is neither `:constant` nor `:linear`.
+- `control_interpolation` is neither `:constant` nor `:linear`;
+- a time grid holds a repeated time;
+- a switching time lies outside the time span, or the limits of the switching model have
+  the wrong number of columns.
 
 ```@repl bs
 CTModels.build_solution(ocp, T, X, U, Float64[], P; objective=1.0, successful=true)
