@@ -131,7 +131,7 @@ mechanism used when [building a solution](../solution/trajectories.md).
 ## Switching structure
 
 The switching structure of a solution (switching times, phase labels, left and right limits,
-see [Switching structure](../solution/switching.md)) is saved with it, in both formats. On
-import, the trajectories are rebuilt phase by phase, so they keep their jumps. A file
+see [Switching structure](../solution/switching.md)) is saved with it, in both formats. When
+the file is read back, the trajectories are rebuilt phase by phase, so they keep their jumps. A file
 without switching structure, including one written by an older version, is read with an
 [`EmptySwitchingModel`](@ref CTModels.Solutions.EmptySwitchingModel).
