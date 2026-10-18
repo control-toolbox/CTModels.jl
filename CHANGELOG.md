@@ -24,14 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and control at every switching time: `build_solution(...; switching=SwitchingModel(...))`
   (default `EmptySwitchingModel()`).
   - Accessors: `switching_model`, `switching_times`, `phase_labels`, `has_switching`,
-    `left_limit(sol, component, i)`, `right_limit(sol, component, i)`.
+    `left_limit(sol, component, i)`, `right_limit(sol, component, i)` (a
+    `PreconditionError` when the limits of `component` were not stored).
   - The trajectories stay left-continuous. Sampled (matrix) trajectories are interpolated
     with the limits, so the jump is not smeared over the next grid cell.
   - Display: `Switching times` and `Phases` rows.
   - Plot (Plots and Makie): each jump is a vertical segment; vertical lines at the
     switching times (`switching_style`, styled like the time markers by default); phase
     labels on the control cell (`phase_labels = :control | :all | :none`,
-    `phase_labels_style`).
+    `phase_labels_style`; an unlabelled phase gets no text). The plot data comes from the
+    building blocks of `CTBase.Plotting` (`splice_jumps`, `switching_vlines`,
+    `phase_annotations`), shared with CTFlows.
   - Serialization (JLD2 and JSON): the structure is saved and read back
     (`format_version` 2); files without it load with an `EmptySwitchingModel`.
   - `Solution` gains an eleventh field and type parameter, `switching`; the ten-argument

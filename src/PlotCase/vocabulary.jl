@@ -56,6 +56,7 @@ function _check_phase_labels(phase_labels::Symbol)
             "Invalid phase_labels choice";
             got="phase_labels=$phase_labels",
             expected=":control, :all or :none",
+            suggestion="Use phase_labels=:control (default), :all or :none",
             context="CTModels.PlotCase.build_figure",
         ),
     )

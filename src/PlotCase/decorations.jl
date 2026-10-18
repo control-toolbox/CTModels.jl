@@ -91,22 +91,6 @@ function _time_vlines(sol, model, time::Symbol, style::NamedTuple)
     return Plotting.VLine[Plotting.VLine(t0; style=s), Plotting.VLine(tf; style=s)]
 end
 
-# Plotted abscissa of a time `t`: itself, or rescaled to `[0, 1]` over the state grid
-# under time normalisation — the same transform `Plotting.lower` applies to the panels.
-"""
-$(TYPEDSIGNATURES)
-
-Return the plotted abscissa of time `t`: `t` itself, or `t` rescaled to `[0, 1]` over the
-state time grid when `time` is `:normalize` / `:normalise` (the transform
-[`CTBase.Plotting.lower`](@extref) applies to the panels).
-"""
-function _plotted_time(sol, t::Real, time::Symbol)
-    (time === :normalize || time === :normalise) || return Float64(t)
-    T = CTModels.time_grid(sol, :state)
-    t0, tf = first(T), last(T)
-    return tf > t0 ? (t - t0) / (tf - t0) : Float64(t - t0)
-end
-
 """
 $(TYPEDSIGNATURES)
 
@@ -122,36 +106,29 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Build the vertical lines at the switching times of `sol`, shared by every cell. Empty when
-the solution has no switching time.
+Build the vertical lines at the switching times of `sol`, shared by every cell, with
+[`CTBase.Plotting.switching_vlines`](@extref) over the state time grid. Empty when the
+solution has no switching time.
 """
 function _switching_vlines(sol, time::Symbol, style::NamedTuple)
-    return Plotting.VLine[
-        Plotting.VLine(_plotted_time(sol, τ, time); style=style) for
-        τ in CTModels.switching_times(sol)
-    ]
+    return Plotting.switching_vlines(
+        CTModels.time_grid(sol, :state), CTModels.switching_times(sol); time=time, style=style
+    )
 end
-
-"""
-Default style of the phase labels: small grey text.
-"""
-const _PHASE_LABEL_STYLE = (color=:gray30, fontsize=9)
 
 """
 $(TYPEDSIGNATURES)
 
-Build the phase labels of `sol` as texts centred on each phase, near the top of the cell.
-A phase with an empty label gets no text; a solution with no label gets none.
+Build the phase labels of `sol` as texts centred on each phase, with
+[`CTBase.Plotting.phase_annotations`](@extref) over the state time grid. A phase with an
+empty label gets no text; a solution with no label gets none.
 """
 function _phase_annotations(sol, time::Symbol, style::NamedTuple)
-    labels = CTModels.phase_labels(sol)
-    any(!isempty, labels) || return Plotting.Annotation[]
-    T = CTModels.time_grid(sol, :state)
-    bounds = vcat(first(T), CTModels.switching_times(sol), last(T))
-    s = merge(_PHASE_LABEL_STYLE, style)
-    return Plotting.Annotation[
-        Plotting.Annotation(
-            _plotted_time(sol, (bounds[k] + bounds[k + 1]) / 2, time), labels[k]; style=s
-        ) for k in eachindex(labels) if !isempty(labels[k])
-    ]
+    return Plotting.phase_annotations(
+        CTModels.time_grid(sol, :state),
+        CTModels.switching_times(sol),
+        CTModels.phase_labels(sol);
+        time=time,
+        style=style,
+    )
 end

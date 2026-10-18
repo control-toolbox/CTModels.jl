@@ -513,6 +513,8 @@ function _check_switching(sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, di
                 "switching time outside the time span";
                 got="switching time $τ",
                 expected="a time in ($t0, $tf), strictly inside the time grid",
+                suggestion="Give switching times strictly between the first and last " *
+                           "times of the grid",
                 context="build_solution - validating the switching model",
             ),
         )
@@ -524,6 +526,7 @@ function _check_switching(sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, di
                 "wrong dimension of the $component limits";
                 got="$ncols column(s)",
                 expected="$dim columns (one per $component component), or 0 if not known",
+                suggestion="Give one column per $component component in the limits",
                 context="build_solution - validating the switching model",
             ),
         )
@@ -552,10 +555,7 @@ Validate and fix a time grid by ensuring it is strictly increasing.
 If the grid is not increasing, it is reordered and a warning is emitted.
 """
 function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
-    for i in 1:(length(T) - 1)
-        # after sorting, a repeated time would be adjacent: check on the sorted grid
-        T[i] == T[i + 1] && _throw_repeated_time(T[i], component_name)
-    end
+    Ts = T
     if !issorted(T; lt=(<))
         # Build appropriate message based on component name
         components_with_issues = [component_name]  # TODO: Collect all components when called multiple times
@@ -568,12 +568,12 @@ function _validate_and_fix_time_grid(T::Vector{Float64}, component_name::String)
 
         @warn msg
         Ts = sort(T)
-        for i in 1:(length(Ts) - 1)
-            Ts[i] == Ts[i + 1] && _throw_repeated_time(Ts[i], component_name)
-        end
-        return Ts
     end
-    return T
+    # on the sorted grid, a repeated time is adjacent
+    for i in 1:(length(Ts) - 1)
+        Ts[i] == Ts[i + 1] && _throw_repeated_time(Ts[i], component_name)
+    end
+    return Ts
 end
 
 """
@@ -1726,12 +1726,22 @@ Version history:
 const SERIALIZATION_FORMAT_VERSION = 2
 
 """
+$(TYPEDSIGNATURES)
+
+Return the key of the serialized `side` limit (`1` left, `2` right) of `component`, e.g.
+`"switching_state_left"`.
+"""
+function _switching_limit_key(component::Symbol, side::Int)::String
+    return "switching_$(component)_$(side == 1 ? "left" : "right")"
+end
+
+"""
 Keys of the serialized switching limits, as `(key, component, side)` with `side = 1` for
 the left limit and `2` for the right limit.
 """
 const _SWITCHING_LIMIT_KEYS = Tuple(
-    ("switching_$(c)_$(side_name)", c, side) for c in (:state, :costate, :control) for
-    (side, side_name) in ((1, "left"), (2, "right"))
+    (_switching_limit_key(c, side), c, side) for c in (:state, :costate, :control) for
+    side in (1, 2)
 )
 
 """
@@ -1763,9 +1773,7 @@ function _deserialize_switching(data)::AbstractSwitchingModel
     haskey(data, "switching_times") || return EmptySwitchingModel()
     times = Vector{Float64}(collect(data["switching_times"]))
     labels = collect(String, data["phase_labels"])
-    lim(c, side) = Matrix{Float64}(
-        data[first(k for (k, cc, ss) in _SWITCHING_LIMIT_KEYS if cc === c && ss == side)]
-    )
+    lim(c, side) = Matrix{Float64}(data[_switching_limit_key(c, side)])
     return SwitchingModel(;
         times=times,
         labels=labels,

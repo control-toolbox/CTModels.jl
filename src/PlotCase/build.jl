@@ -25,6 +25,25 @@ function _time_name(sol, time::Symbol)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the group that receives the phase labels: `:all` for `phase_labels = :all`; for
+`:control`, the control group when it is drawn, otherwise the first drawn group, in the
+order of the figure (`:state`, `:costate`, `:path`, `:dual`), or `:none` when no group is
+drawn. The keywords tell which groups are drawn.
+"""
+function _phase_label_group(
+    phase_labels::Symbol; state::Bool, costate::Bool, control::Bool, path::Bool, dual::Bool
+)::Symbol
+    phase_labels === :all && return :all
+    control && return :control
+    for (group, drawn) in ((:state, state), (:costate, costate), (:path, path), (:dual, dual))
+        drawn && return group
+    end
+    return :none
+end
+
 # Build the layout tree (or `nothing` if there is nothing to draw).
 """
 $(TYPEDSIGNATURES)
@@ -87,21 +106,14 @@ function _build_root(
     else
         _phase_annotations(sol, time, phase_labels_style)
     end
-    label_group = if phase_labels === :all
-        :all
-    elseif do_control
-        :control
-    else
-        first(
-            g for (g, on) in (
-                (:state, do_state),
-                (:costate, do_costate),
-                (:path, do_path),
-                (:dual, do_dual),
-                (:none, true),
-            ) if on
-        )
-    end
+    label_group = _phase_label_group(
+        phase_labels;
+        state=do_state,
+        costate=do_costate,
+        control=do_control,
+        path=do_path,
+        dual=do_dual,
+    )
     _texts(group) = (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
     ncomp(p) = size(p.data, 2)
     L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none) = Plotting.lower(

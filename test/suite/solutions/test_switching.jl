@@ -322,8 +322,11 @@ function test_switching()
             )
             # limits not known
             nolim = _sol_1d(; switching=Solutions.SwitchingModel(; times=[τ]))
-            Test.@test_throws Exceptions.IncorrectArgument CTModels.left_limit(
+            Test.@test_throws Exceptions.PreconditionError CTModels.left_limit(
                 nolim, :state, 1
+            )
+            Test.@test_throws Exceptions.PreconditionError CTModels.right_limit(
+                nolim, :control, 1
             )
         end
 

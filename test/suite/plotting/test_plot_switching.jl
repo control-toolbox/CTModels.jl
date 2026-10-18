@@ -79,9 +79,9 @@ function test_plot_switching()
         # UNIT TESTS - vertical jumps in the panel data
         # ====================================================================
 
-        Test.@testset "_with_jumps: insertion of the limits" begin
+        Test.@testset "_spliced_samples: insertion of the limits" begin
             sol = _sol()
-            Ts, M = CTModels.PlotCase._with_jumps(sol, T, reshape(_x.(T), :, 1), :state)
+            Ts, M = CTModels.PlotCase._spliced_samples(sol, T, reshape(_x.(T), :, 1), :state)
             # τ is in the grid: its sample is replaced by (τ, left), (τ, right)
             Test.@test count(==(τ), Ts) == 2
             Test.@test length(Ts) == length(T) + 1
@@ -91,19 +91,37 @@ function test_plot_switching()
             Test.@test issorted(Ts)
             # τ not in the samples: inserted at its place
             Tn = [0.0, 0.5, 1.5, 2.0]
-            Ts2, M2 = CTModels.PlotCase._with_jumps(sol, Tn, reshape(_x.(Tn), :, 1), :state)
+            Ts2, M2 = CTModels.PlotCase._spliced_samples(sol, Tn, reshape(_x.(Tn), :, 1), :state)
             Test.@test Ts2 == [0.0, 0.5, τ, τ, 1.5, 2.0]
             Test.@test M2[:, 1] ≈ [0.0, 0.5, τ, τ + 1.0, 2.5, 3.0]
             # τ after the last sample
-            Ts3, _ = CTModels.PlotCase._with_jumps(sol, [0.0, 0.5], zeros(2, 1), :state)
+            Ts3, _ = CTModels.PlotCase._spliced_samples(sol, [0.0, 0.5], zeros(2, 1), :state)
             Test.@test Ts3 == [0.0, 0.5, τ, τ]
-            # unchanged when no switching time, or limits not known, or dimension mismatch
+            # unchanged when no switching time, or limits not known
             plain = _sol(; switching=Solutions.EmptySwitchingModel())
-            Test.@test CTModels.PlotCase._with_jumps(plain, T, zeros(11, 1), :state) ==
+            Test.@test CTModels.PlotCase._spliced_samples(plain, T, zeros(11, 1), :state) ==
                 (T, zeros(11, 1))
             nolim = _sol(; switching=_sw(; limits=false))
-            Test.@test CTModels.PlotCase._with_jumps(nolim, T, zeros(11, 1), :state)[1] == T
-            Test.@test CTModels.PlotCase._with_jumps(sol, T, zeros(11, 2), :state)[1] == T
+            Test.@test CTModels.PlotCase._spliced_samples(nolim, T, zeros(11, 1), :state)[1] == T
+            # samples with other components than the limits: an error
+            Test.@test_throws Exceptions.IncorrectArgument CTModels.PlotCase._spliced_samples(
+                sol, T, zeros(11, 2), :state
+            )
+        end
+
+        Test.@testset "_phase_label_group" begin
+            g(pl; kw...) = CTModels.PlotCase._phase_label_group(
+                pl;
+                (; state=false, costate=false, control=false, path=false, dual=false)...,
+                kw...,
+            )
+            Test.@test g(:all; control=true) === :all
+            Test.@test g(:control; state=true, control=true) === :control
+            Test.@test g(:control; state=true, costate=true) === :state
+            Test.@test g(:control; costate=true, path=true) === :costate
+            Test.@test g(:control; path=true, dual=true) === :path
+            Test.@test g(:control; dual=true) === :dual
+            Test.@test g(:control) === :none
         end
 
         Test.@testset "state, costate and control panels draw vertical jumps" begin

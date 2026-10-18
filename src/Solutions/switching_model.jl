@@ -108,6 +108,7 @@ function SwitchingModel(;
             "switching times must be finite";
             got="times=$ts",
             expected="finite times",
+            suggestion="Give the switching times as finite numbers",
             context="SwitchingModel",
         ),
     )
@@ -124,7 +125,8 @@ function SwitchingModel(;
         Exceptions.IncorrectArgument(
             "one label per phase";
             got="$(length(labels)) label(s) for $(length(ts) + 1) phase(s)",
-            expected="$(length(ts) + 1) labels (length(times) + 1); use \"\" for no label",
+            expected="$(length(ts) + 1) labels (length(times) + 1)",
+            suggestion="Give one label per phase, \"\" for a phase with no label",
             context="SwitchingModel",
         ),
     )
@@ -162,6 +164,7 @@ function _checked_limits(lr, n::Integer, name::String)
             "one row of $name limits per switching time";
             got="$(size(left, 1)) and $(size(right, 1)) rows (left, right)",
             expected="$n rows (one per switching time)",
+            suggestion="Give the $name limit at the i-th switching time in row i",
             context="SwitchingModel - $name limits",
         ),
     )
@@ -170,6 +173,7 @@ function _checked_limits(lr, n::Integer, name::String)
             "left and right $name limits must have the same size";
             got="left $(size(left)), right $(size(right))",
             expected="two matrices of the same size",
+            suggestion="Give the left and right $name limits for the same components",
             context="SwitchingModel - $name limits",
         ),
     )
@@ -226,17 +230,10 @@ Return the `(left, right)` matrices of limits of `component` (`:state`, `:costat
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if `component` is not one of these.
 """
 function limits(m::SwitchingModel, component::Symbol)::NTuple{2,Matrix{Float64}}
+    _check_limit_component(component)
     component === :state && return m.state
     component === :costate && return m.costate
-    component === :control && return m.control
-    throw(
-        Exceptions.IncorrectArgument(
-            "unknown component for switching limits";
-            got=":$component",
-            expected=":state, :costate or :control",
-            context="limits(::SwitchingModel, component)",
-        ),
-    )
+    return m.control
 end
 
 """
@@ -246,15 +243,31 @@ Return the `(left, right)` limits of `component`: none for an
 [`CTModels.Solutions.EmptySwitchingModel`](@extref) (two `0 × 0` matrices).
 """
 function limits(::EmptySwitchingModel, component::Symbol)::NTuple{2,Matrix{Float64}}
+    _check_limit_component(component)
+    return (zeros(0, 0), zeros(0, 0))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Check that `component` is a component with switching limits: `:state`, `:costate` or
+`:control`.
+
+# Throws
+
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if it is not.
+"""
+function _check_limit_component(component::Symbol)
     component in (:state, :costate, :control) || throw(
         Exceptions.IncorrectArgument(
             "unknown component for switching limits";
             got=":$component",
             expected=":state, :costate or :control",
-            context="limits(::EmptySwitchingModel, component)",
+            suggestion="Use :state, :costate or :control",
+            context="switching limits",
         ),
     )
-    return (zeros(0, 0), zeros(0, 0))
+    return nothing
 end
 
 # ------------------------------------------------------------------------------ #
@@ -318,7 +331,9 @@ A one-dimensional component is returned as a scalar.
 # Throws
 
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if the solution has no `i`-th switching
-  time, if its limits of `component` are not known, or if `component` is unknown.
+  time, or if `component` is unknown.
+- [`CTBase.Exceptions.PreconditionError`](@extref): if the limits of `component` are not
+  stored in the switching model of the solution.
 
 See also: [`CTModels.Solutions.right_limit`](@extref).
 """
@@ -334,7 +349,9 @@ control law. A one-dimensional component is returned as a scalar.
 # Throws
 
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if the solution has no `i`-th switching
-  time, if its limits of `component` are not known, or if `component` is unknown.
+  time, or if `component` is unknown.
+- [`CTBase.Exceptions.PreconditionError`](@extref): if the limits of `component` are not
+  stored in the switching model of the solution.
 
 See also: [`CTModels.Solutions.left_limit`](@extref).
 """
@@ -355,14 +372,16 @@ function _limit(sol::Solution, component::Symbol, i::Integer, side::Int)
             "no switching time with this index";
             got="i = $i",
             expected=n == 0 ? "no index: the solution has no switching time" : "1 ≤ i ≤ $n",
+            suggestion="Use an index of switching_times(sol)",
             context=(side == 1 ? "left_limit" : "right_limit"),
         ),
     )
     size(M, 2) == 0 && throw(
-        Exceptions.IncorrectArgument(
+        Exceptions.PreconditionError(
             "the $component limits at the switching times are not known";
-            got="no $component limit stored in the switching model",
-            expected="limits given to SwitchingModel(; $component=(left, right))",
+            reason="the switching model of the solution stores no $component limit",
+            suggestion="Build the solution with " *
+                       "switching=SwitchingModel(; $component=(left, right), ...)",
             context=(side == 1 ? "left_limit" : "right_limit"),
         ),
     )
