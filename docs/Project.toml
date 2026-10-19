@@ -14,6 +14,7 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 CTBase = "0.30.11"
+CTModels = "0.19"
 CairoMakie = "0.15"
 Documenter = "1"
 DocumenterInterLinks = "1"
