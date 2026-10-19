@@ -30,7 +30,9 @@ const _OPTIONAL_MATRIX_FIELDS = [
 ]
 
 "Switching limits (present when the solution holds a switching structure), converted like the other matrices."
-const _SWITCHING_MATRIX_FIELDS = [first(k) for k in CTModels.Solutions._SWITCHING_LIMIT_KEYS]
+const _SWITCHING_MATRIX_FIELDS = [
+    first(k) for k in CTModels.Solutions._SWITCHING_LIMIT_KEYS
+]
 
 """
 Convert Matrix fields to Vector{Vector} for JSON export.

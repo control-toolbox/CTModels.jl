@@ -22,7 +22,7 @@ function _ocp()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 1)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     return Building.build(pre)
 end
@@ -35,8 +35,15 @@ function _solution(ocp; set::Bool)
         (;)
     end
     return Solutions.build_solution(
-        ocp, T, t -> [t], t -> [1.0], Float64[], t -> [0.0];
-        objective=0.5, successful=true, extra...,
+        ocp,
+        T,
+        t -> [t],
+        t -> [1.0],
+        Float64[],
+        t -> [0.0];
+        objective=0.5,
+        successful=true,
+        extra...,
     )
 end
 
