@@ -2,6 +2,11 @@ module TestCodeQuality
 
 using Test: Test
 using Aqua: Aqua
+using CTBase: CTBase
+using CairoMakie: CairoMakie
+using JLD2: JLD2
+using JSON: JSON
+using Plots: Plots
 using JET: JET
 using CTModels: CTModels
 using CTModels: Components
@@ -40,6 +45,10 @@ function test_code_quality()
             )
             # do not warn about ambiguities in dependencies
             Aqua.test_ambiguities(CTModels)
+        end
+
+        Test.@testset "Aqua.jl — extensions (TST8)" verbose = VERBOSE showtiming = SHOWTIMING begin
+            CTBase.DevTools.test_extensions_quality(CTModels)
         end
 
         Test.@testset "JET — hot path" begin
