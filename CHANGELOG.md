@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation
+
+- ct-agents pinned at `v0.1.0` in `AGENTS.md`: the recipes (the release) are read from a
+  git-ignored clone in `.ct-agents/` at that tag, not from `main` of ct-agents, and the
+  proposal of a release states the versions applied.
+
 ## [0.20.0] - 2026-10-19
 
 ### 💥 Breaking Changes
