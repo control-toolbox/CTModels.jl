@@ -5,7 +5,7 @@ using Aqua: Aqua
 using CTBase: CTBase
 using CairoMakie: CairoMakie
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using Plots: Plots
 using JET: JET
 using CTModels: CTModels
