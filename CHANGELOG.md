@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### ⚠️ Breaking
+## [0.20.0] - 2026-10-19
+
+### 💥 Breaking Changes
 
 - **`Makie.plot(; kwargs...)` is removed**
   ([#466](https://github.com/control-toolbox/CTModels.jl/issues/466)). The zero-argument
@@ -54,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Solution` gains an eleventh field and type parameter, `switching`; the ten-argument
     positional constructor is kept and builds an `EmptySwitchingModel`.
 
-### 🔧 Fixed
+### 🐛 Bug Fixes
 
 - **Export/import round trip of a `Solution` with unset optional solver fields**
   ([#464](https://github.com/control-toolbox/CTModels.jl/issues/464)). A solution whose
@@ -77,6 +79,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ReleaseTag.yml` (tag and GitHub release of a merged release PR) call CTActions;
   `Breakage.yml` moves to `breakage-suite.yml` (one report, the `REL1` check of a release
   PR) and also runs on push to `main`; `Documentation.yml` accepts `workflow_dispatch`.
+
+### ✅ Compatibility
+
+- **Breaking changes**: see the migration blocks in [BREAKING.md](BREAKING.md).
 
 ## [0.19.8] - 2026-10-14
 
