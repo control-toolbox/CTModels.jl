@@ -2,7 +2,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [Unreleased]
+## [0.20.0] - 2026-10-19
 
 ### `Makie.plot(; kwargs...)` is removed
 
