@@ -1,6 +1,5 @@
 [deps]
 CTBase = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-CTModels = "34c4fa32-2049-4079-8329-de33c2a22e2d"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
