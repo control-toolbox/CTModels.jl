@@ -2,7 +2,7 @@ module TestSwitchingSerialization
 
 using Test: Test
 using JLD2: JLD2
-using JSON3: JSON3
+using JSON: JSON
 using CTModels: CTModels
 using CTModels: Building
 using CTModels: Solutions
@@ -19,15 +19,29 @@ function _ocp()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     return Building.build(pre)
 end
 
 const τ1, τ2 = 0.3, 0.7
-_x(t) = t <= τ1 ? [t, 1.0] : t <= τ2 ? [t + 1.0, 1.0] : [t + 1.0, 3.0]
+_x(t) =
+    if t <= τ1
+        [t, 1.0]
+    elseif t <= τ2
+        [t + 1.0, 1.0]
+    else
+        [t + 1.0, 3.0]
+    end
 _p(t) = t <= τ2 ? [0.0, 0.0] : [1.0, -1.0]
-_u(t) = t <= τ1 ? 1.0 : t <= τ2 ? 0.0 : -1.0
+_u(t) =
+    if t <= τ1
+        1.0
+    elseif t <= τ2
+        0.0
+    else
+        -1.0
+    end
 
 function _sw()
     return Solutions.SwitchingModel(;
@@ -118,7 +132,7 @@ function test_switching_serialization()
                 Serialization.export_ocp_solution(sol; filename=f, format=:JSON)
                 back = Serialization.import_ocp_solution(ocp; filename=f, format=:JSON)
                 _check_roundtrip(sol, back)
-                blob = JSON3.read(read(f * ".json", String))
+                blob = JSON.parse(read(f * ".json", String))
                 Test.@test length(blob["switching_state_left"]) == 2   # one row per τ
             end
 
@@ -131,7 +145,9 @@ function test_switching_serialization()
                     back = Serialization.import_ocp_solution(ocp; filename=f, format=fmt)
                     Test.@test CTModels.switching_times(back) == [τ1]
                     Test.@test CTModels.phase_labels(back) == ["a", "b"]
-                    Test.@test size(Solutions.limits(Solutions.switching_model(back), :state)[1], 2) == 0
+                    Test.@test size(
+                        Solutions.limits(Solutions.switching_model(back), :state)[1], 2
+                    ) == 0
                 end
             end
 

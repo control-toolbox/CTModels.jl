@@ -84,7 +84,13 @@ julia> using JLD2, CTModels
 julia> sol = CTModels.import_ocp_solution(CTModels.JLD2Tag(), model; filename="mysolution")
 ```
 
+# Throws
+- `CTBase.Exceptions.ParsingError`: if an optional solver field has a value of the wrong type.
+
 # Notes
+- An unset optional solver field (`iterations`, `constraints_violation`, `message`, `status`)
+  is stored as `nothing` and read back as `Core.NotProvided` (`Core.NotProvided` stored by
+  older versions is read the same way)
 - The solution is reconstructed from discretized data via `build_solution`
 - This ensures perfect round-trip consistency with the export
 - The file does not contain the model: `ocp` must be the model the solution was computed

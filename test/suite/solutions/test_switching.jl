@@ -20,7 +20,7 @@ function _ocp_1d()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 1)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     return Building.build(pre)
 end
@@ -32,7 +32,7 @@ function _ocp_2d()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     return Building.build(pre)
 end
@@ -95,9 +95,7 @@ function test_switching()
             Test.@test size(Solutions.limits(d, :state)[1]) == (2, 0)
             # conversions: Int times, SubString labels, Int matrices
             c = Solutions.SwitchingModel(;
-                times=[1],
-                labels=[SubString("ab", 1, 1), "b"],
-                state=([1;;], [2;;]),
+                times=[1], labels=[SubString("ab", 1, 1), "b"], state=([1;;], [2;;])
             )
             Test.@test Solutions.switching_times(c) == [1.0]
             Test.@test Solutions.phase_labels(c) == ["a", "b"]
@@ -127,7 +125,8 @@ function test_switching()
             Test.@test occursin("Switching times : [0.5]", plain)
             Test.@test occursin("Phases : bang+ → bang-", plain)
             Test.@test occursin("Limits : state, costate, control", plain)
-            Test.@test sprint(show, sw) == "SwitchingModel(times=[0.5], phases=bang+ → bang-)"
+            Test.@test sprint(show, sw) ==
+                "SwitchingModel(times=[0.5], phases=bang+ → bang-)"
             # labels only, limits not stored; an unlabelled phase shows as ·
             m = Solutions.SwitchingModel(; times=[0.2, 0.6], labels=["a", "", "c"])
             Test.@test occursin("Phases : a → · → c", sprint(show, MIME"text/plain"(), m))

@@ -14,9 +14,9 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Dummy tags for testing stubs - these won't be overridden by extensions
-# because extensions only override for JLD2Tag and JSON3Tag specifically
+# because extensions only override for JLD2Tag and JSONTag specifically
 struct DummyJLD2Tag <: Serialization.AbstractTag end
-struct DummyJSON3Tag <: Serialization.AbstractTag end
+struct DummyJSONTag <: Serialization.AbstractTag end
 
 # Dummy solution and model types for testing serialization stubs
 struct DummyAbstractSolution <: Solutions.AbstractSolution end
@@ -43,7 +43,7 @@ function test_ext_exceptions()
         end
 
         # ============================================================================
-        # Test ExtensionError for real tags (JLD2Tag and JSON3Tag) with dummy types
+        # Test ExtensionError for real tags (JLD2Tag and JSONTag) with dummy types
         # These stubs throw ExtensionError when extensions are not loaded
         # We use dummy types to ensure we're testing the stubs, not extension overrides
         # ============================================================================
@@ -59,33 +59,33 @@ function test_ext_exceptions()
             )
         end
 
-        Test.@testset "ExtensionError for JSON3Tag export/import" begin
+        Test.@testset "ExtensionError for JSONTag export/import" begin
             dummy_sol = DummyAbstractSolution()
             dummy_ocp = DummyAbstractModel()
 
             Test.@test_throws Exceptions.ExtensionError Serialization.export_ocp_solution(
-                Serialization.JSON3Tag(), dummy_sol; filename="test"
+                Serialization.JSONTag(), dummy_sol; filename="test"
             )
             Test.@test_throws Exceptions.ExtensionError Serialization.import_ocp_solution(
-                Serialization.JSON3Tag(), dummy_ocp; filename="test"
+                Serialization.JSONTag(), dummy_ocp; filename="test"
             )
         end
 
         # ============================================================================
         # Test stub dispatch for export/import (using dummy tags)
-        # The stubs for JLD2Tag and JSON3Tag are in CTModels.jl but become no-ops
+        # The stubs for JLD2Tag and JSONTag are in CTModels.jl but become no-ops
         # once extensions are loaded. To test the stub mechanism, we define dummy
         # tag types that will call the stub fallback.
         # ============================================================================
         Test.@testset "Stub dispatch for export_ocp_solution" begin
             # Test that calling with our dummy tag triggers MethodError
-            # Note: The actual stubs are defined for JLD2Tag/JSON3Tag,
+            # Note: The actual stubs are defined for JLD2Tag/JSONTag,
             # but method dispatch should fail for unknown tag types
             Test.@test_throws MethodError Serialization.export_ocp_solution(
                 DummyJLD2Tag(), sol; filename="test"
             )
             Test.@test_throws MethodError Serialization.export_ocp_solution(
-                DummyJSON3Tag(), sol; filename="test"
+                DummyJSONTag(), sol; filename="test"
             )
         end
 
@@ -94,7 +94,7 @@ function test_ext_exceptions()
                 DummyJLD2Tag(), ocp; filename="test"
             )
             Test.@test_throws MethodError Serialization.import_ocp_solution(
-                DummyJSON3Tag(), ocp; filename="test"
+                DummyJSONTag(), ocp; filename="test"
             )
         end
 

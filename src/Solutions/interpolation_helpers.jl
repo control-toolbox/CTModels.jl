@@ -241,11 +241,7 @@ function build_interpolated_function(
     if !isnothing(jumps) && data isa AbstractMatrix
         sw, component = jumps
         func = _with_jumps(
-            func,
-            T[1:size(data, 1)],
-            sw,
-            component;
-            constant=(interpolation === :constant),
+            func, T[1:size(data, 1)], sw, component; constant=(interpolation === :constant)
         )
     end
 

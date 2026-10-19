@@ -25,7 +25,7 @@ function _sol()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 1)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     ocp = Building.build(pre)
     T = collect(range(0.0, 1.0; length=11))
@@ -70,8 +70,7 @@ function test_plot_switching_render()
             # the phase labels are on the control cell only
             Test.@test length(plt.subplots[3][:annotations]) == 2
             Test.@test isempty(plt.subplots[1][:annotations])
-            Test.@test sort([a[3].str for a in plt.subplots[3][:annotations]]) ==
-                ["bang+", "bang-"]
+            Test.@test sort([a[3].str for a in plt.subplots[3][:annotations]]) == ["bang+", "bang-"]
             # no labels, no switching lines: still renders
             Test.@test Plots.plot(sol; phase_labels=:none, switching_style=:none) isa
                 Plots.Plot
@@ -82,7 +81,8 @@ function test_plot_switching_render()
             ys = br.subplots[1].series_list[1][:y]
             Test.@test count(isnan, ys) == 1
             # one color per trajectory: one series for the whole state component
-            Test.@test count(s -> s[:seriestype] === :path, plt.subplots[1].series_list) == 1
+            Test.@test count(s -> s[:seriestype] === :path, plt.subplots[1].series_list) ==
+                1
         end
 
         Test.@testset "Makie" begin

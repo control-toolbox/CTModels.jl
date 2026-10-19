@@ -58,7 +58,7 @@ initial guess are represented, and nothing else: it neither parses, discretises 
 
 | Extension | Trigger package | Adds |
 | --- | --- | --- |
-| `CTModelsJSON` | `JSON3` | JSON export and import of a `Solution` |
+| `CTModelsJSON` | `JSON` | JSON export and import of a `Solution` |
 | `CTModelsJLD` | `JLD2` | JLD2 export and import of a `Solution` |
 | `CTModelsPlots` | `Plots` | `Plots.plot(sol)` / `Plots.plot!(sol)` |
 | `CTModelsMakie` | `Makie` (via `CairoMakie`, `GLMakie`, …) | `Makie.plot(sol)` / `Makie.plot!(fig, sol)` |

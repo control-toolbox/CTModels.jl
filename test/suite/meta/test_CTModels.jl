@@ -34,7 +34,7 @@ function test_CTModels()
             Test.@test AbstractVector{<:Components.Time} <: Components.Times
 
             Test.@test Serialization.JLD2Tag <: Serialization.AbstractTag
-            Test.@test Serialization.JSON3Tag <: Serialization.AbstractTag
+            Test.@test Serialization.JSONTag <: Serialization.AbstractTag
 
             # Aliases towards CTSolvers usage
             Test.@test Models.AbstractModel === Models.AbstractModel

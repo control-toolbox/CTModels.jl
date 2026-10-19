@@ -38,7 +38,8 @@ function _phase_label_group(
 )::Symbol
     phase_labels === :all && return :all
     control && return :control
-    for (group, drawn) in ((:state, state), (:costate, costate), (:path, path), (:dual, dual))
+    for (group, drawn) in
+        ((:state, state), (:costate, costate), (:path, path), (:dual, dual))
         drawn && return group
     end
     return :none
@@ -117,7 +118,8 @@ function _build_root(
         path=do_path,
         dual=do_dual,
     )
-    _texts(group) = (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
+    _texts(group) =
+        (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
     ncomp(p) = size(p.data, 2)
     L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none) = Plotting.lower(
         p;
@@ -132,19 +134,26 @@ function _build_root(
     if layout === :group
         # No bounds lines in :group (historical); only the time markers, via `vlines`.
         cells = Plotting.AbstractLayoutNode[]
-        do_state && push!(cells, L(_state_panel(sol, state_style; connect=connect); group=:state))
+        do_state &&
+            push!(cells, L(_state_panel(sol, state_style; connect=connect); group=:state))
         do_costate && push!(
             cells,
             L(
                 _costate_panel(
-                    sol, costate_style; layout=layout, state_shown=do_state, connect=connect
+                    sol,
+                    costate_style;
+                    layout=layout,
+                    state_shown=do_state,
+                    connect=connect,
                 );
                 group=:costate,
             ),
         )
         if do_control
             # with `control=:all`, the labels go to the first control cell only
-            for (k, cp) in enumerate(_control_panels(sol, control, control_style, layout; connect=connect))
+            for (k, cp) in enumerate(
+                _control_panels(sol, control, control_style, layout; connect=connect)
+            )
                 push!(cells, L(cp; group=(k == 1 ? :control : :none)))
             end
         end
@@ -166,7 +175,11 @@ function _build_root(
         costate_col = if do_costate
             L(
                 _costate_panel(
-                    sol, costate_style; layout=layout, state_shown=do_state, connect=connect
+                    sol,
+                    costate_style;
+                    layout=layout,
+                    state_shown=do_state,
+                    connect=connect,
                 );
                 group=:costate,
             )
