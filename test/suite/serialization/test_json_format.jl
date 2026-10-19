@@ -143,7 +143,9 @@ function test_json_format()
                 Test.@test sprint(show, Serialization.JSONTag()) == "JSONTag()"
                 ocp, sol = _small_solution()
                 path = joinpath(dir, "tag")
-                Serialization.export_ocp_solution(Serialization.JSONTag(), sol; filename=path)
+                Serialization.export_ocp_solution(
+                    Serialization.JSONTag(), sol; filename=path
+                )
                 back = Serialization.import_ocp_solution(
                     Serialization.JSONTag(), ocp; filename=path
                 )

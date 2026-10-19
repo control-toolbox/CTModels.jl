@@ -95,12 +95,8 @@ function SwitchingModel(;
     times::AbstractVector{<:Real},
     labels::AbstractVector{<:AbstractString}=fill("", length(times) + 1),
     state::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(length(times)),
-    costate::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(
-        length(times)
-    ),
-    control::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(
-        length(times)
-    ),
+    costate::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(length(times)),
+    control::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(length(times)),
 )
     ts = collect(Float64, times)
     all(isfinite, ts) || throw(
@@ -371,7 +367,11 @@ function _limit(sol::Solution, component::Symbol, i::Integer, side::Int)
         Exceptions.IncorrectArgument(
             "no switching time with this index";
             got="i = $i",
-            expected=n == 0 ? "no index: the solution has no switching time" : "1 ≤ i ≤ $n",
+            expected=if n == 0
+                "no index: the solution has no switching time"
+            else
+                "1 ≤ i ≤ $n"
+            end,
             suggestion="Use an index of switching_times(sol)",
             context=(side == 1 ? "left_limit" : "right_limit"),
         ),
@@ -463,7 +463,11 @@ Wrap the interpolant `base` of sampled data on `grid` so that it keeps the jumps
 switching time, or no limit of `component`.
 """
 function _with_jumps(
-    base, grid::Vector{Float64}, sw::AbstractSwitchingModel, component::Symbol; constant=false
+    base,
+    grid::Vector{Float64},
+    sw::AbstractSwitchingModel,
+    component::Symbol;
+    constant=false,
 )
     has_switching(sw) || return base
     left, right = limits(sw, component)
@@ -493,7 +497,9 @@ Return the components whose limits a switching model stores, e.g. `"state, costa
 `"none"`.
 """
 function _stored_limits(m::SwitchingModel)::String
-    stored = [String(c) for c in (:state, :costate, :control) if size(limits(m, c)[1], 2) > 0]
+    stored = [
+        String(c) for c in (:state, :costate, :control) if size(limits(m, c)[1], 2) > 0
+    ]
     return isempty(stored) ? "none" : join(stored, ", ")
 end
 
@@ -516,7 +522,13 @@ phase label.
 function Base.show(io::IO, ::MIME"text/plain", ::EmptySwitchingModel)
     fmt = CTBase.Core.get_format_codes(io)
     return print(
-        io, fmt.name, "EmptySwitchingModel", fmt.reset, fmt.muted, "  (no switching)", fmt.reset
+        io,
+        fmt.name,
+        "EmptySwitchingModel",
+        fmt.reset,
+        fmt.muted,
+        "  (no switching)",
+        fmt.reset,
     )
 end
 
@@ -531,7 +543,9 @@ function Base.show(io::IO, m::SwitchingModel)
     print(io, fmt.name, "SwitchingModel", fmt.reset, "(")
     print(io, fmt.label, "times=", fmt.reset, fmt.value, m.times, fmt.reset)
     if any(!isempty, m.labels)
-        print(io, ", ", fmt.label, "phases=", fmt.reset, fmt.value, _phase_sequence(m.labels))
+        print(
+            io, ", ", fmt.label, "phases=", fmt.reset, fmt.value, _phase_sequence(m.labels)
+        )
         print(io, fmt.reset)
     end
     return print(io, ")")

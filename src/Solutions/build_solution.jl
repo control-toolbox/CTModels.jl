@@ -585,7 +585,7 @@ Throw the error of a time grid with a repeated time.
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): always.
 """
 function _throw_repeated_time(t::Float64, component_name::String)
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "repeated time in the $component_name time grid";
             got="time $t appears more than once",

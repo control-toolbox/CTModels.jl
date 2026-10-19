@@ -112,7 +112,10 @@ solution has no switching time.
 """
 function _switching_vlines(sol, time::Symbol, style::NamedTuple)
     return Plotting.switching_vlines(
-        CTModels.time_grid(sol, :state), CTModels.switching_times(sol); time=time, style=style
+        CTModels.time_grid(sol, :state),
+        CTModels.switching_times(sol);
+        time=time,
+        style=style,
     )
 end
 

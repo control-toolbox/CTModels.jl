@@ -23,10 +23,15 @@ function _ocp()
     Building.time!(pre; t0=0.0, tf=2.0)
     Building.state!(pre, 1)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
     Building.constraint!(
-        pre, :path; f=(r, t, x, u, v) -> (r[1] = x + u; nothing), lb=[-10.0], ub=[10.0], label=:g
+        pre,
+        :path;
+        f=(r, t, x, u, v) -> (r[1]=x + u; nothing),
+        lb=[-10.0],
+        ub=[10.0],
+        label=:g,
     )
     return Building.build(pre)
 end
@@ -66,11 +71,13 @@ _leaves(fig) = Plotting.leaves(fig.root)
 _leaf(fig, title) = only(l for l in _leaves(fig) if l.axes.title == title)
 _series(fig, title) = _leaf(fig, title).axes.series[1]
 _decos(fig, title, D) = filter(d -> d isa D, _leaf(fig, title).axes.decorations)
-_texts(fig) = reduce(
-    vcat,
-    (filter(d -> d isa Plotting.Annotation, l.axes.decorations) for l in _leaves(fig));
-    init=Plotting.Annotation[],
-)
+function _texts(fig)
+    return reduce(
+        vcat,
+        (filter(d -> d isa Plotting.Annotation, l.axes.decorations) for l in _leaves(fig));
+        init=Plotting.Annotation[],
+    )
+end
 
 function test_plot_switching()
     Test.@testset "PlotCase: switching structure" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -81,7 +88,9 @@ function test_plot_switching()
 
         Test.@testset "_spliced_samples: insertion of the limits" begin
             sol = _sol()
-            Ts, M = CTModels.PlotCase._spliced_samples(sol, T, reshape(_x.(T), :, 1), :state)
+            Ts, M = CTModels.PlotCase._spliced_samples(
+                sol, T, reshape(_x.(T), :, 1), :state
+            )
             # τ is in the grid: its sample is replaced by (τ, left), (τ, right)
             Test.@test count(==(τ), Ts) == 2
             Test.@test length(Ts) == length(T) + 1
@@ -91,18 +100,24 @@ function test_plot_switching()
             Test.@test issorted(Ts)
             # τ not in the samples: inserted at its place
             Tn = [0.0, 0.5, 1.5, 2.0]
-            Ts2, M2 = CTModels.PlotCase._spliced_samples(sol, Tn, reshape(_x.(Tn), :, 1), :state)
+            Ts2, M2 = CTModels.PlotCase._spliced_samples(
+                sol, Tn, reshape(_x.(Tn), :, 1), :state
+            )
             Test.@test Ts2 == [0.0, 0.5, τ, τ, 1.5, 2.0]
             Test.@test M2[:, 1] ≈ [0.0, 0.5, τ, τ + 1.0, 2.5, 3.0]
             # τ after the last sample
-            Ts3, _ = CTModels.PlotCase._spliced_samples(sol, [0.0, 0.5], zeros(2, 1), :state)
+            Ts3, _ = CTModels.PlotCase._spliced_samples(
+                sol, [0.0, 0.5], zeros(2, 1), :state
+            )
             Test.@test Ts3 == [0.0, 0.5, τ, τ]
             # unchanged when no switching time, or limits not known
             plain = _sol(; switching=Solutions.EmptySwitchingModel())
             Test.@test CTModels.PlotCase._spliced_samples(plain, T, zeros(11, 1), :state) ==
                 (T, zeros(11, 1))
             nolim = _sol(; switching=_sw(; limits=false))
-            Test.@test CTModels.PlotCase._spliced_samples(nolim, T, zeros(11, 1), :state)[1] == T
+            Test.@test CTModels.PlotCase._spliced_samples(
+                nolim, T, zeros(11, 1), :state
+            )[1] == T
             # samples with other components than the limits: an error
             Test.@test_throws Exceptions.IncorrectArgument CTModels.PlotCase._spliced_samples(
                 sol, T, zeros(11, 2), :state
@@ -153,7 +168,9 @@ function test_plot_switching()
             Test.@test s.y[k] ≈ τ + 1.0             # x⁻ + u⁻
             Test.@test s.y[k + 1] ≈ (τ + 1.0) - 1.0 # x⁺ + u⁺
             # limits not known: plain samples
-            fig2 = CTModels.PlotCase.build_figure(_sol(; switching=_sw(; limits=false)), :path)
+            fig2 = CTModels.PlotCase.build_figure(
+                _sol(; switching=_sw(; limits=false)), :path
+            )
             Test.@test count(==(τ), _series(fig2, "path constraints").x) == 1
         end
 
@@ -168,16 +185,23 @@ function test_plot_switching()
                 Test.@test isnan(s.y[k + 1])                    # no vertical segment
                 Test.@test s.y[k + 2] ≈ right
             end
-            p = _series(CTModels.PlotCase.build_figure(_sol(), :path; jumps=:none), "path constraints")
+            p = _series(
+                CTModels.PlotCase.build_figure(_sol(), :path; jumps=:none),
+                "path constraints",
+            )
             k = findfirst(==(τ), p.x)
             Test.@test isnan(p.y[k + 1])
             Test.@test (p.y[k], p.y[k + 2]) == (τ + 1.0, (τ + 1.0) - 1.0)
             # default: the vertical segment, no NaN
-            Test.@test !any(isnan, _series(CTModels.PlotCase.build_figure(_sol()), "state").y)
+            Test.@test !any(
+                isnan, _series(CTModels.PlotCase.build_figure(_sol()), "state").y
+            )
         end
 
         Test.@testset "no switching structure: unchanged panels" begin
-            fig = CTModels.PlotCase.build_figure(_sol(; switching=Solutions.EmptySwitchingModel()))
+            fig = CTModels.PlotCase.build_figure(
+                _sol(; switching=Solutions.EmptySwitchingModel())
+            )
             Test.@test _series(fig, "state").x == T
             Test.@test isempty(_texts(fig))
             Test.@test length(_decos(fig, "state", Plotting.VLine)) == 2   # t0 and tf only
@@ -215,8 +239,7 @@ function test_plot_switching()
 
         Test.@testset "switching lines and labels under time normalisation" begin
             fig = CTModels.PlotCase.build_figure(_sol(); time=:normalize)
-            Test.@test [d.value for d in _decos(fig, "state", Plotting.VLine)] ==
-                [0.0, 1.0, 0.5]
+            Test.@test [d.value for d in _decos(fig, "state", Plotting.VLine)] == [0.0, 1.0, 0.5]
             Test.@test [a.x for a in _texts(fig)] ≈ [0.25, 0.75]
         end
 
@@ -238,7 +261,9 @@ function test_plot_switching()
             Test.@test length(_decos(fig, "state", Plotting.Annotation)) == 2
             Test.@test length(_decos(fig, "costate", Plotting.Annotation)) == 2
             Test.@test length(_decos(fig, "control", Plotting.Annotation)) == 2
-            Test.@test isempty(_texts(CTModels.PlotCase.build_figure(_sol(); phase_labels=:none)))
+            Test.@test isempty(
+                _texts(CTModels.PlotCase.build_figure(_sol(); phase_labels=:none))
+            )
             st = CTModels.PlotCase.build_figure(
                 _sol(); phase_labels_style=(color=:red, fontsize=14)
             )
