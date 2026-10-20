@@ -47,7 +47,8 @@ function test_code_quality()
             Aqua.test_ambiguities(CTModels)
         end
 
-        Test.@testset "Aqua.jl — extensions (TST8)" verbose = VERBOSE showtiming = SHOWTIMING begin
+        Test.@testset "Aqua.jl — extensions (TST8)" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             CTBase.DevTools.test_extensions_quality(CTModels)
         end
 
