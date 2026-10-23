@@ -211,7 +211,10 @@ function _build_root(
             path_col = L(pp; hlines=hl, group=:path)
         end
         dual_col = if do_dual
-            L(_dual_panel(sol, model, dual_style; path_shown=do_path); group=:dual)
+            L(
+                _dual_panel(sol, model, dual_style; path_shown=do_path, connect=connect);
+                group=:dual,
+            )
         else
             nothing
         end

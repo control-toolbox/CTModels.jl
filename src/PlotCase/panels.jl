@@ -23,8 +23,8 @@ _sample(f, T) = Matrix{Float64}(reduce(hcat, f.(T))')
 """
 $(TYPEDSIGNATURES)
 
-Insert the left and right limits of `component` (`:state`, `:costate` or `:control`) at the
-switching times of `sol` into the samples `(T, M)` of that component, with
+Insert the left and right limits of `component` (`:state`, `:costate`, `:control` or
+`:path_dual`) at the switching times of `sol` into the samples `(T, M)` of that component, with
 [`CTBase.Plotting.splice_jumps`](@extref): a jump is drawn as a vertical segment. The samples
 are returned unchanged when the solution has no switching time or the limits of
 `component` are not known. With `connect = false`, the curve is broken between the two
@@ -219,10 +219,15 @@ _as_value(row::AbstractVector) = length(row) == 1 ? row[1] : collect(row)
 $(TYPEDSIGNATURES)
 
 Build a [`CTBase.Plotting.Panel`](@extref) for the dual variables of the path constraints.
+At a switching time whose dual limits are known, the jump is drawn as for the state (see
+[`CTModels.PlotCase._spliced_samples`](@extref)).
 """
-function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool)
-    T = CTModels.time_grid(sol, :path)
-    M = _sample(CTModels.path_constraints_dual(sol), T)
+function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool, connect::Bool=true)
+    Tp = CTModels.time_grid(sol, :path)
+    T, M = _spliced_samples(
+        sol, Tp, _sample(CTModels.path_constraints_dual(sol), Tp), :path_dual;
+        connect=connect,
+    )
     nc = size(M, 2)
     cp = CTModels.path_constraints_nl(model)
     labels = path_shown ? fill("", nc) : ("dual " .* string.(cp[4]))

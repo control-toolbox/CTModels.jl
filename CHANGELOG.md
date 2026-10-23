@@ -7,7 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 💥 Breaking Changes
+
+#### The duals of the boxes follow the sign convention of the ecosystem
+
+- **`dual(sol, model, :box_label)`** for a state, control or variable box now follows
+  ct-conventions `SGN2`/`SGN3`
+  ([OptimalControl.jl#1014](https://github.com/control-toolbox/OptimalControl.jl/discussions/1014)):
+  the lower-bound multiplier for a component with a lower bound only, the **upper-bound
+  multiplier (`≥ 0`)** for an upper bound only, and the signed **`ub_dual − lb_dual`** for
+  two finite bounds or a fixed component. It was `lb_dual − ub_dual` for every component.
+- **Why**: the same constraint written as a box and as a path constraint must have the
+  same dual (`SGN5`); with `lb − ub`, an upper box had a dual of the opposite sign to an
+  upper path constraint.
+- **What changes**: the sign of the dual of a box with only an upper bound, and of a
+  two-sided box. A box with only a lower bound is unchanged. The stored multipliers
+  (`*_constraints_lb_dual`, `*_constraints_ub_dual`) are unchanged.
+
+**Migration**:
+
+```julia
+# Before: a box 0 ≤ u ≤ 1 (two-sided), and a box x ≤ 2 (upper only)
+d = dual(sol, ocp, :u_box)   # zL − zU
+d = dual(sol, ocp, :x_max)   # −zU ≤ 0
+
+# After
+d = dual(sol, ocp, :u_box)   # zU − zL: ≥ 0 when the upper side is active
+d = dual(sol, ocp, :x_max)   # zU ≥ 0
+# the raw multipliers are still available
+zL, zU = control_constraints_lb_dual(sol), control_constraints_ub_dual(sol)
+```
+
+See [BREAKING.md](BREAKING.md).
+
+### ✨ New Features
+
+- **Limits of the path duals in the switching model**
+  ([CTFlows.jl#472](https://github.com/control-toolbox/CTFlows.jl/issues/472)).
+  `SwitchingModel` gains the component `:path_dual`: the left and right limits of the duals
+  of the path constraints at each switching time (keyword `path_dual`, no column when not
+  known, the default). `limits`, `left_limit`, `right_limit` accept `:path_dual`. The dual
+  panel of the plots (Plots and Makie) splices them like the state, costate and control
+  panels: a multiplier that jumps at the entry or exit of a boundary arc is drawn as a
+  vertical segment (or a break with `jumps = :none`). They are serialized with the other
+  limits (JLD, JSON); a file written before loads with the dual limits not known. The
+  solution of a CTFlows flow fills them.
+
+### 🐛 Bug Fixes
+
+- **`dual(sol, model, label)` when the solution holds the duals of some constraints only**.
+  For a label whose kind of constraint has no stored dual (e.g. a box or boundary label on
+  the solution of a CTFlows flow, which carries the path duals only), `dual` returned a
+  function that failed with a `MethodError` when called (box labels), or failed at once
+  (boundary labels). It now throws a `PreconditionError` naming the kind of constraint
+  and how to get its duals. The message for a solution with no dual at all no longer says
+  that a flow solution has none.
+- **The producer of a solution can explain its missing duals**: when
+  `infos(sol)[:missing_duals]` is a string, it is the suggestion of these
+  `PreconditionError`s (CTFlows uses it to say why a flow could not rebuild a dual and how
+  to get it).
+- **An unknown label is an `IncorrectArgument` on every solution**: the label is checked
+  before the duals, so a solution with no dual at all no longer answers an unknown label
+  with a `PreconditionError`.
+
 ### 📚 Documentation
+
+- *Duals & Diagnostics*: the sign convention (with a reference to ct-conventions
+  `SGN1`–`SGN6`), the errors of `dual`, and the dual of a box; the example now gives a
+  constraint with a single bound its nonnegative dual.
 
 - ct-agents pinned at `v0.2.0` and ct-conventions at `v0.7.1` in `AGENTS.md`: the recipes (the
   release) are read from a git-ignored clone in `.ct-agents/` at that tag, not from `main`
@@ -15,6 +82,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   conventions is now `.ct-conventions/` (it was `.conventions/`), like `.ct-agents/`.
 - ct-agents pinned at `v0.3.0` in `AGENTS.md`: at the close of a release the agent runs
   `release.jl audit`, which checks the trail the release left.
+
+### ✅ Compatibility
+
+- **Breaking**: the sign of the box duals returned by `dual` (see *Breaking Changes*
+  above). Also a near-breaking note: a new field in `SwitchingModel`. See
+  [BREAKING.md](BREAKING.md).
 
 ## [0.20.0] - 2026-10-19
 

@@ -371,7 +371,8 @@ function CTModels.import_ocp_solution(
         data["switching_times"] = Vector{Float64}(collect(blob["switching_times"]))
         data["phase_labels"] = collect(String, blob["phase_labels"])
         for key in _SWITCHING_MATRIX_FIELDS
-            data[key] = _json_rows_to_matrix(blob[key], n)
+            # absent from files written before the limits of the duals were stored
+            haskey(blob, key) && (data[key] = _json_rows_to_matrix(blob[key], n))
         end
     end
 

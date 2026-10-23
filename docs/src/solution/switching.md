@@ -17,7 +17,9 @@ grid. A [`Solution`](@ref CTModels.Solutions.Solution) keeps this structure in a
 
 - the switching times, strictly inside the time span;
 - one label per phase (`""` for a phase with no label);
-- the left and right limits of the state, costate and control at every switching time.
+- the left and right limits of the state, costate and control at every switching time;
+- optionally, the left and right limits of the duals of the path constraints
+  (`path_dual`), when a multiplier jumps at a junction.
 
 The trajectories of the solution stay single-valued and **left-continuous**: at a switching
 time, `state(sol)(tᵢ)` returns the value before the jump. The value after it is read with
@@ -112,6 +114,41 @@ plot(sol; jumps=:none)
 
 The whole trajectory keeps one color: the phases are parts of the same curve, not
 separate series. A solution drawn on top with `plot!` takes the next color, as usual.
+
+### Duals of the path constraints
+
+A multiplier usually jumps at the entry and the exit of a boundary arc (`0` on an interior
+arc, positive on the boundary arc). When the limits of the duals are given (`path_dual`),
+the dual panel draws the jump as the other panels do. The solution of a flow of CTFlows
+fills them.
+
+```@example sw
+pre = CTModels.PreModel()
+CTModels.time!(pre; t0=0.0, tf=1.0)
+CTModels.state!(pre, 1)
+CTModels.control!(pre, 1)
+CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = u; nothing))
+CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
+CTModels.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = x; nothing),
+    lb=0.0, ub=Inf, label=:xmin)
+CTModels.time_dependence!(pre; autonomous=true)
+ocp_c = CTModels.build(pre)
+
+X = reshape([t <= τ ? 0.5 - t : 0.0 for t in T], :, 1)   # x reaches 0 at τ, then stays
+U = reshape([t <= τ ? -1.0 : 0.0 for t in T], :, 1)
+switching = CTModels.SwitchingModel(;
+    times=[τ],
+    labels=["interior", "boundary"],
+    state=([0.0;;], [0.0;;]),
+    costate=([0.0;;], [0.0;;]),
+    control=([-1.0;;], [0.0;;]),
+    path_dual=([0.0;;], [1.0;;]),    # μ = 0, then 1 on the boundary arc
+)
+sol_c = CTModels.build_solution(ocp_c, T, X, U, Float64[], P;
+    objective=0.0, successful=true, switching=switching,
+    path_constraints_dual=t -> [t <= τ ? 0.0 : 1.0])
+plot(sol_c, :state, :control, :path, :dual)
+```
 
 ## Saving and loading
 
