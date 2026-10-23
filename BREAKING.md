@@ -2,6 +2,17 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## Unreleased
+
+No breaking change; near-breaking notes:
+
+- **New field in `SwitchingModel`** (`path_dual`, the limits of the path duals): code that
+  builds it with its default positional constructor must pass it; the keyword constructor
+  `SwitchingModel(; times, …)`, the documented one, defaults it to "not known".
+- **`dual(sol, model, label)` throws a `PreconditionError`** when the duals of the kind of
+  `label` are not stored in the solution, instead of returning a function that failed with a
+  `MethodError` when called.
+
 ## [0.20.0] - 2026-10-19
 
 ### `Makie.plot(; kwargs...)` is removed

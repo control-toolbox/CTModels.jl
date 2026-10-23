@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- **Limits of the path duals in the switching model**
+  ([CTFlows.jl#472](https://github.com/control-toolbox/CTFlows.jl/issues/472)).
+  `SwitchingModel` gains the component `:path_dual`: the left and right limits of the duals
+  of the path constraints at each switching time (keyword `path_dual`, no column when not
+  known, the default). `limits`, `left_limit`, `right_limit` accept `:path_dual`. The dual
+  panel of the plots (Plots and Makie) splices them like the state, costate and control
+  panels: a multiplier that jumps at the entry or exit of a boundary arc is drawn as a
+  vertical segment (or a break with `jumps = :none`). They are serialized with the other
+  limits (JLD, JSON); a file written before loads with the dual limits not known. The
+  solution of a CTFlows flow fills them.
+
+### 🐛 Bug Fixes
+
+- **`dual(sol, model, label)` when the solution holds the duals of some constraints only**.
+  For a label whose kind of constraint has no stored dual (e.g. a box or boundary label on
+  the solution of a CTFlows flow, which carries the path duals only), `dual` returned a
+  function that failed with a `MethodError` when called (box labels), or failed at once
+  (boundary labels). It now throws a `PreconditionError` naming the kind of constraint
+  and how to get its duals. The message for a solution with no dual at all no longer says
+  that a flow solution has none.
+
 ### 📚 Documentation
 
 - ct-agents pinned at `v0.2.0` and ct-conventions at `v0.7.1` in `AGENTS.md`: the recipes (the
@@ -15,6 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   conventions is now `.ct-conventions/` (it was `.conventions/`), like `.ct-agents/`.
 - ct-agents pinned at `v0.3.0` in `AGENTS.md`: at the close of a release the agent runs
   `release.jl audit`, which checks the trail the release left.
+
+### ✅ Compatibility
+
+- **No breaking changes**: additive, and a fix of an error path. See
+  [BREAKING.md](BREAKING.md) for the near-breaking note (a new field in `SwitchingModel`).
 
 ## [0.20.0] - 2026-10-19
 
