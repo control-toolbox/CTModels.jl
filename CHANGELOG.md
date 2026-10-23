@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 💥 Breaking Changes
+
+#### The duals of the boxes follow the sign convention of the ecosystem
+
+- **`dual(sol, model, :box_label)`** for a state, control or variable box now follows
+  ct-conventions `SGN2`/`SGN3`
+  ([OptimalControl.jl#1014](https://github.com/control-toolbox/OptimalControl.jl/discussions/1014)):
+  the lower-bound multiplier for a component with a lower bound only, the **upper-bound
+  multiplier (`≥ 0`)** for an upper bound only, and the signed **`ub_dual − lb_dual`** for
+  two finite bounds or a fixed component. It was `lb_dual − ub_dual` for every component.
+- **Why**: the same constraint written as a box and as a path constraint must have the
+  same dual (`SGN5`); with `lb − ub`, an upper box had a dual of the opposite sign to an
+  upper path constraint.
+- **What changes**: the sign of the dual of a box with only an upper bound, and of a
+  two-sided box. A box with only a lower bound is unchanged. The stored multipliers
+  (`*_constraints_lb_dual`, `*_constraints_ub_dual`) are unchanged.
+
+**Migration**:
+
+```julia
+# Before: a box 0 ≤ u ≤ 1 (two-sided), and a box x ≤ 2 (upper only)
+d = dual(sol, ocp, :u_box)   # zL − zU
+d = dual(sol, ocp, :x_max)   # −zU ≤ 0
+
+# After
+d = dual(sol, ocp, :u_box)   # zU − zL: ≥ 0 when the upper side is active
+d = dual(sol, ocp, :x_max)   # zU ≥ 0
+# the raw multipliers are still available
+zL, zU = control_constraints_lb_dual(sol), control_constraints_ub_dual(sol)
+```
+
+See [BREAKING.md](BREAKING.md).
+
 ### ✨ New Features
 
 - **Limits of the path duals in the switching model**
@@ -39,6 +72,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation
 
+- *Duals & Diagnostics*: the sign convention (with a reference to ct-conventions
+  `SGN1`–`SGN6`), the errors of `dual`, and the dual of a box; the example now gives a
+  constraint with a single bound its nonnegative dual.
+
 - ct-agents pinned at `v0.2.0` and ct-conventions at `v0.7.1` in `AGENTS.md`: the recipes (the
   release) are read from a git-ignored clone in `.ct-agents/` at that tag, not from `main`
   of ct-agents, and the proposal of a release states the versions applied. The clone of the
@@ -48,8 +85,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: additive, and a fix of an error path. See
-  [BREAKING.md](BREAKING.md) for the near-breaking note (a new field in `SwitchingModel`).
+- **Breaking**: the sign of the box duals returned by `dual` (see *Breaking Changes*
+  above). Also a near-breaking note: a new field in `SwitchingModel`. See
+  [BREAKING.md](BREAKING.md).
 
 ## [0.20.0] - 2026-10-19
 

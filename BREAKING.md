@@ -4,7 +4,29 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## Unreleased
 
-No breaking change; near-breaking notes:
+### The duals of the boxes follow the sign convention of the ecosystem
+
+`dual(sol, model, :box_label)` for a state, control or variable box follows ct-conventions
+`SGN2`/`SGN3`: the lower-bound multiplier for a lower bound only, the upper-bound multiplier
+(`≥ 0`) for an upper bound only, and `ub_dual − lb_dual` for two finite bounds or a fixed
+component. It was `lb_dual − ub_dual` for every component. The stored multipliers are
+unchanged.
+
+**Migration**:
+
+```julia
+# Before: a box 0 ≤ u ≤ 1 (two-sided), and a box x ≤ 2 (upper only)
+d = dual(sol, ocp, :u_box)   # zL − zU
+d = dual(sol, ocp, :x_max)   # −zU ≤ 0
+
+# After
+d = dual(sol, ocp, :u_box)   # zU − zL: ≥ 0 when the upper side is active
+d = dual(sol, ocp, :x_max)   # zU ≥ 0
+# the raw multipliers are still available
+zL, zU = control_constraints_lb_dual(sol), control_constraints_ub_dual(sol)
+```
+
+### Near-breaking notes
 
 - **New field in `SwitchingModel`** (`path_dual`, the limits of the path duals): code that
   builds it with its default positional constructor must pass it; the keyword constructor

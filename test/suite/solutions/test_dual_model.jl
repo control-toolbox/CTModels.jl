@@ -199,8 +199,9 @@ function test_dual_model()
                 ub = [0.1 0.5; 0.2 0.6; 0.3 0.7]
                 sol = _make_solution(m; state_dim=2, state_lb=lb, state_ub=ub)
                 d = Solutions.dual(sol, m, :s)
-                Test.@test d(0.0) ≈ [1.0 - 0.1, 10.0 - 0.5]
-                Test.@test d(1.0) ≈ [3.0 - 0.3, 30.0 - 0.7]
+                # two finite bounds: the signed zU − zL (SGN3)
+                Test.@test d(0.0) ≈ [0.1 - 1.0, 0.5 - 10.0]
+                Test.@test d(1.0) ≈ [0.3 - 3.0, 0.7 - 30.0]
             end
 
             Test.@testset "state - partial range not starting at 1" begin
@@ -214,9 +215,9 @@ function test_dual_model()
                 ub = zeros(3, 3)
                 sol = _make_solution(m; state_dim=3, state_lb=lb, state_ub=ub)
                 d = Solutions.dual(sol, m, :s)
-                # :s targets components 2,3 → slice cols 2,3
-                Test.@test d(0.0) ≈ [1.0, 10.0]
-                Test.@test d(1.0) ≈ [3.0, 30.0]
+                # :s targets components 2,3 → slice cols 2,3 (two-sided: zU − zL)
+                Test.@test d(0.0) ≈ [-1.0, -10.0]
+                Test.@test d(1.0) ≈ [-3.0, -30.0]
             end
 
             Test.@testset "state - two labels on same component: share per-component dual" begin
@@ -232,10 +233,10 @@ function test_dual_model()
                 ub = zeros(3, 1)
                 sol = _make_solution(m; state_dim=1, state_lb=lb, state_ub=ub)
                 # Both labels point to component 1 → same scalar dual
-                Test.@test Solutions.dual(sol, m, :s1)(0.0) ≈ 1.0
-                Test.@test Solutions.dual(sol, m, :s2)(0.0) ≈ 1.0
-                Test.@test Solutions.dual(sol, m, :s1)(1.0) ≈ 3.0
-                Test.@test Solutions.dual(sol, m, :s2)(1.0) ≈ 3.0
+                Test.@test Solutions.dual(sol, m, :s1)(0.0) ≈ -1.0
+                Test.@test Solutions.dual(sol, m, :s2)(0.0) ≈ -1.0
+                Test.@test Solutions.dual(sol, m, :s1)(1.0) ≈ -3.0
+                Test.@test Solutions.dual(sol, m, :s2)(1.0) ≈ -3.0
             end
 
             # --- Control box ---
@@ -248,7 +249,7 @@ function test_dual_model()
                 ub = zeros(3, 2)
                 sol = _make_solution(m; control_dim=2, control_lb=lb, control_ub=ub)
                 d = Solutions.dual(sol, m, :c)
-                Test.@test d(0.0) ≈ [1.0, 10.0]
+                Test.@test d(0.0) ≈ [-1.0, -10.0]
             end
 
             Test.@testset "control - partial range not starting at 1" begin
@@ -261,7 +262,7 @@ function test_dual_model()
                 ub = zeros(3, 3)
                 sol = _make_solution(m; control_dim=3, control_lb=lb, control_ub=ub)
                 d = Solutions.dual(sol, m, :c)
-                Test.@test d(0.0) ≈ [1.0, 10.0]
+                Test.@test d(0.0) ≈ [-1.0, -10.0]
             end
 
             Test.@testset "control - two labels on same component: share per-component dual" begin
@@ -275,8 +276,8 @@ function test_dual_model()
                 lb = reshape([1.0, 2.0, 3.0], 3, 1)
                 ub = zeros(3, 1)
                 sol = _make_solution(m; control_dim=1, control_lb=lb, control_ub=ub)
-                Test.@test Solutions.dual(sol, m, :c1)(0.0) ≈ 1.0
-                Test.@test Solutions.dual(sol, m, :c2)(0.0) ≈ 1.0
+                Test.@test Solutions.dual(sol, m, :c1)(0.0) ≈ -1.0
+                Test.@test Solutions.dual(sol, m, :c2)(0.0) ≈ -1.0
             end
 
             # --- Variable box ---
@@ -289,7 +290,7 @@ function test_dual_model()
                 ub = [0.1, 0.5]
                 sol = _make_solution(m; variable_dim=2, variable_lb=lb, variable_ub=ub)
                 d = Solutions.dual(sol, m, :vbl)
-                Test.@test d ≈ [1.0 - 0.1, 10.0 - 0.5]
+                Test.@test d ≈ [0.1 - 1.0, 0.5 - 10.0]
             end
 
             Test.@testset "variable - partial range not starting at 1" begin
@@ -302,7 +303,7 @@ function test_dual_model()
                 ub = zeros(3)
                 sol = _make_solution(m; variable_dim=3, variable_lb=lb, variable_ub=ub)
                 d = Solutions.dual(sol, m, :vbl)
-                Test.@test d ≈ [1.0, 10.0]
+                Test.@test d ≈ [-1.0, -10.0]
             end
 
             Test.@testset "variable - two labels on same component: share per-component dual" begin
@@ -316,8 +317,8 @@ function test_dual_model()
                 lb = [1.0]
                 ub = [0.0]
                 sol = _make_solution(m; variable_dim=1, variable_lb=lb, variable_ub=ub)
-                Test.@test Solutions.dual(sol, m, :v1) ≈ 1.0
-                Test.@test Solutions.dual(sol, m, :v2) ≈ 1.0
+                Test.@test Solutions.dual(sol, m, :v1) ≈ -1.0
+                Test.@test Solutions.dual(sol, m, :v2) ≈ -1.0
             end
 
             Test.@testset "variable - dim 1: raw accessors return a scalar" begin
@@ -338,6 +339,60 @@ function test_dual_model()
                 Test.@test vc_ub isa Float64
                 Test.@test vc_lb ≈ 0.05
                 Test.@test vc_ub ≈ 1.5
+            end
+
+            # --- the sign convention (ct-conventions SGN2, SGN3) ---
+            Test.@testset "one bound: the multiplier of its side, ≥ 0" begin
+                lb = [1.0 0.0; 2.0 0.0; 3.0 0.0]       # zL: component 1 active
+                ub = [0.0 4.0; 0.0 5.0; 0.0 6.0]       # zU: component 2 active
+                # x₁ ≥ 0 (lower only), x₂ ≤ 1 (upper only)
+                ocp = _build_model_with_state_box(;
+                    state_dim=2,
+                    constraints=[(1:1, [0.0], [Inf], :lo), (2:2, [-Inf], [1.0], :up)],
+                )
+                m = Building.build(ocp)
+                sol = _make_solution(m; state_dim=2, state_lb=lb, state_ub=ub)
+                Test.@test Solutions.dual(sol, m, :lo)(0.0) ≈ 1.0
+                Test.@test Solutions.dual(sol, m, :up)(0.0) ≈ 4.0     # not −4
+                Test.@test Solutions.dual(sol, m, :up)(1.0) ≈ 6.0
+                # the same on the control and on the variable
+                ocp = _build_model_with_control_box(;
+                    control_dim=2,
+                    constraints=[(1:1, [0.0], [Inf], :lo), (2:2, [-Inf], [1.0], :up)],
+                )
+                m = Building.build(ocp)
+                sol = _make_solution(m; control_dim=2, control_lb=lb, control_ub=ub)
+                Test.@test Solutions.dual(sol, m, :up)(0.0) ≈ 4.0
+                Test.@test Solutions.dual(sol, m, :lo)(0.0) ≈ 1.0
+                ocp = _build_model_with_variable_box(;
+                    variable_dim=2,
+                    constraints=[(1:1, [0.0], [Inf], :lo), (2:2, [-Inf], [1.0], :up)],
+                )
+                m = Building.build(ocp)
+                sol = _make_solution(
+                    m; variable_dim=2, variable_lb=[1.0, 0.0], variable_ub=[0.0, 4.0]
+                )
+                Test.@test Solutions.dual(sol, m, :up) ≈ 4.0
+                Test.@test Solutions.dual(sol, m, :lo) ≈ 1.0
+                # one label on both components: one coefficient per component
+                ocp = _build_model_with_state_box(;
+                    state_dim=2, constraints=[(1:2, [0.0, -Inf], [Inf, 1.0], :both)]
+                )
+                m = Building.build(ocp)
+                sol = _make_solution(m; state_dim=2, state_lb=lb, state_ub=ub)
+                Test.@test Solutions.dual(sol, m, :both)(0.0) ≈ [1.0, 4.0]
+            end
+
+            Test.@testset "fixed component: the signed zU − zL" begin
+                ocp = _build_model_with_state_box(;
+                    state_dim=1, constraints=[(1:1, [0.5], [0.5], :fix)]
+                )
+                m = Building.build(ocp)
+                lb = reshape([2.0, 0.0, 0.0], 3, 1)
+                ub = reshape([0.0, 3.0, 0.0], 3, 1)
+                sol = _make_solution(m; state_dim=1, state_lb=lb, state_ub=ub)
+                Test.@test Solutions.dual(sol, m, :fix)(0.0) ≈ -2.0
+                Test.@test Solutions.dual(sol, m, :fix)(0.5) ≈ 3.0
             end
         end
 
@@ -405,7 +460,7 @@ function test_dual_model()
                 state_constraints_lb_dual=ones(3, 1),
                 state_constraints_ub_dual=zeros(3, 1),
             )
-            Test.@test Solutions.dual(sol, m, :sbox)(0.5) ≈ 1.0
+            Test.@test Solutions.dual(sol, m, :sbox)(0.5) ≈ -1.0   # two-sided: zU − zL
             Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol, m, :pc)
         end
 

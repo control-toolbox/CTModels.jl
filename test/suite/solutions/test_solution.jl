@@ -393,9 +393,10 @@ function test_solution()
             )
             Test.@test Solutions.dual(sol_, ocp, :path)(1) == [5.0, 6.0]
             Test.@test Solutions.dual(sol_, ocp, :boundary) == [3.0, 2.0]
-            Test.@test Solutions.dual(sol_, ocp, :state_rg)(1) == [5.0, 6.0] - (-[5.0, 6.0])
-            Test.@test Solutions.dual(sol_, ocp, :control_rg)(1) == 3.0 - (-3.0)
-            Test.@test Solutions.dual(sol_, ocp, :variable_rg) == [1.0, 2.0] - (-[1.0, 2.0])
+            # two-sided boxes: the signed zU − zL (ct-conventions SGN3)
+            Test.@test Solutions.dual(sol_, ocp, :state_rg)(1) == (-[5.0, 6.0]) - [5.0, 6.0]
+            Test.@test Solutions.dual(sol_, ocp, :control_rg)(1) == (-3.0) - 3.0
+            Test.@test Solutions.dual(sol_, ocp, :variable_rg) == (-[1.0, 2.0]) - [1.0, 2.0]
         end
 
         # ========================================================================

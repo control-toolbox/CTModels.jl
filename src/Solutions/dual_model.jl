@@ -26,9 +26,12 @@ If the label is not found, throws an `IncorrectArgument` exception.
 - For box constraints (state/control/variable), the dual matrices/vectors stored
   in the `Solution` are indexed **by primal component** (i.e.
   `state_dimension(model)` columns for state, etc.), following the CTDirect
-  convention. For a label targeting component indices `rg`, this function
-  returns `duals_lb[:, rg] - duals_ub[:, rg]` (or the time-independent analogue
-  for variables). Components never constrained carry a zero multiplier.
+  convention, with nonnegative lower and upper multipliers `zL`, `zU`. The dual of a
+  component follows the sign convention of the ecosystem (ct-conventions `SGN2`,
+  `SGN3`): `zL` for a component with a lower bound only, `zU` for an upper bound only
+  (both `≥ 0`, as for a path constraint with a single bound), and the signed `zU − zL`
+  for two finite bounds or a fixed component. Components never constrained carry a zero
+  multiplier.
 - If several labels target the same component, `dual(sol, model, :label)` returns
   the (same) per-component multiplier for each: CTModels does not track which
   declaration "owns" the multiplier, because the solver only sees the effective
@@ -110,8 +113,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
         duals_ub = state_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "state box")
         _ensure_dual(sol, duals_ub, label, "state box")
-        idx = length(idxs) == 1 ? idxs[1] : idxs
-        return BoxDualDiff(duals_lb, duals_ub, idx)
+        return _box_dual(duals_lb, duals_ub, cp, idxs)
     end
 
     # control box
@@ -122,8 +124,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
         duals_ub = control_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "control box")
         _ensure_dual(sol, duals_ub, label, "control box")
-        idx = length(idxs) == 1 ? idxs[1] : idxs
-        return BoxDualDiff(duals_lb, duals_ub, idx)
+        return _box_dual(duals_lb, duals_ub, cp, idxs)
     end
 
     # variable box
@@ -134,16 +135,57 @@ function dual(sol::Solution, model::Model, label::Symbol)
         duals_ub = variable_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "variable box")
         _ensure_dual(sol, duals_ub, label, "variable box")
+        cl, cu = _box_dual_coefficients(cp, idxs)
         if length(idxs) == 1
             i = idxs[1]
-            return duals_lb[i] - duals_ub[i]
+            return cl[1] * duals_lb[i] + cu[1] * duals_ub[i]
         else
-            return duals_lb[idxs] - duals_ub[idxs]
+            return cl .* duals_lb[idxs] .+ cu .* duals_ub[idxs]
         end
     end
 
     # unreachable: the label was found above
     return _throw_label_not_found(label)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Coefficients `(cl, cu)` of the lower- and upper-bound multipliers in the dual of each box
+component `idxs` (ct-conventions `SGN2`, `SGN3`): `(1, 0)` for a component with a finite
+lower bound only (the dual is `zL ≥ 0`), `(0, 1)` for a finite upper bound only
+(`zU ≥ 0`), `(-1, 1)` for two finite bounds or a fixed component (the signed
+`zU − zL`). The bounds of a component are those of all its declarations in the box tuple
+`cp` (effective bounds: the largest lower and the smallest upper bound).
+"""
+function _box_dual_coefficients(cp, idxs::Vector{Int})
+    cl = zeros(length(idxs))
+    cu = zeros(length(idxs))
+    for (j, i) in enumerate(idxs)
+        rows = findall(==(i), cp[2])
+        lo, up = maximum(cp[1][rows]), minimum(cp[3][rows])
+        if isfinite(lo) && !isfinite(up)
+            cl[j], cu[j] = 1.0, 0.0
+        elseif !isfinite(lo) && isfinite(up)
+            cl[j], cu[j] = 0.0, 1.0
+        else
+            cl[j], cu[j] = -1.0, 1.0
+        end
+    end
+    return cl, cu
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The dual of the state or control box components `idxs`, as a function of time (a
+[`CTModels.Solutions.BoxDualDiff`](@extref) with the coefficients of
+[`CTModels.Solutions._box_dual_coefficients`](@extref)): a scalar for one component.
+"""
+function _box_dual(duals_lb, duals_ub, cp, idxs::Vector{Int})
+    cl, cu = _box_dual_coefficients(cp, idxs)
+    length(idxs) == 1 && return BoxDualDiff(duals_lb, duals_ub, idxs[1], cl[1], cu[1])
+    return BoxDualDiff(duals_lb, duals_ub, idxs, cl, cu)
 end
 
 """
