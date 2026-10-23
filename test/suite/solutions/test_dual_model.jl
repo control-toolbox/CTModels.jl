@@ -60,6 +60,30 @@ function _build_model_with_variable_box(; variable_dim::Int, constraints::Vector
     return ocp
 end
 
+"""One constraint of every kind: path `:pc`, boundary `:bc`, and boxes `:sbox`, `:cbox`, `:vbox`."""
+function _build_model_with_every_kind()
+    ocp = Building.PreModel()
+    Building.time!(ocp; t0=0.0, tf=1.0)
+    Building.state!(ocp, 1)
+    Building.control!(ocp, 1)
+    Building.variable!(ocp, 1)
+    _dyn!(r, t, x, u, v) = (r .= zero(x))
+    Building.dynamics!(ocp, _dyn!)
+    Building.objective!(ocp, :min; mayer=(x0, xf, v) -> 0.0)
+    Building.definition!(ocp, quote end)
+    Building.time_dependence!(ocp; autonomous=false)
+    Building.constraint!(
+        ocp, :path; f=(r, t, x, u, v) -> (r[1]=x[1] + u[1]; nothing), lb=[-Inf], ub=[0.0], label=:pc
+    )
+    Building.constraint!(
+        ocp, :boundary; f=(r, x0, xf, v) -> (r[1]=x0[1]; nothing), lb=[0.0], ub=[0.0], label=:bc
+    )
+    Building.constraint!(ocp, :state; rg=1:1, lb=[0.0], ub=[1.0], label=:sbox)
+    Building.constraint!(ocp, :control; rg=1:1, lb=[0.0], ub=[1.0], label=:cbox)
+    Building.constraint!(ocp, :variable; rg=1:1, lb=[0.0], ub=[1.0], label=:vbox)
+    return Building.build(ocp)
+end
+
 function _make_solution(
     ocp_model::Models.Model;
     state_dim::Int=1,
@@ -333,6 +357,56 @@ function test_dual_model()
             Test.@test_throws Exceptions.IncorrectArgument Solutions.dual(
                 sol, m, :nonexistent
             )
+        end
+
+        # ====================================================================
+        # ERROR TESTS - dual() of a constraint whose duals were not stored
+        # ====================================================================
+
+        Test.@testset "dual() of a kind with no stored dual → PreconditionError" begin
+            m = _build_model_with_every_kind()
+            T = [0.0, 0.5, 1.0]
+            pc = t -> [2t]
+            # path duals only, as a flow returns them
+            sol = Solutions.build_solution(
+                m,
+                T,
+                zeros(3, 1),
+                zeros(3, 1),
+                zeros(1),
+                zeros(3, 1);
+                objective=0.0,
+                successful=true,
+                path_constraints_dual=pc,
+            )
+            Test.@test Solutions.has_duals(sol)
+            Test.@test Solutions.dual(sol, m, :pc)(0.5) ≈ 1.0
+            for label in (:bc, :sbox, :cbox, :vbox)
+                Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol, m, label)
+            end
+            err = try
+                Solutions.dual(sol, m, :sbox)
+            catch e
+                e
+            end
+            Test.@test occursin("state box", err.msg)
+            Test.@test occursin("constraint=:label", err.suggestion)
+
+            # box duals only: the path dual is the one missing
+            sol = Solutions.build_solution(
+                m,
+                T,
+                zeros(3, 1),
+                zeros(3, 1),
+                zeros(1),
+                zeros(3, 1);
+                objective=0.0,
+                successful=true,
+                state_constraints_lb_dual=ones(3, 1),
+                state_constraints_ub_dual=zeros(3, 1),
+            )
+            Test.@test Solutions.dual(sol, m, :sbox)(0.5) ≈ 1.0
+            Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol, m, :pc)
         end
     end
 

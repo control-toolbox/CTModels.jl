@@ -41,7 +41,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
         Exceptions.PreconditionError(
             "the solution carries no dual variables";
             reason="the solution's dual model is empty (EmptyDualModel)",
-            suggestion="only solutions produced by a solver carry duals; a solution built by a flow has none",
+            suggestion="a direct solve returns the duals; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
             context="dual - looking up a constraint dual on a dual-free solution",
         ),
     )
@@ -52,6 +52,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if label in labels
         indices = findall(x -> x == label, labels)
         duals = path_constraints_dual(sol)
+        _ensure_dual(duals, label, "path")
         idx = length(indices) == 1 ? indices[1] : indices
         return DualSlice(duals, idx)
     end
@@ -62,6 +63,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if label in labels
         indices = findall(x -> x == label, labels)
         duals = boundary_constraints_dual(sol)
+        _ensure_dual(duals, label, "boundary")
         if length(indices) == 1
             return duals[indices[1]]
         else
@@ -89,6 +91,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
+        _ensure_dual(duals_lb, label, "state box")
+        _ensure_dual(duals_ub, label, "state box")
         idx = length(idxs) == 1 ? idxs[1] : idxs
         return BoxDualDiff(duals_lb, duals_ub, idx)
     end
@@ -99,6 +103,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
+        _ensure_dual(duals_lb, label, "control box")
+        _ensure_dual(duals_ub, label, "control box")
         idx = length(idxs) == 1 ? idxs[1] : idxs
         return BoxDualDiff(duals_lb, duals_ub, idx)
     end
@@ -109,6 +115,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
+        _ensure_dual(duals_lb, label, "variable box")
+        _ensure_dual(duals_ub, label, "variable box")
         if length(idxs) == 1
             i = idxs[1]
             return duals_lb[i] - duals_ub[i]
@@ -125,6 +133,26 @@ function dual(sol::Solution, model::Model, label::Symbol)
             expected="existing label in the model",
             suggestion="Check available labels in the model or use a valid label",
             context="get_constraint_dual - looking up constraint label in dual model",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw a [`CTBase.Exceptions.PreconditionError`](@extref) when the solution holds no dual
+for the `kind` constraints (`duals === nothing`), although it holds others: the label
+`label` exists in the model, but its dual was not computed. A flow solution, for
+instance, carries the duals of the path constraints only.
+"""
+function _ensure_dual(duals, label::Symbol, kind::String)
+    isnothing(duals) || return nothing
+    return throw(
+        Exceptions.PreconditionError(
+            "the solution carries no dual for the $kind constraint :$label";
+            reason="the label :$label is a $kind constraint of the model, but the duals of the $kind constraints were not stored in the solution",
+            suggestion="a direct solve returns every dual; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            context="dual - looking up the dual of a constraint",
         ),
     )
 end
