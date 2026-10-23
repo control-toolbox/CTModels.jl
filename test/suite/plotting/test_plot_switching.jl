@@ -174,6 +174,55 @@ function test_plot_switching()
             Test.@test count(==(τ), _series(fig2, "path constraints").x) == 1
         end
 
+        Test.@testset "the dual panel draws the jump of the multiplier" begin
+            # μ = 0 before τ (interior arc), μ = 3 after (boundary arc)
+            sw = Solutions.SwitchingModel(;
+                times=[τ],
+                labels=["interior", "boundary"],
+                state=([τ;;], [τ + 1.0;;]),
+                costate=([0.0;;], [2.0;;]),
+                control=([1.0;;], [-1.0;;]),
+                path_dual=([0.0;;], [3.0;;]),
+            )
+            sol = Solutions.build_solution(
+                _ocp(),
+                T,
+                reshape(_x.(T), :, 1),
+                reshape(_u.(T), :, 1),
+                Float64[],
+                reshape(_p.(T), :, 1);
+                objective=0.0,
+                successful=true,
+                switching=sw,
+                path_constraints_dual=t -> [t <= τ ? 0.0 : 3.0],
+            )
+            s = _series(CTModels.PlotCase.build_figure(sol, :dual), "dual")
+            k = findfirst(==(τ), s.x)
+            Test.@test s.x[k + 1] == τ                 # vertical segment
+            Test.@test (s.y[k], s.y[k + 1]) == (0.0, 3.0)
+            s = _series(CTModels.PlotCase.build_figure(sol, :dual; jumps=:none), "dual")
+            k = findfirst(==(τ), s.x)
+            Test.@test isnan(s.y[k + 1])
+            Test.@test (s.y[k], s.y[k + 2]) == (0.0, 3.0)
+            # limits of the duals not known: plain samples
+            sol2 = Solutions.build_solution(
+                _ocp(),
+                T,
+                reshape(_x.(T), :, 1),
+                reshape(_u.(T), :, 1),
+                Float64[],
+                reshape(_p.(T), :, 1);
+                objective=0.0,
+                successful=true,
+                switching=_sw(),
+                path_constraints_dual=t -> [t <= τ ? 0.0 : 3.0],
+            )
+            s = _series(CTModels.PlotCase.build_figure(sol2, :dual), "dual")
+            Test.@test count(==(τ), s.x) == 1
+            # the phase labels go to the dual cell when it is the only one drawn
+            Test.@test length(_texts(CTModels.PlotCase.build_figure(sol, :dual))) == 2
+        end
+
         Test.@testset "jumps=:none breaks the curves between the limits" begin
             fig = CTModels.PlotCase.build_figure(_sol(); jumps=:none)
             for (title, left, right) in

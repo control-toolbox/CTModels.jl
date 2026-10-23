@@ -93,6 +93,15 @@ function test_switching()
             d = Solutions.SwitchingModel(; times=[0.2, 0.6])
             Test.@test Solutions.phase_labels(d) == ["", "", ""]
             Test.@test size(Solutions.limits(d, :state)[1]) == (2, 0)
+            Test.@test size(Solutions.limits(d, :path_dual)[1]) == (2, 0)
+            # limits of the duals of the path constraints
+            pd = Solutions.SwitchingModel(;
+                times=[τ], path_dual=([0.0 1.0], [2.0 1.0])
+            )
+            Test.@test Solutions.limits(pd, :path_dual) == ([0.0 1.0], [2.0 1.0])
+            Test.@test occursin(
+                "Limits : path_dual", sprint(show, MIME"text/plain"(), pd)
+            )
             # conversions: Int times, SubString labels, Int matrices
             c = Solutions.SwitchingModel(;
                 times=[1], labels=[SubString("ab", 1, 1), "b"], state=([1;;], [2;;])
@@ -322,6 +331,13 @@ function test_switching()
                 times=[τ], control=(zeros(1, 3), zeros(1, 3))
             )
             Test.@test_throws Exceptions.IncorrectArgument _sol_1d(; switching=bad_u)
+            bad_d = Solutions.SwitchingModel(;
+                times=[τ], path_dual=(zeros(1, 5), zeros(1, 5))
+            )
+            Test.@test_throws Exceptions.IncorrectArgument _sol_1d(; switching=bad_d)
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.SwitchingModel(;
+                times=[τ], path_dual=(zeros(1, 1), zeros(1, 2))
+            )
         end
 
         Test.@testset "left_limit / right_limit: errors" begin

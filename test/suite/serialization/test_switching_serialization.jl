@@ -100,6 +100,7 @@ function test_switching_serialization()
             Test.@test data["phase_labels"] == ["bang", "", "boundary"]
             Test.@test data["switching_state_right"] == [τ1+1.0 1.0; τ2+1.0 3.0]
             Test.@test size(data["switching_control_left"]) == (2, 1)
+            Test.@test size(data["switching_path_dual_left"]) == (2, 0)
             # no structure: no key
             plain = Solutions._serialize_solution(
                 _sol(; switching=Solutions.EmptySwitchingModel())
@@ -115,6 +116,12 @@ function test_switching_serialization()
             Test.@test Solutions.limits(sw, :costate) == Solutions.limits(_sw(), :costate)
             Test.@test Solutions._deserialize_switching(Dict{String,Any}()) isa
                 Solutions.EmptySwitchingModel
+            # a file written before the limits of the duals were stored
+            delete!(data, "switching_path_dual_left")
+            delete!(data, "switching_path_dual_right")
+            old = Solutions._deserialize_switching(data)
+            Test.@test Solutions.limits(old, :state) == Solutions.limits(_sw(), :state)
+            Test.@test size(Solutions.limits(old, :path_dual)[1]) == (2, 0)
         end
 
         mktempdir() do dir

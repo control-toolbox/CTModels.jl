@@ -294,7 +294,9 @@ function build_solution(
     end
 
     # Switching structure: consistent with the grids and the dimensions of the problem
-    _check_switching(switching, T_state, dim_x, dim_u)
+    _check_switching(
+        switching, T_state, dim_x, dim_u, dim_path_constraints_nl(ocp)
+    )
 
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping
@@ -495,17 +497,19 @@ $(TYPEDSIGNATURES)
 
 Check that a switching model is consistent with a solution: its switching times lie strictly
 inside the time span of the state grid `T`, and its stored limits have one column per
-component (`dim_x` for the state and costate, `dim_u` for the control) or none (limits not
-known).
+component (`dim_x` for the state and costate, `dim_u` for the control, `dim_p` for the
+duals of the path constraints) or none (limits not known).
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if a switching time is outside
   `(first(T), last(T))`, or a matrix of limits has a wrong number of columns.
 """
-function _check_switching(::EmptySwitchingModel, T, dim_x, dim_u)
+function _check_switching(::EmptySwitchingModel, T, dim_x, dim_u, dim_p)
     return nothing
 end
-function _check_switching(sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, dim_u::Int)
+function _check_switching(
+    sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, dim_u::Int, dim_p::Int
+)
     t0, tf = first(T), last(T)
     for τ in switching_times(sw)
         t0 < τ < tf || throw(
@@ -519,7 +523,8 @@ function _check_switching(sw::SwitchingModel, T::Vector{Float64}, dim_x::Int, di
             ),
         )
     end
-    for (component, dim) in ((:state, dim_x), (:costate, dim_x), (:control, dim_u))
+    for (component, dim) in
+        ((:state, dim_x), (:costate, dim_x), (:control, dim_u), (:path_dual, dim_p))
         ncols = size(limits(sw, component)[1], 2)
         ncols in (0, dim) || throw(
             Exceptions.IncorrectArgument(
@@ -1749,8 +1754,8 @@ Keys of the serialized switching limits, as `(key, component, side)` with `side 
 the left limit and `2` for the right limit.
 """
 const _SWITCHING_LIMIT_KEYS = Tuple(
-    (_switching_limit_key(c, side), c, side) for c in (:state, :costate, :control) for
-    side in (1, 2)
+    (_switching_limit_key(c, side), c, side) for
+    c in (:state, :costate, :control, :path_dual) for side in (1, 2)
 )
 
 """
@@ -1776,19 +1781,25 @@ $(TYPEDSIGNATURES)
 Rebuild the switching model from serialized data: an
 [`CTModels.Solutions.EmptySwitchingModel`](@extref) when the data holds no `"switching_times"`
 (e.g. a file written by an older version), a [`CTModels.Solutions.SwitchingModel`](@extref)
-otherwise. The limits are matrices with one row per switching time.
+otherwise. The limits are matrices with one row per switching time; limits missing from the
+data (the duals, in a file written by an older version) are not known.
 """
 function _deserialize_switching(data)::AbstractSwitchingModel
     haskey(data, "switching_times") || return EmptySwitchingModel()
     times = Vector{Float64}(collect(data["switching_times"]))
     labels = collect(String, data["phase_labels"])
-    lim(c, side) = Matrix{Float64}(data[_switching_limit_key(c, side)])
+    function lim(c, side)
+        key = _switching_limit_key(c, side)
+        haskey(data, key) || return zeros(length(times), 0)
+        return Matrix{Float64}(data[key])
+    end
     return SwitchingModel(;
         times=times,
         labels=labels,
         state=(lim(:state, 1), lim(:state, 2)),
         costate=(lim(:costate, 1), lim(:costate, 2)),
         control=(lim(:control, 1), lim(:control, 2)),
+        path_dual=(lim(:path_dual, 1), lim(:path_dual, 2)),
     )
 end
 
