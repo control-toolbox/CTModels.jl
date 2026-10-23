@@ -2,7 +2,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## Unreleased
+## [0.21.0] - 2026-10-23
 
 ### The duals of the boxes follow the sign convention of the ecosystem
 

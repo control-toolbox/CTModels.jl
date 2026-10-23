@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-23
+
 ### 💥 Breaking Changes
 
 #### The duals of the boxes follow the sign convention of the ecosystem
@@ -82,6 +84,7 @@ See [BREAKING.md](BREAKING.md).
   conventions is now `.ct-conventions/` (it was `.conventions/`), like `.ct-agents/`.
 - ct-agents pinned at `v0.3.0` in `AGENTS.md`: at the close of a release the agent runs
   `release.jl audit`, which checks the trail the release left.
+- ct-conventions pinned at `v0.9.0` in `AGENTS.md`, which adds the sign rules `SGN1`–`SGN6`.
 
 ### ✅ Compatibility
 
