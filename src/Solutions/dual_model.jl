@@ -33,15 +33,32 @@ If the label is not found, throws an `IncorrectArgument` exception.
   the (same) per-component multiplier for each: CTModels does not track which
   declaration "owns" the multiplier, because the solver only sees the effective
   (intersected) bound.
+- A solution may hold the duals of some kinds of constraints only (the solution of a CTFlows
+  flow holds the path duals only). For a label whose duals were not stored, `dual` throws a
+  `PreconditionError`; its suggestion is the note `infos(sol)[:missing_duals]` left by the
+  producer of the solution, which explains why the duals are missing and how to get them,
+  or a generic one.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+- [`CTBase.Exceptions.PreconditionError`](@extref): if the solution holds no dual for the
+  kind of constraint of `label`.
 """
 function dual(sol::Solution, model::Model, label::Symbol)
+
+    # an unknown label is an error whatever the solution
+    _is_constraint_label(model, label) || _throw_label_not_found(label)
 
     # the solution must carry dual variables
     has_duals(sol) || throw(
         Exceptions.PreconditionError(
             "the solution carries no dual variables";
             reason="the solution's dual model is empty (EmptyDualModel)",
-            suggestion="a direct solve returns the duals; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            suggestion=_missing_duals_note(
+                sol,
+                "a direct solve returns the duals; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            ),
             context="dual - looking up a constraint dual on a dual-free solution",
         ),
     )
@@ -52,7 +69,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if label in labels
         indices = findall(x -> x == label, labels)
         duals = path_constraints_dual(sol)
-        _ensure_dual(duals, label, "path")
+        _ensure_dual(sol, duals, label, "path")
         idx = length(indices) == 1 ? indices[1] : indices
         return DualSlice(duals, idx)
     end
@@ -63,7 +80,7 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if label in labels
         indices = findall(x -> x == label, labels)
         duals = boundary_constraints_dual(sol)
-        _ensure_dual(duals, label, "boundary")
+        _ensure_dual(sol, duals, label, "boundary")
         if length(indices) == 1
             return duals[indices[1]]
         else
@@ -91,8 +108,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
-        _ensure_dual(duals_lb, label, "state box")
-        _ensure_dual(duals_ub, label, "state box")
+        _ensure_dual(sol, duals_lb, label, "state box")
+        _ensure_dual(sol, duals_ub, label, "state box")
         idx = length(idxs) == 1 ? idxs[1] : idxs
         return BoxDualDiff(duals_lb, duals_ub, idx)
     end
@@ -103,8 +120,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
-        _ensure_dual(duals_lb, label, "control box")
-        _ensure_dual(duals_ub, label, "control box")
+        _ensure_dual(sol, duals_lb, label, "control box")
+        _ensure_dual(sol, duals_ub, label, "control box")
         idx = length(idxs) == 1 ? idxs[1] : idxs
         return BoxDualDiff(duals_lb, duals_ub, idx)
     end
@@ -115,8 +132,8 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if !isempty(idxs)
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
-        _ensure_dual(duals_lb, label, "variable box")
-        _ensure_dual(duals_ub, label, "variable box")
+        _ensure_dual(sol, duals_lb, label, "variable box")
+        _ensure_dual(sol, duals_ub, label, "variable box")
         if length(idxs) == 1
             i = idxs[1]
             return duals_lb[i] - duals_ub[i]
@@ -125,7 +142,35 @@ function dual(sol::Solution, model::Model, label::Symbol)
         end
     end
 
-    # throw an exception if the label is not found
+    # unreachable: the label was found above
+    return _throw_label_not_found(label)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether `label` is a constraint of `model`: a path or boundary constraint, or an alias of
+a state, control or variable box.
+"""
+function _is_constraint_label(model::Model, label::Symbol)::Bool
+    label in path_constraints_nl(model)[4] && return true
+    label in boundary_constraints_nl(model)[4] && return true
+    for cp in (
+        state_constraints_box(model),
+        control_constraints_box(model),
+        variable_constraints_box(model),
+    )
+        any(aliases -> label in aliases, cp[5]) && return true
+    end
+    return false
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw the [`CTBase.Exceptions.IncorrectArgument`](@extref) of an unknown constraint label.
+"""
+function _throw_label_not_found(label::Symbol)
     return throw(
         Exceptions.IncorrectArgument(
             "Label not found in model";
@@ -140,18 +185,35 @@ end
 """
 $(TYPEDSIGNATURES)
 
+The explanation of the missing duals of `sol`: the note `infos(sol)[:missing_duals]` left by
+the producer of the solution (e.g. CTFlows, which knows why a dual could not be rebuilt and
+how to get it), or `default` when there is none.
+"""
+function _missing_duals_note(sol::Solution, default::AbstractString)::String
+    note = get(infos(sol), :missing_duals, nothing)
+    return note isa AbstractString && !isempty(note) ? String(note) : String(default)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Throw a [`CTBase.Exceptions.PreconditionError`](@extref) when the solution holds no dual
 for the `kind` constraints (`duals === nothing`), although it holds others: the label
 `label` exists in the model, but its dual was not computed. A flow solution, for
-instance, carries the duals of the path constraints only.
+instance, carries the duals of the path constraints only. The suggestion is the note
+`infos(sol)[:missing_duals]` left by the producer of the solution, when there is one (see
+[`CTModels.Solutions._missing_duals_note`](@extref)).
 """
-function _ensure_dual(duals, label::Symbol, kind::String)
+function _ensure_dual(sol::Solution, duals, label::Symbol, kind::String)
     isnothing(duals) || return nothing
     return throw(
         Exceptions.PreconditionError(
             "the solution carries no dual for the $kind constraint :$label";
             reason="the label :$label is a $kind constraint of the model, but the duals of the $kind constraints were not stored in the solution",
-            suggestion="a direct solve returns every dual; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            suggestion=_missing_duals_note(
+                sol,
+                "a direct solve returns every dual; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            ),
             context="dual - looking up the dual of a constraint",
         ),
     )

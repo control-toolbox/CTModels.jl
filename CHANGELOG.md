@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (boundary labels). It now throws a `PreconditionError` naming the kind of constraint
   and how to get its duals. The message for a solution with no dual at all no longer says
   that a flow solution has none.
+- **The producer of a solution can explain its missing duals**: when
+  `infos(sol)[:missing_duals]` is a string, it is the suggestion of these
+  `PreconditionError`s (CTFlows uses it to say why a flow could not rebuild a dual and how
+  to get it).
+- **An unknown label is an `IncorrectArgument` on every solution**: the label is checked
+  before the duals, so a solution with no dual at all no longer answers an unknown label
+  with a `PreconditionError`.
 
 ### 📚 Documentation
 

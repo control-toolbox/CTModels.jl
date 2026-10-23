@@ -408,6 +408,42 @@ function test_dual_model()
             Test.@test Solutions.dual(sol, m, :sbox)(0.5) ≈ 1.0
             Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol, m, :pc)
         end
+
+        Test.@testset "dual(): the note of the producer of the solution" begin
+            m = _build_model_with_every_kind()
+            T = [0.0, 0.5, 1.0]
+            note = "give the constraint to the flow by its label"
+            build(; kw...) = Solutions.build_solution(
+                m,
+                T,
+                zeros(3, 1),
+                zeros(3, 1),
+                zeros(1),
+                zeros(3, 1);
+                objective=0.0,
+                successful=true,
+                kw...,
+            )
+            _err(sol, label) =
+                try
+                    Solutions.dual(sol, m, label)
+                catch e
+                    e
+                end
+            # a kind of dual missing
+            sol = build(; path_constraints_dual=t -> [0.0], infos=Dict{Symbol,Any}(:missing_duals => note))
+            Test.@test _err(sol, :sbox) isa Exceptions.PreconditionError
+            Test.@test _err(sol, :sbox).suggestion == note
+            # no dual at all
+            sol = build(; infos=Dict{Symbol,Any}(:missing_duals => note))
+            Test.@test _err(sol, :pc) isa Exceptions.PreconditionError
+            Test.@test _err(sol, :pc).suggestion == note
+            # no note (or not a string): the generic suggestion
+            sol = build(; infos=Dict{Symbol,Any}(:missing_duals => 1))
+            Test.@test occursin("constraint=:label", _err(sol, :pc).suggestion)
+            # an unknown label is still an IncorrectArgument
+            Test.@test _err(sol, :nonexistent) isa Exceptions.IncorrectArgument
+        end
     end
 
     Test.@testset "DualSlice and BoxDualDiff" verbose=VERBOSE showtiming=SHOWTIMING begin
