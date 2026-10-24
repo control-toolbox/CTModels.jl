@@ -225,7 +225,10 @@ At a switching time whose dual limits are known, the jump is drawn as for the st
 function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool, connect::Bool=true)
     Tp = CTModels.time_grid(sol, :path)
     T, M = _spliced_samples(
-        sol, Tp, _sample(CTModels.path_constraints_dual(sol), Tp), :path_dual;
+        sol,
+        Tp,
+        _sample(CTModels.path_constraints_dual(sol), Tp),
+        :path_dual;
         connect=connect,
     )
     nc = size(M, 2)
