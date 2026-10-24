@@ -294,9 +294,7 @@ function build_solution(
     end
 
     # Switching structure: consistent with the grids and the dimensions of the problem
-    _check_switching(
-        switching, T_state, dim_x, dim_u, dim_path_constraints_nl(ocp)
-    )
+    _check_switching(switching, T_state, dim_x, dim_u, dim_path_constraints_nl(ocp))
 
     # Build interpolated functions for state, control, and costate
     # Using unified API with validation and deepcopy+scalar wrapping

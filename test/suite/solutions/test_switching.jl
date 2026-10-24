@@ -95,13 +95,9 @@ function test_switching()
             Test.@test size(Solutions.limits(d, :state)[1]) == (2, 0)
             Test.@test size(Solutions.limits(d, :path_dual)[1]) == (2, 0)
             # limits of the duals of the path constraints
-            pd = Solutions.SwitchingModel(;
-                times=[τ], path_dual=([0.0 1.0], [2.0 1.0])
-            )
+            pd = Solutions.SwitchingModel(; times=[τ], path_dual=([0.0 1.0], [2.0 1.0]))
             Test.@test Solutions.limits(pd, :path_dual) == ([0.0 1.0], [2.0 1.0])
-            Test.@test occursin(
-                "Limits : path_dual", sprint(show, MIME"text/plain"(), pd)
-            )
+            Test.@test occursin("Limits : path_dual", sprint(show, MIME"text/plain"(), pd))
             # conversions: Int times, SubString labels, Int matrices
             c = Solutions.SwitchingModel(;
                 times=[1], labels=[SubString("ab", 1, 1), "b"], state=([1;;], [2;;])

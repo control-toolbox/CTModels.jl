@@ -73,10 +73,20 @@ function _build_model_with_every_kind()
     Building.definition!(ocp, quote end)
     Building.time_dependence!(ocp; autonomous=false)
     Building.constraint!(
-        ocp, :path; f=(r, t, x, u, v) -> (r[1]=x[1] + u[1]; nothing), lb=[-Inf], ub=[0.0], label=:pc
+        ocp,
+        :path;
+        f=(r, t, x, u, v) -> (r[1]=x[1] + u[1]; nothing),
+        lb=[-Inf],
+        ub=[0.0],
+        label=:pc,
     )
     Building.constraint!(
-        ocp, :boundary; f=(r, x0, xf, v) -> (r[1]=x0[1]; nothing), lb=[0.0], ub=[0.0], label=:bc
+        ocp,
+        :boundary;
+        f=(r, x0, xf, v) -> (r[1]=x0[1]; nothing),
+        lb=[0.0],
+        ub=[0.0],
+        label=:bc,
     )
     Building.constraint!(ocp, :state; rg=1:1, lb=[0.0], ub=[1.0], label=:sbox)
     Building.constraint!(ocp, :control; rg=1:1, lb=[0.0], ub=[1.0], label=:cbox)
@@ -486,7 +496,10 @@ function test_dual_model()
                     e
                 end
             # a kind of dual missing
-            sol = build(; path_constraints_dual=t -> [0.0], infos=Dict{Symbol,Any}(:missing_duals => note))
+            sol = build(;
+                path_constraints_dual=t -> [0.0],
+                infos=Dict{Symbol,Any}(:missing_duals => note),
+            )
             Test.@test _err(sol, :sbox) isa Exceptions.PreconditionError
             Test.@test _err(sol, :sbox).suggestion == note
             # no dual at all
