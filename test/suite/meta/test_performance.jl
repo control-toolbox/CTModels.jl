@@ -83,6 +83,16 @@ function _merged_raw(t)
     return v
 end
 
+# Scalar (dim=1) merged trajectory: the scalar path must need no scratch
+# vector at all — same raw-equivalent contract as above (issue #501).
+_merged1_base_raw(t) = 0.0
+_merged1_c_raw(t) = 2t
+function _merged1_raw(t)
+    b = _merged1_base_raw(t)
+    b = _merged1_c_raw(t)
+    return b
+end
+
 # Minimal built `Model`, for trait reads.
 _pre = Building.PreModel()
 Building.time!(_pre; t0=0.0, tf=1.0)
@@ -209,6 +219,16 @@ function test_performance()
             )
             Test.@test (BenchmarkTools.@ballocated $f_merged($t)) ==
                 (BenchmarkTools.@ballocated $_merged_raw($t))
+
+            # Scalar (dim=1) merged trajectory: `dim` is a type parameter,
+            # so the generated call emits the scalar path directly — no
+            # scratch vector, no boxed union return (issue #501). Measured
+            # 64 B before the fix.
+            f_merged1 = Init.MergedTrajectory(
+                _merged1_base_raw, Dict{Int,Function}(1 => _merged1_c_raw), 1, :state
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_merged1($t)) ==
+                (BenchmarkTools.@ballocated $_merged1_raw($t))
         end
 
         # ======================================================================
