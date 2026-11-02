@@ -79,13 +79,13 @@ function solution_example_dual()
     # the solution
     function SOL(ocp, t0, tf)
         x(t) = -exp(-t)
-        p(t) = exp(t-1) - 1
+        p(t) = exp(t - 1) - 1
         u(t) = -x(t)
         objective = exp(-1) - 1
         v = Float64[]
 
         #
-        path_constraints_dual(t) = [-(p(t)+1), 0, t]
+        path_constraints_dual(t) = [-(p(t) + 1), 0, t]
 
         # 
         times = range(t0, tf, 201)

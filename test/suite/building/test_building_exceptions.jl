@@ -9,7 +9,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_building_exceptions()
-    Test.@testset "OCP Exception Integration" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "OCP Exception Integration" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # INTEGRATION TESTS
@@ -190,12 +190,12 @@ function test_building_exceptions()
             Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= x)
 
             Test.@test_throws Exceptions.PreconditionError begin
-                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
+                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2 * x)
             end
 
             # Verify duplicate dynamics exception
             try
-                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2*x)
+                Building.dynamics!(ocp2, (out, t, x, u, v) -> out .= 2 * x)
             catch e
                 Test.@test e isa Exceptions.PreconditionError
                 Test.@test e.msg == "Dynamics already set"

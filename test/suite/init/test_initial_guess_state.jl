@@ -25,7 +25,7 @@ Components.has_fixed_initial_time(::DummyOCP2DState) = true
 Components.initial_time(::DummyOCP2DState) = 0.0
 
 function test_initial_guess_state()
-    Test.@testset "State Initial Guess Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "State Initial Guess Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - State Initial Guess Functions

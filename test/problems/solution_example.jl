@@ -73,8 +73,8 @@ function solution_example(; fun=false)
     a = x0[1]
     b = x0[2]
     C = [
-        -(tf - t0)^3/6.0 (tf - t0)^2/2.0
-        -(tf - t0)^2/2.0 (tf-t0)
+        -(tf - t0)^3 / 6.0 (tf - t0)^2 / 2.0
+        -(tf - t0)^2 / 2.0 (tf - t0)
     ]
     D = [-a - b * (tf - t0), -b] + xf
     p0 = C \ D

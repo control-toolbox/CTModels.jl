@@ -134,13 +134,14 @@ function _make_solution(
 end
 
 function test_dual_model()
-    Test.@testset "Dual Model Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Dual Model Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Low-level DualModel Accessors
         # ====================================================================
 
-        Test.@testset "DualModel constraint dual accessors" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "DualModel constraint dual accessors" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             pc = t -> [1.0, 2.0]
             bc = [3.0, 4.0]
             sc_lb = t -> [0.0]
@@ -196,7 +197,8 @@ function test_dual_model()
         # in the provided dual matrix).
         # ====================================================================
 
-        Test.@testset "INTEGRATION TESTS - dual() box constraints" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "INTEGRATION TESTS - dual() box constraints" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
 
             # --- State box ---
             Test.@testset "state - single full-range declaration" begin
@@ -514,7 +516,7 @@ function test_dual_model()
         end
     end
 
-    Test.@testset "DualSlice and BoxDualDiff" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "DualSlice and BoxDualDiff" verbose = VERBOSE showtiming = SHOWTIMING begin
         Test.@testset "DualSlice — scalar index" begin
             duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
             f = Solutions.DualSlice(duals_fn, 2)

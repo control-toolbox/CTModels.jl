@@ -37,7 +37,8 @@ function vector_ocp()
 end
 
 function test_initial_guess_scalar()
-    Test.@testset "1-D initial guesses are scalars" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "1-D initial guesses are scalars" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         ocp = scalar_ocp()
         T = collect(range(0.0, 1.0; length=5))
 

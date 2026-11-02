@@ -14,7 +14,7 @@ function _show_string(value; plain=false, color=false)
 end
 
 function test_type_show()
-    Test.@testset "Concrete type display" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Concrete type display" verbose = VERBOSE showtiming = SHOWTIMING begin
         state = Components.StateModel("x", ["x₁", "x₂"])
         state_solution = Components.StateModelSolution("x", ["x₁"], t -> 2t)
         control = Components.ControlModel("u", ["u"])

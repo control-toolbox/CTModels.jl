@@ -47,7 +47,7 @@ function _sw()
     return Solutions.SwitchingModel(;
         times=[τ1, τ2],
         labels=["bang", "", "boundary"],
-        state=([τ1 1.0; τ2+1.0 1.0], [τ1+1.0 1.0; τ2+1.0 3.0]),
+        state=([τ1 1.0; τ2 + 1.0 1.0], [τ1 + 1.0 1.0; τ2 + 1.0 3.0]),
         costate=([0.0 0.0; 0.0 0.0], [0.0 0.0; 1.0 -1.0]),
         control=([1.0; 0.0;;], [0.0; -1.0;;]),
     )
@@ -90,7 +90,8 @@ function _check_roundtrip(sol, back)
 end
 
 function test_switching_serialization()
-    Test.@testset "Serialization of the switching structure" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Serialization of the switching structure" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         ocp = _ocp()
 
         Test.@testset "serialized data" begin
@@ -98,7 +99,7 @@ function test_switching_serialization()
             Test.@test data["format_version"] == 2
             Test.@test data["switching_times"] == [τ1, τ2]
             Test.@test data["phase_labels"] == ["bang", "", "boundary"]
-            Test.@test data["switching_state_right"] == [τ1+1.0 1.0; τ2+1.0 3.0]
+            Test.@test data["switching_state_right"] == [τ1 + 1.0 1.0; τ2 + 1.0 3.0]
             Test.@test size(data["switching_control_left"]) == (2, 1)
             Test.@test size(data["switching_path_dual_left"]) == (2, 0)
             # no structure: no key

@@ -38,9 +38,9 @@ function test_partial_dynamics()
     # Dummy variables for evaluating dynamics
     r = zeros(n_states)
     t = 10
-    x = 20*ones(n_states)
-    u = 100*ones(1)
-    v = 1000*ones(1)
+    x = 20 * ones(n_states)
+    u = 100 * ones(1)
+    v = 1000 * ones(1)
 
     ######
     # 2. Add index-by-index in order, then evaluate vs full function
@@ -143,7 +143,7 @@ function test_partial_dynamics()
     Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp5, full_dynamics!)
 
     ocp6 = deepcopy(ocp)
-    Building.dynamics!(ocp6, 1:2, (r, t, x, u, v)->(r[1]=0; r[2]=0))
+    Building.dynamics!(ocp6, 1:2, (r, t, x, u, v) -> (r[1]=0; r[2]=0))
     Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp6, full_dynamics!)
 
     ######
@@ -290,7 +290,7 @@ function test_full_dynamics()
 
     # Attempt to add partial dynamics after full dynamics -> error
     Test.@test_throws Exceptions.PreconditionError Building.dynamics!(
-        ocp6, 1:1, (r, t, x, u, v)->(r[1]=0)
+        ocp6, 1:1, (r, t, x, u, v) -> (r[1] = 0)
     )
 
     # New ocp for partial dynamics first, then full -> error
@@ -299,12 +299,12 @@ function test_full_dynamics()
     Building.state!(ocp7, 2)
     Building.control!(ocp7, 1)
     Building.variable!(ocp7, 1)
-    Building.dynamics!(ocp7, 1:1, (r, t, x, u, v)->(r[1]=0))
+    Building.dynamics!(ocp7, 1:1, (r, t, x, u, v) -> (r[1] = 0))
     Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp7, dynamics!)
 end
 
 function test_dynamics()
-    Test.@testset "Dynamics Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Dynamics Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Full Dynamics

@@ -9,7 +9,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_variable()
-    Test.@testset "Variable Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Variable Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Variable Model

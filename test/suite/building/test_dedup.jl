@@ -9,7 +9,8 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_dedup()
-    Test.@testset "Building dedup / build(ConstraintsDictType)" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Building dedup / build(ConstraintsDictType)" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT - _dedup_box_constraints!  (direct tests)

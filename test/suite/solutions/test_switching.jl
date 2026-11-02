@@ -75,7 +75,7 @@ end
 _show(sol) = sprint(show, MIME"text/plain"(), sol)
 
 function test_switching()
-    Test.@testset "Switching structure" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Switching structure" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - SwitchingModel construction

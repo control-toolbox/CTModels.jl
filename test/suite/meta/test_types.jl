@@ -11,7 +11,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_types()
-    Test.@testset "CTModels.jl Type System Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "CTModels.jl Type System Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - OCP Model and Solution Core Types

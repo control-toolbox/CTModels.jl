@@ -52,7 +52,7 @@ function _variable_dim1_solution_with_duals()
 end
 
 function test_serialization_units()
-    Test.@testset "Serialization unit tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Serialization unit tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ==============================================================================
         # C.1 — _discretize_function / _discretize_dual

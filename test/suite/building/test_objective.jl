@@ -9,7 +9,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_objective()
-    Test.@testset "Objective Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Objective Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Objective Models
@@ -196,7 +196,7 @@ function test_objective()
         # UNIT TESTS - Cost aliases
         # ====================================================================
 
-        Test.@testset "cost aliases" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "cost aliases" verbose = VERBOSE showtiming = SHOWTIMING begin
             mayer_alias(x0, xf, v) = x0 .+ xf .+ v
             lagrange_alias(t, x, u, v) = t .+ x .+ u .+ v
 

@@ -90,7 +90,7 @@ Models.control(sol::DummySolution1DVar) = sol.ufun
 Models.variable(sol::DummySolution1DVar) = sol.v
 
 function test_initial_guess_validation()
-    Test.@testset "Initial Guess Validation Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Initial Guess Validation Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Validation Functions

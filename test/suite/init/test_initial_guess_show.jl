@@ -7,7 +7,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_initial_guess_show()
-    Test.@testset "InitialGuess Display" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "InitialGuess Display" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - InitialGuess text/plain show

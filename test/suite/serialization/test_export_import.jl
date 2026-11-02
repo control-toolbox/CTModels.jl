@@ -292,7 +292,7 @@ end
 # ============================================================================
 
 function test_export_import()
-    Test.@testset "Export/Import Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Export/Import Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # INTEGRATION TESTS - Basic Round-Trip with TestProblems
@@ -1340,8 +1340,8 @@ function test_export_import()
             u_jld = Components.control(sol_jld_reloaded)
 
             for t in T[1:min(end, 3)]  # Test first few points
-                Test.@test u_orig(t) ≈ u_json(t) atol=1e-10
-                Test.@test u_orig(t) ≈ u_jld(t) atol=1e-10
+                Test.@test u_orig(t) ≈ u_json(t) atol = 1e-10
+                Test.@test u_orig(t) ≈ u_jld(t) atol = 1e-10
             end
 
             remove_if_exists("test_mixed_json.json")

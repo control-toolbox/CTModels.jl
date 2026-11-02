@@ -15,7 +15,8 @@ struct CTMDummySol <: Solutions.AbstractSolution end
 struct CTMDummyModelTop <: Models.AbstractModel end
 
 function test_CTModels()
-    Test.@testset "CTModels.jl Top-Level Module Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "CTModels.jl Top-Level Module Tests" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Basic Aliases and Tags

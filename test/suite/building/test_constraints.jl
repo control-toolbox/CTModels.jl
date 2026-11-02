@@ -50,7 +50,7 @@ If you see warnings like "Multiple bound declarations for component X", they are
 expected and part of the test assertions.
 """
 function test_constraints()
-    Test.@testset "Constraints Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Constraints Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Constraint Handling

@@ -49,7 +49,7 @@ Models.variable_name(::DummyOCP1D2Control) = "v"
 Models.variable_components(::DummyOCP1D2Control) = String[]
 
 function test_initial_guess_builders()
-    Test.@testset "Initial Guess Builders Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Initial Guess Builders Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Builder Functions
