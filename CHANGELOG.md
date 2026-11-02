@@ -857,7 +857,7 @@ model = build(pre)  # Works even without definition
 - **Consistent naming**: Follows pattern `has_*` for presence checks, `is_*` for property checks
 - **New exports**: `has_variable`, `has_control`, `has_abstract_definition`, `is_abstractly_defined`, `is_nonautonomous`, `is_nonvariable`
 
-#### API Enhancements
+#### Predicate API Enhancements
 
 ```julia
 # Check if problem has optimisation variables
@@ -1491,8 +1491,6 @@ pre = CTModels.PreInitialGuess(...)
 - Documentation generation issues resolved
 - Cross-reference warnings handled gracefully
 - Extension integration improvements
-
-## [Unreleased]
 
 ## [0.7.1-beta] - 2026-01-22
 
