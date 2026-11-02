@@ -12,6 +12,7 @@ using CTModels: CTModels
 using CTModels: Components
 using CTModels: Solutions
 using CTModels: Models
+using CTModels: Building
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -81,6 +82,17 @@ function test_code_quality()
             f_proj = Models.BoxProjection{:state}(2)
             JET.@test_opt target_modules = (CTModels,) f_proj(
                 nothing, [1.0, 2.0, 3.0], nothing, nothing
+            )
+
+            # --- Composite dynamics assembled from coordinate parts (Building;
+            #     issue #496) — evaluated once per solver step ---
+            parts = Tuple{UnitRange{Int},Function}[
+                (1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing)),
+                (2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing)),
+            ]
+            dyn_parts = Building.__build_dynamics_from_parts(parts)
+            JET.@test_opt target_modules = (CTModels,) dyn_parts(
+                zeros(2), 0.0, [0.3, 0.7], [0.5], Float64[]
             )
         end
     end
