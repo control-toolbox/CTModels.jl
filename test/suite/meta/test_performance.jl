@@ -171,9 +171,8 @@ function test_performance()
             x0 = [0.3, 0.7]
             u0 = [0.5]
             v0 = Float64[]
-            Test.@test (BenchmarkTools.@ballocated $dyn_parts(
-                $r, $t0, $x0, $u0, $v0
-            )) == (BenchmarkTools.@ballocated $_dyn_mono!($r, $t0, $x0, $u0, $v0))
+            Test.@test (BenchmarkTools.@ballocated $dyn_parts($r, $t0, $x0, $u0, $v0)) ==
+                (BenchmarkTools.@ballocated $_dyn_mono!($r, $t0, $x0, $u0, $v0))
         end
 
         # ======================================================================

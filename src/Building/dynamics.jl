@@ -230,8 +230,7 @@ traversal silently falls back to dynamic calls beyond the compiler's recursion l
 """
 @generated function (f::CompositeDynamics{P})(val, t, x, u, v) where {P}
     calls = [
-        :(f.parts[$i][2](@view(val[f.parts[$i][1]]), t, x, u, v)) for
-        i in 1:fieldcount(P)
+        :(f.parts[$i][2](@view(val[f.parts[$i][1]]), t, x, u, v)) for i in 1:fieldcount(P)
     ]
     return quote
         $(calls...)
@@ -271,7 +270,9 @@ Detailed string representation of [`CTModels.Building.CompositeDynamics`](@extre
 function Base.show(io::IO, ::MIME"text/plain", f::CompositeDynamics{P}) where {P}
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "CompositeDynamics", fmt.reset)
-    print(io, "\n  ", fmt.label, "n:      ", fmt.reset, fmt.count, length(f.parts), fmt.reset)
+    print(
+        io, "\n  ", fmt.label, "n:      ", fmt.reset, fmt.count, length(f.parts), fmt.reset
+    )
     return print(
         io,
         "\n  ",
