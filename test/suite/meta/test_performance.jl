@@ -55,6 +55,13 @@ _ub_raw(t) = [0.5, 0.5, 0.5]
 _boxdualdiff_raw(lb, ub, t, idx) = lb(t)[idx] - ub(t)[idx]
 _boxproj_raw(x, idx) = x[idx]
 
+# Per-coordinate partial dynamics and the equivalent monolithic dynamics: the
+# `Model` built from the two `_dyn_part_*!` calls must evaluate at exactly the
+# cost of a call to `_dyn_mono!` (issue #496).
+_dyn_part_1!(r, t, x, u, v) = (r[1] = x[2]; nothing)
+_dyn_part_2!(r, t, x, u, v) = (r[1] = u[1]; nothing)
+_dyn_mono!(r, t, x, u, v) = (r[1] = x[2]; r[2] = u[1]; nothing)
+
 # Minimal built `Model`, for trait reads.
 _pre = Building.PreModel()
 Building.time!(_pre; t0=0.0, tf=1.0)
@@ -71,6 +78,25 @@ Building.definition!(_pre, quote
 end)
 Building.time_dependence!(_pre; autonomous=true)
 const _model = Building.build(_pre)
+
+# Minimal built `Model` whose dynamics is declared component-wise — the shape
+# CTParser's `@def` produces for `∂(xᵢ)(t) == …` per coordinate.
+_pre_parts = Building.PreModel()
+Building.time!(_pre_parts; t0=0.0, tf=1.0)
+Building.state!(_pre_parts, 2)
+Building.control!(_pre_parts, 1)
+Building.dynamics!(_pre_parts, 1, _dyn_part_1!)
+Building.dynamics!(_pre_parts, 2, _dyn_part_2!)
+Building.objective!(_pre_parts, :min; lagrange=(t, x, u, v) -> u[1]^2)
+Building.definition!(_pre_parts, quote
+    t ∈ [0, 1], time
+    x ∈ R², state
+    u ∈ R, control
+    ẋ(t) == x(t) .+ u(t)
+    ∫(u(t)^2) → min
+end)
+Building.time_dependence!(_pre_parts; autonomous=true)
+const _model_parts = Building.build(_pre_parts)
 
 function test_performance()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Performance contract" begin
@@ -132,6 +158,22 @@ function test_performance()
             raw_interp = Interpolation.ctinterpolate(T, CTBase.Core.matrix2vec(X, 1))
             Test.@test (BenchmarkTools.@ballocated $fx(0.25)) ==
                 (BenchmarkTools.@ballocated $raw_interp(0.25))
+
+            # A dynamics assembled from per-coordinate parts (the shape
+            # CTParser's `@def` emits for `∂(xᵢ)(t) == …`) must allocate exactly
+            # what the equivalent monolithic dynamics function allocates:
+            # declaring component-wise is a syntax choice, not a license for
+            # runtime dispatch — the dynamics is evaluated once per solver step
+            # (issue #496, ct-conventions PERF1). Measured 192 B before the fix.
+            dyn_parts = Models.dynamics(_model_parts)
+            r = zeros(2)
+            t0 = 0.0
+            x0 = [0.3, 0.7]
+            u0 = [0.5]
+            v0 = Float64[]
+            Test.@test (BenchmarkTools.@ballocated $dyn_parts(
+                $r, $t0, $x0, $u0, $v0
+            )) == (BenchmarkTools.@ballocated $_dyn_mono!($r, $t0, $x0, $u0, $v0))
         end
 
         # ======================================================================
