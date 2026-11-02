@@ -32,7 +32,7 @@ Components.has_fixed_initial_time(::DummyOCP2DVarIG) = true
 Components.initial_time(::DummyOCP2DVarIG) = 0.0
 
 function test_initial_guess_variable()
-    Test.@testset "Variable Initial Guess Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Variable Initial Guess Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Variable Initial Guess Functions

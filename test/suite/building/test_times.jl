@@ -16,7 +16,7 @@ Base.length(v::FakeTimeVector) = length(v.data)
 Base.getindex(v::FakeTimeVector{T}, i::Int) where {T} = v.data[i]
 
 function test_times()
-    Test.@testset "Times Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Times Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Time Models

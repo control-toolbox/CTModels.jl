@@ -132,7 +132,8 @@ function _caught(f)
 end
 
 function test_import_model_mismatch()
-    Test.@testset "Import with a model that does not match the file" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Import with a model that does not match the file" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ==================================================================
         # UNIT: validation on serialized data (no I/O)

@@ -11,7 +11,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_interpolation_helpers()
-    Test.@testset "Interpolation Helpers Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Interpolation Helpers Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Interpolation Helpers
@@ -202,7 +202,7 @@ function test_interpolation_helpers()
 
             # Should be wrapped with deepcopy but still work
             Test.@test result(0.0) ≈ [0.0, 1.0]
-            Test.@test result(π/2) ≈ [1.0, 0.0] atol=1e-10
+            Test.@test result(π / 2) ≈ [1.0, 0.0] atol = 1e-10
         end
 
         # ====================================================================

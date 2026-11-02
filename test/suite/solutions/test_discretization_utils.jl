@@ -7,13 +7,14 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_discretization_utils()
-    Test.@testset "Discretization Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Discretization Utils Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Discretization Utilities
         # ====================================================================
 
-        Test.@testset "Basic discretization - scalar function" verbose=VERBOSE showtiming=SHOWTIMING begin
+        Test.@testset "Basic discretization - scalar function" verbose = VERBOSE showtiming =
+            SHOWTIMING begin
             # Simple scalar function
             f_scalar = t -> 2.0 * t
             T = [0.0, 0.5, 1.0]
@@ -30,7 +31,7 @@ function test_discretization_utils()
 
         Test.@testset "Basic discretization - vector function" begin
             # Vector function
-            f_vec = t -> [t, 2*t]
+            f_vec = t -> [t, 2 * t]
             T = [0.0, 0.5, 1.0]
 
             # With explicit dimension
@@ -62,7 +63,7 @@ function test_discretization_utils()
             Test.@test isnothing(result_nothing)
 
             # Dual function exists
-            f_dual = t -> [t, 2*t]
+            f_dual = t -> [t, 2 * t]
             result_func = Solutions._discretize_dual(f_dual, T, 2)
             Test.@test !isnothing(result_func)
             Test.@test size(result_func) == (3, 2)
@@ -75,7 +76,7 @@ function test_discretization_utils()
 
         Test.@testset "Edge cases" begin
             # Single time point
-            f = t -> [t, 2*t]
+            f = t -> [t, 2 * t]
             T_single = [0.5]
             result = Solutions._discretize_function(f, T_single, 2)
             Test.@test size(result) == (1, 2)

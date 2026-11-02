@@ -53,7 +53,8 @@ _axes(f) = [x for x in f.content if x isa Makie.Axis]
 _count_plots(axis, ::Type{P}) where {P} = count(p -> p isa P, axis.scene.plots)
 
 function test_plot_switching_render()
-    Test.@testset "Rendering a solution with switching times" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Rendering a solution with switching times" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         sol = _sol()
 
         Test.@testset "Plots" begin

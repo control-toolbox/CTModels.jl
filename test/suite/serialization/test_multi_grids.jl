@@ -20,7 +20,7 @@ function remove_if_exists(filename::String)
 end
 
 function test_multi_grids()
-    Test.@testset "Multi-Grid Serialization Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Multi-Grid Serialization Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # INTEGRATION TESTS - Multi-Grid Support
@@ -186,11 +186,11 @@ function test_multi_grids()
             # Verify trajectories at their respective grids
             for t in T_state
                 Test.@test Components.state(sol_reloaded)(t) ≈
-                    Components.state(sol_multi)(t) atol=1e-8
+                    Components.state(sol_multi)(t) atol = 1e-8
             end
             for t in T_control
                 Test.@test Components.control(sol_reloaded)(t) ≈
-                    Components.control(sol_multi)(t) atol=1e-8
+                    Components.control(sol_multi)(t) atol = 1e-8
             end
 
             remove_if_exists(filename * ".jld2")

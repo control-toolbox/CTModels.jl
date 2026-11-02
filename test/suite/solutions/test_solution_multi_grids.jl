@@ -10,7 +10,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_solution_multi_grids()
-    Test.@testset "Solution Multi Grids Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Solution Multi Grids Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Time Grid Models
@@ -127,7 +127,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -139,8 +139,8 @@ function test_solution_multi_grids()
 
             Test.@testset "Identical grids → UnifiedTimeGridModel" begin
                 T = collect(LinRange(0, 1, 101))
-                X = [1.0 - t/100 for t in 1:101, i in 1:2]
-                U = [sin(2π * t/100) for t in 1:101, i in 1:1]
+                X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+                U = [sin(2π * t / 100) for t in 1:101, i in 1:1]
                 P = zeros(101, 2)
                 v = Float64[]
 
@@ -172,8 +172,8 @@ function test_solution_multi_grids()
                 T_costate = collect(LinRange(0, 1, 76))
                 T_path = collect(LinRange(0, 1, 61))
 
-                X = [1.0 - t/100 for t in 1:101, i in 1:2]
-                U = [sin(2π * t/50) for t in 1:51, i in 1:1]
+                X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+                U = [sin(2π * t / 50) for t in 1:51, i in 1:1]
                 P = zeros(76, 2)  # Costate has its own grid
                 v = Float64[]
 
@@ -211,8 +211,8 @@ function test_solution_multi_grids()
                 T_costate = collect(LinRange(0, 1, 76))
                 T_path = nothing
 
-                X = [1.0 - t/100 for t in 1:101, i in 1:2]
-                U = [sin(2π * t/50) for t in 1:51, i in 1:1]
+                X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+                U = [sin(2π * t / 50) for t in 1:51, i in 1:1]
                 P = zeros(76, 2)  # Costate has its own grid
                 v = Float64[]
 
@@ -273,7 +273,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -283,8 +283,8 @@ function test_solution_multi_grids()
             ocp = Building.build(pre_ocp)
 
             T = collect(LinRange(0, 1, 101))
-            X = [1.0 - t/100 for t in 1:101, i in 1:2]
-            U = [sin(2π * t/100) for t in 1:101, i in 1:1]
+            X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+            U = [sin(2π * t / 100) for t in 1:101, i in 1:1]
             P = zeros(101, 2)
             v = Float64[]
 
@@ -334,8 +334,8 @@ function test_solution_multi_grids()
                 T_path = collect(LinRange(0, 1, 61))
 
                 # Create data matching the grid sizes
-                X_multi = [1.0 - t/100 for t in 1:101, i in 1:2]  # 101 points for state
-                U_multi = [sin(2π * t/50) for t in 1:51, i in 1:1]   # 51 points for control
+                X_multi = [1.0 - t / 100 for t in 1:101, i in 1:2]  # 101 points for state
+                U_multi = [sin(2π * t / 50) for t in 1:51, i in 1:1]   # 51 points for control
                 P_multi = zeros(76, 2)  # 76 points for costate (has its own grid)
                 v_multi = Float64[]
 
@@ -412,7 +412,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -426,8 +426,8 @@ function test_solution_multi_grids()
             T_costate = collect(LinRange(0, 1, 76))
             T_path = collect(LinRange(0, 1, 61))
 
-            X = [1.0 - t/100 for t in 1:101, i in 1:2]
-            U = [sin(2π * t/50) for t in 1:51, i in 1:1]
+            X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+            U = [sin(2π * t / 50) for t in 1:51, i in 1:1]
             P = zeros(76, 2)  # Costate has its own grid
             v = Float64[]
 
@@ -497,7 +497,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -507,8 +507,8 @@ function test_solution_multi_grids()
             ocp = Building.build(pre_ocp)
 
             T = collect(LinRange(0, 1, 101))
-            X = [1.0 - t/100 for t in 1:101, i in 1:2]
-            U = [sin(2π * t/100) for t in 1:101, i in 1:1]
+            X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+            U = [sin(2π * t / 100) for t in 1:101, i in 1:1]
             P = zeros(101, 2)
             v = Float64[]
 
@@ -567,7 +567,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -580,8 +580,8 @@ function test_solution_multi_grids()
             T_control = collect(LinRange(0, 1, 51))
             T_costate = collect(LinRange(0, 1, 76))
             T_path = collect(LinRange(0, 1, 61))
-            X = [1.0 - t/100 for t in 1:101, i in 1:2]
-            U = [sin(2π * t/50) for t in 1:51, i in 1:1]
+            X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+            U = [sin(2π * t / 50) for t in 1:51, i in 1:1]
             P = zeros(76, 2)
             v = Float64[]
 
@@ -646,7 +646,7 @@ function test_solution_multi_grids()
                 x ∈ R², state
                 u ∈ R, control
                 ẋ(t) == [x₂(t), u(t)]
-                ∫(0.5*u(t)^2) → min
+                ∫(0.5 * u(t)^2) → min
             end
             Building.definition!(pre_ocp, definition)
 
@@ -656,8 +656,8 @@ function test_solution_multi_grids()
             ocp = Building.build(pre_ocp)
 
             T = collect(LinRange(0, 1, 101))
-            X = [1.0 - t/100 for t in 1:101, i in 1:2]
-            U = [sin(2π * t/100) for t in 1:101, i in 1:1]
+            X = [1.0 - t / 100 for t in 1:101, i in 1:2]
+            U = [sin(2π * t / 100) for t in 1:101, i in 1:1]
             P = zeros(101, 2)
             v = Float64[]
 
@@ -692,8 +692,8 @@ function test_solution_multi_grids()
                 T_path = collect(LinRange(0, 1, 61))
 
                 # Create data matching the grid sizes
-                X_stab = [1.0 - t/100 for t in 1:101, i in 1:2]  # 101 points for state
-                U_stab = [sin(2π * t/50) for t in 1:51, i in 1:1]   # 51 points for control
+                X_stab = [1.0 - t / 100 for t in 1:101, i in 1:2]  # 101 points for state
+                U_stab = [sin(2π * t / 50) for t in 1:51, i in 1:1]   # 51 points for control
                 P_stab = zeros(76, 2)  # 76 points for costate
                 v_stab = Float64[]
 

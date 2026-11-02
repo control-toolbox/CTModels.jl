@@ -8,7 +8,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_time_dependence()
-    Test.@testset "Time Dependence Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Time Dependence Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Time Dependence Functions

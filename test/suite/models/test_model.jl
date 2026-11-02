@@ -11,7 +11,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_model()
-    Test.@testset "Model Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Model Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Model Building
@@ -525,7 +525,8 @@ function test_model()
         end
     end
 
-    Test.@testset "BoxProjection, SubPathConstraint, SubBoundaryConstraint" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "BoxProjection, SubPathConstraint, SubBoundaryConstraint" verbose =
+        VERBOSE showtiming = SHOWTIMING begin
         Test.@testset "BoxProjection{:state} — scalar" begin
             f = Models.BoxProjection{:state}(2)
             Test.@test f isa Function

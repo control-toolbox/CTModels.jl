@@ -29,7 +29,7 @@ Models.state_dimension(::FakeSolutionDoPlot) = 2
 Models.control_dimension(::FakeSolutionDoPlot) = 1
 
 function test_plot()
-    Test.@testset "Plotting Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Plotting Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Case-layer vocabulary and gating

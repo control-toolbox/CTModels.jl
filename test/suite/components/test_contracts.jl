@@ -66,7 +66,7 @@ function check_variable_contract(m::Components.AbstractVariableModel)::Bool
 end
 
 function test_contracts()
-    Test.@testset "Contract / LSP Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Contract / LSP Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # Contract: AbstractStateModel — LSP substitutability

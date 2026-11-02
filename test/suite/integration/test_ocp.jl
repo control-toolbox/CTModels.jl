@@ -10,7 +10,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ocp()
-    Test.@testset "OCP Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "OCP Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - OCP Functionality

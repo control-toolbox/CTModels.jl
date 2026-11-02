@@ -24,7 +24,7 @@ Models.has_fixed_initial_time(::DummyOCP2D) = true
 Models.initial_time(::DummyOCP2D) = 0.0
 
 function test_initial_guess_control()
-    Test.@testset "Control Initial Guess Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Control Initial Guess Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Control Initial Guess Functions

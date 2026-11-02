@@ -8,7 +8,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_grid_extension()
-    Test.@testset "Grid Extension Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Grid Extension Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Extension Logic

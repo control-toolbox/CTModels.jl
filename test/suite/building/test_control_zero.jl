@@ -16,7 +16,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_control_zero()
-    Test.@testset "Control Zero Dimension Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Control Zero Dimension Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - EmptyControlModel
@@ -508,7 +508,7 @@ function test_control_zero()
 
                 Test.@test Models.control_dimension(sol2) == 0
                 Test.@test Models.state_dimension(sol2) == 2
-                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol=1e-10
+                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol = 1e-10
                 Test.@test Solutions.iterations(sol2) == Solutions.iterations(sol)
                 Test.@test Solutions.successful(sol2) == Solutions.successful(sol)
                 # Control function should return empty vector after round-trip
@@ -564,7 +564,7 @@ function test_control_zero()
 
                 Test.@test Models.control_dimension(sol2) == 0
                 Test.@test Models.state_dimension(sol2) == 2
-                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol=1e-10
+                Test.@test Models.objective(sol2) ≈ Models.objective(sol) atol = 1e-10
                 Test.@test Solutions.iterations(sol2) == Solutions.iterations(sol)
                 Test.@test Solutions.successful(sol2) == Solutions.successful(sol)
                 # Control function should return empty vector after round-trip

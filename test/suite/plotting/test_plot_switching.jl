@@ -80,7 +80,7 @@ function _texts(fig)
 end
 
 function test_plot_switching()
-    Test.@testset "PlotCase: switching structure" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "PlotCase: switching structure" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - vertical jumps in the panel data

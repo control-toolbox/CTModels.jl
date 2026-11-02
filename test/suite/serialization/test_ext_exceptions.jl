@@ -23,7 +23,7 @@ struct DummyAbstractSolution <: Solutions.AbstractSolution end
 struct DummyAbstractModel <: Models.AbstractModel end
 
 function test_ext_exceptions()
-    Test.@testset "Extension Exceptions Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Extension Exceptions Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Extension Exception Handling

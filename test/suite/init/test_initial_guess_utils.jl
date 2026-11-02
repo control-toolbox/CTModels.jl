@@ -36,7 +36,7 @@ Models.variable_name(::DummyOCP2DUtils) = "v"
 Models.variable_components(::DummyOCP2DUtils) = String[]
 
 function test_initial_guess_utils()
-    Test.@testset "Initial Guess Utils Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Initial Guess Utils Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Utility Functions
