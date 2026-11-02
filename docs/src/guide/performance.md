@@ -62,6 +62,15 @@ f_coerced = CTModels.Components.CoercedTrajectory(t -> [2t], only)
 duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
 f_slice = CTModels.Solutions.DualSlice(duals_fn, 2)
 f_proj = CTModels.Models.BoxProjection{:state}(2)
+# The callable that `build` assembles when the dynamics is declared range by
+# range (`dynamics!(pre, i, f)` per component — the shape CTParser's `@def`
+# emits for `∂(xᵢ)(t) == …`).
+dyn_parts = CTModels.Building.__build_dynamics_from_parts(
+    Tuple{UnitRange{Int},Function}[
+        (1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing)),
+        (2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing)),
+    ],
+)
 nothing # hide
 ```
 
@@ -91,7 +100,14 @@ JET.@report_opt f_slice(0.5)
 JET.@report_opt f_proj(nothing, [10.0, 20.0, 30.0], nothing, nothing)
 ```
 
-All four report `No errors detected`: the repeated-call path is stable.
+**Evaluating a dynamics assembled from coordinate parts** (called once per solver
+step by direct methods; see [CTModels.jl#496](https://github.com/control-toolbox/CTModels.jl/issues/496)):
+
+```@example perf
+JET.@report_opt dyn_parts(zeros(2), 0.0, [0.3, 0.7], [0.5], Float64[])
+```
+
+All five report `No errors detected`: the repeated-call path is stable.
 
 ## What is enforced automatically
 
@@ -102,6 +118,7 @@ stability precisely on the hot-path calls shown above, via `JET.@test_opt`:
 # test/suite/meta/test_code_quality.jl
 JET.@test_opt target_modules = (CTModels,) f_const(0.5)
 JET.@test_opt target_modules = (CTModels,) f_coerced(0.5)
+JET.@test_opt target_modules = (CTModels,) dyn_parts(zeros(2), 0.0, x, u, v)
 # ... and so on for the other hot-path calls
 ```
 
