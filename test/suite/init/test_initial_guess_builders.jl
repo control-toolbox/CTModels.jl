@@ -329,6 +329,24 @@ function test_initial_guess_builders()
                 base, ((5, _ -> 0.0),), 2, :state
             )
         end
+
+        Test.@testset "MergedTrajectory — dim as type parameter D (issue #501)" begin
+            # D is the third type parameter: the scalar/vector path is picked
+            # statically, so the call infers cleanly on both sides.
+            f1 = Init.MergedTrajectory(
+                _ -> 0.0, Dict{Int,Function}(1 => t -> 2t), 1, :state
+            )
+            Test.@test f1 isa Init.MergedTrajectory{<:Any,<:Any,1}
+            Test.@test Test.@inferred(f1(0.5)) ≈ 1.0
+            # vector base with dim=1: first element used (former copy(v)[1] semantics)
+            fv = Init.MergedTrajectory(_ -> [5.0, 99.0], Dict{Int,Function}(), 1, :control)
+            Test.@test fv(0.0) == 5.0
+            f3 = Init.MergedTrajectory(
+                _ -> [1.0, 2.0, 3.0], Dict{Int,Function}(2 => _ -> 9.0), 3, :state
+            )
+            Test.@test f3 isa Init.MergedTrajectory{<:Any,<:Any,3}
+            Test.@test Test.@inferred(f3(0.0)) == [1.0, 9.0, 3.0]
+        end
     end
 end
 

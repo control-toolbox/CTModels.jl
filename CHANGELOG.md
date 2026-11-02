@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now linearised once into a concretely-typed tuple whose generated call method
   emits one statically dispatched call per component: the merged trajectory
   allocates exactly what the equivalent specialised function allocates.
+- **Scalar merged initial guesses allocate nothing at all**
+  ([#501](https://github.com/control-toolbox/CTModels.jl/issues/501)). The total
+  dimension of `Init.MergedTrajectory` is now a type parameter, so the generated
+  call method emits the scalar path directly for `dim == 1` — no scratch vector,
+  no `Union` return: a one-component merged guess went from 64 B per call to 0 B,
+  and both paths infer cleanly (`@inferred`).
 
 ### ✅ Compatibility
 
