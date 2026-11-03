@@ -128,6 +128,27 @@ lives in `test/suite/meta/test_performance.jl` (`BenchmarkTools.@ballocated`
 guards), and `Test.@inferred` guards sit next to each fixture in the ordinary test
 files (e.g. `test/suite/components/test_components.jl`).
 
+### Writing the raw side of an allocation guard
+
+A wrapper-vs-raw guard (`PERF5`) is only as good as its raw side. The raw
+equivalent must be written so the compiler **cannot fold or elide what the wrapper
+provably performs**; otherwise the comparison measures an optimiser artifact, not a
+defect. Two traps have already bitten:
+
+- **Stitched calls.** Benchmarking two raw calls independently and adding the
+  results (`lb(t)[i] - ub(t)[i]` as two separate `@ballocated`) measured 160 B
+  against the wrapper's real 80 B: a single specialised method body gets escape
+  analysis, two separate calls do not. Write the raw side as **one specialised
+  function** performing the whole sequence.
+- **Fresh-vector inputs.** With a base returning a fresh vector, `collect(base(t))`
+  is elided on the raw side (a fresh array cannot escape, so `collect` may return
+  it), while the wrapper's call boundary cannot elide the same copy: `160 == 80`.
+  Use a **shared `const` input**, which makes the required copy explicit on both
+  sides.
+
+Verify at the REPL that the raw side allocates what you expect before freezing the
+guard in `test/suite/meta/test_performance.jl`.
+
 To run a whole-package correctness scan interactively on a fresh checkout:
 
 ```julia

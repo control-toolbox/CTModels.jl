@@ -33,6 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no `Union` return: a one-component merged guess went from 64 B per call to 0 B,
   and both paths infer cleanly (`@inferred`).
 
+### 📚 Documentation
+
+- **Allocation guards: the raw-vs-wrapper comparison trap is documented**
+  ([#502](https://github.com/control-toolbox/CTModels.jl/issues/502)). The
+  performance guide gains a section on writing the raw side of a `PERF5` guard
+  (one specialised function, shared `const` inputs), and the header of
+  `test_performance.jl` now mentions the init-guess functors it covers.
+
 ### ✅ Compatibility
 
 - **No breaking changes**: internals only; the `dynamics!` signatures, the `build`
