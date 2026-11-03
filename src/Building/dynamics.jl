@@ -168,30 +168,143 @@ function dynamics!(ocp::PreModel, i::Integer, f::Function)::Nothing
     return dynamics!(ocp, i:i, f)
 end
 
+# ------------------------------------------------------------------------------
+# Callable struct for composite dynamics assembly
+# ------------------------------------------------------------------------------
+
+"""
+$(TYPEDEF)
+
+In-place callable struct assembling partial dynamics — each declared over a disjoint
+state range — into a single `dyn!(val, t, x, u, v)` function.
+
+The concrete tuple type `P` carries every `(range, f!)` pair in its type parameters,
+so the call method resolves each part statically: no runtime dispatch, no boxed
+`@view`. Evaluating the composite costs exactly the equivalent monolithic dynamics —
+the dynamics runs once per solver step, so this is a hot-path invariant
+(ct-conventions `PERF1`; issue #496). Storing the parts in a field rather than closing
+over them follows the same pattern as [`CTModels.Building.CompositeConstraint`](@extref).
+
+# Fields
+- `parts::P`: Concrete `Tuple` of `(range, f!)` pairs in declaration order; each `f!`
+  writes `view(val, range)` with signature `f!(r, t, x, u, v)`.
+
+# Examples
+
+```julia
+using CTModels: Building
+
+f1!(r, t, x, u, v) = (r[1] = x[2])
+f2!(r, t, x, u, v) = (r[1] = u[1])
+dyn = Building.CompositeDynamics(((1:1, f1!), (2:2, f2!)))
+val = zeros(2)
+dyn(val, 0.0, [1.0, 2.0], [3.0], Float64[])
+# val == [2.0, 3.0]
+```
+"""
+struct CompositeDynamics{P<:Tuple} <: Function
+    parts::P
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply each partial dynamics to its assigned slice of `val`, in declaration order.
+
+The method is `@generated`: the emitted body is a flat sequence of calls, one per part,
+each dispatched on its concrete function type and writing a statically resolved `@view`.
+A plain `for` over the heterogeneous `parts` tuple leaves runtime dispatch on the hot
+path — each `@view` then boxes (issue #496) — and a recursive `first`/`Base.tail`
+traversal silently falls back to dynamic calls beyond the compiler's recursion limit.
+
+# Arguments
+- `f::CompositeDynamics`: The composite dynamics.
+- `val`: Pre-allocated output vector (modified in-place).
+- `t`: Time.
+- `x`: State.
+- `u`: Control (`nothing` for control-free problems).
+- `v`: Optimisation variable.
+
+# Returns
+- `Nothing`
+"""
+@generated function (f::CompositeDynamics{P})(val, t, x, u, v) where {P}
+    calls = [
+        :(f.parts[$i][2](@view(val[f.parts[$i][1]]), t, x, u, v)) for i in 1:fieldcount(P)
+    ]
+    return quote
+        $(calls...)
+        return nothing
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact string representation of [`CTModels.Building.CompositeDynamics`](@extref).
+"""
+function Base.show(io::IO, f::CompositeDynamics{P}) where {P}
+    fmt = CTBase.Core.get_format_codes(io)
+    return print(
+        io,
+        fmt.name,
+        "CompositeDynamics",
+        fmt.reset,
+        "(n=",
+        fmt.count,
+        length(f.parts),
+        fmt.reset,
+        ", ranges=",
+        fmt.value,
+        [p[1] for p in f.parts],
+        fmt.reset,
+        ")",
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Detailed string representation of [`CTModels.Building.CompositeDynamics`](@extref).
+"""
+function Base.show(io::IO, ::MIME"text/plain", f::CompositeDynamics{P}) where {P}
+    fmt = CTBase.Core.get_format_codes(io)
+    print(io, fmt.name, "CompositeDynamics", fmt.reset)
+    print(
+        io, "\n  ", fmt.label, "n:      ", fmt.reset, fmt.count, length(f.parts), fmt.reset
+    )
+    return print(
+        io,
+        "\n  ",
+        fmt.label,
+        "ranges: ",
+        fmt.reset,
+        fmt.value,
+        [p[1] for p in f.parts],
+        fmt.reset,
+    )
+end
+
 """
 $(TYPEDSIGNATURES)
 
 Build a single combined in-place dynamics function from ordered partial parts.
 
 Used internally by [`CTModels.Building.build`](@extref) after all partial dynamics calls
-have been collected. Each part function updates its assigned slice of the output vector
-via a `@view`, avoiding copies.
+have been collected. `tuple(parts...)` preserves each part's concrete `(range, f!)` type
+inside the result's type parameter — what makes the calls in
+[`CTModels.Building.CompositeDynamics`](@extref) statically dispatched.
 
 # Arguments
 - `parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}`: Ordered vector of
   `(range, f!)` pairs; each `f!(r, t, x, u, v)` fills `r` = `view(val, range)`.
 
 # Returns
-- `Function`: Combined `dyn!(val, t, x, u, v)` that applies all parts in order.
+- `CompositeDynamics`: Combined `dyn!(val, t, x, u, v)` applying all parts in order,
+  with the same allocation cost as a monolithic dynamics (issue #496).
 """
 function __build_dynamics_from_parts(
     parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
-)::Function
-    function dyn!(val, t, x, u, v)
-        for (rg, f!) in parts
-            f!(@view(val[rg]), t, x, u, v)
-        end
-        return nothing
-    end
-    return dyn!
+)::CompositeDynamics
+    return CompositeDynamics(tuple(parts...))
 end

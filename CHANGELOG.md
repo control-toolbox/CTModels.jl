@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+- **A dynamics assembled from coordinate parts no longer allocates at every call**
+  ([#496](https://github.com/control-toolbox/CTModels.jl/issues/496)). Declaring the
+  dynamics range by range (`dynamics!(pre, i, f)` — the shape CTParser's `@def` emits
+  for `∂(xᵢ)(t) == …`) built a loop over an abstractly-typed vector of parts: each
+  call dispatched dynamically and boxed its output view (~96 B per part). The parts
+  are now assembled into a `CompositeDynamics`, a callable struct holding them in a
+  concretely-typed tuple whose generated call method emits one statically dispatched
+  call per part: the built dynamics allocates exactly what the equivalent monolithic
+  dynamics allocates.
+
+### ✅ Compatibility
+
+- **No breaking changes**: internals only; the `dynamics!` signatures and the `build`
+  output are unchanged (`Models.dynamics` still returns a `Function`).
+
 ## [0.21.0] - 2026-10-23
 
 ### 💥 Breaking Changes
@@ -840,7 +857,7 @@ model = build(pre)  # Works even without definition
 - **Consistent naming**: Follows pattern `has_*` for presence checks, `is_*` for property checks
 - **New exports**: `has_variable`, `has_control`, `has_abstract_definition`, `is_abstractly_defined`, `is_nonautonomous`, `is_nonvariable`
 
-#### API Enhancements
+#### Predicate API Enhancements
 
 ```julia
 # Check if problem has optimisation variables
@@ -1474,8 +1491,6 @@ pre = CTModels.PreInitialGuess(...)
 - Documentation generation issues resolved
 - Cross-reference warnings handled gracefully
 - Extension integration improvements
-
-## [Unreleased]
 
 ## [0.7.1-beta] - 2026-01-22
 

@@ -303,6 +303,51 @@ function test_full_dynamics()
     Test.@test_throws Exceptions.PreconditionError Building.dynamics!(ocp7, dynamics!)
 end
 
+function test_composite_dynamics()
+
+    # Partial dynamics parts
+    p1!(r, t, x, u, v) = (r[1] = t + x[1])
+    p2!(r, t, x, u, v) = (r[1] = u[1] + x[2])
+    p3!(r, t, x, u, v) = (r[1] = v[1] + x[3])
+
+    t = 10
+    x = 20 * ones(3)
+    u = 100 * ones(1)
+    v = 1000 * ones(1)
+
+    ######
+    # 1. Unit: assembly returns a callable CompositeDynamics (issue #496)
+    ######
+    parts = Tuple{UnitRange{Int},Function}[(1:1, p1!), (2:2, p2!), (3:3, p3!)]
+    dyn = Building.__build_dynamics_from_parts(parts)
+    Test.@test dyn isa Building.CompositeDynamics
+    Test.@test dyn isa Function
+
+    ######
+    # 2. Unit: evaluation fills each range in declaration order
+    ######
+    r = zeros(3)
+    dyn(r, t, x, u, v)
+    Test.@test r == [t + x[1], u[1] + x[2], v[1] + x[3]]
+
+    # a single part degenerates to a single-part tuple
+    dyn1 = Building.__build_dynamics_from_parts([(1:1, p1!)])
+    r1 = zeros(1)
+    dyn1(r1, t, x, u, v)
+    Test.@test r1 == [t + x[1]]
+
+    ######
+    # 3. Contract: the built call is type-stable (PERF4 — hot path guard)
+    ######
+    Test.@inferred dyn(r, t, x, u, v)
+
+    ######
+    # 4. Contract: both show methods render the type name
+    ######
+    Test.@test occursin("CompositeDynamics", sprint(show, dyn))
+    Test.@test occursin("CompositeDynamics", sprint(show, MIME"text/plain"(), dyn))
+end
+
 function test_dynamics()
     Test.@testset "Dynamics Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
@@ -320,6 +365,14 @@ function test_dynamics()
 
         Test.@testset "Partial dynamics" begin
             test_partial_dynamics()
+        end
+
+        # ====================================================================
+        # UNIT/CONTRACT TESTS - Composite Dynamics (issue #496)
+        # ====================================================================
+
+        Test.@testset "Composite dynamics" begin
+            test_composite_dynamics()
         end
     end
 end
