@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ Features
+
+- **The duals of the state and control boxes are plotted**
+  ([#506](https://github.com/control-toolbox/CTModels.jl/issues/506)). The bottom block of
+  the `:split` figure is now one row per constraint label — path constraint, state box or
+  control box — pairing the constraint (the component with its bounds, for a box) with its
+  dual `dual(sol, model, label)`. `:path` draws the left cells and `:dual` the right ones; a
+  box whose dual is unknown has no row. `PlotCase._assemble_split` takes the paired `rows`
+  in place of `path` and `dual`. The jumps of the box duals at the switching times wait for
+  [#493](https://github.com/control-toolbox/CTModels.jl/issues/493).
+
 ### 🐛 Bug Fixes
 
 - **A dynamics assembled from coordinate parts no longer allocates at every call**
