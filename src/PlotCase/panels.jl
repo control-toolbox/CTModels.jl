@@ -28,15 +28,24 @@ Insert the left and right limits of `component` (`:state`, `:costate`, `:control
 [`CTBase.Plotting.splice_jumps`](@extref): a jump is drawn as a vertical segment. The samples
 are returned unchanged when the solution has no switching time or the limits of
 `component` are not known. With `connect = false`, the curve is broken between the two
-limits instead of drawing the vertical segment.
+limits instead of drawing the vertical segment. With `cols`, `M` holds only those columns
+of `component`, and only their limits are used.
 
 # Returns
 - `(T, M)`: the time grid (with each switching time twice) and the matrix of samples.
 """
 function _spliced_samples(
-    sol, T::AbstractVector, M::AbstractMatrix, component::Symbol; connect::Bool=true
+    sol,
+    T::AbstractVector,
+    M::AbstractMatrix,
+    component::Symbol;
+    connect::Bool=true,
+    cols::Union{Nothing,AbstractVector{Int}}=nothing,
 )
     left, right = Solutions.limits(CTModels.switching_model(sol), component)
+    if !isnothing(cols) && size(left, 2) > 0
+        left, right = left[:, cols], right[:, cols]
+    end
     return Plotting.splice_jumps(
         T, M, CTModels.switching_times(sol), left, right; connect=connect
     )
@@ -166,15 +175,23 @@ $(TYPEDSIGNATURES)
 
 Build a [`CTBase.Plotting.Panel`](@extref) for the nonlinear path constraints.
 """
-function _path_panel(sol, model, style::NamedTuple; connect::Bool=true)
+function _path_panel(
+    sol,
+    model,
+    style::NamedTuple;
+    connect::Bool=true,
+    rows::Union{Nothing,AbstractVector{Int}}=nothing,
+    title::String="path constraints",
+)
     Tp = CTModels.time_grid(sol, :path)
     v = CTModels.variable(sol)
     cp = CTModels.path_constraints_nl(model)
     nc = length(cp[1])
+    idx = isnothing(rows) ? collect(1:nc) : collect(rows)
     g = zeros(Float64, nc)
-    constraint(t, x, u) = (cp[2](g, t, x, u, v); copy(g))
+    constraint(t, x, u) = (cp[2](g, t, x, u, v); g[idx])
     x, u = CTModels.state(sol), CTModels.control(sol)
-    data = zeros(Float64, length(Tp), nc)
+    data = zeros(Float64, length(Tp), length(idx))
     for k in eachindex(Tp)
         data[k, :] .= constraint(Tp[k], x(Tp[k]), u(Tp[k]))
     end
@@ -198,10 +215,8 @@ function _path_panel(sol, model, style::NamedTuple; connect::Bool=true)
             Tp, data, taus, at(xl, ul), at(xr, ur); connect=connect
         )
     end
-    labels = string.(cp[4])
-    return Plotting.Panel(
-        T, data; title="path constraints", labels=labels, style=_base_style(style)
-    )
+    labels = string.(cp[4][idx])
+    return Plotting.Panel(T, data; title=title, labels=labels, style=_base_style(style))
 end
 
 # A sampled row as the value of a trajectory: a scalar for a one-dimensional component.
@@ -222,17 +237,22 @@ Build a [`CTBase.Plotting.Panel`](@extref) for the dual variables of the path co
 At a switching time whose dual limits are known, the jump is drawn as for the state (see
 [`CTModels.PlotCase._spliced_samples`](@extref)).
 """
-function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool, connect::Bool=true)
+function _dual_panel(
+    sol,
+    model,
+    style::NamedTuple;
+    path_shown::Bool,
+    connect::Bool=true,
+    rows::Union{Nothing,AbstractVector{Int}}=nothing,
+    title::String="dual",
+)
     Tp = CTModels.time_grid(sol, :path)
-    T, M = _spliced_samples(
-        sol,
-        Tp,
-        _sample(CTModels.path_constraints_dual(sol), Tp),
-        :path_dual;
-        connect=connect,
-    )
-    nc = size(M, 2)
+    M = _sample(CTModels.path_constraints_dual(sol), Tp)
     cp = CTModels.path_constraints_nl(model)
-    labels = path_shown ? fill("", nc) : ("dual " .* string.(cp[4]))
-    return Plotting.Panel(T, M; title="dual", labels=labels, style=_base_style(style))
+    idx = isnothing(rows) ? collect(axes(M, 2)) : collect(rows)
+    T, M = _spliced_samples(
+        sol, Tp, M[:, idx], :path_dual; connect=connect, cols=isnothing(rows) ? nothing : idx
+    )
+    labels = path_shown ? fill("", length(idx)) : ("dual " .* string.(cp[4][idx]))
+    return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end

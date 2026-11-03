@@ -40,6 +40,16 @@ function test_plot_makie()
             end
         end
 
+        Test.@testset "constraint rows: path, state box and control box (issue #506)" begin
+            _, sol_box = TestProblems.solution_example_box_duals()
+            f = Makie.plot(sol_box)
+            Test.@test f isa Makie.Figure
+            # state (2) + costate (2) + control (1) + 3 rows of (constraint | dual)
+            Test.@test _n_axes(f) == 11
+            Test.@test _n_axes(Makie.plot(sol_box, :dual)) == 3
+            Test.@test Makie.plot(sol_box; layout=:group) isa Makie.Figure
+        end
+
         Test.@testset "description subsets" begin
             Test.@test Makie.plot(sol_pc) isa Makie.Figure
             for desc in (

@@ -3,9 +3,9 @@
 #
 #   :group -> one cell per group in a horizontal row, except the four-cell
 #             state|costate / control|norm case, which becomes a 2×2 grid;
-#   :split -> paired columns (state|costate, path|dual) stacked with the control
-#             column, row heights n : l : nc coming for free from the geometry-aware
-#             `:auto` weights of `Stacked`.
+#   :split -> paired columns (state|costate) stacked with the control column and the
+#             constraint rows (constraint|dual), row heights coming for free from the
+#             geometry-aware `:auto` weights of `Stacked`.
 # =============================================================================
 
 # Pair two columns side by side, tolerating a missing one.
@@ -43,22 +43,26 @@ function _assemble_group(cells::AbstractVector{<:Plotting.AbstractLayoutNode})
     return Plotting.Paired(collect(Plotting.AbstractLayoutNode, cells))
 end
 
-# Stacked columns (`:split`): (state|costate) over control over (path|dual). Returns
-# `nothing` when there is nothing to draw.
+# Stacked columns (`:split`): (state|costate) over control over the constraint rows, each
+# row being (constraint|dual). Returns `nothing` when there is nothing to draw.
 """
 $(TYPEDSIGNATURES)
 
 Assemble stacked columns (`:split` layout).
 
-The layout is `(state | costate)` over `control` over `(path | dual)`.
-Returns `nothing` when there is nothing to draw.
+The layout is `(state | costate)` over `control` over the constraint rows, each row being
+`(constraint | dual)` (see [`CTModels.PlotCase._constraint_rows`](@extref)). `rows` holds
+the already paired nodes of the rows. Returns `nothing` when there is nothing to draw.
 """
 function _assemble_split(;
-    state=nothing, costate=nothing, control=nothing, path=nothing, dual=nothing
+    state=nothing,
+    costate=nothing,
+    control=nothing,
+    rows::AbstractVector{<:Plotting.AbstractLayoutNode}=Plotting.AbstractLayoutNode[],
 )
     xp = _pair(state, costate)
-    cd = _pair(path, dual)
-    blocks = Plotting.AbstractLayoutNode[b for b in (xp, control, cd) if b !== nothing]
+    blocks = Plotting.AbstractLayoutNode[b for b in (xp, control) if b !== nothing]
+    append!(blocks, rows)
     isempty(blocks) && return nothing
     length(blocks) == 1 && return blocks[1]
     return Plotting.Stacked(blocks)

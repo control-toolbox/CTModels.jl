@@ -121,11 +121,11 @@ function _build_root(
     _texts(group) =
         (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
     ncomp(p) = size(p.data, 2)
-    L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none) = Plotting.lower(
+    L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none, time_name::String=tn) = Plotting.lower(
         p;
         layout=layout,
         time=time,
-        time_name=tn,
+        time_name=time_name,
         vlines=vlines,
         hlines=hlines,
         annotations=_texts(group),
@@ -200,30 +200,68 @@ function _build_root(
             end
             control_col = L(cp; hlines=hl, group=:control)
         end
-        path_col = nothing
-        if do_path
-            pp = _path_panel(sol, model, path_style; connect=connect)
-            hl = if dec_path_bounds
-                _path_hlines(model, path_bounds_style)
-            else
-                Vector{Plotting.HLine}[]
+        # The constraint block: one row per constraint label (path, state box, control
+        # box), pairing the constraint (`:path`) with its dual (`:dual`). The title is on
+        # the first row, the time label on the last one, the phase labels on the first.
+        row_nodes = Plotting.AbstractLayoutNode[]
+        if do_path || do_dual
+            drawn = [
+                (r, do_path && (r.kind === :path || do_dual), do_dual && r.dual) for
+                r in _constraint_rows(sol, model)
+            ]
+            filter!(d -> d[2] || d[3], drawn)
+            only_path = all(d -> d[1].kind === :path, drawn)
+            for (k, (r, left, right)) in enumerate(drawn)
+                top, bottom = k == 1, k == length(drawn)
+                tname = bottom ? tn : ""
+                grp(g) = top ? g : :none
+                lnode = if left
+                    title = top ? (only_path ? "path constraints" : "constraints") : ""
+                    hl = if r.kind === :path && dec_path_bounds
+                        _row_hlines(model, r, path_bounds_style)
+                    elseif r.kind === :state && dec_state_bounds
+                        _row_hlines(model, r, state_bounds_style)
+                    elseif r.kind === :control && dec_control_bounds
+                        _row_hlines(model, r, control_bounds_style)
+                    else
+                        Vector{Plotting.HLine}[]
+                    end
+                    L(
+                        _row_left_panel(
+                            sol, model, r, path_style; connect=connect, title=title
+                        );
+                        hlines=hl,
+                        group=grp(:path),
+                        time_name=tname,
+                    )
+                else
+                    nothing
+                end
+                rnode = if right
+                    L(
+                        _row_dual_panel(
+                            sol,
+                            model,
+                            r,
+                            dual_style;
+                            left_shown=left,
+                            connect=connect,
+                            title=top ? "dual" : "",
+                        );
+                        group=grp(:dual),
+                        time_name=tname,
+                    )
+                else
+                    nothing
+                end
+                push!(row_nodes, _pair(lnode, rnode))
             end
-            path_col = L(pp; hlines=hl, group=:path)
-        end
-        dual_col = if do_dual
-            L(
-                _dual_panel(sol, model, dual_style; path_shown=do_path, connect=connect);
-                group=:dual,
-            )
-        else
-            nothing
         end
         return _assemble_split(;
             state=state_col,
             costate=costate_col,
             control=control_col,
-            path=path_col,
-            dual=dual_col,
+            rows=row_nodes,
         )
     else
         throw(
