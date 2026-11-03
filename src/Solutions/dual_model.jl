@@ -108,6 +108,54 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return whether the solution `sol` knows the dual of the constraint labelled `label`, that
+is whether [`CTModels.Solutions.dual`](@extref) returns it instead of throwing a
+`PreconditionError`.
+
+A dual is unknown when the solution carries no duals at all, when the duals of the kind of
+constraint of `label` were not stored, or when the duals of that kind were given by label
+and `label` was not among them (see [`CTModels.Solutions.build_solution`](@extref)).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+
+See also: [`CTModels.Solutions.dual`](@extref), [`CTModels.Models.constraint_rows`](@extref).
+"""
+function has_dual(sol::Solution, model::Model, label::Symbol)::Bool
+    kind, rows = constraint_rows(model, label)
+    has_duals(sol) || return false
+    dm = dual_model(sol)
+    if kind === :path
+        return !isnothing(path_constraints_dual(sol)) &&
+               _rows_known(dm.path_constraints_dual_known, rows)
+    elseif kind === :boundary
+        return !isnothing(boundary_constraints_dual(sol)) &&
+               _rows_known(dm.boundary_constraints_dual_known, rows)
+    elseif kind === :state
+        return !isnothing(state_constraints_lb_dual(sol)) &&
+               !isnothing(state_constraints_ub_dual(sol))
+    elseif kind === :control
+        return !isnothing(control_constraints_lb_dual(sol)) &&
+               !isnothing(control_constraints_ub_dual(sol))
+    else # :variable
+        return !isnothing(variable_constraints_lb_dual(sol)) &&
+               !isnothing(variable_constraints_ub_dual(sol))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether the rows `rows` are known in the canonical mask `known` (`nothing`: every row).
+"""
+function _rows_known(known::Union{Nothing,Vector{Bool}}, rows::Vector{Int})::Bool
+    return isnothing(known) || all(i -> known[i], rows)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Coefficients `(cl, cu)` of the lower- and upper-bound multipliers in the dual of each box
 component `idxs` (ct-conventions `SGN2`, `SGN3`): `(1, 0)` for a component with a finite
 lower bound only (the dual is `zL ≥ 0`), `(0, 1)` for a finite upper bound only
@@ -194,7 +242,7 @@ one of `label`, which was absent from the `duals` given to
 function _ensure_known(
     sol::Solution, known::Union{Nothing,Vector{Bool}}, rows::Vector{Int}, label::Symbol, kind::String
 )
-    (isnothing(known) || all(i -> known[i], rows)) && return nothing
+    _rows_known(known, rows) && return nothing
     return throw(
         Exceptions.PreconditionError(
             "the solution carries no dual for the $kind constraint :$label";

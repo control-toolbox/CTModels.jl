@@ -142,9 +142,9 @@ function test_labelled_duals()
 
             # a one-row label gives a scalar (DIM1), from a vector or a function
             Test.@test Solutions.dual(sol0, ocp, :c1)(0.5) isa Float64
-            solf = _ld_solution(ocp, Dict{Symbol,Any}(:c1 => t -> 3t, :c2 => _FakeFlowDual(2.0)))
-            Test.@test Solutions.dual(solf, ocp, :c1)(0.25) ≈ 0.75
-            Test.@test Solutions.dual(solf, ocp, :c2)(0.25) ≈ 2 .* _c2(0.25)
+            sol_fun = _ld_solution(ocp, Dict{Symbol,Any}(:c1 => t -> 3t, :c2 => _FakeFlowDual(2.0)))
+            Test.@test Solutions.dual(sol_fun, ocp, :c1)(0.25) ≈ 0.75
+            Test.@test Solutions.dual(sol_fun, ocp, :c2)(0.25) ≈ 2 .* _c2(0.25)
 
             # a path grid of its own (the multi-grid method; the cases above go through
             # the single-grid one, which forwards `duals`)
@@ -187,6 +187,40 @@ function test_labelled_duals()
             dm = Solutions.DualModel(nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing)
             Test.@test isnothing(dm.path_constraints_dual_known)
             Test.@test isnothing(dm.boundary_constraints_dual_known)
+        end
+
+        # ======================================================================
+        # INTEGRATION — has_dual agrees with dual
+        # ======================================================================
+        Test.@testset "has_dual" begin
+            sol = _ld_solution(ocp, Dict{Symbol,Any}(:c2 => _C2, :b2 => [2.0, 3.0]))
+            Test.@test Solutions.has_dual(sol, ocp, :c2)
+            Test.@test Solutions.has_dual(sol, ocp, :b2)
+            Test.@test !Solutions.has_dual(sol, ocp, :c1)       # absent label
+            Test.@test !Solutions.has_dual(sol, ocp, :b1)
+            Test.@test !Solutions.has_dual(sol, ocp, :x2_box)   # box duals not stored
+            sol_box = _ld_solution(
+                ocp,
+                Dict{Symbol,Any}();
+                state_constraints_lb_dual=zeros(5, 2),
+                state_constraints_ub_dual=zeros(5, 2),
+            )
+            Test.@test Solutions.has_dual(sol_box, ocp, :x2_box)
+            Test.@test !Solutions.has_dual(sol_box, ocp, :c2)   # path duals not stored
+            # no duals at all
+            Test.@test !Solutions.has_dual(_ld_solution(ocp, Dict{Symbol,Any}()), ocp, :c2)
+            # every label: has_dual ⇔ dual does not throw
+            for label in (:c1, :c2, :b1, :b2, :x2_box), s in (sol, sol_box)
+                known = try
+                    Solutions.dual(s, ocp, label)
+                    true
+                catch e
+                    e isa Exceptions.PreconditionError || rethrow()
+                    false
+                end
+                Test.@test Solutions.has_dual(s, ocp, label) == known
+            end
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.has_dual(sol, ocp, :nope)
         end
 
         # ======================================================================
@@ -237,6 +271,7 @@ function test_labelled_duals()
         # ======================================================================
         Test.@testset "exports" begin
             Test.@test :constraint_rows in names(Models)
+            Test.@test :has_dual in names(Solutions)
             Test.@test :StackedDuals ∉ names(Solutions)  # an internal of the layout
             Test.@test :constraint_rows ∉ names(CTModels)  # no top-level export (MOD8)
         end
