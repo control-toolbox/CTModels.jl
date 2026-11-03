@@ -139,6 +139,21 @@ function test_plot_rows()
             # no limits for the control box: its dual is drawn without a jump
             Test.@test count(==(τ), u.x) <= 1
             Test.@test !any(isnan, u.y)
+
+            # a component whose limits are unknown (NaN, a label not given) draws no jump
+            # and no break, while the other components keep theirs
+            sw_nan = CTModels.Solutions.SwitchingModel(;
+                times=[τ],
+                labels=["a", "b"],
+                duals=Dict(:x2_box => ([NaN], [NaN])),
+            )
+            _, sol_nan = TestProblems.solution_example_box_duals(; switching=sw_nan)
+            leaves_nan = Plotting.leaves(CTModels.PlotCase.build_figure(sol_nan).root)
+            x2n = only(leaves_nan[9].axes.series)
+            Test.@test !any(isnan, x2n.y)
+            Test.@test count(==(τ), x2n.x) == 2
+            k = findall(==(τ), x2n.x)
+            Test.@test x2n.y[k[1]] == x2n.y[k[2]]
             # jumps = :none breaks the curve between the limits
             leaves = Plotting.leaves(
                 CTModels.PlotCase.build_figure(sols; jumps=:none).root
