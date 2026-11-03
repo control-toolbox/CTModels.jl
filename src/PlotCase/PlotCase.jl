@@ -16,7 +16,7 @@ figure to a [`CTBase.Plotting.render`](@extref) backend.
 """
 module PlotCase
 
-using DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTBase: Plotting
 using CTBase: Exceptions
@@ -33,6 +33,7 @@ using ..Solutions
 const CTModels = parentmodule(@__MODULE__)
 
 include(joinpath(@__DIR__, "vocabulary.jl"))
+include(joinpath(@__DIR__, "rows.jl"))
 include(joinpath(@__DIR__, "panels.jl"))
 include(joinpath(@__DIR__, "decorations.jl"))
 include(joinpath(@__DIR__, "assemble.jl"))
