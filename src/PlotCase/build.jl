@@ -79,6 +79,12 @@ function _build_root(
     _check_jumps(jumps)
     connect = jumps === :segment
     desc = clean(isempty(description) ? __description() : description)
+    # the constraint rows, listed once for the figure (only the :split layout draws them)
+    rows = if layout === :split && model isa CTModels.Model && (:path in desc || :dual in desc)
+        _constraint_rows(sol, model)
+    else
+        ConstraintRow[]
+    end
     do_state, do_costate, do_control, do_path, do_dual = do_plot(
         sol,
         desc...;
@@ -87,6 +93,7 @@ function _build_root(
         costate_style=costate_style,
         path_style=path_style,
         dual_style=dual_style,
+        rows=rows,
     )
     dec_time, dec_state_bounds, dec_control_bounds, dec_path_bounds = do_decorate(;
         model=model,
@@ -110,26 +117,35 @@ function _build_root(
     else
         _phase_annotations(sol, time, phase_labels_style)
     end
+    # the groups the layout actually draws: `:group` draws neither constraints nor duals
     label_group = _phase_label_group(
         phase_labels;
         state=do_state,
         costate=do_costate,
         control=do_control,
-        path=do_path,
-        dual=do_dual,
+        path=do_path && layout === :split,
+        dual=do_dual && layout === :split,
     )
     _texts(group) =
         (label_group === :all || label_group === group) ? texts : Plotting.Annotation[]
     ncomp(p) = size(p.data, 2)
-    L(p; hlines=Vector{Plotting.HLine}[], group::Symbol=:none, time_name::String=tn) = Plotting.lower(
+    function L(
         p;
-        layout=layout,
-        time=time,
-        time_name=time_name,
-        vlines=vlines,
-        hlines=hlines,
-        annotations=_texts(group),
+        hlines=Vector{Plotting.HLine}[],
+        group::Symbol=:none,
+        time_name::String=tn,
+        extra=Plotting.Annotation[],
     )
+        return Plotting.lower(
+            p;
+            layout=layout,
+            time=time,
+            time_name=time_name,
+            vlines=vlines,
+            hlines=hlines,
+            annotations=vcat(_texts(group), extra),
+        )
+    end
 
     if layout === :group
         # No bounds lines in :group (historical); only the time markers, via `vlines`.
@@ -207,10 +223,24 @@ function _build_root(
         if do_path || do_dual
             drawn = [
                 (r, do_path && (r.kind === :path || do_dual), do_dual && r.dual) for
-                r in _constraint_rows(sol, model)
+                r in rows
             ]
             filter!(d -> d[2] || d[3], drawn)
             only_path = all(d -> d[1].kind === :path, drawn)
+            # a block with a right column keeps it on every row (aligned time axes): a row
+            # drawn on the left whose dual is not known gets an empty right cell
+            two_columns = any(d -> d[2], drawn) && any(d -> d[3], drawn)
+            # the samples of the path constraints and of their duals, once for all rows
+            path_samples = if any(d -> d[2] && d[1].kind === :path, drawn)
+                _path_samples(sol, model)
+            else
+                nothing
+            end
+            dual_samples = if any(d -> d[3] && d[1].kind === :path, drawn)
+                _sample(CTModels.path_constraints_dual(sol), CTModels.time_grid(sol, :path))
+            else
+                nothing
+            end
             for (k, (r, left, right)) in enumerate(drawn)
                 top, bottom = k == 1, k == length(drawn)
                 tname = bottom ? tn : ""
@@ -228,7 +258,13 @@ function _build_root(
                     end
                     L(
                         _row_left_panel(
-                            sol, model, r, path_style; connect=connect, title=title
+                            sol,
+                            model,
+                            r,
+                            path_style;
+                            connect=connect,
+                            title=title,
+                            path_samples=path_samples,
                         );
                         hlines=hl,
                         group=grp(:path),
@@ -247,9 +283,21 @@ function _build_root(
                             left_shown=left,
                             connect=connect,
                             title=top ? "dual" : "",
+                            dual_samples=dual_samples,
                         );
                         group=grp(:dual),
                         time_name=tname,
+                    )
+                elseif left && two_columns
+                    p = _row_unknown_dual_panel(
+                        sol, r, dual_style; title=top ? "dual" : ""
+                    )
+                    xm = _mid_time(p.x, time)
+                    L(
+                        p;
+                        group=grp(:dual),
+                        time_name=tname,
+                        extra=[Plotting.Annotation(xm, "dual not known"; y=0.5)],
                     )
                 else
                     nothing

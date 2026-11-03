@@ -13,6 +13,42 @@ using CTModels: CTModels
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 using .TestProblems: TestProblems
 
+# TOP-LEVEL fixtures (TST3) for the review fixes of #510.
+
+# `:xbox` bounds (x₁, x₂), `:x2_box` x₂ only: after deduplication `:x2_box` is an alias of
+# component 2 (the first label of each component is `:xbox`). A control box `:u_box`, and
+# two path labels `:g1`, `:g2`.
+function _alias_model()
+    pre = CTModels.PreModel()
+    CTModels.time!(pre; t0=0.0, tf=1.0)
+    CTModels.state!(pre, 2)
+    CTModels.control!(pre, 1)
+    CTModels.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
+    CTModels.definition!(pre, quote end)
+    CTModels.time_dependence!(pre; autonomous=true)
+    CTModels.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = x[1]; nothing),
+        lb=-10, ub=10, label=:g1)
+    CTModels.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = x[2]; nothing),
+        lb=-10, ub=10, label=:g2)
+    CTModels.constraint!(pre, :state; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:xbox)
+    CTModels.constraint!(pre, :state; rg=2, lb=-Inf, ub=0.5, label=:x2_box)
+    CTModels.constraint!(pre, :control; rg=1, lb=-1.0, ub=1.0, label=:u_box)
+    return redirect_stderr(devnull) do # the alias warns: several bounds on x₂
+        CTModels.build(pre)
+    end
+end
+
+const _TA = collect(range(0.0, 1.0; length=11))
+
+function _alias_solution(ocp; duals)
+    N = length(_TA)
+    return CTModels.build_solution(
+        ocp, _TA, zeros(N, 2), zeros(N, 1), Float64[], zeros(N, 2);
+        objective=0.0, successful=true, duals=duals,
+    )
+end
+
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
@@ -159,6 +195,86 @@ function test_plot_rows()
                 CTModels.PlotCase.build_figure(sols; jumps=:none).root
             )
             Test.@test any(isnan, only(leaves[9].axes.series).y)
+        end
+
+        # ======================================================================
+        # Review fixes of #510
+        # ======================================================================
+        ocp_a = _alias_model()
+
+        Test.@testset "a box label that is only an alias has its row" begin
+            sol_a = _alias_solution(ocp_a; duals=Dict{Symbol,Any}(:x2_box => t -> -t))
+            rs = CTModels.PlotCase._constraint_rows(sol_a, ocp_a)
+            Test.@test :x2_box in [r.label for r in rs]
+            Test.@test only(filter(r -> r.label === :x2_box, rs)).rows == [2]
+            Test.@test :xbox ∉ [r.label for r in rs]   # x₁ unknown: :xbox has no dual
+            # the rows of the boxes follow their components; path rows come first
+            Test.@test [r.kind for r in rs] == [:path, :path, :state]
+        end
+
+        Test.@testset "a row without dual keeps the right column (aligned axes)" begin
+            # :g1 has its dual, :g2 not: both rows are pairs, :g2 with an empty cell
+            sol_a = _alias_solution(ocp_a; duals=Dict{Symbol,Any}(:g1 => t -> t))
+            fig = CTModels.PlotCase.build_figure(sol_a, :path, :dual)
+            leaves = Plotting.leaves(fig.root)
+            Test.@test length(leaves) == 4
+            empty = leaves[4]
+            Test.@test empty.axes.ylabel == ""
+            notes = filter(d -> d isa Plotting.Annotation, empty.axes.decorations)
+            Test.@test any(a -> a.text == "dual not known", notes)
+            Test.@test only(notes).x ≈ 0.5            # the middle of the time axis
+            Test.@test empty.axes.xlabel == "t"         # last row: the time label
+            # no row has a dual: one column, as before
+            sol_0 = _alias_solution(ocp_a; duals=Dict{Symbol,Any}())
+            Test.@test length(Plotting.leaves(CTModels.PlotCase.build_figure(sol_0, :path).root)) == 2
+            # the empty cell follows the time normalisation
+            figz = CTModels.PlotCase.build_figure(sol_a, :path, :dual; time=:normalize)
+            notez = filter(d -> d isa Plotting.Annotation, Plotting.leaves(figz.root)[4].axes.decorations)
+            Test.@test only(notez).x ≈ 0.5
+            Test.@test CTModels.PlotCase._mid_time([1.0, 3.0], :default) == 2.0
+            Test.@test CTModels.PlotCase._mid_time([1.0, 3.0], :normalize) == 0.5
+        end
+
+        Test.@testset "the dual of a control box is a step function with a constant control" begin
+            sol_a = _alias_solution(ocp_a; duals=Dict{Symbol,Any}(:u_box => t -> t))
+            fig = CTModels.PlotCase.build_figure(sol_a, :path, :dual)
+            row = filter(l -> l.axes.ylabel == "u (u_box)", Plotting.leaves(fig.root))
+            Test.@test only(only(row).axes.series).style.seriestype === :steppost
+            dual_cell = Plotting.leaves(fig.root)[end]
+            Test.@test only(dual_cell.axes.series).style.seriestype === :steppost
+            r = only(filter(r -> r.label === :u_box, CTModels.PlotCase._constraint_rows(sol_a, ocp_a)))
+            Test.@test CTModels.PlotCase._row_seriestype(sol_a, r) === :steppost
+        end
+
+        Test.@testset "the samples of the path constraints are computed once and sliced" begin
+            sol_a = _alias_solution(ocp_a; duals=Dict{Symbol,Any}(:g1 => t -> t, :g2 => t -> 2t))
+            samples = CTModels.PlotCase._path_samples(sol_a, ocp_a)
+            Test.@test size(samples[2]) == (length(_TA), 2)
+            for (k, rows) in ((1, [1]), (2, [2]))
+                shared = CTModels.PlotCase._path_panel(
+                    sol_a, ocp_a, NamedTuple(); rows=rows, samples=samples
+                )
+                alone = CTModels.PlotCase._path_panel(sol_a, ocp_a, NamedTuple(); rows=rows)
+                Test.@test shared.data == alone.data
+            end
+            duals = CTModels.PlotCase._sample(CTModels.path_constraints_dual(sol_a), _TA)
+            shared = CTModels.PlotCase._dual_panel(
+                sol_a, ocp_a, NamedTuple(); path_shown=true, rows=[2], samples=duals
+            )
+            alone = CTModels.PlotCase._dual_panel(sol_a, ocp_a, NamedTuple(); path_shown=true, rows=[2])
+            Test.@test shared.data == alone.data
+        end
+
+        Test.@testset "do_plot: the rows given or listed agree" begin
+            rs = CTModels.PlotCase._constraint_rows(sol, ocp)
+            kw = (
+                state_style=NamedTuple(), control_style=NamedTuple(),
+                costate_style=NamedTuple(), path_style=NamedTuple(), dual_style=NamedTuple(),
+            )
+            for desc in ((:state, :path, :dual), (:path,), (:dual,))
+                Test.@test CTModels.PlotCase.do_plot(sol, desc...; kw..., rows=rs) ==
+                    CTModels.PlotCase.do_plot(sol, desc...; kw...)
+            end
         end
 
         Test.@testset "a multi-row path label is one row" begin

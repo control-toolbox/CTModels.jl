@@ -37,9 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `:split` figure is now one row per constraint label — path constraint, state box or
   control box — pairing the constraint (the component with its bounds, for a box) with its
   dual `dual(sol, model, label)`. `:path` draws the left cells and `:dual` the right ones; a
-  box whose dual is unknown has no row. `PlotCase._assemble_split` takes the paired `rows`
-  in place of `path` and `dual`. The jumps of the box duals at the switching times wait for
-  [#493](https://github.com/control-toolbox/CTModels.jl/issues/493).
+  box whose dual is unknown has no row, and a row whose dual is unknown, next to rows that
+  have theirs, keeps an empty right cell (*dual not known*) so that the time axes stay
+  aligned. Box labels that are aliases of a component have their row. The dual of a control
+  box is drawn as steps with a piecewise-constant control. The box duals draw their jumps at
+  the switching times from the limits given by label
+  ([#493](https://github.com/control-toolbox/CTModels.jl/issues/493)).
+  `PlotCase._assemble_split` takes the paired `rows` in place of `path` and `dual`.
 
 ### 🛠 Enhancements
 

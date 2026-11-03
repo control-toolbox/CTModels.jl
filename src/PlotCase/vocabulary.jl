@@ -168,6 +168,9 @@ A group is drawn when it is requested, its style is not `:none`, and it actually
 - dual needs the dual of at least one constraint row to be known: a path constraint, a
   state box or a control box (see [`CTModels.PlotCase._constraint_rows`](@extref)).
 
+`rows` are the constraint rows of the figure (see
+[`CTModels.PlotCase._constraint_rows`](@extref)), listed here when not given.
+
 # Returns
 - `NTuple{5, Bool}`: flags for `(state, costate, control, path, dual)`.
 """
@@ -179,6 +182,7 @@ function do_plot(
     costate_style::Union{NamedTuple,Symbol},
     path_style::Union{NamedTuple,Symbol},
     dual_style::Union{NamedTuple,Symbol},
+    rows::Union{Nothing,AbstractVector{ConstraintRow}}=nothing,
 )
     do_plot_state = :state ∈ description && state_style != :none
     do_plot_costate = :costate ∈ description && costate_style != :none
@@ -191,12 +195,14 @@ function do_plot(
     # constraint, or a state/control box whose dual is known. `:path` draws the left-hand
     # sides, `:dual` the right-hand sides; a box row is a pair, so its left-hand side needs
     # `:dual` too.
-    box_rows = if ocp isa CTModels.Model
-        filter(r -> r.kind !== :path, _constraint_rows(sol, ocp))
+    dual_requested = :dual ∈ description && dual_style != :none
+    # the rows are listed only when the boxes may be drawn (they need `:dual`), and once:
+    # `_build_root` passes the rows it lists for the figure
+    box_rows = if dual_requested && ocp isa CTModels.Model
+        filter(r -> r.kind !== :path, isnothing(rows) ? _constraint_rows(sol, ocp) : rows)
     else
         ConstraintRow[]
     end
-    dual_requested = :dual ∈ description && dual_style != :none
     has_path = CTModels.dim_path_constraints_nl(ocp) > 0
     do_plot_path =
         :path ∈ description &&

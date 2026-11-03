@@ -79,7 +79,8 @@ constraint rows            one row per constraint label: (constraint | dual)
 ```
 
 `layout=:group` draws the state, the costate and the control only: one cell per group, with
-a legend. The path constraints and the duals have no `:group` cell.
+a legend. The path constraints and the duals have no `:group` cell, so they never receive
+the phase labels there (`_phase_label_group` only considers the groups the layout draws).
 
 ### The constraint rows
 
@@ -93,8 +94,13 @@ label, and its two sides are drawn from the same row:
 | `:state` | the bounded components of the state, with the bounds of the box | `dual(sol, model, label)` | the dual is known |
 | `:control` | the bounded components of the control, with the bounds of the box | `dual(sol, model, label)` | the dual is known |
 
-- **Order**: path constraints, then state boxes, then control boxes, each in declaration
-  order. The built model does not keep the order between kinds.
+- **Order**: path constraints in declaration order, then state boxes, then control boxes,
+  in the order of the components they bound. The built model does not keep the order
+  between kinds, and the boxes are stored by component after deduplication.
+- **Aliases**: the box labels are read from the aliases of the box tuple (`cp[5]`), not
+  from its labels (`cp[4]`, the first label of each component only), so a label that only
+  re-declares a bounded component (`x₂(t) ≤ 0.5, (:x2_box)` after `0 ≤ x(t) ≤ 1, (:xbox)`)
+  has its row; `Models.constraint_rows` gives its components.
 - **Not plotted**: boundary constraints and variable boxes (their duals do not depend on
   time), and a box whose dual is unknown (the mask of `has_dual`).
 - **One row per label**: a label that bounds several components (a vector box, a
@@ -108,6 +114,25 @@ label, and its two sides are drawn from the same row:
   or a box row when `:dual` is requested. The `:split` branch of `_build_root`
   (`src/PlotCase/build.jl`) then draws each row's left side if `:path` is on (and, for a
   box, `:dual` too) and its right side if `:dual` is on and `row.dual`.
+- **Alignment**: when some row of the block has its right side and another does not, the
+  latter gets an empty right cell (`_row_unknown_dual_panel`: an invisible curve on the
+  grid of the row, so that the cell keeps the time axis of the others, and the text *dual
+  not known*). Every row is then a pair and the time axes of the block are aligned. A
+  block with no right side at all stays one column.
+- **Series type**: the cells of a control box are steps (`:steppost`) when the control is
+  piecewise constant, the dual included (`_row_seriestype`): the box dual follows the
+  control interpolation.
+- **Jumps at the switching times**: each side is spliced with
+  `_spliced_samples(sol, T, M, component; cols=row.rows)`, with the limits of the
+  component of the row (`:path_dual`, `:state_dual` or `:control_dual` for the duals,
+  stored by label in the `SwitchingModel` and placed on the layout by `build_solution`).
+  A limit not given (`NaN`) is replaced by the value of the samples at the switching time,
+  so that column is drawn with no jump (`_fill_unknown_limits`; for steps, the sample that
+  holds on the interval).
+- **Computed once**: `_build_root` lists the rows once and passes them to `do_plot`; the
+  path constraints and the path duals are sampled once for the whole figure
+  (`_path_samples`, `dual_samples`) and each row takes its columns, instead of evaluating
+  the whole stacked constraint once per label.
 - **Titles and labels**: the first row carries the titles and the phase labels, the last
   one the time label. One rule for every row, as for state | costate: the left cell carries the
   name and the paired right cell none (`dual <label>` when the right side is drawn alone).
@@ -131,7 +156,7 @@ ocp2 = CTModels.build(pre2)
 M = 21
 T2 = collect(range(0.0, 1.0; length=M))
 sol2 = CTModels.build_solution(ocp2, T2, hcat(T2, ones(M)), ones(M, 1), Float64[], zeros(M, 2);
-    objective=1.0, successful=true, path_constraints_dual=hcat(T2),
+    objective=1.0, successful=true, duals=Dict(:c1 => T2),
     state_constraints_lb_dual=zeros(M, 2), state_constraints_ub_dual=zeros(M, 2),
     control_constraints_lb_dual=zeros(M, 1), control_constraints_ub_dual=zeros(M, 1))
 nothing # hide

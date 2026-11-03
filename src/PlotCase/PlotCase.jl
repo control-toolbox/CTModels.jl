@@ -32,8 +32,9 @@ using ..Solutions
 # call time from the fully-loaded parent module.
 const CTModels = parentmodule(@__MODULE__)
 
-include(joinpath(@__DIR__, "vocabulary.jl"))
+# rows.jl first: `ConstraintRow` is used in the signature of `do_plot` (vocabulary.jl)
 include(joinpath(@__DIR__, "rows.jl"))
+include(joinpath(@__DIR__, "vocabulary.jl"))
 include(joinpath(@__DIR__, "panels.jl"))
 include(joinpath(@__DIR__, "decorations.jl"))
 include(joinpath(@__DIR__, "assemble.jl"))

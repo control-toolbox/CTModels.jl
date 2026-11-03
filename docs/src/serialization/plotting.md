@@ -98,7 +98,7 @@ Tb = collect(range(0.0, 1.0; length=M))
 sol_box = CTModels.build_solution(ocp_box, Tb, hcat(Tb .^ 2, 2Tb), reshape(1 .- Tb, M, 1),
     Float64[], hcat(1 .- Tb, -Tb);
     objective=1 / 3, successful=true,
-    path_constraints_dual=hcat(Tb),
+    duals=Dict(:c1 => Tb),
     state_constraints_lb_dual=hcat(zeros(M), max.(0.0, 1 .- 4Tb)),
     state_constraints_ub_dual=hcat(zeros(M), max.(0.0, 4Tb .- 3)),
     control_constraints_lb_dual=reshape(max.(0.0, 0.5 .- Tb), M, 1),
@@ -115,6 +115,12 @@ The selection stays `:path` and `:dual`:
   (otherwise it would only repeat the component of the state or control panel), so
   `plot(sol, :path)` shows the path constraints only, as before; and a box whose dual is
   unknown has no row;
+- when some rows have their dual and others not, the rows without one keep an empty right
+  cell marked *dual not known*, so that the time axes of the block stay aligned;
+- the dual of a control box is drawn as steps when the control is piecewise constant, like
+  its component on the left;
+- several labels may bound one component (a second declaration is an alias of the first,
+  see [Constraints](../model/constraints.md)): each label has its row;
 - `path_style` and `dual_style` style the two sides, `state_bounds_style` and
   `control_bounds_style` the bounds of the box rows.
 
