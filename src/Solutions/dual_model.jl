@@ -51,7 +51,7 @@ If the label is not found, throws an `IncorrectArgument` exception.
 function dual(sol::Solution, model::Model, label::Symbol)
 
     # an unknown label is an error whatever the solution
-    _is_constraint_label(model, label) || _throw_label_not_found(label)
+    kind, rows = constraint_rows(model, label)
 
     # the solution must carry dual variables
     has_duals(sol) || throw(
@@ -66,86 +66,39 @@ function dual(sol::Solution, model::Model, label::Symbol)
         ),
     )
 
-    # check if the label is in the path constraints
-    cp = path_constraints_nl(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        indices = findall(x -> x == label, labels)
+    if kind === :path
         duals = path_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "path")
-        idx = length(indices) == 1 ? indices[1] : indices
-        return DualSlice(duals, idx)
-    end
-
-    # check if the label is in the boundary constraints
-    cp = boundary_constraints_nl(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        indices = findall(x -> x == label, labels)
+        return DualSlice(duals, length(rows) == 1 ? rows[1] : rows)
+    elseif kind === :boundary
         duals = boundary_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "boundary")
-        if length(indices) == 1
-            return duals[indices[1]]
-        else
-            return duals[indices]
-        end
-    end
-
-    # Box constraints: resolve `label` via the `aliases` field (cp[5]) of each
-    # box tuple. `cp[2][k]` gives the primal component index for row `k`, which
-    # is used to slice the per-component dual matrix/vector.
-    function _box_idxs(cp, lbl)
-        aliases = cp[5]
-        out = Int[]
-        for k in eachindex(aliases)
-            if lbl in aliases[k]
-                push!(out, cp[2][k])
-            end
-        end
-        return out
-    end
-
-    # state box
-    cp = state_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        return length(rows) == 1 ? duals[rows[1]] : duals[rows]
+    elseif kind === :state
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "state box")
         _ensure_dual(sol, duals_ub, label, "state box")
-        return _box_dual(duals_lb, duals_ub, cp, idxs)
-    end
-
-    # control box
-    cp = control_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        return _box_dual(duals_lb, duals_ub, state_constraints_box(model), rows)
+    elseif kind === :control
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "control box")
         _ensure_dual(sol, duals_ub, label, "control box")
-        return _box_dual(duals_lb, duals_ub, cp, idxs)
-    end
-
-    # variable box
-    cp = variable_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        return _box_dual(duals_lb, duals_ub, control_constraints_box(model), rows)
+    else # :variable
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "variable box")
         _ensure_dual(sol, duals_ub, label, "variable box")
-        cl, cu = _box_dual_coefficients(cp, idxs)
-        if length(idxs) == 1
-            i = idxs[1]
+        cl, cu = _box_dual_coefficients(variable_constraints_box(model), rows)
+        if length(rows) == 1
+            i = rows[1]
             return cl[1] * duals_lb[i] + cu[1] * duals_ub[i]
         else
-            return cl .* duals_lb[idxs] .+ cu .* duals_ub[idxs]
+            return cl .* duals_lb[rows] .+ cu .* duals_ub[rows]
         end
     end
-
-    # unreachable: the label was found above
-    return _throw_label_not_found(label)
 end
 
 """
@@ -186,42 +139,6 @@ function _box_dual(duals_lb, duals_ub, cp, idxs::Vector{Int})
     cl, cu = _box_dual_coefficients(cp, idxs)
     length(idxs) == 1 && return BoxDualDiff(duals_lb, duals_ub, idxs[1], cl[1], cu[1])
     return BoxDualDiff(duals_lb, duals_ub, idxs, cl, cu)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Whether `label` is a constraint of `model`: a path or boundary constraint, or an alias of
-a state, control or variable box.
-"""
-function _is_constraint_label(model::Model, label::Symbol)::Bool
-    label in path_constraints_nl(model)[4] && return true
-    label in boundary_constraints_nl(model)[4] && return true
-    for cp in (
-        state_constraints_box(model),
-        control_constraints_box(model),
-        variable_constraints_box(model),
-    )
-        any(aliases -> label in aliases, cp[5]) && return true
-    end
-    return false
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Throw the [`CTBase.Exceptions.IncorrectArgument`](@extref) of an unknown constraint label.
-"""
-function _throw_label_not_found(label::Symbol)
-    return throw(
-        Exceptions.IncorrectArgument(
-            "Label not found in model";
-            got="label=$label",
-            expected="existing label in the model",
-            suggestion="Check available labels in the model or use a valid label",
-            context="get_constraint_dual - looking up constraint label in dual model",
-        ),
-    )
 end
 
 """

@@ -1435,6 +1435,79 @@ See also: [`CTModels.Models.definition`](@extref).
 Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
 
 # ------------------------------------------------------------------------------ #
+# constraint_rows(::Model, label) — where a labelled constraint lives
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the kind of the constraint labelled `label` and the rows it occupies, `(kind, rows)`.
+
+- `kind` is `:path` or `:boundary` for a nonlinear constraint, and `rows` its rows in the
+  stacked constraint vector (`path_constraints_nl(model)`, `boundary_constraints_nl(model)`),
+  in increasing order. The rows of a label are contiguous, in the order of declaration.
+- `kind` is `:state`, `:control` or `:variable` for a box, and `rows` the components it
+  bounds. A box label is any of the aliases of a deduplicated box declaration.
+
+This is the layout of the duals of the solution: the dual of a path or boundary label is
+stored in the rows `rows` of the stacked dual, the dual of a box label in the components
+`rows` of the box duals.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+
+See also: [`CTModels.Models.constraint`](@extref), [`CTModels.Solutions.dual`](@extref).
+"""
+function constraint_rows(model::Model, label::Symbol)::Tuple{Symbol,Vector{Int}}
+    rows = _nl_rows(Components.path_constraints_nl(model), label)
+    isempty(rows) || return (:path, rows)
+    rows = _nl_rows(Components.boundary_constraints_nl(model), label)
+    isempty(rows) || return (:boundary, rows)
+    rows = _box_components(Components.state_constraints_box(model), label)
+    isempty(rows) || return (:state, rows)
+    rows = _box_components(Components.control_constraints_box(model), label)
+    isempty(rows) || return (:control, rows)
+    rows = _box_components(Components.variable_constraints_box(model), label)
+    isempty(rows) || return (:variable, rows)
+    return _throw_constraint_label_not_found(label)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The rows labelled `label` in the nonlinear constraint tuple `cp = (lb, f!, ub, labels)`.
+"""
+_nl_rows(cp::Tuple, label::Symbol)::Vector{Int} = findall(==(label), cp[4])
+
+"""
+$(TYPEDSIGNATURES)
+
+The components bounded under the label `label` in the box tuple
+`cp = (lb, ind, ub, labels, aliases)`.
+"""
+function _box_components(cp::Tuple, label::Symbol)::Vector{Int}
+    return Int[cp[2][k] for k in eachindex(cp[5]) if label in cp[5][k]]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw the [`CTBase.Exceptions.IncorrectArgument`](@extref) of an unknown constraint label.
+"""
+function _throw_constraint_label_not_found(label::Symbol)
+    return throw(
+        Exceptions.IncorrectArgument(
+            "Constraint label not found";
+            got="label :$label",
+            expected="existing constraint label in the model",
+            suggestion="Check available constraint labels or add a constraint with this label first",
+            context="constraint lookup by label",
+        ),
+    )
+end
+
+# ------------------------------------------------------------------------------ #
 # constraint(::Model, label) — retrieve a labelled constraint by name
 # ------------------------------------------------------------------------------ #
 
@@ -1460,9 +1533,8 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
 
     # check if the label is in the path constraints
     cp = Components.path_constraints_nl(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        indices = findall(x -> x == label, labels)
+    indices = _nl_rows(cp, label)
+    if !isempty(indices)
         fc! = SubPathConstraint(cp, length(cp[1]), indices)
         return (
             :path,
@@ -1474,9 +1546,8 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
 
     # check if the label is in the boundary constraints
     cp = Components.boundary_constraints_nl(model)
-    labels = cp[4]
-    if label in labels
-        indices = findall(x -> x == label, labels)
+    indices = _nl_rows(cp, label)
+    if !isempty(indices)
         fc! = SubBoundaryConstraint(cp, length(cp[1]), indices)
         return (
             :boundary,
@@ -1537,13 +1608,5 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
         )
     end
 
-    return throw(
-        Exceptions.IncorrectArgument(
-            "Constraint label not found";
-            got="label :$label",
-            expected="existing constraint label in the model",
-            suggestion="Check available constraint labels or add a constraint with this label first",
-            context="constraint lookup by label",
-        ),
-    )
+    return _throw_constraint_label_not_found(label)
 end
