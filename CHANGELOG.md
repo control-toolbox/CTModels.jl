@@ -34,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
+- **Merged initial guesses promote mixed numeric types instead of throwing**
+  ([#505](https://github.com/control-toolbox/CTModels.jl/issues/505)). A component
+  override whose value does not fit the element type of the block-level data (for
+  instance `state=[0, 0]` with a `Float64` component) raised an `InexactError`; the
+  merged trajectory now returns a vector promoted to the common type. Compatible
+  types are unchanged and the call stays allocation-free.
 - **A dynamics assembled from coordinate parts no longer allocates at every call**
   ([#496](https://github.com/control-toolbox/CTModels.jl/issues/496)). Declaring the
   dynamics range by range (`dynamics!(pre, i, f)` — the shape CTParser's `@def` emits
@@ -43,6 +49,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   concretely-typed tuple whose generated call method emits one statically dispatched
   call per part: the built dynamics allocates exactly what the equivalent monolithic
   dynamics allocates.
+- **A merged block+component initial guess no longer allocates at every call**
+  ([#498](https://github.com/control-toolbox/CTModels.jl/issues/498)). Mixing
+  block-level and component-level `initial_guess` data built a `MergedTrajectory`
+  iterating a `Dict{Int,Function}` at each evaluation: every override dispatched
+  dynamically and its return value was boxed (224 B per call). The overrides are
+  now linearised once into a concretely-typed tuple whose generated call method
+  emits one statically dispatched call per component: the merged trajectory
+  allocates exactly what the equivalent specialised function allocates.
+- **Scalar merged initial guesses allocate nothing at all**
+  ([#501](https://github.com/control-toolbox/CTModels.jl/issues/501)). The total
+  dimension of `Init.MergedTrajectory` is now a type parameter, so the generated
+  call method emits the scalar path directly for `dim == 1` — no scratch vector,
+  no `Union` return: a one-component merged guess went from 64 B per call to 0 B,
+  and both paths infer cleanly (`@inferred`). The scalar path returns the override
+  value as is, without converting it to the element type of the base trajectory.
+
+### 📚 Documentation
+
+- **Allocation guards: the raw-vs-wrapper comparison trap is documented**
+  ([#502](https://github.com/control-toolbox/CTModels.jl/issues/502)). The
+  performance guide gains a section on writing the raw side of a `PERF5` guard
+  (one specialised function, shared `const` inputs), and the header of
+  `test_performance.jl` now mentions the init-guess functors it covers.
 
 ### ✅ Compatibility
 
@@ -52,6 +81,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `boundary_constraints_dual` of `build_solution` still work, every row known, but emit a
   deprecation warning; they will be removed at the next breaking release. See
   [BREAKING.md](BREAKING.md).
+- **No breaking changes**: internals only; the `dynamics!` signatures, the `build`
+  output (`Models.dynamics` still returns a `Function`), and the
+  `Init.MergedTrajectory` constructor are unchanged.
 
 ## [0.21.0] - 2026-10-23
 

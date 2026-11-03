@@ -6,8 +6,9 @@ module TestPerformance
 #
 # This file asserts the *allocation* invariants of CTModels' hot path: the
 # callable structs evaluated repeatedly while reading a solution (time-function
-# functors, dual-by-label functors, constraint-projection functors) and the
-# accessor reads on model/solution components.
+# functors, dual-by-label functors, constraint-projection functors), the
+# init-guess functors (`CompositeDynamics`, `MergedTrajectory`) and the accessor
+# reads on model/solution components.
 #
 # Why allocations, and why here:
 #   - Type-stability is already guarded by `JET.@test_opt` (test_code_quality.jl)
@@ -23,7 +24,11 @@ module TestPerformance
 #   1. Zero-overhead wrappers — a wrapper call must allocate exactly what the
 #      raw wrapped computation does (i.e. the wrapper itself adds nothing). We
 #      compare wrapper-vs-raw rather than to a magic constant, so the guard is
-#      independent of Julia version / word size.
+#      independent of Julia version / word size. The raw side must be written
+#      so the compiler cannot fold or elide what the wrapper provably performs
+#      (shared `const` inputs, or ONE specialised function for the whole
+#      sequence — see `_boxdualdiff_raw`, `_merged_raw`, and the "Writing the raw side
+#      of an allocation guard" section of docs/src/guide/performance.md).
 #   2. Zero-allocation reads — component accessors and trait reads must
 #      allocate nothing at all.
 #
@@ -41,6 +46,7 @@ using CTModels: Components
 using CTModels: Building
 using CTModels: Solutions
 using CTModels: Models
+using CTModels: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -74,6 +80,36 @@ end
 _dyn_part_1!(r, t, x, u, v) = (r[1] = x[2]; nothing)
 _dyn_part_2!(r, t, x, u, v) = (r[1] = u[1]; nothing)
 _dyn_mono!(r, t, x, u, v) = (r[1] = x[2]; r[2] = u[1]; nothing)
+
+# Block-level base trajectory with per-component overrides (the shape
+# `initial_guess` produces when mixing block and component data): the
+# `MergedTrajectory` must evaluate at exactly the cost of the equivalent
+# specialised function (issue #498). The base returns a SHARED vector: the
+# wrapper must not mutate it, so `_coerce_base`'s `collect` is part of the
+# contract, not overhead — and with a fresh-vector base the raw side would
+# let the compiler elide that copy while the `_coerce_base` call boundary
+# cannot, making the comparison artifactual (same trap as `_boxdualdiff_raw`
+# above). A shared base makes the required copy explicit on both sides.
+const _MERGED_BASE_VEC = [0.0, 0.0, 0.0]
+_merged_base_raw(t) = _MERGED_BASE_VEC
+_merged_c1_raw(t) = sin(t)
+_merged_c3_raw(t) = cos(t)
+function _merged_raw(t)
+    v = collect(_merged_base_raw(t))
+    v[1] = _merged_c1_raw(t)
+    v[3] = _merged_c3_raw(t)
+    return v
+end
+
+# Scalar (dim=1) merged trajectory: the scalar path must need no scratch
+# vector at all — same raw-equivalent contract as above (issue #501).
+_merged1_base_raw(t) = 0.0
+_merged1_c_raw(t) = 2t
+function _merged1_raw(t)
+    b = _merged1_base_raw(t)
+    b = _merged1_c_raw(t)
+    return b
+end
 
 # Minimal built `Model`, for trait reads.
 _pre = Building.PreModel()
@@ -192,6 +228,31 @@ function test_performance()
             v0 = Float64[]
             Test.@test (BenchmarkTools.@ballocated $dyn_parts($r, $t0, $x0, $u0, $v0)) ==
                 (BenchmarkTools.@ballocated $_dyn_mono!($r, $t0, $x0, $u0, $v0))
+
+            # An initial guess merging a block-level trajectory with
+            # per-component overrides must allocate exactly what the
+            # equivalent specialised function allocates: the merged
+            # trajectory is evaluated once per grid point at warm-start and
+            # may be re-evaluated when post-processing warm-started solutions
+            # (issue #498). Measured 224 B before the fix.
+            f_merged = Init.MergedTrajectory(
+                _merged_base_raw,
+                Dict{Int,Function}(1 => _merged_c1_raw, 3 => _merged_c3_raw),
+                3,
+                :state,
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_merged($t)) ==
+                (BenchmarkTools.@ballocated $_merged_raw($t))
+
+            # Scalar (dim=1) merged trajectory: `dim` is a type parameter,
+            # so the generated call emits the scalar path directly — no
+            # scratch vector, no boxed union return (issue #501). Measured
+            # 64 B before the fix.
+            f_merged1 = Init.MergedTrajectory(
+                _merged1_base_raw, Dict{Int,Function}(1 => _merged1_c_raw), 1, :state
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_merged1($t)) ==
+                (BenchmarkTools.@ballocated $_merged1_raw($t))
         end
 
         # ======================================================================

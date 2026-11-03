@@ -307,6 +307,82 @@ function test_initial_guess_builders()
             f = Init.MergedTrajectory(base, comps, 2, :state)
             Test.@test_throws Exceptions.IncorrectArgument f(0.0)
         end
+
+        Test.@testset "MergedTrajectory — overrides stored as a concrete tuple (issue #498)" begin
+            base = _ -> [1.0, 2.0, 3.0]
+            c1 = t -> sin(t)
+            c3 = t -> cos(t)
+            comps = Dict{Int,Function}(3 => c3, 1 => c1)   # unordered insertion
+            f = Init.MergedTrajectory(base, comps, 3, :state)
+            # the dict is linearised once, sorted by index, each function type
+            # kept concrete in the tuple's type parameters (static dispatch)
+            Test.@test f.comps isa Tuple{Tuple{Int,typeof(c1)},Tuple{Int,typeof(c3)}}
+            Test.@test f.comps == ((1, c1), (3, c3))
+            Test.@test f(0.5) ≈ [sin(0.5), 2.0, cos(0.5)]
+        end
+
+        Test.@testset "MergedTrajectory — pre-built tuple of overrides accepted" begin
+            base = _ -> [1.0, 2.0]
+            f = Init.MergedTrajectory(base, ((2, _ -> 9.0),), 2, :state)
+            Test.@test f(0.0) == [1.0, 9.0]
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((5, _ -> 0.0),), 2, :state
+            )
+            # unsorted or duplicated indices are rejected (no silent "last wins")
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (1, _ -> 2.0)), 2, :state
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (2, _ -> 2.0)), 2, :state
+            )
+        end
+
+        Test.@testset "MergedTrajectory — override type promotion (issue #505)" begin
+            # integer base + float override: promoted instead of InexactError
+            f = Init.MergedTrajectory(
+                _ -> [0, 0], Dict{Int,Function}(2 => t -> 0.5), 2, :state
+            )
+            Test.@test Test.@inferred(f(0.0)) == [0.0, 0.5]
+            Test.@test f(0.0) isa Vector{Float64}
+            # mixed overrides on distinct components, length-1 vector override
+            g = Init.MergedTrajectory(
+                _ -> [0, 0, 0],
+                Dict{Int,Function}(1 => t -> 2, 3 => t -> [0.25]),
+                3,
+                :control,
+            )
+            Test.@test Test.@inferred(g(0.0)) == [2.0, 0.0, 0.25]
+            # compatible types: no promotion, eltype of the base is kept
+            h = Init.MergedTrajectory(
+                _ -> [1.0, 2.0], Dict{Int,Function}(1 => t -> 3), 2, :state
+            )
+            Test.@test h(0.0) isa Vector{Float64}
+            Test.@test h(0.0) == [3.0, 2.0]
+        end
+
+        Test.@testset "MergedTrajectory — dim as type parameter D (issue #501)" begin
+            # D is the third type parameter: the scalar/vector path is picked
+            # statically, so the call infers cleanly on both sides.
+            f1 = Init.MergedTrajectory(
+                _ -> 0.0, Dict{Int,Function}(1 => t -> 2t), 1, :state
+            )
+            Test.@test f1 isa Init.MergedTrajectory{<:Any,<:Any,1}
+            Test.@test Test.@inferred(f1(0.5)) ≈ 1.0
+            # the scalar path returns the override value as is (no conversion to
+            # the base element type)
+            fi = Init.MergedTrajectory(
+                _ -> 0.0, Dict{Int,Function}(1 => _ -> 1), 1, :state
+            )
+            Test.@test fi(0.5) === 1
+            # vector base with dim=1: first element used (former copy(v)[1] semantics)
+            fv = Init.MergedTrajectory(_ -> [5.0, 99.0], Dict{Int,Function}(), 1, :control)
+            Test.@test fv(0.0) == 5.0
+            f3 = Init.MergedTrajectory(
+                _ -> [1.0, 2.0, 3.0], Dict{Int,Function}(2 => _ -> 9.0), 3, :state
+            )
+            Test.@test f3 isa Init.MergedTrajectory{<:Any,<:Any,3}
+            Test.@test Test.@inferred(f3(0.0)) == [1.0, 9.0, 3.0]
+        end
     end
 end
 
