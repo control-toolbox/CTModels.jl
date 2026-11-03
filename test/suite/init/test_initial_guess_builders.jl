@@ -328,6 +328,13 @@ function test_initial_guess_builders()
             Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
                 base, ((5, _ -> 0.0),), 2, :state
             )
+            # unsorted or duplicated indices are rejected (no silent "last wins")
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (1, _ -> 2.0)), 2, :state
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (2, _ -> 2.0)), 2, :state
+            )
         end
 
         Test.@testset "MergedTrajectory — dim as type parameter D (issue #501)" begin
@@ -338,6 +345,12 @@ function test_initial_guess_builders()
             )
             Test.@test f1 isa Init.MergedTrajectory{<:Any,<:Any,1}
             Test.@test Test.@inferred(f1(0.5)) ≈ 1.0
+            # the scalar path returns the override value as is (no conversion to
+            # the base element type)
+            fi = Init.MergedTrajectory(
+                _ -> 0.0, Dict{Int,Function}(1 => _ -> 1), 1, :state
+            )
+            Test.@test fi(0.5) === 1
             # vector base with dim=1: first element used (former copy(v)[1] semantics)
             fv = Init.MergedTrajectory(_ -> [5.0, 99.0], Dict{Int,Function}(), 1, :control)
             Test.@test fv(0.0) == 5.0

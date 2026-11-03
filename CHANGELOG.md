@@ -31,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dimension of `Init.MergedTrajectory` is now a type parameter, so the generated
   call method emits the scalar path directly for `dim == 1` — no scratch vector,
   no `Union` return: a one-component merged guess went from 64 B per call to 0 B,
-  and both paths infer cleanly (`@inferred`).
+  and both paths infer cleanly (`@inferred`). The scalar path returns the override
+  value as is, without converting it to the element type of the base trajectory.
 
 ### ✅ Compatibility
 

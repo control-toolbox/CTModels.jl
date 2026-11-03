@@ -202,7 +202,7 @@ dyn(val, 0.0, [1.0, 2.0], [3.0], Float64[])
 # val == [2.0, 3.0]
 ```
 """
-struct CompositeDynamics{P} <: Function
+struct CompositeDynamics{P<:Tuple} <: Function
     parts::P
 end
 
@@ -305,6 +305,6 @@ inside the result's type parameter — what makes the calls in
 """
 function __build_dynamics_from_parts(
     parts::Vector{<:Tuple{<:AbstractRange{<:Int},<:Function}}
-)::Function
+)::CompositeDynamics
     return CompositeDynamics(tuple(parts...))
 end
