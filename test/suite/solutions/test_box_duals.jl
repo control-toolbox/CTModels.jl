@@ -2,7 +2,10 @@ module TestBoxDuals
 
 using Test: Test
 using CTBase: Exceptions
+using JLD2: JLD2
+using JSON: JSON
 using CTModels: Building
+using CTModels: Serialization
 using CTModels: Solutions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -271,6 +274,63 @@ function test_box_duals()
                 times=[0.5], path_dual=([1.0;;], [2.0;;]), duals=Dict(:p => ([1.0], [2.0]))
             )
             Test.@test_throws Exceptions.IncorrectArgument _box_solution(ocp; switching=sw_both)
+        end
+
+        # ======================================================================
+        # INTEGRATION — export / import keep the unknown box duals unknown
+        # ======================================================================
+        sw_labels() = Solutions.SwitchingModel(;
+            times=[0.5], duals=Dict(:x2_two => ([-0.5;;], [0.5;;]), :p => ([1.0], [2.0]))
+        )
+        partial() = _box_solution(
+            ocp;
+            switching=sw_labels(),
+            duals=Dict{Symbol,Any}(:x2_two => 2 .* _T .- 0.5, :u_up => 3 .* _T, :p => -_T),
+        )
+        Test.@testset "serialization round trip ($fmt)" for fmt in (:JLD, :JSON)
+            sol = partial()
+            mktempdir() do dir
+                file = joinpath(dir, "box_duals")
+                Serialization.export_ocp_solution(sol; filename=file, format=fmt)
+                sol2 = Serialization.import_ocp_solution(ocp; filename=file, format=fmt)
+                for t in _T
+                    Test.@test Solutions.dual(sol2, ocp, :x2_two)(t) ≈ 2t - 0.5
+                    Test.@test Solutions.dual(sol2, ocp, :u_up)(t) ≈ 3t
+                end
+                Test.@test !Solutions.has_dual(sol2, ocp, :x1_lo)    # still unknown
+                Test.@test !Solutions.has_dual(sol2, ocp, :v_fix)    # never stored
+                Test.@test Solutions.dual_model(sol2).known.state == [false, true]
+                L, R = Solutions.limits(Solutions.switching_model(sol2), :state_dual)
+                Test.@test isnan(L[1, 1]) && (L[1, 2], R[1, 2]) == (-0.5, 0.5)
+                Test.@test Solutions.limits(Solutions.switching_model(sol2), :path_dual) ==
+                    ([1.0;;], [2.0;;])
+            end
+        end
+
+        Test.@testset "JSON: null for unknown box duals and limits; files without masks" begin
+            mktempdir() do dir
+                file = joinpath(dir, "box_duals")
+                Serialization.export_ocp_solution(partial(); filename=file, format=:JSON)
+                blob = JSON.parse(read(file * ".json", String); dicttype=Dict{String,Any})
+                Test.@test all(isnothing(row[1]) for row in blob["state_constraints_lb_dual"])
+                Test.@test blob["state_constraints_dual_known"] == [false, true]
+                Test.@test !haskey(blob, "control_constraints_dual_known")   # all known
+                Test.@test isnothing(blob["switching_state_dual_left"][1][1])
+            end
+            # every box component known: no mask written, the keywords on reading
+            sol = _box_solution(
+                ocp;
+                duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => 2 .* _T .- 0.5, :v_fix => 0.3),
+            )
+            mktempdir() do dir
+                file = joinpath(dir, "full")
+                Serialization.export_ocp_solution(sol; filename=file, format=:JSON)
+                blob = JSON.parse(read(file * ".json", String); dicttype=Dict{String,Any})
+                Test.@test !haskey(blob, "state_constraints_dual_known")
+                sol2 = Serialization.import_ocp_solution(ocp; filename=file, format=:JSON)
+                Test.@test Solutions.dual(sol2, ocp, :x1_lo)(0.5) ≈ 0.5
+                Test.@test Solutions.dual(sol2, ocp, :v_fix) ≈ 0.3
+            end
         end
 
         # ======================================================================

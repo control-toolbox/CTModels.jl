@@ -1890,10 +1890,11 @@ Version history:
 - `2`: optional switching structure (`"switching_times"`, `"phase_labels"` and the
   `"switching_<component>_<side>"` limits), written only for a solution that holds one;
   files without these keys are read with an [`CTModels.Solutions.EmptySwitchingModel`](@extref).
-- `3`: masks of the known rows of the path and boundary duals
-  (`"path_constraints_dual_known"`, `"boundary_constraints_dual_known"`), written only when
-  some rows are unknown; the unknown entries of these duals are `NaN` (`null` in JSON). Files
-  without the masks are read with every stored row known.
+- `3`: masks of the known rows of the duals (`"<kind>_constraints_dual_known"` for `path`,
+  `boundary`, `state`, `control`, `variable`), written only when some rows are unknown; the
+  unknown entries of the duals are `NaN` (`null` in JSON). Limits of the box duals at the
+  switching times (`"switching_state_dual_<side>"`, `"switching_control_dual_<side>"`).
+  Files without the masks are read with every stored row known.
 """
 const SERIALIZATION_FORMAT_VERSION = 3
 
@@ -2210,6 +2211,9 @@ function _discretize_all_components(
     known = _dual_masks(sol)
     isnothing(known.path) || (data["path_constraints_dual_known"] = known.path)
     isnothing(known.boundary) || (data["boundary_constraints_dual_known"] = known.boundary)
+    isnothing(known.state) || (data["state_constraints_dual_known"] = known.state)
+    isnothing(known.control) || (data["control_constraints_dual_known"] = known.control)
+    isnothing(known.variable) || (data["variable_constraints_dual_known"] = known.variable)
     return data
 end
 

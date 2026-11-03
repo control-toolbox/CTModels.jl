@@ -392,6 +392,42 @@ _as_mask(known::AbstractVector{Bool}) = Vector{Bool}(known)
 """
 $(TYPEDSIGNATURES)
 
+The inverse of the placement of the box labels: the `kind` box multipliers stored by
+component (`lb`, `ub`: matrices with one column per component, or vectors for a variable
+box), given back by label as signed duals (`cl * zL + cu * zU`, see
+[`CTModels.Solutions._box_dual_coefficients`](@extref)), the labels with an unknown
+component in `known` left out. Lossless for multipliers that come from signed duals (at
+most one side nonzero), which is the case when some component is unknown. Used to rebuild a
+solution read from a file.
+"""
+function _box_duals_by_label(
+    ocp::Model, kind::Symbol, lb, ub, known::Union{Nothing,AbstractVector{Bool}}
+)::Dict{Symbol,Any}
+    cp = if kind === :state
+        state_constraints_box(ocp)
+    elseif kind === :control
+        control_constraints_box(ocp)
+    else
+        variable_constraints_box(ocp)
+    end
+    duals = Dict{Symbol,Any}()
+    for label in unique(reduce(vcat, cp[5]; init=Symbol[]))
+        _, rows = constraint_rows(ocp, label)
+        _rows_known(_as_mask(known), rows) || continue
+        cl, cu = _box_dual_coefficients(cp, rows)
+        duals[label] = if lb isa AbstractMatrix
+            lb[:, rows] .* cl' .+ ub[:, rows] .* cu'
+        else
+            d = lb[rows] .* cl .+ ub[rows] .* cu
+            length(rows) == 1 ? d[1] : d
+        end
+    end
+    return duals
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 The masks of the known rows of the duals of `sol` (see
 [`CTModels.Solutions.DualMasks`](@extref)); every mask `nothing` when the solution carries
 no duals.
