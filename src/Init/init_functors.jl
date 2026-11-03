@@ -110,35 +110,48 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Assign a component override value `val` to `vec[i]` after shape validation.
+Assign a component override value `val` to `vec[i]` after shape validation, and return
+the vector holding the result.
 
 Dispatched overloads replace `isa AbstractVector` runtime checks with static dispatch:
 a length-1 vector unwraps to `only(val)`, anything longer throws, and a scalar
 assigns directly.
 
+When the type of `val` fits the element type of `vec`, `vec` is filled in place and
+returned. Otherwise (for instance a `Float64` override on an `Int` base vector) the
+result is a copy promoted to `promote_type(eltype(vec), typeof(val))`, instead of
+failing with an `InexactError` (issue #505). The branch is resolved statically from
+the types, so the call stays inferred and allocation-free in the common case.
+
 # Arguments
-- `vec`: Output vector being filled (modified in-place).
+- `vec`: Output vector being filled (modified in-place when no promotion is needed).
 - `i::Int`: Component index.
 - `val`: Raw output of the component override function.
 - `role::Symbol`: Component role (e.g. `:state`, `:control`) used in the error message.
 
 # Returns
-- `Nothing`
+- `Vector`: `vec` itself, or its promoted copy; callers must use the returned vector.
 
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: if `val` is a vector of length other than 1.
 
 See also: [`CTModels.Init._scalar_base`](@extref), [`CTModels.Init._coerce_base`](@extref)
 """
-function _set_component!(vec, i::Int, val::AbstractVector, role::Symbol)
+function _set_component!(vec::AbstractVector, i::Int, val::AbstractVector, role::Symbol)
     length(val) != 1 && _component_shape_error(val, i, role)
-    vec[i] = only(val)
-    return nothing
+    return _set_component!(vec, i, only(val), role)
 end
 
-function _set_component!(vec, i::Int, val, role::Symbol)
-    vec[i] = val
-    return nothing
+function _set_component!(
+    vec::AbstractVector{T}, i::Int, val::V, ::Symbol
+) where {T,V}
+    if V <: T
+        vec[i] = val
+        return vec
+    end
+    promoted = Vector{promote_type(T, V)}(vec)
+    promoted[i] = val
+    return promoted
 end
 
 # Scalar-path counterpart of `_set_component!` for dim-1 merged trajectories: the
@@ -316,7 +329,7 @@ function type — so each override's return type is inferred per element and the
         end
     else
         calls = [
-            :(_set_component!(vec, f.comps[$k][1], f.comps[$k][2](t), f.role)) for
+            :(vec = _set_component!(vec, f.comps[$k][1], f.comps[$k][2](t), f.role)) for
             k in 1:fieldcount(P)
         ]
         return quote

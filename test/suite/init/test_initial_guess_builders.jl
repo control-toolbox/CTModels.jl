@@ -337,6 +337,29 @@ function test_initial_guess_builders()
             )
         end
 
+        Test.@testset "MergedTrajectory — override type promotion (issue #505)" begin
+            # integer base + float override: promoted instead of InexactError
+            f = Init.MergedTrajectory(
+                _ -> [0, 0], Dict{Int,Function}(2 => t -> 0.5), 2, :state
+            )
+            Test.@test Test.@inferred(f(0.0)) == [0.0, 0.5]
+            Test.@test f(0.0) isa Vector{Float64}
+            # mixed overrides on distinct components, length-1 vector override
+            g = Init.MergedTrajectory(
+                _ -> [0, 0, 0],
+                Dict{Int,Function}(1 => t -> 2, 3 => t -> [0.25]),
+                3,
+                :control,
+            )
+            Test.@test Test.@inferred(g(0.0)) == [2.0, 0.0, 0.25]
+            # compatible types: no promotion, eltype of the base is kept
+            h = Init.MergedTrajectory(
+                _ -> [1.0, 2.0], Dict{Int,Function}(1 => t -> 3), 2, :state
+            )
+            Test.@test h(0.0) isa Vector{Float64}
+            Test.@test h(0.0) == [3.0, 2.0]
+        end
+
         Test.@testset "MergedTrajectory — dim as type parameter D (issue #501)" begin
             # D is the third type parameter: the scalar/vector path is picked
             # statically, so the call infers cleanly on both sides.
