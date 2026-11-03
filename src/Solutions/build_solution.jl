@@ -87,10 +87,12 @@ All dual variable arguments are optional:
 - `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: **Deprecated**, give the
   boundary duals by label in `duals`. Boundary constraint duals, one entry per row of the
   stacked boundary constraint.
-- `state_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: State lower bound duals on `T_state` grid
-- `state_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: State upper bound duals on `T_state` grid
-- `control_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: Control lower bound duals on `T_control` grid
-- `control_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: Control upper bound duals on `T_control` grid
+- `state_constraints_lb_dual`, `state_constraints_ub_dual`:
+  `Union{Matrix{Float64},Function,Nothing}`: State box duals by component, sampled on the
+  `T_state` grid or as a function `t -> vector` (one entry per state component)
+- `control_constraints_lb_dual`, `control_constraints_ub_dual`:
+  `Union{Matrix{Float64},Function,Nothing}`: Control box duals by component, on the
+  `T_control` grid or as a function of time
 - `variable_constraints_lb_dual::Union{Vector{Float64},Nothing}`: Variable lower bound duals (time-independent)
 - `variable_constraints_ub_dual::Union{Vector{Float64},Nothing}`: Variable upper bound duals (time-independent)
 - `infos::Dict{Symbol,Any}`: Additional solver-specific information (default: empty dict)
@@ -229,10 +231,10 @@ function build_solution(
     successful::Bool,
     path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
-    state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    state_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    state_constraints_lb_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    state_constraints_ub_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    control_constraints_lb_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    control_constraints_ub_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
@@ -388,7 +390,7 @@ function build_solution(
         state_constraints_lb_dual,
         T_state,
         dim_x,
-        Union{Matrix{Float64},Nothing};
+        typeof(state_constraints_lb_dual);
         allow_nothing=true,
         expected_dim=dim_x,
     )
@@ -396,7 +398,7 @@ function build_solution(
         state_constraints_ub_dual,
         T_state,
         dim_x,
-        Union{Matrix{Float64},Nothing};
+        typeof(state_constraints_ub_dual);
         allow_nothing=true,
         expected_dim=dim_x,
     )
@@ -406,7 +408,7 @@ function build_solution(
         control_constraints_lb_dual,
         T_control,
         dim_u,
-        Union{Matrix{Float64},Nothing};
+        typeof(control_constraints_lb_dual);
         allow_nothing=true,
         expected_dim=dim_u,
         interpolation=control_interpolation,
@@ -415,7 +417,7 @@ function build_solution(
         control_constraints_ub_dual,
         T_control,
         dim_u,
-        Union{Matrix{Float64},Nothing};
+        typeof(control_constraints_ub_dual);
         allow_nothing=true,
         expected_dim=dim_u,
         interpolation=control_interpolation,
@@ -500,8 +502,7 @@ function build_solution(
                 fccud,
                 vc_lb_dual,
                 vc_ub_dual,
-                pc_known,
-                bc_known,
+                DualMasks(pc_known, bc_known, nothing, nothing, nothing),
             )
         end
 
@@ -732,10 +733,10 @@ function build_solution(
     successful::Bool,
     path_constraints_dual::TPCD=__constraints(),
     boundary_constraints_dual::Union{Vector{Float64},Nothing}=__constraints(),
-    state_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    state_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_lb_dual::Union{Matrix{Float64},Nothing}=__constraints(),
-    control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
+    state_constraints_lb_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    state_constraints_ub_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    control_constraints_lb_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
+    control_constraints_ub_dual::Union{Matrix{Float64},Function,Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
     duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
@@ -2080,9 +2081,9 @@ function _discretize_all_components(
     )
     # masks of the known rows: written only when some rows are unknown, as the switching
     # keys are only for a solution that holds a switching structure
-    path_known, boundary_known = _dual_masks(sol)
-    isnothing(path_known) || (data["path_constraints_dual_known"] = path_known)
-    isnothing(boundary_known) || (data["boundary_constraints_dual_known"] = boundary_known)
+    known = _dual_masks(sol)
+    isnothing(known.path) || (data["path_constraints_dual_known"] = known.path)
+    isnothing(known.boundary) || (data["boundary_constraints_dual_known"] = known.boundary)
     return data
 end
 

@@ -191,8 +191,9 @@ CTModels.Models.constraint_rows(ocp, :initial_con)
   vector. The rows of the labels not given hold `NaN`, so that the raw accessors
   `path_constraints_dual(sol)` and `boundary_constraints_dual(sol)` never return a fake
   `0`.
-- **Masks of the known rows.** `path_constraints_dual_known` and
-  `boundary_constraints_dual_known` are the authority on what is known. They are
+- **Masks of the known rows.** The field `known` of the `DualModel`, a
+  [`DualMasks`](@ref CTModels.Solutions.DualMasks) with one mask per kind of constraint, is
+  the authority on what is known. The masks are
   canonical: `nothing` when every row of the stored duals is known (the storage is then the
   same as before the labels), a `Vector{Bool}` only for a partial knowledge. A kind of
   constraint with no known row is stored as `nothing`.
@@ -217,8 +218,8 @@ nothing # hide
 ```
 
 ```@repl duals
-CTModels.dual_model(sol).path_constraints_dual_known
-CTModels.dual_model(sol_part).path_constraints_dual_known
+CTModels.dual_model(sol).known.path
+CTModels.dual_model(sol_part).known.path
 CTModels.path_constraints_dual(sol_part)(0.5)
 ```
 

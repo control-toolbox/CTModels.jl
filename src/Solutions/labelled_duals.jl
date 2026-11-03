@@ -248,12 +248,8 @@ _as_mask(known::AbstractVector{Bool}) = Vector{Bool}(known)
 """
 $(TYPEDSIGNATURES)
 
-The canonical masks of the known rows of the path and boundary duals of `sol`, `(path,
-boundary)`: `nothing` when every row of the stored duals is known, or when the solution
-carries no duals.
+The masks of the known rows of the duals of `sol` (see
+[`CTModels.Solutions.DualMasks`](@extref)); every mask `nothing` when the solution carries
+no duals.
 """
-function _dual_masks(sol::Solution)
-    has_duals(sol) || return (nothing, nothing)
-    dm = dual_model(sol)
-    return (dm.path_constraints_dual_known, dm.boundary_constraints_dual_known)
-end
+_dual_masks(sol::Solution)::DualMasks = has_duals(sol) ? dual_model(sol).known : DualMasks()

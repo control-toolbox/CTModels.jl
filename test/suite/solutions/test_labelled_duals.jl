@@ -188,12 +188,11 @@ function test_labelled_duals()
                     Solutions.dual(sol_pos, ocp, label)
             end
             # every row known: same canonical storage as the positional input
-            Test.@test isnothing(Solutions.dual_model(sol_label).path_constraints_dual_known)
+            Test.@test isnothing(Solutions.dual_model(sol_label).known.path)
 
             # the eight-dual constructor: every stored row known
             dm = Solutions.DualModel(nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing)
-            Test.@test isnothing(dm.path_constraints_dual_known)
-            Test.@test isnothing(dm.boundary_constraints_dual_known)
+            Test.@test dm.known == Solutions.DualMasks()
         end
 
         # ======================================================================
@@ -230,7 +229,7 @@ function test_labelled_duals()
                     Test.@test !Solutions.has_dual(sol2, ocp, label)
                     Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol2, ocp, label)
                 end
-                Test.@test Solutions.dual_model(sol2).path_constraints_dual_known ==
+                Test.@test Solutions.dual_model(sol2).known.path ==
                     [true, true, false]
             end
         end
