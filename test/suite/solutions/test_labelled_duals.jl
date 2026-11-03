@@ -2,8 +2,11 @@ module TestLabelledDuals
 
 using Test: Test
 using CTBase: Exceptions
+using JLD2: JLD2
+using JSON: JSON
 using CTModels: CTModels
 using CTModels: Building
+using CTModels: Serialization
 using CTModels: Models
 using CTModels: Solutions
 
@@ -166,11 +169,15 @@ function test_labelled_duals()
             sol_label = _ld_solution(
                 ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0])
             )
-            sol_pos = _ld_solution(
+            sol_pos = Test.@test_deprecated _ld_solution(
                 ocp,
                 Dict{Symbol,Any}();
                 path_constraints_dual=[_C2 3 .* _T],
                 boundary_constraints_dual=[1.0, 2.0, 3.0],
+            )
+            # each deprecated keyword alone warns too
+            Test.@test_deprecated _ld_solution(
+                ocp, Dict{Symbol,Any}(); boundary_constraints_dual=[1.0, 2.0, 3.0]
             )
             for label in (:c1, :c2)
                 Test.@test Solutions.dual(sol_label, ocp, label)(0.3) ≈
@@ -187,6 +194,77 @@ function test_labelled_duals()
             dm = Solutions.DualModel(nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing)
             Test.@test isnothing(dm.path_constraints_dual_known)
             Test.@test isnothing(dm.boundary_constraints_dual_known)
+        end
+
+        # ======================================================================
+        # UNIT — back to labels (rebuilding a solution read from a file)
+        # ======================================================================
+        Test.@testset "duals by label: inverse of the placement" begin
+            labelled = Dict{Symbol,Any}(:c1 => reshape(3 .* _T, :, 1), :b2 => [2.0, 3.0])
+            (pc, pk), (bc, bk) = Solutions._place_duals(ocp, labelled, _T)
+            back = Solutions._duals_by_label(ocp, pc, bc, pk, bk)
+            Test.@test back == labelled               # the unknown labels are left out
+            # every row known (no mask): every label
+            (pc, pk), (bc, bk) = Solutions._place_duals(
+                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]), _T
+            )
+            back = Solutions._duals_by_label(ocp, pc, bc, pk, bk)
+            Test.@test Set(keys(back)) == Set([:c1, :c2, :b1, :b2])
+            Test.@test back[:b1] === 1.0              # a one-row boundary label: a number
+            Test.@test back[:c2] == _C2
+            Test.@test isempty(Solutions._duals_by_label(ocp, nothing, nothing, nothing, nothing))
+        end
+
+        # ======================================================================
+        # INTEGRATION — export / import keep the unknown duals unknown
+        # ======================================================================
+        Test.@testset "serialization round trip ($fmt)" for fmt in (:JLD, :JSON)
+            sol = _ld_solution(ocp, Dict{Symbol,Any}(:c2 => _C2, :b2 => [2.0, 3.0]))
+            mktempdir() do dir
+                file = joinpath(dir, "labelled_duals")
+                Serialization.export_ocp_solution(sol; filename=file, format=fmt)
+                sol2 = Serialization.import_ocp_solution(ocp; filename=file, format=fmt)
+                Test.@test Solutions.dual(sol2, ocp, :c2)(0.5) ≈ _c2(0.5)
+                Test.@test Solutions.dual(sol2, ocp, :b2) == [2.0, 3.0]
+                for label in (:c1, :b1)
+                    Test.@test !Solutions.has_dual(sol2, ocp, label)
+                    Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol2, ocp, label)
+                end
+                Test.@test Solutions.dual_model(sol2).path_constraints_dual_known ==
+                    [true, true, false]
+            end
+        end
+
+        Test.@testset "JSON: unknown entries are null, files without masks" begin
+            sol = _ld_solution(ocp, Dict{Symbol,Any}(:c2 => _C2, :b2 => [2.0, 3.0]))
+            mktempdir() do dir
+                file = joinpath(dir, "labelled_duals")
+                Serialization.export_ocp_solution(sol; filename=file, format=:JSON)
+                blob = JSON.parse(read(file * ".json", String); dicttype=Dict{String,Any})
+                Test.@test all(isnothing(row[3]) for row in blob["path_constraints_dual"])
+                Test.@test isnothing(blob["boundary_constraints_dual"][1])
+                Test.@test blob["path_constraints_dual_known"] == [true, true, false]
+                Test.@test blob["format_version"] == 3
+            end
+            # a file written before the masks (format 2): every stored row is known
+            sol = _ld_solution(
+                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0])
+            )
+            mktempdir() do dir
+                file = joinpath(dir, "old")
+                Serialization.export_ocp_solution(sol; filename=file, format=:JSON)
+                blob = JSON.parse(read(file * ".json", String); dicttype=Dict{String,Any})
+                # every row known: no mask written, as in a file of format 2
+                Test.@test !haskey(blob, "path_constraints_dual_known")
+                Test.@test !haskey(blob, "boundary_constraints_dual_known")
+                blob["format_version"] = 2
+                write(file * ".json", JSON.json(blob))
+                sol2 = Serialization.import_ocp_solution(ocp; filename=file, format=:JSON)
+                for label in (:c1, :c2, :b1, :b2)
+                    Test.@test Solutions.has_dual(sol2, ocp, label)
+                end
+                Test.@test Solutions.dual(sol2, ocp, :c1)(0.5) ≈ 1.5
+            end
         end
 
         # ======================================================================
@@ -260,6 +338,10 @@ function test_labelled_duals()
             # wrong types
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:c1 => "dual"))
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:b1 => t -> t))
+            # by label and by position at once
+            Test.@test_throws Exceptions.IncorrectArgument _ld_solution(
+                ocp, Dict(:c2 => _C2); boundary_constraints_dual=[1.0, 2.0, 3.0]
+            )
             # path labels sampled on different numbers of times
             Test.@test_throws Exceptions.IncorrectArgument bad(
                 Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2[1:4, :])

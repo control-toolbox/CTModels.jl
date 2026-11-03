@@ -203,3 +203,57 @@ itself otherwise. A mask with no known row never reaches this function: a kind o
 constraint with no known dual is stored as `nothing`.
 """
 _canonical_mask(known::Vector{Bool}) = all(known) ? nothing : known
+
+"""
+$(TYPEDSIGNATURES)
+
+The inverse of the placement: the path and boundary duals stored on the stacked layout of
+`ocp` (`path`: a matrix with one column per row, or `nothing`; `boundary`: a vector or
+`nothing`), with their canonical masks, given back by label, as
+[`CTModels.Solutions.build_solution`](@extref) takes them in `duals`. A label with an
+unknown row is left out. Used to rebuild a solution read from a file.
+"""
+function _duals_by_label(
+    ocp::Model,
+    path::Union{Nothing,AbstractMatrix{<:Real}},
+    boundary::Union{Nothing,AbstractVector{<:Real}},
+    path_known::Union{Nothing,AbstractVector{Bool}},
+    boundary_known::Union{Nothing,AbstractVector{Bool}},
+)::Dict{Symbol,Any}
+    duals = Dict{Symbol,Any}()
+    if !isnothing(path)
+        for label in unique(path_constraints_nl(ocp)[4])
+            _, rows = constraint_rows(ocp, label)
+            _rows_known(_as_mask(path_known), rows) && (duals[label] = path[:, rows])
+        end
+    end
+    if !isnothing(boundary)
+        for label in unique(boundary_constraints_nl(ocp)[4])
+            _, rows = constraint_rows(ocp, label)
+            _rows_known(_as_mask(boundary_known), rows) || continue
+            duals[label] = length(rows) == 1 ? boundary[rows[1]] : boundary[rows]
+        end
+    end
+    return duals
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+A mask of the known rows read from a file as a `Vector{Bool}` (`nothing`: every row known).
+"""
+_as_mask(::Nothing) = nothing
+_as_mask(known::AbstractVector{Bool}) = Vector{Bool}(known)
+
+"""
+$(TYPEDSIGNATURES)
+
+The canonical masks of the known rows of the path and boundary duals of `sol`, `(path,
+boundary)`: `nothing` when every row of the stored duals is known, or when the solution
+carries no duals.
+"""
+function _dual_masks(sol::Solution)
+    has_duals(sol) || return (nothing, nothing)
+    dm = dual_model(sol)
+    return (dm.path_constraints_dual_known, dm.boundary_constraints_dual_known)
+end

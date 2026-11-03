@@ -5,6 +5,7 @@ using JLD2: JLD2
 using JSON: JSON
 using CTBase: Exceptions
 using CTModels: Building
+using CTModels: Components
 using CTModels: Models
 using CTModels: Solutions
 using CTModels: Serialization
@@ -66,6 +67,18 @@ function _model(;
     return Building.build(pre)
 end
 
+# A known zero dual for every path and boundary label of `ocp` (one row each here).
+function _zero_duals(ocp)
+    duals = Dict{Symbol,Any}()
+    for label in unique(Components.path_constraints_nl(ocp)[4])
+        duals[label] = zeros(_N)
+    end
+    for label in unique(Components.boundary_constraints_nl(ocp)[4])
+        duals[label] = 0.0
+    end
+    return duals
+end
+
 function _solution(ocp)
     n = Models.state_dimension(ocp)
     m = Models.control_dimension(ocp)
@@ -86,8 +99,7 @@ function _solution(ocp)
         message="",
         status=:optimal,
         successful=true,
-        path_constraints_dual=np > 0 ? zeros(_N, np) : nothing,
-        boundary_constraints_dual=nb > 0 ? zeros(nb) : nothing,
+        duals=_zero_duals(ocp),
         state_constraints_lb_dual=zeros(_N, n),
         state_constraints_ub_dual=zeros(_N, n),
     )
@@ -278,12 +290,12 @@ function test_import_model_mismatch()
             Test.@test_throws Exceptions.IncorrectArgument build(; v=[1.0, 2.0])
             Test.@test_throws Exceptions.IncorrectArgument build(; v=Float64[])
             Test.@test_throws Exceptions.IncorrectArgument build(;
-                path_constraints_dual=zeros(_N, 3)
+                duals=Dict(:pc => zeros(_N, 3))
             )
             Test.@test_throws Exceptions.IncorrectArgument build(;
-                boundary_constraints_dual=zeros(2)
+                duals=Dict(:bc => zeros(2))
             )
-            err = _caught(() -> build(; path_constraints_dual=zeros(_N, 3)))
+            err = _caught(() -> build(; duals=Dict(:pc => zeros(_N, 3))))
             Test.@test occursin("model", err.suggestion)
         end
 

@@ -84,8 +84,10 @@ function solution_example_dual()
         objective = exp(-1) - 1
         v = Float64[]
 
-        #
-        path_constraints_dual(t) = [-(p(t) + 1), 0, t]
+        # path duals by label: the first path constraint has no label of its own, so its
+        # generated label is read from the model
+        unnamed = CTModels.path_constraints_nl(ocp)[4][1]
+        duals = Dict{Symbol,Any}(unnamed => t -> -(p(t) + 1), :con2 => t -> [0.0, t])
 
         # 
         times = range(t0, tf, 201)
@@ -102,7 +104,7 @@ function solution_example_dual()
             message="",
             status=:optimal,
             successful=true,
-            path_constraints_dual=path_constraints_dual,
+            duals=duals,
         )
 
         return sol

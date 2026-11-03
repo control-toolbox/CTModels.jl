@@ -185,7 +185,7 @@ function test_solution()
             path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
             path_constraints_dual_func = t -> [1.0 + 4.0 * t, 2.0 + 4.0 * t]
             sol_ = Solutions.build_solution(
-                ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual
+                ocp, T, X, U, v, P; kwargs..., duals=Dict(:path => path_constraints_dual)
             )
             Test.@test Solutions.path_constraints_dual(sol_)(1) == [5.0, 6.0]
             sol_ = Solutions.build_solution(
@@ -196,7 +196,7 @@ function test_solution()
                 v,
                 P;
                 kwargs...,
-                path_constraints_dual=path_constraints_dual_func,
+                duals=Dict(:path => path_constraints_dual_func),
             )
             Test.@test Solutions.path_constraints_dual(sol_)(1) == [5.0, 6.0]
             # boundary constraints dual: vector
@@ -209,7 +209,7 @@ function test_solution()
                 v,
                 P;
                 kwargs...,
-                boundary_constraints_dual=boundary_constraints_dual,
+                duals=Dict(:boundary => boundary_constraints_dual),
             )
             Test.@test Solutions.boundary_constraints_dual(sol_) == [3.0, 2.0]
             # state constraints lower bounds dual: matrix
@@ -298,7 +298,7 @@ function test_solution()
             Test.@test Components.dim_path_constraints_nl(sol) == 0  # no path constraints
             path_constraints_dual = [1.0 2.0; 3.0 4.0; 5.0 6.0]
             sol_pc = Solutions.build_solution(
-                ocp, T, X, U, v, P; kwargs..., path_constraints_dual=path_constraints_dual
+                ocp, T, X, U, v, P; kwargs..., duals=Dict(:path => path_constraints_dual)
             )
             Test.@test Components.dim_path_constraints_nl(sol_pc) == 2  # 2 path constraints
 
@@ -313,7 +313,7 @@ function test_solution()
                 v,
                 P;
                 kwargs...,
-                boundary_constraints_dual=boundary_constraints_dual,
+                duals=Dict(:boundary => boundary_constraints_dual),
             )
             Test.@test Components.dim_boundary_constraints_nl(sol_bc) == 2  # 2 boundary constraints
 
@@ -382,8 +382,7 @@ function test_solution()
                 v,
                 P;
                 kwargs...,
-                path_constraints_dual=path_constraints_dual,
-                boundary_constraints_dual=boundary_constraints_dual,
+                duals=Dict(:path => path_constraints_dual, :boundary => boundary_constraints_dual),
                 state_constraints_lb_dual=state_constraints_lb_dual,
                 state_constraints_ub_dual=state_constraints_ub_dual,
                 control_constraints_lb_dual=control_constraints_lb_dual,

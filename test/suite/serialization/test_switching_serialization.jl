@@ -96,7 +96,7 @@ function test_switching_serialization()
 
         Test.@testset "serialized data" begin
             data = Solutions._serialize_solution(_sol())
-            Test.@test data["format_version"] == 2
+            Test.@test data["format_version"] == Solutions.SERIALIZATION_FORMAT_VERSION
             Test.@test data["switching_times"] == [τ1, τ2]
             Test.@test data["phase_labels"] == ["bang", "", "boundary"]
             Test.@test data["switching_state_right"] == [τ1 + 1.0 1.0; τ2 + 1.0 3.0]

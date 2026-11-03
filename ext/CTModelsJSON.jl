@@ -29,6 +29,25 @@ const _OPTIONAL_MATRIX_FIELDS = [
     "control_constraints_ub_dual",
 ]
 
+"Dual fields whose unknown entries are `NaN` (the duals given by label): written as `null`."
+const _DUALS_WITH_UNKNOWN_FIELDS = ["path_constraints_dual", "boundary_constraints_dual"]
+
+"""
+Replace the `NaN` entries of a dual (a vector, or the rows of a matrix) by `nothing`,
+written as `null` in JSON; `nothing` is left as is.
+"""
+_nan_to_null(::Nothing) = nothing
+_nan_to_null(x::Real) = isnan(x) ? nothing : x
+_nan_to_null(v::AbstractVector) = [_nan_to_null(x) for x in v]
+
+"""
+Replace the `null` entries of a dual read from JSON (a vector, or the rows of a matrix) by
+`NaN`: the inverse of `_nan_to_null`.
+"""
+_null_to_nan(::Nothing) = NaN
+_null_to_nan(x::Real) = Float64(x)
+_null_to_nan(v::AbstractVector) = [_null_to_nan(x) for x in v]
+
 "Switching limits (present when the solution holds a switching structure), converted like the other matrices."
 const _SWITCHING_MATRIX_FIELDS = [
     first(k) for k in CTModels.Solutions._SWITCHING_LIMIT_KEYS
@@ -53,6 +72,13 @@ function _convert_matrices_for_json!(blob::Dict)
         if haskey(blob, key) && !isnothing(blob[key]) && blob[key] isa Matrix
             blob[key] = Core.matrix2vec(blob[key], 1)
         end
+    end
+
+    # Path and boundary duals: an unknown entry (NaN) is written as `null`, which JSON
+    # allows, unlike NaN; a reader that does not know the masks then fails instead of
+    # reading a value nobody computed
+    for key in _DUALS_WITH_UNKNOWN_FIELDS
+        haskey(blob, key) && (blob[key] = _nan_to_null(blob[key]))
     end
 
     # Switching limits: one row per switching time (rows may be empty)
@@ -276,6 +302,11 @@ function _json_to_optional_matrix(blob_field)
 end
 
 """
+Convert an optional JSON mask of the known rows to `Vector{Bool}` or `nothing`.
+"""
+_json_to_optional_mask(blob_field) = isnothing(blob_field) ? nothing : Vector{Bool}(blob_field)
+
+"""
 $(TYPEDSIGNATURES)
 
 Import an optimal control solution from a `.json` file exported with `export_ocp_solution`.
@@ -334,6 +365,7 @@ function CTModels.import_ocp_solution(
 
     # Build data dictionary: convert JSON arrays back to the types expected by the helper
     bcd = blob["boundary_constraints_dual"]
+    pcd = blob["path_constraints_dual"]
     vclbd = blob["variable_constraints_lb_dual"]
     vcubd = blob["variable_constraints_ub_dual"]
 
@@ -348,8 +380,17 @@ function CTModels.import_ocp_solution(
         "control" => _json_to_matrix(blob["control"]),
         "costate" => _json_to_matrix(blob["costate"]),
         "variable" => CTModels.Serialization._extract_time_vector(blob["variable"]),
-        "path_constraints_dual" => _json_to_optional_matrix(blob["path_constraints_dual"]),
-        "boundary_constraints_dual" => isnothing(bcd) ? nothing : Vector{Float64}(bcd),
+        "path_constraints_dual" =>
+            isnothing(pcd) ? nothing : _json_to_matrix([_null_to_nan(row) for row in pcd]),
+        "boundary_constraints_dual" =>
+            isnothing(bcd) ? nothing : Vector{Float64}(_null_to_nan(bcd)),
+        # masks of the known rows (absent from files written before format 3)
+        "path_constraints_dual_known" => _json_to_optional_mask(
+            get(blob, "path_constraints_dual_known", nothing)
+        ),
+        "boundary_constraints_dual_known" => _json_to_optional_mask(
+            get(blob, "boundary_constraints_dual_known", nothing)
+        ),
         "state_constraints_lb_dual" =>
             _json_to_optional_matrix(blob["state_constraints_lb_dual"]),
         "state_constraints_ub_dual" =>
