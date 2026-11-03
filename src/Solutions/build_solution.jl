@@ -339,6 +339,19 @@ function build_solution(
     #   unknown in the masks.
     pc_input, bc_input = path_constraints_dual, boundary_constraints_dual
     pc_known, bc_known = nothing, nothing
+    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
+        Core.@ensure isempty(duals) Exceptions.IncorrectArgument(
+            "the path and boundary duals are given both by label and by position";
+            got="`duals` and `path_constraints_dual` / `boundary_constraints_dual`",
+            expected="the duals by label in `duals` only",
+            suggestion="Give every path and boundary dual by label in `duals`.",
+            context="build_solution - placing the duals given by label",
+        )
+        Base.depwarn(
+            "`path_constraints_dual` and `boundary_constraints_dual` are deprecated and will be removed at the next breaking release: give the duals by label, `build_solution(...; duals=Dict(label => value))`. `CTModels.Models.constraint_rows(model, label)` gives the rows of a label in the stacked layout.",
+            :build_solution,
+        )
+    end
     if !isempty(duals)
         (pc_input, pc_known), (bc_input, bc_known) = _place_duals(ocp, duals, T_path)
     end
@@ -1738,8 +1751,12 @@ Version history:
 - `2`: optional switching structure (`"switching_times"`, `"phase_labels"` and the
   `"switching_<component>_<side>"` limits), written only for a solution that holds one;
   files without these keys are read with an [`CTModels.Solutions.EmptySwitchingModel`](@extref).
+- `3`: masks of the known rows of the path and boundary duals
+  (`"path_constraints_dual_known"`, `"boundary_constraints_dual_known"`), written only when
+  some rows are unknown; the unknown entries of these duals are `NaN` (`null` in JSON). Files
+  without the masks are read with every stored row known.
 """
-const SERIALIZATION_FORMAT_VERSION = 2
+const SERIALIZATION_FORMAT_VERSION = 3
 
 """
 $(TYPEDSIGNATURES)
@@ -2009,7 +2026,7 @@ function _discretize_all_components(
     dim_x::Int,
     dim_u::Int,
 )::Dict{String,Any}
-    return Dict{String,Any}(
+    data = Dict{String,Any}(
         "state" => _discretize_function(state(sol), T_state, dim_x),
         "control" => _discretize_function(control(sol), T_control, dim_u),
         "control_interpolation" => string(control_interpolation(sol)),
@@ -2047,6 +2064,12 @@ function _discretize_all_components(
         "format_version" => SERIALIZATION_FORMAT_VERSION,
         "model_signature" => Models._model_signature(model(sol)),
     )
+    # masks of the known rows: written only when some rows are unknown, as the switching
+    # keys are only for a solution that holds a switching structure
+    path_known, boundary_known = _dual_masks(sol)
+    isnothing(path_known) || (data["path_constraints_dual_known"] = path_known)
+    isnothing(boundary_known) || (data["boundary_constraints_dual_known"] = boundary_known)
+    return data
 end
 
 """

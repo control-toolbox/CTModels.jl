@@ -194,7 +194,7 @@ function test_plot_switching()
                 objective=0.0,
                 successful=true,
                 switching=sw,
-                path_constraints_dual=t -> [t <= τ ? 0.0 : 3.0],
+                duals=Dict(:g => t -> [t <= τ ? 0.0 : 3.0]),
             )
             s = _series(CTModels.PlotCase.build_figure(sol, :dual), "dual")
             k = findfirst(==(τ), s.x)
@@ -215,7 +215,7 @@ function test_plot_switching()
                 objective=0.0,
                 successful=true,
                 switching=_sw(),
-                path_constraints_dual=t -> [t <= τ ? 0.0 : 3.0],
+                duals=Dict(:g => t -> [t <= τ ? 0.0 : 3.0]),
             )
             s = _series(CTModels.PlotCase.build_figure(sol2, :dual), "dual")
             Test.@test count(==(τ), s.x) == 1
