@@ -4,6 +4,8 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-03
+
 ### Non-breaking note: the positional path and boundary duals are deprecated
 
 `build_solution`'s `path_constraints_dual` and `boundary_constraints_dual` (the duals in the
