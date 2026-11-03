@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-03
+
 ### ✨ New Features
 
 - **The duals of the path and boundary constraints are given by label**
