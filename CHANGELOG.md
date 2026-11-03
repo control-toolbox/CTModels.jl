@@ -34,6 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and both paths infer cleanly (`@inferred`). The scalar path returns the override
   value as is, without converting it to the element type of the base trajectory.
 
+### 📚 Documentation
+
+- **Allocation guards: the raw-vs-wrapper comparison trap is documented**
+  ([#502](https://github.com/control-toolbox/CTModels.jl/issues/502)). The
+  performance guide gains a section on writing the raw side of a `PERF5` guard
+  (one specialised function, shared `const` inputs), and the header of
+  `test_performance.jl` now mentions the init-guess functors it covers.
+
 ### ✅ Compatibility
 
 - **No breaking changes**: internals only; the `dynamics!` signatures, the `build`

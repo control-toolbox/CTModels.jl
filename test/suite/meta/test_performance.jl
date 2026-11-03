@@ -6,8 +6,9 @@ module TestPerformance
 #
 # This file asserts the *allocation* invariants of CTModels' hot path: the
 # callable structs evaluated repeatedly while reading a solution (time-function
-# functors, dual-by-label functors, constraint-projection functors) and the
-# accessor reads on model/solution components.
+# functors, dual-by-label functors, constraint-projection functors), the
+# init-guess functors (`CompositeDynamics`, `MergedTrajectory`) and the accessor
+# reads on model/solution components.
 #
 # Why allocations, and why here:
 #   - Type-stability is already guarded by `JET.@test_opt` (test_code_quality.jl)
@@ -23,7 +24,11 @@ module TestPerformance
 #   1. Zero-overhead wrappers — a wrapper call must allocate exactly what the
 #      raw wrapped computation does (i.e. the wrapper itself adds nothing). We
 #      compare wrapper-vs-raw rather than to a magic constant, so the guard is
-#      independent of Julia version / word size.
+#      independent of Julia version / word size. The raw side must be written
+#      so the compiler cannot fold or elide what the wrapper provably performs
+#      (shared `const` inputs, or ONE specialised function for the whole
+#      sequence — see `_boxdualdiff_raw`, `_merged_raw`, and the "Writing the raw side
+#      of an allocation guard" section of docs/src/guide/performance.md).
 #   2. Zero-allocation reads — component accessors and trait reads must
 #      allocate nothing at all.
 #
