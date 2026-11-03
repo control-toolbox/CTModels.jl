@@ -129,28 +129,38 @@ end
 """
 $(TYPEDEF)
 
-The path duals given by label, as one function of time on the stacked layout of the
-model: `f(t)` is a vector with one entry per row of the stacked path constraint, the rows
-of a given label filled by its function, and `NaN` in the rows of the labels not given
-(unknown).
+The duals given by label, as one function of time on the stacked layout of the model:
+`f(t)` is a vector with one entry per row (stacked path constraint) or per component (box
+multipliers), the rows of a given label filled by its function, and `fill` in the other
+rows: `NaN` for the path duals (the labels not given are unknown), `0` for the box
+multipliers (a component bounded by no label).
 
-Each part is a pair `(rows, g)`: `rows` the contiguous rows of the label (see
+Each part is a pair `(rows, g)`: `rows` the rows of the label (see
 [`CTModels.Models.constraint_rows`](@extref)), `g` its dual `t -> value` (a scalar for a
 one-row label, a vector otherwise).
 
 # Fields
-- `dim::Int`: The number of rows of the stacked path constraint.
-- `parts::P`: The parts, a tuple of `(UnitRange{Int}, g)` pairs.
+- `dim::Int`: The number of rows.
+- `parts::P`: The parts, a tuple of `(rows, g)` pairs.
+- `fill::Float64`: The value of the rows covered by no part.
 """
 struct StackedDuals{P<:Tuple} <: Function
     dim::Int
     parts::P
+    fill::Float64
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Evaluate the stacked path duals at time `t`.
+The stacked path duals: the rows of the labels not given are `NaN` (unknown).
+"""
+StackedDuals(dim::Int, parts::Tuple) = StackedDuals(dim, parts, NaN)
+
+"""
+$(TYPEDSIGNATURES)
+
+Evaluate the stacked duals at time `t`.
 
 The method is `@generated`: the emitted body is a flat sequence of calls, one per part,
 each dispatched on the concrete type of its function (as for
@@ -160,8 +170,32 @@ each dispatched on the concrete type of its function (as for
 @generated function (f::StackedDuals{P})(t) where {P}
     calls = [:(out[f.parts[$i][1]] .= f.parts[$i][2](t)) for i in 1:fieldcount(P)]
     return quote
-        out = fill(NaN, f.dim)
+        out = fill(f.fill, f.dim)
         $(calls...)
         return out
     end
 end
+
+"""
+$(TYPEDEF)
+
+One side of the box multipliers of a box label given by its signed dual: `f(t)` is the
+lower-bound multiplier `zL` (`S = :lower`) or the upper-bound multiplier `zU` (`S =
+:upper`) of each component of the label, split from the signed dual `dual(t)` with the
+coefficients `(cl, cu)` of the components (see [`CTModels.Solutions._split_lower`](@extref),
+[`CTModels.Solutions._split_upper`](@extref)).
+
+# Fields
+- `dual::F`: The signed dual of the label, `t -> value` (a scalar for one component).
+- `cl::Vector{Float64}`, `cu::Vector{Float64}`: The coefficients of the components.
+"""
+struct BoxDualSplit{S,F} <: Function
+    dual::F
+    cl::Vector{Float64}
+    cu::Vector{Float64}
+end
+
+BoxDualSplit{S}(dual::F, cl, cu) where {S,F} = BoxDualSplit{S,F}(dual, cl, cu)
+
+(f::BoxDualSplit{:lower})(t) = _split_lower.(f.dual(t), f.cl, f.cu)
+(f::BoxDualSplit{:upper})(t) = _split_upper.(f.dual(t), f.cl, f.cu)

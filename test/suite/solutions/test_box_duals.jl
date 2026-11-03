@@ -37,6 +37,20 @@ function _box_model()
     return Building.build(pre)
 end
 
+# A state of dimension 2 whose second component is bounded by no label.
+function _box_model_free()
+    pre = Building.PreModel()
+    Building.time!(pre; t0=0.0, tf=1.0)
+    Building.state!(pre, 2)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
+    Building.definition!(pre, quote end)
+    Building.time_dependence!(pre; autonomous=true)
+    Building.constraint!(pre, :state; rg=1, lb=0.0, ub=1.0, label=:x1_box)
+    return Building.build(pre)
+end
+
 # Fake producer duals: callable structs, as a flow builds its duals (TST3).
 struct _FakeBoxLower <: Function end
 (::_FakeBoxLower)(t) = [t, 0.0]          # zL of (x₁, x₂)
@@ -106,6 +120,126 @@ function test_box_duals()
             Test.@test Solutions.control_constraints_ub_dual(sol_fun)(0.5) ≈ 1.5
             Test.@test Solutions.has_dual(sol_fun, ocp, :x2_two)
             Test.@test !Solutions.has_dual(sol_fun, ocp, :v_fix)   # not stored
+        end
+
+        # ======================================================================
+        # UNIT — the signed dual split back into zL, zU (SGN2/SGN3)
+        # ======================================================================
+        Test.@testset "split of the signed dual" begin
+            for d in (-1.5, 0.0, 2.0), (cl, cu) in ((1.0, 0.0), (0.0, 1.0), (-1.0, 1.0))
+                zL = Solutions._split_lower(d, cl, cu)
+                zU = Solutions._split_upper(d, cl, cu)
+                Test.@test cl * zL + cu * zU == d       # lossless
+                Test.@test zL * zU == 0                 # at most one side active
+                cl == -1 && Test.@test zL >= 0 && zU >= 0
+            end
+            f = Solutions.BoxDualSplit{:upper}(t -> [2t - 0.5, t], [-1.0, 1.0], [1.0, 0.0])
+            Test.@test f(0.5) == [0.5, 0.0]
+            Test.@test (Test.@inferred f(0.5)) isa Vector{Float64}
+        end
+
+        # ======================================================================
+        # INTEGRATION — box labels in `duals`
+        # ======================================================================
+        Test.@testset "box labels: values and masks" begin
+            d_x2 = 2 .* _T .- 0.5    # changes sign: lower side active, then upper side
+            sol = _box_solution(
+                ocp; duals=Dict{Symbol,Any}(:x2_two => d_x2, :u_up => 3 .* _T, :v_fix => -0.7)
+            )
+            for (k, t) in enumerate(_T)
+                Test.@test Solutions.dual(sol, ocp, :x2_two)(t) ≈ d_x2[k]
+                Test.@test Solutions.dual(sol, ocp, :u_up)(t) ≈ 3t
+            end
+            Test.@test Solutions.dual(sol, ocp, :v_fix) ≈ -0.7
+            # the stored multipliers: nonnegative on a two-sided box, NaN when unknown
+            zL, zU = Solutions.state_constraints_lb_dual(sol), Solutions.state_constraints_ub_dual(sol)
+            Test.@test zL(0.0)[2] ≈ 0.5 && zU(0.0)[2] == 0.0
+            Test.@test zL(1.0)[2] == 0.0 && zU(1.0)[2] ≈ 1.5
+            Test.@test isnan(zL(0.5)[1]) && isnan(zU(0.5)[1])      # :x1_lo not given
+            Test.@test Solutions.dual_model(sol).known.state == [false, true]
+            Test.@test isnothing(Solutions.dual_model(sol).known.control)
+            # an absent box label is unknown
+            Test.@test !Solutions.has_dual(sol, ocp, :x1_lo)
+            Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol, ocp, :x1_lo)
+            Test.@test Solutions.has_dual(sol, ocp, :x2_two)
+        end
+
+        Test.@testset "box labels as functions, with path labels" begin
+            sol = _box_solution(
+                ocp;
+                duals=Dict{Symbol,Any}(
+                    :x1_lo => t -> t,
+                    :x2_two => t -> 2t - 0.5,
+                    :u_up => t -> [3t],
+                    :p => t -> -t,
+                ),
+            )
+            for t in (0.1, 0.33, 0.9)  # exact between the grid points
+                Test.@test Solutions.dual(sol, ocp, :x1_lo)(t) ≈ t
+                Test.@test Solutions.dual(sol, ocp, :x2_two)(t) ≈ 2t - 0.5
+                Test.@test Solutions.dual(sol, ocp, :u_up)(t) ≈ 3t
+                Test.@test Solutions.dual(sol, ocp, :p)(t) ≈ -t
+            end
+            Test.@test Solutions.dual_model(sol).known == Solutions.DualMasks()  # all known
+            Test.@test Solutions.state_constraints_lb_dual(sol)(0.1) ≈ [0.1, 0.3]
+            # a matrix label mixed with a function label of the same kind
+            sol = _box_solution(ocp; duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => t -> 2t - 0.5))
+            Test.@test Solutions.dual(sol, ocp, :x1_lo)(0.5) ≈ 0.5
+            Test.@test Solutions.dual(sol, ocp, :x2_two)(0.6) ≈ 0.7
+        end
+
+        Test.@testset "a component bounded by no label is a known 0" begin
+            ocp_free = _box_model_free()
+            sol = Solutions.build_solution(
+                ocp_free, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
+                objective=0.0, successful=true, duals=Dict(:x1_box => t -> -t),
+            )
+            Test.@test Solutions.dual_model(sol).known.state === nothing
+            Test.@test Solutions.state_constraints_lb_dual(sol)(0.5) == [0.5, 0.0]
+            Test.@test Solutions.state_constraints_ub_dual(sol)(0.5) == [0.0, 0.0]
+        end
+
+        # ======================================================================
+        # NON-REGRESSION — by label and by component agree
+        # ======================================================================
+        Test.@testset "by label and by component agree" begin
+            d(t) = [t, 2t - 0.5]                 # signed duals of :x1_lo, :x2_two
+            sol_label = _box_solution(
+                ocp; duals=Dict{Symbol,Any}(:x1_lo => t -> d(t)[1], :x2_two => t -> d(t)[2])
+            )
+            sol_comp = _box_solution(
+                ocp;
+                state_constraints_lb_dual=t -> [d(t)[1], max(-d(t)[2], 0.0)],
+                state_constraints_ub_dual=t -> [0.0, max(d(t)[2], 0.0)],
+            )
+            for label in (:x1_lo, :x2_two), t in (0.0, 0.2, 0.7)
+                Test.@test Solutions.dual(sol_label, ocp, label)(t) ≈
+                    Solutions.dual(sol_comp, ocp, label)(t)
+            end
+        end
+
+        # ======================================================================
+        # ERROR — invalid box duals (EXC1)
+        # ======================================================================
+        Test.@testset "invalid box duals" begin
+            bad(; kw...) = _box_solution(ocp; kw...)
+            # a kind given both by label and by keyword
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict(:u_up => t -> t), control_constraints_ub_dual=zeros(_N, 1)
+            )
+            # sizes and types
+            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:x1_lo => t -> [t, t]))
+            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:x1_lo => [_T _T]))
+            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:v_fix => [1.0, 2.0]))
+            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:v_fix => t -> t))
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => _T[1:4])
+            )
+            # by label for the boxes and by keyword for another kind: accepted
+            Test.@test bad(;
+                duals=Dict(:x1_lo => t -> t), control_constraints_ub_dual=zeros(_N, 1),
+                control_constraints_lb_dual=zeros(_N, 1),
+            ) isa Solutions.Solution
         end
     end
 end

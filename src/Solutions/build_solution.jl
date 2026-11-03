@@ -346,27 +346,52 @@ function build_solution(
 
     # nonlinear constraints and dual variables (optional, can be nothing)
     # Convention for path/boundary duals: one column per row of the stacked constraint
-    #   (`Models.constraint_rows` gives the rows of a label). Given by label in `duals`,
-    #   they are placed there, the rows of the absent labels holding `NaN` and flagged
-    #   unknown in the masks.
-    pc_input, bc_input = path_constraints_dual, boundary_constraints_dual
-    pc_known, bc_known = nothing, nothing
-    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
-        Core.@ensure isempty(duals) Exceptions.IncorrectArgument(
-            "the path and boundary duals are given both by label and by position";
-            got="`duals` and `path_constraints_dual` / `boundary_constraints_dual`",
-            expected="the duals by label in `duals` only",
-            suggestion="Give every path and boundary dual by label in `duals`.",
-            context="build_solution - placing the duals given by label",
+    #   (`Models.constraint_rows` gives the rows of a label); for box duals: one column per
+    #   component. Given by label in `duals`, they are placed there, the rows of the absent
+    #   labels holding `NaN` and flagged unknown in the masks; a box label gives its signed
+    #   dual, split back into the lower- and upper-bound multipliers.
+    placed = if isempty(duals)
+        nothing
+    else
+        _place_duals(
+            ocp,
+            duals,
+            T_path;
+            T_state=T_state,
+            T_control=T_control,
+            control_interpolation=control_interpolation,
         )
+    end
+    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
         Base.depwarn(
             "`path_constraints_dual` and `boundary_constraints_dual` are deprecated and will be removed at the next breaking release: give the duals by label, `build_solution(...; duals=Dict(label => value))`. `CTModels.Models.constraint_rows(model, label)` gives the rows of a label in the stacked layout.",
             :build_solution,
         )
     end
-    if !isempty(duals)
-        (pc_input, pc_known), (bc_input, bc_known) = _place_duals(ocp, duals, T_path)
-    end
+    pc_input, pc_known = _by_label_or_keyword(
+        placed, :path, (path_constraints_dual,), "path_constraints_dual"
+    )
+    bc_input, bc_known = _by_label_or_keyword(
+        placed, :boundary, (boundary_constraints_dual,), "boundary_constraints_dual"
+    )
+    sc_lb_input, sc_ub_input, sc_known = _by_label_or_keyword(
+        placed,
+        :state,
+        (state_constraints_lb_dual, state_constraints_ub_dual),
+        "state_constraints_lb_dual / state_constraints_ub_dual",
+    )
+    cc_lb_input, cc_ub_input, cc_known = _by_label_or_keyword(
+        placed,
+        :control,
+        (control_constraints_lb_dual, control_constraints_ub_dual),
+        "control_constraints_lb_dual / control_constraints_ub_dual",
+    )
+    vc_lb_input, vc_ub_input, vc_known = _by_label_or_keyword(
+        placed,
+        :variable,
+        (variable_constraints_lb_dual, variable_constraints_ub_dual),
+        "variable_constraints_lb_dual / variable_constraints_ub_dual",
+    )
 
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
@@ -387,37 +412,37 @@ function build_solution(
     # can return the multiplier of the component(s) targeted by :label.
     # State box constraint duals share the state grid (T_state)
     fscbd = build_interpolated_function(
-        state_constraints_lb_dual,
+        sc_lb_input,
         T_state,
         dim_x,
-        typeof(state_constraints_lb_dual);
+        typeof(sc_lb_input);
         allow_nothing=true,
         expected_dim=dim_x,
     )
     fscud = build_interpolated_function(
-        state_constraints_ub_dual,
+        sc_ub_input,
         T_state,
         dim_x,
-        typeof(state_constraints_ub_dual);
+        typeof(sc_ub_input);
         allow_nothing=true,
         expected_dim=dim_x,
     )
     # Control box constraint duals share the control grid (T_control)
     # Note: use same interpolation as control
     fccbd = build_interpolated_function(
-        control_constraints_lb_dual,
+        cc_lb_input,
         T_control,
         dim_u,
-        typeof(control_constraints_lb_dual);
+        typeof(cc_lb_input);
         allow_nothing=true,
         expected_dim=dim_u,
         interpolation=control_interpolation,
     )
     fccud = build_interpolated_function(
-        control_constraints_ub_dual,
+        cc_ub_input,
         T_control,
         dim_u,
-        typeof(control_constraints_ub_dual);
+        typeof(cc_ub_input);
         allow_nothing=true,
         expected_dim=dim_u,
         interpolation=control_interpolation,
@@ -437,19 +462,19 @@ function build_solution(
 
     # Variable box constraint duals are (time-independent) vectors.
     # Enforce length == variable_dimension(ocp) when provided.
-    if !isnothing(variable_constraints_lb_dual)
-        Core.@ensure length(variable_constraints_lb_dual) == dim_v Exceptions.IncorrectArgument(
+    if !isnothing(vc_lb_input)
+        Core.@ensure length(vc_lb_input) == dim_v Exceptions.IncorrectArgument(
             "variable_constraints_lb_dual length mismatch";
-            got="length=$(length(variable_constraints_lb_dual))",
+            got="length=$(length(vc_lb_input))",
             expected="length=$(dim_v) (= variable_dimension)",
             suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
             context="build_solution - validating variable dual length",
         )
     end
-    if !isnothing(variable_constraints_ub_dual)
-        Core.@ensure length(variable_constraints_ub_dual) == dim_v Exceptions.IncorrectArgument(
+    if !isnothing(vc_ub_input)
+        Core.@ensure length(vc_ub_input) == dim_v Exceptions.IncorrectArgument(
             "variable_constraints_ub_dual length mismatch";
-            got="length=$(length(variable_constraints_ub_dual))",
+            got="length=$(length(vc_ub_input))",
             expected="length=$(dim_v) (= variable_dimension)",
             suggestion="Provide a vector of length variable_dimension(ocp); pad with zeros for unconstrained components.",
             context="build_solution - validating variable dual length",
@@ -458,15 +483,15 @@ function build_solution(
 
     # Variable box constraint duals follow the same "1-D is a scalar" convention as
     # `variable` itself (see `var` above): a length-1 vector is stored as a scalar.
-    vc_lb_dual = if isnothing(variable_constraints_lb_dual)
+    vc_lb_dual = if isnothing(vc_lb_input)
         nothing
     else
-        (dim_v == 1 ? variable_constraints_lb_dual[1] : variable_constraints_lb_dual)
+        (dim_v == 1 ? vc_lb_input[1] : vc_lb_input)
     end
-    vc_ub_dual = if isnothing(variable_constraints_ub_dual)
+    vc_ub_dual = if isnothing(vc_ub_input)
         nothing
     else
-        (dim_v == 1 ? variable_constraints_ub_dual[1] : variable_constraints_ub_dual)
+        (dim_v == 1 ? vc_ub_input[1] : vc_ub_input)
     end
 
     # build Models
@@ -502,7 +527,7 @@ function build_solution(
                 fccud,
                 vc_lb_dual,
                 vc_ub_dual,
-                DualMasks(pc_known, bc_known, nothing, nothing, nothing),
+                DualMasks(pc_known, bc_known, sc_known, cc_known, vc_known),
             )
         end
 
@@ -523,6 +548,33 @@ function build_solution(
         solver_infos,
         switching,
     )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The duals of the kind `kind` for the solution: those placed from the labels in `placed`
+(see [`CTModels.Solutions._place_duals`](@extref)) when some label of that kind was given,
+the keyword values `keywords` otherwise (every row known), followed by the mask of the
+known rows.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if the duals of `kind` are given both
+  by label and by the keywords `names`.
+"""
+function _by_label_or_keyword(placed, kind::Symbol, keywords::Tuple, names::String)
+    by_label = isnothing(placed) ? nothing : getproperty(placed, kind)
+    if isnothing(by_label) || (kind in (:path, :boundary) && isnothing(first(by_label)))
+        return (keywords..., nothing)
+    end
+    Core.@ensure all(isnothing, keywords) Exceptions.IncorrectArgument(
+        "the $kind duals are given both by label and by keyword";
+        got="labels of $kind constraints in `duals` and `$names`",
+        expected="each kind of dual given one way",
+        suggestion="Give the $kind duals either by label in `duals` or by keyword, not both.",
+        context="build_solution - placing the duals given by label",
+    )
+    return by_label
 end
 
 """
