@@ -137,7 +137,9 @@ multipliers it stores per component:
 | upper bound only | `0` | `d` |
 | two bounds, or fixed | `max(-d, 0)` | `max(d, 0)` |
 
-A component bounded by no label carries a known `0`, as with the box keywords. A kind of
+A component bounded by no label carries a known `0`, as with the box keywords. Several
+labels on one component (aliases) share its multiplier: give it by one of them, the others
+read the same dual; giving it by two labels is an `IncorrectArgument`. A kind of
 dual is given one way: giving the duals of one kind both by label and by keyword (for
 instance a state box label and `state_constraints_lb_dual`) is an `IncorrectArgument`;
 different kinds may be given different ways.

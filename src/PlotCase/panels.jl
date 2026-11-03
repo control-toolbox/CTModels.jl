@@ -52,8 +52,12 @@ function _spliced_samples(
         left, right = left[:, cols], right[:, cols]
     end
     times = CTModels.switching_times(sol)
-    left = _fill_unknown_limits(T, M, times, left)
-    right = _fill_unknown_limits(T, M, times, right)
+    # piecewise-constant samples: a control, or a control-box dual, with a constant control
+    constant =
+        component in (:control, :control_dual) &&
+        CTModels.control_interpolation(sol) === :constant
+    left = _fill_unknown_limits(T, M, times, left; constant=constant)
+    right = _fill_unknown_limits(T, M, times, right; constant=constant)
     return Plotting.splice_jumps(T, M, times, left, right; connect=connect)
 end
 
@@ -61,19 +65,25 @@ end
 $(TYPEDSIGNATURES)
 
 The limits `L` (one row per switching time in `times`, one column per column of the samples
-`(T, M)`) with each `NaN` entry replaced by the value of the samples at that switching time,
-linearly interpolated between the two samples around it (the nearest sample outside the
-grid). Returns `L` itself when it has no `NaN`, or when its shape does not match the samples
-(left to [`CTBase.Plotting.splice_jumps`](@extref) to report).
+`(T, M)`) with each `NaN` entry replaced by the value of the samples at that switching time
+(see [`CTModels.PlotCase._sample_at`](@extref)): linearly interpolated between the two
+samples around it, or, for piecewise-constant samples (`constant = true`), the sample that
+holds on the interval. Returns `L` itself when it has no `NaN`, or when its shape does not
+match the samples (left to [`CTBase.Plotting.splice_jumps`](@extref) to report).
 """
 function _fill_unknown_limits(
-    T::AbstractVector, M::AbstractMatrix, times::AbstractVector, L::AbstractMatrix
+    T::AbstractVector,
+    M::AbstractMatrix,
+    times::AbstractVector,
+    L::AbstractMatrix;
+    constant::Bool=false,
 )
     any(isnan, L) || return L
     size(L) == (length(times), size(M, 2)) || return L
     filled = Matrix{Float64}(L)
     for i in axes(filled, 1), j in axes(filled, 2)
-        isnan(filled[i, j]) && (filled[i, j] = _sample_at(T, view(M, :, j), times[i]))
+        isnan(filled[i, j]) &&
+            (filled[i, j] = _sample_at(T, view(M, :, j), times[i]; constant=constant))
     end
     return filled
 end
@@ -82,14 +92,15 @@ end
 $(TYPEDSIGNATURES)
 
 The value at time `τ` of the samples `y` on the grid `T`: linear interpolation between the
-two samples around `τ`, the first or last sample outside the grid.
+two samples around `τ`, or, with `constant = true` (piecewise-constant samples, drawn as
+steps), the last sample at or before `τ`; the first or last sample outside the grid.
 """
-function _sample_at(T::AbstractVector, y::AbstractVector, τ::Real)::Float64
+function _sample_at(T::AbstractVector, y::AbstractVector, τ::Real; constant::Bool=false)::Float64
     n = min(length(T), length(y))
     k = searchsortedlast(view(T, 1:n), τ)
     k == 0 && return y[1]
     k >= n && return y[n]
-    T[k] == τ && return y[k]
+    (constant || T[k] == τ) && return y[k]
     w = (τ - T[k]) / (T[k + 1] - T[k])
     return (1 - w) * y[k] + w * y[k + 1]
 end

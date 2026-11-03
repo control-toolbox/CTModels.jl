@@ -76,16 +76,21 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         get(data, "path_constraints_dual_known", nothing),
         get(data, "boundary_constraints_dual_known", nothing),
     )
-    # box duals: by component (keywords) when every component is known, by label (signed
-    # duals) when the file holds a mask of the known components (format 3)
-    state_constraints_lb_dual, state_constraints_ub_dual = _box_duals_from_data!(
-        duals, ocp, :state, data
+    # box duals: by component, as they were stored (NaN for an unknown component); the masks
+    # of the known components (format 3) are restored on the rebuilt solution
+    state_constraints_lb_dual = data["state_constraints_lb_dual"]
+    state_constraints_ub_dual = data["state_constraints_ub_dual"]
+    control_constraints_lb_dual = data["control_constraints_lb_dual"]
+    control_constraints_ub_dual = data["control_constraints_ub_dual"]
+    variable_constraints_lb_dual = _extract_optional_vector(
+        data["variable_constraints_lb_dual"]
     )
-    control_constraints_lb_dual, control_constraints_ub_dual = _box_duals_from_data!(
-        duals, ocp, :control, data
+    variable_constraints_ub_dual = _extract_optional_vector(
+        data["variable_constraints_ub_dual"]
     )
-    variable_constraints_lb_dual, variable_constraints_ub_dual = _box_duals_from_data!(
-        duals, ocp, :variable, data
+    box_masks = map(
+        kind -> _optional_mask(get(data, "$(kind)_constraints_dual_known", nothing)),
+        (:state, :control, :variable),
     )
     # Switching structure: absent from files without one (and from older files)
     switching = Solutions._deserialize_switching(data)
@@ -98,7 +103,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         T_costate = _extract_time_vector(data["time_grid_costate"])
         T_path = _extract_time_vector(data["time_grid_path"])
 
-        return Solutions.build_solution(
+        sol = Solutions.build_solution(
             ocp,
             T_state,
             T_control,
@@ -125,6 +130,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             control_interpolation=control_interpolation,
             switching=switching,
         )
+        return Solutions._with_box_masks(sol, box_masks...)
     else
         # Current unified format: single time grid
         if !haskey(data, "time_grid")
@@ -138,7 +144,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         end
         T = _extract_time_vector(data["time_grid"])
 
-        return Solutions.build_solution(
+        sol = Solutions.build_solution(
             ocp,
             T,
             data["state"],
@@ -162,6 +168,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             control_interpolation=control_interpolation,
             switching=switching,
         )
+        return Solutions._with_box_masks(sol, box_masks...)
     end
 end
 
@@ -211,19 +218,6 @@ _extract_optional_vector(x) = isnothing(x) ? nothing : _extract_time_vector(x)
 """
 $(TYPEDSIGNATURES)
 
-The `kind` box duals (`:state`, `:control` or `:variable`) of serialized data, as the
-`(lb, ub)` keywords of `build_solution`. When the data holds a mask of the known components
-(`"<kind>_constraints_dual_known"`, format 3), the keywords are `nothing` and the box duals
-are added to `duals` by label instead, as signed duals (see
-[`CTModels.Solutions._box_duals_by_label`](@extref)), so that the unknown components stay
-unknown.
+A mask of the known rows read from serialized data, as a `Vector{Bool}`, or `nothing`.
 """
-function _box_duals_from_data!(duals::Dict{Symbol,Any}, ocp, kind::Symbol, data)
-    read(key) = kind === :variable ? _extract_optional_vector(data[key]) : data[key]
-    lb = read("$(kind)_constraints_lb_dual")
-    ub = read("$(kind)_constraints_ub_dual")
-    known = get(data, "$(kind)_constraints_dual_known", nothing)
-    (isnothing(known) || isnothing(lb) || isnothing(ub)) && return (lb, ub)
-    merge!(duals, Solutions._box_duals_by_label(ocp, kind, lb, ub, Vector{Bool}(known)))
-    return (nothing, nothing)
-end
+_optional_mask(x) = isnothing(x) ? nothing : Vector{Bool}(x)

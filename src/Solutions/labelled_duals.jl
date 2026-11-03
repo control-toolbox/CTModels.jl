@@ -43,8 +43,10 @@ function _place_duals(
 )
     parts = Dict(k => Pair{Vector{Int},Any}[] for k in (:path, :boundary, :state, :control, :variable))
     grids = (path=T_path, state=T_state, control=T_control)
+    owners = Dict{Tuple{Symbol,Int},Symbol}()   # (box kind, component) => label
     for (label, value) in duals
         kind, rows = constraint_rows(ocp, label)
+        kind in (:state, :control, :variable) && _claim_components!(owners, kind, rows, label)
         checked = if kind in (:boundary, :variable)
             _checked_static_dual(label, kind, rows, value)
         else
@@ -70,6 +72,34 @@ function _place_duals(
             parts[:variable], variable_constraints_box(ocp), variable_dimension(ocp)
         ),
     )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Record that the box label `label` gives the dual of the `kind` components `rows`, in
+`owners` (`(kind, component) => label`).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if a component is already given by
+  another label. Several labels on one component (aliases) share its single multiplier, so
+  it is given by one of them only: two values would leave one silently overwritten.
+"""
+function _claim_components!(
+    owners::Dict{Tuple{Symbol,Int},Symbol}, kind::Symbol, rows::Vector{Int}, label::Symbol
+)
+    for i in rows
+        other = get(owners, (kind, i), nothing)
+        Core.@ensure isnothing(other) Exceptions.IncorrectArgument(
+            "the $kind box component $i is given by two labels";
+            got="labels :$other and :$label, which both bound component $i",
+            expected="each box component given by one label",
+            suggestion="The labels on one component share its multiplier: give the dual by one of them only (the other reads the same dual).",
+            context="build_solution - placing the duals given by label",
+        )
+        owners[(kind, i)] = label
+    end
+    return nothing
 end
 
 """
@@ -392,37 +422,46 @@ _as_mask(known::AbstractVector{Bool}) = Vector{Bool}(known)
 """
 $(TYPEDSIGNATURES)
 
-The inverse of the placement of the box labels: the `kind` box multipliers stored by
-component (`lb`, `ub`: matrices with one column per component, or vectors for a variable
-box), given back by label as signed duals (`cl * zL + cu * zU`, see
-[`CTModels.Solutions._box_dual_coefficients`](@extref)), the labels with an unknown
-component in `known` left out. Lossless for multipliers that come from signed duals (at
-most one side nonzero), which is the case when some component is unknown. Used to rebuild a
-solution read from a file.
+`sol` with the masks of the known components of its box duals replaced by `state`,
+`control` and `variable` (see [`CTModels.Solutions.DualMasks`](@extref)); the duals and the
+other masks are unchanged. Used to rebuild a solution read from a file: its box multipliers
+are passed by component as they were stored (`NaN` for the unknown components), then their
+masks are restored, which holds whatever the aliases of the box labels.
 """
-function _box_duals_by_label(
-    ocp::Model, kind::Symbol, lb, ub, known::Union{Nothing,AbstractVector{Bool}}
-)::Dict{Symbol,Any}
-    cp = if kind === :state
-        state_constraints_box(ocp)
-    elseif kind === :control
-        control_constraints_box(ocp)
-    else
-        variable_constraints_box(ocp)
-    end
-    duals = Dict{Symbol,Any}()
-    for label in unique(reduce(vcat, cp[5]; init=Symbol[]))
-        _, rows = constraint_rows(ocp, label)
-        _rows_known(_as_mask(known), rows) || continue
-        cl, cu = _box_dual_coefficients(cp, rows)
-        duals[label] = if lb isa AbstractMatrix
-            lb[:, rows] .* cl' .+ ub[:, rows] .* cu'
-        else
-            d = lb[rows] .* cl .+ ub[rows] .* cu
-            length(rows) == 1 ? d[1] : d
-        end
-    end
-    return duals
+function _with_box_masks(
+    sol::Solution,
+    state::Union{Nothing,Vector{Bool}},
+    control::Union{Nothing,Vector{Bool}},
+    variable::Union{Nothing,Vector{Bool}},
+)::Solution
+    all(isnothing, (state, control, variable)) && return sol
+    dm = dual_model(sol)
+    dm isa DualModel || return sol
+    known = DualMasks(dm.known.path, dm.known.boundary, state, control, variable)
+    dm2 = DualModel(
+        dm.path_constraints_dual,
+        dm.boundary_constraints_dual,
+        dm.state_constraints_lb_dual,
+        dm.state_constraints_ub_dual,
+        dm.control_constraints_lb_dual,
+        dm.control_constraints_ub_dual,
+        dm.variable_constraints_lb_dual,
+        dm.variable_constraints_ub_dual,
+        known,
+    )
+    return Solution(
+        sol.time_grid,
+        sol.times,
+        sol.state,
+        sol.control,
+        sol.variable,
+        sol.model,
+        sol.costate,
+        sol.objective,
+        dm2,
+        sol.solver_infos,
+        sol.switching,
+    )
 end
 
 """
