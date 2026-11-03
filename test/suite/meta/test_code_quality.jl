@@ -104,6 +104,11 @@ function test_code_quality()
                 :state,
             )
             JET.@test_opt target_modules = (CTModels,) f_merged(0.5)
+
+            f_merged1 = Init.MergedTrajectory(
+                t -> 0.0, Dict{Int,Function}(1 => t -> 2t), 1, :state
+            )
+            JET.@test_opt target_modules = (CTModels,) f_merged1(0.5)
         end
     end
 end

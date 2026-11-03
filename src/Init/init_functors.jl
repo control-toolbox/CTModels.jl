@@ -5,25 +5,28 @@
 # Dispatched helpers — replace `isa AbstractVector` checks with Julia dispatch so
 # the compiler can specialise statically when the return type of `base` is known.
 
-# For dim == 1: normalise any base value to a length-1 vector (no length check).
+# For dim == 1: extract the scalar component value — no scratch vector (issue
+# #501): `v[1]` on a vector base matches the former `copy(v)[1]` semantics,
+# including the `BoundsError` on an empty vector; a scalar base passes through.
 """
 $(TYPEDSIGNATURES)
 
-Normalise a scalar or vector base value to a `Vector` of length 1 for dim-1 components.
+Extract the scalar component value from a dim-1 base trajectory output.
 
-Dispatched overloads replace `isa AbstractVector` runtime checks with static dispatch,
-letting the compiler specialise on the return type of the base trajectory.
+Dispatched overloads replace `isa AbstractVector` runtime checks with static
+dispatch: `v[1]` on a vector base (same `BoundsError` as the former
+`copy(v)[1]` on an empty vector), a scalar base passed through unchanged.
 
 # Arguments
 - `v`: raw output of a base trajectory function for a 1-dimensional component.
 
 # Returns
-- `Vector`: a length-1 vector containing or wrapping `v`.
+- The scalar component value.
 
-See also: [`CTModels.Init._coerce_base`](@extref)
+See also: [`CTModels.Init._coerce_base`](@extref), [`CTModels.Init._merge_scalar`](@extref)
 """
-_wrap_1d(v::AbstractVector) = copy(v)
-_wrap_1d(v) = [v]
+_scalar_base(v::AbstractVector) = v[1]
+_scalar_base(v) = v
 
 # For dim > 1: check that `v` has the expected length, then collect.
 # The scalar overload always throws because a scalar cannot fill a dim>1 vector.
@@ -45,7 +48,7 @@ Throws if `v` is not an `AbstractVector` of the expected length, or if `v` is a 
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: if `v` is a scalar or has incorrect length.
 
-See also: [`CTModels.Init._wrap_1d`](@extref)
+See also: [`CTModels.Init._scalar_base`](@extref)
 """
 function _coerce_base(v::AbstractVector, dim::Int, role::Symbol)
     if length(v) != dim
@@ -74,6 +77,34 @@ function _coerce_base(_, dim::Int, role::Symbol)
     )
 end
 
+# Shared throw for the component-override shape check (vector must hold exactly
+# one value), used by both `_set_component!` and `_merge_scalar`.
+"""
+$(TYPEDSIGNATURES)
+
+Throw `CTBase.Exceptions.IncorrectArgument` for a component override returning a
+vector of length other than 1.
+
+# Arguments
+- `val`: raw output of the component override function.
+- `i::Int`: Component index.
+- `role::Symbol`: Component role (e.g. `:state`, `:control`) used in the error message.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: always.
+"""
+function _component_shape_error(val, i::Int, role::Symbol)
+    return throw(
+        Exceptions.IncorrectArgument(
+            "Component-level initialization must return scalar or length-1 vector";
+            got="vector of length $(length(val)) for $role component $i",
+            expected="scalar or length-1 vector",
+            suggestion="Ensure the function for component $i returns a single value",
+            context="component-level $role initialization",
+        ),
+    )
+end
+
 # Per-component override application — `val::AbstractVector` must hold exactly one
 # value, any other shape is rejected; the scalar overload assigns directly.
 """
@@ -97,20 +128,10 @@ assigns directly.
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: if `val` is a vector of length other than 1.
 
-See also: [`CTModels.Init._wrap_1d`](@extref), [`CTModels.Init._coerce_base`](@extref)
+See also: [`CTModels.Init._scalar_base`](@extref), [`CTModels.Init._coerce_base`](@extref)
 """
 function _set_component!(vec, i::Int, val::AbstractVector, role::Symbol)
-    if length(val) != 1
-        throw(
-            Exceptions.IncorrectArgument(
-                "Component-level initialization must return scalar or length-1 vector";
-                got="vector of length $(length(val)) for $role component $i",
-                expected="scalar or length-1 vector",
-                suggestion="Ensure the function for component $i returns a single value",
-                context="component-level $role initialization",
-            ),
-        )
-    end
+    length(val) != 1 && _component_shape_error(val, i, role)
     vec[i] = only(val)
     return nothing
 end
@@ -120,6 +141,37 @@ function _set_component!(vec, i::Int, val, role::Symbol)
     return nothing
 end
 
+# Scalar-path counterpart of `_set_component!` for dim-1 merged trajectories: the
+# single possible override index is 1, so the override fully replaces the value.
+"""
+$(TYPEDSIGNATURES)
+
+Validate and extract the scalar value of a dim-1 component override.
+
+Dispatched overloads resolve the shape check statically when the override's return
+type is inferred: a length-1 vector unwraps to `only(val)`, anything longer throws,
+and a scalar passes through unchanged.
+
+# Arguments
+- `val`: Raw output of the component override function.
+- `i::Int`: Component index (always 1 for a dim-1 trajectory).
+- `role::Symbol`: Component role (e.g. `:state`, `:control`) used in the error message.
+
+# Returns
+- The scalar override value.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if `val` is a vector of length other than 1.
+
+See also: [`CTModels.Init._scalar_base`](@extref), [`CTModels.Init._set_component!`](@extref)
+"""
+function _merge_scalar(val::AbstractVector, i::Int, role::Symbol)
+    length(val) != 1 && _component_shape_error(val, i, role)
+    return only(val)
+end
+
+_merge_scalar(val, ::Int, ::Symbol) = val
+
 # ------------------------------------------------------------------------------
 
 """
@@ -127,7 +179,7 @@ $(TYPEDEF)
 
 Callable struct merging a block-level trajectory `base` with sparse component-level
 overrides `comps`: `f(t)` evaluates `base(t)`, normalises to a vector, applies each
-component override, and returns a scalar (`dim == 1`) or a vector.
+component override, and returns a scalar (`D == 1`) or a vector.
 
 `base::F` is a concrete type parameter, replacing the former `base_fun::Function`
 abstract capture. `comps::P` is a concrete `Tuple` of `(index, f)` pairs in index
@@ -135,6 +187,10 @@ order — the concrete tuple type `P` carries every override's function type in 
 parameters, so the `@generated` call method dispatches each `f(t)` statically (issue
 #498; same pattern as [`CTModels.Building.CompositeDynamics`](@extref)). Iterating a
 `Dict{Int,Function}` instead dispatched dynamically and boxed every return value.
+
+The total dimension is the type parameter `D` (like the `N` of `Array{T,N}`): the
+generated call picks the scalar or vector path statically — for `D == 1` no scratch
+vector is allocated and the return type is fully inferred (issue #501).
 
 Component index bounds are validated at construction, not at call time, so the call
 method stays allocation-free beyond what `base` and the component functions allocate.
@@ -146,8 +202,12 @@ Replaces the anonymous closure `t -> begin … end` (57 lines) produced inside
 - `base::F`: Block-level trajectory function.
 - `comps::P`: Concrete `Tuple` of `(index::Int, f::Function)` override pairs,
   sorted by index.
-- `dim::Int`: Total dimension.
 - `role::Symbol`: Component role (`:state` or `:control`).
+
+# Type parameters
+- `F`: concrete type of `base`.
+- `P`: concrete tuple type of the override pairs.
+- `D::Int`: total dimension.
 
 # Examples
 
@@ -160,24 +220,21 @@ f = MergedTrajectory(base, comps, 2, :state)
 f(0.5)   # returns [0.0, sin(0.5)]
 ```
 """
-struct MergedTrajectory{F,P<:Tuple} <: Function
+struct MergedTrajectory{F,P<:Tuple,D} <: Function
     base::F
     comps::P       # concrete tuple of (index::Int, f) pairs
-    dim::Int
     role::Symbol
 
-    function MergedTrajectory{F,P}(
-        base::F, comps::P, dim::Int, role::Symbol
-    ) where {F,P<:Tuple}
+    function MergedTrajectory{F,P,D}(base::F, comps::P, role::Symbol) where {F,P<:Tuple,D}
         prev = 0
         for (i, _) in comps
-            if !(1 <= i <= dim)
+            if !(1 <= i <= D)
                 throw(
                     Exceptions.IncorrectArgument(
                         "Component index out of bounds";
                         got="index $i for $role",
-                        expected="index between 1 and $dim",
-                        suggestion="Use a valid component index in range 1:$dim",
+                        expected="index between 1 and $D",
+                        suggestion="Use a valid component index in range 1:$D",
                         context="component-level $role initialization",
                     ),
                 )
@@ -195,12 +252,12 @@ struct MergedTrajectory{F,P<:Tuple} <: Function
             end
             prev = i
         end
-        return new(base, comps, dim, role)
+        return new(base, comps, role)
     end
 end
 
 function MergedTrajectory(base::F, comps::P, dim::Int, role::Symbol) where {F,P<:Tuple}
-    return MergedTrajectory{F,P}(base, comps, dim, role)
+    return MergedTrajectory{F,P,dim}(base, comps, role)
 end
 
 """
@@ -217,7 +274,7 @@ function MergedTrajectory(
     base::F, comps::AbstractDict{Int,<:Function}, dim::Int, role::Symbol
 ) where {F}
     pairs = tuple(((i, fi) for (i, fi) in sort!(collect(comps); by=first))...)
-    return MergedTrajectory{F,typeof(pairs)}(base, pairs, dim, role)
+    return MergedTrajectory{F,typeof(pairs),dim}(base, pairs, role)
 end
 
 """
@@ -229,29 +286,45 @@ Component index bounds are validated once at construction. The dimension of the 
 trajectory and the scalar/vector shape of each component override are validated here
 (at call time), since they depend on the functions' return values.
 
-The method is `@generated`: the emitted body is a flat sequence of calls, one per
-override, each dispatched on its concrete function type — so each override's return
-type is inferred per element and the [`CTModels.Init._set_component!`](@extref) shape
-check resolves statically. A plain `for` over the heterogeneous `comps` tuple leaves
-runtime dispatch on the call path (issue #498).
+The method is `@generated`, specialised on the dimension `D`: for `D == 1` it emits
+the scalar path directly — no scratch vector, no `Union` return (issue #501); for
+`D > 1` a flat sequence of calls, one per override, each dispatched on its concrete
+function type — so each override's return type is inferred per element and the
+[`CTModels.Init._set_component!`](@extref) shape check resolves statically. A plain
+`for` over the heterogeneous `comps` tuple leaves runtime dispatch on the call path
+(issue #498).
 
 # Arguments
 - `f::CTModels.Init.MergedTrajectory`: The merged trajectory.
 - `t`: Time.
 
 # Returns
-- `Real` or `Vector`: Scalar or vector depending on dimension.
+- `Real` or `Vector`: Scalar if `D == 1`, vector otherwise.
 """
-@generated function (f::MergedTrajectory{F,P})(t) where {F,P}
-    calls = [
-        :(_set_component!(vec, f.comps[$k][1], f.comps[$k][2](t), f.role)) for
-        k in 1:fieldcount(P)
-    ]
-    return quote
-        base_val = f.base(t)
-        vec = f.dim == 1 ? _wrap_1d(base_val) : _coerce_base(base_val, f.dim, f.role)
-        $(calls...)
-        return f.dim == 1 ? vec[1] : vec
+@generated function (f::MergedTrajectory{F,P,D})(t) where {F,P,D}
+    if D == 1
+        # scalar path: the only possible override index is 1 (bounds checked at
+        # construction), so each override fully replaces the accumulator.
+        steps = [
+            :(x = _merge_scalar(f.comps[$k][2](t), f.comps[$k][1], f.role)) for
+            k in 1:fieldcount(P)
+        ]
+        return quote
+            x = _scalar_base(f.base(t))
+            $(steps...)
+            return x
+        end
+    else
+        calls = [
+            :(_set_component!(vec, f.comps[$k][1], f.comps[$k][2](t), f.role)) for
+            k in 1:fieldcount(P)
+        ]
+        return quote
+            base_val = f.base(t)
+            vec = _coerce_base(base_val, $D, f.role)
+            $(calls...)
+            return vec
+        end
     end
 end
 
@@ -260,7 +333,7 @@ $(TYPEDSIGNATURES)
 
 Compact string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
-function Base.show(io::IO, f::MergedTrajectory{F,P}) where {F,P}
+function Base.show(io::IO, f::MergedTrajectory{F,P,D}) where {F,P,D}
     fmt = CTBase.Core.get_format_codes(io)
     return print(
         io,
@@ -269,7 +342,7 @@ function Base.show(io::IO, f::MergedTrajectory{F,P}) where {F,P}
         fmt.reset,
         "(dim=",
         fmt.count,
-        f.dim,
+        D,
         fmt.reset,
         ", role=",
         fmt.keyword,
@@ -289,11 +362,11 @@ $(TYPEDSIGNATURES)
 
 Detailed string representation of [`CTModels.Init.MergedTrajectory`](@extref).
 """
-function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,P}) where {F,P}
+function Base.show(io::IO, ::MIME"text/plain", f::MergedTrajectory{F,P,D}) where {F,P,D}
     fmt = CTBase.Core.get_format_codes(io)
     print(io, fmt.name, "MergedTrajectory", fmt.reset)
     print(io, "\n  ", fmt.label, "role:   ", fmt.reset, fmt.keyword, ":", f.role, fmt.reset)
-    print(io, "\n  ", fmt.label, "dim:    ", fmt.reset, fmt.count, f.dim, fmt.reset)
+    print(io, "\n  ", fmt.label, "dim:    ", fmt.reset, fmt.count, D, fmt.reset)
     return print(
         io, "\n  ", fmt.label, "ncomps: ", fmt.reset, fmt.count, length(f.comps), fmt.reset
     )
