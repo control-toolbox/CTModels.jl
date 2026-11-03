@@ -277,6 +277,36 @@ abstract type AbstractDualModel end
 """
 $(TYPEDEF)
 
+The masks of the known rows of the duals of a solution, one per kind of constraint.
+
+A mask has one entry per row of the stacked constraint (path, boundary) or per component
+(state, control, variable box): `true` when the dual of that row is known. The masks are
+canonical: `nothing` when every row of the stored duals of that kind is known, a vector
+only when some rows are known and others are not. A kind with no known row stores no dual
+at all (`nothing` in the [`CTModels.Solutions.DualModel`](@extref)), with the mask
+`nothing`.
+
+# Fields
+- `path`, `boundary`, `state`, `control`, `variable`: `Union{Nothing,Vector{Bool}}`.
+"""
+struct DualMasks
+    path::Union{Nothing,Vector{Bool}}
+    boundary::Union{Nothing,Vector{Bool}}
+    state::Union{Nothing,Vector{Bool}}
+    control::Union{Nothing,Vector{Bool}}
+    variable::Union{Nothing,Vector{Bool}}
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The masks of a [`CTModels.Solutions.DualModel`](@extref) whose stored duals are all known.
+"""
+DualMasks() = DualMasks(nothing, nothing, nothing, nothing, nothing)
+
+"""
+$(TYPEDEF)
+
 Dual variables (Lagrange multipliers) for all constraints in an optimal control solution.
 
 # Fields
@@ -289,14 +319,11 @@ Dual variables (Lagrange multipliers) for all constraints in an optimal control 
 - `control_constraints_ub_dual::CC_UB_Dual`: Multipliers for control upper bounds `t -> ω⁺(t)`, or `nothing`.
 - `variable_constraints_lb_dual::VC_LB_Dual`: Multipliers for variable lower bounds (scalar for 1-D, vector otherwise), or `nothing`.
 - `variable_constraints_ub_dual::VC_UB_Dual`: Multipliers for variable upper bounds (scalar for 1-D, vector otherwise), or `nothing`.
-- `path_constraints_dual_known::Union{Nothing,Vector{Bool}}`: The known rows of the path
-  duals, one entry per row of the stacked path constraint, or `nothing` when every row of
-  the stored path duals is known. An unknown row holds `NaN`.
-- `boundary_constraints_dual_known::Union{Nothing,Vector{Bool}}`: The same for the boundary
-  duals.
+- `known::DualMasks`: The masks of the known rows of each kind of dual (see
+  [`CTModels.Solutions.DualMasks`](@extref)). An unknown row holds `NaN`.
 
-The masks are canonical: a mask is a vector only when some rows are known and others are
-not. The constructor with the eight duals only sets both masks to `nothing`.
+The constructor with the eight duals only sets every mask to `nothing` (every stored row
+known).
 
 # Example
 
@@ -325,13 +352,12 @@ struct DualModel{
     control_constraints_ub_dual::CC_UB_Dual
     variable_constraints_lb_dual::VC_LB_Dual
     variable_constraints_ub_dual::VC_UB_Dual
-    path_constraints_dual_known::Union{Nothing,Vector{Bool}}
-    boundary_constraints_dual_known::Union{Nothing,Vector{Bool}}
+    known::DualMasks
 end
 
 # Every row of the stored duals is known.
 function DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub)
-    return DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub, nothing, nothing)
+    return DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub, DualMasks())
 end
 
 """

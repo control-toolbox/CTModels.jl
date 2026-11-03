@@ -188,12 +188,11 @@ function test_labelled_duals()
                     Solutions.dual(sol_pos, ocp, label)
             end
             # every row known: same canonical storage as the positional input
-            Test.@test isnothing(Solutions.dual_model(sol_label).path_constraints_dual_known)
+            Test.@test isnothing(Solutions.dual_model(sol_label).known.path)
 
             # the eight-dual constructor: every stored row known
             dm = Solutions.DualModel(nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing)
-            Test.@test isnothing(dm.path_constraints_dual_known)
-            Test.@test isnothing(dm.boundary_constraints_dual_known)
+            Test.@test dm.known == Solutions.DualMasks()
         end
 
         # ======================================================================
@@ -230,7 +229,7 @@ function test_labelled_duals()
                     Test.@test !Solutions.has_dual(sol2, ocp, label)
                     Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol2, ocp, label)
                 end
-                Test.@test Solutions.dual_model(sol2).path_constraints_dual_known ==
+                Test.@test Solutions.dual_model(sol2).known.path ==
                     [true, true, false]
             end
         end
@@ -326,7 +325,7 @@ function test_labelled_duals()
 
         Test.@testset "invalid input" begin
             bad(d) = _ld_solution(ocp, d)
-            # unknown label, box label
+            # unknown label; a box label with a wrong size (box labels: test_box_duals.jl)
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:nope => 1.0))
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:x2_box => [_T _T]))
             # wrong sizes
@@ -338,10 +337,18 @@ function test_labelled_duals()
             # wrong types
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:c1 => "dual"))
             Test.@test_throws Exceptions.IncorrectArgument bad(Dict(:b1 => t -> t))
-            # by label and by position at once
+            # one kind by label and by position at once (the check is per kind)
             Test.@test_throws Exceptions.IncorrectArgument _ld_solution(
+                ocp, Dict(:b1 => 1.0); boundary_constraints_dual=[1.0, 2.0, 3.0]
+            )
+            Test.@test_throws Exceptions.IncorrectArgument _ld_solution(
+                ocp, Dict(:c2 => _C2); path_constraints_dual=[_C2 3 .* _T]
+            )
+            # two kinds, one each way: accepted (the positional one still deprecated)
+            sol_mix = Test.@test_deprecated _ld_solution(
                 ocp, Dict(:c2 => _C2); boundary_constraints_dual=[1.0, 2.0, 3.0]
             )
+            Test.@test Solutions.dual(sol_mix, ocp, :b2) == [2.0, 3.0]
             # path labels sampled on different numbers of times
             Test.@test_throws Exceptions.IncorrectArgument bad(
                 Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2[1:4, :])

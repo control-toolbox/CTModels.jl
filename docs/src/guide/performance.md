@@ -17,7 +17,8 @@ CTModels code falls into two categories:
   [`Components.ConstantInTime`](@ref) or [`Components.CoercedTrajectory`](@ref) at
   each time point, extracting a dual by label with
   [`Solutions.DualSlice`](@ref)/[`Solutions.BoxDualDiff`](@ref), evaluating the path
-  duals given by label ([`Solutions.StackedDuals`](@ref)), projecting a box
+  duals given by label ([`Solutions.StackedDuals`](@ref),
+  [`Solutions.BoxDualSplit`](@ref)), projecting a box
   constraint with [`Models.BoxProjection`](@ref), or reading a component accessor
   inside an inner loop. This code **must be type-stable** — an instability here
   multiplies over thousands of calls.
@@ -66,6 +67,9 @@ f_proj = CTModels.Models.BoxProjection{:state}(2)
 # The path duals given by label to `build_solution(...; duals=...)` when one of them is
 # a function: each label fills its rows, the rows of the labels not given hold NaN.
 f_stacked = CTModels.Solutions.StackedDuals(4, ((1:2, t -> [t, 2t]), (4:4, t -> 3t)))
+# One side of the multipliers of a box label given by its signed dual (here the lower
+# side of a two-sided component and of a lower-bounded one).
+f_split = CTModels.Solutions.BoxDualSplit{:lower}(t -> [2t - 0.5, t], [-1.0, 1.0], [1.0, 0.0])
 # The callable that `build` assembles when the dynamics is declared range by
 # range (`dynamics!(pre, i, f)` per component — the shape CTParser's `@def`
 # emits for `∂(xᵢ)(t) == …`).
@@ -107,6 +111,14 @@ dual as a function of time; see
 JET.@report_opt f_stacked(0.5)
 ```
 
+**Splitting the signed dual of a box label** (the parts of the box multipliers given by
+label as functions of time; see
+[CTModels.jl#493](https://github.com/control-toolbox/CTModels.jl/issues/493)):
+
+```@example perf
+JET.@report_opt f_split(0.5)
+```
+
 **Projecting a box constraint** (state/control/variable slot selection):
 
 ```@example perf
@@ -120,7 +132,7 @@ step by direct methods; see [CTModels.jl#496](https://github.com/control-toolbox
 JET.@report_opt dyn_parts(zeros(2), 0.0, [0.3, 0.7], [0.5], Float64[])
 ```
 
-All six report `No errors detected`: the repeated-call path is stable.
+All seven report `No errors detected`: the repeated-call path is stable.
 
 ## What is enforced automatically
 
@@ -133,6 +145,7 @@ JET.@test_opt target_modules = (CTModels,) f_const(0.5)
 JET.@test_opt target_modules = (CTModels,) f_coerced(0.5)
 JET.@test_opt target_modules = (CTModels,) dyn_parts(zeros(2), 0.0, x, u, v)
 JET.@test_opt target_modules = (CTModels,) f_stacked(0.5)
+JET.@test_opt target_modules = (CTModels,) f_split(0.5)
 # ... and so on for the other hot-path calls
 ```
 

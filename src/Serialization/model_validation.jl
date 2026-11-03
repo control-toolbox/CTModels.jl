@@ -138,6 +138,15 @@ function _check_data_dimensions!(errors, ocp, data)::Nothing
         isnothing(bk) ? nothing : length(bk),
         Components.dim_boundary_constraints_nl(cons),
     )
+    for (kind, dim) in (("state", dim_x), ("control", dim_u), ("variable", dim_v))
+        mk = g("$(kind)_constraints_dual_known")
+        _record_difference!(
+            errors,
+            "$kind box dual dimension (mask of the known duals)",
+            isnothing(mk) ? nothing : length(mk),
+            dim,
+        )
+    end
     for lu in ("lb", "ub")
         _record_difference!(
             errors,

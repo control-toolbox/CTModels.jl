@@ -182,7 +182,7 @@ function test_plot_switching()
                 state=([τ;;], [τ + 1.0;;]),
                 costate=([0.0;;], [2.0;;]),
                 control=([1.0;;], [-1.0;;]),
-                path_dual=([0.0;;], [3.0;;]),
+                duals=Dict(:g => ([0.0], [3.0])),
             )
             sol = Solutions.build_solution(
                 _ocp(),

@@ -30,7 +30,22 @@ const _OPTIONAL_MATRIX_FIELDS = [
 ]
 
 "Dual fields whose unknown entries are `NaN` (the duals given by label): written as `null`."
-const _DUALS_WITH_UNKNOWN_FIELDS = ["path_constraints_dual", "boundary_constraints_dual"]
+const _DUALS_WITH_UNKNOWN_FIELDS = [
+    "path_constraints_dual",
+    "boundary_constraints_dual",
+    "state_constraints_lb_dual",
+    "state_constraints_ub_dual",
+    "control_constraints_lb_dual",
+    "control_constraints_ub_dual",
+    "variable_constraints_lb_dual",
+    "variable_constraints_ub_dual",
+]
+
+"The masks of the known rows of the duals, written only when some rows are unknown."
+const _DUAL_MASK_FIELDS = [
+    "$(kind)_constraints_dual_known" for
+    kind in ("path", "boundary", "state", "control", "variable")
+]
 
 """
 Replace the `NaN` entries of a dual (a vector, or the rows of a matrix) by `nothing`,
@@ -85,7 +100,8 @@ function _convert_matrices_for_json!(blob::Dict)
     for key in _SWITCHING_MATRIX_FIELDS
         if haskey(blob, key) && blob[key] isa Matrix
             M = blob[key]
-            blob[key] = [Vector{Float64}(M[i, :]) for i in axes(M, 1)]
+            # the limits of the duals may hold NaN (a label not given): `null` in JSON
+            blob[key] = [_nan_to_null(Vector{Float64}(M[i, :])) for i in axes(M, 1)]
         end
     end
 end
@@ -99,7 +115,7 @@ function _json_rows_to_matrix(rows, n::Int)::Matrix{Float64}
     ncols = length(rows[1])
     M = zeros(n, ncols)
     for i in 1:n
-        M[i, :] .= Float64.(rows[i])
+        M[i, :] .= _null_to_nan(rows[i])
     end
     return M
 end
@@ -289,16 +305,12 @@ function _json_to_matrix(blob_field)::Matrix{Float64}
 end
 
 """
-Convert an optional JSON field to Matrix{Float64} or nothing.
-
-# Arguments
-- `blob_field`: JSON array field or nothing
-
-# Returns
-- `Matrix{Float64}` or `nothing`
+Convert an optional JSON dual matrix (rows of numbers, `null` for an unknown entry) to a
+`Matrix{Float64}` with `NaN` for the unknown entries, or `nothing`.
 """
-function _json_to_optional_matrix(blob_field)
-    return isnothing(blob_field) ? nothing : _json_to_matrix(blob_field)
+function _json_to_optional_dual_matrix(blob_field)
+    isnothing(blob_field) && return nothing
+    return _json_to_matrix([_null_to_nan(row) for row in blob_field])
 end
 
 """
@@ -380,31 +392,31 @@ function CTModels.import_ocp_solution(
         "control" => _json_to_matrix(blob["control"]),
         "costate" => _json_to_matrix(blob["costate"]),
         "variable" => CTModels.Serialization._extract_time_vector(blob["variable"]),
-        "path_constraints_dual" =>
-            isnothing(pcd) ? nothing : _json_to_matrix([_null_to_nan(row) for row in pcd]),
+        "path_constraints_dual" => _json_to_optional_dual_matrix(pcd),
         "boundary_constraints_dual" =>
             isnothing(bcd) ? nothing : Vector{Float64}(_null_to_nan(bcd)),
-        # masks of the known rows (absent from files written before format 3)
-        "path_constraints_dual_known" => _json_to_optional_mask(
-            get(blob, "path_constraints_dual_known", nothing)
-        ),
-        "boundary_constraints_dual_known" => _json_to_optional_mask(
-            get(blob, "boundary_constraints_dual_known", nothing)
-        ),
         "state_constraints_lb_dual" =>
-            _json_to_optional_matrix(blob["state_constraints_lb_dual"]),
+            _json_to_optional_dual_matrix(blob["state_constraints_lb_dual"]),
         "state_constraints_ub_dual" =>
-            _json_to_optional_matrix(blob["state_constraints_ub_dual"]),
+            _json_to_optional_dual_matrix(blob["state_constraints_ub_dual"]),
         "control_constraints_lb_dual" =>
-            _json_to_optional_matrix(blob["control_constraints_lb_dual"]),
+            _json_to_optional_dual_matrix(blob["control_constraints_lb_dual"]),
         "control_constraints_ub_dual" =>
-            _json_to_optional_matrix(blob["control_constraints_ub_dual"]),
-        "variable_constraints_lb_dual" =>
-            CTModels.Serialization._extract_optional_vector(vclbd),
-        "variable_constraints_ub_dual" =>
-            CTModels.Serialization._extract_optional_vector(vcubd),
+            _json_to_optional_dual_matrix(blob["control_constraints_ub_dual"]),
+        "variable_constraints_lb_dual" => CTModels.Serialization._extract_optional_vector(
+            isnothing(vclbd) ? nothing : _null_to_nan(vclbd)
+        ),
+        "variable_constraints_ub_dual" => CTModels.Serialization._extract_optional_vector(
+            isnothing(vcubd) ? nothing : _null_to_nan(vcubd)
+        ),
         "control_interpolation" => blob["control_interpolation"],
     )
+
+    # masks of the known rows (written only when some rows are unknown; absent from files
+    # written before format 3)
+    for key in _DUAL_MASK_FIELDS
+        haskey(blob, key) && (data[key] = _json_to_optional_mask(blob[key]))
+    end
 
     # Switching structure (absent when the solution holds none, and from older files)
     if haskey(blob, "switching_times")

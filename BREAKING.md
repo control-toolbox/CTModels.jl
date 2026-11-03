@@ -27,6 +27,23 @@ sol = build_solution(ocp, T, X, U, v, P; objective=J, successful=true,
 kind, rows = CTModels.Models.constraint_rows(ocp, :c2)
 ```
 
+### Non-breaking note: `SwitchingModel(; path_dual=...)` is deprecated
+
+The limits of the path duals at the switching times, given by position (one column per row
+of the stacked path constraint), still work with a deprecation warning, and will be removed
+at the next breaking release. Give the limits by label; box labels take them too.
+([#493](https://github.com/control-toolbox/CTModels.jl/issues/493))
+
+**Migration**:
+
+```julia
+# Before
+sw = SwitchingModel(; times=[τ], path_dual=([μl_c1 μl_c2], [μr_c1 μr_c2]))
+
+# After: by label, path and box labels alike
+sw = SwitchingModel(; times=[τ], duals=Dict(:c1 => ([μl_c1], [μr_c1]), :c2 => ([μl_c2], [μr_c2])))
+```
+
 Other notes: the message of `dual` for an unknown label is now the one of `constraint`
 ("Constraint label not found"), same exception type; the serialization format is 3.
 

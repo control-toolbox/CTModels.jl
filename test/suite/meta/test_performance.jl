@@ -74,6 +74,25 @@ function _stacked_raw(t)
     return out
 end
 
+# Box duals given by label (issue #493): `BoxDualSplit` must cost what the split of the
+# signed dual costs, and its `StackedDuals` (by component, an unknown component NaN) what
+# one function filling the same vector from the split costs. The raw side calls the split
+# as a function, as the wrapper must: fusing the split into the assignment (one broadcast)
+# saves the intermediate vector, which the call boundary of a part cannot (80 B; see
+# docs/src/guide/performance.md, "Writing the raw side of an allocation guard").
+_box_signed_raw(t) = [2t - 0.5, t]
+const _BOX_CL = [-1.0, 1.0]
+const _BOX_CU = [1.0, 0.0]
+const _BOX_ROWS = [1, 3]
+const _BOX_UNKNOWN = [2]
+_box_split_raw(t) = Solutions._split_lower.(_box_signed_raw(t), _BOX_CL, _BOX_CU)
+function _box_stacked_raw(t)
+    out = fill(0.0, 3)
+    out[_BOX_ROWS] .= _box_split_raw(t)
+    out[_BOX_UNKNOWN] .= NaN
+    return out
+end
+
 # Per-coordinate partial dynamics and the equivalent monolithic dynamics: the
 # `Model` built from the two `_dyn_part_*!` calls must evaluate at exactly the
 # cost of a call to `_dyn_mono!` (issue #496).
@@ -194,6 +213,15 @@ function test_performance()
             )
             Test.@test (BenchmarkTools.@ballocated $f_stacked($t)) ==
                 (BenchmarkTools.@ballocated _stacked_raw($t))
+
+            f_split = Solutions.BoxDualSplit{:lower}(_box_signed_raw, _BOX_CL, _BOX_CU)
+            Test.@test (BenchmarkTools.@ballocated $f_split($t)) ==
+                (BenchmarkTools.@ballocated _box_split_raw($t))
+            f_box = Solutions.StackedDuals(
+                3, ((_BOX_ROWS, f_split), (_BOX_UNKNOWN, Returns(NaN))), 0.0
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_box($t)) ==
+                (BenchmarkTools.@ballocated _box_stacked_raw($t))
 
             f_proj = Models.BoxProjection{:state}(idx)
             x = [1.0, 2.0, 3.0]
