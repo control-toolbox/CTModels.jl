@@ -444,7 +444,7 @@ function test_dual_model()
                 zeros(3, 1);
                 objective=0.0,
                 successful=true,
-                path_constraints_dual=pc,
+                duals=Dict(:pc => pc),
             )
             Test.@test Solutions.has_duals(sol)
             Test.@test Solutions.dual(sol, m, :pc)(0.5) ≈ 1.0
@@ -499,7 +499,7 @@ function test_dual_model()
                 end
             # a kind of dual missing
             sol = build(;
-                path_constraints_dual=t -> [0.0],
+                duals=Dict(:pc => t -> [0.0]),
                 infos=Dict{Symbol,Any}(:missing_duals => note),
             )
             Test.@test _err(sol, :sbox) isa Exceptions.PreconditionError

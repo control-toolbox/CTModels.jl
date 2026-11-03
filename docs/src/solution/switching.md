@@ -146,7 +146,7 @@ switching = CTModels.SwitchingModel(;
 )
 sol_c = CTModels.build_solution(ocp_c, T, X, U, Float64[], P;
     objective=0.0, successful=true, switching=switching,
-    path_constraints_dual=t -> [t <= τ ? 0.0 : 1.0])
+    duals=Dict(:xmin => t -> t <= τ ? 0.0 : 1.0))
 plot(sol_c, :state, :control, :path, :dual)
 ```
 

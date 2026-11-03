@@ -67,8 +67,15 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
 
     control_interpolation = Symbol(data["control_interpolation"])
 
-    path_constraints_dual = data["path_constraints_dual"]
-    boundary_constraints_dual = data["boundary_constraints_dual"]
+    # path and boundary duals: rebuilt by label from the stacked layout and the masks of
+    # the known rows (absent from files written before format 3: every row known)
+    duals = Solutions._duals_by_label(
+        ocp,
+        data["path_constraints_dual"],
+        data["boundary_constraints_dual"],
+        get(data, "path_constraints_dual_known", nothing),
+        get(data, "boundary_constraints_dual_known", nothing),
+    )
     state_constraints_lb_dual = data["state_constraints_lb_dual"]
     state_constraints_ub_dual = data["state_constraints_ub_dual"]
     control_constraints_lb_dual = data["control_constraints_lb_dual"]
@@ -106,8 +113,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             message=_optional(data, "message", String),
             status=_optional(data, "status", Symbol),
             successful=data["successful"],
-            path_constraints_dual=path_constraints_dual,
-            boundary_constraints_dual=boundary_constraints_dual,
+            duals=duals,
             state_constraints_lb_dual=state_constraints_lb_dual,
             state_constraints_ub_dual=state_constraints_ub_dual,
             control_constraints_lb_dual=control_constraints_lb_dual,
@@ -144,8 +150,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             message=_optional(data, "message", String),
             status=_optional(data, "status", Symbol),
             successful=data["successful"],
-            path_constraints_dual=path_constraints_dual,
-            boundary_constraints_dual=boundary_constraints_dual,
+            duals=duals,
             state_constraints_lb_dual=state_constraints_lb_dual,
             state_constraints_ub_dual=state_constraints_ub_dual,
             control_constraints_lb_dual=control_constraints_lb_dual,

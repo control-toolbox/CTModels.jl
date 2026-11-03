@@ -100,6 +100,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Solutions", "dual_functors.jl"),
                 joinpath("Solutions", "build_solution.jl"),
                 joinpath("Solutions", "dual_model.jl"),
+                joinpath("Solutions", "labelled_duals.jl"),
                 joinpath("Solutions", "interpolation_helpers.jl"),
                 joinpath("Solutions", "discretization_utils.jl"),
                 joinpath("Solutions", "show.jl"),

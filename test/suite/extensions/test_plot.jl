@@ -410,7 +410,8 @@ function test_plot()
             # mimics CTDirect's `zeros(N, dpc)` with `dpc == 0`
             path_constraints_dual_nopath = zeros(N, 0)
 
-            sol_nopath = CTModels.build_solution(
+            # the deprecated positional input, as CTDirect passes it today
+            sol_nopath = Test.@test_deprecated CTModels.build_solution(
                 ocp_nopath,
                 T_nopath,
                 T_nopath,

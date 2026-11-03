@@ -126,14 +126,8 @@ function solution_example(; fun=false)
     # Path constraints: Matrix{Float64}
     path_constraints = nothing
 
-    # Path constraints dual: Matrix{Float64}
-    path_constraints_dual = nothing
-
     # Boundary constraints: Vector{Float64}
     boundary_constraints = nothing
-
-    # Boundary constraints dual: Vector{Float64}
-    boundary_constraints_dual = nothing
 
     # State constraints lower bound dual: Matrix{Float64}
     state_constraints_lb_dual = nothing
@@ -167,8 +161,6 @@ function solution_example(; fun=false)
         message=message,
         status=status,
         successful=successful,
-        path_constraints_dual=path_constraints_dual,
-        boundary_constraints_dual=boundary_constraints_dual,
         state_constraints_lb_dual=state_constraints_lb_dual,
         state_constraints_ub_dual=state_constraints_ub_dual,
         control_constraints_lb_dual=control_constraints_lb_dual,

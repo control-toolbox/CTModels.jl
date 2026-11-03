@@ -16,7 +16,8 @@ CTModels code falls into two categories:
 - **Hot path** — code called *repeatedly* while reading a solution: evaluating a
   [`Components.ConstantInTime`](@ref) or [`Components.CoercedTrajectory`](@ref) at
   each time point, extracting a dual by label with
-  [`Solutions.DualSlice`](@ref)/[`Solutions.BoxDualDiff`](@ref), projecting a box
+  [`Solutions.DualSlice`](@ref)/[`Solutions.BoxDualDiff`](@ref), evaluating the path
+  duals given by label ([`Solutions.StackedDuals`](@ref)), projecting a box
   constraint with [`Models.BoxProjection`](@ref), or reading a component accessor
   inside an inner loop. This code **must be type-stable** — an instability here
   multiplies over thousands of calls.
@@ -62,6 +63,9 @@ f_coerced = CTModels.Components.CoercedTrajectory(t -> [2t], only)
 duals_fn = t -> [10.0 * t, 20.0 * t, 30.0 * t]
 f_slice = CTModels.Solutions.DualSlice(duals_fn, 2)
 f_proj = CTModels.Models.BoxProjection{:state}(2)
+# The path duals given by label to `build_solution(...; duals=...)` when one of them is
+# a function: each label fills its rows, the rows of the labels not given hold NaN.
+f_stacked = CTModels.Solutions.StackedDuals(4, ((1:2, t -> [t, 2t]), (4:4, t -> 3t)))
 # The callable that `build` assembles when the dynamics is declared range by
 # range (`dynamics!(pre, i, f)` per component — the shape CTParser's `@def`
 # emits for `∂(xᵢ)(t) == …`).
@@ -94,6 +98,15 @@ post-processing a solution's multipliers):
 JET.@report_opt f_slice(0.5)
 ```
 
+**Evaluating the path duals given by label** (the function behind
+`path_constraints_dual(sol)` and `dual(sol, model, :label)` when a producer gives a path
+dual as a function of time; see
+[CTModels.jl#492](https://github.com/control-toolbox/CTModels.jl/issues/492)):
+
+```@example perf
+JET.@report_opt f_stacked(0.5)
+```
+
 **Projecting a box constraint** (state/control/variable slot selection):
 
 ```@example perf
@@ -107,7 +120,7 @@ step by direct methods; see [CTModels.jl#496](https://github.com/control-toolbox
 JET.@report_opt dyn_parts(zeros(2), 0.0, [0.3, 0.7], [0.5], Float64[])
 ```
 
-All five report `No errors detected`: the repeated-call path is stable.
+All six report `No errors detected`: the repeated-call path is stable.
 
 ## What is enforced automatically
 
@@ -119,6 +132,7 @@ stability precisely on the hot-path calls shown above, via `JET.@test_opt`:
 JET.@test_opt target_modules = (CTModels,) f_const(0.5)
 JET.@test_opt target_modules = (CTModels,) f_coerced(0.5)
 JET.@test_opt target_modules = (CTModels,) dyn_parts(zeros(2), 0.0, x, u, v)
+JET.@test_opt target_modules = (CTModels,) f_stacked(0.5)
 # ... and so on for the other hot-path calls
 ```
 

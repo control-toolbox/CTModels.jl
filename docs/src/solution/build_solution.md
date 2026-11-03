@@ -105,15 +105,50 @@ are not known. See [Switching structure](switching.md).
 
 ## Dual variables
 
-All duals are optional keywords; leaving one out (`nothing`) stores no multiplier for it.
+All duals are optional. The duals of the **path and boundary constraints** are given **by
+label**, in the `duals` keyword; the duals of the **boxes** by component, in their own
+keywords.
 
 | Keyword | Type | Shape |
 | --- | --- | --- |
-| `path_constraints_dual` | `Matrix{Float64}` or `Function` | `length(T_path) × dim_path_constraints_nl(ocp)`, one column per constraint row |
-| `boundary_constraints_dual` | `Vector{Float64}` | `dim_boundary_constraints_nl(ocp)` |
+| `duals` | `AbstractDict{Symbol}` | `label => value`, for path and boundary labels (below) |
 | `state_constraints_lb_dual`, `state_constraints_ub_dual` | `Matrix{Float64}` | `length(T_state) × state_dimension(ocp)` |
 | `control_constraints_lb_dual`, `control_constraints_ub_dual` | `Matrix{Float64}` | `length(T_control) × control_dimension(ocp)` |
 | `variable_constraints_lb_dual`, `variable_constraints_ub_dual` | `Vector{Float64}` | `variable_dimension(ocp)` |
+
+In `duals`, the value of a label depends on its kind and on its number of rows `n` (the
+number of components of the constraint declared under that label):
+
+| Label | Value |
+| --- | --- |
+| path | a `Function` `t -> value` (a scalar when `n = 1`), or a `Matrix` `length(T_path) × n` (a `Vector` when `n = 1`) |
+| boundary | a `Number` when `n = 1`, a `Vector` of length `n` otherwise |
+
+A label **absent** from `duals` is **unknown**: [`dual`](@ref CTModels.Solutions.dual)
+throws for it, and [`has_dual`](@ref CTModels.Solutions.has_dual) returns `false`. A label
+given as `0` is a known `0`. The producer never needs the order of the rows: CTModels places
+each label (see [How the duals are stored](duals.md#How-the-duals-are-stored)).
+
+```@example bs
+sol = CTModels.build_solution(ocp, T, X, U, v, P; objective=1.0, successful=true,
+    duals=Dict(:p => t -> 2t))   # :x0 not given: unknown
+nothing # hide
+```
+
+```@repl bs
+CTModels.dual(sol, ocp, :p)(0.5)
+CTModels.has_dual(sol, ocp, :x0)
+```
+
+!!! warning "Deprecated: `path_constraints_dual` and `boundary_constraints_dual`"
+
+    The duals of the path and boundary constraints used to be given by position, in the
+    stacked order of the constraints (`path_constraints_dual`, one column per row of
+    `path_constraints_nl(ocp)`; `boundary_constraints_dual`, one entry per row of
+    `boundary_constraints_nl(ocp)`). These keywords still work, with every row known, but
+    emit a deprecation warning and will be removed at the next breaking release. Nothing
+    could check the order, so a dual given in another order silently went to the wrong
+    label. Giving them together with `duals` is an error.
 
 Box duals have **one column per primal component**, not one per declared constraint:
 components without a bound carry a zero multiplier, and several labels on one component
@@ -139,9 +174,10 @@ flow-based result typically needs; see the display examples in [Solutions](overv
 
 `build_solution` raises an `IncorrectArgument`, with the received and expected sizes, when:
 
-- the number of columns of `X`, `U`, `P`, a path dual or a box dual does not match the
-  model;
-- `v`, `boundary_constraints_dual` or a variable box dual has the wrong length;
+- the number of columns of `X`, `U`, `P` or a box dual does not match the model;
+- `v` or a variable box dual has the wrong length;
+- a label of `duals` is not a path or boundary constraint of the model (a box label
+  included), or its value has the wrong type or the wrong number of rows;
 - `control_interpolation` is neither `:constant` nor `:linear`;
 - a time grid holds a repeated time;
 - a switching time lies outside the time span, or the limits of the switching model have
@@ -153,5 +189,5 @@ CTModels.build_solution(ocp, T, X, U, Float64[], P; objective=1.0, successful=tr
 
 ```@repl bs
 CTModels.build_solution(ocp, T, X, U, v, P; objective=1.0, successful=true,
-    boundary_constraints_dual=[1.0, 2.0])
+    duals=Dict(:x0 => [1.0, 2.0]))
 ```

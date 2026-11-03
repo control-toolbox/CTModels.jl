@@ -74,6 +74,6 @@ export get_build_examodel
 
 # Constraints helpers
 export isempty_constraints
-export constraint
+export constraint, constraint_rows
 
 end # module Models

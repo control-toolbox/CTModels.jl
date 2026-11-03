@@ -21,8 +21,10 @@ A function of time `t` for time-dependent constraints, or a scalar/vector for ti
 If the label is not found, throws an `IncorrectArgument` exception.
 
 # Notes
-- For path/boundary constraints, duals are indexed per declaration (one column per
-  row of the stacked nonlinear constraint vector).
+- For path/boundary constraints, the duals are stored on the stacked layout of the model
+  (one entry per row of the stacked nonlinear constraint vector, see
+  [`CTModels.Models.constraint_rows`](@extref)), placed there by
+  [`CTModels.Solutions.build_solution`](@extref) from the duals given by label.
 - For box constraints (state/control/variable), the dual matrices/vectors stored
   in the `Solution` are indexed **by primal component** (i.e.
   `state_dimension(model)` columns for state, etc.), following the CTDirect
@@ -36,22 +38,24 @@ If the label is not found, throws an `IncorrectArgument` exception.
   the (same) per-component multiplier for each: CTModels does not track which
   declaration "owns" the multiplier, because the solver only sees the effective
   (intersected) bound.
-- A solution may hold the duals of some kinds of constraints only (the solution of a CTFlows
-  flow holds the path duals only). For a label whose duals were not stored, `dual` throws a
-  `PreconditionError`; its suggestion is the note `infos(sol)[:missing_duals]` left by the
-  producer of the solution, which explains why the duals are missing and how to get them,
-  or a generic one.
+- A solution may hold the duals of some constraints only: some kinds (the solution of a
+  CTFlows flow holds the path duals only), or some labels (a label absent from the `duals`
+  given to `build_solution` is unknown). For a label whose dual is unknown, `dual` throws a
+  `PreconditionError`, never a `0`; its suggestion is the note `infos(sol)[:missing_duals]`
+  left by the producer of the solution, which explains why the duals are missing and how
+  to get them, or a generic one. [`CTModels.Solutions.has_dual`](@extref) tells whether
+  the dual of a label is known.
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
   model.
-- [`CTBase.Exceptions.PreconditionError`](@extref): if the solution holds no dual for the
-  kind of constraint of `label`.
+- [`CTBase.Exceptions.PreconditionError`](@extref): if the dual of `label` is unknown: the
+  solution holds no dual for its kind of constraint, or `label` was not given.
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 
     # an unknown label is an error whatever the solution
-    _is_constraint_label(model, label) || _throw_label_not_found(label)
+    kind, rows = constraint_rows(model, label)
 
     # the solution must carry dual variables
     has_duals(sol) || throw(
@@ -66,86 +70,91 @@ function dual(sol::Solution, model::Model, label::Symbol)
         ),
     )
 
-    # check if the label is in the path constraints
-    cp = path_constraints_nl(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        indices = findall(x -> x == label, labels)
+    if kind === :path
         duals = path_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "path")
-        idx = length(indices) == 1 ? indices[1] : indices
-        return DualSlice(duals, idx)
-    end
-
-    # check if the label is in the boundary constraints
-    cp = boundary_constraints_nl(model)
-    labels = cp[4] # vector of labels
-    if label in labels
-        indices = findall(x -> x == label, labels)
+        _ensure_known(sol, dual_model(sol).path_constraints_dual_known, rows, label, "path")
+        return DualSlice(duals, length(rows) == 1 ? rows[1] : rows)
+    elseif kind === :boundary
         duals = boundary_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "boundary")
-        if length(indices) == 1
-            return duals[indices[1]]
-        else
-            return duals[indices]
-        end
-    end
-
-    # Box constraints: resolve `label` via the `aliases` field (cp[5]) of each
-    # box tuple. `cp[2][k]` gives the primal component index for row `k`, which
-    # is used to slice the per-component dual matrix/vector.
-    function _box_idxs(cp, lbl)
-        aliases = cp[5]
-        out = Int[]
-        for k in eachindex(aliases)
-            if lbl in aliases[k]
-                push!(out, cp[2][k])
-            end
-        end
-        return out
-    end
-
-    # state box
-    cp = state_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        _ensure_known(
+            sol, dual_model(sol).boundary_constraints_dual_known, rows, label, "boundary"
+        )
+        return length(rows) == 1 ? duals[rows[1]] : duals[rows]
+    elseif kind === :state
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "state box")
         _ensure_dual(sol, duals_ub, label, "state box")
-        return _box_dual(duals_lb, duals_ub, cp, idxs)
-    end
-
-    # control box
-    cp = control_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        return _box_dual(duals_lb, duals_ub, state_constraints_box(model), rows)
+    elseif kind === :control
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "control box")
         _ensure_dual(sol, duals_ub, label, "control box")
-        return _box_dual(duals_lb, duals_ub, cp, idxs)
-    end
-
-    # variable box
-    cp = variable_constraints_box(model)
-    idxs = _box_idxs(cp, label)
-    if !isempty(idxs)
+        return _box_dual(duals_lb, duals_ub, control_constraints_box(model), rows)
+    else # :variable
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "variable box")
         _ensure_dual(sol, duals_ub, label, "variable box")
-        cl, cu = _box_dual_coefficients(cp, idxs)
-        if length(idxs) == 1
-            i = idxs[1]
+        cl, cu = _box_dual_coefficients(variable_constraints_box(model), rows)
+        if length(rows) == 1
+            i = rows[1]
             return cl[1] * duals_lb[i] + cu[1] * duals_ub[i]
         else
-            return cl .* duals_lb[idxs] .+ cu .* duals_ub[idxs]
+            return cl .* duals_lb[rows] .+ cu .* duals_ub[rows]
         end
     end
+end
 
-    # unreachable: the label was found above
-    return _throw_label_not_found(label)
+"""
+$(TYPEDSIGNATURES)
+
+Return whether the solution `sol` knows the dual of the constraint labelled `label`, that
+is whether [`CTModels.Solutions.dual`](@extref) returns it instead of throwing a
+`PreconditionError`.
+
+A dual is unknown when the solution carries no duals at all, when the duals of the kind of
+constraint of `label` were not stored, or when the duals of that kind were given by label
+and `label` was not among them (see [`CTModels.Solutions.build_solution`](@extref)).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+
+See also: [`CTModels.Solutions.dual`](@extref), [`CTModels.Models.constraint_rows`](@extref).
+"""
+function has_dual(sol::Solution, model::Model, label::Symbol)::Bool
+    kind, rows = constraint_rows(model, label)
+    has_duals(sol) || return false
+    dm = dual_model(sol)
+    if kind === :path
+        return !isnothing(path_constraints_dual(sol)) &&
+               _rows_known(dm.path_constraints_dual_known, rows)
+    elseif kind === :boundary
+        return !isnothing(boundary_constraints_dual(sol)) &&
+               _rows_known(dm.boundary_constraints_dual_known, rows)
+    elseif kind === :state
+        return !isnothing(state_constraints_lb_dual(sol)) &&
+               !isnothing(state_constraints_ub_dual(sol))
+    elseif kind === :control
+        return !isnothing(control_constraints_lb_dual(sol)) &&
+               !isnothing(control_constraints_ub_dual(sol))
+    else # :variable
+        return !isnothing(variable_constraints_lb_dual(sol)) &&
+               !isnothing(variable_constraints_ub_dual(sol))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether the rows `rows` are known in the canonical mask `known` (`nothing`: every row).
+"""
+function _rows_known(known::Union{Nothing,Vector{Bool}}, rows::Vector{Int})::Bool
+    return isnothing(known) || all(i -> known[i], rows)
 end
 
 """
@@ -191,42 +200,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Whether `label` is a constraint of `model`: a path or boundary constraint, or an alias of
-a state, control or variable box.
-"""
-function _is_constraint_label(model::Model, label::Symbol)::Bool
-    label in path_constraints_nl(model)[4] && return true
-    label in boundary_constraints_nl(model)[4] && return true
-    for cp in (
-        state_constraints_box(model),
-        control_constraints_box(model),
-        variable_constraints_box(model),
-    )
-        any(aliases -> label in aliases, cp[5]) && return true
-    end
-    return false
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Throw the [`CTBase.Exceptions.IncorrectArgument`](@extref) of an unknown constraint label.
-"""
-function _throw_label_not_found(label::Symbol)
-    return throw(
-        Exceptions.IncorrectArgument(
-            "Label not found in model";
-            got="label=$label",
-            expected="existing label in the model",
-            suggestion="Check available labels in the model or use a valid label",
-            context="get_constraint_dual - looking up constraint label in dual model",
-        ),
-    )
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 The explanation of the missing duals of `sol`: the note `infos(sol)[:missing_duals]` left by
 the producer of the solution (e.g. CTFlows, which knows why a dual could not be rebuilt and
 how to get it), or `default` when there is none.
@@ -264,13 +237,41 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Throw a [`CTBase.Exceptions.PreconditionError`](@extref) when some of the rows `rows` of
+the `kind` constraint `label` are unknown in the mask `known` (see
+[`CTModels.Solutions.DualModel`](@extref)): the duals of this kind were stored, but not the
+one of `label`, which was absent from the `duals` given to
+[`CTModels.Solutions.build_solution`](@extref).
+"""
+function _ensure_known(
+    sol::Solution, known::Union{Nothing,Vector{Bool}}, rows::Vector{Int}, label::Symbol, kind::String
+)
+    _rows_known(known, rows) && return nothing
+    return throw(
+        Exceptions.PreconditionError(
+            "the solution carries no dual for the $kind constraint :$label";
+            reason="the duals of other $kind constraints were stored, but :$label was not given to `build_solution(...; duals=...)`, so its dual is unknown",
+            suggestion=_missing_duals_note(
+                sol,
+                "a dual is known only when its producer gives it by label; a label absent from `duals` is unknown, never read as 0",
+            ),
+            context="dual - looking up the dual of a constraint",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return the dual function associated with the nonlinear path constraints.
 
 # Arguments
 - `model::DualModel`: A model including dual variables for path constraints.
 
 # Returns
-- `PC_Dual`: A function mapping time `t` to the vector of dual values, or `nothing` if not set.
+- `PC_Dual`: A function mapping time `t` to the vector of dual values, one entry per row of
+  the stacked path constraint, or `nothing` if not set. The rows of the labels whose dual is
+  unknown hold `NaN`; read a dual with [`CTModels.Solutions.dual`](@extref).
 
 See also: [`CTModels.Solutions.boundary_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
@@ -298,7 +299,9 @@ Return the dual vector associated with the boundary constraints.
 - `model::DualModel`: A model including dual variables for boundary constraints.
 
 # Returns
-- `BC_Dual`: A vector of dual values, or `nothing` if not set.
+- `BC_Dual`: A vector of dual values, one entry per row of the stacked boundary constraint,
+  or `nothing` if not set. The rows of the labels whose dual is unknown hold `NaN`; read a
+  dual with [`CTModels.Solutions.dual`](@extref).
 
 See also: [`CTModels.Solutions.path_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """

@@ -125,3 +125,43 @@ function Base.show(io::IO, ::MIME"text/plain", f::BoxDualDiff{DL,DU,I}) where {D
     )
     return print(io, "\n  ", fmt.label, "idx: ", fmt.reset, fmt.value, f.idx, fmt.reset)
 end
+
+"""
+$(TYPEDEF)
+
+The path duals given by label, as one function of time on the stacked layout of the
+model: `f(t)` is a vector with one entry per row of the stacked path constraint, the rows
+of a given label filled by its function, and `NaN` in the rows of the labels not given
+(unknown).
+
+Each part is a pair `(rows, g)`: `rows` the contiguous rows of the label (see
+[`CTModels.Models.constraint_rows`](@extref)), `g` its dual `t -> value` (a scalar for a
+one-row label, a vector otherwise).
+
+# Fields
+- `dim::Int`: The number of rows of the stacked path constraint.
+- `parts::P`: The parts, a tuple of `(UnitRange{Int}, g)` pairs.
+"""
+struct StackedDuals{P<:Tuple} <: Function
+    dim::Int
+    parts::P
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Evaluate the stacked path duals at time `t`.
+
+The method is `@generated`: the emitted body is a flat sequence of calls, one per part,
+each dispatched on the concrete type of its function (as for
+[`CTModels.Building.CompositeDynamics`](@extref)). A plain `for` over the heterogeneous
+`parts` tuple would dispatch at runtime on the hot path.
+"""
+@generated function (f::StackedDuals{P})(t) where {P}
+    calls = [:(out[f.parts[$i][1]] .= f.parts[$i][2](t)) for i in 1:fieldcount(P)]
+    return quote
+        out = fill(NaN, f.dim)
+        $(calls...)
+        return out
+    end
+end

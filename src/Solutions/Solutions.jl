@@ -80,6 +80,7 @@ include(joinpath(@__DIR__, "dual_functors.jl"))
 include(joinpath(@__DIR__, "dual_model.jl"))
 include(joinpath(@__DIR__, "discretization_utils.jl"))
 include(joinpath(@__DIR__, "interpolation_helpers.jl"))
+include(joinpath(@__DIR__, "labelled_duals.jl"))
 include(joinpath(@__DIR__, "build_solution.jl"))
 include(joinpath(@__DIR__, "show.jl"))
 
@@ -101,7 +102,7 @@ export clean_component_symbols, time_grid_model
 export control_interpolation
 export dim_dual_state_constraints_box,
     dim_dual_control_constraints_box, dim_dual_variable_constraints_box
-export dual
+export dual, has_dual
 export iterations, status, message, successful
 export constraints_violation, infos
 export is_empty, is_empty_time_grid

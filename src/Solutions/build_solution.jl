@@ -36,7 +36,7 @@ for memory efficiency. Otherwise, it uses `MultipleTimeGridModel` to store each 
 
 # Trajectory Data Formats
 
-Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two formats:
+Trajectory data (`X`, `U`, `P`, the path duals) can be provided in two formats:
 
 - **Matrix format**: `Matrix{Float64}` with dimensions `(n_points, n_dim)`
   - Each row corresponds to a time point in the associated grid
@@ -73,10 +73,20 @@ Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two 
 
 ## Optional Keyword Arguments (Dual Variables)
 
-All dual variable arguments default to `nothing` if not provided:
+All dual variable arguments are optional:
 
-- `path_constraints_dual::Union{Matrix{Float64},Function,Nothing}`: Path constraint duals on `T_path` grid
-- `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: Boundary constraint duals (time-independent)
+- `duals::AbstractDict{Symbol}`: The duals of the path and boundary constraints, **by
+  label** (default: empty). A path label takes a `Function` `t -> value` or a `Matrix`
+  (`length(T_path)` × its number of rows; a `Vector` for one row); a boundary label takes a
+  `Number` (one row) or a `Vector`. A label absent from `duals` is unknown:
+  [`CTModels.Solutions.dual`](@extref) throws a `PreconditionError` for it. CTModels places
+  the labels on the stacked layout (see [`CTModels.Models.constraint_rows`](@extref)).
+- `path_constraints_dual::Union{Matrix{Float64},Function,Nothing}`: **Deprecated**, give the
+  path duals by label in `duals`. Path constraint duals on `T_path` grid, one column per row
+  of the stacked path constraint.
+- `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: **Deprecated**, give the
+  boundary duals by label in `duals`. Boundary constraint duals, one entry per row of the
+  stacked boundary constraint.
 - `state_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: State lower bound duals on `T_state` grid
 - `state_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: State upper bound duals on `T_state` grid
 - `control_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: Control lower bound duals on `T_control` grid
@@ -225,6 +235,7 @@ function build_solution(
     control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
     switching::AbstractSwitchingModel=EmptySwitchingModel(),
@@ -332,15 +343,36 @@ function build_solution(
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
+    # Convention for path/boundary duals: one column per row of the stacked constraint
+    #   (`Models.constraint_rows` gives the rows of a label). Given by label in `duals`,
+    #   they are placed there, the rows of the absent labels holding `NaN` and flagged
+    #   unknown in the masks.
+    pc_input, bc_input = path_constraints_dual, boundary_constraints_dual
+    pc_known, bc_known = nothing, nothing
+    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
+        Core.@ensure isempty(duals) Exceptions.IncorrectArgument(
+            "the path and boundary duals are given both by label and by position";
+            got="`duals` and `path_constraints_dual` / `boundary_constraints_dual`",
+            expected="the duals by label in `duals` only",
+            suggestion="Give every path and boundary dual by label in `duals`.",
+            context="build_solution - placing the duals given by label",
+        )
+        Base.depwarn(
+            "`path_constraints_dual` and `boundary_constraints_dual` are deprecated and will be removed at the next breaking release: give the duals by label, `build_solution(...; duals=Dict(label => value))`. `CTModels.Models.constraint_rows(model, label)` gives the rows of a label in the stacked layout.",
+            :build_solution,
+        )
+    end
+    if !isempty(duals)
+        (pc_input, pc_known), (bc_input, bc_known) = _place_duals(ocp, duals, T_path)
+    end
+
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
-    # Convention for path/boundary duals: one column per constraint row
-    #   (indexed by declaration, matching cp[4] labels).
     fpcd = build_interpolated_function(
-        path_constraints_dual,
+        pc_input,
         T_path,
         dim_path_constraints_nl(ocp),
-        TPCD;
+        typeof(pc_input);
         allow_nothing=true,
         expected_dim=dim_path_constraints_nl(ocp),
     )
@@ -390,11 +422,11 @@ function build_solution(
     )
 
     # Boundary constraint duals are a (time-independent) vector with one entry per constraint.
-    if !isnothing(boundary_constraints_dual)
+    if !isnothing(bc_input)
         dim_b = dim_boundary_constraints_nl(ocp)
-        Core.@ensure length(boundary_constraints_dual) == dim_b Exceptions.IncorrectArgument(
+        Core.@ensure length(bc_input) == dim_b Exceptions.IncorrectArgument(
             "boundary_constraints_dual length mismatch";
-            got="length=$(length(boundary_constraints_dual))",
+            got="length=$(length(bc_input))",
             expected="length=$(dim_b) (= number of boundary constraints)",
             suggestion="Provide a vector with one entry per boundary constraint. If the data comes from an exported solution, pass the model the solution was computed from.",
             context="build_solution - validating boundary dual length",
@@ -448,7 +480,7 @@ function build_solution(
             isnothing,
             (
                 fpcd,
-                boundary_constraints_dual,
+                bc_input,
                 fscbd,
                 fscud,
                 fccbd,
@@ -461,13 +493,15 @@ function build_solution(
         else
             DualModel(
                 fpcd,
-                boundary_constraints_dual,
+                bc_input,
                 fscbd,
                 fscud,
                 fccbd,
                 fccud,
                 vc_lb_dual,
                 vc_ub_dual,
+                pc_known,
+                bc_known,
             )
         end
 
@@ -654,8 +688,12 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `message::String`: the message associated to the status criterion.
 - `status::Symbol`: the status criterion.
 - `successful::Bool`: the successful status.
-- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
-- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
+- `duals::AbstractDict{Symbol}`: the duals of the path and boundary constraints, by label
+  (see the multi-grid method).
+- `path_constraints_dual::Matrix{Float64}`: deprecated, the dual of the path constraints
+  by position; give it by label in `duals`.
+- `boundary_constraints_dual::Vector{Float64}`: deprecated, the dual of the boundary
+  constraints by position; give it by label in `duals`.
 - `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
 - `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
 - `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.
@@ -700,6 +738,7 @@ function build_solution(
     control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
     switching::AbstractSwitchingModel=EmptySwitchingModel(),
@@ -734,6 +773,7 @@ function build_solution(
         control_constraints_ub_dual=control_constraints_ub_dual,
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,
+        duals=duals,
         infos=infos,
         control_interpolation=control_interpolation,
         switching=switching,
@@ -1725,8 +1765,12 @@ Version history:
 - `2`: optional switching structure (`"switching_times"`, `"phase_labels"` and the
   `"switching_<component>_<side>"` limits), written only for a solution that holds one;
   files without these keys are read with an [`CTModels.Solutions.EmptySwitchingModel`](@extref).
+- `3`: masks of the known rows of the path and boundary duals
+  (`"path_constraints_dual_known"`, `"boundary_constraints_dual_known"`), written only when
+  some rows are unknown; the unknown entries of these duals are `NaN` (`null` in JSON). Files
+  without the masks are read with every stored row known.
 """
-const SERIALIZATION_FORMAT_VERSION = 2
+const SERIALIZATION_FORMAT_VERSION = 3
 
 """
 $(TYPEDSIGNATURES)
@@ -1996,7 +2040,7 @@ function _discretize_all_components(
     dim_x::Int,
     dim_u::Int,
 )::Dict{String,Any}
-    return Dict{String,Any}(
+    data = Dict{String,Any}(
         "state" => _discretize_function(state(sol), T_state, dim_x),
         "control" => _discretize_function(control(sol), T_control, dim_u),
         "control_interpolation" => string(control_interpolation(sol)),
@@ -2034,6 +2078,12 @@ function _discretize_all_components(
         "format_version" => SERIALIZATION_FORMAT_VERSION,
         "model_signature" => Models._model_signature(model(sol)),
     )
+    # masks of the known rows: written only when some rows are unknown, as the switching
+    # keys are only for a solution that holds a switching structure
+    path_known, boundary_known = _dual_masks(sol)
+    isnothing(path_known) || (data["path_constraints_dual_known"] = path_known)
+    isnothing(boundary_known) || (data["boundary_constraints_dual_known"] = boundary_known)
+    return data
 end
 
 """

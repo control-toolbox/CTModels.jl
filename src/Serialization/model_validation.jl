@@ -123,6 +123,21 @@ function _check_data_dimensions!(errors, ocp, data)::Nothing
         isnothing(bcd) ? nothing : length(bcd),
         Components.dim_boundary_constraints_nl(cons),
     )
+    # masks of the known rows: one entry per row of the stacked constraint
+    pk = g("path_constraints_dual_known")
+    _record_difference!(
+        errors,
+        "path constraints (mask of the known duals)",
+        isnothing(pk) ? nothing : length(pk),
+        Components.dim_path_constraints_nl(cons),
+    )
+    bk = g("boundary_constraints_dual_known")
+    _record_difference!(
+        errors,
+        "boundary constraints (mask of the known duals)",
+        isnothing(bk) ? nothing : length(bk),
+        Components.dim_boundary_constraints_nl(cons),
+    )
     for lu in ("lb", "ub")
         _record_difference!(
             errors,

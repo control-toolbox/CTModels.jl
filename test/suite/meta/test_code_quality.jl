@@ -79,6 +79,14 @@ function test_code_quality()
             f_boxdiff = Solutions.BoxDualDiff(t -> [1.0, 2.0, 3.0], t -> [0.5, 0.5, 0.5], 2)
             JET.@test_opt target_modules = (CTModels,) f_boxdiff(0.5)
 
+            # path duals given by label, stacked on the layout of the model (issue #492):
+            # evaluated at every time point when reading or plotting a dual
+            f_stacked = Solutions.StackedDuals(
+                4, ((1:2, t -> [t, 2t]), (4:4, t -> 3t))
+            )
+            JET.@test_opt target_modules = (CTModels,) f_stacked(0.5)
+            JET.@test_opt target_modules = (CTModels,) Solutions.DualSlice(f_stacked, 4)(0.5)
+
             # --- Constraint-by-label functor (Models) ---
             f_proj = Models.BoxProjection{:state}(2)
             JET.@test_opt target_modules = (CTModels,) f_proj(
