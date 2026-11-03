@@ -118,7 +118,8 @@ separate series. A solution drawn on top with `plot!` takes the next color, as u
 ### Duals of the path constraints
 
 A multiplier usually jumps at the entry and the exit of a boundary arc (`0` on an interior
-arc, positive on the boundary arc). When the limits of the duals are given (`path_dual`),
+arc, positive on the boundary arc). When the limits of the duals are given (by label, in
+`duals`),
 the dual panel draws the jump as the other panels do. The solution of a flow of CTFlows
 fills them.
 
@@ -142,7 +143,7 @@ switching = CTModels.SwitchingModel(;
     state=([0.0;;], [0.0;;]),
     costate=([0.0;;], [0.0;;]),
     control=([-1.0;;], [0.0;;]),
-    path_dual=([0.0;;], [1.0;;]),    # μ = 0, then 1 on the boundary arc
+    duals=Dict(:xmin => ([0.0], [1.0])),    # μ = 0, then 1 on the boundary arc
 )
 sol_c = CTModels.build_solution(ocp_c, T, X, U, Float64[], P;
     objective=0.0, successful=true, switching=switching,

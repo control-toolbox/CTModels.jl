@@ -306,7 +306,9 @@ function build_solution(
         )
     end
 
-    # Switching structure: consistent with the grids and the dimensions of the problem
+    # Switching structure: the limits of the duals given by label placed on the layout of
+    # the model, then consistent with the grids and the dimensions of the problem
+    switching = _place_dual_limits(switching, ocp)
     _check_switching(switching, T_state, dim_x, dim_u, dim_path_constraints_nl(ocp))
 
     # Build interpolated functions for state, control, and costate
@@ -362,12 +364,6 @@ function build_solution(
             control_interpolation=control_interpolation,
         )
     end
-    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
-        Base.depwarn(
-            "`path_constraints_dual` and `boundary_constraints_dual` are deprecated and will be removed at the next breaking release: give the duals by label, `build_solution(...; duals=Dict(label => value))`. `CTModels.Models.constraint_rows(model, label)` gives the rows of a label in the stacked layout.",
-            :build_solution,
-        )
-    end
     pc_input, pc_known = _by_label_or_keyword(
         placed, :path, (path_constraints_dual,), "path_constraints_dual"
     )
@@ -392,6 +388,13 @@ function build_solution(
         (variable_constraints_lb_dual, variable_constraints_ub_dual),
         "variable_constraints_lb_dual / variable_constraints_ub_dual",
     )
+    # deprecated positional input, warned once the conflicts with `duals` are ruled out
+    if !isnothing(path_constraints_dual) || !isnothing(boundary_constraints_dual)
+        Base.depwarn(
+            "`path_constraints_dual` and `boundary_constraints_dual` are deprecated and will be removed at the next breaking release: give the duals by label, `build_solution(...; duals=Dict(label => value))`. `CTModels.Models.constraint_rows(model, label)` gives the rows of a label in the stacked layout.",
+            :build_solution,
+        )
+    end
 
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
@@ -580,6 +583,69 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Place the limits of the duals given by label to the switching model `sw` (its
+`labelled_duals`) on the layout of `ocp`: the limits of a path label go to the columns of
+its rows in `path_dual`, those of a state or control box label (signed duals) to the
+columns of its components in `state_dual` or `control_dual`. The columns of a kind with
+some label given and the others not are `NaN`; a kind with no label keeps its limits.
+Returns a switching model with no label left to place.
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if a label is not a constraint of
+  `ocp`, is not a path, state box or control box label (a boundary or variable dual does not
+  depend on time), its limits have the wrong number of columns, or the limits of the path
+  duals are given both by label and by `path_dual`.
+"""
+_place_dual_limits(sw::EmptySwitchingModel, ::Model) = sw
+function _place_dual_limits(sw::SwitchingModel, ocp::Model)::SwitchingModel
+    isempty(sw.labelled_duals) && return sw
+    n = length(sw.times)
+    dims = (
+        path=dim_path_constraints_nl(ocp),
+        state=state_dimension(ocp),
+        control=control_dimension(ocp),
+    )
+    placed = Dict{Symbol,NTuple{2,Matrix{Float64}}}()
+    for (label, (left, right)) in sw.labelled_duals
+        kind, rows = constraint_rows(ocp, label)
+        kind in (:path, :state, :control) || throw(
+            Exceptions.IncorrectArgument(
+                "no limits at the switching times for a $kind constraint";
+                got="limits of :$label (a $kind constraint)",
+                expected="the label of a path constraint or of a state or control box",
+                suggestion="Give the limits of the time-dependent duals only; the dual of a $kind constraint does not depend on time.",
+                context="build_solution - placing the limits of the duals",
+            ),
+        )
+        _ensure_dual_size(label, length(rows), size(left, 2), "number of columns of the limits")
+        dim = getproperty(dims, kind)
+        L, R = get!(() -> (fill(NaN, n, dim), fill(NaN, n, dim)), placed, kind)
+        L[:, rows] .= left
+        R[:, rows] .= right
+    end
+    Core.@ensure !(haskey(placed, :path) && size(sw.path_dual[1], 2) > 0) Exceptions.IncorrectArgument(
+        "the limits of the path duals are given both by label and by `path_dual`";
+        got="path labels in `duals` and `path_dual`",
+        expected="the limits of the path duals by label only",
+        suggestion="Give the limits of every path dual by label in `SwitchingModel(; duals=...)`.",
+        context="build_solution - placing the limits of the duals",
+    )
+    return SwitchingModel(
+        sw.times,
+        sw.labels,
+        sw.state,
+        sw.costate,
+        sw.control,
+        get(placed, :path, sw.path_dual),
+        get(placed, :state, sw.state_dual),
+        get(placed, :control, sw.control_dual),
+        Dict{Symbol,NTuple{2,Matrix{Float64}}}(),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Check that a switching model is consistent with a solution: its switching times lie strictly
 inside the time span of the state grid `T`, and its stored limits have one column per
 component (`dim_x` for the state and costate, `dim_u` for the control, `dim_p` for the
@@ -608,8 +674,14 @@ function _check_switching(
             ),
         )
     end
-    for (component, dim) in
-        ((:state, dim_x), (:costate, dim_x), (:control, dim_u), (:path_dual, dim_p))
+    for (component, dim) in (
+        (:state, dim_x),
+        (:costate, dim_x),
+        (:control, dim_u),
+        (:path_dual, dim_p),
+        (:state_dual, dim_x),
+        (:control_dual, dim_u),
+    )
         ncols = size(limits(sw, component)[1], 2)
         ncols in (0, dim) || throw(
             Exceptions.IncorrectArgument(
@@ -1850,7 +1922,7 @@ the left limit and `2` for the right limit.
 """
 const _SWITCHING_LIMIT_KEYS = Tuple(
     (_switching_limit_key(c, side), c, side) for
-    c in (:state, :costate, :control, :path_dual) for side in (1, 2)
+    c in _LIMIT_COMPONENTS for side in (1, 2)
 )
 
 """
@@ -1858,7 +1930,7 @@ $(TYPEDSIGNATURES)
 
 Add the switching structure of a solution to its serialized data: nothing for an
 [`CTModels.Solutions.EmptySwitchingModel`](@extref); the switching times, the phase labels and
-the six matrices of limits for a [`CTModels.Solutions.SwitchingModel`](@extref).
+the matrices of limits for a [`CTModels.Solutions.SwitchingModel`](@extref).
 """
 _serialize_switching!(data::Dict{String,Any}, ::EmptySwitchingModel) = data
 function _serialize_switching!(data::Dict{String,Any}, sw::SwitchingModel)
@@ -1888,13 +1960,15 @@ function _deserialize_switching(data)::AbstractSwitchingModel
         haskey(data, key) || return zeros(length(times), 0)
         return Matrix{Float64}(data[key])
     end
-    return SwitchingModel(;
+    return _switching_model(;
         times=times,
         labels=labels,
         state=(lim(:state, 1), lim(:state, 2)),
         costate=(lim(:costate, 1), lim(:costate, 2)),
         control=(lim(:control, 1), lim(:control, 2)),
         path_dual=(lim(:path_dual, 1), lim(:path_dual, 2)),
+        state_dual=(lim(:state_dual, 1), lim(:state_dual, 2)),
+        control_dual=(lim(:control_dual, 1), lim(:control_dual, 2)),
     )
 end
 

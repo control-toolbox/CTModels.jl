@@ -219,6 +219,61 @@ function test_box_duals()
         end
 
         # ======================================================================
+        # INTEGRATION — limits of the duals at the switching times, by label
+        # ======================================================================
+        Test.@testset "switching limits by label" begin
+            sw = Solutions.SwitchingModel(;
+                times=[0.5],
+                duals=Dict(
+                    :p => ([1.0], [2.0]),           # one-row label: vectors
+                    :x2_two => ([-0.5;;], [0.5;;]),  # signed dual of a two-sided box
+                    :u_up => ([0.0], [1.0]),
+                ),
+            )
+            sol = _box_solution(ocp; switching=sw, duals=Dict(:x2_two => t -> 2t - 0.5))
+            m = Solutions.switching_model(sol)
+            Test.@test isempty(m.labelled_duals)                  # placed by build_solution
+            Test.@test Solutions.limits(m, :path_dual) == ([1.0;;], [2.0;;])
+            L, R = Solutions.limits(m, :state_dual)
+            Test.@test isnan(L[1, 1]) && isnan(R[1, 1])          # :x1_lo not given
+            Test.@test (L[1, 2], R[1, 2]) == (-0.5, 0.5)
+            Test.@test Solutions.limits(m, :control_dual) == ([0.0;;], [1.0;;])
+            Test.@test Solutions.right_limit(sol, :control_dual, 1) == 1.0  # DIM1: scalar
+            Test.@test occursin("state_dual", sprint(show, MIME"text/plain"(), m))
+            # a kind with no label keeps no limit
+            sw_p = Solutions.SwitchingModel(; times=[0.5], duals=Dict(:p => ([1.0], [2.0])))
+            m_p = Solutions.switching_model(_box_solution(ocp; switching=sw_p))
+            Test.@test size(Solutions.limits(m_p, :state_dual)[1]) == (1, 0)
+        end
+
+        Test.@testset "switching limits: errors and deprecation" begin
+            sol_with(duals) = _box_solution(
+                ocp; switching=Solutions.SwitchingModel(; times=[0.5], duals=duals)
+            )
+            # no limits for a dual that does not depend on time
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:v_fix => ([0.0], [1.0])))
+            # unknown label, wrong number of columns, not a (left, right) pair
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:nope => ([0.0], [1.0])))
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:p => ([0.0 1.0], [1.0 2.0])))
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.SwitchingModel(;
+                times=[0.5], duals=Dict(:p => [0.0, 1.0])
+            )
+            # one row per switching time
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.SwitchingModel(;
+                times=[0.5], duals=Dict(:p => ([0.0, 1.0], [1.0, 2.0]))
+            )
+            # the deprecated stacked keyword, alone and together with path labels
+            sw = Test.@test_deprecated Solutions.SwitchingModel(;
+                times=[0.5], path_dual=([1.0;;], [2.0;;])
+            )
+            Test.@test Solutions.limits(sw, :path_dual) == ([1.0;;], [2.0;;])
+            sw_both = Test.@test_deprecated Solutions.SwitchingModel(;
+                times=[0.5], path_dual=([1.0;;], [2.0;;]), duals=Dict(:p => ([1.0], [2.0]))
+            )
+            Test.@test_throws Exceptions.IncorrectArgument _box_solution(ocp; switching=sw_both)
+        end
+
+        # ======================================================================
         # ERROR — invalid box duals (EXC1)
         # ======================================================================
         Test.@testset "invalid box duals" begin

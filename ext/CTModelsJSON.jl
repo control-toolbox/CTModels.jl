@@ -85,7 +85,8 @@ function _convert_matrices_for_json!(blob::Dict)
     for key in _SWITCHING_MATRIX_FIELDS
         if haskey(blob, key) && blob[key] isa Matrix
             M = blob[key]
-            blob[key] = [Vector{Float64}(M[i, :]) for i in axes(M, 1)]
+            # the limits of the duals may hold NaN (a label not given): `null` in JSON
+            blob[key] = [_nan_to_null(Vector{Float64}(M[i, :])) for i in axes(M, 1)]
         end
     end
 end
@@ -99,7 +100,7 @@ function _json_rows_to_matrix(rows, n::Int)::Matrix{Float64}
     ncols = length(rows[1])
     M = zeros(n, ncols)
     for i in 1:n
-        M[i, :] .= Float64.(rows[i])
+        M[i, :] .= _null_to_nan(rows[i])
     end
     return M
 end
