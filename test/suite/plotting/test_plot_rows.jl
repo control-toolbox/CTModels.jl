@@ -66,7 +66,7 @@ function test_plot_rows()
             # state (2) + costate (2) + control (1) + 3 rows of 2 cells
             Test.@test Plotting.n_leaves(fig) == 11
             ylabels = [l.axes.ylabel for l in leaves]
-            Test.@test ylabels[6:end] == ["c1", "", "x₂", "dual x2_box", "u", "dual u_box"]
+            Test.@test ylabels[6:end] == ["c1", "dual c1", "x₂", "dual x2_box", "u", "dual u_box"]
             titles = [l.axes.title for l in leaves]
             # titles on the first row only, the time label on the last one only
             Test.@test titles[6:end] == ["constraints", "dual", "", "", "", ""]
@@ -119,6 +119,33 @@ function test_plot_rows()
             n += CTModels.control_dimension(sol_pc)           # control
             n += 2 * CTModels.dim_path_constraints_nl(ocp_pc) # path + dual
             Test.@test Plotting.n_leaves(fig) == n
+        end
+
+        Test.@testset "figure: the dual of a box row draws its jump at a switching time" begin
+            τ = 0.5
+            sw = CTModels.Solutions.SwitchingModel(;
+                times=[τ],
+                labels=["a", "b"],
+                # x2_box: a known jump 0 → 3; u_box: the limits are unknown (NaN)
+                duals=Dict(:x2_box => ([0.0], [3.0]), :u_box => ([NaN], [NaN])),
+            )
+            _, sols = TestProblems.solution_example_box_duals(; switching=sw)
+            leaves = Plotting.leaves(CTModels.PlotCase.build_figure(sols).root)
+            x2, u = only(leaves[9].axes.series), only(leaves[11].axes.series)
+            # the switching time appears twice, with the left and the right limit
+            k = findall(==(τ), x2.x)
+            Test.@test length(k) == 2
+            Test.@test x2.y[k] == [0.0, 3.0]
+            # an unknown limit draws no jump: same samples as without switching
+            Test.@test !any(isnan, u.y)
+            ref = only(Plotting.leaves(CTModels.PlotCase.build_figure(sol).root)[11].axes.series)
+            Test.@test count(==(τ), u.x) == 2
+            Test.@test length(u.x) == length(ref.x) + 1
+            # jumps = :none breaks the curve between the limits
+            leaves = Plotting.leaves(
+                CTModels.PlotCase.build_figure(sols; jumps=:none).root
+            )
+            Test.@test any(isnan, only(leaves[9].axes.series).y)
         end
 
         Test.@testset "a multi-row path label is one row" begin

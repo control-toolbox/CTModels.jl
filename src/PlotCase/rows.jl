@@ -118,33 +118,52 @@ end
 $(TYPEDSIGNATURES)
 
 The right-hand side of the row `row`: its dual, [`CTModels.PlotCase._row_dual`](@extref),
-sampled on the grid of the row. A path constraint is drawn as before: its ylabels are
-dropped when the left-hand side is shown alongside, as for the costate. A box is labelled
-by its label, since its left-hand side carries the name of the component.
+sampled on the grid of the row. Its ylabels are `dual <label>` for every kind of row (the
+left-hand side of a box carries the name of the component, so the label is not repeated
+there).
 """
 function _row_dual_panel(
-    sol,
-    model,
-    row::ConstraintRow,
-    style::NamedTuple;
-    left_shown::Bool,
-    connect::Bool=true,
-    title::String="",
+    sol, model, row::ConstraintRow, style::NamedTuple; connect::Bool=true, title::String=""
 )
     row.kind === :path && return _dual_panel(
-        sol,
-        model,
-        style;
-        path_shown=left_shown,
-        connect=connect,
-        rows=row.rows,
-        title=title,
+        sol, model, style; connect=connect, rows=row.rows, title=title
     )
     T = _row_grid(sol, row)
-    M = _sample(_row_dual(sol, model, row), T)
+    d = _row_dual(sol, model, row)
+    T, M = _splice_box_dual(sol, row, d, T, _sample(d, T); connect=connect)
     n = length(row.rows)
-    labels = n == 1 ? ["dual $(row.label)"] : ["dual $(row.label)[$i]" for i in 1:n]
+    labels = "dual " .* _row_labels(fill(row.label, n))
     return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Insert the limits of the dual `d` of the box row `row` at the switching times into its
+samples `(T, M)`, as [`CTModels.PlotCase._spliced_samples`](@extref) does for the path duals.
+
+The limits are the signed duals per component stored in the switching model
+(`:state_dual`, `:control_dual`), taken at the components of the row. The samples are
+returned unchanged when the solution has no switching time or no box limits. A limit that
+is unknown (`NaN`) draws no jump: the dual is continuous there, with its value at the
+switching time.
+"""
+function _splice_box_dual(
+    sol, row::ConstraintRow, d, T::AbstractVector, M::AbstractMatrix; connect::Bool=true
+)
+    taus = CTModels.switching_times(sol)
+    component = row.kind === :state ? :state_dual : :control_dual
+    left, right = Solutions.limits(CTModels.switching_model(sol), component)
+    (isempty(taus) || size(left, 2) == 0) && return (T, M)
+    left, right = left[:, row.rows], right[:, row.rows]
+    for (i, tau) in enumerate(taus)
+        value = vcat(d(tau))
+        for j in eachindex(value)
+            isnan(left[i, j]) && (left[i, j] = value[j])
+            isnan(right[i, j]) && (right[i, j] = value[j])
+        end
+    end
+    return Plotting.splice_jumps(T, M, taus, left, right; connect=connect)
 end
 
 """

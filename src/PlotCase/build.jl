@@ -244,7 +244,6 @@ function _build_root(
                             model,
                             r,
                             dual_style;
-                            left_shown=left,
                             connect=connect,
                             title=top ? "dual" : "",
                         );

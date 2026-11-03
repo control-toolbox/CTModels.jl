@@ -168,6 +168,20 @@ end
 
 # --- path constraints / duals ------------------------------------------------
 
+# The ylabels of the cells of a constraint: its label, indexed when it has several rows.
+"""
+$(TYPEDSIGNATURES)
+
+The ylabels of the rows `labels` (one label per row of a constraint, as stored in the
+model): the label itself for a single row, `label[i]` when a label spans several rows.
+"""
+function _row_labels(labels::AbstractVector{Symbol})
+    return [
+        count(==(l), labels) == 1 ? string(l) : "$l[$(count(==(l), @view labels[1:i]))]" for
+        (i, l) in enumerate(labels)
+    ]
+end
+
 # Evaluate the nonlinear path constraints g(t, x, u, v) over the path grid into an
 # (n_times × nc) matrix; labels are the constraint labels carried by the model.
 """
@@ -215,7 +229,7 @@ function _path_panel(
             Tp, data, taus, at(xl, ul), at(xr, ur); connect=connect
         )
     end
-    labels = string.(cp[4][idx])
+    labels = _row_labels(cp[4][idx])
     return Plotting.Panel(T, data; title=title, labels=labels, style=_base_style(style))
 end
 
@@ -228,8 +242,8 @@ Return a sampled row as the value of a trajectory: a scalar for one component (t
 """
 _as_value(row::AbstractVector) = length(row) == 1 ? row[1] : collect(row)
 
-# Duals of the path constraints. As for the costate, the ylabels are dropped when the
-# path column is shown alongside (paired), otherwise prefixed with "dual ".
+# Duals of the path constraints: the ylabels are the labels of the constraint, prefixed with
+# "dual ", on every row (as for a box).
 """
 $(TYPEDSIGNATURES)
 
@@ -241,7 +255,6 @@ function _dual_panel(
     sol,
     model,
     style::NamedTuple;
-    path_shown::Bool,
     connect::Bool=true,
     rows::Union{Nothing,AbstractVector{Int}}=nothing,
     title::String="dual",
@@ -253,6 +266,6 @@ function _dual_panel(
     T, M = _spliced_samples(
         sol, Tp, M[:, idx], :path_dual; connect=connect, cols=isnothing(rows) ? nothing : idx
     )
-    labels = path_shown ? fill("", length(idx)) : ("dual " .* string.(cp[4][idx]))
+    labels = "dual " .* _row_labels(cp[4][idx])
     return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end

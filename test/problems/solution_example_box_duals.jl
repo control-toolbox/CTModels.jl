@@ -5,7 +5,7 @@
 #   path      :c1      x₁(t) + x₂(t) ≤ 3
 #   state box :x2_box  -0.5 ≤ x₂(t) ≤ 2       (two bounds: signed dual zU − zL)
 #   ctrl box  :u_box   -1 ≤ u(t) ≤ 1
-function solution_example_box_duals()
+function solution_example_box_duals(; switching=CTModels.Solutions.EmptySwitchingModel())
     pre = CTModels.PreModel()
     CTModels.variable!(pre, 0)
     CTModels.time!(pre; t0=0.0, tf=1.0)
@@ -58,6 +58,7 @@ function solution_example_box_duals()
         state_constraints_ub_dual=hcat(zeros(N), max.(0.0, 4T .- 3)),
         control_constraints_lb_dual=reshape(max.(0.0, 0.5 .- T), N, 1),
         control_constraints_ub_dual=zeros(N, 1),
+        switching=switching,
     )
     return ocp, sol
 end
