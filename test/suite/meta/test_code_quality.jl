@@ -88,8 +88,8 @@ function test_code_quality()
             # --- Composite dynamics assembled from coordinate parts (Building;
             #     issue #496) — evaluated once per solver step ---
             parts = Tuple{UnitRange{Int},Function}[
-                (1:1, (r, t, x, u, v) -> (r[1]=x[2]; nothing)),
-                (2:2, (r, t, x, u, v) -> (r[1]=u[1]; nothing)),
+                (1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing)),
+                (2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing)),
             ]
             dyn_parts = Building.__build_dynamics_from_parts(parts)
             JET.@test_opt target_modules = (CTModels,) dyn_parts(

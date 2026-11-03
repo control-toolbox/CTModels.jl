@@ -169,6 +169,7 @@ struct MergedTrajectory{F,P<:Tuple} <: Function
     function MergedTrajectory{F,P}(
         base::F, comps::P, dim::Int, role::Symbol
     ) where {F,P<:Tuple}
+        prev = 0
         for (i, _) in comps
             if !(1 <= i <= dim)
                 throw(
@@ -181,6 +182,18 @@ struct MergedTrajectory{F,P<:Tuple} <: Function
                     ),
                 )
             end
+            if i <= prev
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Component overrides must be sorted by strictly increasing index";
+                        got="index $i after index $prev for $role",
+                        expected="strictly increasing component indices",
+                        suggestion="Sort the overrides by index and give each component at most one override",
+                        context="component-level $role initialization",
+                    ),
+                )
+            end
+            prev = i
         end
         return new(base, comps, dim, role)
     end

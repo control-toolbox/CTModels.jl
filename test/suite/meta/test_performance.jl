@@ -59,9 +59,9 @@ _boxproj_raw(x, idx) = x[idx]
 # Per-coordinate partial dynamics and the equivalent monolithic dynamics: the
 # `Model` built from the two `_dyn_part_*!` calls must evaluate at exactly the
 # cost of a call to `_dyn_mono!` (issue #496).
-_dyn_part_1!(r, t, x, u, v) = (r[1]=x[2]; nothing)
-_dyn_part_2!(r, t, x, u, v) = (r[1]=u[1]; nothing)
-_dyn_mono!(r, t, x, u, v) = (r[1]=x[2]; r[2]=u[1]; nothing)
+_dyn_part_1!(r, t, x, u, v) = (r[1] = x[2]; nothing)
+_dyn_part_2!(r, t, x, u, v) = (r[1] = u[1]; nothing)
+_dyn_mono!(r, t, x, u, v) = (r[1] = x[2]; r[2] = u[1]; nothing)
 
 # Block-level base trajectory with per-component overrides (the shape
 # `initial_guess` produces when mixing block and component data): the

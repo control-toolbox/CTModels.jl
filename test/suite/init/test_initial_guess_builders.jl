@@ -328,6 +328,13 @@ function test_initial_guess_builders()
             Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
                 base, ((5, _ -> 0.0),), 2, :state
             )
+            # unsorted or duplicated indices are rejected (no silent "last wins")
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (1, _ -> 2.0)), 2, :state
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (2, _ -> 2.0)), 2, :state
+            )
         end
     end
 end
