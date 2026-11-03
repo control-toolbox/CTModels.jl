@@ -2,6 +2,34 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [Unreleased]
+
+### Non-breaking note: the positional path and boundary duals are deprecated
+
+`build_solution`'s `path_constraints_dual` and `boundary_constraints_dual` (the duals in the
+stacked order of the constraints) still work, every row known, but emit a deprecation
+warning; they will be removed at the next breaking release. Give the duals by label: a label
+not given is unknown (`dual` throws a `PreconditionError`), never `0`.
+([#492](https://github.com/control-toolbox/CTModels.jl/issues/492))
+
+**Migration**:
+
+```julia
+# Before: one column per row of path_constraints_nl(ocp), one entry per row of
+# boundary_constraints_nl(ocp), in their stacked order
+sol = build_solution(ocp, T, X, U, v, P; objective=J, successful=true,
+    path_constraints_dual=[M_c1 M_c2], boundary_constraints_dual=[b1; b2])
+
+# After: by label, in any order
+sol = build_solution(ocp, T, X, U, v, P; objective=J, successful=true,
+    duals=Dict(:c1 => M_c1, :c2 => M_c2, :b1 => b1, :b2 => b2))
+# the rows of a label in the stacked layout, if a producer needs them
+kind, rows = CTModels.Models.constraint_rows(ocp, :c2)
+```
+
+Other notes: the message of `dual` for an unknown label is now the one of `constraint`
+("Constraint label not found"), same exception type; the serialization format is 3.
+
 ## [0.21.0] - 2026-10-23
 
 ### The duals of the boxes follow the sign convention of the ecosystem

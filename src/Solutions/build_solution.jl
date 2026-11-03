@@ -36,7 +36,7 @@ for memory efficiency. Otherwise, it uses `MultipleTimeGridModel` to store each 
 
 # Trajectory Data Formats
 
-Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two formats:
+Trajectory data (`X`, `U`, `P`, the path duals) can be provided in two formats:
 
 - **Matrix format**: `Matrix{Float64}` with dimensions `(n_points, n_dim)`
   - Each row corresponds to a time point in the associated grid
@@ -73,10 +73,20 @@ Trajectory data (`X`, `U`, `P`, `path_constraints_dual`) can be provided in two 
 
 ## Optional Keyword Arguments (Dual Variables)
 
-All dual variable arguments default to `nothing` if not provided:
+All dual variable arguments are optional:
 
-- `path_constraints_dual::Union{Matrix{Float64},Function,Nothing}`: Path constraint duals on `T_path` grid
-- `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: Boundary constraint duals (time-independent)
+- `duals::AbstractDict{Symbol}`: The duals of the path and boundary constraints, **by
+  label** (default: empty). A path label takes a `Function` `t -> value` or a `Matrix`
+  (`length(T_path)` × its number of rows; a `Vector` for one row); a boundary label takes a
+  `Number` (one row) or a `Vector`. A label absent from `duals` is unknown:
+  [`CTModels.Solutions.dual`](@extref) throws a `PreconditionError` for it. CTModels places
+  the labels on the stacked layout (see [`CTModels.Models.constraint_rows`](@extref)).
+- `path_constraints_dual::Union{Matrix{Float64},Function,Nothing}`: **Deprecated**, give the
+  path duals by label in `duals`. Path constraint duals on `T_path` grid, one column per row
+  of the stacked path constraint.
+- `boundary_constraints_dual::Union{Vector{Float64},Nothing}`: **Deprecated**, give the
+  boundary duals by label in `duals`. Boundary constraint duals, one entry per row of the
+  stacked boundary constraint.
 - `state_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: State lower bound duals on `T_state` grid
 - `state_constraints_ub_dual::Union{Matrix{Float64},Nothing}`: State upper bound duals on `T_state` grid
 - `control_constraints_lb_dual::Union{Matrix{Float64},Nothing}`: Control lower bound duals on `T_control` grid
@@ -678,8 +688,12 @@ Build a solution from the optimal control problem, the time grid, the state, con
 - `message::String`: the message associated to the status criterion.
 - `status::Symbol`: the status criterion.
 - `successful::Bool`: the successful status.
-- `path_constraints_dual::Matrix{Float64}`: the dual of the path constraints.
-- `boundary_constraints_dual::Vector{Float64}`: the dual of the boundary constraints.
+- `duals::AbstractDict{Symbol}`: the duals of the path and boundary constraints, by label
+  (see the multi-grid method).
+- `path_constraints_dual::Matrix{Float64}`: deprecated, the dual of the path constraints
+  by position; give it by label in `duals`.
+- `boundary_constraints_dual::Vector{Float64}`: deprecated, the dual of the boundary
+  constraints by position; give it by label in `duals`.
 - `state_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the state constraints.
 - `state_constraints_ub_dual::Matrix{Float64}`: the upper bound dual of the state constraints.
 - `control_constraints_lb_dual::Matrix{Float64}`: the lower bound dual of the control constraints.

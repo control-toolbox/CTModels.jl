@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- **The duals of the path and boundary constraints are given by label**
+  ([#492](https://github.com/control-toolbox/CTModels.jl/issues/492)):
+  `build_solution(...; duals=Dict(label => value))`, a path label taking a function of time
+  or a matrix on the path grid, a boundary label a number or a vector. CTModels places each
+  label on the stacked layout of the model, so a producer no longer rebuilds the row order,
+  and a dual can no longer go silently to the wrong label.
+- **An absent label is unknown**: `dual(sol, model, :label)` throws a `PreconditionError`
+  for it (with the note `infos(sol)[:missing_duals]` as the suggestion); it is never read as
+  `0`. A label given as `0` is a known `0`.
+- **`Models.constraint_rows(model, label) -> (kind, rows)`**: the rows of a path or
+  boundary label in the stacked constraint vector, or the components of a box label. `dual`
+  and `constraint` use it.
+- **`Solutions.has_dual(sol, model, label)`**: whether the dual of a label is known.
+
+### 🛠 Enhancements
+
+- **Unknown duals are `NaN` in the stacked storage**, with masks of the known rows in the
+  `DualModel` (`nothing` when every row is known): the raw accessors
+  `path_constraints_dual(sol)` and `boundary_constraints_dual(sol)` never return a fake `0`.
+- **Serialization format 3**: the masks are written when some rows are unknown, and the
+  unknown entries are `null` in JSON. Files of earlier formats are read as before, every
+  stored row known.
+
 ### 🐛 Bug Fixes
 
 - **A dynamics assembled from coordinate parts no longer allocates at every call**
@@ -21,8 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: internals only; the `dynamics!` signatures and the `build`
-  output are unchanged (`Models.dynamics` still returns a `Function`).
+- **No breaking changes**: the `dynamics!` signatures and the `build` output are unchanged
+  (`Models.dynamics` still returns a `Function`).
+- **Deprecated**: the positional keywords `path_constraints_dual` and
+  `boundary_constraints_dual` of `build_solution` still work, every row known, but emit a
+  deprecation warning; they will be removed at the next breaking release. See
+  [BREAKING.md](BREAKING.md).
 
 ## [0.21.0] - 2026-10-23
 

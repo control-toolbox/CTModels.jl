@@ -21,8 +21,10 @@ A function of time `t` for time-dependent constraints, or a scalar/vector for ti
 If the label is not found, throws an `IncorrectArgument` exception.
 
 # Notes
-- For path/boundary constraints, duals are indexed per declaration (one column per
-  row of the stacked nonlinear constraint vector).
+- For path/boundary constraints, the duals are stored on the stacked layout of the model
+  (one entry per row of the stacked nonlinear constraint vector, see
+  [`CTModels.Models.constraint_rows`](@extref)), placed there by
+  [`CTModels.Solutions.build_solution`](@extref) from the duals given by label.
 - For box constraints (state/control/variable), the dual matrices/vectors stored
   in the `Solution` are indexed **by primal component** (i.e.
   `state_dimension(model)` columns for state, etc.), following the CTDirect
@@ -36,17 +38,19 @@ If the label is not found, throws an `IncorrectArgument` exception.
   the (same) per-component multiplier for each: CTModels does not track which
   declaration "owns" the multiplier, because the solver only sees the effective
   (intersected) bound.
-- A solution may hold the duals of some kinds of constraints only (the solution of a CTFlows
-  flow holds the path duals only). For a label whose duals were not stored, `dual` throws a
-  `PreconditionError`; its suggestion is the note `infos(sol)[:missing_duals]` left by the
-  producer of the solution, which explains why the duals are missing and how to get them,
-  or a generic one.
+- A solution may hold the duals of some constraints only: some kinds (the solution of a
+  CTFlows flow holds the path duals only), or some labels (a label absent from the `duals`
+  given to `build_solution` is unknown). For a label whose dual is unknown, `dual` throws a
+  `PreconditionError`, never a `0`; its suggestion is the note `infos(sol)[:missing_duals]`
+  left by the producer of the solution, which explains why the duals are missing and how
+  to get them, or a generic one. [`CTModels.Solutions.has_dual`](@extref) tells whether
+  the dual of a label is known.
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
   model.
-- [`CTBase.Exceptions.PreconditionError`](@extref): if the solution holds no dual for the
-  kind of constraint of `label`.
+- [`CTBase.Exceptions.PreconditionError`](@extref): if the dual of `label` is unknown: the
+  solution holds no dual for its kind of constraint, or `label` was not given.
 """
 function dual(sol::Solution, model::Model, label::Symbol)
 
@@ -265,7 +269,9 @@ Return the dual function associated with the nonlinear path constraints.
 - `model::DualModel`: A model including dual variables for path constraints.
 
 # Returns
-- `PC_Dual`: A function mapping time `t` to the vector of dual values, or `nothing` if not set.
+- `PC_Dual`: A function mapping time `t` to the vector of dual values, one entry per row of
+  the stacked path constraint, or `nothing` if not set. The rows of the labels whose dual is
+  unknown hold `NaN`; read a dual with [`CTModels.Solutions.dual`](@extref).
 
 See also: [`CTModels.Solutions.boundary_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """
@@ -293,7 +299,9 @@ Return the dual vector associated with the boundary constraints.
 - `model::DualModel`: A model including dual variables for boundary constraints.
 
 # Returns
-- `BC_Dual`: A vector of dual values, or `nothing` if not set.
+- `BC_Dual`: A vector of dual values, one entry per row of the stacked boundary constraint,
+  or `nothing` if not set. The rows of the labels whose dual is unknown hold `NaN`; read a
+  dual with [`CTModels.Solutions.dual`](@extref).
 
 See also: [`CTModels.Solutions.path_constraints_dual`](@extref), [`CTModels.Solutions.state_constraints_lb_dual`](@extref).
 """

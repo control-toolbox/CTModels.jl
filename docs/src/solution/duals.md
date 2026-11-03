@@ -10,9 +10,9 @@ diagnostics** (a [`SolverInfos`](@ref CTModels.Solutions.SolverInfos)).
 
 ## A solution with duals
 
-We build a small problem with a boundary constraint and two path constraints, then supply the
-path-constraint multipliers as a callable `t → μ(t)`. State, control and costate are passed as
-**functions** here (the array form is equally accepted):
+We build a small problem with a boundary constraint and two path constraints, then give the
+path-constraint multipliers **by label**, each as a callable `t → μ(t)`. State, control and
+costate are passed as **functions** here (the array form is equally accepted):
 
 ```@example duals
 using CTModels
@@ -28,7 +28,7 @@ CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> -u)
 CTModels.constraint!(pre, :boundary;
     f=(r, x0, xf, v) -> (r[1] = x0 + 1; nothing), lb=[0.0], ub=[0.0], label=:initial_con)
 CTModels.constraint!(pre, :path;
-    f=(r, t, x, u, v) -> (r[1] = x + u; nothing), lb=[-Inf], ub=[0.0])  # 1 row
+    f=(r, t, x, u, v) -> (r[1] = x + u; nothing), lb=[-Inf], ub=[0.0], label=:mixed)  # 1 row
 CTModels.constraint!(pre, :path;
     f=(r, t, x, u, v) -> (r[1] = x + 1; r[2] = u + 1; nothing),
     lb=[-3.0, 1.0], ub=[1.0, 2.5], label=:con2)                                # 2 rows
@@ -39,16 +39,16 @@ ocp = CTModels.build(pre)
 x(t) = -exp(-t)
 p(t) = exp(t - 1) - 1
 u(t) = -x(t)
-# one entry per stacked path-constraint row: x + u ≤ 0 is active, with the nonnegative
-# dual e^{t-1} (single bound, see the sign convention below); :con2 is inactive on its first
-# row, and the signed dual t of its second row says its upper side is active
-mu(t) = [p(t) + 1, 0.0, t]
+# x + u ≤ 0 is active, with the nonnegative dual e^{t-1} (single bound, see the sign
+# convention below); :con2 is inactive on its first row, and the signed dual t of its second
+# row says its upper side is active. The dual of :initial_con is not given: it is unknown.
+duals = Dict(:mixed => t -> p(t) + 1, :con2 => t -> [0.0, t])
 
 sol = CTModels.build_solution(ocp, collect(range(0.0, 1.0; length=201)),
     x, u, Float64[], p;
     objective=exp(-1) - 1, iterations=12, constraints_violation=0.0,
     message="Solve_Succeeded", status=:optimal, successful=true,
-    path_constraints_dual=mu)
+    duals=duals)
 nothing # hide
 ```
 
@@ -100,7 +100,8 @@ CTModels.path_constraints_dual(sol)(0.5)
 ```
 
 Boundary-constraint multipliers are read with
-[`boundary_constraints_dual`](@ref CTModels.Solutions.boundary_constraints_dual):
+[`boundary_constraints_dual`](@ref CTModels.Solutions.boundary_constraints_dual). No
+boundary label was given here, so the solution stores none:
 
 ```@repl duals
 CTModels.boundary_constraints_dual(sol)
@@ -135,12 +136,26 @@ any dual — when it returns `false`, the dual model is an
 [`EmptyDualModel`](@ref CTModels.Solutions.EmptyDualModel) and all dual accessors return
 `nothing`.
 
+[`has_dual`](@ref CTModels.Solutions.has_dual) tells whether the dual of one label is known,
+that is whether [`dual`](@ref CTModels.Solutions.dual) returns it:
+
+```@repl duals
+CTModels.has_dual(sol, ocp, :con2)
+CTModels.has_dual(sol, ocp, :initial_con)
+```
+
 [`dual`](@ref CTModels.Solutions.dual) throws:
 
 - an `IncorrectArgument` for a label that is not a constraint of the model;
-- a `PreconditionError` for a label whose duals the solution does not hold. Its suggestion
-  is the note `infos(sol)[:missing_duals]` left by the producer of the solution, when
-  there is one: it says why the dual is missing and how to get it.
+- a `PreconditionError` for a label whose dual the solution does not hold: a label absent
+  from the `duals` given to `build_solution`, or a kind of constraint whose duals were not
+  stored at all. A missing dual is never read as `0`. The suggestion of the error is the
+  note `infos(sol)[:missing_duals]` left by the producer of the solution, when there is
+  one: it says why the dual is missing and how to get it.
+
+```@repl duals
+CTModels.dual(sol, ocp, :initial_con)
+```
 
 !!! note "Box duals are indexed per component"
 
@@ -152,6 +167,60 @@ any dual — when it returns `false`, the dual model is an
     fixed component (see the sign convention above). If several labels target the same
     component (the alias mechanism of the [Constraints](../model/constraints.md) page),
     they share that one multiplier — the solver only sees the intersected bound.
+
+## How the duals are stored
+
+This section is for developers of CTModels and of the producers of solutions (CTDirect,
+CTFlows). A user only needs `duals=` and [`dual`](@ref CTModels.Solutions.dual).
+
+**The label is the only interface.** A producer gives `label => value`; the order of the
+rows is a CTModels internal. [`constraint_rows`](@ref CTModels.Models.constraint_rows) gives
+it, `(kind, rows)`:
+
+```@repl duals
+CTModels.Models.constraint_rows(ocp, :mixed)
+CTModels.Models.constraint_rows(ocp, :con2)
+CTModels.Models.constraint_rows(ocp, :initial_con)
+```
+
+- A path or boundary label occupies contiguous rows of the stacked constraint
+  (`path_constraints_nl(ocp)`, `boundary_constraints_nl(ocp)`), in the order of
+  declaration. For a box label, `rows` are the components it bounds.
+- **Stacked storage.** The [`DualModel`](@ref CTModels.Solutions.DualModel) keeps the path
+  duals as one function of time with one entry per row, and the boundary duals as one
+  vector. The rows of the labels not given hold `NaN`, so that the raw accessors
+  `path_constraints_dual(sol)` and `boundary_constraints_dual(sol)` never return a fake
+  `0`.
+- **Masks of the known rows.** `path_constraints_dual_known` and
+  `boundary_constraints_dual_known` are the authority on what is known. They are
+  canonical: `nothing` when every row of the stored duals is known (the storage is then the
+  same as before the labels), a `Vector{Bool}` only for a partial knowledge. A kind of
+  constraint with no known row is stored as `nothing`.
+- **Placement** (`src/Solutions/labelled_duals.jl`). When every path label is a matrix,
+  they are stacked into one matrix and interpolated as a whole. As soon as one is a
+  function, every part becomes a function of time and they are combined into a
+  [`StackedDuals`](@ref CTModels.Solutions.StackedDuals), a callable struct over a typed
+  tuple with a generated call method; it is on the hot path, see
+  [Performance](../guide/performance.md).
+- **Serialization** (format 3). The masks are written only when some rows are unknown; the
+  unknown entries are `null` in JSON (`NaN` in JLD2). Reading a file goes back to labels and
+  passes `duals=`; a file without masks is read with every stored row known.
+
+Here every path label was given, so the mask is `nothing`. With `:con2` only, the row of
+`:mixed` is unknown:
+
+```@example duals
+sol_part = CTModels.build_solution(ocp, collect(range(0.0, 1.0; length=201)),
+    x, u, Float64[], p; objective=exp(-1) - 1, successful=true,
+    duals=Dict(:con2 => t -> [0.0, t]))
+nothing # hide
+```
+
+```@repl duals
+CTModels.dual_model(sol).path_constraints_dual_known
+CTModels.dual_model(sol_part).path_constraints_dual_known
+CTModels.path_constraints_dual(sol_part)(0.5)
+```
 
 ## Solver diagnostics
 

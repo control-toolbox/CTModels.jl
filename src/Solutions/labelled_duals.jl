@@ -237,7 +237,12 @@ function _duals_by_label(
     return duals
 end
 
-_as_mask(known::Nothing) = nothing
+"""
+$(TYPEDSIGNATURES)
+
+A mask of the known rows read from a file as a `Vector{Bool}` (`nothing`: every row known).
+"""
+_as_mask(::Nothing) = nothing
 _as_mask(known::AbstractVector{Bool}) = Vector{Bool}(known)
 
 """

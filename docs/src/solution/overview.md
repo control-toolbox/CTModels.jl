@@ -192,6 +192,6 @@ sol_d = CTModels.build_solution(ocp_d, T, Xv, Uv, [1.5], Pv;
     successful=true,
     variable_constraints_lb_dual=[0.0],
     variable_constraints_ub_dual=[0.3],
-    boundary_constraints_dual=[1.2, -0.8],
+    duals=Dict(:bc => [1.2, -0.8]),
 )
 ```
