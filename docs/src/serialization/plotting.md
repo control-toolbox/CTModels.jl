@@ -64,10 +64,13 @@ a state box or a control box — pairing the constraint (left) with its dual (ri
  ───┴───
    u₁            ← control, full width
  ───┬───
- c₁ │ μ₁         ← path constraint │ its dual
- x₂ │ dual x2_box ← state box: x₂(t) with its bounds │ its dual
- u  │ dual u_box  ← control box
+ c₁           │ μ₁   ← path constraint │ its dual
+ x₂ (x2_box)  │      ← state box: x₂(t) with its bounds │ its dual
+ u (u_box)    │      ← control box
 ```
+
+As for the state | costate pair, the left cell carries the name and the paired right cell
+none; a box is named by its component and its label, `x₂ (x2_box)`.
 
 A box is drawn like a path constraint because its dual follows the same sign convention
 (ct-conventions `SGN5`): the pair makes the complementarity visible — the component
@@ -109,8 +112,9 @@ The selection stays `:path` and `:dual`:
 - `:dual` draws the right cells — the dual of every path constraint and every box whose
   dual the solution knows (`has_dual`, see [Duals & diagnostics](../solution/duals.md));
 - a box is a pair: its left cell is drawn when both `:path` and `:dual` are requested
-  (otherwise it would only repeat the component of the state or control panel), and a box
-  whose dual is unknown has no row;
+  (otherwise it would only repeat the component of the state or control panel), so
+  `plot(sol, :path)` shows the path constraints only, as before; and a box whose dual is
+  unknown has no row;
 - `path_style` and `dual_style` style the two sides, `state_bounds_style` and
   `control_bounds_style` the bounds of the box rows.
 

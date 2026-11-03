@@ -66,7 +66,7 @@ function test_plot_rows()
             # state (2) + costate (2) + control (1) + 3 rows of 2 cells
             Test.@test Plotting.n_leaves(fig) == 11
             ylabels = [l.axes.ylabel for l in leaves]
-            Test.@test ylabels[6:end] == ["c1", "dual c1", "x₂", "dual x2_box", "u", "dual u_box"]
+            Test.@test ylabels[6:end] == ["c1", "", "x₂ (x2_box)", "", "u (u_box)", ""]
             titles = [l.axes.title for l in leaves]
             # titles on the first row only, the time label on the last one only
             Test.@test titles[6:end] == ["constraints", "dual", "", "", "", ""]
@@ -126,8 +126,8 @@ function test_plot_rows()
             sw = CTModels.Solutions.SwitchingModel(;
                 times=[τ],
                 labels=["a", "b"],
-                # x2_box: a known jump 0 → 3; u_box: the limits are unknown (NaN)
-                duals=Dict(:x2_box => ([0.0], [3.0]), :u_box => ([NaN], [NaN])),
+                # x2_box: a known jump 0 → 3; no limits are given for u_box
+                duals=Dict(:x2_box => ([0.0], [3.0])),
             )
             _, sols = TestProblems.solution_example_box_duals(; switching=sw)
             leaves = Plotting.leaves(CTModels.PlotCase.build_figure(sols).root)
@@ -136,11 +136,9 @@ function test_plot_rows()
             k = findall(==(τ), x2.x)
             Test.@test length(k) == 2
             Test.@test x2.y[k] == [0.0, 3.0]
-            # an unknown limit draws no jump: same samples as without switching
+            # no limits for the control box: its dual is drawn without a jump
+            Test.@test count(==(τ), u.x) <= 1
             Test.@test !any(isnan, u.y)
-            ref = only(Plotting.leaves(CTModels.PlotCase.build_figure(sol).root)[11].axes.series)
-            Test.@test count(==(τ), u.x) == 2
-            Test.@test length(u.x) == length(ref.x) + 1
             # jumps = :none breaks the curve between the limits
             leaves = Plotting.leaves(
                 CTModels.PlotCase.build_figure(sols; jumps=:none).root

@@ -109,8 +109,10 @@ label, and its two sides are drawn from the same row:
   (`src/PlotCase/build.jl`) then draws each row's left side if `:path` is on (and, for a
   box, `:dual` too) and its right side if `:dual` is on and `row.dual`.
 - **Titles and labels**: the first row carries the titles and the phase labels, the last
-  one the time label. A path constraint keeps its labels (the right side has none when
-  paired); a box is labelled by its component on the left and `dual <label>` on the right.
+  one the time label. One rule for every row, as for state | costate: the left cell carries the
+  name and the paired right cell none (`dual <label>` when the right side is drawn alone).
+  A path constraint is named by its label, a box by its component and its label,
+  `x₂ (x2_box)`.
 
 ```@example pc
 pre2 = CTModels.PreModel()
