@@ -50,6 +50,20 @@ function test_plot_reference()
         ocp_tf, sol_tf = TestProblems.solution_example_free_final_time()
 
         # ======================================================================
+        # Constraint rows (issue #506): path, state box and control box, each
+        # paired with its dual. Fixture: solution_example_box_duals().
+        # ======================================================================
+        Test.@testset "constraint rows: path, state box and control box" begin
+            _, sol_box = TestProblems.solution_example_box_duals()
+            plt = Plots.plot(sol_box)
+            Test.@test plt isa Plots.Plot
+            # state (2) + costate (2) + control (1) + 3 rows of (constraint | dual)
+            Test.@test length(plt.subplots) == 11
+            Test.@test length(Plots.plot(sol_box, :dual).subplots) == 3
+            Test.@test Plots.plot(sol_box; layout=:group) isa Plots.Plot
+        end
+
+        # ======================================================================
         # Description-symbol subsets (.extras/plot_duals.jl:70-78)
         # Every subset must render for a solution carrying path constraints and
         # duals. `plot(sol)` with no description falls back to "everything".

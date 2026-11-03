@@ -16,7 +16,7 @@ figure to a [`CTBase.Plotting.render`](@extref) backend.
 """
 module PlotCase
 
-using DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using CTBase: Plotting
 using CTBase: Exceptions
@@ -32,6 +32,8 @@ using ..Solutions
 # call time from the fully-loaded parent module.
 const CTModels = parentmodule(@__MODULE__)
 
+# rows.jl first: `ConstraintRow` is used in the signature of `do_plot` (vocabulary.jl)
+include(joinpath(@__DIR__, "rows.jl"))
 include(joinpath(@__DIR__, "vocabulary.jl"))
 include(joinpath(@__DIR__, "panels.jl"))
 include(joinpath(@__DIR__, "decorations.jl"))

@@ -32,6 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SwitchingModel(; duals=Dict(label => (left, right)))`, for path and state / control box
   labels, placed on the layout by `build_solution`. The limits of the box duals are stored as
   signed duals, read with `limits(sw, :state_dual)` and `limits(sw, :control_dual)`.
+- **The duals of the state and control boxes are plotted**
+  ([#506](https://github.com/control-toolbox/CTModels.jl/issues/506)). The bottom block of
+  the `:split` figure is now one row per constraint label — path constraint, state box or
+  control box — pairing the constraint (the component with its bounds, for a box) with its
+  dual `dual(sol, model, label)`. `:path` draws the left cells and `:dual` the right ones; a
+  box whose dual is unknown has no row, and a row whose dual is unknown, next to rows that
+  have theirs, keeps an empty right cell (*dual not known*) so that the time axes stay
+  aligned. Box labels that are aliases of a component have their row. The dual of a control
+  box is drawn as steps with a piecewise-constant control. The box duals draw their jumps at
+  the switching times from the limits given by label
+  ([#493](https://github.com/control-toolbox/CTModels.jl/issues/493)).
+  `PlotCase._assemble_split` takes the paired `rows` in place of `path` and `dual`.
 
 ### 🛠 Enhancements
 

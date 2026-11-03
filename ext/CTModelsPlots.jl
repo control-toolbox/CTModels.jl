@@ -89,8 +89,10 @@ dual variables over time, depending on the problem and the given `description`.
 # Arguments
 - `sol`: the optimal control solution to visualise.
 - `description`: symbols selecting which groups to include; any of `:state`, `:costate`,
-  `:control`, `:path` (path constraints), `:dual` (their multipliers). If none is given,
-  a default set is used based on the problem.
+  `:control`, `:path` (path constraints), `:dual` (their multipliers, and those of the state
+  and control boxes). If none is given, a default set is used based on the problem. A box
+  is drawn as a constraint row, the component with its bounds paired with its dual: it needs
+  `:dual`, so `:path` alone shows the path constraints only.
 
 # Keyword arguments
 - `layout::Symbol = :split`: `:split` (one subplot per component) or `:group` (group

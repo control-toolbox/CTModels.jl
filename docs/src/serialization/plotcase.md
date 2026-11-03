@@ -66,6 +66,111 @@ nothing # hide
 typeof(fig)
 ```
 
+## What is plotted
+
+`build_figure` draws up to five groups, selected by the description symbols (`:state`,
+`:costate`, `:control`, `:path`, `:dual`) and hidden by a `*_style=:none` keyword. In
+`layout=:split`, they are arranged in three blocks:
+
+```text
+(state | costate)          one cell per component, paired column by column
+control                    full width
+constraint rows            one row per constraint label: (constraint | dual)
+```
+
+`layout=:group` draws the state, the costate and the control only: one cell per group, with
+a legend. The path constraints and the duals have no `:group` cell, so they never receive
+the phase labels there (`_phase_label_group` only considers the groups the layout draws).
+
+### The constraint rows
+
+The third block is built from `ConstraintRow`s, listed
+by `_constraint_rows(sol, model)` in `src/PlotCase/rows.jl`. A row is one constraint
+label, and its two sides are drawn from the same row:
+
+| `kind` | left (`:path`) | right (`:dual`) | row exists |
+| --- | --- | --- | --- |
+| `:path` | the rows of the path constraint, `g(t, x, u, v)`, with its bounds | `dual(sol, model, label)` | always (the right side needs `row.dual`) |
+| `:state` | the bounded components of the state, with the bounds of the box | `dual(sol, model, label)` | the dual is known |
+| `:control` | the bounded components of the control, with the bounds of the box | `dual(sol, model, label)` | the dual is known |
+
+- **Order**: path constraints in declaration order, then state boxes, then control boxes,
+  in the order of the components they bound. The built model does not keep the order
+  between kinds, and the boxes are stored by component after deduplication.
+- **Aliases**: the box labels are read from the aliases of the box tuple (`cp[5]`), not
+  from its labels (`cp[4]`, the first label of each component only), so a label that only
+  re-declares a bounded component (`x₂(t) ≤ 0.5, (:x2_box)` after `0 ≤ x(t) ≤ 1, (:xbox)`)
+  has its row; `Models.constraint_rows` gives its components.
+- **Not plotted**: boundary constraints and variable boxes (their duals do not depend on
+  time), and a box whose dual is unknown (the mask of `has_dual`).
+- **One row per label**: a label that bounds several components (a vector box, a
+  multi-row path constraint) is one row whose cells are as numerous as its components.
+- **The dual of a box** is a single signed curve per component, `zU − zL` for two bounds
+  (ct-conventions `SGN2`, `SGN3`); `Solutions.dual` builds it, the plot only samples it.
+- **Grids**: each side carries its own grid — the path grid for a path constraint, the
+  state or control grid for a box — as every `Panel` does.
+- **Gating**: `do_plot` (`src/PlotCase/vocabulary.jl`) sets the `path` and `dual` flags
+  from the rows: `:dual` needs at least one dual to draw, `:path` needs a path constraint,
+  or a box row when `:dual` is requested. The `:split` branch of `_build_root`
+  (`src/PlotCase/build.jl`) then draws each row's left side if `:path` is on (and, for a
+  box, `:dual` too) and its right side if `:dual` is on and `row.dual`.
+- **Alignment**: when some row of the block has its right side and another does not, the
+  latter gets an empty right cell (`_row_unknown_dual_panel`: an invisible curve on the
+  grid of the row, so that the cell keeps the time axis of the others, and the text *dual
+  not known*). Every row is then a pair and the time axes of the block are aligned. A
+  block with no right side at all stays one column.
+- **Series type**: the cells of a control box are steps (`:steppost`) when the control is
+  piecewise constant, the dual included (`_row_seriestype`): the box dual follows the
+  control interpolation.
+- **Jumps at the switching times**: each side is spliced with
+  `_spliced_samples(sol, T, M, component; cols=row.rows)`, with the limits of the
+  component of the row (`:path_dual`, `:state_dual` or `:control_dual` for the duals,
+  stored by label in the `SwitchingModel` and placed on the layout by `build_solution`).
+  A limit not given (`NaN`) is replaced by the value of the samples at the switching time,
+  so that column is drawn with no jump (`_fill_unknown_limits`; for steps, the sample that
+  holds on the interval).
+- **Computed once**: `_build_root` lists the rows once and passes them to `do_plot`; the
+  path constraints and the path duals are sampled once for the whole figure
+  (`_path_samples`, `dual_samples`) and each row takes its columns, instead of evaluating
+  the whole stacked constraint once per label.
+- **Titles and labels**: the first row carries the titles and the phase labels, the last
+  one the time label. One rule for every row, as for state | costate: the left cell carries the
+  name and the paired right cell none (`dual <label>` when the right side is drawn alone).
+  A path constraint is named by its label, a box by its component and its label,
+  `x₂ (x2_box)`.
+
+```@example pc
+pre2 = CTModels.PreModel()
+CTModels.variable!(pre2, 0)
+CTModels.time!(pre2; t0=0.0, tf=1.0)
+CTModels.state!(pre2, 2)
+CTModels.control!(pre2, 1)
+CTModels.dynamics!(pre2, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+CTModels.objective!(pre2, :min; lagrange=(t, x, u, v) -> u^2)
+CTModels.constraint!(pre2, :path; f=(r, t, x, u, v) -> (r[1] = x[1] + x[2]; nothing),
+    lb=[-Inf], ub=[3.0], label=:c1)
+CTModels.constraint!(pre2, :state; rg=2:2, lb=[-0.5], ub=[2.0], label=:x2_box)
+CTModels.constraint!(pre2, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:u_box)
+CTModels.time_dependence!(pre2; autonomous=true)
+ocp2 = CTModels.build(pre2)
+M = 21
+T2 = collect(range(0.0, 1.0; length=M))
+sol2 = CTModels.build_solution(ocp2, T2, hcat(T2, ones(M)), ones(M, 1), Float64[], zeros(M, 2);
+    objective=1.0, successful=true, duals=Dict(:c1 => T2),
+    state_constraints_lb_dual=zeros(M, 2), state_constraints_ub_dual=zeros(M, 2),
+    control_constraints_lb_dual=zeros(M, 1), control_constraints_ub_dual=zeros(M, 1))
+nothing # hide
+```
+
+The rows of this solution, and the cells that result:
+
+```@repl pc
+[(r.label, r.kind, r.rows, r.dual) for r in CTModels.PlotCase._constraint_rows(sol2, ocp2)]
+using CTBase: Plotting
+fig2 = CTModels.PlotCase.build_figure(sol2);
+[(l.axes.title, l.axes.ylabel) for l in Plotting.leaves(fig2.root)]
+```
+
 ## Keywords: build or render
 
 `plot(sol; kwargs...)` mixes two kinds of keywords.
@@ -85,8 +190,9 @@ CTModels.PlotCase.split_plot_kwargs((layout=:group, state_style=(color=:red,), d
 | --- | --- |
 | the accepted group symbols and defaults (`:state`, `:dual`, default layout, …) | `src/PlotCase/vocabulary.jl` |
 | how a group is sampled and labelled | `src/PlotCase/panels.jl` |
+| which constraint rows exist, and the cells of a row | `src/PlotCase/rows.jl` |
 | reference lines (box bounds, initial and final times) | `src/PlotCase/decorations.jl` |
-| the arrangement of panels for `:split` and `:group` | `src/PlotCase/assemble.jl` |
+| the arrangement of panels for `:split` and `:group` (the constraint block is built in `_build_root`) | `src/PlotCase/assemble.jl`, `src/PlotCase/build.jl` |
 | the keyword surface of `plot` | `build_figure` and `_BUILD_KEYS` in `src/PlotCase/build.jl` |
 | the `Plots.plot` / `Makie.plot` methods themselves | `ext/CTModelsPlots.jl`, `ext/CTModelsMakie.jl` |
 

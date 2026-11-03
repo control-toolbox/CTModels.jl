@@ -164,8 +164,12 @@ Decide which signal groups to draw for the given solution and description.
 
 A group is drawn when it is requested, its style is not `:none`, and it actually exists in the solution:
 - control needs `control_dimension(sol) > 0`,
-- path needs `dim_path_constraints_nl(ocp) > 0`,
-- dual needs `path_constraints_dual(sol)` to be present.
+- path needs path constraints, or a box row (see `:dual`),
+- dual needs the dual of at least one constraint row to be known: a path constraint, a
+  state box or a control box (see [`CTModels.PlotCase._constraint_rows`](@extref)).
+
+`rows` are the constraint rows of the figure (see
+[`CTModels.PlotCase._constraint_rows`](@extref)), listed here when not given.
 
 # Returns
 - `NTuple{5, Bool}`: flags for `(state, costate, control, path, dual)`.
@@ -178,6 +182,7 @@ function do_plot(
     costate_style::Union{NamedTuple,Symbol},
     path_style::Union{NamedTuple,Symbol},
     dual_style::Union{NamedTuple,Symbol},
+    rows::Union{Nothing,AbstractVector{ConstraintRow}}=nothing,
 )
     do_plot_state = :state ∈ description && state_style != :none
     do_plot_costate = :costate ∈ description && costate_style != :none
@@ -186,15 +191,28 @@ function do_plot(
         control_style != :none &&
         CTModels.control_dimension(sol) > 0
     ocp = CTModels.model(sol)
+    # The constraint block has one row per constraint label (see `_constraint_rows`): a path
+    # constraint, or a state/control box whose dual is known. `:path` draws the left-hand
+    # sides, `:dual` the right-hand sides; a box row is a pair, so its left-hand side needs
+    # `:dual` too.
+    dual_requested = :dual ∈ description && dual_style != :none
+    # the rows are listed only when the boxes may be drawn (they need `:dual`), and once:
+    # `_build_root` passes the rows it lists for the figure
+    box_rows = if dual_requested && ocp isa CTModels.Model
+        filter(r -> r.kind !== :path, isnothing(rows) ? _constraint_rows(sol, ocp) : rows)
+    else
+        ConstraintRow[]
+    end
+    has_path = CTModels.dim_path_constraints_nl(ocp) > 0
     do_plot_path =
         :path ∈ description &&
         path_style != :none &&
-        CTModels.dim_path_constraints_nl(ocp) > 0
+        (has_path || (dual_requested && !isempty(box_rows)))
     do_plot_dual =
-        :dual ∈ description &&
-        dual_style != :none &&
-        CTModels.dim_path_constraints_nl(ocp) > 0 &&
-        !isnothing(CTModels.path_constraints_dual(sol))
+        dual_requested && (
+            (has_path && !isnothing(CTModels.path_constraints_dual(sol))) ||
+            !isempty(box_rows)
+        )
 
     return (do_plot_state, do_plot_costate, do_plot_control, do_plot_path, do_plot_dual)
 end

@@ -112,6 +112,7 @@ function generate_api_reference(src_dir::String, ext_dir::String)
             filename="plotcase",
             files=src(
                 joinpath("PlotCase", "PlotCase.jl"),
+                joinpath("PlotCase", "rows.jl"),
                 joinpath("PlotCase", "vocabulary.jl"),
                 joinpath("PlotCase", "panels.jl"),
                 joinpath("PlotCase", "decorations.jl"),

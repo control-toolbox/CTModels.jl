@@ -28,7 +28,8 @@ Insert the left and right limits of `component` (`:state`, `:costate`, `:control
 [`CTBase.Plotting.splice_jumps`](@extref): a jump is drawn as a vertical segment. The samples
 are returned unchanged when the solution has no switching time or the limits of
 `component` are not known. With `connect = false`, the curve is broken between the two
-limits instead of drawing the vertical segment.
+limits instead of drawing the vertical segment. With `cols`, `M` holds only those columns
+of `component`, and only their limits are used.
 
 A limit may be unknown for some columns only (`NaN`: the limits of the duals given by label,
 for a label whose limits were not given). Such a limit is replaced by the value of the
@@ -39,9 +40,17 @@ that no jump is drawn for that column, instead of a break in the curve.
 - `(T, M)`: the time grid (with each switching time twice) and the matrix of samples.
 """
 function _spliced_samples(
-    sol, T::AbstractVector, M::AbstractMatrix, component::Symbol; connect::Bool=true
+    sol,
+    T::AbstractVector,
+    M::AbstractMatrix,
+    component::Symbol;
+    connect::Bool=true,
+    cols::Union{Nothing,AbstractVector{Int}}=nothing,
 )
     left, right = Solutions.limits(CTModels.switching_model(sol), component)
+    if !isnothing(cols) && size(left, 2) > 0
+        left, right = left[:, cols], right[:, cols]
+    end
     times = CTModels.switching_times(sol)
     # piecewise-constant samples: a control, or a control-box dual, with a constant control
     constant =
@@ -214,13 +223,18 @@ end
 # --- path constraints / duals ------------------------------------------------
 
 # Evaluate the nonlinear path constraints g(t, x, u, v) over the path grid into an
-# (n_times × nc) matrix; labels are the constraint labels carried by the model.
+# (n_times × nc) matrix, once for the whole figure; each constraint row takes its columns.
 """
 $(TYPEDSIGNATURES)
 
-Build a [`CTBase.Plotting.Panel`](@extref) for the nonlinear path constraints.
+The samples of the nonlinear path constraints of `model` along `sol`, for every row of the
+stacked constraint: `(T, data, left, right)`, with `T` the path grid, `data` the `length(T) ×
+nc` matrix of values, and `left`, `right` the values at the left and right limits of the
+state and control at the switching times (one row per switching time), or `nothing` when
+those limits are not known. Computed once per figure, then sliced per constraint row (see
+[`CTModels.PlotCase._path_panel`](@extref)).
 """
-function _path_panel(sol, model, style::NamedTuple; connect::Bool=true)
+function _path_samples(sol, model)
     Tp = CTModels.time_grid(sol, :path)
     v = CTModels.variable(sol)
     cp = CTModels.path_constraints_nl(model)
@@ -234,28 +248,51 @@ function _path_panel(sol, model, style::NamedTuple; connect::Bool=true)
     end
     # at the switching times, the constraints at both limits of the state and control
     # (when both are known)
-    T = Tp
     taus = CTModels.switching_times(sol)
     sw = CTModels.switching_model(sol)
     (xl, xr), (ul, ur) = Solutions.limits(sw, :state), Solutions.limits(sw, :control)
-    if !isempty(taus) && size(xl, 2) > 0 && size(ul, 2) > 0
-        at(X, U) = permutedims(
-            reduce(
-                hcat,
-                (
-                    constraint(taus[i], _as_value(X[i, :]), _as_value(U[i, :])) for
-                    i in eachindex(taus)
-                ),
+    if isempty(taus) || size(xl, 2) == 0 || size(ul, 2) == 0
+        return (Tp, data, nothing, nothing)
+    end
+    at(X, U) = permutedims(
+        reduce(
+            hcat,
+            (
+                constraint(taus[i], _as_value(X[i, :]), _as_value(U[i, :])) for
+                i in eachindex(taus)
             ),
-        )
-        T, data = Plotting.splice_jumps(
-            Tp, data, taus, at(xl, ul), at(xr, ur); connect=connect
+        ),
+    )
+    return (Tp, data, at(xl, ul), at(xr, ur))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTBase.Plotting.Panel`](@extref) for the nonlinear path constraints: all of them,
+or the rows `rows` (those of one label). `samples` are the values of the constraints (see
+[`CTModels.PlotCase._path_samples`](@extref)), computed here when not given.
+"""
+function _path_panel(
+    sol,
+    model,
+    style::NamedTuple;
+    connect::Bool=true,
+    rows::Union{Nothing,AbstractVector{Int}}=nothing,
+    title::String="path constraints",
+    samples=_path_samples(sol, model),
+)
+    Tp, data, left, right = samples
+    cp = CTModels.path_constraints_nl(model)
+    idx = isnothing(rows) ? collect(axes(data, 2)) : collect(rows)
+    T, M = Tp, data[:, idx]
+    if !isnothing(left)
+        T, M = Plotting.splice_jumps(
+            Tp, M, CTModels.switching_times(sol), left[:, idx], right[:, idx]; connect=connect
         )
     end
-    labels = string.(cp[4])
-    return Plotting.Panel(
-        T, data; title="path constraints", labels=labels, style=_base_style(style)
-    )
+    labels = string.(cp[4][idx])
+    return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end
 
 # A sampled row as the value of a trajectory: a scalar for a one-dimensional component.
@@ -272,21 +309,30 @@ _as_value(row::AbstractVector) = length(row) == 1 ? row[1] : collect(row)
 """
 $(TYPEDSIGNATURES)
 
-Build a [`CTBase.Plotting.Panel`](@extref) for the dual variables of the path constraints.
-At a switching time whose dual limits are known, the jump is drawn as for the state (see
+Build a [`CTBase.Plotting.Panel`](@extref) for the dual variables of the path constraints:
+all of them, or the rows `rows` (those of one label). `samples` are the duals sampled on
+the path grid, computed here when not given. At a switching time whose dual limits are
+known, the jump is drawn as for the state (see
 [`CTModels.PlotCase._spliced_samples`](@extref)).
 """
-function _dual_panel(sol, model, style::NamedTuple; path_shown::Bool, connect::Bool=true)
+function _dual_panel(
+    sol,
+    model,
+    style::NamedTuple;
+    path_shown::Bool,
+    connect::Bool=true,
+    rows::Union{Nothing,AbstractVector{Int}}=nothing,
+    title::String="dual",
+    samples=nothing,
+)
     Tp = CTModels.time_grid(sol, :path)
-    T, M = _spliced_samples(
-        sol,
-        Tp,
-        _sample(CTModels.path_constraints_dual(sol), Tp),
-        :path_dual;
-        connect=connect,
-    )
-    nc = size(M, 2)
+    # the samples of every row, computed once per figure when given (see `_build_root`)
+    M = isnothing(samples) ? _sample(CTModels.path_constraints_dual(sol), Tp) : samples
     cp = CTModels.path_constraints_nl(model)
-    labels = path_shown ? fill("", nc) : ("dual " .* string.(cp[4]))
-    return Plotting.Panel(T, M; title="dual", labels=labels, style=_base_style(style))
+    idx = isnothing(rows) ? collect(axes(M, 2)) : collect(rows)
+    T, M = _spliced_samples(
+        sol, Tp, M[:, idx], :path_dual; connect=connect, cols=isnothing(rows) ? nothing : idx
+    )
+    labels = path_shown ? fill("", length(idx)) : ("dual " .* string.(cp[4][idx]))
+    return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end
