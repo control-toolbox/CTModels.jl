@@ -80,6 +80,7 @@ include(joinpath(@__DIR__, "dual_functors.jl"))
 include(joinpath(@__DIR__, "dual_model.jl"))
 include(joinpath(@__DIR__, "discretization_utils.jl"))
 include(joinpath(@__DIR__, "interpolation_helpers.jl"))
+include(joinpath(@__DIR__, "labelled_duals.jl"))
 include(joinpath(@__DIR__, "build_solution.jl"))
 include(joinpath(@__DIR__, "show.jl"))
 

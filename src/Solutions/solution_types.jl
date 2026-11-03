@@ -289,6 +289,14 @@ Dual variables (Lagrange multipliers) for all constraints in an optimal control 
 - `control_constraints_ub_dual::CC_UB_Dual`: Multipliers for control upper bounds `t -> ω⁺(t)`, or `nothing`.
 - `variable_constraints_lb_dual::VC_LB_Dual`: Multipliers for variable lower bounds (scalar for 1-D, vector otherwise), or `nothing`.
 - `variable_constraints_ub_dual::VC_UB_Dual`: Multipliers for variable upper bounds (scalar for 1-D, vector otherwise), or `nothing`.
+- `path_constraints_dual_known::Union{Nothing,Vector{Bool}}`: The known rows of the path
+  duals, one entry per row of the stacked path constraint, or `nothing` when every row of
+  the stored path duals is known. An unknown row holds `NaN`.
+- `boundary_constraints_dual_known::Union{Nothing,Vector{Bool}}`: The same for the boundary
+  duals.
+
+The masks are canonical: a mask is a vector only when some rows are known and others are
+not. The constructor with the eight duals only sets both masks to `nothing`.
 
 # Example
 
@@ -317,6 +325,13 @@ struct DualModel{
     control_constraints_ub_dual::CC_UB_Dual
     variable_constraints_lb_dual::VC_LB_Dual
     variable_constraints_ub_dual::VC_UB_Dual
+    path_constraints_dual_known::Union{Nothing,Vector{Bool}}
+    boundary_constraints_dual_known::Union{Nothing,Vector{Bool}}
+end
+
+# Every row of the stored duals is known.
+function DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub)
+    return DualModel(pc, bc, sc_lb, sc_ub, cc_lb, cc_ub, vc_lb, vc_ub, nothing, nothing)
 end
 
 """

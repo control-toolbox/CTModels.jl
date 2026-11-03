@@ -69,10 +69,14 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if kind === :path
         duals = path_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "path")
+        _ensure_known(sol, dual_model(sol).path_constraints_dual_known, rows, label, "path")
         return DualSlice(duals, length(rows) == 1 ? rows[1] : rows)
     elseif kind === :boundary
         duals = boundary_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "boundary")
+        _ensure_known(
+            sol, dual_model(sol).boundary_constraints_dual_known, rows, label, "boundary"
+        )
         return length(rows) == 1 ? duals[rows[1]] : duals[rows]
     elseif kind === :state
         duals_lb = state_constraints_lb_dual(sol)
@@ -172,6 +176,32 @@ function _ensure_dual(sol::Solution, duals, label::Symbol, kind::String)
             suggestion=_missing_duals_note(
                 sol,
                 "a direct solve returns every dual; a solution built by a CTFlows flow carries the duals of the path constraints only, when they are given to `Flow(ocp, law; constraint=:label, multiplier=μ)` by their label",
+            ),
+            context="dual - looking up the dual of a constraint",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw a [`CTBase.Exceptions.PreconditionError`](@extref) when some of the rows `rows` of
+the `kind` constraint `label` are unknown in the mask `known` (see
+[`CTModels.Solutions.DualModel`](@extref)): the duals of this kind were stored, but not the
+one of `label`, which was absent from the `duals` given to
+[`CTModels.Solutions.build_solution`](@extref).
+"""
+function _ensure_known(
+    sol::Solution, known::Union{Nothing,Vector{Bool}}, rows::Vector{Int}, label::Symbol, kind::String
+)
+    (isnothing(known) || all(i -> known[i], rows)) && return nothing
+    return throw(
+        Exceptions.PreconditionError(
+            "the solution carries no dual for the $kind constraint :$label";
+            reason="the duals of other $kind constraints were stored, but :$label was not given to `build_solution(...; duals=...)`, so its dual is unknown",
+            suggestion=_missing_duals_note(
+                sol,
+                "a dual is known only when its producer gives it by label; a label absent from `duals` is unknown, never read as 0",
             ),
             context="dual - looking up the dual of a constraint",
         ),

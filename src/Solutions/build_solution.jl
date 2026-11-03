@@ -225,6 +225,7 @@ function build_solution(
     control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
     switching::AbstractSwitchingModel=EmptySwitchingModel(),
@@ -332,15 +333,23 @@ function build_solution(
     var = (dim_v == 1) ? v[1] : v
 
     # nonlinear constraints and dual variables (optional, can be nothing)
+    # Convention for path/boundary duals: one column per row of the stacked constraint
+    #   (`Models.constraint_rows` gives the rows of a label). Given by label in `duals`,
+    #   they are placed there, the rows of the absent labels holding `NaN` and flagged
+    #   unknown in the masks.
+    pc_input, bc_input = path_constraints_dual, boundary_constraints_dual
+    pc_known, bc_known = nothing, nothing
+    if !isempty(duals)
+        (pc_input, pc_known), (bc_input, bc_known) = _place_duals(ocp, duals, T_path)
+    end
+
     # Note: dim is set to dim_path_constraints_nl for proper scalar wrapping
     # Path constraints duals share the path grid (T_path)
-    # Convention for path/boundary duals: one column per constraint row
-    #   (indexed by declaration, matching cp[4] labels).
     fpcd = build_interpolated_function(
-        path_constraints_dual,
+        pc_input,
         T_path,
         dim_path_constraints_nl(ocp),
-        TPCD;
+        typeof(pc_input);
         allow_nothing=true,
         expected_dim=dim_path_constraints_nl(ocp),
     )
@@ -390,11 +399,11 @@ function build_solution(
     )
 
     # Boundary constraint duals are a (time-independent) vector with one entry per constraint.
-    if !isnothing(boundary_constraints_dual)
+    if !isnothing(bc_input)
         dim_b = dim_boundary_constraints_nl(ocp)
-        Core.@ensure length(boundary_constraints_dual) == dim_b Exceptions.IncorrectArgument(
+        Core.@ensure length(bc_input) == dim_b Exceptions.IncorrectArgument(
             "boundary_constraints_dual length mismatch";
-            got="length=$(length(boundary_constraints_dual))",
+            got="length=$(length(bc_input))",
             expected="length=$(dim_b) (= number of boundary constraints)",
             suggestion="Provide a vector with one entry per boundary constraint. If the data comes from an exported solution, pass the model the solution was computed from.",
             context="build_solution - validating boundary dual length",
@@ -448,7 +457,7 @@ function build_solution(
             isnothing,
             (
                 fpcd,
-                boundary_constraints_dual,
+                bc_input,
                 fscbd,
                 fscud,
                 fccbd,
@@ -461,13 +470,15 @@ function build_solution(
         else
             DualModel(
                 fpcd,
-                boundary_constraints_dual,
+                bc_input,
                 fscbd,
                 fscud,
                 fccbd,
                 fccud,
                 vc_lb_dual,
                 vc_ub_dual,
+                pc_known,
+                bc_known,
             )
         end
 
@@ -700,6 +711,7 @@ function build_solution(
     control_constraints_ub_dual::Union{Matrix{Float64},Nothing}=__constraints(),
     variable_constraints_lb_dual::Union{Vector{Float64},Nothing}=__constraints(),
     variable_constraints_ub_dual::Union{Vector{Float64},Nothing}=__constraints(),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
     infos::Dict{Symbol,Any}=Dict{Symbol,Any}(),
     control_interpolation::Symbol=__control_interpolation(),
     switching::AbstractSwitchingModel=EmptySwitchingModel(),
@@ -734,6 +746,7 @@ function build_solution(
         control_constraints_ub_dual=control_constraints_ub_dual,
         variable_constraints_lb_dual=variable_constraints_lb_dual,
         variable_constraints_ub_dual=variable_constraints_ub_dual,
+        duals=duals,
         infos=infos,
         control_interpolation=control_interpolation,
         switching=switching,

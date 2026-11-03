@@ -55,6 +55,19 @@ _ub_raw(t) = [0.5, 0.5, 0.5]
 _boxdualdiff_raw(lb, ub, t, idx) = lb(t)[idx] - ub(t)[idx]
 _boxproj_raw(x, idx) = x[idx]
 
+# Path duals given by label (issue #492): `StackedDuals` must evaluate at exactly the
+# cost of one specialised function filling the same stacked vector — `NaN` in the rows
+# of the labels not given. One function for the whole sequence, not the parts
+# benchmarked separately (see `_boxdualdiff_raw`).
+_stacked_part1_raw(t) = [t, 2t]
+_stacked_part2_raw(t) = 3t
+function _stacked_raw(t)
+    out = fill(NaN, 4)
+    out[1:2] .= _stacked_part1_raw(t)
+    out[4:4] .= _stacked_part2_raw(t)
+    return out
+end
+
 # Per-coordinate partial dynamics and the equivalent monolithic dynamics: the
 # `Model` built from the two `_dyn_part_*!` calls must evaluate at exactly the
 # cost of a call to `_dyn_mono!` (issue #496).
@@ -139,6 +152,12 @@ function test_performance()
                 (BenchmarkTools.@ballocated _boxdualdiff_raw(
                 $_lb_raw, $_ub_raw, $t, $idx
             ))
+
+            f_stacked = Solutions.StackedDuals(
+                4, ((1:2, _stacked_part1_raw), (4:4, _stacked_part2_raw))
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_stacked($t)) ==
+                (BenchmarkTools.@ballocated _stacked_raw($t))
 
             f_proj = Models.BoxProjection{:state}(idx)
             x = [1.0, 2.0, 3.0]
