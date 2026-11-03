@@ -54,6 +54,24 @@ function _box_model_free()
     return Building.build(pre)
 end
 
+# Two labels on the state component 2: `:xbox` bounds (x₁, x₂), `:x2_box` x₂ only (an
+# alias after deduplication).
+function _box_model_alias()
+    pre = Building.PreModel()
+    Building.time!(pre; t0=0.0, tf=1.0)
+    Building.state!(pre, 2)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
+    Building.definition!(pre, quote end)
+    Building.time_dependence!(pre; autonomous=true)
+    Building.constraint!(pre, :state; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:xbox)
+    Building.constraint!(pre, :state; rg=2, lb=-Inf, ub=0.5, label=:x2_box)
+    return redirect_stderr(devnull) do # the alias warns: several bounds on x₂
+        Building.build(pre)
+    end
+end
+
 # Fake producer duals: callable structs, as a flow builds its duals (TST3).
 struct _FakeBoxLower <: Function end
 (::_FakeBoxLower)(t) = [t, 0.0]          # zL of (x₁, x₂)
@@ -307,6 +325,24 @@ function test_box_duals()
             end
         end
 
+        Test.@testset "serialization round trip with aliases ($fmt)" for fmt in (:JLD, :JSON)
+            # :x2_box given, :xbox not: x₂ known, x₁ unknown (bounded by :xbox only)
+            ocp_alias = _box_model_alias()
+            sol = Solutions.build_solution(
+                ocp_alias, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
+                objective=0.0, successful=true, duals=Dict(:x2_box => t -> 0.5 - t),
+            )
+            Test.@test Solutions.dual_model(sol).known.state == [false, true]
+            mktempdir() do dir
+                file = joinpath(dir, "alias")
+                Serialization.export_ocp_solution(sol; filename=file, format=fmt)
+                sol2 = Serialization.import_ocp_solution(ocp_alias; filename=file, format=fmt)
+                Test.@test Solutions.dual_model(sol2).known.state == [false, true]
+                Test.@test Solutions.dual(sol2, ocp_alias, :x2_box)(0.25) ≈ 0.25
+                Test.@test !Solutions.has_dual(sol2, ocp_alias, :xbox)
+            end
+        end
+
         Test.@testset "JSON: null for unknown box duals and limits; files without masks" begin
             mktempdir() do dir
                 file = joinpath(dir, "box_duals")
@@ -350,6 +386,19 @@ function test_box_duals()
             Test.@test_throws Exceptions.IncorrectArgument bad(;
                 duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => _T[1:4])
             )
+            # one component given by two labels (aliases): ambiguous
+            ocp_alias = _box_model_alias()
+            alias_sol(duals) = Solutions.build_solution(
+                ocp_alias, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
+                objective=0.0, successful=true, duals=duals,
+            )
+            Test.@test_throws Exceptions.IncorrectArgument alias_sol(
+                Dict{Symbol,Any}(:xbox => t -> [t, t], :x2_box => t -> 2t)
+            )
+            # one of them is enough: the other reads the same dual
+            sol_a = alias_sol(Dict{Symbol,Any}(:xbox => t -> [t, -t]))
+            Test.@test Solutions.has_dual(sol_a, ocp_alias, :x2_box)
+            Test.@test Solutions.dual(sol_a, ocp_alias, :x2_box)(0.5) ≈ -0.5
             # by label for the boxes and by keyword for another kind: accepted
             Test.@test bad(;
                 duals=Dict(:x1_lo => t -> t), control_constraints_ub_dual=zeros(_N, 1),

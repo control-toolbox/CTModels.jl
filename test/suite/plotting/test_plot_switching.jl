@@ -171,6 +171,10 @@ function test_plot_switching()
                 [5.0 6.0]                            # nothing unknown: unchanged
             Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], 0.5) == 1.0   # on the grid
             Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], 3.0) == 4.0   # after it
+            # piecewise-constant samples: the sample that holds on the interval, no ramp
+            Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], τ; constant=true) == 1.0
+            Test.@test CTModels.PlotCase._fill_unknown_limits(Tg, M, [τ], L; constant=true) ==
+                [1.0 31.0]
             # in a figure: a model with two path labels, limits given for :g2 only
             sol = _sol2()
             Ts, Mp = CTModels.PlotCase._spliced_samples(

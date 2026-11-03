@@ -197,7 +197,8 @@ CTModels.Models.constraint_rows(ocp, :initial_con)
   canonical: `nothing` when every row of the stored duals is known (the storage is then the
   same as before the labels), a `Vector{Bool}` only for a partial knowledge. A kind of
   constraint with no known row is stored as `nothing`.
-- **Box labels.** A box label takes its signed dual; CTModels splits it back into the
+- **Box labels.** A box label takes its signed dual (one label per component: several
+  labels on one component share its multiplier, so it is given by one of them); CTModels splits it back into the
   lower- and upper-bound multipliers stored by component (`d` on the active side of a
   one-sided box, `max(-d, 0)` and `max(d, 0)` on a two-sided one; see
   [`build_solution`](build_solution.md#Dual-variables)), and
@@ -216,9 +217,10 @@ CTModels.Models.constraint_rows(ocp, :initial_con)
   [Switching structure](switching.md#Limits-of-the-duals-by-label).
 - **Serialization** (format 3). The masks are written only when some rows are unknown; the
   unknown entries (duals and limits) are `null` in JSON (`NaN` in JLD2). Reading a file goes
-  back to labels and passes `duals=`: always for the path and boundary duals, and for a box
-  kind when it has a mask (otherwise its multipliers are passed by component, untouched). A
-  file without masks is read with every stored row known.
+  back to labels for the path and boundary duals and passes `duals=`; the box multipliers
+  are passed by component as they were stored (`NaN` for an unknown component) and their
+  masks restored, which holds whatever the aliases of the box labels. A file without masks
+  is read with every stored row known.
 
 Here every path label was given, so the mask is `nothing`. With `:con2` only, the row of
 `:mixed` is unknown:
