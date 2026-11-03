@@ -113,7 +113,7 @@ Building.definition!(_pre_parts, quote
     t ∈ [0, 1], time
     x ∈ R², state
     u ∈ R, control
-    ẋ(t) == x(t) .+ u(t)
+    ẋ(t) == [x₂(t), u(t)]
     ∫(u(t)^2) → min
 end)
 Building.time_dependence!(_pre_parts; autonomous=true)
