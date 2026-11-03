@@ -197,15 +197,28 @@ CTModels.Models.constraint_rows(ocp, :initial_con)
   canonical: `nothing` when every row of the stored duals is known (the storage is then the
   same as before the labels), a `Vector{Bool}` only for a partial knowledge. A kind of
   constraint with no known row is stored as `nothing`.
-- **Placement** (`src/Solutions/labelled_duals.jl`). When every path label is a matrix,
-  they are stacked into one matrix and interpolated as a whole. As soon as one is a
-  function, every part becomes a function of time and they are combined into a
-  [`StackedDuals`](@ref CTModels.Solutions.StackedDuals), a callable struct over a typed
-  tuple with a generated call method; it is on the hot path, see
-  [Performance](../guide/performance.md).
+- **Box labels.** A box label takes its signed dual; CTModels splits it back into the
+  lower- and upper-bound multipliers stored by component (`d` on the active side of a
+  one-sided box, `max(-d, 0)` and `max(d, 0)` on a two-sided one; see
+  [`build_solution`](build_solution.md#Dual-variables)), and
+  [`dual`](@ref CTModels.Solutions.dual) combines them back: the round trip is lossless. A
+  bounded component whose label is not given is unknown (`NaN`, mask `false`); a component
+  bounded by no label is a known `0`.
+- **Placement** (`src/Solutions/labelled_duals.jl`). When every label of a kind is a
+  matrix, they are stacked (and split, for a box) into matrices interpolated as a whole. As
+  soon as one is a function, every part becomes a function of time and they are combined
+  into a [`StackedDuals`](@ref CTModels.Solutions.StackedDuals), a callable struct over a
+  typed tuple with a generated call method; a box side is made of
+  [`BoxDualSplit`](@ref CTModels.Solutions.BoxDualSplit) parts. Both are on the hot path,
+  see [Performance](../guide/performance.md).
+- **Switching limits.** The limits of the duals at the switching times are given by label
+  too, and placed by `build_solution`; see
+  [Switching structure](switching.md#Limits-of-the-duals-by-label).
 - **Serialization** (format 3). The masks are written only when some rows are unknown; the
-  unknown entries are `null` in JSON (`NaN` in JLD2). Reading a file goes back to labels and
-  passes `duals=`; a file without masks is read with every stored row known.
+  unknown entries (duals and limits) are `null` in JSON (`NaN` in JLD2). Reading a file goes
+  back to labels and passes `duals=`: always for the path and boundary duals, and for a box
+  kind when it has a mask (otherwise its multipliers are passed by component, untouched). A
+  file without masks is read with every stored row known.
 
 Here every path label was given, so the mask is `nothing`. With `:con2` only, the row of
 `:mixed` is unknown:
@@ -218,8 +231,8 @@ nothing # hide
 ```
 
 ```@repl duals
-CTModels.dual_model(sol).known.path
-CTModels.dual_model(sol_part).known.path
+CTModels.Solutions.dual_model(sol).known.path
+CTModels.Solutions.dual_model(sol_part).known.path
 CTModels.path_constraints_dual(sol_part)(0.5)
 ```
 

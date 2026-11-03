@@ -18,8 +18,8 @@ grid. A [`Solution`](@ref CTModels.Solutions.Solution) keeps this structure in a
 - the switching times, strictly inside the time span;
 - one label per phase (`""` for a phase with no label);
 - the left and right limits of the state, costate and control at every switching time;
-- optionally, the left and right limits of the duals of the path constraints
-  (`path_dual`), when a multiplier jumps at a junction.
+- optionally, the left and right limits of the duals, **by label** (`duals`), when a
+  multiplier jumps at a junction: path constraints and state or control boxes.
 
 The trajectories of the solution stay single-valued and **left-continuous**: at a switching
 time, `state(sol)(tᵢ)` returns the value before the jump. The value after it is read with
@@ -150,6 +150,42 @@ sol_c = CTModels.build_solution(ocp_c, T, X, U, Float64[], P;
     duals=Dict(:xmin => t -> t <= τ ? 0.0 : 1.0))
 plot(sol_c, :state, :control, :path, :dual)
 ```
+
+### Limits of the duals by label
+
+A switching model is built without the model, so it cannot know where the rows of a label
+are. It keeps the limits given in `duals` by label, and
+[`build_solution`](@ref CTModels.Solutions.build_solution) places them on the layout of the
+model (see [How the duals are stored](duals.md#How-the-duals-are-stored)):
+
+| Label | `label => (left, right)` | Stored in |
+| --- | --- | --- |
+| path constraint | one row per switching time, one column per row of the label | `limits(sw, :path_dual)`, one column per row of the stacked path constraint |
+| state box | the **signed** dual (what [`dual`](@ref CTModels.Solutions.dual) returns), one column per component of the label | `limits(sw, :state_dual)`, one column per state component |
+| control box | the same | `limits(sw, :control_dual)`, one column per control component |
+
+A vector stands for a one-row label. In a kind where some labels are given, the columns of
+the others are `NaN`; a kind with no label keeps no column (limits not known). Boundary and
+variable labels take no limits: their duals do not depend on time.
+
+```@repl sw
+sw_d = CTModels.SwitchingModel(; times=[τ], duals=Dict(:xmin => ([0.0], [1.0])));
+sol_d = CTModels.build_solution(ocp_c, T, X, U, Float64[], P;
+    objective=0.0, successful=true, switching=sw_d,
+    duals=Dict(:xmin => t -> t <= τ ? 0.0 : 1.0));
+CTModels.Solutions.limits(CTModels.switching_model(sol_d), :path_dual)
+```
+
+!!! warning "Deprecated: `path_dual`"
+
+    `SwitchingModel(; path_dual=(left, right))` gave the limits of the stacked path duals by
+    position, one column per row of the path constraint. It still works, with a deprecation
+    warning, and will be removed at the next breaking release; give the limits by label in
+    `duals`.
+
+The limits of the box duals are stored and saved, but not drawn yet: the box duals get
+their own rows in the plot with
+[CTModels.jl#506](https://github.com/control-toolbox/CTModels.jl/issues/506).
 
 ## Saving and loading
 
