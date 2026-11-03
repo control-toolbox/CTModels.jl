@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
+- **Merged initial guesses promote mixed numeric types instead of throwing**
+  ([#505](https://github.com/control-toolbox/CTModels.jl/issues/505)). A component
+  override whose value does not fit the element type of the block-level data (for
+  instance `state=[0, 0]` with a `Float64` component) raised an `InexactError`; the
+  merged trajectory now returns a vector promoted to the common type. Compatible
+  types are unchanged and the call stays allocation-free.
 - **A dynamics assembled from coordinate parts no longer allocates at every call**
   ([#496](https://github.com/control-toolbox/CTModels.jl/issues/496)). Declaring the
   dynamics range by range (`dynamics!(pre, i, f)` — the shape CTParser's `@def` emits
