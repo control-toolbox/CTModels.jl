@@ -18,11 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   concretely-typed tuple whose generated call method emits one statically dispatched
   call per part: the built dynamics allocates exactly what the equivalent monolithic
   dynamics allocates.
+- **A merged block+component initial guess no longer allocates at every call**
+  ([#498](https://github.com/control-toolbox/CTModels.jl/issues/498)). Mixing
+  block-level and component-level `initial_guess` data built a `MergedTrajectory`
+  iterating a `Dict{Int,Function}` at each evaluation: every override dispatched
+  dynamically and its return value was boxed (224 B per call). The overrides are
+  now linearised once into a concretely-typed tuple whose generated call method
+  emits one statically dispatched call per component: the merged trajectory
+  allocates exactly what the equivalent specialised function allocates.
 
 ### ✅ Compatibility
 
-- **No breaking changes**: internals only; the `dynamics!` signatures and the `build`
-  output are unchanged (`Models.dynamics` still returns a `Function`).
+- **No breaking changes**: internals only; the `dynamics!` signatures, the `build`
+  output (`Models.dynamics` still returns a `Function`), and the
+  `Init.MergedTrajectory` constructor are unchanged.
 
 ## [0.21.0] - 2026-10-23
 

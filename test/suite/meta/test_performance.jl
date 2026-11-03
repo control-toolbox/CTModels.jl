@@ -41,6 +41,7 @@ using CTModels: Components
 using CTModels: Building
 using CTModels: Solutions
 using CTModels: Models
+using CTModels: Init
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -61,6 +62,26 @@ _boxproj_raw(x, idx) = x[idx]
 _dyn_part_1!(r, t, x, u, v) = (r[1] = x[2]; nothing)
 _dyn_part_2!(r, t, x, u, v) = (r[1] = u[1]; nothing)
 _dyn_mono!(r, t, x, u, v) = (r[1] = x[2]; r[2] = u[1]; nothing)
+
+# Block-level base trajectory with per-component overrides (the shape
+# `initial_guess` produces when mixing block and component data): the
+# `MergedTrajectory` must evaluate at exactly the cost of the equivalent
+# specialised function (issue #498). The base returns a SHARED vector: the
+# wrapper must not mutate it, so `_coerce_base`'s `collect` is part of the
+# contract, not overhead — and with a fresh-vector base the raw side would
+# let the compiler elide that copy while the `_coerce_base` call boundary
+# cannot, making the comparison artifactual (same trap as `_boxdualdiff_raw`
+# above). A shared base makes the required copy explicit on both sides.
+const _MERGED_BASE_VEC = [0.0, 0.0, 0.0]
+_merged_base_raw(t) = _MERGED_BASE_VEC
+_merged_c1_raw(t) = sin(t)
+_merged_c3_raw(t) = cos(t)
+function _merged_raw(t)
+    v = collect(_merged_base_raw(t))
+    v[1] = _merged_c1_raw(t)
+    v[3] = _merged_c3_raw(t)
+    return v
+end
 
 # Minimal built `Model`, for trait reads.
 _pre = Building.PreModel()
@@ -173,6 +194,21 @@ function test_performance()
             v0 = Float64[]
             Test.@test (BenchmarkTools.@ballocated $dyn_parts($r, $t0, $x0, $u0, $v0)) ==
                 (BenchmarkTools.@ballocated $_dyn_mono!($r, $t0, $x0, $u0, $v0))
+
+            # An initial guess merging a block-level trajectory with
+            # per-component overrides must allocate exactly what the
+            # equivalent specialised function allocates: the merged
+            # trajectory is evaluated once per grid point at warm-start and
+            # may be re-evaluated when post-processing warm-started solutions
+            # (issue #498). Measured 224 B before the fix.
+            f_merged = Init.MergedTrajectory(
+                _merged_base_raw,
+                Dict{Int,Function}(1 => _merged_c1_raw, 3 => _merged_c3_raw),
+                3,
+                :state,
+            )
+            Test.@test (BenchmarkTools.@ballocated $f_merged($t)) ==
+                (BenchmarkTools.@ballocated $_merged_raw($t))
         end
 
         # ======================================================================

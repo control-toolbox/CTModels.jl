@@ -307,6 +307,35 @@ function test_initial_guess_builders()
             f = Init.MergedTrajectory(base, comps, 2, :state)
             Test.@test_throws Exceptions.IncorrectArgument f(0.0)
         end
+
+        Test.@testset "MergedTrajectory — overrides stored as a concrete tuple (issue #498)" begin
+            base = _ -> [1.0, 2.0, 3.0]
+            c1 = t -> sin(t)
+            c3 = t -> cos(t)
+            comps = Dict{Int,Function}(3 => c3, 1 => c1)   # unordered insertion
+            f = Init.MergedTrajectory(base, comps, 3, :state)
+            # the dict is linearised once, sorted by index, each function type
+            # kept concrete in the tuple's type parameters (static dispatch)
+            Test.@test f.comps isa Tuple{Tuple{Int,typeof(c1)},Tuple{Int,typeof(c3)}}
+            Test.@test f.comps == ((1, c1), (3, c3))
+            Test.@test f(0.5) ≈ [sin(0.5), 2.0, cos(0.5)]
+        end
+
+        Test.@testset "MergedTrajectory — pre-built tuple of overrides accepted" begin
+            base = _ -> [1.0, 2.0]
+            f = Init.MergedTrajectory(base, ((2, _ -> 9.0),), 2, :state)
+            Test.@test f(0.0) == [1.0, 9.0]
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((5, _ -> 0.0),), 2, :state
+            )
+            # unsorted or duplicated indices are rejected (no silent "last wins")
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (1, _ -> 2.0)), 2, :state
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Init.MergedTrajectory(
+                base, ((2, _ -> 1.0), (2, _ -> 2.0)), 2, :state
+            )
+        end
     end
 end
 
