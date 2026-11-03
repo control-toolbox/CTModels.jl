@@ -67,6 +67,42 @@ function _sol(; switching=_sw(), grid=T)
     )
 end
 
+# Two path labels, :g1 and :g2; the limits of the duals at τ are given for :g2 only.
+function _sol2()
+    pre = Building.PreModel()
+    Building.time_dependence!(pre; autonomous=true)
+    Building.time!(pre; t0=0.0, tf=2.0)
+    Building.state!(pre, 1)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
+    Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
+    Building.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1]=x; nothing),
+        lb=[-10.0], ub=[10.0], label=:g1)
+    Building.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1]=u; nothing),
+        lb=[-10.0], ub=[10.0], label=:g2)
+    ocp = Building.build(pre)
+    sw = Solutions.SwitchingModel(;
+        times=[τ],
+        labels=["interior", "boundary"],
+        state=([τ;;], [τ + 1.0;;]),
+        costate=([0.0;;], [2.0;;]),
+        control=([1.0;;], [-1.0;;]),
+        duals=Dict(:g2 => ([0.0], [3.0])),
+    )
+    return Solutions.build_solution(
+        ocp,
+        T,
+        reshape(_x.(T), :, 1),
+        reshape(_u.(T), :, 1),
+        Float64[],
+        reshape(_p.(T), :, 1);
+        objective=0.0,
+        successful=true,
+        switching=sw,
+        duals=Dict(:g1 => t -> t, :g2 => t -> t <= τ ? 0.0 : 3.0),
+    )
+end
+
 _leaves(fig) = Plotting.leaves(fig.root)
 _leaf(fig, title) = only(l for l in _leaves(fig) if l.axes.title == title)
 _series(fig, title) = _leaf(fig, title).axes.series[1]
@@ -122,6 +158,35 @@ function test_plot_switching()
             Test.@test_throws Exceptions.IncorrectArgument CTModels.PlotCase._spliced_samples(
                 sol, T, zeros(11, 2), :state
             )
+        end
+
+        Test.@testset "_spliced_samples: unknown limits (NaN) draw no jump" begin
+            # the limits of a dual given by label, for a label whose limits were not given
+            Tg = [0.0, 0.5, 1.5, 2.0]
+            M = [0.0 10.0; 1.0 20.0; 3.0 40.0; 4.0 50.0]
+            L = [NaN 31.0]
+            filled = CTModels.PlotCase._fill_unknown_limits(Tg, M, [τ], L)
+            Test.@test filled == [2.0 31.0]          # column 1: the samples at τ
+            Test.@test CTModels.PlotCase._fill_unknown_limits(Tg, M, [τ], [5.0 6.0]) ==
+                [5.0 6.0]                            # nothing unknown: unchanged
+            Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], 0.5) == 1.0   # on the grid
+            Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], 3.0) == 4.0   # after it
+            # piecewise-constant samples: the sample that holds on the interval, no ramp
+            Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], τ; constant=true) == 1.0
+            Test.@test CTModels.PlotCase._fill_unknown_limits(Tg, M, [τ], L; constant=true) ==
+                [1.0 31.0]
+            # in a figure: a model with two path labels, limits given for :g2 only
+            sol = _sol2()
+            Ts, Mp = CTModels.PlotCase._spliced_samples(
+                sol, T, reduce(vcat, (Solutions.path_constraints_dual(sol)(t)' for t in T)),
+                :path_dual,
+            )
+            k = findfirst(==(τ), Ts)
+            Test.@test !any(isnan, Mp)               # no break in the curve of :g1
+            Test.@test Mp[k, 1] == Mp[k + 1, 1]      # :g1: no jump
+            Test.@test (Mp[k, 2], Mp[k + 1, 2]) == (0.0, 3.0)   # :g2: its jump
+            s = _series(CTModels.PlotCase.build_figure(sol, :dual), "dual")
+            Test.@test !any(isnan, s.y)
         end
 
         Test.@testset "_phase_label_group" begin
@@ -182,7 +247,7 @@ function test_plot_switching()
                 state=([τ;;], [τ + 1.0;;]),
                 costate=([0.0;;], [2.0;;]),
                 control=([1.0;;], [-1.0;;]),
-                path_dual=([0.0;;], [3.0;;]),
+                duals=Dict(:g => ([0.0], [3.0])),
             )
             sol = Solutions.build_solution(
                 _ocp(),

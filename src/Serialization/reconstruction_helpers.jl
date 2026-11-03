@@ -76,6 +76,8 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         get(data, "path_constraints_dual_known", nothing),
         get(data, "boundary_constraints_dual_known", nothing),
     )
+    # box duals: by component, as they were stored (NaN for an unknown component); the masks
+    # of the known components (format 3) are restored on the rebuilt solution
     state_constraints_lb_dual = data["state_constraints_lb_dual"]
     state_constraints_ub_dual = data["state_constraints_ub_dual"]
     control_constraints_lb_dual = data["control_constraints_lb_dual"]
@@ -85,6 +87,10 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
     )
     variable_constraints_ub_dual = _extract_optional_vector(
         data["variable_constraints_ub_dual"]
+    )
+    box_masks = map(
+        kind -> _optional_mask(get(data, "$(kind)_constraints_dual_known", nothing)),
+        (:state, :control, :variable),
     )
     # Switching structure: absent from files without one (and from older files)
     switching = Solutions._deserialize_switching(data)
@@ -97,7 +103,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         T_costate = _extract_time_vector(data["time_grid_costate"])
         T_path = _extract_time_vector(data["time_grid_path"])
 
-        return Solutions.build_solution(
+        sol = Solutions.build_solution(
             ocp,
             T_state,
             T_control,
@@ -124,6 +130,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             control_interpolation=control_interpolation,
             switching=switching,
         )
+        return Solutions._with_box_masks(sol, box_masks...)
     else
         # Current unified format: single time grid
         if !haskey(data, "time_grid")
@@ -137,7 +144,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
         end
         T = _extract_time_vector(data["time_grid"])
 
-        return Solutions.build_solution(
+        sol = Solutions.build_solution(
             ocp,
             T,
             data["state"],
@@ -161,6 +168,7 @@ function _reconstruct_solution_from_data(ocp, data; infos=Dict{Symbol,Any}())
             control_interpolation=control_interpolation,
             switching=switching,
         )
+        return Solutions._with_box_masks(sol, box_masks...)
     end
 end
 
@@ -206,3 +214,10 @@ nullable (unlike the time grids and `"variable"`, which are always present).
 See also: [`CTModels.Serialization._reconstruct_solution_from_data`](@extref).
 """
 _extract_optional_vector(x) = isnothing(x) ? nothing : _extract_time_vector(x)
+
+"""
+$(TYPEDSIGNATURES)
+
+A mask of the known rows read from serialized data, as a `Vector{Bool}`, or `nothing`.
+"""
+_optional_mask(x) = isnothing(x) ? nothing : Vector{Bool}(x)

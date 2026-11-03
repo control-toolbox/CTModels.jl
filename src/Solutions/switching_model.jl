@@ -41,7 +41,17 @@ Build it with the keyword constructor, which checks the shapes.
 - `costate::NTuple{2,Matrix{Float64}}`: `(left, right)` limits of the costate.
 - `control::NTuple{2,Matrix{Float64}}`: `(left, right)` limits of the control.
 - `path_dual::NTuple{2,Matrix{Float64}}`: `(left, right)` limits of the duals of the path
-  constraints, one column per row of the path constraint (no column when not known).
+  constraints, one column per row of the path constraint (no column when not known; `NaN`
+  in the rows of a label whose limits are not given).
+- `state_dual::NTuple{2,Matrix{Float64}}`, `control_dual::NTuple{2,Matrix{Float64}}`:
+  `(left, right)` limits of the duals of the state and control boxes, as signed duals
+  (ct-conventions `SGN2`/`SGN3`, what [`CTModels.Solutions.dual`](@extref) returns), one
+  column per component (no column when not known; `NaN` for a component whose limits are not
+  given).
+- `labelled_duals::Dict{Symbol,NTuple{2,Matrix{Float64}}}`: the limits of the duals given by
+  label to the keyword constructor, not yet placed: [`CTModels.Solutions.build_solution`](@extref)
+  places them on the layout of the model (into `path_dual`, `state_dual`, `control_dual`) and
+  stores a switching model where this dictionary is empty.
 
 # Example
 
@@ -72,6 +82,9 @@ struct SwitchingModel <: AbstractSwitchingModel
     costate::NTuple{2,Matrix{Float64}}
     control::NTuple{2,Matrix{Float64}}
     path_dual::NTuple{2,Matrix{Float64}}
+    state_dual::NTuple{2,Matrix{Float64}}
+    control_dual::NTuple{2,Matrix{Float64}}
+    labelled_duals::Dict{Symbol,NTuple{2,Matrix{Float64}}}
 end
 
 """
@@ -84,16 +97,24 @@ Build a [`CTModels.Solutions.SwitchingModel`](@extref) and check its shapes.
 - `times::AbstractVector{<:Real}`: the switching times, strictly increasing.
 - `labels::AbstractVector{<:AbstractString}`: one label per phase; default: no label
   (`""` for each of the `length(times) + 1` phases).
-- `state`, `costate`, `control`, `path_dual`: `(left, right)` pairs of matrices with one
-  row per switching time. Default: matrices with no column, for a solution whose limits are not
-  known (e.g. a single phase, with no switching time).
+- `state`, `costate`, `control`: `(left, right)` pairs of matrices with one row per
+  switching time. Default: matrices with no column, for a solution whose limits are not known
+  (e.g. a single phase, with no switching time).
+- `duals::AbstractDict{Symbol}`: the limits of the duals **by label**, `label => (left,
+  right)`, for path and state / control box labels: two matrices with one row per switching
+  time and one column per row of the label (vectors for a one-row label). A box label takes
+  its signed dual. [`CTModels.Solutions.build_solution`](@extref) places them on the layout
+  of the model; a label not given has `NaN` limits.
+- `path_dual`: **deprecated**, give the limits of the path duals by label in `duals`. The
+  `(left, right)` limits of the stacked path duals, one column per row of the path
+  constraint.
 
 # Throws
 
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if the switching times are not strictly
   increasing or not finite, if the number of labels is not `length(times) + 1`, or if a
   matrix does not have one row per switching time, or its left and right matrices differ in
-  size.
+  size, or `path_dual` and `duals` are both given.
 """
 function SwitchingModel(;
     times::AbstractVector{<:Real},
@@ -104,6 +125,42 @@ function SwitchingModel(;
     path_dual::Tuple{AbstractMatrix{<:Real},AbstractMatrix{<:Real}}=_no_limits(
         length(times)
     ),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
+)
+    if size(path_dual[1], 2) > 0
+        Base.depwarn(
+            "`SwitchingModel(; path_dual=...)` is deprecated and will be removed at the next breaking release: give the limits of the duals by label, `SwitchingModel(; duals=Dict(label => (left, right)))`.",
+            :SwitchingModel,
+        )
+    end
+    return _switching_model(;
+        times=times,
+        labels=labels,
+        state=state,
+        costate=costate,
+        control=control,
+        path_dual=path_dual,
+        duals=duals,
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build a [`CTModels.Solutions.SwitchingModel`](@extref) and check its shapes: the keyword
+constructor without its deprecation warning, used to rebuild a switching model from
+serialized data, where the stacked limits of the duals are already placed.
+"""
+function _switching_model(;
+    times::AbstractVector{<:Real},
+    labels::AbstractVector{<:AbstractString}=fill("", length(times) + 1),
+    state=_no_limits(length(times)),
+    costate=_no_limits(length(times)),
+    control=_no_limits(length(times)),
+    path_dual=_no_limits(length(times)),
+    state_dual=_no_limits(length(times)),
+    control_dual=_no_limits(length(times)),
+    duals::AbstractDict{Symbol}=Dict{Symbol,Any}(),
 )
     ts = collect(Float64, times)
     all(isfinite, ts) || throw(
@@ -140,8 +197,68 @@ function SwitchingModel(;
         _checked_limits(costate, length(ts), "costate"),
         _checked_limits(control, length(ts), "control"),
         _checked_limits(path_dual, length(ts), "path_dual"),
+        _checked_limits(state_dual, length(ts), "state_dual"),
+        _checked_limits(control_dual, length(ts), "control_dual"),
+        Dict{Symbol,NTuple{2,Matrix{Float64}}}(
+            label => _checked_limits(_as_limit_matrices(lr), length(ts), "$label dual") for
+            (label, lr) in duals
+        ),
     )
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+The `(left, right)` limits of a label as two matrices: a vector (one-row label) becomes a
+one-column matrix.
+
+# Throws
+
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `lr` is not a pair of vectors or
+  matrices.
+"""
+function _as_limit_matrices(lr)
+    lr isa Tuple{Any,Any} || throw(
+        Exceptions.IncorrectArgument(
+            "the limits of a dual are a (left, right) pair";
+            got="a value of type $(typeof(lr))",
+            expected="(left, right): two matrices (switching times × rows), or two vectors",
+            suggestion="Give the left and right limits of the label at every switching time",
+            context="SwitchingModel - limits of the duals by label",
+        ),
+    )
+    return (_limit_matrix(lr[1]), _limit_matrix(lr[2]))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The limits of a label on one side as a matrix: a vector (one-row label) becomes a
+one-column matrix.
+
+# Throws
+
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `x` is neither a vector nor a matrix
+  of numbers.
+"""
+_limit_matrix(x::AbstractVector{<:Real}) = reshape(Vector{Float64}(x), :, 1)
+_limit_matrix(x::AbstractMatrix{<:Real}) = x
+function _limit_matrix(x)
+    return throw(
+        Exceptions.IncorrectArgument(
+            "invalid limits of a dual";
+            got="a value of type $(typeof(x))",
+            expected="a matrix (switching times × rows) or a vector (one-row label)",
+            suggestion="Give the limits as numbers, one row per switching time",
+            context="SwitchingModel - limits of the duals by label",
+        ),
+    )
+end
+
+"""
+The components of a switching model with `(left, right)` limits.
+"""
+const _LIMIT_COMPONENTS = (:state, :costate, :control, :path_dual, :state_dual, :control_dual)
 
 """
 $(TYPEDSIGNATURES)
@@ -227,7 +344,7 @@ has_switching(m::AbstractSwitchingModel)::Bool = !isempty(switching_times(m))
 $(TYPEDSIGNATURES)
 
 Return the `(left, right)` matrices of limits of `component` (`:state`, `:costate`,
-`:control` or `:path_dual`), one row per switching time.
+`:control`, `:path_dual`, `:state_dual` or `:control_dual`), one row per switching time.
 
 # Throws
 
@@ -238,6 +355,8 @@ function limits(m::SwitchingModel, component::Symbol)::NTuple{2,Matrix{Float64}}
     component === :state && return m.state
     component === :costate && return m.costate
     component === :path_dual && return m.path_dual
+    component === :state_dual && return m.state_dual
+    component === :control_dual && return m.control_dual
     return m.control
 end
 
@@ -255,20 +374,20 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Check that `component` is a component with switching limits: `:state`, `:costate`,
-`:control` or `:path_dual`.
+Check that `component` is a component with switching limits (see
+[`CTModels.Solutions._LIMIT_COMPONENTS`](@extref)).
 
 # Throws
 
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if it is not.
 """
 function _check_limit_component(component::Symbol)
-    component in (:state, :costate, :control, :path_dual) || throw(
+    component in _LIMIT_COMPONENTS || throw(
         Exceptions.IncorrectArgument(
             "unknown component for switching limits";
             got=":$component",
-            expected=":state, :costate, :control or :path_dual",
-            suggestion="Use :state, :costate, :control or :path_dual",
+            expected=join((":$c" for c in _LIMIT_COMPONENTS), ", "),
+            suggestion="Use one of " * join((":$c" for c in _LIMIT_COMPONENTS), ", "),
             context="switching limits",
         ),
     )
@@ -329,7 +448,7 @@ has_switching(sol::Solution)::Bool = has_switching(switching_model(sol))
 """
 $(TYPEDSIGNATURES)
 
-Return the left limit of `component` (`:state`, `:costate`, `:control` or `:path_dual`)
+Return the left limit of `component` (one of [`CTModels.Solutions._LIMIT_COMPONENTS`](@extref))
 at the `i`-th
 switching time: the value before the jump, which the trajectory itself returns at that time.
 A one-dimensional component is returned as a scalar.
@@ -348,7 +467,7 @@ left_limit(sol::Solution, component::Symbol, i::Integer) = _limit(sol, component
 """
 $(TYPEDSIGNATURES)
 
-Return the right limit of `component` (`:state`, `:costate`, `:control` or `:path_dual`)
+Return the right limit of `component` (one of [`CTModels.Solutions._LIMIT_COMPONENTS`](@extref))
 at the `i`-th
 switching time: the value after a jump of the state or costate, or after a change of
 control law. A one-dimensional component is returned as a scalar.
@@ -510,7 +629,7 @@ Return the components whose limits a switching model stores, e.g. `"state, costa
 function _stored_limits(m::SwitchingModel)::String
     stored = [
         String(c) for
-        c in (:state, :costate, :control, :path_dual) if size(limits(m, c)[1], 2) > 0
+        c in _LIMIT_COMPONENTS if size(limits(m, c)[1], 2) > 0
     ]
     return isempty(stored) ? "none" : join(stored, ", ")
 end

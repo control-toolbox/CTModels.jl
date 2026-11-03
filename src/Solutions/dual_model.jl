@@ -73,32 +73,33 @@ function dual(sol::Solution, model::Model, label::Symbol)
     if kind === :path
         duals = path_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "path")
-        _ensure_known(sol, dual_model(sol).path_constraints_dual_known, rows, label, "path")
+        _ensure_known(sol, dual_model(sol).known.path, rows, label, "path")
         return DualSlice(duals, length(rows) == 1 ? rows[1] : rows)
     elseif kind === :boundary
         duals = boundary_constraints_dual(sol)
         _ensure_dual(sol, duals, label, "boundary")
-        _ensure_known(
-            sol, dual_model(sol).boundary_constraints_dual_known, rows, label, "boundary"
-        )
+        _ensure_known(sol, dual_model(sol).known.boundary, rows, label, "boundary")
         return length(rows) == 1 ? duals[rows[1]] : duals[rows]
     elseif kind === :state
         duals_lb = state_constraints_lb_dual(sol)
         duals_ub = state_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "state box")
         _ensure_dual(sol, duals_ub, label, "state box")
+        _ensure_known(sol, dual_model(sol).known.state, rows, label, "state box")
         return _box_dual(duals_lb, duals_ub, state_constraints_box(model), rows)
     elseif kind === :control
         duals_lb = control_constraints_lb_dual(sol)
         duals_ub = control_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "control box")
         _ensure_dual(sol, duals_ub, label, "control box")
+        _ensure_known(sol, dual_model(sol).known.control, rows, label, "control box")
         return _box_dual(duals_lb, duals_ub, control_constraints_box(model), rows)
     else # :variable
         duals_lb = variable_constraints_lb_dual(sol)
         duals_ub = variable_constraints_ub_dual(sol)
         _ensure_dual(sol, duals_lb, label, "variable box")
         _ensure_dual(sol, duals_ub, label, "variable box")
+        _ensure_known(sol, dual_model(sol).known.variable, rows, label, "variable box")
         cl, cu = _box_dual_coefficients(variable_constraints_box(model), rows)
         if length(rows) == 1
             i = rows[1]
@@ -132,19 +133,22 @@ function has_dual(sol::Solution, model::Model, label::Symbol)::Bool
     dm = dual_model(sol)
     if kind === :path
         return !isnothing(path_constraints_dual(sol)) &&
-               _rows_known(dm.path_constraints_dual_known, rows)
+               _rows_known(dm.known.path, rows)
     elseif kind === :boundary
         return !isnothing(boundary_constraints_dual(sol)) &&
-               _rows_known(dm.boundary_constraints_dual_known, rows)
+               _rows_known(dm.known.boundary, rows)
     elseif kind === :state
         return !isnothing(state_constraints_lb_dual(sol)) &&
-               !isnothing(state_constraints_ub_dual(sol))
+               !isnothing(state_constraints_ub_dual(sol)) &&
+               _rows_known(dm.known.state, rows)
     elseif kind === :control
         return !isnothing(control_constraints_lb_dual(sol)) &&
-               !isnothing(control_constraints_ub_dual(sol))
+               !isnothing(control_constraints_ub_dual(sol)) &&
+               _rows_known(dm.known.control, rows)
     else # :variable
         return !isnothing(variable_constraints_lb_dual(sol)) &&
-               !isnothing(variable_constraints_ub_dual(sol))
+               !isnothing(variable_constraints_ub_dual(sol)) &&
+               _rows_known(dm.known.variable, rows)
     end
 end
 

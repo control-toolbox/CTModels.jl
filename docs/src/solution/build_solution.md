@@ -105,15 +105,15 @@ are not known. See [Switching structure](switching.md).
 
 ## Dual variables
 
-All duals are optional. The duals of the **path and boundary constraints** are given **by
-label**, in the `duals` keyword; the duals of the **boxes** by component, in their own
-keywords.
+All duals are optional. They are given **by label**, in the `duals` keyword; the duals of
+the **boxes** can also be given by component, in their own keywords (the native form of the
+bound multipliers of an NLP solver).
 
 | Keyword | Type | Shape |
 | --- | --- | --- |
-| `duals` | `AbstractDict{Symbol}` | `label => value`, for path and boundary labels (below) |
-| `state_constraints_lb_dual`, `state_constraints_ub_dual` | `Matrix{Float64}` | `length(T_state) × state_dimension(ocp)` |
-| `control_constraints_lb_dual`, `control_constraints_ub_dual` | `Matrix{Float64}` | `length(T_control) × control_dimension(ocp)` |
+| `duals` | `AbstractDict{Symbol}` | `label => value`, for every kind of label (below) |
+| `state_constraints_lb_dual`, `state_constraints_ub_dual` | `Matrix{Float64}` or `Function` | `length(T_state) × state_dimension(ocp)`, or `t -> vector` |
+| `control_constraints_lb_dual`, `control_constraints_ub_dual` | `Matrix{Float64}` or `Function` | `length(T_control) × control_dimension(ocp)`, or `t -> vector` |
 | `variable_constraints_lb_dual`, `variable_constraints_ub_dual` | `Vector{Float64}` | `variable_dimension(ocp)` |
 
 In `duals`, the value of a label depends on its kind and on its number of rows `n` (the
@@ -123,6 +123,26 @@ number of components of the constraint declared under that label):
 | --- | --- |
 | path | a `Function` `t -> value` (a scalar when `n = 1`), or a `Matrix` `length(T_path) × n` (a `Vector` when `n = 1`) |
 | boundary | a `Number` when `n = 1`, a `Vector` of length `n` otherwise |
+| state or control box | as a path label, on `T_state` or `T_control`: the **signed** dual |
+| variable box | as a boundary label: the **signed** dual |
+
+A box label takes the signed dual of the
+[sign convention](duals.md#Sign-convention), the value
+[`dual`](@ref CTModels.Solutions.dual) returns, and CTModels splits it back into the two
+multipliers it stores per component:
+
+| Component | lower-bound multiplier | upper-bound multiplier |
+| --- | --- | --- |
+| lower bound only | `d` | `0` |
+| upper bound only | `0` | `d` |
+| two bounds, or fixed | `max(-d, 0)` | `max(d, 0)` |
+
+A component bounded by no label carries a known `0`, as with the box keywords. Several
+labels on one component (aliases) share its multiplier: give it by one of them, the others
+read the same dual; giving it by two labels is an `IncorrectArgument`. A kind of
+dual is given one way: giving the duals of one kind both by label and by keyword (for
+instance a state box label and `state_constraints_lb_dual`) is an `IncorrectArgument`;
+different kinds may be given different ways.
 
 A label **absent** from `duals` is **unknown**: [`dual`](@ref CTModels.Solutions.dual)
 throws for it, and [`has_dual`](@ref CTModels.Solutions.has_dual) returns `false`. A label

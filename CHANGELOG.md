@@ -22,15 +22,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   boundary label in the stacked constraint vector, or the components of a box label. `dual`
   and `constraint` use it.
 - **`Solutions.has_dual(sol, model, label)`**: whether the dual of a label is known.
+- **Box duals by label and as functions of time**
+  ([#493](https://github.com/control-toolbox/CTModels.jl/issues/493)): a state, control or
+  variable box label in `duals=` takes its signed dual (`SGN2`/`SGN3`, what `dual` returns),
+  split back by CTModels into the lower- and upper-bound multipliers (lossless). The state
+  and control box keywords also accept a function `t -> vector`, kept exact. The keywords by
+  component stay, not deprecated; one kind is given one way.
+- **Limits of the duals at the switching times by label**:
+  `SwitchingModel(; duals=Dict(label => (left, right)))`, for path and state / control box
+  labels, placed on the layout by `build_solution`. The limits of the box duals are stored as
+  signed duals, read with `limits(sw, :state_dual)` and `limits(sw, :control_dual)`.
 
 ### 🛠 Enhancements
 
-- **Unknown duals are `NaN` in the stacked storage**, with masks of the known rows in the
-  `DualModel` (`nothing` when every row is known): the raw accessors
-  `path_constraints_dual(sol)` and `boundary_constraints_dual(sol)` never return a fake `0`.
-- **Serialization format 3**: the masks are written when some rows are unknown, and the
-  unknown entries are `null` in JSON. Files of earlier formats are read as before, every
-  stored row known.
+- **Unknown duals are `NaN` in the stored duals**, with the masks of the known rows of every
+  kind in the `DualModel` (a `DualMasks`, `nothing` when every row is known): the raw
+  accessors (`path_constraints_dual(sol)`, `state_constraints_lb_dual(sol)`, …) never return
+  a fake `0`.
+- **Serialization format 3**: the masks are written when some rows are unknown, the unknown
+  entries (duals and switching limits) are `null` in JSON, and the limits of the box duals
+  are saved. Files of earlier formats are read as before, every stored row known.
 
 ### 🐛 Bug Fixes
 
@@ -78,9 +89,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **No breaking changes**: the `dynamics!` signatures and the `build` output are unchanged
   (`Models.dynamics` still returns a `Function`).
 - **Deprecated**: the positional keywords `path_constraints_dual` and
-  `boundary_constraints_dual` of `build_solution` still work, every row known, but emit a
-  deprecation warning; they will be removed at the next breaking release. See
-  [BREAKING.md](BREAKING.md).
+  `boundary_constraints_dual` of `build_solution`, and `path_dual` of `SwitchingModel`, still
+  work, every row known, but emit a deprecation warning; they will be removed at the next
+  breaking release. See [BREAKING.md](BREAKING.md).
 - **No breaking changes**: internals only; the `dynamics!` signatures, the `build`
   output (`Models.dynamics` still returns a `Function`), and the
   `Init.MergedTrajectory` constructor are unchanged.

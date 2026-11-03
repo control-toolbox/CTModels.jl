@@ -87,6 +87,13 @@ function test_code_quality()
             JET.@test_opt target_modules = (CTModels,) f_stacked(0.5)
             JET.@test_opt target_modules = (CTModels,) Solutions.DualSlice(f_stacked, 4)(0.5)
 
+            # box duals given by label (issue #493): the signed dual split back into one
+            # side of the multipliers, stacked by component (NaN for an unknown one)
+            f_split = Solutions.BoxDualSplit{:lower}(t -> [2t - 0.5, t], [-1.0, 1.0], [1.0, 0.0])
+            JET.@test_opt target_modules = (CTModels,) f_split(0.5)
+            f_box = Solutions.StackedDuals(3, (([1, 3], f_split), ([2], Returns(NaN))), 0.0)
+            JET.@test_opt target_modules = (CTModels,) f_box(0.5)
+
             # --- Constraint-by-label functor (Models) ---
             f_proj = Models.BoxProjection{:state}(2)
             JET.@test_opt target_modules = (CTModels,) f_proj(
