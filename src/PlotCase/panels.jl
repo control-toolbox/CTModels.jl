@@ -30,6 +30,11 @@ are returned unchanged when the solution has no switching time or the limits of
 `component` are not known. With `connect = false`, the curve is broken between the two
 limits instead of drawing the vertical segment.
 
+A limit may be unknown for some columns only (`NaN`: the limits of the duals given by label,
+for a label whose limits were not given). Such a limit is replaced by the value of the
+samples at the switching time (see [`CTModels.PlotCase._fill_unknown_limits`](@extref)), so
+that no jump is drawn for that column, instead of a break in the curve.
+
 # Returns
 - `(T, M)`: the time grid (with each switching time twice) and the matrix of samples.
 """
@@ -37,9 +42,47 @@ function _spliced_samples(
     sol, T::AbstractVector, M::AbstractMatrix, component::Symbol; connect::Bool=true
 )
     left, right = Solutions.limits(CTModels.switching_model(sol), component)
-    return Plotting.splice_jumps(
-        T, M, CTModels.switching_times(sol), left, right; connect=connect
-    )
+    times = CTModels.switching_times(sol)
+    left = _fill_unknown_limits(T, M, times, left)
+    right = _fill_unknown_limits(T, M, times, right)
+    return Plotting.splice_jumps(T, M, times, left, right; connect=connect)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The limits `L` (one row per switching time in `times`, one column per column of the samples
+`(T, M)`) with each `NaN` entry replaced by the value of the samples at that switching time,
+linearly interpolated between the two samples around it (the nearest sample outside the
+grid). Returns `L` itself when it has no `NaN`, or when its shape does not match the samples
+(left to [`CTBase.Plotting.splice_jumps`](@extref) to report).
+"""
+function _fill_unknown_limits(
+    T::AbstractVector, M::AbstractMatrix, times::AbstractVector, L::AbstractMatrix
+)
+    any(isnan, L) || return L
+    size(L) == (length(times), size(M, 2)) || return L
+    filled = Matrix{Float64}(L)
+    for i in axes(filled, 1), j in axes(filled, 2)
+        isnan(filled[i, j]) && (filled[i, j] = _sample_at(T, view(M, :, j), times[i]))
+    end
+    return filled
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The value at time `τ` of the samples `y` on the grid `T`: linear interpolation between the
+two samples around `τ`, the first or last sample outside the grid.
+"""
+function _sample_at(T::AbstractVector, y::AbstractVector, τ::Real)::Float64
+    n = min(length(T), length(y))
+    k = searchsortedlast(view(T, 1:n), τ)
+    k == 0 && return y[1]
+    k >= n && return y[n]
+    T[k] == τ && return y[k]
+    w = (τ - T[k]) / (T[k + 1] - T[k])
+    return (1 - w) * y[k] + w * y[k + 1]
 end
 
 # Euclidean norm of a matrix row.
