@@ -27,15 +27,16 @@ function _box_model()
     Building.state!(pre, 2)
     Building.control!(pre, 1)
     Building.variable!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r.=x; nothing))
     Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
     Building.definition!(pre, quote end)
     Building.time_dependence!(pre; autonomous=true)
     Building.constraint!(pre, :state; rg=1, lb=0.0, ub=Inf, label=:x1_lo)
-    Building.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = u[1]; nothing),
-        lb=-1, ub=1, label=:p)
+    Building.constraint!(
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=u[1]; nothing), lb=-1, ub=1, label=:p
+    )
     Building.constraint!(pre, :state; rg=2, lb=-1.0, ub=1.0, label=:x2_two)
-    Building.constraint!(pre, :control; rg=1, lb=-Inf, ub=1.0, label=:u_up)
+    Building.constraint!(pre, :control; rg=1, lb=(-Inf), ub=1.0, label=:u_up)
     Building.constraint!(pre, :variable; rg=1, lb=2.0, ub=2.0, label=:v_fix)
     return Building.build(pre)
 end
@@ -46,7 +47,7 @@ function _box_model_free()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r.=x; nothing))
     Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
     Building.definition!(pre, quote end)
     Building.time_dependence!(pre; autonomous=true)
@@ -61,14 +62,14 @@ function _box_model_alias()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r.=x; nothing))
     Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
     Building.definition!(pre, quote end)
     Building.time_dependence!(pre; autonomous=true)
     Building.constraint!(pre, :state; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:xbox)
-    Building.constraint!(pre, :state; rg=2, lb=-Inf, ub=0.5, label=:x2_box)
+    Building.constraint!(pre, :state; rg=2, lb=(-Inf), ub=0.5, label=:x2_box)
     return redirect_stderr(devnull) do # the alias warns: several bounds on x₂
-        Building.build(pre)
+        return Building.build(pre)
     end
 end
 
@@ -106,7 +107,9 @@ function test_box_duals()
         Test.@testset "DualMasks" begin
             m = Solutions.DualMasks()
             Test.@test all(isnothing, (m.path, m.boundary, m.state, m.control, m.variable))
-            dm = Solutions.DualModel(nothing, nothing, nothing, nothing, nothing, nothing, 1.0, 1.0)
+            dm = Solutions.DualModel(
+                nothing, nothing, nothing, nothing, nothing, nothing, 1.0, 1.0
+            )
             Test.@test dm.known.variable === nothing
         end
 
@@ -165,7 +168,8 @@ function test_box_duals()
         Test.@testset "box labels: values and masks" begin
             d_x2 = 2 .* _T .- 0.5    # changes sign: lower side active, then upper side
             sol = _box_solution(
-                ocp; duals=Dict{Symbol,Any}(:x2_two => d_x2, :u_up => 3 .* _T, :v_fix => -0.7)
+                ocp;
+                duals=Dict{Symbol,Any}(:x2_two => d_x2, :u_up => 3 .* _T, :v_fix => -0.7),
             )
             for (k, t) in enumerate(_T)
                 Test.@test Solutions.dual(sol, ocp, :x2_two)(t) ≈ d_x2[k]
@@ -173,7 +177,8 @@ function test_box_duals()
             end
             Test.@test Solutions.dual(sol, ocp, :v_fix) ≈ -0.7
             # the stored multipliers: nonnegative on a two-sided box, NaN when unknown
-            zL, zU = Solutions.state_constraints_lb_dual(sol), Solutions.state_constraints_ub_dual(sol)
+            zL, zU = Solutions.state_constraints_lb_dual(sol),
+            Solutions.state_constraints_ub_dual(sol)
             Test.@test zL(0.0)[2] ≈ 0.5 && zU(0.0)[2] == 0.0
             Test.@test zL(1.0)[2] == 0.0 && zU(1.0)[2] ≈ 1.5
             Test.@test isnan(zL(0.5)[1]) && isnan(zU(0.5)[1])      # :x1_lo not given
@@ -204,7 +209,9 @@ function test_box_duals()
             Test.@test Solutions.dual_model(sol).known == Solutions.DualMasks()  # all known
             Test.@test Solutions.state_constraints_lb_dual(sol)(0.1) ≈ [0.1, 0.3]
             # a matrix label mixed with a function label of the same kind
-            sol = _box_solution(ocp; duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => t -> 2t - 0.5))
+            sol = _box_solution(
+                ocp; duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => t -> 2t - 0.5)
+            )
             Test.@test Solutions.dual(sol, ocp, :x1_lo)(0.5) ≈ 0.5
             Test.@test Solutions.dual(sol, ocp, :x2_two)(0.6) ≈ 0.7
         end
@@ -212,8 +219,15 @@ function test_box_duals()
         Test.@testset "a component bounded by no label is a known 0" begin
             ocp_free = _box_model_free()
             sol = Solutions.build_solution(
-                ocp_free, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
-                objective=0.0, successful=true, duals=Dict(:x1_box => t -> -t),
+                ocp_free,
+                _T,
+                zeros(_N, 2),
+                zeros(_N, 1),
+                Float64[],
+                zeros(_N, 2);
+                objective=0.0,
+                successful=true,
+                duals=Dict(:x1_box => t -> -t),
             )
             Test.@test Solutions.dual_model(sol).known.state === nothing
             Test.@test Solutions.state_constraints_lb_dual(sol)(0.5) == [0.5, 0.0]
@@ -272,10 +286,16 @@ function test_box_duals()
                 ocp; switching=Solutions.SwitchingModel(; times=[0.5], duals=duals)
             )
             # no limits for a dual that does not depend on time
-            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:v_fix => ([0.0], [1.0])))
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(
+                Dict(:v_fix => ([0.0], [1.0]))
+            )
             # unknown label, wrong number of columns, not a (left, right) pair
-            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:nope => ([0.0], [1.0])))
-            Test.@test_throws Exceptions.IncorrectArgument sol_with(Dict(:p => ([0.0 1.0], [1.0 2.0])))
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(
+                Dict(:nope => ([0.0], [1.0]))
+            )
+            Test.@test_throws Exceptions.IncorrectArgument sol_with(
+                Dict(:p => ([0.0 1.0], [1.0 2.0]))
+            )
             Test.@test_throws Exceptions.IncorrectArgument Solutions.SwitchingModel(;
                 times=[0.5], duals=Dict(:p => [0.0, 1.0])
             )
@@ -291,14 +311,17 @@ function test_box_duals()
             sw_both = Test.@test_deprecated Solutions.SwitchingModel(;
                 times=[0.5], path_dual=([1.0;;], [2.0;;]), duals=Dict(:p => ([1.0], [2.0]))
             )
-            Test.@test_throws Exceptions.IncorrectArgument _box_solution(ocp; switching=sw_both)
+            Test.@test_throws Exceptions.IncorrectArgument _box_solution(
+                ocp; switching=sw_both
+            )
         end
 
         # ======================================================================
         # INTEGRATION — export / import keep the unknown box duals unknown
         # ======================================================================
         sw_labels() = Solutions.SwitchingModel(;
-            times=[0.5], duals=Dict(:x2_two => ([-0.5;;], [0.5;;]), :p => ([1.0], [2.0]))
+            times=[0.5],
+            duals=Dict(:x2_two => ([-0.5;;], [0.5;;]), :p => ([1.0], [2.0])),
         )
         partial() = _box_solution(
             ocp;
@@ -325,18 +348,28 @@ function test_box_duals()
             end
         end
 
-        Test.@testset "serialization round trip with aliases ($fmt)" for fmt in (:JLD, :JSON)
+        Test.@testset "serialization round trip with aliases ($fmt)" for fmt in
+                                                                         (:JLD, :JSON)
             # :x2_box given, :xbox not: x₂ known, x₁ unknown (bounded by :xbox only)
             ocp_alias = _box_model_alias()
             sol = Solutions.build_solution(
-                ocp_alias, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
-                objective=0.0, successful=true, duals=Dict(:x2_box => t -> 0.5 - t),
+                ocp_alias,
+                _T,
+                zeros(_N, 2),
+                zeros(_N, 1),
+                Float64[],
+                zeros(_N, 2);
+                objective=0.0,
+                successful=true,
+                duals=Dict(:x2_box => t -> 0.5 - t),
             )
             Test.@test Solutions.dual_model(sol).known.state == [false, true]
             mktempdir() do dir
                 file = joinpath(dir, "alias")
                 Serialization.export_ocp_solution(sol; filename=file, format=fmt)
-                sol2 = Serialization.import_ocp_solution(ocp_alias; filename=file, format=fmt)
+                sol2 = Serialization.import_ocp_solution(
+                    ocp_alias; filename=file, format=fmt
+                )
                 Test.@test Solutions.dual_model(sol2).known.state == [false, true]
                 Test.@test Solutions.dual(sol2, ocp_alias, :x2_box)(0.25) ≈ 0.25
                 Test.@test !Solutions.has_dual(sol2, ocp_alias, :xbox)
@@ -348,7 +381,9 @@ function test_box_duals()
                 file = joinpath(dir, "box_duals")
                 Serialization.export_ocp_solution(partial(); filename=file, format=:JSON)
                 blob = JSON.parse(read(file * ".json", String); dicttype=Dict{String,Any})
-                Test.@test all(isnothing(row[1]) for row in blob["state_constraints_lb_dual"])
+                Test.@test all(
+                    isnothing(row[1]) for row in blob["state_constraints_lb_dual"]
+                )
                 Test.@test blob["state_constraints_dual_known"] == [false, true]
                 Test.@test !haskey(blob, "control_constraints_dual_known")   # all known
                 Test.@test isnothing(blob["switching_state_dual_left"][1][1])
@@ -356,7 +391,9 @@ function test_box_duals()
             # every box component known: no mask written, the keywords on reading
             sol = _box_solution(
                 ocp;
-                duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => 2 .* _T .- 0.5, :v_fix => 0.3),
+                duals=Dict{Symbol,Any}(
+                    :x1_lo => _T, :x2_two => 2 .* _T .- 0.5, :v_fix => 0.3
+                ),
             )
             mktempdir() do dir
                 file = joinpath(dir, "full")
@@ -379,18 +416,33 @@ function test_box_duals()
                 duals=Dict(:u_up => t -> t), control_constraints_ub_dual=zeros(_N, 1)
             )
             # sizes and types
-            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:x1_lo => t -> [t, t]))
-            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:x1_lo => [_T _T]))
-            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:v_fix => [1.0, 2.0]))
-            Test.@test_throws Exceptions.IncorrectArgument bad(; duals=Dict(:v_fix => t -> t))
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict(:x1_lo => t -> [t, t])
+            )
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict(:x1_lo => [_T _T])
+            )
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict(:v_fix => [1.0, 2.0])
+            )
+            Test.@test_throws Exceptions.IncorrectArgument bad(;
+                duals=Dict(:v_fix => t -> t)
+            )
             Test.@test_throws Exceptions.IncorrectArgument bad(;
                 duals=Dict{Symbol,Any}(:x1_lo => _T, :x2_two => _T[1:4])
             )
             # one component given by two labels (aliases): ambiguous
             ocp_alias = _box_model_alias()
             alias_sol(duals) = Solutions.build_solution(
-                ocp_alias, _T, zeros(_N, 2), zeros(_N, 1), Float64[], zeros(_N, 2);
-                objective=0.0, successful=true, duals=duals,
+                ocp_alias,
+                _T,
+                zeros(_N, 2),
+                zeros(_N, 1),
+                Float64[],
+                zeros(_N, 2);
+                objective=0.0,
+                successful=true,
+                duals=duals,
             )
             Test.@test_throws Exceptions.IncorrectArgument alias_sol(
                 Dict{Symbol,Any}(:xbox => t -> [t, t], :x2_box => t -> 2t)
@@ -401,7 +453,8 @@ function test_box_duals()
             Test.@test Solutions.dual(sol_a, ocp_alias, :x2_box)(0.5) ≈ -0.5
             # by label for the boxes and by keyword for another kind: accepted
             Test.@test bad(;
-                duals=Dict(:x1_lo => t -> t), control_constraints_ub_dual=zeros(_N, 1),
+                duals=Dict(:x1_lo => t -> t),
+                control_constraints_ub_dual=zeros(_N, 1),
                 control_constraints_lb_dual=zeros(_N, 1),
             ) isa Solutions.Solution
         end

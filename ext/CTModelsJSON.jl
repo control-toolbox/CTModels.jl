@@ -316,7 +316,9 @@ end
 """
 Convert an optional JSON mask of the known rows to `Vector{Bool}` or `nothing`.
 """
-_json_to_optional_mask(blob_field) = isnothing(blob_field) ? nothing : Vector{Bool}(blob_field)
+function _json_to_optional_mask(blob_field)
+    return isnothing(blob_field) ? nothing : Vector{Bool}(blob_field)
+end
 
 """
 $(TYPEDSIGNATURES)

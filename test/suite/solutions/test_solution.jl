@@ -382,7 +382,9 @@ function test_solution()
                 v,
                 P;
                 kwargs...,
-                duals=Dict(:path => path_constraints_dual, :boundary => boundary_constraints_dual),
+                duals=Dict(
+                    :path => path_constraints_dual, :boundary => boundary_constraints_dual
+                ),
                 state_constraints_lb_dual=state_constraints_lb_dual,
                 state_constraints_ub_dual=state_constraints_ub_dual,
                 control_constraints_lb_dual=control_constraints_lb_dual,

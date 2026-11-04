@@ -81,15 +81,17 @@ function test_code_quality()
 
             # path duals given by label, stacked on the layout of the model (issue #492):
             # evaluated at every time point when reading or plotting a dual
-            f_stacked = Solutions.StackedDuals(
-                4, ((1:2, t -> [t, 2t]), (4:4, t -> 3t))
-            )
+            f_stacked = Solutions.StackedDuals(4, ((1:2, t -> [t, 2t]), (4:4, t -> 3t)))
             JET.@test_opt target_modules = (CTModels,) f_stacked(0.5)
-            JET.@test_opt target_modules = (CTModels,) Solutions.DualSlice(f_stacked, 4)(0.5)
+            JET.@test_opt target_modules = (CTModels,) Solutions.DualSlice(f_stacked, 4)(
+                0.5
+            )
 
             # box duals given by label (issue #493): the signed dual split back into one
             # side of the multipliers, stacked by component (NaN for an unknown one)
-            f_split = Solutions.BoxDualSplit{:lower}(t -> [2t - 0.5, t], [-1.0, 1.0], [1.0, 0.0])
+            f_split = Solutions.BoxDualSplit{:lower}(
+                t -> [2t - 0.5, t], [-1.0, 1.0], [1.0, 0.0]
+            )
             JET.@test_opt target_modules = (CTModels,) f_split(0.5)
             f_box = Solutions.StackedDuals(3, (([1, 3], f_split), ([2], Returns(NaN))), 0.0)
             JET.@test_opt target_modules = (CTModels,) f_box(0.5)
@@ -103,8 +105,8 @@ function test_code_quality()
             # --- Composite dynamics assembled from coordinate parts (Building;
             #     issue #496) — evaluated once per solver step ---
             parts = Tuple{UnitRange{Int},Function}[
-                (1:1, (r, t, x, u, v) -> (r[1] = x[2]; nothing)),
-                (2:2, (r, t, x, u, v) -> (r[1] = u[1]; nothing)),
+                (1:1, (r, t, x, u, v) -> (r[1]=x[2]; nothing)),
+                (2:2, (r, t, x, u, v) -> (r[1]=u[1]; nothing)),
             ]
             dyn_parts = Building.__build_dynamics_from_parts(parts)
             JET.@test_opt target_modules = (CTModels,) dyn_parts(

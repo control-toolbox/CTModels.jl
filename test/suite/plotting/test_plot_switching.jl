@@ -76,10 +76,12 @@ function _sol2()
     Building.control!(pre, 1)
     Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> 0.5 * u^2)
-    Building.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1]=x; nothing),
-        lb=[-10.0], ub=[10.0], label=:g1)
-    Building.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1]=u; nothing),
-        lb=[-10.0], ub=[10.0], label=:g2)
+    Building.constraint!(
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=x; nothing), lb=[-10.0], ub=[10.0], label=:g1
+    )
+    Building.constraint!(
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=u; nothing), lb=[-10.0], ub=[10.0], label=:g2
+    )
     ocp = Building.build(pre)
     sw = Solutions.SwitchingModel(;
         times=[τ],
@@ -173,12 +175,15 @@ function test_plot_switching()
             Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], 3.0) == 4.0   # after it
             # piecewise-constant samples: the sample that holds on the interval, no ramp
             Test.@test CTModels.PlotCase._sample_at(Tg, M[:, 1], τ; constant=true) == 1.0
-            Test.@test CTModels.PlotCase._fill_unknown_limits(Tg, M, [τ], L; constant=true) ==
-                [1.0 31.0]
+            Test.@test CTModels.PlotCase._fill_unknown_limits(
+                Tg, M, [τ], L; constant=true
+            ) == [1.0 31.0]
             # in a figure: a model with two path labels, limits given for :g2 only
             sol = _sol2()
             Ts, Mp = CTModels.PlotCase._spliced_samples(
-                sol, T, reduce(vcat, (Solutions.path_constraints_dual(sol)(t)' for t in T)),
+                sol,
+                T,
+                reduce(vcat, (Solutions.path_constraints_dual(sol)(t)' for t in T)),
                 :path_dual,
             )
             k = findfirst(==(τ), Ts)

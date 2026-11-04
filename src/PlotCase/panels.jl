@@ -95,7 +95,9 @@ The value at time `τ` of the samples `y` on the grid `T`: linear interpolation 
 two samples around `τ`, or, with `constant = true` (piecewise-constant samples, drawn as
 steps), the last sample at or before `τ`; the first or last sample outside the grid.
 """
-function _sample_at(T::AbstractVector, y::AbstractVector, τ::Real; constant::Bool=false)::Float64
+function _sample_at(
+    T::AbstractVector, y::AbstractVector, τ::Real; constant::Bool=false
+)::Float64
     n = min(length(T), length(y))
     k = searchsortedlast(view(T, 1:n), τ)
     k == 0 && return y[1]
@@ -288,7 +290,12 @@ function _path_panel(
     T, M = Tp, data[:, idx]
     if !isnothing(left)
         T, M = Plotting.splice_jumps(
-            Tp, M, CTModels.switching_times(sol), left[:, idx], right[:, idx]; connect=connect
+            Tp,
+            M,
+            CTModels.switching_times(sol),
+            left[:, idx],
+            right[:, idx];
+            connect=connect,
         )
     end
     labels = string.(cp[4][idx])
@@ -331,7 +338,12 @@ function _dual_panel(
     cp = CTModels.path_constraints_nl(model)
     idx = isnothing(rows) ? collect(axes(M, 2)) : collect(rows)
     T, M = _spliced_samples(
-        sol, Tp, M[:, idx], :path_dual; connect=connect, cols=isnothing(rows) ? nothing : idx
+        sol,
+        Tp,
+        M[:, idx],
+        :path_dual;
+        connect=connect,
+        cols=isnothing(rows) ? nothing : idx,
     )
     labels = path_shown ? fill("", length(idx)) : ("dual " .* string.(cp[4][idx]))
     return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))

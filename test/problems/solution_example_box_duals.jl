@@ -11,12 +11,12 @@ function solution_example_box_duals(; switching=CTModels.Solutions.EmptySwitchin
     CTModels.time!(pre; t0=0.0, tf=1.0)
     CTModels.state!(pre, 2)
     CTModels.control!(pre, 1)
-    CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u[1]; nothing))
+    CTModels.dynamics!(pre, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u[1]; nothing))
     CTModels.objective!(pre, :min; lagrange=(t, x, u, v) -> u[1]^2)
     CTModels.constraint!(
         pre,
         :boundary;
-        f=(r, x0, xf, v) -> (r[1] = x0[1]; r[2] = x0[2]; nothing),
+        f=(r, x0, xf, v) -> (r[1]=x0[1]; r[2]=x0[2]; nothing),
         lb=[0.0, 0.0],
         ub=[0.0, 0.0],
         label=:init,
@@ -24,7 +24,7 @@ function solution_example_box_duals(; switching=CTModels.Solutions.EmptySwitchin
     CTModels.constraint!(
         pre,
         :path;
-        f=(r, t, x, u, v) -> (r[1] = x[1] + x[2]; nothing),
+        f=(r, t, x, u, v) -> (r[1]=x[1] + x[2]; nothing),
         lb=[-Inf],
         ub=[3.0],
         label=:c1,
