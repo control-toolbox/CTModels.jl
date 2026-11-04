@@ -80,11 +80,12 @@ function _build_root(
     connect = jumps === :segment
     desc = clean(isempty(description) ? __description() : description)
     # the constraint rows, listed once for the figure (only the :split layout draws them)
-    rows = if layout === :split && model isa CTModels.Model && (:path in desc || :dual in desc)
-        _constraint_rows(sol, model)
-    else
-        ConstraintRow[]
-    end
+    rows =
+        if layout === :split && model isa CTModels.Model && (:path in desc || :dual in desc)
+            _constraint_rows(sol, model)
+        else
+            ConstraintRow[]
+        end
     do_state, do_costate, do_control, do_path, do_dual = do_plot(
         sol,
         desc...;
@@ -289,9 +290,7 @@ function _build_root(
                         time_name=tname,
                     )
                 elseif left && two_columns
-                    p = _row_unknown_dual_panel(
-                        sol, r, dual_style; title=top ? "dual" : ""
-                    )
+                    p = _row_unknown_dual_panel(sol, r, dual_style; title=top ? "dual" : "")
                     xm = _mid_time(p.x, time)
                     L(
                         p;
@@ -306,10 +305,7 @@ function _build_root(
             end
         end
         return _assemble_split(;
-            state=state_col,
-            costate=costate_col,
-            control=control_col,
-            rows=row_nodes,
+            state=state_col, costate=costate_col, control=control_col, rows=row_nodes
         )
     else
         throw(

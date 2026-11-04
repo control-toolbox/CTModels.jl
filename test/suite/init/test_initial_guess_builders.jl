@@ -370,9 +370,7 @@ function test_initial_guess_builders()
             Test.@test Test.@inferred(f1(0.5)) ≈ 1.0
             # the scalar path returns the override value as is (no conversion to
             # the base element type)
-            fi = Init.MergedTrajectory(
-                _ -> 0.0, Dict{Int,Function}(1 => _ -> 1), 1, :state
-            )
+            fi = Init.MergedTrajectory(_ -> 0.0, Dict{Int,Function}(1 => _ -> 1), 1, :state)
             Test.@test fi(0.5) === 1
             # vector base with dim=1: first element used (former copy(v)[1] semantics)
             fv = Init.MergedTrajectory(_ -> [5.0, 99.0], Dict{Int,Function}(), 1, :control)

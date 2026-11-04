@@ -18,10 +18,10 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 # ==============================================================================
 
 # Constraint functions of the fixture model.
-_ld_path2!(r, t, x, u, v) = (r .= x .+ u[1]; nothing)
-_ld_path1!(r, t, x, u, v) = (r[1] = u[1]; nothing)
-_ld_boundary1!(r, x0, xf, v) = (r[1] = x0[1]; nothing)
-_ld_boundary2!(r, x0, xf, v) = (r .= xf; nothing)
+_ld_path2!(r, t, x, u, v) = (r.=x .+ u[1]; nothing)
+_ld_path1!(r, t, x, u, v) = (r[1]=u[1]; nothing)
+_ld_boundary1!(r, x0, xf, v) = (r[1]=x0[1]; nothing)
+_ld_boundary2!(r, x0, xf, v) = (r.=xf; nothing)
 
 # A model whose path and boundary constraints are declared interleaved with each other
 # and with a state box. Stacked layout:
@@ -32,7 +32,7 @@ function _ld_model()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r.=x; nothing))
     Building.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
     Building.definition!(pre, quote end)
     Building.time_dependence!(pre; autonomous=true)
@@ -97,14 +97,18 @@ function test_labelled_duals()
         Test.@testset "placement" begin
             # every label, all matrices: one stacked matrix, mask canonical (all known)
             (pc, pk), (bc, bk) = Solutions._place_duals(
-                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]), _T
+                ocp,
+                Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]),
+                _T,
             )
             Test.@test pc == [_C2 3 .* _T]
             Test.@test bc == [1.0, 2.0, 3.0]
             Test.@test isnothing(pk) && isnothing(bk)
 
             # some labels only: NaN in the unknown rows, mask as a vector
-            (pc, pk), (bc, bk) = Solutions._place_duals(ocp, Dict(:c1 => reshape(3 .* _T, :, 1)), _T)
+            (pc, pk), (bc, bk) = Solutions._place_duals(
+                ocp, Dict(:c1 => reshape(3 .* _T, :, 1)), _T
+            )
             Test.@test pc[:, 3] == 3 .* _T
             Test.@test all(isnan, pc[:, 1:2])
             Test.@test pk == [false, false, true]
@@ -145,7 +149,9 @@ function test_labelled_duals()
 
             # a one-row label gives a scalar (DIM1), from a vector or a function
             Test.@test Solutions.dual(sol0, ocp, :c1)(0.5) isa Float64
-            sol_fun = _ld_solution(ocp, Dict{Symbol,Any}(:c1 => t -> 3t, :c2 => _FakeFlowDual(2.0)))
+            sol_fun = _ld_solution(
+                ocp, Dict{Symbol,Any}(:c1 => t -> 3t, :c2 => _FakeFlowDual(2.0))
+            )
             Test.@test Solutions.dual(sol_fun, ocp, :c1)(0.25) ≈ 0.75
             Test.@test Solutions.dual(sol_fun, ocp, :c2)(0.25) ≈ 2 .* _c2(0.25)
 
@@ -153,8 +159,18 @@ function test_labelled_duals()
             # the single-grid one, which forwards `duals`)
             Tp = collect(range(0.0, 1.0; length=3))
             solp = Solutions.build_solution(
-                ocp, _T, _T, _T, Tp, zeros(5, 2), zeros(5, 1), Float64[], zeros(5, 2);
-                objective=0.0, successful=true, duals=Dict(:c2 => [Tp 2 .* Tp]),
+                ocp,
+                _T,
+                _T,
+                _T,
+                Tp,
+                zeros(5, 2),
+                zeros(5, 1),
+                Float64[],
+                zeros(5, 2);
+                objective=0.0,
+                successful=true,
+                duals=Dict(:c2 => [Tp 2 .* Tp]),
             )
             Test.@test Solutions.dual(solp, ocp, :c2)(0.25) ≈ _c2(0.25)
 
@@ -167,7 +183,8 @@ function test_labelled_duals()
         # ======================================================================
         Test.@testset "positional and by label agree" begin
             sol_label = _ld_solution(
-                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0])
+                ocp,
+                Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]),
             )
             sol_pos = Test.@test_deprecated _ld_solution(
                 ocp,
@@ -191,7 +208,9 @@ function test_labelled_duals()
             Test.@test isnothing(Solutions.dual_model(sol_label).known.path)
 
             # the eight-dual constructor: every stored row known
-            dm = Solutions.DualModel(nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing)
+            dm = Solutions.DualModel(
+                nothing, [1.0], nothing, nothing, nothing, nothing, nothing, nothing
+            )
             Test.@test dm.known == Solutions.DualMasks()
         end
 
@@ -205,13 +224,17 @@ function test_labelled_duals()
             Test.@test back == labelled               # the unknown labels are left out
             # every row known (no mask): every label
             (pc, pk), (bc, bk) = Solutions._place_duals(
-                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]), _T
+                ocp,
+                Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]),
+                _T,
             )
             back = Solutions._duals_by_label(ocp, pc, bc, pk, bk)
             Test.@test Set(keys(back)) == Set([:c1, :c2, :b1, :b2])
             Test.@test back[:b1] === 1.0              # a one-row boundary label: a number
             Test.@test back[:c2] == _C2
-            Test.@test isempty(Solutions._duals_by_label(ocp, nothing, nothing, nothing, nothing))
+            Test.@test isempty(
+                Solutions._duals_by_label(ocp, nothing, nothing, nothing, nothing)
+            )
         end
 
         # ======================================================================
@@ -227,10 +250,11 @@ function test_labelled_duals()
                 Test.@test Solutions.dual(sol2, ocp, :b2) == [2.0, 3.0]
                 for label in (:c1, :b1)
                     Test.@test !Solutions.has_dual(sol2, ocp, label)
-                    Test.@test_throws Exceptions.PreconditionError Solutions.dual(sol2, ocp, label)
+                    Test.@test_throws Exceptions.PreconditionError Solutions.dual(
+                        sol2, ocp, label
+                    )
                 end
-                Test.@test Solutions.dual_model(sol2).known.path ==
-                    [true, true, false]
+                Test.@test Solutions.dual_model(sol2).known.path == [true, true, false]
             end
         end
 
@@ -247,7 +271,8 @@ function test_labelled_duals()
             end
             # a file written before the masks (format 2): every stored row is known
             sol = _ld_solution(
-                ocp, Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0])
+                ocp,
+                Dict{Symbol,Any}(:c1 => 3 .* _T, :c2 => _C2, :b1 => 1.0, :b2 => [2.0, 3.0]),
             )
             mktempdir() do dir
                 file = joinpath(dir, "old")
@@ -297,7 +322,9 @@ function test_labelled_duals()
                 end
                 Test.@test Solutions.has_dual(s, ocp, label) == known
             end
-            Test.@test_throws Exceptions.IncorrectArgument Solutions.has_dual(sol, ocp, :nope)
+            Test.@test_throws Exceptions.IncorrectArgument Solutions.has_dual(
+                sol, ocp, :nope
+            )
         end
 
         # ======================================================================

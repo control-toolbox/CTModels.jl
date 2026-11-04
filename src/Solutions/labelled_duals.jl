@@ -41,12 +41,16 @@ function _place_duals(
     T_control=T_path,
     control_interpolation::Symbol=:constant,
 )
-    parts = Dict(k => Pair{Vector{Int},Any}[] for k in (:path, :boundary, :state, :control, :variable))
+    parts = Dict(
+        k => Pair{Vector{Int},Any}[] for
+        k in (:path, :boundary, :state, :control, :variable)
+    )
     grids = (path=T_path, state=T_state, control=T_control)
     owners = Dict{Tuple{Symbol,Int},Symbol}()   # (box kind, component) => label
     for (label, value) in duals
         kind, rows = constraint_rows(ocp, label)
-        kind in (:state, :control, :variable) && _claim_components!(owners, kind, rows, label)
+        kind in (:state, :control, :variable) &&
+            _claim_components!(owners, kind, rows, label)
         checked = if kind in (:boundary, :variable)
             _checked_static_dual(label, kind, rows, value)
         else
@@ -59,7 +63,11 @@ function _place_duals(
         path=_place_path_duals(path, dim_path_constraints_nl(ocp), T_path),
         boundary=_place_boundary_duals(parts[:boundary], dim_boundary_constraints_nl(ocp)),
         state=_place_box_duals(
-            parts[:state], state_constraints_box(ocp), state_dimension(ocp), T_state, :linear
+            parts[:state],
+            state_constraints_box(ocp),
+            state_dimension(ocp),
+            T_state,
+            :linear,
         ),
         control=_place_box_duals(
             parts[:control],
@@ -221,9 +229,7 @@ $(TYPEDSIGNATURES)
 A matrix part of the duals as a function of time on the grid `T`, with `interpolation`
 (a scalar for one row).
 """
-function _interpolate_part(
-    value::Matrix{Float64}, T, n::Int, interpolation::Symbol=:linear
-)
+function _interpolate_part(value::Matrix{Float64}, T, n::Int, interpolation::Symbol=:linear)
     return build_interpolated_function(
         value, T, n, Matrix{Float64}; expected_dim=n, interpolation=interpolation
     )
@@ -254,7 +260,14 @@ The lower-bound multiplier `zL` of a box component whose signed dual is `d` (ct-
 component (`(-1, 1)`). With [`CTModels.Solutions._split_upper`](@extref), the inverse of
 `cl * zL + cu * zU`: lossless, since at most one side of a component is active.
 """
-_split_lower(d::Real, cl::Real, cu::Real) = cl == 1 ? float(d) : cl == -1 ? max(-d, 0.0) : 0.0
+_split_lower(d::Real, cl::Real, cu::Real) =
+    if cl == 1
+        float(d)
+    elseif cl == -1
+        max(-d, 0.0)
+    else
+        0.0
+    end
 
 """
 $(TYPEDSIGNATURES)
@@ -263,7 +276,14 @@ The upper-bound multiplier `zU` of a box component whose signed dual is `d`: `0`
 lower bound only, `d` for an upper bound only, `max(d, 0)` for two bounds or a fixed
 component (see [`CTModels.Solutions._split_lower`](@extref)).
 """
-_split_upper(d::Real, cl::Real, cu::Real) = cl == 1 ? 0.0 : cl == -1 ? max(d, 0.0) : float(d)
+_split_upper(d::Real, cl::Real, cu::Real) =
+    if cl == 1
+        0.0
+    elseif cl == -1
+        max(d, 0.0)
+    else
+        float(d)
+    end
 
 """
 $(TYPEDSIGNATURES)
@@ -325,7 +345,9 @@ $(TYPEDSIGNATURES)
 The variable box duals of the parts `components => value`, on `dim` components, split into
 `(lb, ub, known)` vectors (see [`CTModels.Solutions._place_box_duals`](@extref)).
 """
-function _place_variable_box_duals(parts::Vector{Pair{Vector{Int},Any}}, cp::Tuple, dim::Int)
+function _place_variable_box_duals(
+    parts::Vector{Pair{Vector{Int},Any}}, cp::Tuple, dim::Int
+)
     isempty(parts) && return nothing
     known, unknown = _box_known(parts, cp, dim)
     lb, ub = zeros(dim), zeros(dim)

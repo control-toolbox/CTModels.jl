@@ -113,12 +113,7 @@ function _row_left_panel(
     T = _row_grid(sol, row)
     f = state ? CTModels.state(sol) : CTModels.control(sol)
     T, M = _spliced_samples(
-        sol,
-        T,
-        _sample(f, T)[:, row.rows],
-        row.kind;
-        connect=connect,
-        cols=row.rows,
+        sol, T, _sample(f, T)[:, row.rows], row.kind; connect=connect, cols=row.rows
     )
     names = state ? CTModels.state_components(sol) : CTModels.control_components(sol)
     st = _row_seriestype(sol, row)
@@ -200,7 +195,9 @@ theirs: an empty cell on the grid of the row (an invisible curve, so that the ce
 the time axis of the others), which keeps the two columns of the block aligned. The text
 `dual not known` is put in it by the caller.
 """
-function _row_unknown_dual_panel(sol, row::ConstraintRow, style::NamedTuple; title::String="")
+function _row_unknown_dual_panel(
+    sol, row::ConstraintRow, style::NamedTuple; title::String=""
+)
     T = _row_grid(sol, row)
     return Plotting.Panel(
         T,
@@ -225,7 +222,11 @@ function _row_hlines(model, row::ConstraintRow, style::NamedTuple)
     else
         CTModels.control_constraints_box(model)
     end
-    n = row.kind === :state ? CTModels.state_dimension(model) : CTModels.control_dimension(model)
+    n = if row.kind === :state
+        CTModels.state_dimension(model)
+    else
+        CTModels.control_dimension(model)
+    end
     return _box_hlines(box, n, style)[row.rows]
 end
 

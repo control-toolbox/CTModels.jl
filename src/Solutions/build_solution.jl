@@ -507,17 +507,7 @@ function build_solution(
     # reports `has_duals == false` and its dual accessors return `nothing`.
     dual =
         if all(
-            isnothing,
-            (
-                fpcd,
-                bc_input,
-                fscbd,
-                fscud,
-                fccbd,
-                fccud,
-                vc_lb_dual,
-                vc_ub_dual,
-            ),
+            isnothing, (fpcd, bc_input, fscbd, fscud, fccbd, fccud, vc_lb_dual, vc_ub_dual)
         )
             EmptyDualModel()
         else
@@ -617,7 +607,9 @@ function _place_dual_limits(sw::SwitchingModel, ocp::Model)::SwitchingModel
                 context="build_solution - placing the limits of the duals",
             ),
         )
-        _ensure_dual_size(label, length(rows), size(left, 2), "number of columns of the limits")
+        _ensure_dual_size(
+            label, length(rows), size(left, 2), "number of columns of the limits"
+        )
         dim = getproperty(dims, kind)
         L, R = get!(() -> (fill(NaN, n, dim), fill(NaN, n, dim)), placed, kind)
         L[:, rows] .= left
@@ -1922,8 +1914,7 @@ Keys of the serialized switching limits, as `(key, component, side)` with `side 
 the left limit and `2` for the right limit.
 """
 const _SWITCHING_LIMIT_KEYS = Tuple(
-    (_switching_limit_key(c, side), c, side) for
-    c in _LIMIT_COMPONENTS for side in (1, 2)
+    (_switching_limit_key(c, side), c, side) for c in _LIMIT_COMPONENTS for side in (1, 2)
 )
 
 """

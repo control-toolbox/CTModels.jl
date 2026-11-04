@@ -142,9 +142,7 @@ function _set_component!(vec::AbstractVector, i::Int, val::AbstractVector, role:
     return _set_component!(vec, i, only(val), role)
 end
 
-function _set_component!(
-    vec::AbstractVector{T}, i::Int, val::V, ::Symbol
-) where {T,V}
+function _set_component!(vec::AbstractVector{T}, i::Int, val::V, ::Symbol) where {T,V}
     if V <: T
         vec[i] = val
         return vec

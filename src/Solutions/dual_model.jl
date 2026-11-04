@@ -132,8 +132,7 @@ function has_dual(sol::Solution, model::Model, label::Symbol)::Bool
     has_duals(sol) || return false
     dm = dual_model(sol)
     if kind === :path
-        return !isnothing(path_constraints_dual(sol)) &&
-               _rows_known(dm.known.path, rows)
+        return !isnothing(path_constraints_dual(sol)) && _rows_known(dm.known.path, rows)
     elseif kind === :boundary
         return !isnothing(boundary_constraints_dual(sol)) &&
                _rows_known(dm.known.boundary, rows)
@@ -248,7 +247,11 @@ one of `label`, which was absent from the `duals` given to
 [`CTModels.Solutions.build_solution`](@extref).
 """
 function _ensure_known(
-    sol::Solution, known::Union{Nothing,Vector{Bool}}, rows::Vector{Int}, label::Symbol, kind::String
+    sol::Solution,
+    known::Union{Nothing,Vector{Bool}},
+    rows::Vector{Int},
+    label::Symbol,
+    kind::String,
 )
     _rows_known(known, rows) && return nothing
     return throw(

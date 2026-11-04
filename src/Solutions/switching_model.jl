@@ -258,7 +258,9 @@ end
 """
 The components of a switching model with `(left, right)` limits.
 """
-const _LIMIT_COMPONENTS = (:state, :costate, :control, :path_dual, :state_dual, :control_dual)
+const _LIMIT_COMPONENTS = (
+    :state, :costate, :control, :path_dual, :state_dual, :control_dual
+)
 
 """
 $(TYPEDSIGNATURES)
@@ -627,10 +629,7 @@ Return the components whose limits a switching model stores, e.g. `"state, costa
 `"none"`.
 """
 function _stored_limits(m::SwitchingModel)::String
-    stored = [
-        String(c) for
-        c in _LIMIT_COMPONENTS if size(limits(m, c)[1], 2) > 0
-    ]
+    stored = [String(c) for c in _LIMIT_COMPONENTS if size(limits(m, c)[1], 2) > 0]
     return isempty(stored) ? "none" : join(stored, ", ")
 end
 

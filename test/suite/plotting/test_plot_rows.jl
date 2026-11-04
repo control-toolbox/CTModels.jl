@@ -23,19 +23,21 @@ function _alias_model()
     CTModels.time!(pre; t0=0.0, tf=1.0)
     CTModels.state!(pre, 2)
     CTModels.control!(pre, 1)
-    CTModels.dynamics!(pre, (r, t, x, u, v) -> (r .= x; nothing))
+    CTModels.dynamics!(pre, (r, t, x, u, v) -> (r.=x; nothing))
     CTModels.objective!(pre, :min; mayer=(x0, xf, v) -> xf[1])
     CTModels.definition!(pre, quote end)
     CTModels.time_dependence!(pre; autonomous=true)
-    CTModels.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = x[1]; nothing),
-        lb=-10, ub=10, label=:g1)
-    CTModels.constraint!(pre, :path; f=(r, t, x, u, v) -> (r[1] = x[2]; nothing),
-        lb=-10, ub=10, label=:g2)
+    CTModels.constraint!(
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=x[1]; nothing), lb=-10, ub=10, label=:g1
+    )
+    CTModels.constraint!(
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=x[2]; nothing), lb=-10, ub=10, label=:g2
+    )
     CTModels.constraint!(pre, :state; rg=1:2, lb=[-1.0, -1.0], ub=[1.0, 1.0], label=:xbox)
-    CTModels.constraint!(pre, :state; rg=2, lb=-Inf, ub=0.5, label=:x2_box)
+    CTModels.constraint!(pre, :state; rg=2, lb=(-Inf), ub=0.5, label=:x2_box)
     CTModels.constraint!(pre, :control; rg=1, lb=-1.0, ub=1.0, label=:u_box)
     return redirect_stderr(devnull) do # the alias warns: several bounds on x₂
-        CTModels.build(pre)
+        return CTModels.build(pre)
     end
 end
 
@@ -44,8 +46,15 @@ const _TA = collect(range(0.0, 1.0; length=11))
 function _alias_solution(ocp; duals)
     N = length(_TA)
     return CTModels.build_solution(
-        ocp, _TA, zeros(N, 2), zeros(N, 1), Float64[], zeros(N, 2);
-        objective=0.0, successful=true, duals=duals,
+        ocp,
+        _TA,
+        zeros(N, 2),
+        zeros(N, 1),
+        Float64[],
+        zeros(N, 2);
+        objective=0.0,
+        successful=true,
+        duals=duals,
     )
 end
 
@@ -179,9 +188,7 @@ function test_plot_rows()
             # a component whose limits are unknown (NaN, a label not given) draws no jump
             # and no break, while the other components keep theirs
             sw_nan = CTModels.Solutions.SwitchingModel(;
-                times=[τ],
-                labels=["a", "b"],
-                duals=Dict(:x2_box => ([NaN], [NaN])),
+                times=[τ], labels=["a", "b"], duals=Dict(:x2_box => ([NaN], [NaN]))
             )
             _, sol_nan = TestProblems.solution_example_box_duals(; switching=sw_nan)
             leaves_nan = Plotting.leaves(CTModels.PlotCase.build_figure(sol_nan).root)
@@ -191,9 +198,7 @@ function test_plot_rows()
             k = findall(==(τ), x2n.x)
             Test.@test x2n.y[k[1]] == x2n.y[k[2]]
             # jumps = :none breaks the curve between the limits
-            leaves = Plotting.leaves(
-                CTModels.PlotCase.build_figure(sols; jumps=:none).root
-            )
+            leaves = Plotting.leaves(CTModels.PlotCase.build_figure(sols; jumps=:none).root)
             Test.@test any(isnan, only(leaves[9].axes.series).y)
         end
 
@@ -226,10 +231,15 @@ function test_plot_rows()
             Test.@test empty.axes.xlabel == "t"         # last row: the time label
             # no row has a dual: one column, as before
             sol_0 = _alias_solution(ocp_a; duals=Dict{Symbol,Any}())
-            Test.@test length(Plotting.leaves(CTModels.PlotCase.build_figure(sol_0, :path).root)) == 2
+            Test.@test length(
+                Plotting.leaves(CTModels.PlotCase.build_figure(sol_0, :path).root)
+            ) == 2
             # the empty cell follows the time normalisation
             figz = CTModels.PlotCase.build_figure(sol_a, :path, :dual; time=:normalize)
-            notez = filter(d -> d isa Plotting.Annotation, Plotting.leaves(figz.root)[4].axes.decorations)
+            notez = filter(
+                d -> d isa Plotting.Annotation,
+                Plotting.leaves(figz.root)[4].axes.decorations,
+            )
             Test.@test only(notez).x ≈ 0.5
             Test.@test CTModels.PlotCase._mid_time([1.0, 3.0], :default) == 2.0
             Test.@test CTModels.PlotCase._mid_time([1.0, 3.0], :normalize) == 0.5
@@ -242,12 +252,19 @@ function test_plot_rows()
             Test.@test only(only(row).axes.series).style.seriestype === :steppost
             dual_cell = Plotting.leaves(fig.root)[end]
             Test.@test only(dual_cell.axes.series).style.seriestype === :steppost
-            r = only(filter(r -> r.label === :u_box, CTModels.PlotCase._constraint_rows(sol_a, ocp_a)))
+            r = only(
+                filter(
+                    r -> r.label === :u_box,
+                    CTModels.PlotCase._constraint_rows(sol_a, ocp_a),
+                ),
+            )
             Test.@test CTModels.PlotCase._row_seriestype(sol_a, r) === :steppost
         end
 
         Test.@testset "the samples of the path constraints are computed once and sliced" begin
-            sol_a = _alias_solution(ocp_a; duals=Dict{Symbol,Any}(:g1 => t -> t, :g2 => t -> 2t))
+            sol_a = _alias_solution(
+                ocp_a; duals=Dict{Symbol,Any}(:g1 => t -> t, :g2 => t -> 2t)
+            )
             samples = CTModels.PlotCase._path_samples(sol_a, ocp_a)
             Test.@test size(samples[2]) == (length(_TA), 2)
             for (k, rows) in ((1, [1]), (2, [2]))
@@ -261,15 +278,20 @@ function test_plot_rows()
             shared = CTModels.PlotCase._dual_panel(
                 sol_a, ocp_a, NamedTuple(); path_shown=true, rows=[2], samples=duals
             )
-            alone = CTModels.PlotCase._dual_panel(sol_a, ocp_a, NamedTuple(); path_shown=true, rows=[2])
+            alone = CTModels.PlotCase._dual_panel(
+                sol_a, ocp_a, NamedTuple(); path_shown=true, rows=[2]
+            )
             Test.@test shared.data == alone.data
         end
 
         Test.@testset "do_plot: the rows given or listed agree" begin
             rs = CTModels.PlotCase._constraint_rows(sol, ocp)
             kw = (
-                state_style=NamedTuple(), control_style=NamedTuple(),
-                costate_style=NamedTuple(), path_style=NamedTuple(), dual_style=NamedTuple(),
+                state_style=NamedTuple(),
+                control_style=NamedTuple(),
+                costate_style=NamedTuple(),
+                path_style=NamedTuple(),
+                dual_style=NamedTuple(),
             )
             for desc in ((:state, :path, :dual), (:path,), (:dual,))
                 Test.@test CTModels.PlotCase.do_plot(sol, desc...; kw..., rows=rs) ==
@@ -279,7 +301,12 @@ function test_plot_rows()
 
         Test.@testset "a multi-row path label is one row" begin
             ocp_pc, sol_pc = TestProblems.solution_example_dual()
-            r = only(filter(r -> r.label == :con2, CTModels.PlotCase._constraint_rows(sol_pc, ocp_pc)))
+            r = only(
+                filter(
+                    r -> r.label == :con2,
+                    CTModels.PlotCase._constraint_rows(sol_pc, ocp_pc),
+                ),
+            )
             Test.@test r.kind === :path
             Test.@test length(r.rows) == 2
         end
