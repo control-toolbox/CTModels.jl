@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation
+
+- Documentation previews now deploy only when requested with the
+  `documentation push preview` label ([#517](https://github.com/control-toolbox/CTModels.jl/issues/517)).
+
 ## [0.21.1] - 2026-11-03
 
 ### ✨ New Features
