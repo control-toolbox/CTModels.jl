@@ -93,6 +93,14 @@ const CTModelsMakie = Base.get_extension(CTModels, :CTModelsMakie)
 repo_url = "github.com/control-toolbox/CTModels.jl"
 src_dir = abspath(joinpath(@__DIR__, "..", "src"))
 ext_dir = abspath(joinpath(@__DIR__, "..", "ext"))
+push_preview = get(ENV, "DOCUMENTER_PUSH_PREVIEW", "false") == "true"
+deploy_decision = Documenter.deploy_folder(
+    Documenter.auto_detect_deploy_system();
+    repo=repo_url,
+    devbranch="main",
+    devurl="dev",
+    push_preview=push_preview,
+)
 
 # Include the API reference manager
 include("api_reference.jl")
@@ -107,7 +115,11 @@ with_api_reference(src_dir, ext_dir) do api_pages
         warnonly=[:cross_references, :external_cross_references],
         sitename="CTModels.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
-            repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
+            repo=repo_url,
+            devbranch="main",
+            devurl="dev",
+            sidebar_drawer=true,
+            deploy_decision=deploy_decision,
         ),
         pages=[
             # index.md is the VitePress root — not listed here
@@ -152,14 +164,21 @@ end
 # Deploy documentation to GitHub Pages
 # ═══════════════════════════════════════════════════════════════════════════════
 bases_file = joinpath(@__DIR__, "build", "bases.txt")
-if isfile(bases_file)
+if !deploy_decision.all_ok
+    reason = if get(ENV, "GITHUB_EVENT_NAME", "") == "pull_request" && !push_preview
+        "no preview requested (label `documentation push preview` absent)"
+    else
+        "the deployment criteria above are not met"
+    end
+    @info "Skipping deployment: $(reason)."
+elseif !isfile(bases_file)
+    @info "Skipping deployment: no bases were built (prerelease with existing higher stable release)."
+else
     # PR previews are opt-in: CTActions sets DOCUMENTER_PUSH_PREVIEW to "true" only on a
     # PR carrying the `documentation push preview` label.
     DocumenterVitepress.deploydocs(;
         repo=repo_url * ".git",
         devbranch="main",
-        push_preview=get(ENV, "DOCUMENTER_PUSH_PREVIEW", "false") == "true",
+        push_preview=push_preview,
     )
-else
-    @info "Skipping deployment: no bases were built (prerelease with existing higher stable release)."
 end
