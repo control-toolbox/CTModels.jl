@@ -1,0 +1,56 @@
+# The request of the release of CTModels v0.21.2, for the release workflow of CTActions.
+# Written by `release.jl facts`, completed by the agent after the human's validation, checked
+# by `release.jl request` and again by the workflow. The proposal is in .releases/v0.21.2.md.
+
+[release]
+package = "CTModels"
+version = "0.21.2"
+kind = "stable"
+mode = "autonomous" # supervised or autonomous: the human's choice
+requested_by = "ocots" # the GitHub login of the person who validated the proposal
+reference = "0.21.1"
+base = "bfaf5f3b8dcd65302c954649b2dafd1c18731865"
+
+[versions]
+ct_agents = "v0.5.0"
+ct_conventions = "v0.14.0"
+ctactions = "f1d6b68"
+
+[facts]
+expected_version = "0.21.2"
+breaking = false
+feature = false
+rel4 = true
+rel7 = 12
+jump = "none"
+labels = ["run breakage", "run ci github-runner", "run documentation", "documentation push preview"]
+
+[[review]]
+id = "pr-514"
+what = "#514 [AUTO] JuliaFormatter.jl run — touches ext, src; not cited in the changelog since `v0.21.1`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "JuliaFormatter run: layout only, no behaviour change."
+
+[[review]]
+id = "pr-522"
+what = "#522 [AUTO] JuliaFormatter.jl run — touches docs; not cited in the changelog since `v0.21.1`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "JuliaFormatter run on docs files: layout only."
+
+[[review]]
+id = "pr-524"
+what = "#524 chore: pin ct-conventions v0.14.0; build the docs with --project=docs — touches docs; not cited in the changelog since `v0.21.1`"
+verdict = "covered"   # covered, added, not-user-facing
+note = "The pin of ct-conventions v0.14.0 and the docs build command are in the Documentation section of [Unreleased]."
+
+[[review]]
+id = "compat-CTBase"
+what = "`[compat]` of `CTBase`: `0.30.12` → `0.30.14`"
+verdict = "covered"   # covered, added, not-user-facing
+note = "The move of the CTBase compat to 0.30.14 is in the Dependencies section of [Unreleased]."
+
+[[review]]
+id = "wording-aaa79adf"
+what = "under `### 🐛 Bug Fixes`, “no longer”: **The bounds are no longer drawn in the colour of the first curve with Makie.** The default style of the bound lines was `color=15`, an index into the palette o…"
+verdict = "covered"   # covered, added, not-user-facing
+note = "A bug fix, not a breaking change: with Makie the bounds change colour, which is the fix. BREAKING.md carries a non-breaking note, and the Compatibility section says so."
