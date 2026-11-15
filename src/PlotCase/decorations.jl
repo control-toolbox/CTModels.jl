@@ -13,14 +13,21 @@
 """$(TYPEDSIGNATURES)
 
 Default style for box-bound and path-bound horizontal reference lines.
+
+The colour is a concrete one, `CTBase.Plotting.COLORS.bound`, and not an index into a
+palette: an integer colour means the colour of that rank in the palette of the backend,
+and the palettes of Plots and Makie differ, so the same index drew the bounds in pink with
+Plots and, with Makie, in the colour of the first curve.
 """
-const _BOUND_STYLE = (color=15, linewidth=1, z_order=:back, label="")
+const _BOUND_STYLE = (color=Plotting.COLORS.bound, linewidth=1, z_order=:back, label="")
 
 """$(TYPEDSIGNATURES)
 
 Default style for initial/final time vertical reference lines.
 """
-const _TIME_STYLE = (color=:black, linestyle=:dash, linewidth=1, z_order=:back, label="")
+const _TIME_STYLE = (
+    color=Plotting.COLORS.time, linestyle=:dash, linewidth=1, z_order=:back, label=""
+)
 
 # Per-component horizontal bound lines from a box `(lb, ind, ub, …)`, aligned to a
 # panel of `ncomp` components: `hlines[i]` holds the lines for component `i`.

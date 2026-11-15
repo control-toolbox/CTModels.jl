@@ -4,6 +4,14 @@ This document describes breaking changes in CTModels releases and how to migrate
 
 ## [Unreleased]
 
+### Non-breaking note: the bounds change colour with Makie
+
+The bound lines of a plot were drawn with `color=15`, an index into the palette of the
+backend: pink with Plots, the colour of the first curve with Makie. They now take
+`CTBase.Plotting.COLORS.bound`, a concrete colour (`#dd65b6`, the pink of Plots), so Plots is
+unchanged and Makie draws pink bounds. The compat of `CTBase` moves to `0.30.14`. No public
+signature, type or name changed; no migration is required.
+
 ## [0.21.1] - 2026-11-03
 
 ### Non-breaking note: the positional path and boundary duals are deprecated

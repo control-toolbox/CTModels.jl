@@ -152,6 +152,23 @@ function test_plot_makie()
             Test.@test any(ax -> _count_plots(ax, Makie.VLines) >= 1, axs)
         end
 
+        Test.@testset "the bounds are not drawn in the colour of a curve (#527)" begin
+            # `color=15` was an index into the palette of the backend: with Makie, whose
+            # palette has seven colours, it wrapped around to colour 1, the first curve's
+            f = Makie.plot(sol)
+            bound = Makie.to_color(Plotting.COLORS.bound)
+            drawn(p) = Makie.to_color(p.color[] isa AbstractVector ? only(p.color[]) : p.color[])
+            hlines = [p for ax in _axes(f) for p in ax.scene.plots if p isa Makie.HLines]
+            Test.@test !isempty(hlines)
+            Test.@test all(p -> drawn(p) == bound, hlines)
+            curves = [
+                drawn(p) for ax in _axes(f) for p in ax.scene.plots if
+                p isa Union{Makie.Lines,Makie.Stairs}
+            ]
+            Test.@test !isempty(curves)
+            Test.@test bound ∉ curves
+        end
+
         Test.@testset "nothing to draw -> empty figure, no throw" begin
             f = Makie.plot(
                 sol_pc;
