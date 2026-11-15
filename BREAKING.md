@@ -2,7 +2,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [Unreleased]
+## [0.21.2] - 2026-11-15
 
 ### Non-breaking note: the bounds change colour with Makie
 
