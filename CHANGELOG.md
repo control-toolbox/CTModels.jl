@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+- **The bounds are no longer drawn in the colour of the first curve with Makie.** The default style of the bound lines was `color=15`, an index into the palette of the backend: pink with Plots, but colour 1 with Makie, whose palette has seven colours. The bounds and the time lines now take the concrete colours of `CTBase.Plotting.COLORS`; nothing changes with Plots
+  ([#527](https://github.com/control-toolbox/CTModels.jl/issues/527)).
+
 ### 📚 Documentation
 
 - Documentation previews now deploy only when requested with the
@@ -14,9 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ct-conventions pinned at `v0.13.0` and ct-agents at `v0.5.0` in `AGENTS.md`; the `Release` workflow of CTActions is called from `.github/workflows/Release.yml`.
 - ct-conventions pinned at `v0.14.0` in `AGENTS.md`; the header of `docs/make.jl` gives the docs build command `julia --project=docs docs/make.jl`, the command of CI, instead of `--project=.`, which let the root environment shadow `docs/` (`SITE18`, [ct-conventions#63](https://github.com/control-toolbox/ct-conventions/issues/63)).
 
+### 📦 Dependencies
+
+- The compat of `CTBase` moves to `0.30.14`, the release that provides `CTBase.Plotting.COLORS`.
+
 ### ✅ Compatibility
 
-- **No breaking changes**: documentation and CI only. See [BREAKING.md](BREAKING.md).
+- **No breaking changes.** With Makie, the bounds change colour, which is the fix. See [BREAKING.md](BREAKING.md).
 
 ## [0.21.1] - 2026-11-03
 

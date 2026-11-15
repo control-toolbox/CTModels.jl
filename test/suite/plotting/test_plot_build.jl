@@ -111,6 +111,22 @@ function test_plot_build()
             Test.@test isempty(_hlines(f_off))
         end
 
+        Test.@testset "bound and time lines use the colours of CTBase, not a palette index (#527)" begin
+            # an integer colour is an index into the palette of the backend, and the palettes
+            # of Plots and Makie differ: the lines take a concrete colour, the same everywhere
+            fig = CTModels.PlotCase.build_figure(sol, :state)
+            Test.@test !isempty(_hlines(fig))
+            Test.@test all(h -> h.style.color == Plotting.COLORS.bound, _hlines(fig))
+            Test.@test all(v -> v.style.color == Plotting.COLORS.time, _vlines(fig))
+            Test.@test !(CTModels.PlotCase._BOUND_STYLE.color isa Integer)
+            # a user style still replaces the default colour
+            f2 = CTModels.PlotCase.build_figure(
+                sol, :state; state_bounds_style=(color=:red,), time_style=(color=:blue,)
+            )
+            Test.@test all(h -> h.style.color === :red, _hlines(f2))
+            Test.@test all(v -> v.style.color === :blue, _vlines(f2))
+        end
+
         Test.@testset "free final time: VLines at initial_time / final_time" begin
             model = CTModels.model(sol_tf)
             v = CTModels.variable(sol_tf)
