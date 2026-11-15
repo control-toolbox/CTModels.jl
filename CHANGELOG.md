@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.2] - 2026-11-15
+
 ### 🐛 Bug Fixes
 
 - **The bounds are no longer drawn in the colour of the first curve with Makie.** The default style of the bound lines was `color=15`, an index into the palette of the backend: pink with Plots, but colour 1 with Makie, whose palette has seven colours. The bounds and the time lines now take the concrete colours of `CTBase.Plotting.COLORS`; nothing changes with Plots
