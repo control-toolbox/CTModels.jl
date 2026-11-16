@@ -157,13 +157,14 @@ function test_plot_makie()
             # palette has seven colours, it wrapped around to colour 1, the first curve's
             f = Makie.plot(sol)
             bound = Makie.to_color(Plotting.COLORS.bound)
-            drawn(p) = Makie.to_color(p.color[] isa AbstractVector ? only(p.color[]) : p.color[])
+            drawn(p) =
+                Makie.to_color(p.color[] isa AbstractVector ? only(p.color[]) : p.color[])
             hlines = [p for ax in _axes(f) for p in ax.scene.plots if p isa Makie.HLines]
             Test.@test !isempty(hlines)
             Test.@test all(p -> drawn(p) == bound, hlines)
             curves = [
-                drawn(p) for ax in _axes(f) for p in ax.scene.plots if
-                p isa Union{Makie.Lines,Makie.Stairs}
+                drawn(p) for ax in _axes(f) for
+                p in ax.scene.plots if p isa Union{Makie.Lines,Makie.Stairs}
             ]
             Test.@test !isempty(curves)
             Test.@test bound ∉ curves
