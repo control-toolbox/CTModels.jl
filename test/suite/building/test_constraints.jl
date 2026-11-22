@@ -482,6 +482,53 @@ function test_constraints()
             Test.@test val[1] ≈ 2.0
             Test.@test val[2] ≈ 5.0
         end
+
+        # ====================================================================
+        # INTEGRATION TESTS - nonlinear groups built by `build`
+        # ====================================================================
+
+        # The stacked group is a CompositeConstraint whatever the number of declared
+        # constraints, so its type and display do not depend on the cardinality (#533).
+        Test.@testset "build — nonlinear groups are CompositeConstraint for 0, 1, 2 declarations" begin
+            ocp0 = _make_min_premodel(; state_dim=2)
+            model0 = Building.build(ocp0)
+            path0 = Components.path_constraints_nl(model0)[2]
+            boundary0 = Components.boundary_constraints_nl(model0)[2]
+            Test.@test path0 isa Building.CompositeConstraint{:path}
+            Test.@test path0.n == 0
+            Test.@test boundary0 isa Building.CompositeConstraint{:boundary}
+            Test.@test boundary0.n == 0
+
+            ocp1 = _make_min_premodel(; state_dim=2)
+            Building.constraint!(
+                ocp1, :path; f=_path_stub2!, lb=[0.0, 0.0], ub=[1.0, 1.0], label=:p
+            )
+            Building.constraint!(ocp1, :boundary; f=_boundary_stub1!, lb=0.0, ub=1.0, label=:b)
+            model1 = Building.build(ocp1)
+            path1 = Components.path_constraints_nl(model1)[2]
+            boundary1 = Components.boundary_constraints_nl(model1)[2]
+            Test.@test path1 isa Building.CompositeConstraint{:path}
+            Test.@test path1.n == 1
+            Test.@test path1.dims == [2]
+            Test.@test boundary1 isa Building.CompositeConstraint{:boundary}
+            Test.@test boundary1.n == 1
+            val = zeros(2)
+            path1(val, 0.5, [3.0, 4.0], [7.0], nothing)
+            Test.@test val ≈ [4.0, 0.5]  # stub2: [x[2], t]
+            val = zeros(1)
+            boundary1(val, [2.0, 0.0], [5.0, 0.0], nothing)
+            Test.@test val ≈ [2.0]       # stub1: x0[1]
+
+            ocp2 = _make_min_premodel(; state_dim=2)
+            Building.constraint!(ocp2, :path; f=_path_stub1!, lb=0.0, ub=1.0, label=:p1)
+            Building.constraint!(
+                ocp2, :path; f=_path_stub2!, lb=[0.0, 0.0], ub=[1.0, 1.0], label=:p2
+            )
+            path2 = Components.path_constraints_nl(Building.build(ocp2))[2]
+            Test.@test path2 isa Building.CompositeConstraint{:path}
+            Test.@test path2.n == 2
+            Test.@test path2.dims == [1, 2]
+        end
     end
 end
 
