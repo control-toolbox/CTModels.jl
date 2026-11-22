@@ -1514,18 +1514,31 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get a labelled constraint from the model. Returns a tuple of the form
-`(type, f, lb, ub)` where `type` is the type of the constraint, `f` is the function,
-`lb` is the lower bound and `ub` is the upper bound.
+Get a labelled constraint from the model, as a tuple `(type, f, lb, ub)`.
 
-The function returns an exception if the label is not found in the model.
+`type` is the kind of the constraint (`:path`, `:boundary`, `:state`, `:control` or
+`:variable`), `f` an out-of-place function evaluating the constrained quantity, and
+`lb`, `ub` its bounds. `f` is a named functor, so it prints as such:
+
+| `type` | `f` | Call |
+|---|---|---|
+| `:path` | [`CTModels.Models.SubPathConstraint`](@extref) | `f(t, x, u, v)` |
+| `:boundary` | [`CTModels.Models.SubBoundaryConstraint`](@extref) | `f(x0, xf, v)` |
+| `:state` | [`CTModels.Models.BoxProjection`](@extref)`{:state}` | `f(t, x, u, v)` |
+| `:control` | [`CTModels.Models.BoxProjection`](@extref)`{:control}` | `f(t, x, u, v)` |
+| `:variable` | [`CTModels.Models.BoxProjection`](@extref)`{:variable}` | `f(x0, xf, v)` |
+
+A constraint of dimension one gives a scalar value and scalar bounds (1-D is a scalar).
 
 # Arguments
 - `model::Model`: The optimal control problem.
 - `label::Symbol`: The constraint label.
 
 # Returns
-- `Tuple`: A tuple of the form `(type, f, lb, ub)`.
+- `Tuple`: `(type, f, lb, ub)`.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if no constraint of the model has the label `label`.
 
 See also: [`CTModels.Models.constraints`](@extref), [`CTModels.Components.path_constraints_nl`](@extref).
 """
@@ -1535,12 +1548,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
     cp = Components.path_constraints_nl(model)
     indices = _nl_rows(cp, label)
     if !isempty(indices)
-        fc! = SubPathConstraint(cp, length(cp[1]), indices)
+        rows = length(indices) == 1 ? indices[1] : indices
         return (
             :path,
-            Core.to_out_of_place(fc!, length(indices)),
-            length(indices) == 1 ? cp[1][indices[1]] : cp[1][indices],
-            length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices],
+            SubPathConstraint(cp[2], length(cp[1]), rows),
+            cp[1][rows],
+            cp[3][rows],
         )
     end
 
@@ -1548,12 +1561,12 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
     cp = Components.boundary_constraints_nl(model)
     indices = _nl_rows(cp, label)
     if !isempty(indices)
-        fc! = SubBoundaryConstraint(cp, length(cp[1]), indices)
+        rows = length(indices) == 1 ? indices[1] : indices
         return (
             :boundary,
-            Core.to_out_of_place(fc!, length(indices)),
-            length(indices) == 1 ? cp[1][indices[1]] : cp[1][indices],
-            length(indices) == 1 ? cp[3][indices[1]] : cp[3][indices],
+            SubBoundaryConstraint(cp[2], length(cp[1]), rows),
+            cp[1][rows],
+            cp[3][rows],
         )
     end
 

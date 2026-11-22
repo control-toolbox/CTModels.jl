@@ -30,7 +30,7 @@ See also: [`CTModels.Components`](@extref), [`CTModels.Building`](@extref), [`CT
 """
 module Models
 
-using CTBase: CTBase, Core, Exceptions, Traits
+using CTBase: CTBase, Exceptions, Traits
 # Time/variable/control-dependence predicates are generic functions owned by
 # CTBase.Traits; CTModels only provides the `Model` trait contract (see model.jl)
 # and re-exports them.

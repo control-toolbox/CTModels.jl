@@ -79,7 +79,7 @@ function test_type_show()
         Test.@test occursin("state", _show_string(multi_grid; plain=true))
         Test.@test occursin("status", _show_string(Solutions.EmptyDualModel(); plain=true))
 
-        subpath = Models.SubPathConstraint(((1,), (r, t, x, u, v) -> nothing), 1, 1)
+        subpath = Models.SubPathConstraint((r, t, x, u, v) -> nothing, 1, 1)
         projection = Models.BoxProjection{:state}(1)
         merged = Init.MergedTrajectory(t -> [0.0], Dict{Int,Function}(), 1, :state)
         constant = Components.ConstantInTime(1.0)

@@ -10,6 +10,10 @@ using CTModels: Models
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+# Module-level stacked constraints for the SubPathConstraint / SubBoundaryConstraint tests
+_stacked_path!(r, t, x, u, _) = (r[1] = t; r[2] = x[1]; r[3] = u[1]; nothing)
+_stacked_boundary!(r, x0, xf, _) = (r[1] = x0[1]; r[2] = xf[1]; nothing)
+
 function test_model()
     Test.@testset "Model Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
@@ -570,29 +574,55 @@ function test_model()
             Test.@inferred f_variable(nothing, nothing, v)
         end
 
-        Test.@testset "SubPathConstraint" begin
-            # stub cp tuple: (lb, fun!, ub, labels, aliases)
-            # fun!(r, t, x, u, v) fills r with [t, x[1], u[1]]
-            _cp_fun!(r, t, x, u, _) = (r[1]=t; r[2]=x[1]; r[3]=u[1])
-            cp = ([0.0, 0.0, 0.0], _cp_fun!, [1.0, 1.0, 1.0], [:a, :b, :c], [])
-            f = Models.SubPathConstraint(cp, 3, [2, 3])
-            r = zeros(2)
-            f(r, 0.5, [3.0], [7.0], nothing)
+        Test.@testset "SubPathConstraint — vector rows" begin
+            f = Models.SubPathConstraint(_stacked_path!, 3, [2, 3])
             Test.@test f isa Function
-            Test.@test r == [3.0, 7.0]
-            Test.@test contains(repr(f), "SubPathConstraint")
+            Test.@test f(0.5, [3.0], [7.0], nothing) == [3.0, 7.0]
+            Test.@test f(0.5, [3.0], [7.0], nothing) isa Vector{Float64}
+            Test.@test repr(f) == "SubPathConstraint(n=3, indices=[2, 3])"
             Test.@test contains(repr(MIME("text/plain"), f), "SubPathConstraint")
         end
 
-        Test.@testset "SubBoundaryConstraint" begin
-            _cp_fun!(r, x0, xf, _) = (r[1]=x0[1]; r[2]=xf[1])
-            cp = ([0.0, 0.0], _cp_fun!, [1.0, 1.0], [:a, :b], [])
-            f = Models.SubBoundaryConstraint(cp, 2, [2])
-            r = zeros(1)
-            f(r, [2.0], [9.0], nothing)
+        Test.@testset "SubPathConstraint — scalar row (1-D is a scalar)" begin
+            f = Models.SubPathConstraint(_stacked_path!, 3, 1)
+            Test.@test f(0.5, [3.0], [7.0], nothing) === 0.5
+            Test.@test repr(f) == "SubPathConstraint(n=3, indices=1)"
+        end
+
+        Test.@testset "SubPathConstraint — buffer widens to the arguments" begin
+            f = Models.SubPathConstraint(_stacked_path!, 3, [2, 3])
+            Test.@test f(0.5, BigFloat[3], [7.0], nothing) isa Vector{BigFloat}
+            Test.@test f(0.5, 3, 7, nothing) == [3.0, 7.0]  # scalar state and control
+        end
+
+        Test.@testset "SubBoundaryConstraint — vector rows" begin
+            f = Models.SubBoundaryConstraint(_stacked_boundary!, 2, [1, 2])
             Test.@test f isa Function
-            Test.@test r == [9.0]
-            Test.@test contains(repr(f), "SubBoundaryConstraint")
+            Test.@test f([2.0], [9.0], nothing) == [2.0, 9.0]
+            Test.@test repr(f) == "SubBoundaryConstraint(n=2, indices=[1, 2])"
+            Test.@test contains(repr(MIME("text/plain"), f), "SubBoundaryConstraint")
+        end
+
+        Test.@testset "SubBoundaryConstraint — scalar row (1-D is a scalar)" begin
+            f = Models.SubBoundaryConstraint(_stacked_boundary!, 2, 2)
+            Test.@test f([2.0], [9.0], nothing) === 9.0
+            Test.@test f(BigFloat[2], [9.0], nothing) isa BigFloat
+        end
+
+        # Contract: the call must infer, for both shapes of the rows.
+        Test.@testset "SubPathConstraint, SubBoundaryConstraint — type stability" begin
+            x, u = [3.0], [7.0]
+            Test.@inferred Models.SubPathConstraint(_stacked_path!, 3, 1)(0.5, x, u, nothing)
+            Test.@inferred Models.SubPathConstraint(_stacked_path!, 3, [2, 3])(
+                0.5, x, u, nothing
+            )
+            x0, xf = [2.0], [9.0]
+            Test.@inferred Models.SubBoundaryConstraint(_stacked_boundary!, 2, 2)(
+                x0, xf, nothing
+            )
+            Test.@inferred Models.SubBoundaryConstraint(_stacked_boundary!, 2, [1, 2])(
+                x0, xf, nothing
+            )
         end
     end
 end
