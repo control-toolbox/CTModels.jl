@@ -1435,6 +1435,41 @@ See also: [`CTModels.Models.definition`](@extref).
 Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
 
 # ------------------------------------------------------------------------------ #
+# is_unnamed_label(label) — a label generated for a constraint written without one
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether `label` was generated for a constraint declared without a label, rather than given
+by the user.
+
+A generated label comes from `gensym`, so its name contains `##`: CTModels gives an
+unnamed constraint `gensym(:unnamed)` (`##unnamed#288`), and a parser may use its own
+prefix (CTParser gives `label##288`). A label given by the user is a Julia identifier and
+never contains `##`. A generated label differs from one model instance to another: it is
+not shown to the user nor compared between models.
+
+# Arguments
+- `label::Symbol`: A constraint label.
+
+# Returns
+- `Bool`: `true` for a generated label, `false` for a label given by the user.
+
+# Example
+```julia-repl
+julia> CTModels.Models.is_unnamed_label(gensym(:unnamed))
+true
+
+julia> CTModels.Models.is_unnamed_label(:u_box)
+false
+```
+
+See also: [`CTModels.Models.constraint_rows`](@extref).
+"""
+is_unnamed_label(label::Symbol)::Bool = occursin("##", String(label))
+
+# ------------------------------------------------------------------------------ #
 # constraint_rows(::Model, label) — where a labelled constraint lives
 # ------------------------------------------------------------------------------ #
 
@@ -1471,6 +1506,49 @@ function constraint_rows(model::Model, label::Symbol)::Tuple{Symbol,Vector{Int}}
     rows = _box_components(Components.variable_constraints_box(model), label)
     isempty(rows) || return (:variable, rows)
     return _throw_constraint_label_not_found(label)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Describe the constraint labelled `label`, of kind `kind` and rows `rows` (as returned by
+[`CTModels.Models.constraint_rows`](@extref)), for a message: its kind and its label,
+`path constraint :c1`, `state box :x2_box`. A constraint declared without a label (see
+[`CTModels.Models.is_unnamed_label`](@extref)) is described by what is known of it, never
+by its generated label: its rows for a nonlinear constraint, `unnamed path constraint
+(rows 2:3)`, the components it bounds for a box, `unnamed control box on u`.
+"""
+function _describe_constraint(
+    model::Model, label::Symbol, kind::Symbol, rows::Vector{Int}
+)::String
+    what = kind in (:path, :boundary) ? "$kind constraint" : "$kind box"
+    is_unnamed_label(label) || return "$what :$label"
+    if kind in (:path, :boundary)
+        at = length(rows) == 1 ? "row $(only(rows))" : "rows $(first(rows)):$(last(rows))"
+        return "unnamed $what ($at)"
+    end
+    names = if kind === :state
+        state_components(model)
+    elseif kind === :control
+        control_components(model)
+    else
+        variable_components(model)
+    end
+    return "unnamed $what on " * join(names[rows], ", ")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Describe the constraint labelled `label` of `model` for a message (see
+[`CTModels.Models._describe_constraint`](@extref) with its kind and rows).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+"""
+function _describe_constraint(model::Model, label::Symbol)::String
+    return _describe_constraint(model, label, constraint_rows(model, label)...)
 end
 
 """

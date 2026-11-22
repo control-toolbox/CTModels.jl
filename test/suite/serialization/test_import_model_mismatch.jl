@@ -225,6 +225,21 @@ function test_import_model_mismatch()
                 Test.@test occursin("boundary constraint labels", err.got)
             end
 
+            Test.@testset "generated labels of unnamed constraints: silent (#526)" begin
+                # the label of an unnamed constraint differs from one instance of the
+                # model to another (`gensym`): a file matches any instance
+                ocp_u = _model(; path_label=gensym(:label))   # as CTParser names it
+                data_u = Solutions._serialize_solution(_solution(ocp_u))
+                Test.@test data_u["model_signature"]["labels_path_nl"] == [""]
+                Test.@test_logs validate(_model(; path_label=gensym(:unnamed)), data_u)
+                # a file written before the labels of CTParser were recognised
+                data_u["model_signature"]["labels_path_nl"] = ["label##288"]
+                Test.@test_logs validate(_model(; path_label=gensym(:label)), data_u)
+                # an unnamed constraint does not match a labelled one
+                err = _caught(() -> validate(ocp, data_u))
+                Test.@test occursin("path constraint labels", err.got)
+            end
+
             Test.@testset "fixed vs free time: error" begin
                 fixed = Solutions._serialize_solution(_solution(_model(; nv=1)))
                 free = Solutions._serialize_solution(

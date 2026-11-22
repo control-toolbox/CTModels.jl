@@ -598,17 +598,18 @@ function _place_dual_limits(sw::SwitchingModel, ocp::Model)::SwitchingModel
     placed = Dict{Symbol,NTuple{2,Matrix{Float64}}}()
     for (label, (left, right)) in sw.labelled_duals
         kind, rows = constraint_rows(ocp, label)
+        desc = Models._describe_constraint(ocp, label, kind, rows)
         kind in (:path, :state, :control) || throw(
             Exceptions.IncorrectArgument(
                 "no limits at the switching times for a $kind constraint";
-                got="limits of :$label (a $kind constraint)",
+                got="limits of the $desc",
                 expected="the label of a path constraint or of a state or control box",
                 suggestion="Give the limits of the time-dependent duals only; the dual of a $kind constraint does not depend on time.",
                 context="build_solution - placing the limits of the duals",
             ),
         )
         _ensure_dual_size(
-            label, length(rows), size(left, 2), "number of columns of the limits"
+            label, desc, length(rows), size(left, 2), "number of columns of the limits"
         )
         dim = getproperty(dims, kind)
         L, R = get!(() -> (fill(NaN, n, dim), fill(NaN, n, dim)), placed, kind)
