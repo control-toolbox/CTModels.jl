@@ -102,6 +102,23 @@ function test_code_quality()
                 nothing, [1.0, 2.0, 3.0], nothing, nothing
             )
 
+            # --- Hamiltonians of a model (Models; CTModels#532) — evaluated at every
+            #     step of a Hamiltonian flow, and differentiated ---
+            dyn_h! = (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u; nothing)
+            lag_h = (t, x, u, v) -> u^2
+            f_ph = Models.PseudoHamiltonianFunction{
+                CTBase.Traits.Autonomous,CTBase.Traits.Fixed,typeof(dyn_h!),typeof(lag_h)
+            }(
+                dyn_h!, lag_h, -1.0, 2
+            )
+            JET.@test_opt target_modules = (CTModels,) f_ph([1.0, 2.0], [3.0, 4.0], 0.5)
+            f_h = Models.HamiltonianFunction{
+                CTBase.Traits.NonAutonomous,CTBase.Traits.NonFixed,typeof(dyn_h!),Nothing
+            }(
+                dyn_h!, nothing, -1.0, 2
+            )
+            JET.@test_opt target_modules = (CTModels,) f_h(0.5, [1.0, 2.0], [3.0, 4.0], 0.7)
+
             # --- Composite dynamics assembled from coordinate parts (Building;
             #     issue #496) — evaluated once per solver step ---
             parts = Tuple{UnitRange{Int},Function}[
