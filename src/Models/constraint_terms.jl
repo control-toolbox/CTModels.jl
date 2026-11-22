@@ -18,9 +18,21 @@
 # One labelled constraint
 # ------------------------------------------------------------------------------
 
-const _LOWER = 1    # lower bound only
-const _UPPER = 2    # upper bound only
-const _BOTH = 3     # two finite bounds, or an equality
+"""
+Side code of a constraint component with a finite lower bound only: term `y (c − lb)`.
+"""
+const _LOWER = 1
+
+"""
+Side code of a constraint component with a finite upper bound only: term `y (ub − c)`.
+"""
+const _UPPER = 2
+
+"""
+Side code of a constraint component with two finite bounds, or an equality: term
+`−y (c − b)`, with `b = ub` if `y > 0` and `b = lb` otherwise.
+"""
+const _BOTH = 3
 
 """
 $(TYPEDEF)
@@ -35,8 +47,20 @@ struct _BoxValue{Slot}
     components::Vector{Int}
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Component `i` of a state or control: the number itself for a one-dimensional quantity
+(ct-conventions `DIM1`), `z[i]` otherwise.
+"""
 _component(z::Number, ::Int) = z
 _component(z::AbstractVector, i::Int) = z[i]
+"""
+$(TYPEDSIGNATURES)
+
+Value of a box: the bounded components of the state (`:state`) or of the control
+(`:control`), as a vector.
+"""
 (c::_BoxValue{:state})(t, x, u, v) = map(i -> _component(x, i), c.components)
 (c::_BoxValue{:control})(t, x, u, v) = map(i -> _component(u, i), c.components)
 
@@ -86,6 +110,13 @@ function _side_term(side::Int, lb::Float64, ub::Float64, c, y)
     return -y * (c - ifelse(y > 0, ub, lb))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Value of the term of a labelled constraint for the multiplier `y` (a number for a
+one-dimensional constraint, a vector otherwise): the sum over its components of
+[`CTModels.Models._side_term`](@extref).
+"""
 function (τ::_ConstraintTerm)(t, x, u, y, v)
     return sum(_side_term.(τ.side, τ.lb, τ.ub, τ.c(t, x, u, v), y))
 end
@@ -289,6 +320,13 @@ function _constrained_pseudo_H(h::ConstrainedPseudoHamiltonianFunction, t, x, p,
     return val + sum(terms)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Call operators of [`CTModels.Models.ConstrainedPseudoHamiltonianFunction`](@extref), one
+natural arity per `(TD, VD)` pair: `H(x, p, u, μ)`, `H(t, x, p, u, μ)`, `H(x, p, u, μ, v)`
+and `H(t, x, p, u, μ, v)`.
+"""
 function (h::ConstrainedPseudoHamiltonianFunction{Traits.Autonomous,Traits.Fixed})(
     x, p, u, μ
 )
@@ -314,10 +352,20 @@ end
 # Multipliers in feedback form, stacked in the order of the labels
 # ------------------------------------------------------------------------------
 
+"""
+$(TYPEDSIGNATURES)
+
+Join of two time dependences: `Autonomous` only if both are.
+"""
 _join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
 function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
     return Traits.NonAutonomous
 end
+"""
+$(TYPEDSIGNATURES)
+
+Join of two variable dependences: `Fixed` only if both are.
+"""
 _join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
 function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
     return Traits.NonFixed
@@ -370,12 +418,24 @@ function _checked_part(m::_StackedMultiplier, k::Int, y)
     return d == 1 ? only(y) : y
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+The stacked value of the multipliers at `(t, x, p, v)`, each checked against the
+dimension of its constraint: a number if there is one component in all.
+"""
 function _stacked_value(m::_StackedMultiplier, t, x, p, v)
     ks = ntuple(identity, length(m.parts))
     values = map((μk, k) -> _checked_part(m, k, μk(t, x, p, v)), m.parts, ks)
     return length(values) == 1 ? only(values) : reduce(vcat, values)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Call operators of [`CTModels.Models._StackedMultiplier`](@extref), one natural arity per
+`(TD, VD)` pair: `μ(x, p)`, `μ(t, x, p)`, `μ(x, p, v)` and `μ(t, x, p, v)`.
+"""
 function (m::_StackedMultiplier{Traits.Autonomous,Traits.Fixed})(x, p)
     return _stacked_value(m, 0.0, x, p, nothing)
 end

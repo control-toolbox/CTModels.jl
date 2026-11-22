@@ -11,6 +11,10 @@ LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 MarkdownAST = "d0879d2d-cac2-40c8-9cee-1863dc0c7391"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
+[sources]
+# Temporary, until CTBase 0.30.15 is released (control-toolbox/CTBase.jl#663).
+CTBase = {url = "https://github.com/control-toolbox/CTBase.jl", rev = "feat/constrained-pseudo-hamiltonian"}
+
 [compat]
 CTBase = "0.30.11"
 CairoMakie = "0.15"

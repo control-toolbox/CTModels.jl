@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New Features
 
+- **Hamiltonians of a model** ([#532](https://github.com/control-toolbox/CTModels.jl/issues/532)). They are methods of `CTBase.Data.pseudo_hamiltonian` and `CTBase.Data.hamiltonian`, re-exported by `CTModels.Models`. They replace the private builders of CTFlows.
+  - `pseudo_hamiltonian(ocp; p0)` returns the pseudo-Hamiltonian `H̃ = p·f + p⁰ℓ` of a problem with a control.
+  - `hamiltonian(ocp, u; p0)` returns the Hamiltonian for a control law in feedback form.
+  - `hamiltonian(ocp; p0)` returns the Hamiltonian of a control-free problem.
+  - `p0` defaults to `-1` for `:min` and `+1` for `:max`. `p0 = 0` is the abnormal case. A sign that contradicts the criterion is rejected (ct-conventions `SGN4`).
+- **Constraints by label in the Hamiltonians.**
+  - `pseudo_hamiltonian(ocp; constraints=…)` returns the constrained pseudo-Hamiltonian `H(t, x, p, u, μ, v)`, with the multipliers as an explicit argument.
+  - `hamiltonian(ocp, u; multipliers=label => μ)` takes the multipliers in feedback form.
+  - Path constraints, state boxes and control boxes enter by label; boundary constraints and variable boxes are rejected.
+  - The multipliers follow the sign convention of the duals of a solution (`SGN2`, `SGN3`). The active side of a two-sided constraint is read on the sign of the multiplier.
+
+### 📚 Documentation
+
+- New page "Hamiltonians" in the OCP Model section.
+
+### 📦 Dependencies
+
+- `ForwardDiff` is a new test dependency.
+- The compat of `CTBase` moves to `0.30.15`, the release that provides the constrained Hamiltonians.
+
+### ✨ New Features
+
 - `CTModels.Models.is_unnamed_label(label)` tells a label generated for an unnamed constraint (any `gensym`, whose name contains `##`) from a label given by the user. The plot and the model signature share it.
 
 ### 🐛 Bug Fixes

@@ -135,6 +135,14 @@ function _pseudo_H(h::PseudoHamiltonianFunction, t, x, p, u, v)
     return val
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Call operators of [`CTModels.Models.PseudoHamiltonianFunction`](@extref), one natural
+arity per `(TD, VD)` pair: `H̃(x, p, u)`, `H̃(t, x, p, u)`, `H̃(x, p, u, v)` and
+`H̃(t, x, p, u, v)`. An autonomous problem is evaluated at `t = 0`, a problem without
+variable with an empty variable.
+"""
 function (h::PseudoHamiltonianFunction{Traits.Autonomous,Traits.Fixed})(x, p, u)
     return _pseudo_H(h, 0.0, x, p, u, nothing)
 end
@@ -205,6 +213,12 @@ function _control_free_H(h::HamiltonianFunction, t, x, p, v)
     return val
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Call operators of [`CTModels.Models.HamiltonianFunction`](@extref), one natural arity
+per `(TD, VD)` pair: `H(x, p)`, `H(t, x, p)`, `H(x, p, v)` and `H(t, x, p, v)`.
+"""
 function (h::HamiltonianFunction{Traits.Autonomous,Traits.Fixed})(x, p)
     return _control_free_H(h, 0.0, x, p, nothing)
 end
@@ -395,7 +409,7 @@ multiplier in the sign convention of the duals of a solution (ct-conventions `SG
 `SGN3`), component by component:
 
 | Bounds of the component | Term | Multiplier `y` |
-| --- | --- | --- |
+| :--- | :--- | :--- |
 | lower only, `lb ≤ c` | `y (c − lb)` | `y ≥ 0` |
 | upper only, `c ≤ ub` | `y (ub − c)` | `y ≥ 0` |
 | both, or `c = lb = ub` | `−y (c − b)`, `b = ub` if `y > 0`, `lb` otherwise | signed |
