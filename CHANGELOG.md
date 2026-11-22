@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation
 
 - The "Constraints" page explains the stacked nonlinear groups and shows what `constraint(ocp, label)` returns, for each kind of constraint.
+- ct-conventions pinned at `v0.15.0` in `AGENTS.md`.
 
 ### ✅ Compatibility
 
