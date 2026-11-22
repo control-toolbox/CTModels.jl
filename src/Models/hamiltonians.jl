@@ -253,14 +253,16 @@ end
 $(TYPEDSIGNATURES)
 
 A one-line diagnostic if the raw function `f` has a single method whose arity is not the
-natural arity for `ocp`, `nothing` otherwise. A function with several methods is not
-checked: the intended arity cannot be known.
+natural arity for `ocp`, `nothing` otherwise. A function with several methods, or with a
+variable number of arguments, is not checked: the intended arity cannot be known.
 
 See also: [`CTModels.Models._expected_arity`](@extref).
 """
 function _arity_issue(f::Function, ocp::Model, name::AbstractString, kind::AbstractString)
     length(methods(f)) == 1 || return nothing
-    arity = first(methods(f)).nargs - 1
+    method = first(methods(f))
+    method.isva && return nothing
+    arity = method.nargs - 1
     expected = _expected_arity(ocp)
     arity == expected && return nothing
     return "$kind `$name` has arity $arity, expected $expected: natural syntax is `$(_natural_syntax(name, ocp))`"
@@ -377,53 +379,91 @@ Return the pseudo-Hamiltonian of the optimal control problem `ocp`,
 \\tilde H(t, x, p, u, v) = p \\cdot f(t, x, u, v) + p^0\\, \\ell(t, x, u, v),
 ```
 
-as a `CTBase.Data.PseudoHamiltonian` with the time and variable dependence of `ocp`,
-where `f` is the dynamics and `ℓ` the Lagrange cost (absent for a Mayer problem). It
-does not depend on any control law.
+where `f` is the dynamics and `ℓ` the Lagrange cost (absent for a Mayer problem). It does
+not depend on any control law. The pseudo-Hamiltonian is always **maximised**
+(ct-conventions `SGN4`): only the sign of `p⁰` depends on the criterion.
 
-The pseudo-Hamiltonian is always **maximised** (ct-conventions `SGN4`): only the sign of
-`p⁰` depends on the criterion.
+With `constraints`, the labelled path constraints, state boxes or control boxes are
+adjoined with their multipliers `μ`, an **explicit argument** like the control:
+
+```math
+H(t, x, p, u, \\mu, v) = \\tilde H(t, x, p, u, v) + \\sum_k \\mu_k \\cdot g_k(t, x, u, v),
+```
+
+where each constraint `lb ≤ c ≤ ub` enters on its active side, `g ≥ 0`, with its
+multiplier in the sign convention of the duals of a solution (ct-conventions `SGN2`,
+`SGN3`), component by component:
+
+| Bounds of the component | Term | Multiplier `y` |
+| --- | --- | --- |
+| lower only, `lb ≤ c` | `y (c − lb)` | `y ≥ 0` |
+| upper only, `c ≤ ub` | `y (ub − c)` | `y ≥ 0` |
+| both, or `c = lb = ub` | `−y (c − b)`, `b = ub` if `y > 0`, `lb` otherwise | signed |
+
+For a constraint with two bounds the active side is read on the sign of `y`; the term is
+continuous at `y = 0`. Constraints not listed are inactive. The partial derivatives of
+`H` in `x` and `p`, at fixed `u` and `μ` (see `CTBase.Data.freeze_multiplier`), give the
+extremals of the maximum principle.
 
 # Arguments
 - `ocp::Model`: an optimal control problem **with a control**.
 - `p0::Real`: the multiplier of the cost; `-1` for `:min` and `+1` for `:max` by default
   (normal case), `0` for the abnormal case. Its sign must agree with the criterion.
+- `constraints`: a label, or a tuple or vector of labels, of path constraints, state
+  boxes or control boxes of `ocp`; none by default.
 
 # Returns
-- `CTBase.Data.PseudoHamiltonian`: callable with its natural signature,
-  `H̃(x, p, u)`, `H̃(t, x, p, u)`, `H̃(x, p, u, v)` or `H̃(t, x, p, u, v)`, and with the
-  uniform signature `H̃(t, x, p, u, v)`. A one-dimensional state, control or variable is a
-  number.
+- Without `constraints`, a `CTBase.Data.PseudoHamiltonian`, callable with its natural
+  signature, `H̃(x, p, u)`, `H̃(t, x, p, u)`, `H̃(x, p, u, v)` or `H̃(t, x, p, u, v)`, and
+  with the uniform signature `H̃(t, x, p, u, v)`.
+- With `constraints`, a `CTBase.Data.ConstrainedPseudoHamiltonian`, callable as
+  `H([t, ]x, p, u, μ[, v])` and `H(t, x, p, u, μ, v)`, where `μ` stacks the multipliers of
+  the labels in the order given, each with the components of its constraint.
+
+A one-dimensional state, control, variable or multiplier is a number.
 
 # Throws
 - `CTBase.Exceptions.PreconditionError`: if `ocp` is control-free (use
   [`CTBase.Data.hamiltonian`](@extref) instead).
-- `CTBase.Exceptions.IncorrectArgument`: if the sign of `p0` contradicts the criterion.
+- `CTBase.Exceptions.IncorrectArgument`: if the sign of `p0` contradicts the criterion;
+  if a label is unknown, given twice, or names a boundary constraint or a variable box,
+  which do not enter the Hamiltonian; and, at the call, if `μ` does not have the
+  dimension of the constraints.
 
 # Example
 
 ```julia-repl
-julia> H̃ = CTModels.Models.pseudo_hamiltonian(ocp)          # ẋ = u, ∫ x² → min
+julia> H̃ = CTModels.Models.pseudo_hamiltonian(ocp)    # ẋ = u, ∫ x² → min, x(t) ≥ 0.1, (x_con)
 
-julia> H̃(1.0, 2.0, 0.5)                                    # p·u − x² = 0.0
+julia> H̃(1.0, 2.0, 0.5)                              # p·u − x²
 0.0
 
 julia> CTModels.Models.pseudo_hamiltonian(ocp; p0=0)(1.0, 2.0, 0.5)   # abnormal: p·u
 1.0
+
+julia> H = CTModels.Models.pseudo_hamiltonian(ocp; constraints=:x_con);
+
+julia> H(1.0, 2.0, 0.5, 3.0)                         # p·u − x² + μ (x − 0.1)
+2.7
 ```
 
 See also: [`CTBase.Data.hamiltonian`](@extref),
-[`CTModels.Models.PseudoHamiltonianFunction`](@extref).
+[`CTModels.Models.PseudoHamiltonianFunction`](@extref),
+[`CTModels.Models.ConstrainedPseudoHamiltonianFunction`](@extref).
 """
-function Data.pseudo_hamiltonian(ocp::Model; p0::Real=_normal_p0(ocp))
-    context = "pseudo_hamiltonian(ocp; p0)"
+function Data.pseudo_hamiltonian(ocp::Model; p0::Real=_normal_p0(ocp), constraints=())
+    context = "pseudo_hamiltonian(ocp; p0, constraints)"
     _require_control(
         ocp,
         "the pseudo-Hamiltonian of a control-free problem is not defined",
         "Use hamiltonian(ocp) for the Hamiltonian of a control-free problem",
         context,
     )
-    return _pseudo_hamiltonian(ocp, _checked_p0(ocp, p0, context))
+    p0 = _checked_p0(ocp, p0, context)
+    labels = _labels(constraints)
+    isempty(labels) && return _pseudo_hamiltonian(ocp, p0)
+    terms = _constraint_terms(ocp, labels, context)
+    return _constrained_pseudo_hamiltonian(ocp, p0, terms)
 end
 
 """
@@ -460,25 +500,36 @@ as a `CTBase.Data.Hamiltonian` with the time and variable dependence of `ocp`.
 - `p0::Real`: the multiplier of the cost; `-1` for `:min` and `+1` for `:max` by default
   (normal case), `0` for the abnormal case. Its sign must agree with the criterion
   (ct-conventions `SGN4`).
+- `multipliers`: must be left empty. Constraints are not adjoined to the Hamiltonian of
+  a control-free problem: such a problem is easily ill-posed, and these conditions are
+  rather boundary conditions.
 
 # Returns
 - `CTBase.Data.Hamiltonian`: callable as `H([t, ]x, p[, v])` and `H(t, x, p, v)`.
 
 # Throws
 - `CTBase.Exceptions.PreconditionError`: if `ocp` has a control (give a control law:
-  `hamiltonian(ocp, u)`).
+  `hamiltonian(ocp, u)`), or if `multipliers` are given.
 - `CTBase.Exceptions.IncorrectArgument`: if the sign of `p0` contradicts the criterion.
 
 See also: [`CTBase.Data.pseudo_hamiltonian`](@extref),
 [`CTModels.Models.HamiltonianFunction`](@extref).
 """
-function Data.hamiltonian(ocp::Model; p0::Real=_normal_p0(ocp))
+function Data.hamiltonian(ocp::Model; p0::Real=_normal_p0(ocp), multipliers=())
     context = "hamiltonian(ocp; p0)"
     _require_control_free(
         ocp,
         "the Hamiltonian of a problem with a control needs a control law",
         "Use hamiltonian(ocp, u) with a control law u, or pseudo_hamiltonian(ocp)",
         context,
+    )
+    isempty(multipliers) || throw(
+        Exceptions.PreconditionError(
+            "constraints are not adjoined to the Hamiltonian of a control-free problem";
+            reason="the problem is control-free",
+            suggestion="Write these conditions as boundary conditions",
+            context=context,
+        ),
     )
     p0 = _checked_p0(ocp, p0, context)
     TD = Traits.time_dependence(ocp)
@@ -497,12 +548,13 @@ $(TYPEDSIGNATURES)
 Return the Hamiltonian of the optimal control problem `ocp` for the control law `u`,
 
 ```math
-H(t, x, p, v) = \\tilde H(t, x, p, u(t, x, p, v), v),
+h(t, x, p, v) = \\tilde H(t, x, p, u(t, x, p, v), v) + \\sum_k \\mu_k(t, x, p, v) \\cdot g_k(t, x, u(t, x, p, v), v),
 ```
 
-where `H̃` is [`CTBase.Data.pseudo_hamiltonian`](@extref)`(ocp; p0)`, as a
-`CTBase.Data.ComposedHamiltonian`. Differentiating it gives the total derivative,
-through the control law.
+where the sum runs over the constraints given in `multipliers`, adjoined as in
+[`CTBase.Data.pseudo_hamiltonian`](@extref)`(ocp; constraints)`, with their multipliers in
+feedback form. Differentiating `h` gives the total derivative, through the control law
+and the multipliers.
 
 # Arguments
 - `ocp::Model`: an optimal control problem with a control.
@@ -510,39 +562,62 @@ through the control law.
   function with the natural arity of the problem: `u(x, p)`, `u(t, x, p)`, `u(x, p, v)`
   or `u(t, x, p, v)`.
 - `p0::Real`: the multiplier of the cost; see [`CTBase.Data.pseudo_hamiltonian`](@extref).
+- `multipliers`: the multipliers of the constraints active on the arc, as
+  `label => μ` pairs (a `Pair`, a tuple of pairs, a `NamedTuple` or a `Dict`). Each `μ`
+  is a `CTBase.Data.Multiplier`, or a function with the natural arity of the problem,
+  `μ(x, p)`, `μ(t, x, p)`, `μ(x, p, v)` or `μ(t, x, p, v)`, returning the multiplier in
+  the sign convention of the duals of a solution, with the components of its constraint
+  (a number for a one-dimensional constraint). None by default.
 
 # Returns
-- `CTBase.Data.ComposedHamiltonian`: callable as `H([t, ]x, p[, v])` and `H(t, x, p, v)`,
-  with the joined time and variable dependence of the problem and the law.
+- Without `multipliers`, a `CTBase.Data.ComposedHamiltonian`; with `multipliers`, a
+  `CTBase.Data.ComposedConstrainedHamiltonian`. Both are callable as `h([t, ]x, p[, v])`
+  and `h(t, x, p, v)`, with the joined time and variable dependence of the problem, the
+  law and the multipliers.
 
 # Throws
 - `CTBase.Exceptions.PreconditionError`: if `ocp` is control-free (use
   `hamiltonian(ocp)`).
-- `CTBase.Exceptions.IncorrectArgument`: if `u` is an open-loop or closed-loop law, if
-  a raw `u` has a single method with the wrong arity, or if the sign of `p0` contradicts
-  the criterion.
+- `CTBase.Exceptions.IncorrectArgument`: if `u` is an open-loop or closed-loop law; if a
+  raw `u` or `μ` has a single method with the wrong arity; if the sign of `p0`
+  contradicts the criterion; if a label is unknown, given twice, or does not enter the
+  Hamiltonian; and, at the call, if a multiplier does not have the dimension of its
+  constraint.
 
 # Example
 
 ```julia-repl
-julia> H = CTModels.Models.hamiltonian(ocp, (x, p) -> p)    # ẋ = u, ∫ x² → min, u = p
+julia> h = CTModels.Models.hamiltonian(ocp, (x, p) -> p)    # ẋ = u, ∫ x² → min, u = p
 
-julia> H(1.0, 2.0)                                         # p² − x²
+julia> h(1.0, 2.0)                                         # p² − x²
 3.0
+
+julia> hb = CTModels.Models.hamiltonian(ocp, (x, p) -> 0.0; multipliers=(:x_con => (x, p) -> 2x));
+
+julia> hb(1.0, 2.0)                                        # −x² + 2x (x − 0.1)
+0.8
 ```
 
-See also: [`CTBase.Data.pseudo_hamiltonian`](@extref), `CTBase.Data.ComposedHamiltonian`.
+See also: [`CTBase.Data.pseudo_hamiltonian`](@extref), `CTBase.Data.ComposedHamiltonian`,
+`CTBase.Data.ComposedConstrainedHamiltonian`.
 """
 function Data.hamiltonian(
-    ocp::Model, u::Union{Function,Data.ControlLaw}; p0::Real=_normal_p0(ocp)
+    ocp::Model, u::Union{Function,Data.ControlLaw}; p0::Real=_normal_p0(ocp), multipliers=()
 )
-    context = "hamiltonian(ocp, u; p0)"
+    context = "hamiltonian(ocp, u; p0, multipliers)"
     _require_control(
         ocp,
         "a control law is given for a control-free problem",
         "Use hamiltonian(ocp) for the Hamiltonian of a control-free problem",
         context,
     )
-    h̃ = _pseudo_hamiltonian(ocp, _checked_p0(ocp, p0, context))
-    return Data.ComposedHamiltonian(h̃, _control_law(ocp, u, context))
+    p0 = _checked_p0(ocp, p0, context)
+    law = _control_law(ocp, u, context)
+    specs = _multiplier_pairs(multipliers, context)
+    isempty(specs) && return Data.ComposedHamiltonian(_pseudo_hamiltonian(ocp, p0), law)
+    labels = Symbol[Symbol(first(pr)) for pr in specs]
+    terms = _constraint_terms(ocp, labels, context)
+    μs = Tuple(_multiplier(ocp, Symbol(first(pr)), last(pr), context) for pr in specs)
+    h = _constrained_pseudo_hamiltonian(ocp, p0, terms)
+    return Data.ComposedConstrainedHamiltonian(h, law, _stacked_multiplier(terms, μs))
 end

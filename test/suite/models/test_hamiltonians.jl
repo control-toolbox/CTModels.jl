@@ -10,6 +10,7 @@ using CTBase: Data, Exceptions, Traits
 using CTModels: CTModels
 using CTModels: Building, Models
 using ForwardDiff: ForwardDiff
+using JET: JET
 
 include(joinpath("..", "..", "problems", "TestProblems.jl"))
 using .TestProblems: TestProblems
@@ -117,6 +118,93 @@ ocp_cf(; kwargs...) = build_ocp(; n=2, m=0, dynamics=dyn_cf!, lagrange=lag_cf, k
 H̃_1d(x, p, u; p0=-1) = p * u + p0 * x^2
 H̃_2d(t, x, p, u, v; p0=-1) = p[1] * x[2] + p[2] * (t * u + v) + p0 * (u^2 + t)
 H_cf(x, p; p0=-1) = p[1] * x[2] - p[2] * x[1] + p0 * x[1]^2
+
+# ==============================================================================
+# Constrained models (module top-level)
+# ==============================================================================
+
+const LB = 0.1
+
+# The order-one example of the OptimalControl docs, x ≥ lb written as a path constraint
+# (:x_con) and as a state box (:x_box): ẋ = u, ∫ x² → min, |u| ≤ 1 (:u_box).
+x_con!(r, t, x, u, v) = (r[1]=x - LB; nothing)
+
+function ocp_bd(; as_box=false, criterion=:min)
+    pre = Building.PreModel()
+    Building.time!(pre; t0=0.0, tf=2.0)
+    Building.state!(pre, 1)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, dyn_1d!)
+    Building.objective!(
+        pre, criterion; lagrange=criterion === :min ? lag_1d : (t, x, u, v) -> -x^2
+    )
+    if as_box
+        Building.constraint!(pre, :state; rg=1:1, lb=[LB], ub=[Inf], label=:x_box)
+    else
+        Building.constraint!(pre, :path; f=x_con!, lb=[0.0], ub=[Inf], label=:x_con)
+    end
+    Building.constraint!(pre, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:u_box)
+    Building.time_dependence!(pre; autonomous=true)
+    Building.definition!(pre, quote end)
+    return Building.build(pre)
+end
+
+# Every kind of constraint: 2-D state, 1-D control, 1-D variable.
+mixed!(r, t, x, u, v) = (r[1]=x[1] + u; nothing)                  # −1 ≤ x₁ + u ≤ 1
+pv!(r, t, x, u, v) = (r[1]=x[1]^2; r[2]=x[2]; nothing)          # x₁² ≤ 4, x₂ = 0
+dyn_c!(r, t, x, u, v) = (r[1]=x[2]; r[2]=u; nothing)
+lag_c(t, x, u, v) = u^2
+bc!(r, x0, xf, v) = (r[1]=x0[1]; nothing)
+
+function ocp_all(; autonomous=true, path=mixed!)
+    pre = Building.PreModel()
+    Building.variable!(pre, 1)
+    Building.time!(pre; t0=0.0, tf=1.0)
+    Building.state!(pre, 2)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, dyn_c!)
+    Building.objective!(pre, :min; lagrange=lag_c)
+    Building.constraint!(pre, :path; f=path, lb=[-1.0], ub=[1.0], label=:mixed)
+    Building.constraint!(pre, :path; f=pv!, lb=[-Inf, 0.0], ub=[4.0, 0.0], label=:pv)
+    Building.constraint!(pre, :state; rg=2:2, lb=[-Inf], ub=[1.2], label=:vmax)
+    Building.constraint!(pre, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:ubox)
+    Building.constraint!(pre, :boundary; f=bc!, lb=[0.0], ub=[0.0], label=:bc)
+    Building.constraint!(pre, :variable; rg=1:1, lb=[0.0], ub=[10.0], label=:vbox)
+    Building.time_dependence!(pre; autonomous=autonomous)
+    Building.definition!(pre, quote end)
+    return Building.build(pre)
+end
+
+# Closed forms of the terms, in the sign convention of the duals.
+term_mixed(x, u, y) = -y * (x[1] + u - (y > 0 ? 1.0 : -1.0))
+term_pv(x, y) = y[1] * (4.0 - x[1]^2) - y[2] * x[2]
+term_vmax(x, y) = y * (1.2 - x[2])
+term_ubox(u, y) = -y * (u - (y > 0 ? 1.0 : -1.0))
+
+# A path constraint recording what it receives.
+mutable struct SpyConstraint <: Function
+    args::Any
+    calls::Int
+end
+SpyConstraint() = SpyConstraint(nothing, 0)
+function (s::SpyConstraint)(r, t, x, u, v)
+    s.args = (t, x, u, v)
+    s.calls += 1
+    r[1] = 0.0
+    return nothing
+end
+
+# A multiplier recording what it receives.
+mutable struct SpyMultiplier <: Function
+    args::Any
+    calls::Int
+end
+SpyMultiplier() = SpyMultiplier(nothing, 0)
+function (s::SpyMultiplier)(args...)
+    s.args = args
+    s.calls += 1
+    return 0.5
+end
 
 function test_hamiltonians()
     Test.@testset "Hamiltonians of a model" verbose = VERBOSE showtiming = SHOWTIMING begin
@@ -276,6 +364,11 @@ function test_hamiltonians()
             Test.@test H(1.5, 2.0) ≈ H̃_1d(1.5, 2.0, 2.0)
         end
 
+        Test.@testset "Unit: a variadic raw law is not arity-checked" begin
+            H = Models.hamiltonian(ocp_1d(), (args...) -> last(args))
+            Test.@test H(1.5, 2.0) ≈ H̃_1d(1.5, 2.0, 2.0)
+        end
+
         Test.@testset "Unit: hamiltonian(ocp, u; p0)" begin
             Test.@test Models.hamiltonian(ocp_1d(), (x, p) -> p; p0=0)(1.5, 2.0) ≈ 4.0
         end
@@ -396,6 +489,337 @@ function test_hamiltonians()
                 Test.@test Models.hamiltonian(ocp, (x, p) -> [p[2] / 2])(x, p) ≈
                     H̃(x, p, [p[2] / 2])
             end
+        end
+
+        # ======================================================================
+        # UNIT — constraints by label (pseudo_hamiltonian(ocp; constraints))
+        # ======================================================================
+
+        Test.@testset "Unit: constrained pseudo-Hamiltonian type, traits and calls" begin
+            ocp = ocp_all()
+            H = Models.pseudo_hamiltonian(ocp; constraints=:vmax)
+            Test.@test H isa Data.ConstrainedPseudoHamiltonian
+            Test.@test Traits.time_dependence(H) === Traits.Autonomous
+            Test.@test Traits.variable_dependence(H) === Traits.NonFixed
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            base = Models.pseudo_hamiltonian(ocp)(x, p, u, v)
+            Test.@test H(x, p, u, 0.7, v) ≈ base + term_vmax(x, 0.7)
+            Test.@test H(9.0, x, p, u, 0.7, v) ≈ base + term_vmax(x, 0.7)   # uniform
+            Hn = Models.pseudo_hamiltonian(ocp_all(; autonomous=false); constraints=:vmax)
+            Test.@test Traits.time_dependence(Hn) === Traits.NonAutonomous
+            Test.@test Hn(1.0, x, p, u, 0.7, v) ≈ base + term_vmax(x, 0.7)
+        end
+
+        Test.@testset "Unit: the term of each kind of constraint (dual convention)" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            base = Models.pseudo_hamiltonian(ocp)(x, p, u, v)
+            H(label) = Models.pseudo_hamiltonian(ocp; constraints=label)
+            # upper bound only (state box): y (ub − c)
+            Test.@test H(:vmax)(x, p, u, 0.7, v) - base ≈ 0.7 * (1.2 - 1.5)
+            # two bounds, upper side active (y > 0): −y (c − ub) = y (ub − c)
+            Test.@test H(:mixed)(x, p, u, 0.4, v) - base ≈ 0.4 * (1.0 - (x[1] + u))
+            # two bounds, lower side active (y < 0): −y (c − lb) = |y| (c − lb)
+            Test.@test H(:mixed)(x, p, u, -0.4, v) - base ≈ 0.4 * (x[1] + u + 1.0)
+            # control box, both sides
+            Test.@test H(:ubox)(x, p, u, 0.5, v) - base ≈ 0.5 * (1.0 - u)
+            Test.@test H(:ubox)(x, p, u, -0.5, v) - base ≈ 0.5 * (u + 1.0)
+            # a vector label: upper bound only, then an equality, with both signs
+            Test.@test H(:pv)(x, p, u, [0.2, 0.9], v) - base ≈ term_pv(x, [0.2, 0.9])
+            Test.@test H(:pv)(x, p, u, [0.2, -0.9], v) - base ≈ term_pv(x, [0.2, -0.9])
+        end
+
+        Test.@testset "Unit: lower bound only, path and state box (SGN5: same term)" begin
+            x, p, u, y = 0.7, 2.0, 0.3, 1.4
+            Hc = Models.pseudo_hamiltonian(ocp_bd(); constraints=:x_con)
+            Hb = Models.pseudo_hamiltonian(ocp_bd(; as_box=true); constraints=:x_box)
+            Test.@test Hc(x, p, u, y) ≈ H̃_1d(x, p, u) + y * (x - LB)
+            Test.@test Hb(x, p, u, y) ≈ Hc(x, p, u, y)
+        end
+
+        Test.@testset "Unit: the term is continuous at y = 0 and vanishes there" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            base = Models.pseudo_hamiltonian(ocp)(x, p, u, v)
+            H = Models.pseudo_hamiltonian(ocp; constraints=:mixed)
+            Test.@test H(x, p, u, 0.0, v) == base
+            Test.@test abs(H(x, p, u, 1e-12, v) - H(x, p, u, -1e-12, v)) < 1e-10
+        end
+
+        Test.@testset "Unit: several labels, μ stacked in the order given" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            base = Models.pseudo_hamiltonian(ocp)(x, p, u, v)
+            H1 = Models.pseudo_hamiltonian(ocp; constraints=(:vmax, :mixed, :pv, :ubox))
+            μ1 = [0.7, -0.4, 0.2, 0.9, 0.5]
+            expected =
+                base +
+                term_vmax(x, 0.7) +
+                term_mixed(x, u, -0.4) +
+                term_pv(x, [0.2, 0.9]) +
+                term_ubox(u, 0.5)
+            Test.@test H1(x, p, u, μ1, v) ≈ expected
+            H2 = Models.pseudo_hamiltonian(ocp; constraints=[:pv, :ubox, :vmax, :mixed])
+            Test.@test H2(x, p, u, [0.2, 0.9, 0.5, 0.7, -0.4], v) ≈ expected
+        end
+
+        Test.@testset "Unit: a zero multiplier gives the unconstrained pseudo-Hamiltonian" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            H = Models.pseudo_hamiltonian(ocp; constraints=(:vmax, :pv))
+            Test.@test H(x, p, u, zeros(3), v) == Models.pseudo_hamiltonian(ocp)(x, p, u, v)
+        end
+
+        Test.@testset "Unit: freeze_multiplier on the constrained pseudo-Hamiltonian" begin
+            H = Models.pseudo_hamiltonian(ocp_bd(); constraints=:x_con)
+            H̃ = Data.freeze_multiplier(H, 1.4)
+            Test.@test H̃ isa Data.PseudoHamiltonian
+            Test.@test H̃(0.7, 2.0, 0.3) == H(0.7, 2.0, 0.3, 1.4)
+        end
+
+        Test.@testset "Unit: constrained pseudo-Hamiltonian with p0" begin
+            H0 = Models.pseudo_hamiltonian(ocp_bd(); constraints=:x_con, p0=0)
+            Test.@test H0(0.7, 2.0, 0.3, 1.4) ≈ 2.0 * 0.3 + 1.4 * (0.7 - LB)
+            Hmax = Models.pseudo_hamiltonian(ocp_bd(; criterion=:max); constraints=:x_con)
+            Test.@test Hmax(0.7, 2.0, 0.3, 1.4) ≈
+                Models.pseudo_hamiltonian(ocp_bd(); constraints=:x_con)(
+                0.7, 2.0, 0.3, 1.4
+            )
+        end
+
+        # ======================================================================
+        # UNIT — constraints in feedback form (hamiltonian(ocp, u; multipliers))
+        # ======================================================================
+
+        Test.@testset "Unit: hamiltonian(ocp, u; multipliers), the boundary arc of the docs" begin
+            h = Models.hamiltonian(
+                ocp_bd(), (x, p) -> 0.0; multipliers=(:x_con => (x, p) -> 2x)
+            )
+            Test.@test h isa Data.ComposedConstrainedHamiltonian
+            Test.@test h(1.0, 2.0) ≈ -1.0 + 2.0 * (1.0 - LB)
+            Test.@test h(0.0, 1.0, 2.0, nothing) ≈ h(1.0, 2.0)
+            Test.@test h(LB, 0.0) ≈ -LB^2                   # on the arc, g = 0
+        end
+
+        Test.@testset "Unit: every form of the multipliers argument gives the same h" begin
+            ocp = ocp_all()
+            x, p, v = [0.5, 1.5], [1.0, 2.0], 2.0
+            law = (x, p, v) -> 0.3
+            μv = (x, p, v) -> 0.7
+            μp = (x, p, v) -> [0.2, 0.9]
+            ref = Models.hamiltonian(ocp, law; multipliers=(:vmax => μv, :pv => μp))(
+                x, p, v
+            )
+            expected =
+                Models.pseudo_hamiltonian(ocp)(x, p, 0.3, v) +
+                term_vmax(x, 0.7) +
+                term_pv(x, [0.2, 0.9])
+            Test.@test ref ≈ expected
+            for spec in (
+                (vmax=μv, pv=μp),
+                Dict(:vmax => μv, :pv => μp),
+                [:pv => μp, :vmax => μv],
+                (:vmax => Data.Multiplier(μv; is_variable=true), :pv => μp),
+            )
+                Test.@test Models.hamiltonian(ocp, law; multipliers=spec)(x, p, v) ≈ ref
+            end
+            Test.@test Models.hamiltonian(ocp, law; multipliers=:vmax => μv)(x, p, v) ≈
+                Models.pseudo_hamiltonian(ocp)(x, p, 0.3, v) + term_vmax(x, 0.7)
+        end
+
+        Test.@testset "Unit: hamiltonian(ocp, u; multipliers) without multipliers is unconstrained" begin
+            ocp = ocp_bd()
+            Test.@test Models.hamiltonian(ocp, (x, p) -> p; multipliers=()) isa
+                Data.ComposedHamiltonian
+        end
+
+        Test.@testset "Unit: traits joined with a time-varying multiplier" begin
+            μ = Data.Multiplier((t, x, p) -> 2x + t; is_autonomous=false)
+            h = Models.hamiltonian(ocp_bd(), (x, p) -> 0.0; multipliers=(:x_con => μ,))
+            Test.@test Traits.time_dependence(h) === Traits.NonAutonomous
+            Test.@test h(1.0, 0.5, 2.0) ≈ -0.25 + (1.0 + 1.0) * (0.5 - LB)
+        end
+
+        Test.@testset "Unit: control box on a saturated arc is inert (KKT)" begin
+            # on u = 1 = ub, the term μ·(ub − u) vanishes, as do its derivatives in x, p
+            ocp = ocp_bd()
+            h = Models.hamiltonian(ocp, (x, p) -> 1.0; multipliers=(:u_box => (x, p) -> p))
+            h0 = Models.hamiltonian(ocp, (x, p) -> 1.0)
+            for (x, p) in ((0.5, 2.0), (-1.0, 0.3))
+                Test.@test h(x, p) ≈ h0(x, p)
+                Test.@test ForwardDiff.derivative(x_ -> h(x_, p), x) ≈
+                    ForwardDiff.derivative(x_ -> h0(x_, p), x)
+                Test.@test ForwardDiff.derivative(p_ -> h(x, p_), p) ≈
+                    ForwardDiff.derivative(p_ -> h0(x, p_), p)
+                # the multiplier is the one of the stationarity: ∂H̃/∂u = p = μ
+                H̃ = Models.pseudo_hamiltonian(ocp)
+                Test.@test ForwardDiff.derivative(u_ -> H̃(x, p, u_), 1.0) ≈ p
+            end
+        end
+
+        # ======================================================================
+        # UNIT — what the constraint and the multiplier receive (spies)
+        # ======================================================================
+
+        Test.@testset "Unit: the constraint gets (t, x, u, v), v empty without variable" begin
+            spy = SpyConstraint()
+            pre = Building.PreModel()
+            Building.time!(pre; t0=0.0, tf=1.0)
+            Building.state!(pre, 1)
+            Building.control!(pre, 1)
+            Building.dynamics!(pre, dyn_1d!)
+            Building.objective!(pre, :min; lagrange=lag_1d)
+            Building.constraint!(pre, :path; f=spy, lb=[0.0], ub=[Inf], label=:s)
+            Building.time_dependence!(pre; autonomous=true)
+            Building.definition!(pre, quote end)
+            H = Models.pseudo_hamiltonian(Building.build(pre); constraints=:s)
+            H(1.5, 2.0, 0.5, 3.0)
+            Test.@test spy.calls == 1
+            t, x, u, v = spy.args
+            Test.@test t == 0.0 && x === 1.5 && u === 0.5
+            Test.@test v isa AbstractVector && isempty(v)
+        end
+
+        Test.@testset "Unit: each multiplier is called once with its natural arguments" begin
+            spy = SpyMultiplier()
+            h = Models.hamiltonian(ocp_all(), (x, p, v) -> 0.3; multipliers=(:vmax => spy,))
+            x, p, v = [0.5, 1.5], [1.0, 2.0], 2.0
+            h(x, p, v)
+            Test.@test spy.calls == 1
+            Test.@test spy.args == (x, p, v)
+        end
+
+        # ======================================================================
+        # UNIT — automatic differentiation with constraints
+        # ======================================================================
+
+        Test.@testset "Unit: ForwardDiff through the constrained pseudo-Hamiltonian" begin
+            ocp = ocp_all()
+            H = Models.pseudo_hamiltonian(ocp; constraints=(:vmax, :pv))
+            x, p, u, v, μ = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0, [0.7, 0.2, 0.9]
+            # H = p₁x₂ + p₂u − u² + 0.7(1.2 − x₂) + 0.2(4 − x₁²) − 0.9 x₂
+            Test.@test ForwardDiff.gradient(x_ -> H(x_, p, u, μ, v), x) ≈
+                [-2 * 0.2 * x[1], p[1] - 0.7 - 0.9]
+            Test.@test ForwardDiff.gradient(p_ -> H(x, p_, u, μ, v), p) ≈ [x[2], u]
+            Test.@test ForwardDiff.derivative(u_ -> H(x, p, u_, μ, v), u) ≈ p[2] - 2u
+            Test.@test ForwardDiff.gradient(μ_ -> H(x, p, u, μ_, v), μ) ≈
+                [1.2 - x[2], 4.0 - x[1]^2, -x[2]]
+        end
+
+        Test.@testset "Unit: total derivative of h adds g·∂μ/∂x to the partial one" begin
+            ocp = ocp_bd()
+            h = Models.hamiltonian(ocp, (x, p) -> 0.0; multipliers=(:x_con => (x, p) -> 2x))
+            H = Models.pseudo_hamiltonian(ocp; constraints=:x_con)
+            for x in (1.5, 0.4)
+                total = ForwardDiff.derivative(x_ -> h(x_, 0.0), x)
+                partial = ForwardDiff.derivative(x_ -> H(x_, 0.0, 0.0, 2x), x)
+                Test.@test partial ≈ 0.0                    # −2x + μ, μ = 2x
+                Test.@test total - partial ≈ 2 * (x - LB)   # g · ∂μ/∂x
+            end
+        end
+
+        Test.@testset "Unit: constrained calls are type-stable" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            H = Models.pseudo_hamiltonian(ocp; constraints=(:vmax, :mixed, :pv, :ubox))
+            μ = [0.7, -0.4, 0.2, 0.9, 0.5]
+            Test.@test (Test.@inferred H(x, p, u, μ, v)) isa Float64
+            JET.@test_opt target_modules = (CTModels,) H(x, p, u, μ, v)
+            h = Models.hamiltonian(
+                ocp,
+                (x, p, v) -> 0.3;
+                multipliers=(:vmax => (x, p, v) -> 0.7, :pv => (x, p, v) -> [0.2, 0.9]),
+            )
+            Test.@test (Test.@inferred h(x, p, v)) isa Float64
+            Hb = Models.pseudo_hamiltonian(ocp_bd(); constraints=:x_con)
+            Test.@test (Test.@inferred Hb(0.7, 2.0, 0.3, 1.4)) isa Float64
+        end
+
+        # ======================================================================
+        # NON-REGRESSION — the boundary arc of the docs
+        # ======================================================================
+
+        Test.@testset "Non-regression: on the boundary arc x = lb, total = partial and ṗ = 0" begin
+            ocp = ocp_bd()
+            h = Models.hamiltonian(ocp, (x, p) -> 0.0; multipliers=(:x_con => (x, p) -> 2x))
+            H = Models.pseudo_hamiltonian(ocp; constraints=:x_con)
+            total = ForwardDiff.derivative(x_ -> h(x_, 0.0), LB)
+            partial = ForwardDiff.derivative(x_ -> H(x_, 0.0, 0.0, 2LB), LB)
+            Test.@test total ≈ partial atol = 1e-14
+            Test.@test total ≈ 0.0 atol = 1e-14
+            Test.@test H(0.7, 2.0, 0.3, 1.4) ≈ 2.0 * 0.3 - 0.49 + 1.4 * 0.6     # golden
+        end
+
+        # ======================================================================
+        # ERROR — constraints and multipliers
+        # ======================================================================
+
+        Test.@testset "Error: labels that cannot be adjoined" begin
+            ocp = ocp_all()
+            for label in (:bc, :vbox)
+                Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                    ocp; constraints=label
+                )
+            end
+            e = try
+                Models.pseudo_hamiltonian(ocp; constraints=:bc)
+            catch err
+                err
+            end
+            Test.@test occursin("boundary", e.got)
+            Test.@test occursin("transversality", e.suggestion)
+            Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                ocp; constraints=(:vmax, :vmax)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                ocp; constraints=:unknown
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
+                ocp, (x, p, v) -> 0.3; multipliers=(:bc => (x, p, v) -> 1.0)
+            )
+        end
+
+        Test.@testset "Error: a multiplier without the dimension of the constraints" begin
+            ocp = ocp_all()
+            x, p, u, v = [0.5, 1.5], [1.0, 2.0], 0.3, 2.0
+            H = Models.pseudo_hamiltonian(ocp; constraints=(:vmax, :pv))
+            Test.@test_throws Exceptions.IncorrectArgument H(x, p, u, [1.0, 2.0], v)
+            Test.@test_throws Exceptions.IncorrectArgument H(x, p, u, 1.0, v)
+            Hpv = Models.pseudo_hamiltonian(ocp; constraints=:pv)
+            Test.@test_throws Exceptions.IncorrectArgument Hpv(x, p, u, 1.0, v)
+            h = Models.hamiltonian(
+                ocp, (x, p, v) -> 0.3; multipliers=(:pv => (x, p, v) -> 1.0,)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument h(x, p, v)
+            hv = Models.hamiltonian(
+                ocp, (x, p, v) -> 0.3; multipliers=(:vmax => (x, p, v) -> [1.0, 2.0],)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument hv(x, p, v)
+        end
+
+        Test.@testset "Error: multipliers given in an unsupported way" begin
+            ocp = ocp_all()
+            law = (x, p, v) -> 0.3
+            Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
+                ocp, law; multipliers=(x, p, v) -> 1.0
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
+                ocp, law; multipliers=(:vmax => 1.0,)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
+                ocp,
+                law;
+                multipliers=(:vmax => (x, p) -> 1.0,),          # wrong arity
+            )
+        end
+
+        Test.@testset "Error: constraints on a control-free problem" begin
+            Test.@test_throws Exceptions.PreconditionError Models.pseudo_hamiltonian(
+                ocp_cf(); constraints=:x
+            )
+            Test.@test_throws Exceptions.PreconditionError Models.hamiltonian(
+                ocp_cf(); multipliers=(:x => (x, p) -> 1.0,)
+            )
         end
 
         # ======================================================================

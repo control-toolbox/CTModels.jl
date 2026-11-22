@@ -9,6 +9,7 @@ component types), and all reader functions that operate on a built `Model`.
 # Organisation
 
 - **hamiltonians.jl**: the pseudo-Hamiltonian and Hamiltonian getters
+- **constraint_terms.jl**: the constraint terms adjoined to them, by label
 - **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref), [`CTModels.Components.variable`](@extref), [`CTModels.Components.times`](@extref), [`CTModels.Components.objective`](@extref), [`CTModels.Models.constraints`](@extref), [`CTModels.Models.dynamics`](@extref), [`CTModels.Models.definition`](@extref))
 
 # Public API
@@ -44,9 +45,9 @@ using CTBase:
     has_variable,
     is_control_free,
     has_control
-# The Hamiltonian getters are methods of generic functions owned by CTBase.Data, which
-# CTFlows extends too; CTModels re-exports them.
-using CTBase.Data: hamiltonian, pseudo_hamiltonian
+# The Hamiltonian getters are methods of generic functions owned by CTBase.Data (bound
+# at the CTBase top level), which CTFlows extends too; CTModels re-exports them.
+using CTBase: hamiltonian, pseudo_hamiltonian
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using ..Components
@@ -55,6 +56,7 @@ include(joinpath(@__DIR__, "constraint_functors.jl"))
 include(joinpath(@__DIR__, "model.jl"))
 include(joinpath(@__DIR__, "model_signature.jl"))
 include(joinpath(@__DIR__, "hamiltonians.jl"))
+include(joinpath(@__DIR__, "constraint_terms.jl"))
 
 # Types
 export AbstractModel, Model
