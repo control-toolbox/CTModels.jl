@@ -1511,6 +1511,49 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Describe the constraint labelled `label`, of kind `kind` and rows `rows` (as returned by
+[`CTModels.Models.constraint_rows`](@extref)), for a message: its kind and its label,
+`path constraint :c1`, `state box :x2_box`. A constraint declared without a label (see
+[`CTModels.Models.is_unnamed_label`](@extref)) is described by what is known of it, never
+by its generated label: its rows for a nonlinear constraint, `unnamed path constraint
+(rows 2:3)`, the components it bounds for a box, `unnamed control box on u`.
+"""
+function _describe_constraint(
+    model::Model, label::Symbol, kind::Symbol, rows::Vector{Int}
+)::String
+    what = kind in (:path, :boundary) ? "$kind constraint" : "$kind box"
+    is_unnamed_label(label) || return "$what :$label"
+    if kind in (:path, :boundary)
+        at = length(rows) == 1 ? "row $(only(rows))" : "rows $(first(rows)):$(last(rows))"
+        return "unnamed $what ($at)"
+    end
+    names = if kind === :state
+        state_components(model)
+    elseif kind === :control
+        control_components(model)
+    else
+        variable_components(model)
+    end
+    return "unnamed $what on " * join(names[rows], ", ")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Describe the constraint labelled `label` of `model` for a message (see
+[`CTModels.Models._describe_constraint`](@extref) with its kind and rows).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `label` is not a constraint of the
+  model.
+"""
+function _describe_constraint(model::Model, label::Symbol)::String
+    return _describe_constraint(model, label, constraint_rows(model, label)...)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 The rows labelled `label` in the nonlinear constraint tuple `cp = (lb, f!, ub, labels)`.
 """
 _nl_rows(cp::Tuple, label::Symbol)::Vector{Int} = findall(==(label), cp[4])

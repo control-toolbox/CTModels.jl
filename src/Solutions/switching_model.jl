@@ -200,10 +200,23 @@ function _switching_model(;
         _checked_limits(state_dual, length(ts), "state_dual"),
         _checked_limits(control_dual, length(ts), "control_dual"),
         Dict{Symbol,NTuple{2,Matrix{Float64}}}(
-            label => _checked_limits(_as_limit_matrices(lr), length(ts), "$label dual") for
+            label =>
+                _checked_limits(_as_limit_matrices(lr), length(ts), _limits_name(label)) for
             (label, lr) in duals
         ),
     )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The name of the limits of the dual labelled `label` in a message: `x2_box dual`, or
+`unnamed constraint dual` for a label generated for a constraint declared without one (see
+[`CTModels.Models.is_unnamed_label`](@extref)), which would mean nothing to the reader.
+No model is known here to say more (see [`CTModels.Models._describe_constraint`](@extref)).
+"""
+function _limits_name(label::Symbol)::String
+    return Models.is_unnamed_label(label) ? "unnamed constraint dual" : "$label dual"
 end
 
 """
