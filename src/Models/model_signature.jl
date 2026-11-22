@@ -1,18 +1,19 @@
 """
 $(TYPEDSIGNATURES)
 
-Normalize constraint labels to strings, mapping the unique labels generated for
-unnamed constraints (`gensym(:unnamed)`, which differ from one model instance to
-another) to the empty string.
+Normalize constraint labels to strings, mapping the labels generated for unnamed
+constraints (see [`CTModels.Models.is_unnamed_label`](@extref)), which differ from one
+model instance to another, to the empty string.
 
 # Arguments
-- `labels`: Collection of constraint labels.
+- `labels`: Collection of constraint labels, as symbols or as strings (the labels read
+  from a file).
 
 # Returns
 - `Vector{String}`: The normalized labels.
 """
 function _label_strings(labels)::Vector{String}
-    return String[startswith(string(l), "##unnamed") ? "" : string(l) for l in labels]
+    return String[is_unnamed_label(Symbol(l)) ? "" : string(l) for l in labels]
 end
 
 """

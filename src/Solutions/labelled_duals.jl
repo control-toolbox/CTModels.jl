@@ -46,15 +46,17 @@ function _place_duals(
         k in (:path, :boundary, :state, :control, :variable)
     )
     grids = (path=T_path, state=T_state, control=T_control)
-    owners = Dict{Tuple{Symbol,Int},Symbol}()   # (box kind, component) => label
+    owners = Dict{Tuple{Symbol,Int},String}()   # (box kind, component) => constraint
     for (label, value) in duals
         kind, rows = constraint_rows(ocp, label)
+        # the constraint as named in a message: never the generated label of an unnamed one
+        desc = Models._describe_constraint(ocp, label, kind, rows)
         kind in (:state, :control, :variable) &&
-            _claim_components!(owners, kind, rows, label)
+            _claim_components!(owners, kind, rows, desc)
         checked = if kind in (:boundary, :variable)
-            _checked_static_dual(label, kind, rows, value)
+            _checked_static_dual(label, desc, rows, value)
         else
-            _checked_timed_dual(label, kind, rows, value, getproperty(grids, kind))
+            _checked_timed_dual(label, desc, kind, rows, value, getproperty(grids, kind))
         end
         push!(parts[kind], rows => checked)
     end
@@ -85,8 +87,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Record that the box label `label` gives the dual of the `kind` components `rows`, in
-`owners` (`(kind, component) => label`).
+Record that the box described by `desc` (see
+[`CTModels.Models._describe_constraint`](@extref)) gives the dual of the `kind` components
+`rows`, in `owners` (`(kind, component) => desc`).
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if a component is already given by
@@ -94,18 +97,18 @@ Record that the box label `label` gives the dual of the `kind` components `rows`
   it is given by one of them only: two values would leave one silently overwritten.
 """
 function _claim_components!(
-    owners::Dict{Tuple{Symbol,Int},Symbol}, kind::Symbol, rows::Vector{Int}, label::Symbol
+    owners::Dict{Tuple{Symbol,Int},String}, kind::Symbol, rows::Vector{Int}, desc::String
 )
     for i in rows
         other = get(owners, (kind, i), nothing)
         Core.@ensure isnothing(other) Exceptions.IncorrectArgument(
             "the $kind box component $i is given by two labels";
-            got="labels :$other and :$label, which both bound component $i",
+            got="the $other and the $desc, which both bound component $i",
             expected="each box component given by one label",
             suggestion="The labels on one component share its multiplier: give the dual by one of them only (the other reads the same dual).",
             context="build_solution - placing the duals given by label",
         )
-        owners[(kind, i)] = label
+        owners[(kind, i)] = desc
     end
     return nothing
 end
@@ -114,32 +117,36 @@ end
 $(TYPEDSIGNATURES)
 
 Check the dual `value` given for the label `label` of a time-dependent constraint (`kind`
-`:path`, `:state` or `:control`) of rows `rows`: a `Function` `t -> value` (its size is
+`:path`, `:state` or `:control`) of rows `rows`, described by `desc` in the messages (see
+[`CTModels.Models._describe_constraint`](@extref)): a `Function` `t -> value` (its size is
 checked at the first time of the grid `T`), or a matrix with one row per time of `T` and
 one column per row of the label (a vector for a one-row label). Returns the value, a vector
 being turned into a one-column matrix.
 """
-function _checked_timed_dual(label::Symbol, kind::Symbol, rows::Vector{Int}, value, T)
+function _checked_timed_dual(
+    label::Symbol, desc::String, kind::Symbol, rows::Vector{Int}, value, T
+)
     n = length(rows)
-    what = kind === :path ? "path constraint" : "$kind box"
     if value isa Function
         if !isnothing(T) && !isempty(T)
-            _ensure_dual_size(label, n, length(value(first(T))), "value at t = $(first(T))")
+            _ensure_dual_size(
+                label, desc, n, length(value(first(T))), "value at t = $(first(T))"
+            )
         end
         return value
     elseif value isa AbstractVector{<:Real} && n == 1
         return reshape(Vector{Float64}(value), :, 1)
     elseif value isa AbstractMatrix{<:Real}
-        _ensure_dual_size(label, n, size(value, 2), "number of columns")
+        _ensure_dual_size(label, desc, n, size(value, 2), "number of columns")
         return Matrix{Float64}(value)
     end
     return throw(
         Exceptions.IncorrectArgument(
-            "invalid dual for the $what :$label";
+            "invalid dual for the $desc";
             got="a value of type $(typeof(value))",
             expected="a Function `t -> value`, or a Matrix (times × $n rows)" *
                      (n == 1 ? " or a Vector (one entry per time)" : ""),
-            suggestion="Give the dual of :$label as a function of time or sampled on the $(kind === :path ? "path" : kind) grid.",
+            suggestion="Give the dual of the $desc as a function of time or sampled on the $(kind === :path ? "path" : kind) grid.",
             context="build_solution - placing the duals given by label",
         ),
     )
@@ -148,23 +155,23 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Check the dual `value` given for the label `label` of a time-independent constraint (`kind`
-`:boundary` or `:variable`) of rows `rows`: a `Number` for a one-row label, a vector with
-one entry per row otherwise.
+Check the dual `value` given for the label `label` of a time-independent constraint
+(`:boundary` or `:variable`) of rows `rows`, described by `desc` in the messages (see
+[`CTModels.Models._describe_constraint`](@extref)): a `Number` for a one-row label, a
+vector with one entry per row otherwise.
 """
-function _checked_static_dual(label::Symbol, kind::Symbol, rows::Vector{Int}, value)
+function _checked_static_dual(label::Symbol, desc::String, rows::Vector{Int}, value)
     n = length(rows)
-    what = kind === :boundary ? "boundary constraint" : "variable box"
     if value isa Real || value isa AbstractVector{<:Real}
-        _ensure_dual_size(label, n, length(value), "length")
+        _ensure_dual_size(label, desc, n, length(value), "length")
         return value
     end
     return throw(
         Exceptions.IncorrectArgument(
-            "invalid dual for the $what :$label";
+            "invalid dual for the $desc";
             got="a value of type $(typeof(value))",
             expected=n == 1 ? "a Number" : "a Vector of length $n",
-            suggestion="Give the dual of :$label as a number (one row) or a vector (one entry per row).",
+            suggestion="Give the dual of the $desc as a number (one row) or a vector (one entry per row).",
             context="build_solution - placing the duals given by label",
         ),
     )
@@ -174,16 +181,24 @@ end
 $(TYPEDSIGNATURES)
 
 Throw an [`CTBase.Exceptions.IncorrectArgument`](@extref) when the dual given for `label`
-has `got` entries instead of the `n` rows of the label.
+has `got` entries instead of the `n` rows of the label. The constraint is described by
+`desc` (see [`CTModels.Models._describe_constraint`](@extref)); the call to
+[`CTModels.Models.constraint_rows`](@extref) is suggested for a label given by the user
+only, a generated label being no valid Julia symbol literal.
 """
-function _ensure_dual_size(label::Symbol, n::Int, got::Int, what::String)
+function _ensure_dual_size(label::Symbol, desc::String, n::Int, got::Int, what::String)
     got == n && return nothing
+    rows_hint = if Models.is_unnamed_label(label)
+        "."
+    else
+        "; `CTModels.Models.constraint_rows(model, :$label)` gives its rows."
+    end
     return throw(
         Exceptions.IncorrectArgument(
-            "dual size mismatch for the constraint :$label";
+            "dual size mismatch for the $desc";
             got="$what = $got",
-            expected="$n (the number of rows of :$label)",
-            suggestion="Give one entry per row of the constraint :$label; `CTModels.Models.constraint_rows(model, :$label)` gives its rows.",
+            expected="$n (the number of rows of the $desc)",
+            suggestion="Give one entry per row of the $desc" * rows_hint,
             context="build_solution - placing the duals given by label",
         ),
     )

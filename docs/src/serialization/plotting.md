@@ -72,6 +72,22 @@ a state box or a control box — pairing the constraint (left) with its dual (ri
 As for the state | costate pair, the left cell carries the name and the paired right cell
 none; a box is named by its component and its label, `x₂ (x2_box)`.
 
+A constraint declared without a label has a generated one (see
+[`CTModels.Models.is_unnamed_label`](@ref)), which is never shown: the row is named after
+what is known of the constraint, its kind and the component it bounds, or its row in the
+stacked path constraint. A generic name holds a space, so it cannot be mistaken for a
+label:
+
+```text
+ c1           │ μ₁   ← path constraint labelled :c1
+ path 2       │      ← unnamed path constraint, row 2
+ x₂ (x2_box)  │      ← state box labelled :x2_box
+ box x₂       │      ← unnamed state box on x₂
+```
+
+When the duals are plotted alone, their cells take the same name prefixed with `dual`:
+`dual c1`, `dual path 2`, `dual x2_box`, `dual box x₂`.
+
 A box is drawn like a path constraint because its dual follows the same sign convention
 (ct-conventions `SGN5`): the pair makes the complementarity visible — the component
 touches a bound exactly where the dual is nonzero. For a component with two bounds, the
