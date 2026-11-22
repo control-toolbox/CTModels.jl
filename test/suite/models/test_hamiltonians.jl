@@ -64,6 +64,14 @@ function (s::SpyLagrange)(t, x, u, v)
     return 7.0
 end
 
+# Batched states (CTFlows#358): one column per point, linear dynamics valid for a
+# vector or a matrix state.
+const A_BATCH = [0.0 1.0; -1.0 0.0]
+const B_BATCH = [0.0, 1.0]
+dyn_batch!(r, t, x, u, v) = (r .= A_BATCH * x .+ B_BATCH .* u; nothing)
+dyn_batch_cf!(r, t, x, u, v) = (r .= A_BATCH * x; nothing)
+mayer_zero(x0, xf, v) = 0.0
+
 # A control law with two methods: its arity cannot be checked.
 law_two_methods(x, p) = p
 law_two_methods(t, x, p) = p
@@ -409,6 +417,44 @@ function test_hamiltonians()
             Test.@test spy_f.buffer_type == Vector{Float32}
             Models.pseudo_hamiltonian(build_ocp(; dynamics=spy_f))(1.5, 2.0, 0.5)
             Test.@test spy_f.buffer_type == Vector{Float64}        # 1-D: a host Vector
+        end
+
+        Test.@testset "Unit: a batched (Matrix) state gets an n × batch buffer" begin
+            spy_f = SpyDynamics()
+            ocp = build_ocp(; n=2, dynamics=spy_f, lagrange=nothing, mayer=mayer_zero)
+            Models.pseudo_hamiltonian(ocp)(ones(2, 3), ones(2, 3), ones(1, 3))
+            Test.@test spy_f.buffer_type == Matrix{Float64}
+            Test.@test size(spy_f.args[2]) == (2, 3)
+        end
+
+        Test.@testset "Unit: batched (Matrix) state, the value sums the columns" begin
+            X = [1.0 2.0 -1.0; 0.5 -0.3 2.0]
+            P = [0.3 -1.0 0.7; 1.2 0.4 -0.6]
+            U = [0.2 -0.4 1.5]
+            H̃ = Models.pseudo_hamiltonian(
+                build_ocp(; n=2, dynamics=dyn_batch!, lagrange=nothing, mayer=mayer_zero)
+            )
+            Test.@test H̃(X, P, U) ≈ sum(H̃(X[:, j], P[:, j], U[1, j]) for j in 1:3)
+            ocp_cf_batch = build_ocp(;
+                n=2, m=0, dynamics=dyn_batch_cf!, lagrange=nothing, mayer=mayer_zero
+            )
+            H = Models.hamiltonian(ocp_cf_batch)
+            Test.@test H(X, P) ≈ sum(H(X[:, j], P[:, j]) for j in 1:3)
+        end
+
+        Test.@testset "Unit: batched (Matrix) state, the gradient is taken column by column" begin
+            X = [1.0 2.0; 0.5 -0.3]
+            P = [0.3 -1.0; 1.2 0.4]
+            U = [0.2 -0.4]
+            H̃ = Models.pseudo_hamiltonian(
+                build_ocp(; n=2, dynamics=dyn_batch!, lagrange=nothing, mayer=mayer_zero)
+            )
+            ∇X = ForwardDiff.gradient(Y -> H̃(Y, P, U), X)
+            Test.@test size(∇X) == size(X)
+            for j in 1:2
+                ∇x = ForwardDiff.gradient(y -> H̃(y, P[:, j], U[1, j]), X[:, j])
+                Test.@test ∇X[:, j] ≈ ∇x
+            end
         end
 
         Test.@testset "Unit: control-free problem: the model functions get an empty control" begin

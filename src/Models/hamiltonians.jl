@@ -33,6 +33,19 @@ _buffer_like(::Any, ::Type{T}, n::Int) where {T} = zeros(T, n)
 """
 $(TYPEDSIGNATURES)
 
+Batched state: allocate a zero-filled `n × batch` buffer, `batch = size(template, 2)`.
+Each column of a `Matrix` state is an independent point (CTFlows batched flows), so the
+dynamics fills one column per point and `p·f` sums the values of all the columns.
+
+See also: [`CTModels.Models.PseudoHamiltonianFunction`](@extref).
+"""
+function _buffer_like(template::AbstractMatrix, ::Type{T}, n::Int) where {T}
+    return fill!(similar(template, T, n, size(template, 2)), zero(T))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 The value of `p⁰` in the normal case (ct-conventions `SGN4`): `-1` for a minimisation,
 `+1` for a maximisation.
 

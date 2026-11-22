@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `pseudo_hamiltonian(ocp; p0)` returns the pseudo-Hamiltonian `H̃ = p·f + p⁰ℓ` of a problem with a control.
   - `hamiltonian(ocp, u; p0)` returns the Hamiltonian for a control law in feedback form.
   - `hamiltonian(ocp; p0)` returns the Hamiltonian of a control-free problem.
+  - A batched state (a `Matrix`, one column per point, as in CTFlows batched flows) gets an `n × batch` buffer; the value sums the columns.
   - `p0` defaults to `-1` for `:min` and `+1` for `:max`. `p0 = 0` is the abnormal case. A sign that contradicts the criterion is rejected (ct-conventions `SGN4`).
 - **Constraints by label in the Hamiltonians.**
   - `pseudo_hamiltonian(ocp; constraints=…)` returns the constrained pseudo-Hamiltonian `H(t, x, p, u, μ, v)`, with the multipliers as an explicit argument.
