@@ -290,50 +290,14 @@ function build(constraints::ConstraintsDictType)::ConstraintsModel
     length_path_cons_nl::Int = length(path_cons_nl_f)
     length_boundary_cons_nl::Int = length(boundary_cons_nl_f)
 
-    function make_path_cons_nl(
-        constraints_number::Int,
-        constraints_dimensions::Vector{Int},
-        constraints_function::Function, # only one function
-    )
-        @assert constraints_number == 1
-        return constraints_function
-    end
-
-    function make_path_cons_nl(
-        constraints_number::Int,
-        constraints_dimensions::Vector{Int},
-        constraints_functions::Function...,
-    )
-        return CompositeConstraint{:path}(
-            constraints_number, constraints_dimensions, constraints_functions
-        )
-    end
-
-    function make_boundary_cons_nl(
-        constraints_number::Int,
-        constraints_dimensions::Vector{Int},
-        constraints_function::Function, # only one function
-    )
-        @assert constraints_number == 1
-        return constraints_function
-    end
-
-    function make_boundary_cons_nl(
-        constraints_number::Int,
-        constraints_dimensions::Vector{Int},
-        constraints_functions::Function...,
-    )
-        return CompositeConstraint{:boundary}(
-            constraints_number, constraints_dimensions, constraints_functions
-        )
-    end
-
-    path_cons_nl! = make_path_cons_nl(
-        length_path_cons_nl, path_cons_nl_dim, path_cons_nl_f...
+    # Every nonlinear group is a `CompositeConstraint`, whatever the number of declared
+    # constraints (0, 1 or more): its type and display do not depend on the cardinality.
+    path_cons_nl! = CompositeConstraint{:path}(
+        length_path_cons_nl, path_cons_nl_dim, Tuple(path_cons_nl_f)
     )
 
-    boundary_cons_nl! = make_boundary_cons_nl(
-        length_boundary_cons_nl, boundary_cons_nl_dim, boundary_cons_nl_f...
+    boundary_cons_nl! = CompositeConstraint{:boundary}(
+        length_boundary_cons_nl, boundary_cons_nl_dim, Tuple(boundary_cons_nl_f)
     )
 
     # Enforce the per-component uniqueness invariant for box constraints:
