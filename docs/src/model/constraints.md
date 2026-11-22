@@ -69,9 +69,44 @@ CTModels.control_constraints_box(ocp)
 CTModels.variable_constraints_box(ocp)
 ```
 
+Each nonlinear tuple has the form `(lb, f!, ub, labels)`: `f!` is the **stacked** in-place
+function of the group, which fills the rows of all its constraints in declaration order.
+It is always a [`CompositeConstraint`](@ref CTModels.Building.CompositeConstraint), even when
+the group holds a single declaration, as `:p` here: its type and display do not depend on the
+number of constraints. `n` counts the declarations and `dims` gives the dimension of each.
+
 Use [`isempty_constraints`](@ref CTModels.Models.isempty_constraints) to check whether the
-model has any constraints at all, and [`constraint`](@ref CTModels.Models.constraint) to
-retrieve a single constraint by label.
+model has any constraints at all.
+
+## Reading a constraint by label
+
+[`constraint`](@ref CTModels.Models.constraint) returns one declared constraint as a tuple
+`(type, f, lb, ub)`. Unlike the stacked `f!` above, `f` is **out of place**: it returns the
+value of that constraint alone. It is a named functor, so it prints what it does:
+
+```@repl cons
+CTModels.constraint(ocp, :p)
+CTModels.constraint(ocp, :bc)
+CTModels.constraint(ocp, :x1)
+CTModels.constraint(ocp, :vbox)
+```
+
+| `type` | `f` | Call |
+|---|---|---|
+| `:path` | [`SubPathConstraint`](@ref CTModels.Models.SubPathConstraint): rows `indices` of the stacked path constraint, which has `n` rows | `f(t, x, u, v)` |
+| `:boundary` | [`SubBoundaryConstraint`](@ref CTModels.Models.SubBoundaryConstraint): same for the boundary constraint | `f(x0, xf, v)` |
+| `:state`, `:control` | [`BoxProjection`](@ref CTModels.Models.BoxProjection): the bounded components | `f(t, x, u, v)` |
+| `:variable` | [`BoxProjection`](@ref CTModels.Models.BoxProjection) | `f(x0, xf, v)` |
+
+A constraint of dimension one gives a scalar, and so do its bounds:
+
+```@repl cons
+_, f, lb, ub = CTModels.constraint(ocp, :p);
+f(0.0, [0.25, 0.0], 0.5, [0.0, 0.0])  # x[1] + u
+(lb, ub)
+_, g, _, _ = CTModels.constraint(ocp, :bc);
+g([1.0, 0.0], [3.0, 0.0], [0.0, 0.0])  # [x0[1], xf[1]]
+```
 
 ## Labels and aliases
 

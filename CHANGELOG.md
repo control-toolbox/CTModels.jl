@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🛠 Enhancements
+
+- **The callables returned by the constraint accessors print as named functors** ([#533](https://github.com/control-toolbox/CTModels.jl/issues/533)). `constraint(ocp, label)` returns a `SubPathConstraint` or a `SubBoundaryConstraint` for a nonlinear label, instead of an anonymous closure whose display spelled out a `var"#f#…"` chain; both are now out of place. `path_constraints_nl(ocp)` and `boundary_constraints_nl(ocp)` hold a `CompositeConstraint` whatever the number of declared constraints, instead of the raw user function when there is only one. The values are unchanged.
+
+### 📚 Documentation
+
+- The "Constraints" page explains the stacked nonlinear groups and shows what `constraint(ocp, label)` returns, for each kind of constraint.
+
+### ✅ Compatibility
+
+- **No breaking changes.** The concrete types returned change, not the calls nor their values. See [BREAKING.md](BREAKING.md).
+
 ## [0.21.2] - 2026-11-15
 
 ### 🐛 Bug Fixes

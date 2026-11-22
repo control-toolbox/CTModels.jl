@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Callable structs for composite nonlinear constraint assembly (Famille F)
+# Callable structs for composite nonlinear constraint assembly (family F)
 # ------------------------------------------------------------------------------
 
 """
@@ -15,8 +15,9 @@ Storing `n`, `dims`, and `funs` as fields (Pattern 7) eliminates the capture-by-
 fragility present in the previous `make_boundary_cons_nl` closure (where
 `constraints_number` and `constraints_dimensions` were outside the `let` block).
 
-Replaces the anonymous closures `path_cons_nl!` and `boundary_cons_nl!` produced
-inside [`CTModels.Building.build`](@extref) in `build.jl`.
+[`CTModels.Building.build`](@extref) stores every nonlinear group of a model as a
+`CompositeConstraint`, whatever the number of declared constraints (`n = 0`, `1` or
+more), so the type and display of the group do not depend on its cardinality.
 
 # Fields
 - `n::Int`: Number of individual constraints.

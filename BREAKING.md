@@ -2,6 +2,16 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
+## [Unreleased]
+
+### Non-breaking note: the constraint accessors return named functors
+
+- **`constraint(ocp, label)[2]`** is a `Models.SubPathConstraint` (`:path`) or a `Models.SubBoundaryConstraint` (`:boundary`) instead of the anonymous closure built by `CTBase.Core.to_out_of_place`. It is called the same way, `f(t, x, u, v)` or `f(x0, xf, v)`, and returns the same values.
+- **`SubPathConstraint` and `SubBoundaryConstraint`** are out of place: they store the stacked function of the group (field `f!`) instead of the whole constraint tuple, and are called without the output buffer. Code that built them directly must follow.
+- **`path_constraints_nl(ocp)[2]` and `boundary_constraints_nl(ocp)[2]`** are a `Building.CompositeConstraint` even for a single declared constraint, instead of the user function itself; they are called with the same in-place signature and fill the same rows.
+
+No public signature or name changed; no migration is required. ([#533](https://github.com/control-toolbox/CTModels.jl/issues/533))
+
 ## [0.21.2] - 2026-11-15
 
 ### Non-breaking note: the bounds change colour with Makie
