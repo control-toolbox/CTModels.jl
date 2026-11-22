@@ -70,6 +70,45 @@ The dual of the constraint row `row`, as a function of time:
 """
 _row_dual(sol, model, row::ConstraintRow) = Solutions.dual(sol, model, row.label)
 
+# --- names of a row -------------------------------------------------------------
+
+# A constraint without a label has a generated one (see `Models.is_unnamed_label`), which
+# is never shown: the row is named after what is known of the constraint, its kind and the
+# component it bounds or its row. A generic name holds a space, so it never reads as a
+# label, which is a Julia identifier.
+"""
+$(TYPEDSIGNATURES)
+
+The name of the component `component` bounded by the box labelled `label`: the component
+and the label, `x₂ (x2_box)`, or `box x₂` when the box has no label (see
+[`CTModels.Models.is_unnamed_label`](@extref)).
+"""
+function _box_name(label::Symbol, component::AbstractString)::String
+    return Models.is_unnamed_label(label) ? "box $component" : "$component ($label)"
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The name of the dual of the component `component` bounded by the box labelled `label`:
+`dual x2_box`, or `dual box x₂` when the box has no label (see
+[`CTModels.Models.is_unnamed_label`](@extref)).
+"""
+function _box_dual_name(label::Symbol, component::AbstractString)::String
+    return "dual " * (Models.is_unnamed_label(label) ? "box $component" : string(label))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The name of the row `i` of the stacked path constraint, labelled `label`: the label, or
+`path i` when the constraint has no label (see
+[`CTModels.Models.is_unnamed_label`](@extref)).
+"""
+function _path_name(label::Symbol, i::Int)::String
+    return Models.is_unnamed_label(label) ? "path $i" : string(label)
+end
+
 # --- panels of a row ----------------------------------------------------------
 
 # The time grid of the data of a row: the path grid for a path constraint, the grid of the
@@ -86,7 +125,8 @@ $(TYPEDSIGNATURES)
 
 The left-hand side of the row `row`: the path constraint, or the components of the state
 or control bounded by the box, as a [`CTBase.Plotting.Panel`](@extref). A box cell is
-labelled with the component and the label of the constraint, e.g. `x₂ (x2_box)`.
+labelled with the component and the label of the constraint, e.g. `x₂ (x2_box)`, or
+`box x₂` when the box has no label (see [`CTModels.PlotCase._box_name`](@extref)).
 `title` is the title of the panel (shown on its first cell). `path_samples` are the
 samples of the path constraints shared by the rows of a figure (see
 [`CTModels.PlotCase._path_samples`](@extref)), computed here when not given.
@@ -121,7 +161,7 @@ function _row_left_panel(
         T,
         M;
         title=title,
-        labels=["$(names[j]) ($(row.label))" for j in row.rows],
+        labels=[_box_name(row.label, names[j]) for j in row.rows],
         style=_base_style(merge((seriestype=st,), style)),
     )
 end
@@ -131,7 +171,8 @@ $(TYPEDSIGNATURES)
 
 The right-hand side of the row `row`: its dual, [`CTModels.PlotCase._row_dual`](@extref),
 sampled on the grid of the row. As for the costate, its ylabels are dropped when the
-left-hand side is shown alongside (the left cell carries the name), otherwise `dual <label>`.
+left-hand side is shown alongside (the left cell carries the name), otherwise `dual <label>`,
+or `dual box x₂` when the box has no label (see [`CTModels.PlotCase._box_dual_name`](@extref)).
 `dual_samples` are the path duals sampled on the path grid, shared by the path rows of a
 figure, computed here when not given.
 """
@@ -165,9 +206,17 @@ function _row_dual_panel(
         connect=connect,
         cols=row.rows,
     )
-    n = length(row.rows)
+    names = if row.kind === :state
+        CTModels.state_components(sol)
+    else
+        CTModels.control_components(sol)
+    end
     # one rule for every row: the left cell carries the name, the paired right cell none
-    labels = left_shown ? fill("", n) : ["dual $(row.label)" for _ in 1:n]
+    labels = if left_shown
+        fill("", length(row.rows))
+    else
+        [_box_dual_name(row.label, names[j]) for j in row.rows]
+    end
     # the dual of a control box follows the control interpolation, as its left cell does
     st = _row_seriestype(sol, row)
     return Plotting.Panel(

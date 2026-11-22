@@ -1435,6 +1435,41 @@ See also: [`CTModels.Models.definition`](@extref).
 Components.expression(ocp::Model)::Expr = Components.expression(definition(ocp))
 
 # ------------------------------------------------------------------------------ #
+# is_unnamed_label(label) — a label generated for a constraint written without one
+# ------------------------------------------------------------------------------ #
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether `label` was generated for a constraint declared without a label, rather than given
+by the user.
+
+A generated label comes from `gensym`, so its name contains `##`: CTModels gives an
+unnamed constraint `gensym(:unnamed)` (`##unnamed#288`), and a parser may use its own
+prefix (CTParser gives `label##288`). A label given by the user is a Julia identifier and
+never contains `##`. A generated label differs from one model instance to another: it is
+not shown to the user nor compared between models.
+
+# Arguments
+- `label::Symbol`: A constraint label.
+
+# Returns
+- `Bool`: `true` for a generated label, `false` for a label given by the user.
+
+# Example
+```julia-repl
+julia> CTModels.Models.is_unnamed_label(gensym(:unnamed))
+true
+
+julia> CTModels.Models.is_unnamed_label(:u_box)
+false
+```
+
+See also: [`CTModels.Models.constraint_rows`](@extref).
+"""
+is_unnamed_label(label::Symbol)::Bool = occursin("##", String(label))
+
+# ------------------------------------------------------------------------------ #
 # constraint_rows(::Model, label) — where a labelled constraint lives
 # ------------------------------------------------------------------------------ #
 

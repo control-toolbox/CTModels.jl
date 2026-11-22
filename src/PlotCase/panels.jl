@@ -273,7 +273,9 @@ $(TYPEDSIGNATURES)
 
 Build a [`CTBase.Plotting.Panel`](@extref) for the nonlinear path constraints: all of them,
 or the rows `rows` (those of one label). `samples` are the values of the constraints (see
-[`CTModels.PlotCase._path_samples`](@extref)), computed here when not given.
+[`CTModels.PlotCase._path_samples`](@extref)), computed here when not given. A row is named
+after its label, or `path i` when the constraint has no label (see
+[`CTModels.PlotCase._path_name`](@extref)).
 """
 function _path_panel(
     sol,
@@ -298,7 +300,7 @@ function _path_panel(
             connect=connect,
         )
     end
-    labels = string.(cp[4][idx])
+    labels = [_path_name(cp[4][i], i) for i in idx]
     return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end
 
@@ -345,6 +347,10 @@ function _dual_panel(
         connect=connect,
         cols=isnothing(rows) ? nothing : idx,
     )
-    labels = path_shown ? fill("", length(idx)) : ("dual " .* string.(cp[4][idx]))
+    labels = if path_shown
+        fill("", length(idx))
+    else
+        ["dual " * _path_name(cp[4][i], i) for i in idx]
+    end
     return Plotting.Panel(T, M; title=title, labels=labels, style=_base_style(style))
 end

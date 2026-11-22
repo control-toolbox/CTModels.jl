@@ -221,6 +221,9 @@ function _check_signature!(errors, warnings, ocp, sig)::Nothing
     asint(x) = isnothing(x) ? nothing : Int(x)
     asstrs(x) = isnothing(x) ? nothing : String[string(e) for e in x]
     asstr(x) = isnothing(x) ? nothing : string(x)
+    # a file written before the labels of CTParser were recognised as generated may still
+    # hold them (`label##288`): they are normalized as those of the model
+    aslabels(x) = isnothing(x) ? nothing : Models._label_strings(x)
 
     for (key, what) in (
         ("dim_x", "state dimension"),
@@ -241,7 +244,7 @@ function _check_signature!(errors, warnings, ocp, sig)::Nothing
         ("labels_control_box", "control box constraint labels"),
         ("labels_variable_box", "variable box constraint labels"),
     )
-        _record_difference!(errors, what, asstrs(g(key)), msig[key])
+        _record_difference!(errors, what, aslabels(g(key)), msig[key])
     end
 
     kind(b) = b ? "fixed" : "free"
