@@ -60,7 +60,7 @@ _lb_raw(t) = [1.0, 2.0, 3.0]
 _ub_raw(t) = [0.5, 0.5, 0.5]
 _boxdualdiff_raw(lb, ub, t, idx) = lb(t)[idx] - ub(t)[idx]
 _boxproj_raw(x, idx) = x[idx]
-_single_path_raw!(r, t, x, u, _) = (r[1] = x[1] + u[1]; r[2] = t; nothing)
+_single_path_raw!(r, t, x, u, _) = (r[1]=x[1] + u[1]; r[2]=t; nothing)
 
 # Path duals given by label (issue #492): `StackedDuals` must evaluate at exactly the
 # cost of one specialised function filling the same stacked vector — `NaN` in the rows
@@ -237,7 +237,9 @@ function test_performance()
             r = zeros(2)
             u = [0.5]
             Test.@test (BenchmarkTools.@ballocated $f_single($r, $t, $x, $u, nothing)) ==
-                (BenchmarkTools.@ballocated _single_path_raw!($r, $t, $x, $u, nothing))
+                (BenchmarkTools.@ballocated _single_path_raw!(
+                $r, $t, $x, $u, nothing
+            ))
 
             # CTModels-specific composition: the CoercedTrajectory+deepcopy
             # wrapping produced by `build_interpolated_function` (the function
