@@ -503,7 +503,9 @@ function test_constraints()
             Building.constraint!(
                 ocp1, :path; f=_path_stub2!, lb=[0.0, 0.0], ub=[1.0, 1.0], label=:p
             )
-            Building.constraint!(ocp1, :boundary; f=_boundary_stub1!, lb=0.0, ub=1.0, label=:b)
+            Building.constraint!(
+                ocp1, :boundary; f=_boundary_stub1!, lb=0.0, ub=1.0, label=:b
+            )
             model1 = Building.build(ocp1)
             path1 = Components.path_constraints_nl(model1)[2]
             boundary1 = Components.boundary_constraints_nl(model1)[2]

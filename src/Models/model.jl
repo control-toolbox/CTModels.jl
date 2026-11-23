@@ -1628,10 +1628,7 @@ function constraint(model::Model, label::Symbol)::Tuple # not type stable: Tuple
     if !isempty(indices)
         rows = length(indices) == 1 ? indices[1] : indices
         return (
-            :path,
-            SubPathConstraint(cp[2], length(cp[1]), rows),
-            cp[1][rows],
-            cp[3][rows],
+            :path, SubPathConstraint(cp[2], length(cp[1]), rows), cp[1][rows], cp[3][rows]
         )
     end
 

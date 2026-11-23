@@ -11,8 +11,8 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Module-level stacked constraints for the SubPathConstraint / SubBoundaryConstraint tests
-_stacked_path!(r, t, x, u, _) = (r[1] = t; r[2] = x[1]; r[3] = u[1]; nothing)
-_stacked_boundary!(r, x0, xf, _) = (r[1] = x0[1]; r[2] = xf[1]; nothing)
+_stacked_path!(r, t, x, u, _) = (r[1]=t; r[2]=x[1]; r[3]=u[1]; nothing)
+_stacked_boundary!(r, x0, xf, _) = (r[1]=x0[1]; r[2]=xf[1]; nothing)
 
 function test_model()
     Test.@testset "Model Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
@@ -612,7 +612,9 @@ function test_model()
         # Contract: the call must infer, for both shapes of the rows.
         Test.@testset "SubPathConstraint, SubBoundaryConstraint — type stability" begin
             x, u = [3.0], [7.0]
-            Test.@inferred Models.SubPathConstraint(_stacked_path!, 3, 1)(0.5, x, u, nothing)
+            Test.@inferred Models.SubPathConstraint(_stacked_path!, 3, 1)(
+                0.5, x, u, nothing
+            )
             Test.@inferred Models.SubPathConstraint(_stacked_path!, 3, [2, 3])(
                 0.5, x, u, nothing
             )

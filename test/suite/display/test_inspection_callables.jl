@@ -17,15 +17,15 @@ function _model_with_anonymous_constraints()
     Building.time!(pre; t0=0.0, tf=1.0)
     Building.state!(pre, 2)
     Building.control!(pre, 1)
-    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1] = x[2]; r[2] = u; nothing))
+    Building.dynamics!(pre, (r, t, x, u, v) -> (r[1]=x[2]; r[2]=u; nothing))
     Building.objective!(pre, :min; lagrange=(t, x, u, v) -> u^2)
     Building.constraint!(
-        pre, :path; f=(r, t, x, u, v) -> (r[1] = x[1] + u; nothing), lb=0.0, ub=1.0, label=:p
+        pre, :path; f=(r, t, x, u, v) -> (r[1]=x[1] + u; nothing), lb=0.0, ub=1.0, label=:p
     )
     Building.constraint!(
         pre,
         :boundary;
-        f=(r, x0, xf, v) -> (r[1] = x0[1]; r[2] = xf[1]; nothing),
+        f=(r, x0, xf, v) -> (r[1]=x0[1]; r[2]=xf[1]; nothing),
         lb=[0.0, 0.0],
         ub=[0.0, 0.0],
         label=:bc,
