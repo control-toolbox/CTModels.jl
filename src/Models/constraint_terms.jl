@@ -127,7 +127,8 @@ one-dimensional constraint, a vector otherwise): the sum over its components of
 [`CTModels.Models._side_term`](@extref).
 """
 function (τ::_ConstraintTerm)(t, x, u, y, v)
-    return sum(_side_term.(τ.side, τ.lb, τ.ub, τ.c(t, x, u, v), y))
+    terms = Broadcast.broadcasted(_side_term, τ.side, τ.lb, τ.ub, τ.c(t, x, u, v), y)
+    return sum(Broadcast.instantiate(terms))   # lazy: no temporary array
 end
 
 """
@@ -396,8 +397,8 @@ the pseudo-Hamiltonian.
 """
 function _constrained_pseudo_H(h::ConstrainedPseudoHamiltonianFunction, t, x, p, u, μ, v)
     _check_multiplier_dimension(h, μ, x)
-    val = _pseudo_H(h.h̃, t, x, p, u, v)
-    vv = v === nothing ? _buffer_like(x, eltype(x), 0) : v
+    vv = _variable_or_empty(x, u, v)
+    val = _pseudo_H(h.h̃, t, x, p, u, v, vv)
     terms = map((τ, r) -> τ(t, x, u, _multiplier_part(μ, r), vv), h.terms, h.ranges)
     return val + sum(terms)
 end

@@ -167,6 +167,29 @@ end)
 Building.time_dependence!(_pre_parts; autonomous=true)
 const _model_parts = Building.build(_pre_parts)
 
+# Constrained Hamiltonians (control-toolbox/CTModels.jl#536, point 7): x ≥ 0.1 by label
+# (:xcon) and the control box |u| ≤ 1 (:ubox), on ẋ = u, ∫ x² → min.
+_ham_xcon!(r, t, x, u, v) = (r[1]=x - 0.1; nothing)
+_ham_dyn!(r, t, x, u, v) = (r[1]=u; nothing)
+_ham_lag(t, x, u, v) = x^2
+_ham_law(x, p) = p
+_ham_mult(x, p) = 2x
+_ham_pre = Building.PreModel()
+Building.time!(_ham_pre; t0=0.0, tf=2.0)
+Building.state!(_ham_pre, 1)
+Building.control!(_ham_pre, 1)
+Building.dynamics!(_ham_pre, _ham_dyn!)
+Building.objective!(_ham_pre, :min; lagrange=_ham_lag)
+Building.constraint!(
+    _ham_pre, :path; f=_ham_xcon!, lb=[0.0], ub=[Inf], label=:xcon
+)
+Building.constraint!(_ham_pre, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:ubox)
+Building.time_dependence!(_ham_pre; autonomous=true)
+Building.definition!(_ham_pre, quote end)
+const _ham_model = Building.build(_ham_pre)
+# raw side: the Hamiltonian with the multiplier in feedback form, composed by hand
+_ham_feedback_raw(f, x, p) = f(x, p, _ham_law(x, p), _ham_mult(x, p))
+
 function test_performance()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Performance contract" begin
         # ======================================================================
@@ -296,6 +319,23 @@ function test_performance()
         # ======================================================================
         # 2. Zero-allocation reads: component accessors, trait reads, interpolants
         # ======================================================================
+        Test.@testset "Constrained Hamiltonians: zero-overhead wrappers" begin
+            # The CTBase wrappers add nothing to the CTModels functor: the constrained
+            # pseudo-Hamiltonian allocates what its functor does, and the Hamiltonian with
+            # multipliers in feedback form what the composition written by hand does.
+            Hx = Models.pseudo_hamiltonian(_ham_model; constraints=:xcon)
+            Hxu = Models.pseudo_hamiltonian(_ham_model; constraints=(:xcon, :ubox))
+            fx, fxu = Hx.f, Hxu.f
+            x, p, u, y, yy = 1.0, 2.0, 0.5, 2.0, [2.0, 1.0]
+            Test.@test (BenchmarkTools.@ballocated $Hx($x, $p, $u, $y)) ==
+                (BenchmarkTools.@ballocated $fx($x, $p, $u, $y))
+            Test.@test (BenchmarkTools.@ballocated $Hxu($x, $p, $u, $yy)) ==
+                (BenchmarkTools.@ballocated $fxu($x, $p, $u, $yy))
+            h = Models.hamiltonian(_ham_model, _ham_law; multipliers=(:xcon => _ham_mult))
+            Test.@test (BenchmarkTools.@ballocated $h($x, $p)) ==
+                (BenchmarkTools.@ballocated _ham_feedback_raw($fx, $x, $p))
+        end
+
         Test.@testset "Zero-allocation reads" begin
             sms = Components.StateModelSolution("x", ["x1", "x2"], t -> [sin(t), cos(t)])
             Test.@test (BenchmarkTools.@ballocated Components.value($sms)) == 0

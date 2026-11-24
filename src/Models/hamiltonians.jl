@@ -138,8 +138,31 @@ receives an empty vector.
 See also: [`CTModels.Models.PseudoHamiltonianFunction`](@extref).
 """
 function _pseudo_H(h::PseudoHamiltonianFunction, t, x, p, u, v)
+    return _pseudo_H(h, t, x, p, u, v, _variable_or_empty(x, u, v))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The variable passed to the model functions: `v`, or, for a problem without variable
+(`v === nothing`), an empty buffer built like the state (`0 × batch` for a batched
+state).
+
+See also: [`CTModels.Models._pseudo_H`](@extref).
+"""
+@inline function _variable_or_empty(x, u, v)
+    return v === nothing ? _buffer_like(x, Base.promote_op(*, eltype(x), eltype(u)), 0) : v
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Value `p·f(t, x, u, v) + p⁰ ℓ(t, x, u, v)`, with `vv` the variable passed to the model
+functions (see [`CTModels.Models._variable_or_empty`](@extref)), built once by the caller
+so that the constrained pseudo-Hamiltonian shares it with its constraints.
+"""
+@inline function _pseudo_H(h::PseudoHamiltonianFunction, t, x, p, u, v, vv)
     T = Base.promote_op(*, eltype(x), eltype(u))
-    vv = v === nothing ? _buffer_like(x, T, 0) : v
     v === nothing || (T = Base.promote_op(*, T, eltype(v)))
     r = _buffer_like(x, T, h.n)
     h.dynamics!(r, t, x, u, vv)
