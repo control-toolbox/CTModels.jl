@@ -171,6 +171,13 @@ Hu(x, p, 1.0, 0.5) - H̃(x, p, 1.0), Hu(x, p, -1.0, -0.5) - H̃(x, p, -1.0)   # 
 A constraint written as a box or as a path constraint has the same term, and the same
 multiplier (ct-conventions `SGN5`).
 
+The bounds of a box are the **effective** bounds of its components: when a component is
+bounded under several labels, its bounds are intersected, and each of these labels gives
+the same box, and the same dual in the solution. With `x₁(t) ≥ 0, (a)` and
+`x₁(t) ≤ 1, (b)`, the label `:a` gives the two-sided term of ``0 \le x_1 \le 1``, whose
+multiplier is signed: ``y < 0`` when the lower bound is active. Adjoin one of the two
+labels; giving both would add the term twice, and is rejected.
+
 A **control box** is inert in the flow: on an arc where the control is saturated,
 ``u = u_b``, the term ``\mu\,(u_b - u)`` vanishes, and so do its derivatives in ``x`` and
 ``p`` (with ``u`` fixed, or with ``u`` constant along the arc). Its multiplier is given by
@@ -274,5 +281,5 @@ control, which needs a control law.
 | multipliers for a control-free problem | `PreconditionError` |
 | ``p^0`` with the wrong sign, or not finite | `IncorrectArgument` |
 | open-loop or closed-loop control law; wrong arity of a plain function | `IncorrectArgument` |
-| unknown label, label given twice, boundary constraint or variable box | `IncorrectArgument` |
+| unknown label, label given twice, two labels of the same box component, boundary constraint or variable box | `IncorrectArgument` |
 | multiplier without the dimension of its constraint (at the call) | `IncorrectArgument` |

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `hamiltonian(ocp, u; multipliers=label => μ)` takes the multipliers in feedback form.
   - Path constraints, state boxes and control boxes enter by label; boundary constraints and variable boxes are rejected.
   - The multipliers follow the sign convention of the duals of a solution (`SGN2`, `SGN3`). The active side of a two-sided constraint is read on the sign of the multiplier.
+  - A box label gives the effective box of its components, intersected over all the labels that bound them. Two labels bounding the same component cannot both be adjoined: they give the same term, which would be added twice.
 
 ### 📚 Documentation
 

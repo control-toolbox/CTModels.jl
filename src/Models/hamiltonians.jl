@@ -437,7 +437,10 @@ extremals of the maximum principle.
 - `p0::Real`: the multiplier of the cost; `-1` for `:min` and `+1` for `:max` by default
   (normal case), `0` for the abnormal case. Its sign must agree with the criterion.
 - `constraints`: a label, or a tuple or vector of labels, of path constraints, state
-  boxes or control boxes of `ocp`; none by default.
+  boxes or control boxes of `ocp`; none by default. The bounds of a box are the
+  **effective** bounds of its components, intersected over all the labels that bound
+  them: a label written `x₁(t) ≥ 0` gives a two-sided term, with a signed multiplier, if
+  another label bounds `x₁` above.
 
 # Returns
 - Without `constraints`, a `CTBase.Data.PseudoHamiltonian`, callable with its natural
@@ -454,8 +457,9 @@ A one-dimensional state, control, variable or multiplier is a number.
   [`CTBase.Data.hamiltonian`](@extref) instead).
 - `CTBase.Exceptions.IncorrectArgument`: if the sign of `p0` contradicts the criterion;
   if a label is unknown, given twice, or names a boundary constraint or a variable box,
-  which do not enter the Hamiltonian; and, at the call, if `μ` does not have the
-  dimension of the constraints.
+  which do not enter the Hamiltonian; if two labels bound the same component of the
+  state or of the control; and, at the call, if `μ` does not have the dimension of the
+  constraints.
 
 # Example
 
@@ -608,8 +612,8 @@ and the multipliers.
 - `CTBase.Exceptions.IncorrectArgument`: if `u` is an open-loop or closed-loop law; if a
   raw `u` or `μ` has a single method with the wrong arity; if the sign of `p0`
   contradicts the criterion; if a label is unknown, given twice, or does not enter the
-  Hamiltonian; and, at the call, if a multiplier does not have the dimension of its
-  constraint.
+  Hamiltonian; if two labels bound the same component of the state or of the control;
+  and, at the call, if a multiplier does not have the dimension of its constraint.
 
 # Example
 

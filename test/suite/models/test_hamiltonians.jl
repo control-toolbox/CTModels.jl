@@ -189,6 +189,23 @@ term_pv(x, y) = y[1] * (4.0 - x[1]^2) - y[2] * x[2]
 term_vmax(x, y) = y * (1.2 - x[2])
 term_ubox(u, y) = -y * (u - (y > 0 ? 1.0 : -1.0))
 
+# One state component bounded under two labels (`:a` and `:b`, intersected to
+# `0 ≤ x₁ ≤ 1`), and another component under `:c`.
+function ocp_alias()
+    pre = Building.PreModel()
+    Building.time!(pre; t0=0.0, tf=1.0)
+    Building.state!(pre, 2)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, dyn_c!)
+    Building.objective!(pre, :min; lagrange=lag_c)
+    Building.constraint!(pre, :state; rg=1:1, lb=[0.0], ub=[Inf], label=:a)
+    Building.constraint!(pre, :state; rg=1:1, lb=[-Inf], ub=[1.0], label=:b)
+    Building.constraint!(pre, :state; rg=2:2, lb=[-Inf], ub=[2.0], label=:c)
+    Building.time_dependence!(pre; autonomous=true)
+    Building.definition!(pre, quote end)
+    return Test.@test_logs (:warn, r"Multiple bound declarations") Building.build(pre)
+end
+
 # A path constraint recording what it receives.
 mutable struct SpyConstraint <: Function
     args::Any
@@ -823,6 +840,41 @@ function test_hamiltonians()
             Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
                 ocp, (x, p, v) -> 0.3; multipliers=(:bc => (x, p, v) -> 1.0)
             )
+        end
+
+        Test.@testset "Unit: a box label gives the effective, intersected box" begin
+            ocp = ocp_alias()
+            x, p, u = [0.5, 1.0], [1.0, 1.0], 0.2
+            H̃ = Models.pseudo_hamiltonian(ocp)
+            Ha = Models.pseudo_hamiltonian(ocp; constraints=:a)
+            Hb = Models.pseudo_hamiltonian(ocp; constraints=:b)
+            # :a was written x₁ ≥ 0, but its box is 0 ≤ x₁ ≤ 1: two-sided, y signed
+            Test.@test Ha(x, p, u, 2.0) ≈ H̃(x, p, u) - 2.0 * (x[1] - 1.0)
+            Test.@test Ha(x, p, u, -2.0) ≈ H̃(x, p, u) + 2.0 * (x[1] - 0.0)
+            Test.@test Hb(x, p, u, 2.0) ≈ Ha(x, p, u, 2.0)
+            Hac = Models.pseudo_hamiltonian(ocp; constraints=(:a, :c))
+            Test.@test Hac(x, p, u, [2.0, 3.0]) ≈ Ha(x, p, u, 2.0) + 3.0 * (2.0 - x[2])
+        end
+
+        Test.@testset "Error: two labels of the same box component" begin
+            ocp = ocp_alias()
+            Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                ocp; constraints=(:a, :b)
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                ocp; constraints=[:c, :b, :a]
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Models.hamiltonian(
+                ocp, (x, p) -> 0.3; multipliers=(:a => (x, p) -> 1.0, :b => (x, p) -> 1.0)
+            )
+            e = try
+                Models.pseudo_hamiltonian(ocp; constraints=(:a, :b))
+            catch err
+                err
+            end
+            Test.@test occursin(":a and :b", e.msg)
+            Test.@test occursin("[1]", e.got)
+            Test.@test occursin("effective box", e.suggestion)
         end
 
         Test.@testset "Error: a multiplier without the dimension of the constraints" begin

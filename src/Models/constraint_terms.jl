@@ -212,7 +212,48 @@ function _constraint_terms(ocp::Model, labels, context::String)
         )
         push!(seen, label)
     end
-    return Tuple(_constraint_term(ocp, label, context) for label in labels)
+    terms = Tuple(_constraint_term(ocp, label, context) for label in labels)
+    _check_disjoint_boxes(terms, context)
+    return terms
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The slot of the value of a constraint term: `:state` or `:control` for a box, `nothing`
+for a path constraint.
+"""
+_box_slot(::_BoxValue{Slot}) where {Slot} = Slot
+_box_slot(::Any) = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Check that no component of the state or of the control is bounded by two of the box
+terms `terms`. The bounds of a component declared under several labels are intersected,
+so each of these labels gives the same effective box: adjoining two of them would add
+its term twice.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if two box terms share a component.
+"""
+function _check_disjoint_boxes(terms::Tuple, context::String)
+    for i in eachindex(terms), j in (i + 1):length(terms)
+        a, b = terms[i], terms[j]
+        slot = _box_slot(a.c)
+        (slot === nothing || slot !== _box_slot(b.c)) && continue
+        shared = intersect(a.c.components, b.c.components)
+        isempty(shared) || throw(
+            Exceptions.IncorrectArgument(
+                "the constraints :$(a.label) and :$(b.label) bound the same $slot component";
+                got="(:$(a.label), :$(b.label)), both on $slot component(s) $shared",
+                expected="each $slot component adjoined at most once",
+                suggestion="The bounds of a component are intersected: :$(a.label) and :$(b.label) give the same effective box, with the same dual. Adjoin one of them",
+                context=context,
+            ),
+        )
+    end
+    return nothing
 end
 
 # ------------------------------------------------------------------------------
