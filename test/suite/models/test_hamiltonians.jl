@@ -206,6 +206,44 @@ function ocp_alias()
     return Test.@test_logs (:warn, r"Multiple bound declarations") Building.build(pre)
 end
 
+# Batched constrained problem: every function is written on the columns, so that it is
+# valid for a vector or a matrix state (one column per point), like dyn_batch!.
+lag_batch(t, x, u, v) = 0.5 * sum(abs2, u)                     # Σ over the points
+pc_batch!(r, t, x, u, v) = (r[1:1, :] .= x[1:1, :] .+ u; nothing)  # −1 ≤ x₁ + u ≤ 1
+pc2_batch!(r, t, x, u, v) = (r[1:1, :] .= x[2:2, :] .^ 2; nothing) # x₂² ≤ 4
+
+function ocp_batch(; two_paths=true)
+    pre = Building.PreModel()
+    Building.time!(pre; t0=0.0, tf=1.0)
+    Building.state!(pre, 2)
+    Building.control!(pre, 1)
+    Building.dynamics!(pre, dyn_batch!)
+    Building.objective!(pre, :min; lagrange=lag_batch)
+    Building.constraint!(pre, :path; f=pc_batch!, lb=[-1.0], ub=[1.0], label=:pc)
+    two_paths &&
+        Building.constraint!(pre, :path; f=pc2_batch!, lb=[-Inf], ub=[4.0], label=:pc2)
+    Building.constraint!(pre, :state; rg=2:2, lb=[-Inf], ub=[1.2], label=:vmax)
+    Building.constraint!(pre, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:ubox)
+    Building.time_dependence!(pre; autonomous=true)
+    Building.definition!(pre, quote end)
+    return Building.build(pre)
+end
+
+const X_BATCH = [1.0 2.0 -1.0; 0.5 -0.3 2.0]
+const P_BATCH = [0.3 -1.0 0.7; 1.2 0.4 -0.6]
+const U_BATCH = [0.2 -0.4 0.5]
+const M_BATCH = [0.5 -0.2 1.0; 0.3 0.7 0.1; 2.0 1.0 0.4; -1.0 0.5 0.3]
+
+# Multipliers in feedback form, on the columns (batched) and on one point.
+μ_pc_batch(x, p) = x[1:1, :]
+μ_pc2_batch(x, p) = p[2:2, :]
+μ_vmax_batch(x, p) = p[1:1, :]
+law_batch(x, p) = p[2:2, :]
+μ_pc_point(x, p) = x[1]
+μ_pc2_point(x, p) = p[2]
+μ_vmax_point(x, p) = p[1]
+law_point(x, p) = p[2]
+
 # A path constraint recording what it receives.
 mutable struct SpyConstraint <: Function
     args::Any
@@ -842,6 +880,63 @@ function test_hamiltonians()
             )
         end
 
+        Test.@testset "Unit: batched (Matrix) state, the constrained value sums the columns" begin
+            X, P, U, M = X_BATCH, P_BATCH, U_BATCH, M_BATCH
+            labels = (:pc, :pc2, :vmax, :ubox)
+            H = Models.pseudo_hamiltonian(ocp_batch(); constraints=labels)
+            Test.@test H(X, P, U, M) ≈
+                sum(H(X[:, j], P[:, j], U[1, j], M[:, j]) for j in 1:3)
+            Test.@test (Test.@inferred H(X, P, U, M)) isa Float64
+            JET.@test_opt target_modules = (CTModels,) H(X, P, U, M)
+            # a multiplier that is not batched is shared by all the points
+            Test.@test H(X, P, U, M[:, 1]) ≈
+                sum(H(X[:, j], P[:, j], U[1, j], M[:, 1]) for j in 1:3)
+            # a single path constraint: its function gets the n × batch buffer itself
+            H1 = Models.pseudo_hamiltonian(
+                ocp_batch(; two_paths=false); constraints=(:pc, :ubox)
+            )
+            M1 = M[[1, 4], :]
+            Test.@test H1(X, P, U, M1) ≈
+                sum(H1(X[:, j], P[:, j], U[1, j], M1[:, j]) for j in 1:3)
+        end
+
+        Test.@testset "Unit: batched (Matrix) state, the constrained gradient is taken column by column" begin
+            X, P, U, M = X_BATCH, P_BATCH, U_BATCH, M_BATCH
+            H = Models.pseudo_hamiltonian(ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox))
+            ∇X = ForwardDiff.gradient(Y -> H(Y, P, U, M), X)
+            for j in 1:3
+                ∇x = ForwardDiff.gradient(y -> H(y, P[:, j], U[1, j], M[:, j]), X[:, j])
+                Test.@test ∇X[:, j] ≈ ∇x
+            end
+        end
+
+        Test.@testset "Unit: batched (Matrix) state, the rows of a constraint" begin
+            ocp = ocp_batch()
+            _, c, _, _ = Models.constraint(ocp, :pc2)
+            Test.@test c(0.0, X_BATCH, U_BATCH, zeros(0, 3)) ≈ X_BATCH[2:2, :] .^ 2
+            Test.@test c(0.0, X_BATCH[:, 2], U_BATCH[1, 2], Float64[]) ≈ X_BATCH[2, 2]^2
+        end
+
+        Test.@testset "Unit: batched (Matrix) state, hamiltonian(ocp, u; multipliers)" begin
+            ocp = ocp_batch()
+            h = Models.hamiltonian(
+                ocp,
+                law_batch;
+                multipliers=(
+                    :pc => μ_pc_batch, :pc2 => μ_pc2_batch, :vmax => μ_vmax_batch
+                ),
+            )
+            hp = Models.hamiltonian(
+                ocp,
+                law_point;
+                multipliers=(
+                    :pc => μ_pc_point, :pc2 => μ_pc2_point, :vmax => μ_vmax_point
+                ),
+            )
+            Test.@test h(X_BATCH, P_BATCH) ≈
+                sum(hp(X_BATCH[:, j], P_BATCH[:, j]) for j in 1:3)
+        end
+
         Test.@testset "Unit: a box label gives the effective, intersected box" begin
             ocp = ocp_alias()
             x, p, u = [0.5, 1.0], [1.0, 1.0], 0.2
@@ -893,6 +988,20 @@ function test_hamiltonians()
                 ocp, (x, p, v) -> 0.3; multipliers=(:vmax => (x, p, v) -> [1.0, 2.0],)
             )
             Test.@test_throws Exceptions.IncorrectArgument hv(x, p, v)
+        end
+
+        Test.@testset "Error: a batched multiplier without one column per point" begin
+            H = Models.pseudo_hamiltonian(ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox))
+            Test.@test_throws Exceptions.IncorrectArgument H(
+                X_BATCH, P_BATCH, U_BATCH, M_BATCH[:, 1:2]
+            )
+            Test.@test_throws Exceptions.IncorrectArgument H(
+                X_BATCH, P_BATCH, U_BATCH, M_BATCH[1:3, :]
+            )
+            h = Models.hamiltonian(
+                ocp_batch(), law_batch; multipliers=(:pc => (x, p) -> [x; p])
+            )
+            Test.@test_throws Exceptions.IncorrectArgument h(X_BATCH, P_BATCH)
         end
 
         Test.@testset "Error: multipliers given in an unsupported way" begin

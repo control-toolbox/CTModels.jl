@@ -76,6 +76,25 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Call method for path constraints on a batched buffer (an `n × batch` matrix, one column
+per point, as in CTFlows batched flows): each individual constraint fills its rows,
+`li × batch`.
+
+See also: [`CTModels.Models.SubPathConstraint`](@extref).
+"""
+function (f::CompositeConstraint{:path})(val::AbstractMatrix, t, x, u, v)
+    j = 1
+    for i in 1:f.n
+        li = f.dims[i]
+        f.funs[i](@view(val[j:(j + li - 1), :]), t, x, u, v)
+        j += li
+    end
+    return nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Call method for boundary constraints: evaluates all individual constraints and concatenates results.
 
 # Arguments

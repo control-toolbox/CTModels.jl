@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Path constraints, state boxes and control boxes enter by label; boundary constraints and variable boxes are rejected.
   - The multipliers follow the sign convention of the duals of a solution (`SGN2`, `SGN3`). The active side of a two-sided constraint is read on the sign of the multiplier.
   - A box label gives the effective box of its components, intersected over all the labels that bound them. Two labels bounding the same component cannot both be adjoined: they give the same term, which would be added twice.
+  - A batched state (a `Matrix`, one column per point) is accepted with constraints, as without: the boxes take their rows, the path constraints fill an `n × batch` buffer, the multipliers are `d × batch` matrices (or shared by all the points), and the value sums the points. The functions of the model are written on the columns, as the dynamics already was; the Lagrange cost returns the sum over the points.
 
 ### 📚 Documentation
 

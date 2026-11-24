@@ -91,6 +91,29 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Batched state (a `Matrix`, one column per point, as in CTFlows batched flows): evaluate
+the stacked path constraint into an `n × batch` buffer built like `x`, and return its
+rows `f.indices` as a `d × batch` matrix, one column per point, `1 × batch` when
+`I = Int`. The constraint function receives the whole matrices and fills one column per
+point, like the dynamics.
+"""
+function (f::SubPathConstraint)(t, x::AbstractMatrix, u, v)
+    r = _buffer_like(x, _buffer_eltype(t, x, u, v), f.n)
+    f.f!(r, t, x, u, v)
+    return r[_row_range(f.indices), :]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The rows `indices` as a collection, so that `r[_row_range(i), :]` keeps a matrix.
+"""
+_row_range(i::Int) = i:i
+_row_range(indices) = indices
+
+"""
+$(TYPEDSIGNATURES)
+
 Print a compact one-line representation of a [`SubPathConstraint`](@extref).
 """
 function Base.show(io::IO, f::SubPathConstraint)

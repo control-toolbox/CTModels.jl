@@ -58,11 +58,20 @@ _component(z::AbstractVector, i::Int) = z[i]
 """
 $(TYPEDSIGNATURES)
 
-Value of a box: the bounded components of the state (`:state`) or of the control
-(`:control`), as a vector.
+The components `components` of a state or control, as a vector; for a batched quantity
+(a `Matrix`, one column per point), the rows `components`, as a `d × batch` matrix.
 """
-(c::_BoxValue{:state})(t, x, u, v) = map(i -> _component(x, i), c.components)
-(c::_BoxValue{:control})(t, x, u, v) = map(i -> _component(u, i), c.components)
+_box_rows(z, components::Vector{Int}) = map(i -> _component(z, i), components)
+_box_rows(z::AbstractMatrix, components::Vector{Int}) = z[components, :]
+
+"""
+$(TYPEDSIGNATURES)
+
+Value of a box: the bounded components of the state (`:state`) or of the control
+(`:control`), as a vector, or a `d × batch` matrix for a batched quantity.
+"""
+(c::_BoxValue{:state})(t, x, u, v) = _box_rows(x, c.components)
+(c::_BoxValue{:control})(t, x, u, v) = _box_rows(u, c.components)
 
 """
 $(TYPEDEF)
@@ -324,24 +333,54 @@ _multiplier_part(μ::Number, ::UnitRange{Int}) = μ
 function _multiplier_part(μ::AbstractVector, r::UnitRange{Int})
     return length(r) == 1 ? μ[first(r)] : view(μ, r)
 end
+_multiplier_part(μ::AbstractMatrix, r::UnitRange{Int}) = view(μ, r, :)
+
+"""
+$(TYPEDSIGNATURES)
+
+The number of components of a multiplier: `1` for a number, its length for a vector, its
+number of rows for a batched multiplier (a `Matrix`, one column per point).
+"""
+_multiplier_rows(μ::Number) = 1
+_multiplier_rows(μ::AbstractVector) = length(μ)
+_multiplier_rows(μ::AbstractMatrix) = size(μ, 1)
+
+"""
+$(TYPEDSIGNATURES)
+
+Whether a batched multiplier has one column per point of a batched state `x`; always
+true when one of them is not batched (a multiplier that is not batched is shared by all
+the points).
+"""
+_same_batch(μ, x) = true
+_same_batch(μ::AbstractMatrix, x::AbstractMatrix) = size(μ, 2) == size(x, 2)
 
 """
 $(TYPEDSIGNATURES)
 
 Check that the stacked multiplier `μ` has `dim` components: a number when `dim == 1`, a
-vector of length `dim` otherwise.
+vector of length `dim` otherwise, or, for a batched state `x`, a `dim × batch` matrix
+with one column per point.
 
 # Throws
 - `CTBase.Exceptions.IncorrectArgument`: otherwise.
 """
-function _check_multiplier_dimension(h::ConstrainedPseudoHamiltonianFunction, μ)
-    n = μ isa Number ? 1 : length(μ)
+function _check_multiplier_dimension(h::ConstrainedPseudoHamiltonianFunction, μ, x)
+    n = _multiplier_rows(μ)
     (n == h.dim && (h.dim == 1 || !(μ isa Number))) || throw(
         Exceptions.IncorrectArgument(
             "the multiplier does not have the dimension of the constraints";
             got="a multiplier with $n component(s)",
             expected="$(h.dim) component(s), for $(join((":$(τ.label)" for τ in h.terms), ", ")) in this order (a number if 1)",
             context="constrained pseudo-Hamiltonian H(t, x, p, u, μ, v)",
+        ),
+    )
+    _same_batch(μ, x) || throw(
+        Exceptions.IncorrectArgument(
+            "the batched multiplier does not have one column per point of the state";
+            got="a $(size(μ, 1)) × $(size(μ, 2)) multiplier for $(size(x, 2)) points",
+            expected="a $(h.dim) × $(size(x, 2)) multiplier",
+            context="constrained pseudo-Hamiltonian H(t, x, p, u, μ, v), batched state",
         ),
     )
     return nothing
@@ -351,10 +390,12 @@ end
 $(TYPEDSIGNATURES)
 
 Value `H̃(t, x, p, u, v) + Σ_k term_k(t, x, u, μ_k, v)`; `v === nothing` stands for a
-problem without variable, whose constraints receive an empty vector.
+problem without variable, whose constraints receive an empty vector (a `0 × batch`
+matrix for a batched state). For a batched state the value sums the columns, as for
+the pseudo-Hamiltonian.
 """
 function _constrained_pseudo_H(h::ConstrainedPseudoHamiltonianFunction, t, x, p, u, μ, v)
-    _check_multiplier_dimension(h, μ)
+    _check_multiplier_dimension(h, μ, x)
     val = _pseudo_H(h.h̃, t, x, p, u, v)
     vv = v === nothing ? _buffer_like(x, eltype(x), 0) : v
     terms = map((τ, r) -> τ(t, x, u, _multiplier_part(μ, r), vv), h.terms, h.ranges)
@@ -428,16 +469,16 @@ Value of the `k`-th multiplier, checked against the dimension of its constraint.
 """
 function _checked_part(m::_StackedMultiplier, k::Int, y)
     d = m.dims[k]
-    ok = d == 1 ? (y isa Number || length(y) == 1) : (!(y isa Number) && length(y) == d)
+    ok = d == 1 ? _multiplier_rows(y) == 1 : (!(y isa Number) && _multiplier_rows(y) == d)
     ok || throw(
         Exceptions.IncorrectArgument(
             "the multiplier of :$(m.labels[k]) does not have the dimension of its constraint";
-            got="a value with $(y isa Number ? 1 : length(y)) component(s)",
+            got="a value with $(_multiplier_rows(y)) component(s)",
             expected="$d component(s) (a number if 1)",
             context="hamiltonian(ocp, u; multipliers) — multiplier of :$(m.labels[k])",
         ),
     )
-    return d == 1 ? only(y) : y
+    return d == 1 && !(y isa AbstractMatrix) ? only(y) : y
 end
 
 """

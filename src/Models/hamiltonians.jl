@@ -450,7 +450,10 @@ extremals of the maximum principle.
   `H([t, ]x, p, u, μ[, v])` and `H(t, x, p, u, μ, v)`, where `μ` stacks the multipliers of
   the labels in the order given, each with the components of its constraint.
 
-A one-dimensional state, control, variable or multiplier is a number.
+A one-dimensional state, control, variable or multiplier is a number. A batched state
+(a `Matrix`, one column per point, as in CTFlows batched flows) comes with batched
+arguments, a quantity of dimension `d` being a `d × batch` matrix; the value is the sum
+over the points, and the functions of the model must be written on the columns.
 
 # Throws
 - `CTBase.Exceptions.PreconditionError`: if `ocp` is control-free (use

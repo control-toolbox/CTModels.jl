@@ -272,6 +272,31 @@ problem is easily ill-posed, and these conditions are rather boundary conditions
 `CTBase.Exceptions.PreconditionError`, as does `hamiltonian(ocp)` for a problem with a
 control, which needs a control law.
 
+## Batched states
+
+The flows of CTFlows can integrate several points at once: the state is then a `Matrix`,
+one column per point, and so are the costate, the control, the variable and the
+multipliers, a quantity of dimension ``d`` being a ``d \times`` batch matrix. The
+Hamiltonians accept such arguments, and their value is the **sum over the points**,
+``\sum_j H(t, x_j, p_j, u_j, \mu_j, v_j)``, so that its gradient in the batched state is
+the gradient at each point, column by column.
+
+The functions of the model then receive whole matrices: the dynamics, the Lagrange cost
+and the path constraints must be written on the columns. The dynamics and the path
+constraints fill one column per point of an ``n \times`` batch buffer, and the Lagrange
+cost returns the sum of its values over the points:
+
+```julia
+dynamics!(r, t, x, u, v) = (r .= A * x .+ B .* u; nothing)
+lagrange(t, x, u, v) = 0.5 * sum(abs2, u)                 # Σ over the points
+path!(r, t, x, u, v) = (r[1:1, :] .= x[1:1, :] .+ u; nothing)
+```
+
+A box needs nothing more: its rows are taken from the batched state or control. A
+multiplier that is not batched (a number, or a vector of the dimension of the
+constraints) is shared by all the points. A batched multiplier must have one column per
+point; otherwise the call raises a `CTBase.Exceptions.IncorrectArgument`.
+
 ## Errors
 
 | Situation | Exception |
@@ -283,3 +308,4 @@ control, which needs a control law.
 | open-loop or closed-loop control law; wrong arity of a plain function | `IncorrectArgument` |
 | unknown label, label given twice, two labels of the same box component, boundary constraint or variable box | `IncorrectArgument` |
 | multiplier without the dimension of its constraint (at the call) | `IncorrectArgument` |
+| batched multiplier without one column per point (at the call) | `IncorrectArgument` |
