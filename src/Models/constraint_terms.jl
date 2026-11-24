@@ -353,25 +353,6 @@ end
 # ------------------------------------------------------------------------------
 
 """
-$(TYPEDSIGNATURES)
-
-Join of two time dependences: `Autonomous` only if both are.
-"""
-_join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
-function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
-    return Traits.NonAutonomous
-end
-"""
-$(TYPEDSIGNATURES)
-
-Join of two variable dependences: `Fixed` only if both are.
-"""
-_join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
-function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
-    return Traits.NonFixed
-end
-
-"""
 $(TYPEDEF)
 
 The multipliers of the labelled constraints in feedback form, stacked in the order of
@@ -518,8 +499,8 @@ $(TYPEDSIGNATURES)
 Stack the multipliers `μs` of the constraint terms `terms` into one `CTBase.Data.Multiplier`.
 """
 function _stacked_multiplier(terms::Tuple, μs::Tuple)
-    TD = foldl(_join_td, map(Traits.time_dependence, μs))
-    VD = foldl(_join_vd, map(Traits.variable_dependence, μs))
+    TD = Traits.join_time_dependence(map(Traits.time_dependence, μs)...)
+    VD = Traits.join_variable_dependence(map(Traits.variable_dependence, μs)...)
     f = _StackedMultiplier{TD,VD,typeof(μs)}(
         μs, [τ.label for τ in terms], [_dimension(τ) for τ in terms]
     )
