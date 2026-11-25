@@ -306,6 +306,7 @@ point; otherwise the call raises a `CTBase.Exceptions.IncorrectArgument`.
 | multipliers for a control-free problem | `PreconditionError` |
 | ``p^0`` with the wrong sign, or not finite | `IncorrectArgument` |
 | open-loop or closed-loop control law; wrong arity of a plain function | `IncorrectArgument` |
+| `constraints` not given by labels (a `String`, `nothing`, …) | `IncorrectArgument` |
 | unknown label, label given twice, two labels of the same box component, boundary constraint or variable box | `IncorrectArgument` |
 | multiplier without the dimension of its constraint (at the call) | `IncorrectArgument` |
 | batched multiplier without one column per point (at the call) | `IncorrectArgument` |

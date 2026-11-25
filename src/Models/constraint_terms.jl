@@ -599,9 +599,34 @@ $(TYPEDSIGNATURES)
 
 Normalise a `constraints` argument (a `Symbol`, or a tuple or vector of `Symbol`s) into a
 vector of labels.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: for anything else, such as a `String` or `nothing`.
 """
-_labels(label::Symbol) = [label]
-_labels(labels::Union{Tuple,AbstractVector}) = Symbol[labels...]
+_labels(label::Symbol, ::String) = [label]
+function _labels(labels::Union{Tuple,AbstractVector}, context::String)
+    all(l -> l isa Symbol, labels) || _throw_not_labels(labels, context)
+    return Symbol[labels...]
+end
+_labels(labels, context::String) = _throw_not_labels(labels, context)
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw the `CTBase.Exceptions.IncorrectArgument` of a `constraints` argument that is not
+given by labels.
+"""
+function _throw_not_labels(labels, context::String)
+    return throw(
+        Exceptions.IncorrectArgument(
+            "the constraints are not given by their labels";
+            got="constraints=$(repr(labels))",
+            expected="a Symbol, or a tuple or vector of Symbols, e.g. :x_con or (:x_con, :u_box)",
+            suggestion="Write a label as a Symbol, :x_con; for no constraint, leave constraints out",
+            context=context,
+        ),
+    )
+end
 
 """
 $(TYPEDSIGNATURES)

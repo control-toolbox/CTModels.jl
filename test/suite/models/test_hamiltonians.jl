@@ -547,6 +547,19 @@ function test_hamiltonians()
         # UNIT — type stability
         # ======================================================================
 
+        Test.@testset "Unit: ForwardDiff in t of a non-autonomous problem" begin
+            # the buffer of the dynamics takes the type of t: a Dual in t is not written
+            # into a Float64 buffer
+            H̃ = Models.pseudo_hamiltonian(ocp_2d())
+            x, p, u, v = [1.0, 2.0], [0.5, -1.5], 0.3, 2.0
+            Test.@test ForwardDiff.derivative(t -> H̃(t, x, p, u, v), 0.7) ≈ p[2] * u - 1
+            Hc = Models.pseudo_hamiltonian(
+                ocp_all(; autonomous=false); constraints=(:mixed, :vmax)
+            )
+            dHc = ForwardDiff.derivative(t -> Hc(t, x, p, u, [0.4, 0.2], v), 0.7)
+            Test.@test dHc ≈ 0.0 atol = 1e-12   # nothing depends on t in ocp_all
+        end
+
         Test.@testset "Unit: calls are type-stable" begin
             H̃1 = Models.pseudo_hamiltonian(ocp_1d())
             Test.@test (Test.@inferred H̃1(1.5, 2.0, 0.5)) isa Float64
@@ -949,6 +962,22 @@ function test_hamiltonians()
             Test.@test Hb(x, p, u, 2.0) ≈ Ha(x, p, u, 2.0)
             Hac = Models.pseudo_hamiltonian(ocp; constraints=(:a, :c))
             Test.@test Hac(x, p, u, [2.0, 3.0]) ≈ Ha(x, p, u, 2.0) + 3.0 * (2.0 - x[2])
+        end
+
+        Test.@testset "Error: constraints not given by their labels" begin
+            ocp = ocp_all()
+            for bad in ("mixed", nothing, (:mixed, "pv"), ["mixed"], 1)
+                Test.@test_throws Exceptions.IncorrectArgument Models.pseudo_hamiltonian(
+                    ocp; constraints=bad
+                )
+            end
+            e = try
+                Models.pseudo_hamiltonian(ocp; constraints="mixed")
+            catch err
+                err
+            end
+            Test.@test occursin("\"mixed\"", e.got)
+            Test.@test occursin("Symbol", e.expected)
         end
 
         Test.@testset "Error: two labels of the same box component" begin

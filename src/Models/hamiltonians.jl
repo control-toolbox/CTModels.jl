@@ -144,6 +144,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
+The contribution of the time `t` to the element type of the buffer of the dynamics:
+none for a plain number (`Union{}`, neutral under `promote_type`), so the buffer follows
+the state (a `Float32` state keeps a `Float32` buffer), and its type otherwise, so a
+derivative in `t` (a `ForwardDiff.Dual`) is not written into a `Float64` buffer.
+"""
+_time_eltype(::Union{AbstractFloat,Integer}) = Union{}
+_time_eltype(t) = typeof(t)
+
+"""
+$(TYPEDSIGNATURES)
+
 The variable passed to the model functions: `v`, or, for a problem without variable
 (`v === nothing`), an empty buffer built like the state (`0 × batch` for a batched
 state).
@@ -162,7 +173,7 @@ functions (see [`CTModels.Models._variable_or_empty`](@extref)), built once by t
 so that the constrained pseudo-Hamiltonian shares it with its constraints.
 """
 @inline function _pseudo_H(h::PseudoHamiltonianFunction, t, x, p, u, v, vv)
-    T = Base.promote_op(*, eltype(x), eltype(u))
+    T = promote_type(Base.promote_op(*, eltype(x), eltype(u)), _time_eltype(t))
     v === nothing || (T = Base.promote_op(*, T, eltype(v)))
     r = _buffer_like(x, T, h.n)
     h.dynamics!(r, t, x, u, vv)
@@ -517,7 +528,7 @@ function Data.pseudo_hamiltonian(ocp::Model; p0::Real=_normal_p0(ocp), constrain
         context,
     )
     p0 = _checked_p0(ocp, p0, context)
-    labels = _labels(constraints)
+    labels = _labels(constraints, context)
     isempty(labels) && return _pseudo_hamiltonian(ocp, p0)
     terms = _constraint_terms(ocp, labels, context)
     return _constrained_pseudo_hamiltonian(ocp, p0, terms)
