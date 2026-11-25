@@ -2,7 +2,7 @@
 
 This document describes breaking changes in CTModels releases and how to migrate your code.
 
-## [Unreleased]
+## [0.21.3] - 2026-11-25
 
 ### Non-breaking note: the constraint accessors return named functors
 
