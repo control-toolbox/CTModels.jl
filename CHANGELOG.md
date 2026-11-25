@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.3] - 2026-11-25
+
 ### ✨ New Features
 
 - **Hamiltonians of a model** ([#532](https://github.com/control-toolbox/CTModels.jl/issues/532)). They are methods of `CTBase.Data.pseudo_hamiltonian` and `CTBase.Data.hamiltonian`, re-exported by `CTModels.Models`. They replace the private builders of CTFlows.

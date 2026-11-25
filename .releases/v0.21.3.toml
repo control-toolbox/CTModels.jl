@@ -1,0 +1,50 @@
+# The request of the release of CTModels v0.21.3, for the release workflow of CTActions.
+# Written by `release.jl facts`, completed by the agent after the human's validation, checked
+# by `release.jl request` and again by the workflow. The proposal is in .releases/v0.21.3.md.
+
+[release]
+package = "CTModels"
+version = "0.21.3"
+kind = "stable"
+mode = "autonomous" # supervised or autonomous: the human's choice
+requested_by = "ocots" # the GitHub login of the person who validated the proposal
+reference = "0.21.2"
+base = "2311aa0f6b41bb91aac7e19dd05530325028a0c1"
+
+[versions]
+ct_agents = "v0.5.0"
+ct_conventions = "v0.15.0"
+ctactions = "dc60661"
+
+[facts]
+expected_version = "0.21.3"
+breaking = false
+feature = true
+rel4 = true
+rel7 = 21
+jump = "none"
+labels = ["run breakage", "run ci github-runner", "run documentation", "documentation push preview"]
+
+[[review]]
+id = "pr-539"
+what = "#539 [AUTO] JuliaFormatter.jl run — touches src; not cited in the changelog since `v0.21.2`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "JuliaFormatter run: layout only, no behaviour change."
+
+[[review]]
+id = "compat-CTBase"
+what = "`[compat]` of `CTBase`: `0.30.14` → `0.30.15`"
+verdict = "covered"   # covered, added, not-user-facing
+note = "The move of the CTBase compat to 0.30.15 is in the Dependencies section of [Unreleased]."
+
+[[review]]
+id = "wording-77b3b58c"
+what = "under `### 🐛 Bug Fixes`, “no longer”: **A plot no longer shows the generated label of an unnamed constraint** ([#526](https://github.com/control-toolbox/CTModels.jl/issues/526)). A constraint writte…"
+verdict = "covered"   # covered, added, not-user-facing
+note = "A bug fix, not a breaking change: only the names of the plot rows of unnamed constraints change, which is the fix. The Compatibility section says so."
+
+[[review]]
+id = "wording-1a286b34"
+what = "under `### 🐛 Bug Fixes`, “no longer”: **The messages of `build_solution` no longer show the generated label of an unnamed constraint.** When the duals given by label to `build_solution` (or their li…"
+verdict = "covered"   # covered, added, not-user-facing
+note = "A bug fix, not a breaking change: only the text of the error messages of build_solution changes, for an unnamed constraint. The Compatibility section says so."
