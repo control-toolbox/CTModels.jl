@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🛠 Enhancements
 
 - **The callables returned by the constraint accessors print as named functors** ([#533](https://github.com/control-toolbox/CTModels.jl/issues/533)). `constraint(ocp, label)` returns a `SubPathConstraint` or a `SubBoundaryConstraint` for a nonlinear label, instead of an anonymous closure whose display spelled out a `var"#f#…"` chain; both are now out of place. `path_constraints_nl(ocp)` and `boundary_constraints_nl(ocp)` hold a `CompositeConstraint` whatever the number of declared constraints, instead of the raw user function when there is only one. The values are unchanged.
-- An evaluation of the constrained pseudo-Hamiltonian builds the empty variable of a problem without variable once, shared by the pseudo-Hamiltonian and the constraints, and sums the terms of the constraints lazily, without a temporary array. A constrained flow of CTFlows is as fast as with the former CTFlows builders, or faster (two labels: about 30 % less time and 15 % fewer allocations).
+- An evaluation of the constrained pseudo-Hamiltonian builds the empty variable of a problem without variable once, shared by the pseudo-Hamiltonian and the constraints, and sums the terms of the constraints lazily, without a temporary array. A constrained flow of CTFlows allocates less than with the former CTFlows builders (one label: about 6 to 11 % fewer allocations; two labels: about 26 to 30 % fewer), and is not slower.
 
 ### 🧪 Testing
 
