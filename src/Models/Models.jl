@@ -8,6 +8,8 @@ component types), and all reader functions that operate on a built `Model`.
 
 # Organisation
 
+- **hamiltonians.jl**: the pseudo-Hamiltonian and Hamiltonian getters
+- **constraint_terms.jl**: the constraint terms adjoined to them, by label
 - **model.jl**: AbstractModel, Model struct, and all accessor functions ([`CTModels.Components.state`](@extref), [`CTModels.Components.control`](@extref), [`CTModels.Components.variable`](@extref), [`CTModels.Components.times`](@extref), [`CTModels.Components.objective`](@extref), [`CTModels.Models.constraints`](@extref), [`CTModels.Models.dynamics`](@extref), [`CTModels.Models.definition`](@extref))
 
 # Public API
@@ -21,6 +23,7 @@ The following functions are exported and accessible as `CTModels.function_name()
 - **Named accessors on state/control/variable**: [`CTModels.Models.state_name`](@extref), [`CTModels.Models.state_components`](@extref), [`CTModels.Models.state_dimension`](@extref), [`CTModels.Models.control_name`](@extref), [`CTModels.Models.control_components`](@extref), [`CTModels.Models.control_dimension`](@extref), [`CTModels.Models.variable_name`](@extref), [`CTModels.Models.variable_components`](@extref), [`CTModels.Models.variable_dimension`](@extref)
 - **ExaModels builder**: [`CTModels.Models.get_build_examodel`](@extref)
 - **Constraints helpers**: [`CTModels.Models.isempty_constraints`](@extref), [`CTModels.Models.constraint`](@extref)
+- **Hamiltonians**: `pseudo_hamiltonian`, `hamiltonian` (methods of the `CTBase.Data` generic functions)
 
 # Dependencies
 
@@ -30,7 +33,7 @@ See also: [`CTModels.Components`](@extref), [`CTModels.Building`](@extref), [`CT
 """
 module Models
 
-using CTBase: CTBase, Exceptions, Traits
+using CTBase: CTBase, Data, Exceptions, Traits
 # Time/variable/control-dependence predicates are generic functions owned by
 # CTBase.Traits; CTModels only provides the `Model` trait contract (see model.jl)
 # and re-exports them.
@@ -42,6 +45,9 @@ using CTBase:
     has_variable,
     is_control_free,
     has_control
+# The Hamiltonian getters are methods of generic functions owned by CTBase.Data (bound
+# at the CTBase top level), which CTFlows extends too; CTModels re-exports them.
+using CTBase: hamiltonian, pseudo_hamiltonian
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 using ..Components
@@ -49,6 +55,8 @@ using ..Components
 include(joinpath(@__DIR__, "constraint_functors.jl"))
 include(joinpath(@__DIR__, "model.jl"))
 include(joinpath(@__DIR__, "model_signature.jl"))
+include(joinpath(@__DIR__, "hamiltonians.jl"))
+include(joinpath(@__DIR__, "constraint_terms.jl"))
 
 # Types
 export AbstractModel, Model
@@ -75,5 +83,8 @@ export get_build_examodel
 # Constraints helpers
 export isempty_constraints
 export constraint, constraint_rows
+
+# Hamiltonians of the problem (methods of the CTBase.Data generic functions)
+export pseudo_hamiltonian, hamiltonian
 
 end # module Models

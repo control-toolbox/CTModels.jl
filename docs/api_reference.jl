@@ -65,6 +65,8 @@ function generate_api_reference(src_dir::String, ext_dir::String)
                 joinpath("Models", "constraint_functors.jl"),
                 joinpath("Models", "model.jl"),
                 joinpath("Models", "model_signature.jl"),
+                joinpath("Models", "hamiltonians.jl"),
+                joinpath("Models", "constraint_terms.jl"),
             ),
         ),
         (

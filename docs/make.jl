@@ -131,6 +131,7 @@ with_api_reference(src_dir, ext_dir) do api_pages
                 "Components" => joinpath("model", "components.md"),
                 "Dynamics & Objective" => joinpath("model", "dynamics_objective.md"),
                 "Constraints" => joinpath("model", "constraints.md"),
+                "Hamiltonians" => joinpath("model", "hamiltonians.md"),
                 "Building a Model" => joinpath("model", "building.md"),
                 "Displaying Models & Solutions" => joinpath("model", "display.md"),
             ],

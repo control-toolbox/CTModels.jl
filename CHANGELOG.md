@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New Features
 
+- **Hamiltonians of a model** ([#532](https://github.com/control-toolbox/CTModels.jl/issues/532)). They are methods of `CTBase.Data.pseudo_hamiltonian` and `CTBase.Data.hamiltonian`, re-exported by `CTModels.Models`. They replace the private builders of CTFlows.
+  - `pseudo_hamiltonian(ocp; p0)` returns the pseudo-Hamiltonian `H̃ = p·f + p⁰ℓ` of a problem with a control.
+  - `hamiltonian(ocp, u; p0)` returns the Hamiltonian for a control law in feedback form.
+  - `hamiltonian(ocp; p0)` returns the Hamiltonian of a control-free problem.
+  - A batched state (a `Matrix`, one column per point, as in CTFlows batched flows) gets an `n × batch` buffer; the value sums the columns.
+  - `p0` defaults to `-1` for `:min` and `+1` for `:max`. `p0 = 0` is the abnormal case. A sign that contradicts the criterion is rejected (ct-conventions `SGN4`).
+- **Constraints by label in the Hamiltonians.**
+  - `pseudo_hamiltonian(ocp; constraints=…)` returns the constrained pseudo-Hamiltonian `H(t, x, p, u, μ, v)`, with the multipliers as an explicit argument.
+  - `hamiltonian(ocp, u; multipliers=label => μ)` takes the multipliers in feedback form.
+  - Path constraints, state boxes and control boxes enter by label; boundary constraints and variable boxes are rejected.
+  - The multipliers follow the sign convention of the duals of a solution (`SGN2`, `SGN3`). The active side of a two-sided constraint is read on the sign of the multiplier.
+  - A box label gives the effective box of its components, intersected over all the labels that bound them. Two labels bounding the same component cannot both be adjoined: they give the same term, which would be added twice.
+  - A batched state (a `Matrix`, one column per point) is accepted with constraints, as without: the boxes take their rows, the path constraints fill an `n × batch` buffer, the multipliers are `d × batch` matrices (or shared by all the points), and the value sums the points. The functions of the model are written on the columns, as the dynamics already was; the Lagrange cost returns the sum over the points.
 - `CTModels.Models.is_unnamed_label(label)` tells a label generated for an unnamed constraint (any `gensym`, whose name contains `##`) from a label given by the user. The plot and the model signature share it.
 
 ### 🐛 Bug Fixes
@@ -20,11 +33,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🛠 Enhancements
 
 - **The callables returned by the constraint accessors print as named functors** ([#533](https://github.com/control-toolbox/CTModels.jl/issues/533)). `constraint(ocp, label)` returns a `SubPathConstraint` or a `SubBoundaryConstraint` for a nonlinear label, instead of an anonymous closure whose display spelled out a `var"#f#…"` chain; both are now out of place. `path_constraints_nl(ocp)` and `boundary_constraints_nl(ocp)` hold a `CompositeConstraint` whatever the number of declared constraints, instead of the raw user function when there is only one. The values are unchanged.
+- An evaluation of the constrained pseudo-Hamiltonian builds the empty variable of a problem without variable once, shared by the pseudo-Hamiltonian and the constraints, and sums the terms of the constraints lazily, without a temporary array. A constrained flow of CTFlows allocates less than with the former CTFlows builders (one label: about 6 to 11 % fewer allocations; two labels: about 26 to 30 % fewer), and is not slower.
+
+### 🧪 Testing
+
+- `test/suite/meta/test_performance.jl`: allocation contract of the constrained Hamiltonians. The CTBase wrappers allocate what the CTModels functor does, and the Hamiltonian with multipliers in feedback form what the composition written by hand does.
 
 ### 📚 Documentation
 
+- New page "Hamiltonians" in the OCP Model section.
 - The "Constraints" page explains the stacked nonlinear groups and shows what `constraint(ocp, label)` returns, for each kind of constraint.
 - ct-conventions pinned at `v0.15.0` in `AGENTS.md`.
+
+### 📦 Dependencies
+
+- `ForwardDiff` is a new test dependency.
+- The compat of `CTBase` moves to `0.30.15`, the release that provides the constrained Hamiltonians.
 
 ### ✅ Compatibility
 
