@@ -68,8 +68,8 @@ end
 # vector or a matrix state.
 const A_BATCH = [0.0 1.0; -1.0 0.0]
 const B_BATCH = [0.0, 1.0]
-dyn_batch!(r, t, x, u, v) = (r .= A_BATCH * x .+ B_BATCH .* u; nothing)
-dyn_batch_cf!(r, t, x, u, v) = (r .= A_BATCH * x; nothing)
+dyn_batch!(r, t, x, u, v) = (r.=A_BATCH * x .+ B_BATCH .* u; nothing)
+dyn_batch_cf!(r, t, x, u, v) = (r.=A_BATCH * x; nothing)
 mayer_zero(x0, xf, v) = 0.0
 
 # A control law with two methods: its arity cannot be checked.
@@ -209,8 +209,8 @@ end
 # Batched constrained problem: every function is written on the columns, so that it is
 # valid for a vector or a matrix state (one column per point), like dyn_batch!.
 lag_batch(t, x, u, v) = 0.5 * sum(abs2, u)                     # Σ over the points
-pc_batch!(r, t, x, u, v) = (r[1:1, :] .= x[1:1, :] .+ u; nothing)  # −1 ≤ x₁ + u ≤ 1
-pc2_batch!(r, t, x, u, v) = (r[1:1, :] .= x[2:2, :] .^ 2; nothing) # x₂² ≤ 4
+pc_batch!(r, t, x, u, v) = (r[1:1, :].=x[1:1, :] .+ u; nothing)  # −1 ≤ x₁ + u ≤ 1
+pc2_batch!(r, t, x, u, v) = (r[1:1, :].=x[2:2, :] .^ 2; nothing) # x₂² ≤ 4
 
 function ocp_batch(; two_paths=true)
     pre = Building.PreModel()
@@ -915,7 +915,9 @@ function test_hamiltonians()
 
         Test.@testset "Unit: batched (Matrix) state, the constrained gradient is taken column by column" begin
             X, P, U, M = X_BATCH, P_BATCH, U_BATCH, M_BATCH
-            H = Models.pseudo_hamiltonian(ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox))
+            H = Models.pseudo_hamiltonian(
+                ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox)
+            )
             ∇X = ForwardDiff.gradient(Y -> H(Y, P, U, M), X)
             for j in 1:3
                 ∇x = ForwardDiff.gradient(y -> H(y, P[:, j], U[1, j], M[:, j]), X[:, j])
@@ -935,16 +937,12 @@ function test_hamiltonians()
             h = Models.hamiltonian(
                 ocp,
                 law_batch;
-                multipliers=(
-                    :pc => μ_pc_batch, :pc2 => μ_pc2_batch, :vmax => μ_vmax_batch
-                ),
+                multipliers=(:pc => μ_pc_batch, :pc2 => μ_pc2_batch, :vmax => μ_vmax_batch),
             )
             hp = Models.hamiltonian(
                 ocp,
                 law_point;
-                multipliers=(
-                    :pc => μ_pc_point, :pc2 => μ_pc2_point, :vmax => μ_vmax_point
-                ),
+                multipliers=(:pc => μ_pc_point, :pc2 => μ_pc2_point, :vmax => μ_vmax_point),
             )
             Test.@test h(X_BATCH, P_BATCH) ≈
                 sum(hp(X_BATCH[:, j], P_BATCH[:, j]) for j in 1:3)
@@ -1020,7 +1018,9 @@ function test_hamiltonians()
         end
 
         Test.@testset "Error: a batched multiplier without one column per point" begin
-            H = Models.pseudo_hamiltonian(ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox))
+            H = Models.pseudo_hamiltonian(
+                ocp_batch(); constraints=(:pc, :pc2, :vmax, :ubox)
+            )
             Test.@test_throws Exceptions.IncorrectArgument H(
                 X_BATCH, P_BATCH, U_BATCH, M_BATCH[:, 1:2]
             )

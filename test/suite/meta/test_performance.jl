@@ -180,9 +180,7 @@ Building.state!(_ham_pre, 1)
 Building.control!(_ham_pre, 1)
 Building.dynamics!(_ham_pre, _ham_dyn!)
 Building.objective!(_ham_pre, :min; lagrange=_ham_lag)
-Building.constraint!(
-    _ham_pre, :path; f=_ham_xcon!, lb=[0.0], ub=[Inf], label=:xcon
-)
+Building.constraint!(_ham_pre, :path; f=_ham_xcon!, lb=[0.0], ub=[Inf], label=:xcon)
 Building.constraint!(_ham_pre, :control; rg=1:1, lb=[-1.0], ub=[1.0], label=:ubox)
 Building.time_dependence!(_ham_pre; autonomous=true)
 Building.definition!(_ham_pre, quote end)
